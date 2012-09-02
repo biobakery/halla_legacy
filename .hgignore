@@ -1,0 +1,9 @@
+syntax: glob
+
+.DS_Store
+.sconsign.dblite
+*.orig
+*.pyc
+*.pyo
+
+SConscript.py
