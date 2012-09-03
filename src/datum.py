@@ -54,6 +54,12 @@ class CDatum:
 		def __deepcopy__( self, hashMemo ):
 			
 			return CDiscretized( copy.deepcopy( self.m_setiIndices, hashMemo ), self.m_dProbability )
+		
+		def probability( self, setiIndices = None ):
+			
+			return ( ( float(len( setiIndices & self.m_setiIndices )) / len( setiIndices ) ) if setiIndices
+				else self.m_dProbability )
+				
 	
 	def __init__( self, astrDatum, strID = None ):
 		
@@ -135,6 +141,12 @@ class CDatum:
 
 		>>> CDatum._discretize_continuous( [0, 0, 0, 0, 1, 2, 2, 2, 2, 3], 3 )
 		[0, 0, 0, 0, 1, 1, 1, 1, 1, 2]
+
+		>>> CDatum._discretize_continuous( [0.1, 0, 0, 0, 0, 0, 0, 0, 0] )
+		[1, 0, 0, 0, 0, 0, 0, 0, 0]
+		
+		>>> CDatum._discretize_continuous( [0.992299, 1, 1, 0.999696, 0.999605, 0.663081, 0.978293, 0.987621, 0.997237, 0.999915, 0.984792, 0.998338, 0.999207, 0.98051, 0.997984, 0.999219, 0.579824, 0.998983, 0.720498, 1, 0.803619, 0.970992, 1, 0.952881, 0.999866, 0.997153, 0.014053, 0.998049, 0.977727, 0.971233, 0.995309, 0.0010376, 1, 0.989373, 0.989161, 0.91637, 1, 0.99977, 0.960816, 0.998025, 1, 0.998852, 0.960849, 0.957963, 0.998733, 0.999426, 0.876182, 0.998509, 0.988527, 0.998265, 0.943673] )
+		[3, 6, 6, 5, 5, 0, 2, 2, 3, 5, 2, 4, 4, 2, 3, 5, 0, 4, 0, 6, 0, 1, 6, 1, 5, 3, 0, 3, 2, 1, 3, 0, 6, 3, 2, 0, 6, 5, 1, 3, 6, 4, 1, 1, 4, 5, 0, 4, 2, 4, 1]
 		"""
 
 		if iN == None:
@@ -187,7 +199,7 @@ class CDatum:
 			CDatum._discretize_continuous( self.m_aDatum )
 		self.m_hashValues = CDatum._discretize_helper( self.m_astrBins )
 				
-	def mutual_information( self, pDatum ):
+	def mutual_information( self, pDatum, aiIndices = None ):
 		"""
 		>>> pOne = CDatum( ["A", "A", "B", "B"] )
 		>>> pTwo = CDatum( ["B", "B", "A", "A"] )
@@ -222,18 +234,47 @@ class CDatum:
 		... 	ad.append( pA.mutual_information( pB ) )
 		>>> ( min( ad ) >= 0 ) and ( max( ad ) <= 3.4 ) # log( 10, 2 ) = 3.32 and should be the max
 		True
+
+		>>> pSix = CDatum( ["A", "B", "C", "A", "B", "C", "D", "D"] )
+		>>> pSeven = CDatum( ["A", "A", "B", "A", "A", "B", "B", "B"] )
+		>>> "%g" % pSix.mutual_information( pSeven, range( 6 ) )
+		'0.918296'
+		
+		>>> pEight = CDatum( [8.47E-05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] )
+		>>> pNine = CDatum( [0.992299, 1, 1, 0.999696, 0.999605, 0.663081, 0.978293, 0.987621, 0.997237, 0.999915, 0.984792, 0.998338, 0.999207, 0.98051, 0.997984, 0.999219, 0.579824, 0.998983, 0.720498, 1, 0.803619, 0.970992, 1, 0.952881, 0.999866, 0.997153, 0.014053, 0.998049, 0.977727, 0.971233, 0.995309, 0.0010376, 1, 0.989373, 0.989161, 0.91637, 1, 0.99977, 0.960816, 0.998025, 1, 0.998852, 0.960849, 0.957963, 0.998733, 0.999426, 0.876182, 0.998509, 0.988527, 0.998265, 0.943673] )
+		>>> "%g" % pEight.mutual_information( pNine )
+		'0.053968'
+		
+		>>> "%g" % pEight.mutual_information( pNine, range( len( pEight.m_aDatum ) / 2 ) )
+		'0.132097'
+		
+		>>> "%g" % pEight.mutual_information( pNine, range( len( pEight.m_aDatum ) / 4 ) )
+		'0.24715'
+		
+		>>> "%g" % pEight.mutual_information( pNine, range( len( pEight.m_aDatum ) / 8 ) )
+		'0.650022'
 		"""
+		
+		setiIndices = set(aiIndices if aiIndices else range( len( self.m_aDatum ) ))
+		hashProbabilities = {}
+		for p in (self, pDatum):
+			for strX, pX in p.m_hashValues.items( ):
+				hashProbabilities[pX] = pX.probability( setiIndices )
 		
 		dRet = 0
 		for strY, pY in self.m_hashValues.items( ):
+			dYProbability = hashProbabilities[pY]
 			for strX, pX in pDatum.m_hashValues.items( ):
-				dXY = float(len( pX.m_setiIndices & pY.m_setiIndices )) / len( self.m_aDatum )
+				dXProbability = hashProbabilities[pX]
+				setiXY = pX.m_setiIndices & pY.m_setiIndices & setiIndices
+				dXY = float(len( setiXY )) / len( setiIndices )
+#				sys.stderr.write( "%s\n" % [dXProbability, dYProbability, dXY, setiIndices] )
 				if dXY:
-					dRet += dXY * math.log( dXY / pX.m_dProbability / pY.m_dProbability, 2 )
+					dRet += dXY * math.log( dXY / dXProbability / dYProbability, 2 )
 		
 		return dRet
 	
-	def mutual_information_relative( self, pDatum ):
+	def mutual_information_relative( self, pDatum, aiIndices = None ):
 		"""
 		>>> pOne = CDatum( ["A", "A", "B", "B"] )
 		>>> pTwo = CDatum( ["B", "B", "A", "A"] )
@@ -260,15 +301,32 @@ class CDatum:
 		... 	ad.append( pA.mutual_information_relative( pB ) )
 		>>> ( min( ad ) >= 0 ) and ( max( ad ) <= 1 )
 		True
+		
+		>>> pEight = CDatum( [8.47E-05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] )
+		>>> pNine = CDatum( [0.992299, 1, 1, 0.999696, 0.999605, 0.663081, 0.978293, 0.987621, 0.997237, 0.999915, 0.984792, 0.998338, 0.999207, 0.98051, 0.997984, 0.999219, 0.579824, 0.998983, 0.720498, 1, 0.803619, 0.970992, 1, 0.952881, 0.999866, 0.997153, 0.014053, 0.998049, 0.977727, 0.971233, 0.995309, 0.0010376, 1, 0.989373, 0.989161, 0.91637, 1, 0.99977, 0.960816, 0.998025, 1, 0.998852, 0.960849, 0.957963, 0.998733, 0.999426, 0.876182, 0.998509, 0.988527, 0.998265, 0.943673] )
+		>>> "%g" % pEight.mutual_information( pNine )
+		'0.053968'
 		"""
 
-		dRet = self.mutual_information( pDatum )
-		iMin = min( len( p.m_hashValues ) for p in (self, pDatum) )
-		return ( ( dRet / math.log( iMin, 2 ) ) if ( iMin > 1 ) else 0 )
+		dMI = self.mutual_information( pDatum, aiIndices )
+		if aiIndices:
+			setiIndices = set(aiIndices)
+			aiValues = []
+			for p in (self, pDatum):
+				iValues = 0
+				for strValue, pValue in p.m_hashValues.items( ):
+					if setiIndices & pValue.m_setiIndices:
+						iValues += 1
+				aiValues.append( iValues )
+			iMin = min( aiValues )
+		else:
+			iMin = min( len( p.m_hashValues ) for p in (self, pDatum) )
+		dRet = ( ( dMI / math.log( iMin, 2 ) ) if ( iMin > 1 ) else 0 )
+		return dRet
 	
-	def mutual_information_distance( self, pDatum ):
+	def mutual_information_distance( self, pDatum, aiIndices = None ):
 		
-		return ( 1 - self.mutual_information_relative( pDatum ) )
+		return ( 1 - self.mutual_information_relative( pDatum, aiIndices ) )
 	
 	def permute( self ):
 		"""
