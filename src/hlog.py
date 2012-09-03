@@ -25,6 +25,7 @@
 
 import logging
 import pylab
+import sys
 
 c_logrHAllA	= logging.getLogger( "halla" )
 
@@ -66,7 +67,9 @@ def _log_plot( pData, pTest, adTotal ):
 
 	figr = pylab.figure( figsize = (12, 6) )
 	pylab.subplot( 1, 2, 1 )
-	_log_plot_scatter( pOne.m_aDatum, pTwo.m_aDatum, figr, None, pOne.m_strID, pTwo.m_strID )
+	# Fix me to plot categoricals as boxplots etc.
+	if all( p.iscontinuous( ) for p in (pOne, pTwo) ):
+		_log_plot_scatter( pOne.m_aDatum, pTwo.m_aDatum, figr, None, pOne.m_strID, pTwo.m_strID )
 	pylab.subplot( 1, 2, 2 )
  	_log_plot_histograms( [adTotal, pData.get_permutation( iOne, iTwo ), pData.get_bootstrap( iOne, iTwo )],
 		figr, "%g (%g), p_perm=%g, p_boot=%g" % (dMID, pTest.get_mutual_information( ), dPOne, dPTwo),

@@ -344,3 +344,7 @@ class CDatum:
 		aiIndices = random.sample( xrange( len( self.m_aDatum ) ), len( self.m_aDatum ) )
 		self.m_astrBins, self.m_aDatum = ([a[i] for i in aiIndices] for a in (self.m_astrBins, self.m_aDatum))
 		self.m_hashValues = CDatum._discretize_helper( self.m_astrBins )
+
+	def iscontinuous( self ):
+		
+		return ( self.m_eType == CDatum.EType.CONTINUOUS )

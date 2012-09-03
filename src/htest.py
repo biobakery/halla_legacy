@@ -30,6 +30,31 @@ import sys
 
 c_logrHAllA	= logging.getLogger( "halla" )
 
+def _ztest( adX, adY ):
+	"""
+	>>> def s( a ):
+	... 	return [( "%g" % d ) for d in a]
+	>>> s( _ztest( [0, 1, 2], [0, 1, 2] ) )
+	['0', '0.5']
+
+	>>> s( _ztest( [0, 1, 2], [0, 1, 0] ) )
+	['-1.03528', '0.15027']
+
+	>>> s( _ztest( [4, 5, 6, 4, 5, 6], [0, 1, 0, 1, 0, 1, 0, 1] ) )
+	['-7.12168', '5.33105e-13']
+
+	>>> s( _ztest( [0, 1, 0], [4, 5, 6, 4, 5, 6, 4, 5, 6, 4, 5, 6] ) )
+	['6.11296', '1']
+	"""
+	
+	dMX, dMY = (numpy.mean( a ) for a in (adX, adY))
+	dSX, dSY = (numpy.std( a ) for a in (adX, adY))
+	dS = ( ( ( len( adX ) - 1 ) * dSX ) + ( ( len( adY ) - 1 ) * dSY ) ) / ( len( adX ) + len( adY ) - 2 )
+	dZ = ( ( dMY - dMX ) / dS ) if dS else 0
+	dP = scipy.stats.norm.cdf( dZ )
+	
+	return (dZ, dP)
+
 class CHTest:
 	
 	def __init__( self, pData, iOne, iTwo, adTotal = None, dTotal = None ):
@@ -46,6 +71,7 @@ class CHTest:
 		if self.m_dMID == None:
 			self.m_dMID = self.m_pOne.mutual_information_distance( self.m_pTwo )
 		if self.m_dPPerm == None:
+			# Z-test doesn't work here since MI isn't length-invariant
 			# Guarantee at least one better score to adjust permutation p-value
 			self.m_dPPerm = scipy.stats.percentileofscore( [self.m_dMID - 1] +
 				self.m_pData.get_permutation( self.m_iOne, self.m_iTwo ), self.m_dMID ) / 100
@@ -56,6 +82,7 @@ class CHTest:
 
 		if self.m_dPBoot == None:
 			adBootstrap = self.m_pData.get_bootstrap( self.m_iOne, self.m_iTwo )
+			# Z-test doesn't work here for non-huge sample sizes
 			dU, self.m_dPBoot = scipy.stats.ttest_ind( self.m_adTotal, adBootstrap )
 			self.m_dPBoot /= 2
 			if numpy.average( adBootstrap ) > self.m_dTotal:
