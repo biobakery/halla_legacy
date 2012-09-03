@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#######################################################################################
+#############################################################################
 # This file is provided under the Creative Commons Attribution 3.0 license.
 #
 # You are free to share, copy, distribute, transmit, or adapt this work
@@ -7,15 +7,15 @@
 # For more information, please see the following web page:
 # http://creativecommons.org/licenses/by/3.0/
 #
-# This file is a component of the SflE Scientific workFLow Environment for reproducible 
-# research, authored by the Huttenhower lab at the Harvard School of Public Health
-# (contact Curtis Huttenhower, chuttenh@hsph.harvard.edu).
+# This file is a component of HAllA, a Hierarchical All-against-All
+# association testing method, authored by the Huttenhower lab at the Harvard
+# School of Public Health (contact Curtis Huttenhower,
+# chuttenh@hsph.harvard.edu).
 #
-# If you use this environment, the included scripts, or any related code in your work,
-# please let us know, sign up for the SflE user's group (sfle-users@googlegroups.com),
-# pass along any issues or feedback, and we'll let you know as soon as a formal citation
-# is available.
-#######################################################################################
+# If you use this method or its code in your work, please cite the associated
+# publication:
+# ***
+#############################################################################
 
 """
 .. testsetup::
@@ -53,7 +53,6 @@ class CDataset:
 		for iOne, pOne in enumerate( apData ):
 			for iTwo in xrange( iOne + 1, len( apData ) ):
 				pTwo = apData[iTwo]
-#				sys.stderr.write( "%s\n" % [iOne, iTwo, aiIndices, self.m_funcDist( pOne, pTwo, aiIndices )] )
 				adRet.append( self.m_funcDist( pOne, pTwo, aiIndices ) )
 				
 		return adRet
@@ -66,8 +65,8 @@ class CDataset:
 		for astrLine in csv.reader( istm, csv.excel_tab ):
 			strID, astrData = astrLine[0], astrLine[1:]
 			if self.m_astrCols:
-				self.m_hashData[len( self.m_apData )] = pDatum = datum.CDatum( astrData, strID )
-				self.m_apData.append( pDatum )
+				self.m_hashData[strID] = len( self.m_apData )
+				self.m_apData.append( datum.CDatum( astrData, strID ) )
 			else:
 				self.m_astrCols = astrData
 
@@ -115,6 +114,9 @@ class CDataset:
 		"""
 
 		iA, iB = (min( iX, iY ), max( iX, iY ))
+		# Closed form solution of ( iB - iA - 1 ) + sum( iN - i - 1, i = 0..iB )
+		# Counts up the first (iN-1) + (iN-2) + ... + (iN-iA-1) chunks, then adds the
+		# offset of iB's difference from iA within the "triangle"
 		iIndex = ( iA * ( iN - 1 ) ) - ( iA * ( iA - 1 ) / 2 ) + ( iB - iA - 1 )
 		return aValues[iIndex]
 
@@ -160,6 +162,8 @@ class CDataset:
 			self.m_aadZ = scipy.cluster.hierarchy.linkage( self.m_adY, method = "complete" )
 		
 		adMins = [min( a ) for a in self._permutations( dP )]
+		# This may be too strict - not sure yet
+		# Seems to result in slightly fewer clusters than I'd expect
 		dT = scipy.stats.scoreatpercentile( adMins, dP * 100 )
 		aiClusters = scipy.cluster.hierarchy.fcluster( self.m_aadZ, dT )
 		hashRet = {}

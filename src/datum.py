@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#######################################################################################
+#############################################################################
 # This file is provided under the Creative Commons Attribution 3.0 license.
 #
 # You are free to share, copy, distribute, transmit, or adapt this work
@@ -7,15 +7,15 @@
 # For more information, please see the following web page:
 # http://creativecommons.org/licenses/by/3.0/
 #
-# This file is a component of the SflE Scientific workFLow Environment for reproducible 
-# research, authored by the Huttenhower lab at the Harvard School of Public Health
-# (contact Curtis Huttenhower, chuttenh@hsph.harvard.edu).
+# This file is a component of HAllA, a Hierarchical All-against-All
+# association testing method, authored by the Huttenhower lab at the Harvard
+# School of Public Health (contact Curtis Huttenhower,
+# chuttenh@hsph.harvard.edu).
 #
-# If you use this environment, the included scripts, or any related code in your work,
-# please let us know, sign up for the SflE user's group (sfle-users@googlegroups.com),
-# pass along any issues or feedback, and we'll let you know as soon as a formal citation
-# is available.
-#######################################################################################
+# If you use this method or its code in your work, please cite the associated
+# publication:
+# ***
+#############################################################################
 
 """
 .. testsetup::
@@ -36,35 +36,12 @@ class CDatum:
 		CATEGORICAL	= 0,
 		CONTINUOUS	= 1,
 	
-	class CDiscretized:
-		
-		def __init__( self, aiIndices, dProbability ):
-			
-			self.m_setiIndices = set(aiIndices)
-			self.m_dProbability = dProbability
-			
-		def __repr__( self ):
-			
-			return ( "CDiscretized(%s, %g)" % (sorted( self.m_setiIndices ), self.m_dProbability) )
-		
-		def __copy__( self ):
-			
-			return CDiscretized( self.m_setiIndices, self.m_dProbability )
-		
-		def __deepcopy__( self, hashMemo ):
-			
-			return CDiscretized( copy.deepcopy( self.m_setiIndices, hashMemo ), self.m_dProbability )
-		
-		def probability( self, setiIndices = None ):
-			
-			return ( ( float(len( setiIndices & self.m_setiIndices )) / len( setiIndices ) ) if setiIndices
-				else self.m_dProbability )
-				
-	
 	def __init__( self, astrDatum, strID = None ):
 		
 		self.m_strID = strID
 		try:
+			# Needs to be adapted to handle small-count integer values
+			# e.g. [0, 1, 1, 0] probably shouldn't be continuous
 			adDatum = [float(s) for s in astrDatum]
 			self.m_eType = CDatum.EType.CONTINUOUS
 			self.m_aDatum = adDatum
@@ -76,11 +53,11 @@ class CDatum:
 	def __repr__( self ):
 		
 		return ( "CDatum(%s, %s)" % (self.m_aDatum, self.m_strID) )
-
+	
 	def __copy__( self ):
 		
 		return CDatum( self.m_aDatum, self.m_strID )
-
+	
 	def __deepcopy__( self, hashMemo ):
 		
 		return CDatum( copy.deepcopy( self.m_aDatum, hashMemo ), self.m_strID )
@@ -150,6 +127,7 @@ class CDatum:
 		"""
 
 		if iN == None:
+			# Default to rounded sqrt(n) if no bin count requested
 			iN = int(len( astrValues )**0.5 + 0.5)
 		elif iN == 0:
 			iN = len( astrValues )
@@ -171,25 +149,25 @@ class CDatum:
 	@staticmethod
 	def _discretize_helper( astrBins ):
 		"""
-		>>> CDatum._discretize_helper( [0, 1] )
-		{0: CDiscretized([0], 0.5), 1: CDiscretized([1], 0.5)}
+		>>> def s( h ):
+		... 	return ( [(a[0], sorted( a[1] )) for a in sorted( h.items( ) )] if h else None )
 
-		>>> CDatum._discretize_helper( [0, 1, 0, 1] )
-		{0: CDiscretized([0, 2], 0.5), 1: CDiscretized([1, 3], 0.5)}
+		>>> s( CDatum._discretize_helper( [0, 1] ) )
+		[(0, [0]), (1, [1])]
 
-		>>> CDatum._discretize_helper( [0, 1, 0, 1, 1, 1] )
-		{0: CDiscretized([0, 2], 0.333333), 1: CDiscretized([1, 3, 4, 5], 0.666667)}
+		>>> s( CDatum._discretize_helper( [0, 1, 0, 1] ) )
+		[(0, [0, 2]), (1, [1, 3])]
 
-		>>> CDatum._discretize_helper( ["A", "B", "C", "A"] )
-		{'A': CDiscretized([0, 3], 0.5), 'C': CDiscretized([2], 0.25), 'B': CDiscretized([1], 0.25)}
+		>>> s( CDatum._discretize_helper( [0, 1, 0, 1, 1, 1] ) )
+		[(0, [0, 2]), (1, [1, 3, 4, 5])]
+
+		>>> s( CDatum._discretize_helper( ["A", "B", "C", "A"] ) )
+		[('A', [0, 3]), ('B', [1]), ('C', [2])]
 		"""
 
 		hashRet = {}
 		for iIndex, strValue in enumerate( astrBins ):
-			hashRet.setdefault( strValue, [] ).append( iIndex )
-		for strValue, aiIndices in hashRet.items( ):
-			hashRet[strValue] = CDatum.CDiscretized( aiIndices,
-				float(len( aiIndices )) / len( astrBins ) )
+			hashRet.setdefault( strValue, set() ).add( iIndex )
 
 		return hashRet
 
@@ -255,20 +233,15 @@ class CDatum:
 		'0.650022'
 		"""
 		
-		setiIndices = set(aiIndices if aiIndices else range( len( self.m_aDatum ) ))
-		hashProbabilities = {}
-		for p in (self, pDatum):
-			for strX, pX in p.m_hashValues.items( ):
-				hashProbabilities[pX] = pX.probability( setiIndices )
-		
+		setiIndices = set(aiIndices if aiIndices else xrange( len( self.m_aDatum ) ))
 		dRet = 0
-		for strY, pY in self.m_hashValues.items( ):
-			dYProbability = hashProbabilities[pY]
-			for strX, pX in pDatum.m_hashValues.items( ):
-				dXProbability = hashProbabilities[pX]
-				setiXY = pX.m_setiIndices & pY.m_setiIndices & setiIndices
+		for strY, setiY in self.m_hashValues.items( ):
+			dYProbability = float(len( setiY & setiIndices )) / len( setiIndices )
+			for strX, setiX in pDatum.m_hashValues.items( ):
+				setiTmp = setiX & setiIndices
+				dXProbability = float(len( setiTmp )) / len( setiIndices )
+				setiXY = setiTmp & setiY
 				dXY = float(len( setiXY )) / len( setiIndices )
-#				sys.stderr.write( "%s\n" % [dXProbability, dYProbability, dXY, setiIndices] )
 				if dXY:
 					dRet += dXY * math.log( dXY / dXProbability / dYProbability, 2 )
 		
@@ -314,8 +287,8 @@ class CDatum:
 			aiValues = []
 			for p in (self, pDatum):
 				iValues = 0
-				for strValue, pValue in p.m_hashValues.items( ):
-					if setiIndices & pValue.m_setiIndices:
+				for strValue, setiValue in p.m_hashValues.items( ):
+					if setiIndices & setiValue:
 						iValues += 1
 				aiValues.append( iValues )
 			iMin = min( aiValues )
@@ -338,7 +311,6 @@ class CDatum:
 		['0.0', '1.0', '2.0']
 		"""
 
-		aiIndices = range( len( self.m_aDatum ) )
-		random.shuffle( aiIndices )
+		aiIndices = random.sample( xrange( len( self.m_aDatum ) ), len( self.m_aDatum ) )
 		self.m_astrBins, self.m_aDatum = ([a[i] for i in aiIndices] for a in (self.m_astrBins, self.m_aDatum))
 		self.m_hashValues = CDatum._discretize_helper( self.m_astrBins )

@@ -36,75 +36,102 @@ import datum
 
 c_logrHAllA	= logging.getLogger( "halla" )
 
-def test1( pData, hashClusters ):
+class CTest:
+	
+	def __init__( self, pData, iOne, iTwo, adTotal = None ):
+		
+		self.m_pData = pData
+		self.m_iOne, self.m_iTwo = iOne, iTwo
+		self.m_pOne, self.m_pTwo = (pData.get( i ) for i in (self.m_iOne, self.m_iTwo))
+		self.m_adTotal = adTotal if adTotal else self.m_pData.get_bootstrap( )
+		self.m_dTotal = numpy.average( self.m_adTotal )
+		self.m_dMI = self.m_dMID = self.m_dPPerm = self.m_dPBoot = None
 
-	#===============================================================================
-	# Permutation test leaf clusters
-	#===============================================================================
-	adMIs = [d for a in pData.m_aadPermutations for d in a]
-	aaClusters = sorted( hashClusters.items( ) )
-	for iOne, aOne in enumerate( aaClusters ):
-		pOne = pData.get( aOne[1][0] )
-		for aTwo in aaClusters[( iOne + 1 ):]:
-			pTwo = pData.get( aTwo[1][0] )
-			dMI = pOne.mutual_information( pTwo )
-			dMIR = pOne.mutual_information_relative( pTwo )
-			dP = scipy.stats.percentileofscore( adMIs, 1 - dMIR ) / 100
-			c_logrHAllA.debug( "%s" % [pOne.m_strID, pTwo.m_strID, dMI, dMIR, dP] )
+	def test_permutation( self ):
+		
+		if self.m_dMID == None:
+			self.m_dMID = self.m_pOne.mutual_information_distance( self.m_pTwo )
+		if self.m_dPPerm == None:
+			self.m_dPPerm = scipy.stats.percentileofscore( self.m_pData.get_permutation( self.m_iOne, self.m_iTwo ),
+				self.m_dMID ) / 100
 
-def test2( pData, hashClusters, iBootstrap ):
+		return (self.m_dMID, self.m_dPPerm)
 
-	#===============================================================================
-	# Bootstrap test leaf clusters
-	#===============================================================================
+	def test_bootstrap( self ):
+
+		if self.m_dPBoot == None:
+			adBootstrap = self.m_pData.get_bootstrap( self.m_iOne, self.m_iTwo )
+			dU, self.m_dPBoot = scipy.stats.ttest_ind( self.m_adTotal, adBootstrap )
+			# Check this for sidedness
+			if numpy.average( adBootstrap ) > self.m_dTotal:
+				self.m_dPBoot = 1
+		else:
+			dU = None
+			
+		return (dU, self.m_dPBoot)
+
+	def get_mutual_information( self ):
+		
+		if self.m_dMI == None:
+			self.m_dMI = self.m_pOne.mutual_information( self.m_pTwo )
+		return self.m_dMI
+	
+	def save_header( self, ostm ):
+
+		ostm.write( "%s\n" % "\t".join( ("One", "Two", "MI", "MID", "Pperm", "Pboot", "P") ) )
+
+	def save( self, ostm ):
+		
+		dMID, dPPerm = self.test_permutation( )
+		dU, dPBoot = self.test_bootstrap( )
+		ostm.write( "%s\n" % "\t".join( [self.m_pOne.m_strID, self.m_pTwo.m_strID] +
+			[( "%g" % d ) for d in (self.get_mutual_information( ), dMID, dPPerm, dPBoot, max( dPPerm, dPBoot ))] ) )
+
+def _log_plot_histograms( aadValues, strFile, strTitle = None ):
+	c_iN	= 20
+
+	pylab.figure( )
+	for iValues, adValues in enumerate( aadValues ):
+		iN = min( c_iN, int(( len( adValues ) / 5.0 ) + 0.5) )
+		iBins, adBins, pPatches = pylab.hist( adValues, iN, normed = 1, histtype = "stepfilled" )
+		pylab.setp( pPatches, alpha = 0.5 )
+	if strTitle:
+		pylab.title( strTitle )
+	pylab.savefig( strFile )
+
+def _halla_test( ostm, pData, hashClusters, dP, iBootstrap ):
+
 	pData.bootstrap( iBootstrap )
 	adTotal = pData.get_bootstrap( )
 	dTotal = numpy.average( adTotal )
 	aaClusters = sorted( hashClusters.items( ) )
+	fFirst = True
 	for iOne, aOne in enumerate( aaClusters ):
 		iX = aOne[1][0]
-		pOne = pData.get( iX )
 		for aTwo in aaClusters[( iOne + 1 ):]:
 			iY = aTwo[1][0]
-			pTwo = pData.get( iY )
-			dMID = pOne.mutual_information_distance( pTwo )
-			dPOne = scipy.stats.percentileofscore( pData.get_permutation( iX, iY ), dMID ) / 100
 			
-			adBootstrap = pData.get_bootstrap( iX, iY )
-			dMI = pOne.mutual_information( pTwo )
+			pTest = CTest( pData, iX, iY, adTotal )
+			if fFirst:
+				fFirst = False
+				pTest.save_header( ostm )
+			pTest.save( ostm )
+			
+			if c_logrHAllA.level <= logging.DEBUG:
+				dMID, dPOne = pTest.test_permutation( )
+				dU, dPTwo = pTest.test_bootstrap( )
+ 				if ( dPOne < dP ) and ( dPTwo < dP ):
+ 					pOne, pTwo = (pData.get( i ) for i in (iX, iY))
+				 	_log_plot_histograms( [adTotal, pData.get_permutation( iX, iY ), pData.get_bootstrap( iX, iY )],
+						"-".join( (s.split( "|" )[-1] for s in (pOne.m_strID, pTwo.m_strID)) ) + ".png",
+						"%g (%g), p_perm=%g, p_boot=%g" % (dMID, pTest.get_mutual_information( ), dPOne, dPTwo) )
 
-#			sys.stderr.write( "%s\n" % adBootstrap )
-# too sensitive
-#			dU, dPTwo = scipy.stats.mannwhitneyu( adTotal, adBootstrap )
-#			dPTwo = 1 if ( numpy.average( adBootstrap ) > dTotal ) else ( dPTwo * 2 )
-# too sensitive
-#			dU, dPTwo = scipy.stats.ks_2samp( adTotal, adBootstrap )
-			dU, dPTwo = scipy.stats.ttest_ind( adTotal, adBootstrap )
-			if numpy.average( adBootstrap ) > dTotal:
-				dPTwo = 1
-# this works decently well, need to also test here whether the point estimate is significantly different than the permuted null
-
-			c_logrHAllA.debug( "%s" % [pOne.m_strID, pTwo.m_strID, dMI, 1 - dMID, dU, dPTwo, dPOne] )
-
-			if ( dPOne < 0.05 ) and ( dPTwo < ( 0.05 ) ):#/ ( len( aaClusters ) * ( len( aaClusters ) - 1 ) / 2 ) ) ):
-				pylab.figure( )
-				iN = 20
-				iBins, adBins, pPatches = pylab.hist( adTotal, iN, normed = 1, histtype = "stepfilled" )
-				pylab.setp( pPatches, "facecolor", "blue", "alpha", 0.5 )
-				iBins, adBins, pPatches = pylab.hist( adBootstrap, iN, normed = 1, histtype = "stepfilled" )
-				pylab.setp( pPatches, "facecolor", "red", "alpha", 0.5 )
-				pylab.title( "%g (%g), p1=%g, p2=%g" % (dMI, 1 - dMID, dPOne, dPTwo) )
-				pylab.savefig( "-".join( (s.split( "|" )[-1] for s in (pOne.m_strID, pTwo.m_strID)) ) + ".png" )
-
-def halla( istm, ostm, dPMI, iBootstrap ):
+def halla( istm, ostm, dP, dPMI, iBootstrap ):
 
 	pData = dataset.CDataset( datum.CDatum.mutual_information_distance )
 	pData.open( istm )
 	hashClusters = pData.hierarchy( dPMI )
-
-	test2( pData, hashClusters, iBootstrap )
-	
-	return None
+	_halla_test( ostm, pData, hashClusters, dP, iBootstrap )
 
 argp = argparse.ArgumentParser( prog = "halla.py",
 	description = """Hierarchical All-against-All significance association testing.""" )
@@ -114,7 +141,10 @@ argp.add_argument( "istm",		metavar = "input.txt",
 argp.add_argument( "-o",		dest = "ostm",			metavar = "output.txt",
 	type = argparse.FileType( "w" ),	default = sys.stdout,
 	help = "Optional output file for association significance tests" )
-argp.add_argument( "-p",		dest = "dPMI",			metavar = "p_mi",
+argp.add_argument( "-p",		dest = "dP",			metavar = "p_value",
+	type = float,	default = 0.05,
+	help = "P-value for overall significance tests" )
+argp.add_argument( "-P",		dest = "dPMI",			metavar = "p_mi",
 	type = float,	default = 0.05,
 	help = "P-value for permutation equivalence of MI clusters" )
 argp.add_argument( "-b",		dest = "iBootstrap",	metavar = "bootstraps",
@@ -139,7 +169,7 @@ def _main( ):
 	c_logrHAllA.addHandler( lghn )
 	c_logrHAllA.setLevel( ( 10 - args.iDebug ) * 10 )
 
-	halla( args.istm, args.ostm, args.dPMI, args.iBootstrap )
+	halla( args.istm, args.ostm, args.dP, args.dPMI, args.iBootstrap )
 
 if __name__ == "__main__":
 	_main( )
