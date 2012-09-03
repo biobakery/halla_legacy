@@ -31,6 +31,8 @@ import scipy.cluster.hierarchy
 import scipy.stats
 import sys
 
+#import time
+
 import datum
 
 c_logrHAllA	= logging.getLogger( "halla" )
@@ -47,13 +49,14 @@ class CDataset:
 		self.m_aadBootstraps, self.m_aadPermutations, self.m_adY, self.m_aadZ = ([] for i in xrange( 4 ))
 		self.m_hashData = {}
 
-	def _pdist( self, apData, aiIndices = None ):
-	
+	def _pdist( self, apData, hashIndices = None ):
+
+		aCache = [pDatum.cache( hashIndices ) for pDatum in apData]
 		adRet = []
 		for iOne, pOne in enumerate( apData ):
 			for iTwo in xrange( iOne + 1, len( apData ) ):
 				pTwo = apData[iTwo]
-				adRet.append( self.m_funcDist( pOne, pTwo, aiIndices ) )
+				adRet.append( self.m_funcDist( pOne, pTwo, hashIndices, aCache[iOne], aCache[iTwo] ) )
 				
 		return adRet
 	
@@ -74,19 +77,30 @@ class CDataset:
 
 		c_logrHAllA.info( "Generating %s permutations" % iIterations )
 		apPermute = copy.deepcopy( self.m_apData )
+#		iTOne = 0
 		for iIteration in xrange( iIterations ):
 			c_logrHAllA.info( "Permutation %s/%s" % (iIteration, iIterations) )
 			for pDatum in apPermute:
 				pDatum.permute( )
+#			iT = time.clock( )
 			self.m_aadPermutations.append( self._pdist( apPermute ) )
+#			iTOne += time.clock( ) - iT
+#			sys.stderr.write( "%s\n" % [iIteration, iTOne] )
 
 	def bootstrap( self, iIterations ):
 
 		c_logrHAllA.info( "Generating %s bootstraps" % iIterations )
+#		iTOne = 0
 		for iIteration in xrange( iIterations ):
 			c_logrHAllA.info( "Bootstrap %s/%s" % (iIteration, iIterations) )
 			aiBootstrap = [random.sample( xrange( len( self.m_astrCols ) ), 1 )[0] for i in xrange( len( self.m_apData ) )]
-			self.m_aadBootstraps.append( self._pdist( self.m_apData, aiBootstrap ) )
+			hashBootstrap = {}
+			for i in aiBootstrap:
+				hashBootstrap[i] = 1 + hashBootstrap.get( i, 0 )
+#			iT = time.clock( )
+			self.m_aadBootstraps.append( self._pdist( self.m_apData, hashBootstrap ) )
+#			iTOne += time.clock( ) - iT
+#			sys.stderr.write( "%s\n" % [iIteration, iTOne] )
 
 	@staticmethod
 	def _get_pdist( iN, aValues, iX, iY ):
@@ -120,6 +134,10 @@ class CDataset:
 		iIndex = ( iA * ( iN - 1 ) ) - ( iA * ( iA - 1 ) / 2 ) + ( iB - iA - 1 )
 		return aValues[iIndex]
 
+# Should really fix this so it caches these correctly; right now it
+# generates more at every request, rather than ensuring at least the
+# requested number exist
+
 	def _get_result( self, aadResults, iX, iY ):
 		
 		if iX == None:
@@ -148,7 +166,8 @@ class CDataset:
 
 	def _permutations( self, dP ):
 		
-		iPermutations = int(1 / dP) + 1
+		# Perform enough permutations to safely exceed the requested p-value
+		iPermutations = int(2 / dP) + 1
 		i = iPermutations - len( self.m_aadPermutations )
 		if i > 0:
 			self.permute( i )
@@ -160,11 +179,9 @@ class CDataset:
 			self.m_adY = self._pdist( self.m_apData )
 		if not self.m_aadZ:
 			self.m_aadZ = scipy.cluster.hierarchy.linkage( self.m_adY, method = "complete" )
-		
-		adMins = [min( a ) for a in self._permutations( dP )]
-		# This may be too strict - not sure yet
-		# Seems to result in slightly fewer clusters than I'd expect
-		dT = scipy.stats.scoreatpercentile( adMins, dP * 100 )
+
+		# Initially cluster at a fairly strict threshold to group "indistinguishable" features		
+		dT = scipy.stats.scoreatpercentile( [d for a in self._permutations( dP ) for d in a], dP * 100 )
 		aiClusters = scipy.cluster.hierarchy.fcluster( self.m_aadZ, dT )
 		hashRet = {}
 		for iIndex, iCluster in enumerate( aiClusters ):

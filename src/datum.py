@@ -176,8 +176,27 @@ class CDatum:
 		self.m_astrBins = self.m_aDatum if ( self.m_eType == CDatum.EType.CATEGORICAL ) else \
 			CDatum._discretize_continuous( self.m_aDatum )
 		self.m_hashValues = CDatum._discretize_helper( self.m_astrBins )
-				
-	def mutual_information( self, pDatum, aiIndices = None ):
+
+	def cache( self, hashIndices = None ):
+	
+		if not hashIndices:
+			hashIndices = dict((i, 1) for i in xrange( len( self.m_aDatum ) ))
+		setiIndices = set(hashIndices.keys( ))
+		adRet = []
+		iValues = 0
+		for strX, setiX in self.m_hashValues.items( ):
+			iX = len( setiX & setiIndices )
+			if iX:
+				iValues += 1
+				d = float(iX) / len( hashIndices )
+			else:
+				d = 0
+			adRet.append( d )
+		adRet.append( iValues )
+		
+		return adRet
+			
+	def mutual_information( self, pDatum, hashIndices = None, pCacheSelf = None, pCacheDatum = None ):
 		"""
 		>>> pOne = CDatum( ["A", "A", "B", "B"] )
 		>>> pTwo = CDatum( ["B", "B", "A", "A"] )
@@ -215,7 +234,7 @@ class CDatum:
 
 		>>> pSix = CDatum( ["A", "B", "C", "A", "B", "C", "D", "D"] )
 		>>> pSeven = CDatum( ["A", "A", "B", "A", "A", "B", "B", "B"] )
-		>>> "%g" % pSix.mutual_information( pSeven, range( 6 ) )
+		>>> "%g" % pSix.mutual_information( pSeven, dict((i, 1) for i in xrange( 6 )) )
 		'0.918296'
 		
 		>>> pEight = CDatum( [8.47E-05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] )
@@ -223,31 +242,40 @@ class CDatum:
 		>>> "%g" % pEight.mutual_information( pNine )
 		'0.053968'
 		
-		>>> "%g" % pEight.mutual_information( pNine, range( len( pEight.m_aDatum ) / 2 ) )
+		>>> "%g" % pEight.mutual_information( pNine, dict((i, 1) for i in xrange( len( pEight.m_aDatum ) / 2 )) )
 		'0.132097'
 		
-		>>> "%g" % pEight.mutual_information( pNine, range( len( pEight.m_aDatum ) / 4 ) )
+		>>> "%g" % pEight.mutual_information( pNine, dict((i, 1) for i in xrange( len( pEight.m_aDatum ) / 4 )) )
 		'0.24715'
 		
-		>>> "%g" % pEight.mutual_information( pNine, range( len( pEight.m_aDatum ) / 8 ) )
+		>>> "%g" % pEight.mutual_information( pNine, dict((i, 1) for i in xrange( len( pEight.m_aDatum ) / 8 )) )
 		'0.650022'
 		"""
-		
-		setiIndices = set(aiIndices if aiIndices else xrange( len( self.m_aDatum ) ))
+
+		iLen = sum( hashIndices.values( ) ) if hashIndices else len( self.m_aDatum )
 		dRet = 0
-		for strY, setiY in self.m_hashValues.items( ):
-			dYProbability = float(len( setiY & setiIndices )) / len( setiIndices )
-			for strX, setiX in pDatum.m_hashValues.items( ):
-				setiTmp = setiX & setiIndices
-				dXProbability = float(len( setiTmp )) / len( setiIndices )
-				setiXY = setiTmp & setiY
-				dXY = float(len( setiXY )) / len( setiIndices )
+		for iY, aY in zip( xrange( len( self.m_hashValues ) ), self.m_hashValues.items( ) ):
+			strY, setiY = aY
+			if pCacheSelf:
+				dYProbability = pCacheSelf[iY]
+			else:
+				dYProbability = ( sum( hashIndices.get( i, 0 ) for i in setiY ) if hashIndices else len( setiY ) ) / float(iLen)
+			if not dYProbability:
+				continue
+			for iX, aX in zip( xrange( len( pDatum.m_hashValues ) ), pDatum.m_hashValues.items( ) ):
+				strX, setiX = aX
+				if pCacheDatum:
+					dXProbability = pCacheDatum[iX]
+				else:
+					dXProbability = ( sum( hashIndices.get( i, 0 ) for i in setiX ) if hashIndices else len( setiX ) ) / float(iLen)
+				setiXY = setiX & setiY
+				dXY = ( sum( hashIndices.get( i, 0 ) for i in setiXY ) if hashIndices else len( setiXY ) ) / float(iLen)
 				if dXY:
 					dRet += dXY * math.log( dXY / dXProbability / dYProbability, 2 )
 		
 		return dRet
 	
-	def mutual_information_relative( self, pDatum, aiIndices = None ):
+	def mutual_information_relative( self, pDatum, hashIndices = None, pCacheSelf = None, pCacheDatum = None ):
 		"""
 		>>> pOne = CDatum( ["A", "A", "B", "B"] )
 		>>> pTwo = CDatum( ["B", "B", "A", "A"] )
@@ -281,15 +309,17 @@ class CDatum:
 		'0.053968'
 		"""
 
-		dMI = self.mutual_information( pDatum, aiIndices )
-		if aiIndices:
-			setiIndices = set(aiIndices)
+		dMI = self.mutual_information( pDatum, hashIndices, pCacheSelf, pCacheDatum )
+		if hashIndices:
 			aiValues = []
-			for p in (self, pDatum):
-				iValues = 0
-				for strValue, setiValue in p.m_hashValues.items( ):
-					if setiIndices & setiValue:
-						iValues += 1
+			for p, pCache in zip( (self, pDatum), (pCacheSelf, pCacheDatum) ):
+				if pCache:
+					iValues = pCache[-1]
+				else:
+					iValues = 0
+					for strValue, setiValue in p.m_hashValues.items( ):
+						if hashIndices & setiValue:
+							iValues += 1
 				aiValues.append( iValues )
 			iMin = min( aiValues )
 		else:
@@ -297,9 +327,9 @@ class CDatum:
 		dRet = ( ( dMI / math.log( iMin, 2 ) ) if ( iMin > 1 ) else 0 )
 		return dRet
 	
-	def mutual_information_distance( self, pDatum, aiIndices = None ):
+	def mutual_information_distance( self, pDatum, hashIndices = None, pCacheSelf = None, pCacheDatum = None ):
 		
-		return ( 1 - self.mutual_information_relative( pDatum, aiIndices ) )
+		return ( 1 - self.mutual_information_relative( pDatum, hashIndices, pCacheSelf, pCacheDatum ) )
 	
 	def permute( self ):
 		"""

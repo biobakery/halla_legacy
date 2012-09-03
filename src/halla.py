@@ -29,75 +29,22 @@ import numpy
 import scipy.stats
 import sys
 
-import pylab
-
 import dataset
 import datum
+import hlog
+import htest
 
 c_logrHAllA	= logging.getLogger( "halla" )
 
-class CTest:
+def _halla_clusters( ostm, hashClusters, pData ):
 	
-	def __init__( self, pData, iOne, iTwo, adTotal = None ):
-		
-		self.m_pData = pData
-		self.m_iOne, self.m_iTwo = iOne, iTwo
-		self.m_pOne, self.m_pTwo = (pData.get( i ) for i in (self.m_iOne, self.m_iTwo))
-		self.m_adTotal = adTotal if adTotal else self.m_pData.get_bootstrap( )
-		self.m_dTotal = numpy.average( self.m_adTotal )
-		self.m_dMI = self.m_dMID = self.m_dPPerm = self.m_dPBoot = None
-
-	def test_permutation( self ):
-		
-		if self.m_dMID == None:
-			self.m_dMID = self.m_pOne.mutual_information_distance( self.m_pTwo )
-		if self.m_dPPerm == None:
-			self.m_dPPerm = scipy.stats.percentileofscore( self.m_pData.get_permutation( self.m_iOne, self.m_iTwo ),
-				self.m_dMID ) / 100
-
-		return (self.m_dMID, self.m_dPPerm)
-
-	def test_bootstrap( self ):
-
-		if self.m_dPBoot == None:
-			adBootstrap = self.m_pData.get_bootstrap( self.m_iOne, self.m_iTwo )
-			dU, self.m_dPBoot = scipy.stats.ttest_ind( self.m_adTotal, adBootstrap )
-			# Check this for sidedness
-			if numpy.average( adBootstrap ) > self.m_dTotal:
-				self.m_dPBoot = 1
-		else:
-			dU = None
-			
-		return (dU, self.m_dPBoot)
-
-	def get_mutual_information( self ):
-		
-		if self.m_dMI == None:
-			self.m_dMI = self.m_pOne.mutual_information( self.m_pTwo )
-		return self.m_dMI
-	
-	def save_header( self, ostm ):
-
-		ostm.write( "%s\n" % "\t".join( ("One", "Two", "MI", "MID", "Pperm", "Pboot", "P") ) )
-
-	def save( self, ostm ):
-		
-		dMID, dPPerm = self.test_permutation( )
-		dU, dPBoot = self.test_bootstrap( )
-		ostm.write( "%s\n" % "\t".join( [self.m_pOne.m_strID, self.m_pTwo.m_strID] +
-			[( "%g" % d ) for d in (self.get_mutual_information( ), dMID, dPPerm, dPBoot, max( dPPerm, dPBoot ))] ) )
-
-def _log_plot_histograms( aadValues, strFile, strTitle = None ):
-	c_iN	= 20
-
-	pylab.figure( )
-	for iValues, adValues in enumerate( aadValues ):
-		iN = min( c_iN, int(( len( adValues ) / 5.0 ) + 0.5) )
-		iBins, adBins, pPatches = pylab.hist( adValues, iN, normed = 1, histtype = "stepfilled" )
-		pylab.setp( pPatches, alpha = 0.5 )
-	if strTitle:
-		pylab.title( strTitle )
-	pylab.savefig( strFile )
+	fFirst = True
+	for iCluster, aiCluster in hashClusters.items( ):
+		if len( aiCluster ) > 1:
+			if fFirst:
+				fFirst = False
+				ostm.write( "Clusters\n" )
+			ostm.write( "%s\n" % "\t".join( pData.get( i ).m_strID for i in aiCluster ) )
 
 def _halla_test( ostm, pData, hashClusters, dP, iBootstrap ):
 
@@ -106,31 +53,57 @@ def _halla_test( ostm, pData, hashClusters, dP, iBootstrap ):
 	dTotal = numpy.average( adTotal )
 	aaClusters = sorted( hashClusters.items( ) )
 	fFirst = True
+#===============================================================================
+# Should add hierarchical testing at this point to prevent all-against-all MHT.
+# Specifically, each test is looking at two nodes in the pData hierarchy.  Each
+# test should thus be:
+#   dPPerm = something like
+#     paired test of (real values) vs. (score-at-percentile-of-pvalue in permutations)
+#       across all leaves in the node
+#     except this can't be exactly right, since it doesn't reduce correctly in the
+#       single-leaf case
+#     what we want to test is "is at least one of these values different"
+#       not sure if simes (min p-value) or similar would be appropriate
+#   dPBoot = something like
+#     t-test of (boot dists for all leaves in node) vs. (total boot dist)
+#     this one's easy
+# Then use the algorithm:
+#   dDepth = 1.0 (full height)
+#   while not done:
+#     dDepth /= 2
+#     hashNodes = clusters at dDepth
+#     dPDepth = 1 - ( 1 - dP )**len( hashNodes )
+#     for each node in hashNodes:
+#       test dPPerm and dPBoot against dPDepth
+#       if significant, recurse at half depth; if not, stop exploring branch
+#===============================================================================
 	for iOne, aOne in enumerate( aaClusters ):
 		iX = aOne[1][0]
-		for aTwo in aaClusters[( iOne + 1 ):]:
+		c_logrHAllA.info( "Testing %d/%d" % (iOne, len( aaClusters )) )
+		for iTwo in xrange( iOne + 1, len( aaClusters ) ):
+			aTwo = aaClusters[iTwo]
 			iY = aTwo[1][0]
-			
-			pTest = CTest( pData, iX, iY, adTotal )
+
+			pTest = htest.CHTest( pData, iX, iY, adTotal, dTotal )
+			dMID, dPPerm = pTest.test_permutation( )
+			dU, dPBoot = pTest.test_bootstrap( )
+			if all( ( d > dP ) for d in (dPPerm, dPBoot) ):
+				continue
 			if fFirst:
 				fFirst = False
 				pTest.save_header( ostm )
 			pTest.save( ostm )
 			
-			if c_logrHAllA.level <= logging.DEBUG:
-				dMID, dPOne = pTest.test_permutation( )
-				dU, dPTwo = pTest.test_bootstrap( )
- 				if ( dPOne < dP ) and ( dPTwo < dP ):
- 					pOne, pTwo = (pData.get( i ) for i in (iX, iY))
-				 	_log_plot_histograms( [adTotal, pData.get_permutation( iX, iY ), pData.get_bootstrap( iX, iY )],
-						"-".join( (s.split( "|" )[-1] for s in (pOne.m_strID, pTwo.m_strID)) ) + ".png",
-						"%g (%g), p_perm=%g, p_boot=%g" % (dMID, pTest.get_mutual_information( ), dPOne, dPTwo) )
+			if ( c_logrHAllA.level <= logging.DEBUG ) and \
+				all( ( d <= dP ) for d in (dPPerm, dPBoot) ):
+ 					hlog._log_plot( pData, pTest, adTotal )
 
 def halla( istm, ostm, dP, dPMI, iBootstrap ):
 
 	pData = dataset.CDataset( datum.CDatum.mutual_information_distance )
 	pData.open( istm )
 	hashClusters = pData.hierarchy( dPMI )
+	_halla_clusters( ostm, hashClusters, pData )
 	_halla_test( ostm, pData, hashClusters, dP, iBootstrap )
 
 argp = argparse.ArgumentParser( prog = "halla.py",
