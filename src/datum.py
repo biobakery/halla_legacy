@@ -28,6 +28,7 @@ import logging
 import math
 import random
 import sys
+import numpy as np 
 
 c_logrHAllA	= logging.getLogger( "halla" )
 
@@ -134,17 +135,12 @@ class CDatum:
 		else:
 			iN = min( iN, len( set(astrValues) ) )
 			
-		# This is still a bit buggy since ( [0, 0, 0, 1, 2, 2, 2, 2], 3 ) will exhibit suboptimal behavior
-		aiIndices = sorted( range( len( astrValues ) ), cmp = lambda i, j: cmp( astrValues[i], astrValues[j] ) )
-		astrRet = [None] * len( astrValues )
-		iPrev = 0
-		for i, iIndex in enumerate( aiIndices ):
-			# If you're on a tie, you can't increase the bin number
-			# Otherwise, increase by at most one
-			iPrev = astrRet[iIndex] = iPrev if ( i and ( astrValues[iIndex] == astrValues[aiIndices[i - 1]] ) ) else \
-				min( iPrev + 1, int(iN * i / float(len( astrValues ))) )
-		
-		return astrRet
+		afBins = np.linspace( np.min(astrValues), np.max(astrValues), iN )
+
+		# np.digitize is 1-indexed when none of the values fall to the left of the bin 
+		aiBins = [i-1 for i in np.digitize( astrValues, afBins )]
+				
+		return aiBins
 
 	@staticmethod
 	def _discretize_helper( astrBins ):
@@ -164,7 +160,7 @@ class CDatum:
 		>>> s( CDatum._discretize_helper( ["A", "B", "C", "A"] ) )
 		[('A', [0, 3]), ('B', [1]), ('C', [2])]
 		"""
-
+	
 		hashRet = {}
 		for iIndex, strValue in enumerate( astrBins ):
 			hashRet.setdefault( strValue, set() ).add( iIndex )
