@@ -31,8 +31,8 @@ import sys
 
 import dataset
 import datum
-import hlog
-import htest
+import hlog #logging features
+import htest # hypothesis testing module 
 
 c_logrHAllA	= logging.getLogger( "halla" )
 
