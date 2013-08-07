@@ -13,7 +13,7 @@ import sklearn as sk
 from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, adjusted_mutual_info_score 
 
 #==========================================================================#
-# Measures of Divergence 
+# DIVERGENCE CLASSES
 #==========================================================================#
 
 class CDistance:
@@ -61,18 +61,21 @@ class CMutualInformation( CDistance ):
 	
 	__metaclass__ = ABCMeta 
 
-	def __init__( self, c_array1, c_array2 ):
+	def __init__( self, c_array1, c_array2, bSym = False ):
 		self.m_data1 = c_array1 
 		self.m_data2 = c_array2 
+		self.bSym = bSym
 		self.c_distance_type = CDistance.EMetricType.NONMETRIC 
 	
 	def get_distance( self ):
 		assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
-		return mutual_info_score( self.m_data1, self.m_data2 )
+		return ( mutual_info_score( self.m_data1, self.m_data2 ) if not(self.bSym) \
+			else mutual_info_score( self.m_data1, self.m_data2 ) +  \
+			mutual_info_score( self.m_data2, self.m_data1 ) )
 	
 	def get_distance_type( self ):
 		return self.c_distance_type 	
-	
+
 class CNormalizedMutualInformation( CDistance ):
 	
 	__metaclass__ = ABCMeta 
@@ -106,6 +109,16 @@ class CAdjustedMutualInformation( CDistance ):
 		return self.c_distance_type 	
 
 #==========================================================================#
-# Hypothesis Testing 
+# HYPOTHESIS TESTING CLASSES 
 #==========================================================================#
 
+
+#==========================================================================#
+# FUNCTIONS  
+#==========================================================================#
+
+def mi( pData1, pData2 ):
+	return CMutualInformation( pData1, pData2 ).get_distance()
+
+def sym_mi( pData1, pData2 ):
+	return CMutualInformation( pData1, pData2, True ).get_distance()
