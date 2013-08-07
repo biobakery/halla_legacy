@@ -12,6 +12,10 @@ import sklearn as sk
 #mi-based distances from scikit-learn 
 from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, adjusted_mutual_info_score 
 
+#==========================================================================#
+# Measures of Divergence 
+#==========================================================================#
+
 class CDistance:
 	''' 
 	abstract distance, handles numpy arrays (probably should support lists for compatibility issues)
@@ -20,9 +24,6 @@ class CDistance:
 		
 	c_hashInvertFunctions = {"logistic": lambda x:1.0/(1+numpy.exp(-1.0*x)), "flip": lambda x: -1.0*x, "1mflip": lambda x: 1-1.0*x }
 
-	class EDataType:
-		DISCRETE = 0 
-		CONTINUOUS = 1
 	class EMetricType:
 		NONMETRIC = 0
 		METRIC = 1
@@ -103,4 +104,8 @@ class CAdjustedMutualInformation( CDistance ):
 
 	def get_distance_type( self ):
 		return self.c_distance_type 	
-	
+
+#==========================================================================#
+# Hypothesis Testing 
+#==========================================================================#
+

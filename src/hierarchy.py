@@ -7,22 +7,82 @@ import math
 import numpy as np  
 from numpy import array 
 import datum 
+import distance 
 
-class CHallaTree():
+#c_hashStructures = {"tree": lambda: Tree()}
+
+
+#==========================================================================#
+# DATA STRUCTURES 
+#==========================================================================#
+
+class Tree():
 	''' 
-	A HallaTree is a hierarchically nested structure containing nodes as
-	a basic core unit
-
-	Should write it as a sequence or iterator for convenience.  
+	A hierarchically nested structure containing nodes as
+	a basic core unit	
 	'''	
 
-
 	def __init__(self):
-		self.m_pData = None
-		self.m_queue = [] 
+		self.m_pData = None 
 		self.m_arrayChildren = []
 		self.m_iLayer = 0 
     
+	def pop(self):
+		# pop one of the children, else return none, since this amounts to killing the singleton 
+		if self.m_arrayChildren:
+			return self.m_arrayChildren.pop()
+		
+	def is_leaf(self):
+		return bool(not(self.m_pData and self.m_arrayChildren))
+
+	def is_degenerate(self):
+		return ( not(self.m_pData) and not(self.m_arrayChildren) )			
+
+	def add_child(self, node_object):
+		self.m_arrayChildren.append(node_object)
+		
+	def get_children(self): 
+		return self.m_arrayChildren
+	
+	def get_child(self,iIndex=None):
+		return self.m_arrayChildren[iIndex or 0]
+	
+	def add_data(self, pDatum):
+		self.m_pData = pDatum 
+		return self 
+	
+	def get_data(self):
+		return self.m_pData 
+
+
+#==========================================================================#
+# METHODS  
+#==========================================================================#
+
+
+#==========================================================================#
+# META
+#==========================================================================#
+
+class Gardener():
+	"""
+	A gardener object is a handler for the different types of hierarchical data structures ("trees")
+	Can collapse and manipulate data structures and wrap them in different objects, depending on the 
+	context. 
+	"""
+
+	@staticmethod 
+	def PlantTree():
+		"""
+		Input: halla.Dataset object 
+		Output: halla.hierarchy.Tree object 
+		"""
+
+		return None 
+
+	def __init__(self):
+		pass 
+
 	def next(self):
 		'''
 		return the data of the tree, layer by layer
@@ -32,6 +92,7 @@ class CHallaTree():
 		
 		if self.is_leaf():
 			return Exception("Empty Tree")
+
 		elif self.m_pData:
 			pTmp = self.m_pData 
 			self.m_queue.extend(self.m_arrayChildren)
@@ -56,33 +117,13 @@ class CHallaTree():
 			self = pSelf 
 		return pTmp 
 
-	def pop(self):
-		if self.m_arrayChildren:
-			return self.m_arrayChildren.pop()
-		else:
-			pTmp = self.m_pData
-			self.m_pData = None 
-			return pTmp	
 
-	def is_leaf(self):
-		return bool(self.m_pData and self.m_queue and self.m_arrayChildren) 
+#==========================================================================#
+# OBJECT WRAPPERS
+#==========================================================================#
 
-	def is_degenerate(self):
-		return ( not(self.m_pData) and self.m_queue and not(self.m_arrayChildren) )			
-
-	def add_child(self, node_object):
-		self.m_arrayChildren.append(node_object)
-		#self.m_arrayChildren = node_object
-	def get_children(self): 
-		return self.m_arrayChildren
-	def get_child(self,iIndex=None):
-		return self.m_arrayChildren[iIndex or 0]
-	def add_data(self, pDatum):
-		self.m_pData = pDatum 
-		return self 
-	def get_data(self):
-		return self.m_pData 
+def HAC( pDataset ):
+	"""
+	Hierarchical Agglomerative Clustering
+	"""
 	
-	def collapse(self):
-		aaOut = [] 
-		return (x for x in self) 	
