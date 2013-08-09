@@ -28,8 +28,12 @@ import logging
 import math
 import random
 import sys
+from numpy import array 
 
 c_logrHAllA	= logging.getLogger( "halla" )
+
+def discretize( pArray ):
+	return array([CDatum._discretize_continuous(line) for line in pArray])
 
 class CDatum:
 	class EType:
