@@ -4,6 +4,10 @@
 Scaffold script for HAllA development
 """
 
+## native python packages 
+
+import itertools 
+
 ## structural packages 
 
 import sys 
@@ -24,7 +28,9 @@ import random
 from distance import mi, sym_mi 
 from numpy.random import normal 
 from scipy.misc import * 
+from scipy.stats import kruskal, ttest_ind, ttest_lsamp 
 import pandas as pd 
+
 
 
 #=================================================# 
@@ -39,13 +45,22 @@ l2 = lambda x,y: np.linalg.norm(x-y)
 """
 Hierarchically compare two datasets 
 
-"""
+
+
+if len(sys.argv[1:]) < 2:
+	raise Exception("Usage: python clustering.py [file1.csv] [file2.csv] .. <additional_files> .. ")
+
+args = sys.argv[1:]
+strFile1, strFile2 = args[:2]
 
 ## Parse 
 
 ## Load into dataframe 
 
-pd.DataFrame( )
+df1 = pd.read_csv(strFile1)
+df2 = pd.read_csv(strFile2)
+
+"""
 
 ## Example Data 
 #csvr = csv.reader(open("table.tsv"), csv.excel_tab)
@@ -106,24 +121,33 @@ Z2 = linkage( distance_matrix2 )
 Z11 = linkage( distance_matrix11 )
 Z22 = linkage( distance_matrix22 )
 
-def compute_medoid( pArray, pMetric = l2, iAxis = 0 ):
+def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
 	"""
 	Input: numpy array 
 	Output: float
 	
-	For lack of better way, compute centroid, then compute medoid. 
+	For lack of better way, compute centroid, then compute medoid 
+	by looking at an element that is closest to the centroid. 
+
+	Can define arbitrary metric passed in as a function to pMetric 
 
 	"""
 
 	d = pMetric 
 
-	mean_vec = np.mean(pArray,0) 
+	pArray = ( pArray.T if bool(iAxis) else pArray  ) 
+
+	print pArray.shape 
+
+	mean_vec = np.mean(pArray, 0) 
 	
 	pArrayCenter = pArray - ( mean_vec * np.ones(pArray.shape) )
 
 	return pArray[np.argsort( map( np.linalg.norm, pArrayCenter) )[0],:]
 
-
+def get_representative( pArray, pMethod = None ):
+	hash_method = {None: get_medoid}
+	return hash_method[pMethod]( pArray )
 
 def reduce_tree( pClusterNode, pFunction = lambda x: x.id, aOut = [] ):
 	func = pFunction
@@ -131,18 +155,43 @@ def reduce_tree( pClusterNode, pFunction = lambda x: x.id, aOut = [] ):
 	if pClusterNode.is_leaf():
 		return ( aOut + [func(pClusterNode)] )
 	else:
-		return reduce_tree( pClusterNode.left, func, aOut ) + reduce_tree( pClusterNode.right, func, aOut ) 
+		return reduce_tree( pClusterNode.left, func, aOut ) + \
+			reduce_tree( pClusterNode.right, func, aOut ) 
 
-tree = to_tree( Z11 )
+def traverse( apClusterNode, pFunction = lambda x: x.id, aOut = [] ):
 
+	def _compare( pClusterNode ):
+		node = pClusterNode 
+		get_representative( node.left ) 
+		get_representative( node.right ) 
+		 
+
+	if len(apClusterNode) == 1:
+		return reduce_tree( pClusterNode, pFunction )
+	else:
+
+
+
+
+	""" 
+	Map/reduce like function for the scipy ClusterNode object.
+	Perform all-against-all actions between clusters per layer on the tree
+
+	"""
+
+	ttest = lambda ttest_ind( )
+
+	reduce_tree( pClusterNode, lambda ttest )
+
+
+
+
+#tree = to_tree( Z11 )
 
 if __name__ == "__main__":
 
-	aargs = sys.argv[1:]
-
-
-
-
+	#aargs = sys.argv[1:]
+	
 	## plot stuff 
 	pl.figure(1)
 
@@ -164,8 +213,6 @@ if __name__ == "__main__":
 	dendrogram( Z22 )
 	pl.title("euc 2")
 
-
-	#pl.show()  
-
+	pl.show()  
 
 	print Z1 
