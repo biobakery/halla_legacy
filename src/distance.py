@@ -124,6 +124,9 @@ class CAdjustedMutualInformation( CDistance ):
 # FUNCTIONS  
 #==========================================================================#
 
+def l2( pData1, pData2 ):
+	return numpy.linalg.norm(pData1 - pData2)
+
 def mi( pData1, pData2 ):
 	"""
 	static implementation of mutual information, 
@@ -137,7 +140,6 @@ def norm_mi( pData1, pData2 ):
 	static implementation of normalized mutual information 
 
 	"""
-
 
 	return CNormalizedMutualInformation( pData1, pData2 ).get_distance() 
 

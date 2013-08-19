@@ -87,7 +87,7 @@ class CHTest:
 			self.m_dPBoot /= 2
 			if numpy.average( adBootstrap ) > self.m_dTotal:
 				self.m_dPBoot = 1 - self.m_dPBoot
-		else:
+		else: 
 			dU = None
 			
 		return (dU, self.m_dPBoot)

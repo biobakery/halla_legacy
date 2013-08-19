@@ -14,10 +14,11 @@ import itertools
 import sys 
 import re 
 import os 
+import pprint 
 
 ## halla modules 
 from datum import discretize  
-from distance import mi, adj_mi
+from distance import mi, adj_mi, l2
 
 ## statistics packages 
 
@@ -35,7 +36,7 @@ import pylab as pl
 import random  
 from numpy.random import normal 
 from scipy.misc import * 
-from scipy.stats import kruskal, ttest_ind, ttest_1samp 
+from scipy.stats import kruskal, ttest_ind, ttest_1samp, percentileofscore
 import pandas as pd 
 import logging 
 
@@ -56,7 +57,9 @@ class HAllA():
 		## Don't have to keep everything in memory 
 
 		self.htest = ttest_ind
-		self.distance = adj_mi
+		self.distance = mi 
+		#self.distance = adj_mi
+		#self.distance = l2 
 		self.rep = None 
 		self.meta_array = array( ta )
 		self.meta_discretize = None 
@@ -77,7 +80,7 @@ class HAllA():
 		#return self.directory 
 
 	@staticmethod 
-	def m( self, pArray, pFunc, axis = 0 ):
+	def m( pArray, pFunc, axis = 0 ):
 		""" 
 		Maps pFunc over the array pArray 
 		"""
@@ -117,36 +120,72 @@ class HAllA():
 		pFilter = pFilter or np.arange( iRow )
 
 		if iIter == 1:
-			return _bootstrap( pArray[pFilter] )
+			return self._bootstrap( pArray[pFilter] )
 		else:
-			return np.hstack( [ _bootstrap( pArray[pFilter] ) ] * iIter )
+			return np.hstack( [ self._bootstrap( pArray[pFilter] ) ] * iIter )
 
 
-	def _bootstrap_test( self, pArray1, pArray2, pMedoid1, pMedoid2, iX, iY, iIter = self.m_iIter ): 
+	def _bootstrap_test( self, pArray1, pArray2, pMedoid1, pMedoid2, iX, iY ): 
 
+		iIter = self.m_iIter 
+		
 		dMID = self.outhash[(iX,iY)]["MID"]
-		pArrayAll = [ self.distance( _get_medoid( bootstrap_by_column( pArray1 ) ), pMedoid2 ) ] * iIter
-		pArrayDist12 = [ self.distance( bootstrap_by_column( pArray1[iX] ), pMedoid2 ) ] * iIter
+		pArrayAll = [ self.distance( self._get_medoid( self.bootstrap_by_column( pArray1 ) ), pMedoid2 ) ] * iIter
+		pArrayDist12 = [ self.distance( self.bootstrap_by_column( pArray1 )[iX], pMedoid2 ) ] * iIter
 
 		dU, dPBoot = ttest_ind( pArrayAll, pArrayDist12 )
 		dPBoot /= 2 
 		
-		if np.average( pArrayDist12 ) > np.average( ArrayAll ):
+		if np.average( pArrayDist12 ) > np.average( pArrayAll ):
 			dPBoot = 1- dPBoot 
 
-	
 		self.outhash[(iX,iY)]["pBoot"] = dPBoot
+
+		print "dPBoot is " + str(dPBoot)
 	
 		return dPBoot
 
-	def _permute_test( self, pArray1, pArray2, pMedoid1, pMedoid2, iX, iY, iIter = self.m_iIter ):
+
+	def _permute_test( self, pArray1, pArray2, pMedoid1, pMedoid2, iX, iY ):
+
+		"""
+		something is really, really, messed up here 
+		"""
+		
+		iIter = self.m_iIter 
 
 		dMID = self.outhash[(iX,iY)]["MID"]
-		pArrayPerm = [ self.distance( permute_by_column( pArray1 )[iX], pMedoid2 ) ] * iIter 
+		#pArrayPerm = [ self.distance( self.permute_by_column( pArray1 )[iX], pMedoid2 ) for i in xrange( iIter )]  
 
-		scipy.stats.percentileofscore( [dMID-1] + pArrayPerm, dMID )
+		print "Perm is "
+		print self.permute_by_row( pArray1 )[iX]
+		
+		print np.sort( self.permute_by_row( pArray1 )[iX] ) 
+		print np.sort( pMedoid1 ) 
 
-		self.outhash[(iX,iY)] = {"pPerm": dPPerm}
+
+
+		print "Permuted distance"
+		print self.distance( self.permute_by_row( pArray1 )[iX], pMedoid2 )	
+		print "sorted distance"
+		print self.distance( np.sort( self.permute_by_row( pArray1 )[iX] ) , np.sort( pMedoid1 ) )
+		print "normal"
+		print self.distance( pMedoid1, pMedoid2 ) 
+
+		assert( self.distance( self.permute_by_row( pArray1 )[iX], pMedoid2 ) == self.distance( pMedoid1, pMedoid2 ) )
+
+		pArrayPerm = [ self.distance( self.permute_by_row( pArray1 )[iX], pMedoid2 ) for i in xrange( iIter )]  
+
+		print "ArrayPerm is " 
+		print pArrayPerm
+
+		#dPPerm = 1- ( percentileofscore( [dMID-1] + pArrayPerm, dMID ) / 100 )
+
+		dPPerm = 1- ( percentileofscore( pArrayPerm, dMID ) / 100 )
+
+		self.outhash[(iX,iY)]["pPerm"] = dPPerm
+
+		print "dPPerm is " + str( dPPerm )
 
 		return dPPerm
 
@@ -229,23 +268,38 @@ class HAllA():
 		This is assuming that the standard suite of preprocessing functions have been run 
 		"""
 
-		pData1, pData2 = self.meta_array[0], self.meta_array[1] 
-		pMedoid1, pMedoid2 = self._representative( pData1 ), self._representative( pData2 )
+		pData1, pData2 = self.meta_discretize[0], self.meta_discretize[1] 
+		
+		## BUGBUG: Uncomment this for the general case later 
+		## pMedoid1, pMedoid2 = self._representative( pData1 ), self._representative( pData2 )
 		iRow1, iCol1 = pData1.shape 
 		iRow2, iCol2 = pData2.shape 
 
 		#iterate through every single pair 
 		for tPair in itertools.product( xrange(iRow1), xrange(iRow2) ):
 			iOne, iTwo = tPair
+			pMedoid1, pMedoid2 = pData1[iOne], pData2[iTwo]
+
+			print "first medoid:"
+			print pMedoid1 
+			print "second medoid"
+			print pMedoid2 
+
+			print "iteration %s,%s" % (iOne, iTwo )
 
 			## convention: when bootstrapping and permuting, the left dataset is the one that the action is applied to. 
 			
-			dMID =  1- self.distance( pData1[:,iOne], pData2[:,iTwo] ) 
+			dMID =  1- self.distance( pData1[iOne], pData2[iTwo] ) 
+
+			print "dMID is " + str(dMID)
 
 			self.outhash[(iOne,iTwo)] = {"MID": dMID}
 
-			_bootstrap_test( pData1, pData2, pMedoid1, pMedoid2, iOne, iTwo )
-			_permute_test( pData1, pData2, pMedoid1, pMedoid2, iOne, iTwo )
+			#self._bootstrap_test( pData1, pData2, pMedoid1, pMedoid2, iOne, iTwo )
+			self._permute_test( pData1, pData2, pMedoid1, pMedoid2, iOne, iTwo )
+
+	def _htest_baseline( self ):
+		pass 
 
 	def _htest( self ):
 		pass 
@@ -254,12 +308,12 @@ class HAllA():
 
 		import csv 
 
-		csvr = csv.reader(open( sys.stdout ), csv.excel_tab )
+		csvw = csv.writer(open( sys.stdout ), csv.excel_tab )
 
-		csvr.writerow( self.header )
+		csvw.writerow( self.header )
 
 		for k,v in self.outhash.items():
-			csvr.writerow( [k] + v )
+			csvw.writerow( [k] + v )
 
 	def _plot_dendrogram( self ):
 		for i, pArray in enumerate( self.meta_linkage ):
@@ -270,31 +324,6 @@ class HAllA():
 			pl.title( str( self.distance ) + " " + str(i) )
 			pl.savefig( self.directory + str(i) + ".pdf" ) 
 				
- 
-
-		"""	
-		pl.figure(1)
-
-		pl.subplot(211)
-		dendrogram( Z1 )
-		pl.title("sym_mi 1")
-
-		pl.subplot(212)
-		dendrogram( Z2 )
-		pl.title("sym_mi 2")
-
-		pl.figure(2)
-
-		pl.subplot(211)
-		dendrog ram( Z11 )
-		pl.title("euc 1")
-
-		pl.subplot(212)
-		dendrogram( Z22 )
-		pl.title("euc 2")
-
-		pl.show()  
-		"""
 	def run( self ):
 		self._discretize()
 		self._distance_matrix()
@@ -308,72 +337,30 @@ class HAllA():
 
 		return self.outhash 
 
-### STUFF FROM THE MAIN HALLA SCRIPT #### 
-
-
-"""
-def halla( istm, ostm, dP, dPMI, iBootstrap ):
-
-	pData = dataset.CDataset( datum.CDatum.mutual_information_distance )
-	pData.open( istm )
-	hashClusters = pData.hierarchy( dPMI )
-	_halla_clusters( ostm, hashClusters, pData )
-	_halla_test( ostm, pData, hashClusters, dP, iBootstrap )
-"""
-
-argp = argparse.ArgumentParser( prog = "halla.py",
-	description = """Hierarchical All-against-All significance association testing.""" )
-argp.add_argument( "istm",		metavar = "input.txt",
-	type = argparse.FileType( "r" ),	default = sys.stdin,	nargs = "?",
-	help = "Tab-delimited text input file, one row per feature, one column per measurement" )
-argp.add_argument( "-o",		dest = "ostm",			metavar = "output.txt",
-	type = argparse.FileType( "w" ),	default = sys.stdout,
-	help = "Optional output file for association significance tests" )
-argp.add_argument( "-p",		dest = "dP",			metavar = "p_value",
-	type = float,	default = 0.05,
-	help = "P-value for overall significance tests" )
-argp.add_argument( "-P",		dest = "dPMI",			metavar = "p_mi",
-	type = float,	default = 0.05,
-	help = "P-value for permutation equivalence of MI clusters" )
-argp.add_argument( "-b",		dest = "iBootstrap",	metavar = "bootstraps",
-	type = int,		default = 100,
-	help = "Number of bootstraps for significance testing" )
-argp.add_argument( "-v",		dest = "iDebug",		metavar = "verbosity",
-	type = int,		default = 10 - ( logging.WARNING / 10 ),
-	help = "Debug logging level; increase for greater verbosity" )
-argp.add_argument( "-f",		dest = "fFlag",		action = "store_true",
-	help = "A flag set to true if provided" )
-argp.add_argument( "strString",	metavar = "string",
-	help = "A required free text string" )
-
-"""
-__doc__ = "::\n\n\t" + argp.format_help( ).replace( "\n", "\n\t" ) + __doc__
-
-def _main( ):
-	args = argp.parse_args( )
-
-	lghn = logging.StreamHandler( sys.stderr )
-	lghn.setFormatter( logging.Formatter( '%(asctime)s %(levelname)10s %(module)s.%(funcName)s@%(lineno)d %(message)s' ) )
-	c_logrHAllA.addHandler( lghn )
-	c_logrHAllA.setLevel( ( 10 - args.iDebug ) * 10 )
-
-	halla( args.istm, args.ostm, args.dP, args.dPMI, args.iBootstrap )
 
 if __name__ == "__main__":
-	_main( )
-"""
+	
+	import csv
+	from numpy import array 
 
-### =================================================================================== ### 
+	strFile1, strFile2 = sys.argv[1:]
 
-if __name__ == "__main__":
+	Data1 = array( pd.read_table( strFile1 ) ) 
+	Data2 = array( pd.read_table( strFile2 ) ) 
+
+	#Data1 = array([x for x in csv.reader(open(strFile1), csv.excel_tab)])
+	#Data2 = array([x for x in csv.reader(open(strFile2), csv.excel_tab)])
+
 	c_strOutputPath = "/home/ysupmoon/Dropbox/halla/output/" 
 	
-	c_DataArray1 = np.array([[normal() for x in range(100)] for y in range(20)])
-	c_DataArray2 = np.array([[normal() for x in range(100)] for y in range(20)]) 
+	#c_DataArray1 = np.array([[normal() for x in range(100)] for y in range(20)])
+	#c_DataArray2 = np.array([[normal() for x in range(100)] for y in range(20)]) 
 
-	CH = HAllA( c_DataArray1, c_DataArray2 )
+	CH = HAllA( Data1, Data2 )
 
 	CH.set_directory( c_strOutputPath )
 	
-	CH.run() 
+	pOutHash = CH.run_pr_test()
+
+	pprint.pprint( pOutHash )
 
