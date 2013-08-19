@@ -8,8 +8,9 @@ from abc import ABCMeta
 import numpy 
 from numpy import array 
 import sklearn as sk 
+import math 
 
-#mi-based distances from scikit-learn 
+#mi-based distances from scikit-learn; (log e)-based.  
 from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, adjusted_mutual_info_score 
 
 #==========================================================================#
@@ -58,7 +59,11 @@ class CEuclideanDistance( CDistance ):
 		return self.c_distance_type 	
 	
 class CMutualInformation( CDistance ):
-	
+	"""
+	Scikit-learn uses the convention log = ln
+	Adjust multiplicative factor of log(e,2) 
+	"""	
+
 	__metaclass__ = ABCMeta 
 
 	def __init__( self, c_array1, c_array2, bSym = False ):
@@ -68,16 +73,15 @@ class CMutualInformation( CDistance ):
 		self.c_distance_type = CDistance.EMetricType.NONMETRIC 
 	
 	def get_distance( self ):
-		assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
-		return ( mutual_info_score( self.m_data1, self.m_data2 ) if not(self.bSym) \
-			else mutual_info_score( self.m_data1, self.m_data2 ) +  \
-			mutual_info_score( self.m_data2, self.m_data1 ) )
-	
+		#assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
+		return math.log(math.e,2) *  mutual_info_score( self.m_data1, self.m_data2 ) 	
 	def get_distance_type( self ):
 		return self.c_distance_type 	
 
 class CNormalizedMutualInformation( CDistance ):
-	
+	"""
+	normalized by sqrt(H1*H2) so the range is [0,1]
+	"""	
 	__metaclass__ = ABCMeta 
 
 	def __init__( self, c_array1, c_array2 ):
@@ -86,13 +90,16 @@ class CNormalizedMutualInformation( CDistance ):
 		self.c_distance_type = CDistance.EMetricType.NONMETRIC 
 	
 	def get_distance( self ):
-		assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
+		#assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
 		return normalized_mutual_info_score( self.m_data1, self.m_data2 )
 
 	def get_distance_type( self ):
 		return self.c_distance_type 	
 	
 class CAdjustedMutualInformation( CDistance ):
+	"""
+	adjusted for chance
+	""" 
 	
 	__metaclass__ = ABCMeta 
 
@@ -102,7 +109,7 @@ class CAdjustedMutualInformation( CDistance ):
 		self.c_distance_type = CDistance.EMetricType.NONMETRIC 
 	
 	def get_distance( self ):
-		assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
+		#assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
 		return adjusted_mutual_info_score( self.m_data1, self.m_data2 )
 
 	def get_distance_type( self ):
@@ -118,7 +125,25 @@ class CAdjustedMutualInformation( CDistance ):
 #==========================================================================#
 
 def mi( pData1, pData2 ):
+	"""
+	static implementation of mutual information, 
+	caveat: returns nats, not bits 
+	"""
+
 	return CMutualInformation( pData1, pData2 ).get_distance()
 
-def sym_mi( pData1, pData2 ):
-	return CMutualInformation( pData1, pData2, True ).get_distance()
+def norm_mi( pData1, pData2 ):
+	"""
+	static implementation of normalized mutual information 
+
+	"""
+
+
+	return CNormalizedMutualInformation( pData1, pData2 ).get_distance() 
+
+def adj_mi( pData1, pData2 ):
+	""" 
+	static implementation of adjusted distance 
+	"""
+
+	return CAdjustedMutualInformation( pData1, pData2 ).get_distance()
