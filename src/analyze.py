@@ -9,8 +9,8 @@ from scipy.stats import scoreatpercentile as sap
 import itertools 
 from pprint import pprint 
 
-c_bPScatter = True  
-c_bDataScatter = True  
+c_bPScatter = True 
+c_bDataScatter = False    
 
 c_iPercentPerm = 5
 c_iPercentPearson = 95  
@@ -37,7 +37,7 @@ adPerm, adPearson = map(float,hashTable["pPerm"]), map(float,hashTable["pPearson
 
 if c_bPScatter:
 	pl.scatter( adPerm , adPearson ) 
-	pl.xlabel("$p_{permutation}$")
+	pl.xlabel("$p_{halla}$")
 	pl.ylabel("$p_{perason}$") 
 
 	pl.show()
@@ -67,7 +67,7 @@ if c_bDataScatter:
 
 #print len(stMatch)
 
-for line in aOut:
-	print "\t".join( map(str,line) ) 
+#for line in aOut:
+#	print "\t".join( map(str,line) ) 
 
 

@@ -74,29 +74,6 @@ class HAllA():
 		## this is not so efficient for huge arrays, fix later 
 
 		self.m_iIter = 100
-
-	#def _clean( self, *ta ):
-	#	def _clean_helper( pArray ):
-	#		aOut = [] 
-	#		for line in pArray:
-	#			line = line[0]
-	#
-	#			def _dec( x ):
-	#				return ( x.strip() if bool(x.strip()) else None )
-	#			line = map( _dec , line )
-	#		
-	#			if all(line):
-	#				try: 
-	#					line = map(int, line) #is it explicitly categorical?  
-	#				except Exception:
-	#					try:
-	#						line = map(float, line) #is it continuous? 
-	#					except Exception:
-	#						pass #we are forced to conclude that it is implicitly categorical, with some lexical ordering 
-	#				print line 
-	#				aOut.append(line)
-	#		return array( aOut )
-	#	return array([_clean_helper(a) for a in ta])
 	
 	def _issingle( self ):
 		
@@ -180,30 +157,26 @@ class HAllA():
 		dMID = self.outhash[(iX,iY)]["MID"]
 		#pArrayPerm = [ self.distance( self.permute_by_column( pArray1 )[iX], pMedoid2 ) for i in xrange( iIter )]  
 
-		"""
-		print "Perm is "
-		print self.permute_by_row( pArray1 )[iX]
+		#print "Perm is "
+		#print self.permute_by_row( pArray1 )[iX]
 		
-		print np.sort( self.permute_by_row( pArray1 )[iX] ) 
-		print np.sort( pMedoid1 ) 
+		#print np.sort( self.permute_by_row( pArray1 )[iX] ) 
+		#print np.sort( pMedoid1 ) 
 
+		#print "Permuted distance"
+		#print self.distance( self.permute_by_row( pArray1 )[iX], pMedoid2 )	
+		#print "sorted distance"
+		#print self.distance( np.sort( self.permute_by_row( pArray1 )[iX] ) , np.sort( pMedoid1 ) )
+		#print "normal"
+		#print self.distance( pMedoid1, pMedoid2 ) 
 
-
-		print "Permuted distance"
-		print self.distance( self.permute_by_row( pArray1 )[iX], pMedoid2 )	
-		print "sorted distance"
-		print self.distance( np.sort( self.permute_by_row( pArray1 )[iX] ) , np.sort( pMedoid1 ) )
-		print "normal"
-		print self.distance( pMedoid1, pMedoid2 ) 
-
-		assert( self.distance( self.permute_by_row( pArray1 )[iX], pMedoid2 ) == self.distance( pMedoid1, pMedoid2 ) )
-		"""
+		#assert( self.distance( self.permute_by_row( pArray1 )[iX], pMedoid2 ) == self.distance( pMedoid1, pMedoid2 ) )
+		
 		pArrayPerm = [ self.distance( self.permute_by_row( pArray1 )[iX], pMedoid2 ) for i in xrange( iIter )]  
 
 		#print "ArrayPerm is " 
 		#print pArrayPerm
 		
-
 		#dPPerm = 1- ( percentileofscore( [dMID-1] + pArrayPerm, dMID ) / 100 )
 
 		dPPerm = 1- ( percentileofscore( pArrayPerm, dMID ) / 100 )
@@ -380,7 +353,10 @@ class HAllA():
 		return self.outhash 
 
 def _main():
-	strFile1, strFile2 = sys.argv[1:]
+	if len(sys.argv[1:]) > 1:
+		strFile1, strFile2 = sys.argv[1:3]
+	elif len(sys.argv[1:]) == 1:
+		strFile1, strFile2 = sys.argv[1], sys.argv[1]
 
 	def _parser( strFile ):
 		aOut = [] 
