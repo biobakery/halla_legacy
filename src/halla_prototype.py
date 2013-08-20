@@ -18,7 +18,7 @@ import pprint
 
 ## halla modules 
 from datum import discretize  
-from distance import mi, adj_mi, l2
+from distance import mi, adj_mi, l2, mid, adj_mid 
 
 ## statistics packages 
 
@@ -36,7 +36,7 @@ import pylab as pl
 import random  
 from numpy.random import normal 
 from scipy.misc import * 
-from scipy.stats import kruskal, ttest_ind, ttest_1samp, percentileofscore
+from scipy.stats import kruskal, ttest_ind, ttest_1samp, percentileofscore, pearsonr
 import pandas as pd 
 import logging 
 
@@ -52,28 +52,55 @@ class HAllA():
 
 					}  
 
-
 		## Think about lazy implementation to save time during run-time;
 		## Don't have to keep everything in memory 
 
+
 		self.htest = ttest_ind
-		self.distance = mi 
-		#self.distance = adj_mi
-		#self.distance = l2 
+		self.distance = adj_mid 
+		
 		self.rep = None 
 		self.meta_array = array( ta )
+
 		self.meta_discretize = None 
 		self.meta_linkage = None 
 		self.meta_distance = None 
 		self.directory = None 
 		self.outhash = {} 
-		self.outtable = None 
+		self.outtable = None
+
 		self.header = ["Var", "MID", "pBoot", "pPerm"]
 
+		## this is not so efficient for huge arrays, fix later 
+
 		self.m_iIter = 100
+
+	#def _clean( self, *ta ):
+	#	def _clean_helper( pArray ):
+	#		aOut = [] 
+	#		for line in pArray:
+	#			line = line[0]
+	#
+	#			def _dec( x ):
+	#				return ( x.strip() if bool(x.strip()) else None )
+	#			line = map( _dec , line )
+	#		
+	#			if all(line):
+	#				try: 
+	#					line = map(int, line) #is it explicitly categorical?  
+	#				except Exception:
+	#					try:
+	#						line = map(float, line) #is it continuous? 
+	#					except Exception:
+	#						pass #we are forced to conclude that it is implicitly categorical, with some lexical ordering 
+	#				print line 
+	#				aOut.append(line)
+	#		return array( aOut )
+	#	return array([_clean_helper(a) for a in ta])
 	
-	def _ttest( self, x, y ):
-		return self.hashMethods["ttest"](x,y)
+	def _issingle( self ):
+		
+		return ( self.meta_array[0] == self.meta_array[1] ).all()
 
 	def set_directory( self, strDir ):
 		self.directory = strDir 
@@ -148,15 +175,12 @@ class HAllA():
 
 	def _permute_test( self, pArray1, pArray2, pMedoid1, pMedoid2, iX, iY ):
 
-		"""
-		something is really, really, messed up here 
-		"""
-		
 		iIter = self.m_iIter 
 
 		dMID = self.outhash[(iX,iY)]["MID"]
 		#pArrayPerm = [ self.distance( self.permute_by_column( pArray1 )[iX], pMedoid2 ) for i in xrange( iIter )]  
 
+		"""
 		print "Perm is "
 		print self.permute_by_row( pArray1 )[iX]
 		
@@ -173,11 +197,12 @@ class HAllA():
 		print self.distance( pMedoid1, pMedoid2 ) 
 
 		assert( self.distance( self.permute_by_row( pArray1 )[iX], pMedoid2 ) == self.distance( pMedoid1, pMedoid2 ) )
-
+		"""
 		pArrayPerm = [ self.distance( self.permute_by_row( pArray1 )[iX], pMedoid2 ) for i in xrange( iIter )]  
 
-		print "ArrayPerm is " 
-		print pArrayPerm
+		#print "ArrayPerm is " 
+		#print pArrayPerm
+		
 
 		#dPPerm = 1- ( percentileofscore( [dMID-1] + pArrayPerm, dMID ) / 100 )
 
@@ -185,7 +210,7 @@ class HAllA():
 
 		self.outhash[(iX,iY)]["pPerm"] = dPPerm
 
-		print "dPPerm is " + str( dPPerm )
+		#print "dPPerm is " + str( dPPerm )
 
 		return dPPerm
 
@@ -259,7 +284,6 @@ class HAllA():
 		self.outhash[(0,0)] = self._ttest( self._representative( self.meta_array[0] ), 
 			self._representative( self.meta_array[1] ) ) 			
 
-	
 		return self.outhash 
 
 	def _htest_pr( self ):
@@ -267,6 +291,8 @@ class HAllA():
 		Run htest for the progress report 
 		This is assuming that the standard suite of preprocessing functions have been run 
 		"""
+
+		#pRaw1, pRaw2 = self.meta_array[0], self.meta_array[1]
 
 		pData1, pData2 = self.meta_discretize[0], self.meta_discretize[1] 
 		
@@ -276,24 +302,40 @@ class HAllA():
 		iRow2, iCol2 = pData2.shape 
 
 		#iterate through every single pair 
-		for tPair in itertools.product( xrange(iRow1), xrange(iRow2) ):
+
+		gen_product = itertools.combinations( xrange(iRow1), 2 ) if self._issingle() else itertools.product( xrange(iRow1), xrange(iRow2) )
+
+		for tPair in gen_product:
 			iOne, iTwo = tPair
 			pMedoid1, pMedoid2 = pData1[iOne], pData2[iTwo]
 
-			print "first medoid:"
-			print pMedoid1 
-			print "second medoid"
-			print pMedoid2 
+			sys.stderr.write( "iteration %s,%s \n" %(iOne, iTwo) )
 
-			print "iteration %s,%s" % (iOne, iTwo )
+			#print "first medoid:"
+			#print pMedoid1 
+			#print "second medoid"
+			#print pMedoid2 
+
+			#print "iteration %s,%s" % (iOne, iTwo )
 
 			## convention: when bootstrapping and permuting, the left dataset is the one that the action is applied to. 
 			
-			dMID =  1- self.distance( pData1[iOne], pData2[iTwo] ) 
+			dMID =  self.distance( pData1[iOne], pData2[iTwo] ) 
 
-			print "dMID is " + str(dMID)
+			#print "dMID is " + str(dMID)
 
-			self.outhash[(iOne,iTwo)] = {"MID": dMID}
+			#print "raw1"
+			#print pRaw1[iOne]
+			#print "raw2"
+			#print pRaw2[iTwo]
+
+			#print "data1"
+			#print pData1[iOne]
+			#print "data2"
+			#print pData2[iOne]
+
+			dPearsonr, dPearsonp = pearsonr( pData1[iOne], pData2[iTwo] )
+			self.outhash[(iOne,iTwo)] = {"MID": dMID, "pPearson": dPearsonp}
 
 			#self._bootstrap_test( pData1, pData2, pMedoid1, pMedoid2, iOne, iTwo )
 			self._permute_test( pData1, pData2, pMedoid1, pMedoid2, iOne, iTwo )
@@ -337,30 +379,84 @@ class HAllA():
 
 		return self.outhash 
 
-
-if __name__ == "__main__":
-	
-	import csv
-	from numpy import array 
-
+def _main():
 	strFile1, strFile2 = sys.argv[1:]
 
-	Data1 = array( pd.read_table( strFile1 ) ) 
-	Data2 = array( pd.read_table( strFile2 ) ) 
+	def _parser( strFile ):
+		aOut = [] 
+		csvr = csv.reader(open( strFile ), csv.excel_tab )
 
-	#Data1 = array([x for x in csv.reader(open(strFile1), csv.excel_tab)])
-	#Data2 = array([x for x in csv.reader(open(strFile2), csv.excel_tab)])
+		astrHeaders = None 
+		astrNames = []
 
-	c_strOutputPath = "/home/ysupmoon/Dropbox/halla/output/" 
-	
-	#c_DataArray1 = np.array([[normal() for x in range(100)] for y in range(20)])
-	#c_DataArray2 = np.array([[normal() for x in range(100)] for y in range(20)]) 
+		for line in csvr:
+			def _dec( x ):
+				return ( x.strip() if bool(x.strip()) else None )
+
+			if not astrHeaders:
+				astrHeaders = line 
+			
+			else: 
+				strName = line[0]
+				 
+				line = line[1:]
+				line = map( _dec , line )
+				
+				if all(line):
+
+					astrNames.append( strName )
+					try: 
+						line = map(int, line) #is it explicitly categorical?  
+					except ValueError:
+						try:
+							line = map(float, line) #is it continuous? 
+						except ValueError:
+							line = line #we are forced to conclude that it is implicitly categorical, with some lexical ordering 
+					sys.stderr.write( "\t".join( map(str,line)  ) + "\n" ) 
+					aOut.append(line)
+		
+		Data = array( aOut )
+		Name = array( astrNames )
+		
+		assert( len(Data) == len(Name) )
+		#At this point, all empty data should have been thrown out 
+
+		#Name, Data = Array[:,0][1:], Array[1:][:,1:]
+
+		return Name, Data 
+
+	Name1, Data1 = _parser( strFile1 )
+	Name2, Data2 = _parser( strFile2 )
+
+	#print Data1[0]
+	#print Data2[0]
+
 
 	CH = HAllA( Data1, Data2 )
 
-	CH.set_directory( c_strOutputPath )
+	#c_strOutputPath = "/home/ysupmoon/Dropbox/halla/output/"
+	#CH.set_directory( c_strOutputPath )
 	
 	pOutHash = CH.run_pr_test()
 
-	pprint.pprint( pOutHash )
+	csvw = csv.writer( sys.stdout , csv.excel_tab )
+
+	astrHeaders = ["Var1", "Var2", "MID", "pPerm", "pPearson"]
+
+	#Write the header
+	csvw.writerow( astrHeaders )
+
+	for k,v in pOutHash.items():
+		iX, iY = k 
+		csvw.writerow( [Name1[iX], Name2[iY]] + [v[j] for j in astrHeaders[2:]] )
+
+	sys.stderr.write("Done!\n")
+	#sys.stderr.write( str( pOutHash ) ) 
+
+
+if __name__ == "__main__":
+
+	_main() 	
+
+
 

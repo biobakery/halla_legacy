@@ -148,4 +148,27 @@ def adj_mi( pData1, pData2 ):
 	static implementation of adjusted distance 
 	"""
 
-	return CAdjustedMutualInformation( pData1, pData2 ).get_distance()
+	return 1 - CAdjustedMutualInformation( pData1, pData2 ).get_distance()
+
+def mid( pData1, pData2 ):
+	"""
+	static implementation of mutual information, 
+	caveat: returns nats, not bits 
+	"""
+
+	return 1 - CMutualInformation( pData1, pData2 ).get_distance()
+
+def norm_mid( pData1, pData2 ):
+	"""
+	static implementation of normalized mutual information 
+
+	"""
+
+	return 1 - CNormalizedMutualInformation( pData1, pData2 ).get_distance() 
+
+def adj_mid( pData1, pData2 ):
+	""" 
+	static implementation of adjusted distance 
+	"""
+
+	return 1 - CAdjustedMutualInformation( pData1, pData2 ).get_distance()
