@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use("Agg")
 from matplotlib import pyplot as pl 
 import pylab 
 import numpy 
@@ -9,11 +11,11 @@ from scipy.stats import scoreatpercentile as sap
 import itertools 
 from pprint import pprint 
 
-c_bPScatter = True 
-c_bDataScatter = False    
+c_bPScatter = False 
+c_bDataScatter = True     
 
-c_iPercentPerm = 5
-c_iPercentPearson = 95  
+c_iPercentPermLow, c_iPercentPermHigh = 10, 90
+c_iPercentPearsonLow, c_iPercentPearsonHigh = 10, 90  
 
 strFile = sys.argv[1]
 
@@ -33,14 +35,14 @@ for line in csvr:
 		for iItem, item in enumerate( line ):
 			hashTable[astrHeaders[iItem]].append( item )
 
-adPerm, adPearson = map(float,hashTable["pPerm"]), map(float,hashTable["pPearson"])
+adPerm, adPearson, adPearsonr = map(float,hashTable["pPerm"]), map(float,hashTable["pPearson"]), map(float, hashTable["rPearson"] )
 
 if c_bPScatter:
 	pl.scatter( adPerm , adPearson ) 
 	pl.xlabel("$p_{halla}$")
-	pl.ylabel("$p_{perason}$") 
+	pl.ylabel("$p_{pearson}$") 
 
-	pl.show()
+	pl.savefig("pscatter.pdf")
 
 if c_bDataScatter:
 	
@@ -48,26 +50,39 @@ if c_bDataScatter:
 
 	stMatch = set([]) 
 
-	percentile_perm = sap( adPerm, c_iPercentPerm )
-	percentile_pearson = sap( adPearson, c_iPercentPearson )
+	percentile_perm_low, percentile_perm_high = sap( adPerm, c_iPercentPermLow ), sap( adPerm, c_iPercentPermHigh )
+	percentile_pearson_low, percentile_pearson_high  = sap( adPearson, c_iPercentPearsonLow ), sap( adPearson, c_iPercentPearsonHigh )
 
 	astrVar1, astrVar2 = hashTable["Var1"], hashTable["Var2"]
 
 	iCount = 0
 
-	aOut.append(["Var1","Var2","pPerm", "pPearson"])
+	aOut.append(["Type", "Var1","Var2","pPerm", "pPearson", "rPearson"])
 
 	for i,x in enumerate(adPerm):
-		y = adPearson[i]
-		if ( x <= percentile_perm ) and ( y >= percentile_pearson ):
+		y,z = adPearson[i], adPearsonr[i] 
+		if ( x <= percentile_perm_low ) and ( y >= percentile_pearson_high ):
 			
-			aOut.append( [astrVar1[i], astrVar2[i],x,y] )
+			aOut.append( ["Outlier:HAllA", astrVar1[i], astrVar2[i],x,y,z] )
+		elif ( x >= percentile_perm_high ) and ( y <= percentile_pearson_low ):
+			
+			aOut.append( ["Outlier:Pearson", astrVar1[i], astrVar2[i],x,y,z] )
+
+		elif ( x <= percentile_perm_low ) and ( y <= percentile_pearson_low ):
+		
+			aOut.append( ["Outlier:Both", astrVar1[i], astrVar2[i],x,y,z] )
+
+		elif ( x >= percentile_perm_high ) and ( y >= percentile_pearson_high ):
+		
+			aOut.append( ["Outlier:None", astrVar1[i], astrVar2[i],x,y,z] )
+
+
 
 			#stMatch = stMatch | set([frozenset([astrVar1[i], astrVar2[i]])])
 
-#print len(stMatch)
 
-#for line in aOut:
-#	print "\t".join( map(str,line) ) 
+
+	for line in aOut:
+		print "\t".join( map(str,line) ) 
 
 

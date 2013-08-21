@@ -179,7 +179,9 @@ class HAllA():
 		
 		#dPPerm = 1- ( percentileofscore( [dMID-1] + pArrayPerm, dMID ) / 100 )
 
-		dPPerm = 1- ( percentileofscore( pArrayPerm, dMID ) / 100 )
+		## smaller distance means closer 
+
+		dPPerm = percentileofscore( pArrayPerm, dMID ) / 100
 
 		self.outhash[(iX,iY)]["pPerm"] = dPPerm
 
@@ -265,7 +267,7 @@ class HAllA():
 		This is assuming that the standard suite of preprocessing functions have been run 
 		"""
 
-		#pRaw1, pRaw2 = self.meta_array[0], self.meta_array[1]
+		pRaw1, pRaw2 = self.meta_array[0], self.meta_array[1]
 
 		pData1, pData2 = self.meta_discretize[0], self.meta_discretize[1] 
 		
@@ -307,8 +309,14 @@ class HAllA():
 			#print "data2"
 			#print pData2[iOne]
 
-			dPearsonr, dPearsonp = pearsonr( pData1[iOne], pData2[iTwo] )
-			self.outhash[(iOne,iTwo)] = {"MID": dMID, "pPearson": dPearsonp}
+			#dPearsonr, dPearsonp = pearsonr( pData1[iOne], pData2[iTwo] )
+			try:
+				dPearsonr, dPearsonp = pearsonr( pRaw1[iOne], pRaw2[iTwo] )
+				sys.stderr.write(str(dPearsonr) + ", " + str(dPearsonp) + "\n" )
+			except ValueError:
+				dPearsonr, dPearsonp = np.nan, np.nan 
+			
+			self.outhash[(iOne,iTwo)] = {"MID": dMID, "pPearson": dPearsonp, "rPearson": dPearsonr}
 
 			#self._bootstrap_test( pData1, pData2, pMedoid1, pMedoid2, iOne, iTwo )
 			self._permute_test( pData1, pData2, pMedoid1, pMedoid2, iOne, iTwo )
@@ -417,7 +425,7 @@ def _main():
 
 	csvw = csv.writer( sys.stdout , csv.excel_tab )
 
-	astrHeaders = ["Var1", "Var2", "MID", "pPerm", "pPearson"]
+	astrHeaders = ["Var1", "Var2", "MID", "pPerm", "pPearson", "rPearson"]
 
 	#Write the header
 	csvw.writerow( astrHeaders )
