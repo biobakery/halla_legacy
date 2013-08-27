@@ -11,11 +11,11 @@ from scipy.stats import scoreatpercentile as sap
 import itertools 
 from pprint import pprint 
 
-c_bPScatter = False 
+c_bPScatter = True  
 c_bDataScatter = True     
 
-c_iPercentPermLow, c_iPercentPermHigh = 10, 90
-c_iPercentPearsonLow, c_iPercentPearsonHigh = 10, 90  
+c_iPercentPermLow, c_iPercentPermHigh = 5, 95
+c_iPercentPearsonLow, c_iPercentPearsonHigh = 5, 95  
 
 strFile = sys.argv[1]
 
@@ -60,24 +60,24 @@ if c_bDataScatter:
 	aOut.append(["Type", "Var1","Var2","pPerm", "pPearson", "rPearson"])
 
 	for i,x in enumerate(adPerm):
-		y,z = adPearson[i], adPearsonr[i] 
-		if ( x <= percentile_perm_low ) and ( y >= percentile_pearson_high ):
+		try: 
+			y,z = adPearson[i], adPearsonr[i] 
+			if ( x <= percentile_perm_low ) and ( y >= percentile_pearson_high ):
+				
+				aOut.append( ["Outlier:HAllA", astrVar1[i], astrVar2[i],x,y,z] )
+			elif ( x >= percentile_perm_high ) and ( y <= percentile_pearson_low ):
+				
+				aOut.append( ["Outlier:Pearson", astrVar1[i], astrVar2[i],x,y,z] )
+
+			elif ( x <= percentile_perm_low ) and ( y <= percentile_pearson_low ):
 			
-			aOut.append( ["Outlier:HAllA", astrVar1[i], astrVar2[i],x,y,z] )
-		elif ( x >= percentile_perm_high ) and ( y <= percentile_pearson_low ):
+				aOut.append( ["Outlier:Both", astrVar1[i], astrVar2[i],x,y,z] )
+
+			elif ( x >= percentile_perm_high ) and ( y >= percentile_pearson_high ):
 			
-			aOut.append( ["Outlier:Pearson", astrVar1[i], astrVar2[i],x,y,z] )
-
-		elif ( x <= percentile_perm_low ) and ( y <= percentile_pearson_low ):
-		
-			aOut.append( ["Outlier:Both", astrVar1[i], astrVar2[i],x,y,z] )
-
-		elif ( x >= percentile_perm_high ) and ( y >= percentile_pearson_high ):
-		
-			aOut.append( ["Outlier:None", astrVar1[i], astrVar2[i],x,y,z] )
-
-
-
+				aOut.append( ["Outlier:None", astrVar1[i], astrVar2[i],x,y,z] )
+		except IndexError:
+			continue 
 			#stMatch = stMatch | set([frozenset([astrVar1[i], astrVar2[i]])])
 
 
