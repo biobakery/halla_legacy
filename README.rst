@@ -77,8 +77,7 @@ HAllA: is a programmatic tool for performing multiple association testing betwee
 Input 
 ----------------------------------------------
 
-HAlLA by default takes a tab-delimited text file as an input, 
-where each row describes feature (data/metadata) and each column represents an instance. In other words, input `X` is a `D x N` matrix where `D` is the number of dimensions in each instance of the data and `N` is the number of instances (samples). The "edges" of the matrix should contain labels of the data, if desired. The following is an example input ::
+HAlLA by default takes a tab-delimited text file as an input, where each row describes feature (data/metadata) and each column represents an instance. In other words, input `X` is a `D x N` matrix where `D` is the number of dimensions in each instance of the data and `N` is the number of instances (samples). The "edges" of the matrix should contain labels of the data, if desired. The following is an example input ::
 
 	+-------+---------+---------+--------+
 	|       | Sample1 | Sample2 | Sample3|
@@ -100,9 +99,7 @@ HAllA by default prints a tab-delimited text file as output ::
 	| Data1| Data2| 0.64  | 0.02 | 0.008|
 	+------+------+-------+------+------+  	
 
-`MID` stands for "mutual information distance", which is an information-theoretic measure 
-of association between two random variables. `Pperm` and `Pboot` corresponds to the p-values 
-of the permutation and bootstrap tests used to assess the statistical significance of the mutual information distance (i.e. lower p-values signify that the association between two variables 
+`MID` stands for "mutual information distance", which is an information-theoretic measure of association between two random variables. `Pperm` and `Pboot` corresponds to the p-values of the permutation and bootstrap tests used to assess the statistical significance of the mutual information distance (i.e. lower p-values signify that the association between two variables 
 is not likely to be caused by the noise in the data).  
 
 
@@ -130,8 +127,7 @@ The following is a list of all available arguments that can be passed into halla
 Mini-tutorial
 ---------------------------------------------------
 
-Suppose you have a tab-delimited file containing the dataset you wish to run halla on.
-We will call this file `in.txt`. We will call the output file `out.txt`. In the root directory of halla, one can type::
+Suppose you have a tab-delimited file containing the dataset you wish to run halla on. We will call this file `in.txt`. We will call the output file `out.txt`. In the root directory of halla, one can type::
 	
 	$ python halla.py in.txt > out.txt 
 
