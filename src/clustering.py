@@ -13,9 +13,14 @@ import itertools
 import sys 
 import re 
 
+## halla-specific modules 
+
+from distance import mi, l2 
+from datum import discretize 
+
+
 ## statistics packages 
 
-from datum import discretize 
 import numpy as np
 import scipy as sp
 import sklearn.decomposition
@@ -25,19 +30,16 @@ from scipy.spatial.distance import pdist, cdist, squareform
 from scipy.cluster.hierarchy import linkage, dendrogram, to_tree, leaves_list
 import pylab as pl 
 import random  
-from distance import mi, sym_mi 
 from numpy.random import normal 
 from scipy.misc import * 
-from scipy.stats import kruskal, ttest_ind, ttest_lsamp 
 import pandas as pd 
-
 
 
 #=================================================# 
 # FUNCTIONS  
 #=================================================# 
 
-l2 = lambda x,y: np.linalg.norm(x-y)
+
 
 #=================================================# 
 # RUNTIME  
@@ -121,6 +123,8 @@ Z2 = linkage( distance_matrix2 )
 Z11 = linkage( distance_matrix11 )
 Z22 = linkage( distance_matrix22 )
 
+
+## this should be in dimensionality reduction script 
 def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
 	"""
 	Input: numpy array 
@@ -145,10 +149,20 @@ def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
 
 	return pArray[np.argsort( map( np.linalg.norm, pArrayCenter) )[0],:]
 
+
+## this should be in dimensionality reduction script 
 def get_representative( pArray, pMethod = None ):
 	hash_method = {None: get_medoid}
 	return hash_method[pMethod]( pArray )
 
+def hclust( pArray, pdist_metric = mi, cluster_metric = l2 ):
+	#returns linkage matrix 
+	pdist_data = pdist( pArray, metric= pdist_metric )  
+	linkage_data = linkage( pdist_data, metric=l2 ) 
+	return linkage_data  
+
+
+## this is the most useful function 
 def reduce_tree( pClusterNode, pFunction = lambda x: x.id, aOut = [] ):
 	func = pFunction
 
@@ -158,6 +172,16 @@ def reduce_tree( pClusterNode, pFunction = lambda x: x.id, aOut = [] ):
 		return reduce_tree( pClusterNode.left, func, aOut ) + \
 			reduce_tree( pClusterNode.right, func, aOut ) 
 
+
+def reduce_trees( pClusterNode1, pClusterNode2, pFunction = lambda x: x.id, aOut = [] ): 
+	"""
+	Meta version of reduce tree. 
+	Can perform hierarchical all-against-all testing 
+	""" 
+	
+	
+
+## this is garbage 
 def traverse( apClusterNode, pFunction = lambda x: x.id, aOut = [] ):
 
 	def _compare( pClusterNode ):

@@ -39,6 +39,8 @@ from scipy.misc import *
 from scipy.stats import kruskal, ttest_ind, ttest_1samp, percentileofscore, pearsonr
 import pandas as pd 
 import logging 
+from clustering import reduce_tree 
+
 
 class HAllA():
 	
@@ -82,6 +84,10 @@ class HAllA():
 	def set_directory( self, strDir ):
 		self.directory = strDir 
 		#return self.directory 
+
+	@staticmethod 
+	def reduce_tree( pClusterNode ):
+		return reduce_tree( pClusterNode ) 
 
 	@staticmethod 
 	def m( pArray, pFunc, axis = 0 ):
@@ -129,6 +135,7 @@ class HAllA():
 			return np.hstack( [ self._bootstrap( pArray[pFilter] ) ] * iIter )
 
 
+	#BUGBUG: bootstrap test is garbage now ... 
 	def _bootstrap_test( self, pArray1, pArray2, pMedoid1, pMedoid2, iX, iY ): 
 
 		iIter = self.m_iIter 
@@ -150,6 +157,7 @@ class HAllA():
 		return dPBoot
 
 
+	#Permutation test / statistical testing by random matrix theory is the way to go ... 
 	def _permute_test( self, pArray1, pArray2, pMedoid1, pMedoid2, iX, iY ):
 
 		iIter = self.m_iIter 
