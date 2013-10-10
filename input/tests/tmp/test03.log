@@ -1,0 +1,154 @@
+2012-10-13 11:35:22,264       INFO dataset.permute@90 Generating 41 permutations
+2012-10-13 11:35:22,292       INFO dataset.permute@94 Permutation 0/41
+2012-10-13 11:35:22,864       INFO dataset.permute@94 Permutation 1/41
+2012-10-13 11:35:23,433       INFO dataset.permute@94 Permutation 2/41
+2012-10-13 11:35:24,003       INFO dataset.permute@94 Permutation 3/41
+2012-10-13 11:35:24,580       INFO dataset.permute@94 Permutation 4/41
+2012-10-13 11:35:25,141       INFO dataset.permute@94 Permutation 5/41
+2012-10-13 11:35:25,688       INFO dataset.permute@94 Permutation 6/41
+2012-10-13 11:35:26,237       INFO dataset.permute@94 Permutation 7/41
+2012-10-13 11:35:26,783       INFO dataset.permute@94 Permutation 8/41
+2012-10-13 11:35:27,328       INFO dataset.permute@94 Permutation 9/41
+2012-10-13 11:35:27,882       INFO dataset.permute@94 Permutation 10/41
+2012-10-13 11:35:28,438       INFO dataset.permute@94 Permutation 11/41
+2012-10-13 11:35:28,985       INFO dataset.permute@94 Permutation 12/41
+2012-10-13 11:35:29,532       INFO dataset.permute@94 Permutation 13/41
+2012-10-13 11:35:30,078       INFO dataset.permute@94 Permutation 14/41
+2012-10-13 11:35:30,625       INFO dataset.permute@94 Permutation 15/41
+2012-10-13 11:35:31,172       INFO dataset.permute@94 Permutation 16/41
+2012-10-13 11:35:31,720       INFO dataset.permute@94 Permutation 17/41
+2012-10-13 11:35:32,266       INFO dataset.permute@94 Permutation 18/41
+2012-10-13 11:35:32,814       INFO dataset.permute@94 Permutation 19/41
+2012-10-13 11:35:33,360       INFO dataset.permute@94 Permutation 20/41
+2012-10-13 11:35:33,907       INFO dataset.permute@94 Permutation 21/41
+2012-10-13 11:35:34,456       INFO dataset.permute@94 Permutation 22/41
+2012-10-13 11:35:35,005       INFO dataset.permute@94 Permutation 23/41
+2012-10-13 11:35:35,553       INFO dataset.permute@94 Permutation 24/41
+2012-10-13 11:35:36,101       INFO dataset.permute@94 Permutation 25/41
+2012-10-13 11:35:36,650       INFO dataset.permute@94 Permutation 26/41
+2012-10-13 11:35:37,198       INFO dataset.permute@94 Permutation 27/41
+2012-10-13 11:35:37,746       INFO dataset.permute@94 Permutation 28/41
+2012-10-13 11:35:38,292       INFO dataset.permute@94 Permutation 29/41
+2012-10-13 11:35:38,841       INFO dataset.permute@94 Permutation 30/41
+2012-10-13 11:35:39,389       INFO dataset.permute@94 Permutation 31/41
+2012-10-13 11:35:39,936       INFO dataset.permute@94 Permutation 32/41
+2012-10-13 11:35:40,484       INFO dataset.permute@94 Permutation 33/41
+2012-10-13 11:35:41,034       INFO dataset.permute@94 Permutation 34/41
+2012-10-13 11:35:41,584       INFO dataset.permute@94 Permutation 35/41
+2012-10-13 11:35:42,132       INFO dataset.permute@94 Permutation 36/41
+2012-10-13 11:35:42,680       INFO dataset.permute@94 Permutation 37/41
+2012-10-13 11:35:43,231       INFO dataset.permute@94 Permutation 38/41
+2012-10-13 11:35:43,779       INFO dataset.permute@94 Permutation 39/41
+2012-10-13 11:35:44,335       INFO dataset.permute@94 Permutation 40/41
+2012-10-13 11:35:45,036       INFO dataset.hierarchy@205 Cluster 1 (2): ['k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pseudomonadales|f__Moraxellaceae', 'k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pseudomonadales|f__Moraxellaceae|g__Enhydrobacter|s__Enhydrobacter_aerosaccus']
+2012-10-13 11:35:45,036       INFO dataset.hierarchy@205 Cluster 2 (2): ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Enterococcaceae|g__Enterococcus', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Enterococcaceae|g__Enterococcus|s__Enterococcus_faecalis']
+2012-10-13 11:35:45,036       INFO dataset.hierarchy@205 Cluster 3 (3): ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Bacillales|f__Staphylococcaceae|g__Staphylococcus|s__Staphylococcus_haemolyticus', 'k__Bacteria|p__Proteobacteria|c__Epsilonproteobacteria|o__Campylobacterales', 'k__Bacteria|p__Proteobacteria|c__Epsilonproteobacteria|o__Campylobacterales|f__Helicobacteraceae|g__Helicobacter|s__Helicobacter_pylori']
+2012-10-13 11:35:45,036       INFO dataset.hierarchy@205 Cluster 4 (2): ['k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Porphyromonadaceae|g__Parabacteroides|s__Parabacteroides_unclassified', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_coleohominis']
+2012-10-13 11:35:45,036       INFO dataset.hierarchy@205 Cluster 5 (4): ['k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_eggerthii', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_finegoldii', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_stercoris', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Porphyromonadaceae|g__Parabacteroides|s__Parabacteroides_johnsonii']
+2012-10-13 11:35:45,036       INFO dataset.hierarchy@205 Cluster 6 (5): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Micrococcaceae', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Micrococcaceae|g__Rothia', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Micrococcaceae|g__Rothia|s__Rothia_dentocariosa', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_coprocola', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_plebeius']
+2012-10-13 11:35:45,036       INFO dataset.hierarchy@205 Cluster 7 (4): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Mycobacteriaceae|g__Mycobacterium|s__Mycobacterium_abscessus', 'k__Bacteria|p__Proteobacteria|c__Alphaproteobacteria', 'k__Bacteria|p__Proteobacteria|c__Alphaproteobacteria|o__Sphingomonadales|f__Sphingomonadaceae|g__Sphingopyxis|s__Sphingopyxis_alaskensis', 'k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pseudomonadales|f__Pseudomonadaceae|g__Pseudomonas|s__Pseudomonas_putida']
+2012-10-13 11:35:45,036       INFO dataset.hierarchy@205 Cluster 8 (8): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Corynebacteriaceae|g__Corynebacterium|s__Corynebacterium_amycolatum', 'k__Bacteria|p__Proteobacteria|c__Betaproteobacteria|o__Burkholderiales|f__Oxalobacteraceae', 'k__Bacteria|p__Proteobacteria|c__Betaproteobacteria|o__Burkholderiales|f__Oxalobacteraceae|g__Herbaspirillum|s__Herbaspirillum_seropedicae', 'k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria', 'k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pseudomonadales', 'k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pseudomonadales|f__Pseudomonadaceae|g__Pseudomonas', 'k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pseudomonadales|f__Pseudomonadaceae|g__Pseudomonas|s__Pseudomonas_fluorescens', 'k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pseudomonadales|f__Pseudomonadaceae|g__Pseudomonas|s__Pseudomonas_unclassified']
+2012-10-13 11:35:45,037       INFO dataset.hierarchy@205 Cluster 9 (15): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae|g__Actinomyces|s__Actinomyces_viscosus', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Corynebacteriaceae|g__Corynebacterium', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Corynebacteriaceae|g__Corynebacterium|s__Corynebacterium_matruchotii', 'k__Bacteria|p__Bacteroidetes|c__Flavobacteria|o__Flavobacteriales|f__Flavobacteriaceae', 'k__Bacteria|p__Bacteroidetes|c__Flavobacteria|o__Flavobacteriales|f__Flavobacteriaceae|g__Capnocytophaga', 'k__Bacteria|p__Bacteroidetes|c__Flavobacteria|o__Flavobacteriales|f__Flavobacteriaceae|g__Capnocytophaga|s__Capnocytophaga_gingivalis', 'k__Bacteria|p__Bacteroidetes|c__Flavobacteria|o__Flavobacteriales|f__Flavobacteriaceae|g__Capnocytophaga|s__Capnocytophaga_ochracea', 'k__Bacteria|p__Firmicutes|c__Negativicutes|o__Selenomonadales|f__Veillonellaceae|g__Veillonella', 'k__Bacteria|p__Firmicutes|c__Negativicutes|o__Selenomonadales|f__Veillonellaceae|g__Veillonella|s__Veillonella_unclassified', 'k__Bacteria|p__Fusobacteria|c__Fusobacteria|o__Fusobacteriales|f__Fusobacteriaceae', 'k__Bacteria|p__Fusobacteria|c__Fusobacteria|o__Fusobacteriales|f__Fusobacteriaceae|g__Fusobacterium', 'k__Bacteria|p__Fusobacteria|c__Fusobacteria|o__Fusobacteriales|f__Fusobacteriaceae|g__Fusobacterium|s__Fusobacterium_nucleatum', 'k__Bacteria|p__Proteobacteria|c__Betaproteobacteria|o__Neisseriales|f__Neisseriaceae|g__Neisseria', 'k__Bacteria|p__Proteobacteria|c__Betaproteobacteria|o__Neisseriales|f__Neisseriaceae|g__Neisseria|s__Neisseria_sicca', 'k__Bacteria|p__Proteobacteria|c__Betaproteobacteria|o__Neisseriales|f__Neisseriaceae|g__Neisseria|s__Neisseria_unclassified']
+2012-10-13 11:35:45,037       INFO dataset.hierarchy@205 Cluster 10 (5): ['k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_unclassified', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_vulgatus', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_copri', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiales_Family_XI_Incertae_Sedis|g__Parvimonas|s__Parvimonas_micros']
+2012-10-13 11:35:45,037       INFO dataset.hierarchy@205 Cluster 11 (5): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Micrococcaceae|g__Rothia|s__Rothia_mucilaginosa', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus|s__Streptococcus_mitis', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus|s__Streptococcus_salivarius']
+2012-10-13 11:35:45,037       INFO dataset.hierarchy@205 Cluster 12 (2): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae|g__Actinomyces']
+2012-10-13 11:35:45,037       INFO dataset.hierarchy@205 Cluster 13 (2): ['k__Bacteria|p__Proteobacteria', 'k__Bacteria|p__Proteobacteria|c__Betaproteobacteria']
+2012-10-13 11:35:45,037       INFO dataset.hierarchy@205 Cluster 14 (2): ['k__Bacteria|p__Proteobacteria|c__Betaproteobacteria|o__Neisseriales|f__Neisseriaceae', 'k__Bacteria|p__Proteobacteria|c__Betaproteobacteria|o__Neisseriales|f__Neisseriaceae|g__Neisseriaceae_unclassified']
+2012-10-13 11:35:45,037       INFO dataset.hierarchy@205 Cluster 18 (19): ['k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_uniformis', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_xylanisolvens', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Porphyromonadaceae', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Porphyromonadaceae|g__Odoribacter|s__Odoribacter_splanchnicus', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Porphyromonadaceae|g__Parabacteroides', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Porphyromonadaceae|g__Parabacteroides|s__Parabacteroides_distasonis', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Porphyromonadaceae|g__Parabacteroides|s__Parabacteroides_merdae', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Rikenellaceae|g__Alistipes', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Rikenellaceae|g__Alistipes|s__Alistipes_putredinis', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Rikenellaceae|g__Alistipes|s__Alistipes_unclassified', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Eubacteriaceae', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Eubacteriaceae|g__Eubacterium', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Eubacteriaceae|g__Eubacterium|s__Eubacterium_rectale', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Faecalibacterium', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Faecalibacterium|s__Faecalibacterium_prausnitzii', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Ruminococcus', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Ruminococcus|s__Ruminococcus_bromii', 'k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Verrucomicrobiaceae|g__Akkermansia|s__Akkermansia_muciniphila']
+2012-10-13 11:35:45,037       INFO dataset.hierarchy@205 Cluster 19 (3): ['k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_caccae', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_cellulosilyticus', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_ovatus']
+2012-10-13 11:35:45,037       INFO dataset.hierarchy@205 Cluster 20 (2): ['k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Porphyromonadaceae|g__Porphyromonas', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Porphyromonadaceae|g__Porphyromonas|s__Porphyromonas_uenonis']
+2012-10-13 11:35:45,037       INFO dataset.hierarchy@205 Cluster 21 (3): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Coriobacteriales|f__Coriobacteriaceae', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Coriobacteriales|f__Coriobacteriaceae|g__Atopobium', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Coriobacteriales|f__Coriobacteriaceae|g__Atopobium|s__Atopobium_vaginae']
+2012-10-13 11:35:45,037       INFO dataset.hierarchy@205 Cluster 22 (4): ['k__Bacteria|p__Firmicutes|c__Negativicutes|o__Selenomonadales', 'k__Bacteria|p__Firmicutes|c__Negativicutes|o__Selenomonadales|f__Veillonellaceae', 'k__Bacteria|p__Firmicutes|c__Negativicutes|o__Selenomonadales|f__Veillonellaceae|g__Dialister', 'k__Bacteria|p__Firmicutes|c__Negativicutes|o__Selenomonadales|f__Veillonellaceae|g__Dialister|s__Dialister_microaerophilus']
+2012-10-13 11:35:45,038       INFO dataset.hierarchy@205 Cluster 24 (9): ['k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Porphyromonadaceae|g__Porphyromonas|s__Porphyromonas_asaccharolytica', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_amnii', 'k__Bacteria|p__Chlamydiae|c__Chlamydiae|o__Chlamydiales|f__Chlamydiaceae|g__Chlamydiaceae_unclassified', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiales_Family_XI_Incertae_Sedis|g__Anaerococcus|s__Anaerococcus_tetradius', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiales_Family_XI_Incertae_Sedis|g__Peptoniphilus|s__Peptoniphilus_harei', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiales_Family_XI_Incertae_Sedis|g__Peptoniphilus|s__Peptoniphilus_lacrimalis', 'k__Bacteria|p__Fusobacteria|c__Fusobacteria', 'k__Bacteria|p__Fusobacteria|c__Fusobacteria|o__Leptotrichales', 'k__Bacteria|p__Fusobacteria|c__Fusobacteria|o__Leptotrichales|f__Leptotrichales_unclassified']
+2012-10-13 11:35:45,038       INFO dataset.hierarchy@205 Cluster 25 (8): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Corynebacteriaceae|g__Corynebacterium|s__Corynebacterium_kroppenstedtii', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Bacillales', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Bacillales|f__Staphylococcaceae|g__Staphylococcus', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Bacillales|f__Staphylococcaceae|g__Staphylococcus|s__Staphylococcus_capitis', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Bacillales|f__Staphylococcaceae|g__Staphylococcus|s__Staphylococcus_epidermidis', 'k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacteriales|f__Enterobacteriaceae', 'k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacteriales|f__Enterobacteriaceae|g__Escherichia', 'k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacteriales|f__Enterobacteriaceae|g__Escherichia|s__Escherichia_coli']
+2012-10-13 11:35:45,038       INFO dataset.hierarchy@205 Cluster 26 (3): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Propionibacteriaceae|g__Propionibacterium', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Propionibacteriaceae|g__Propionibacterium|s__Propionibacterium_acnes', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Propionibacteriaceae|g__Propionibacterium|s__Propionibacterium_unclassified']
+2012-10-13 11:35:45,038       INFO dataset.hierarchy@205 Cluster 27 (3): ['k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiales_Family_XI_Incertae_Sedis', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiales_Family_XI_Incertae_Sedis|g__Clostridiales_Family_XI_Incertae_Sedis_unclassified']
+2012-10-13 11:35:45,038       INFO dataset.hierarchy@205 Cluster 28 (2): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales']
+2012-10-13 11:35:45,038       INFO dataset.hierarchy@205 Cluster 29 (2): ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus']
+2012-10-13 11:35:45,038       INFO dataset.hierarchy@205 Cluster 30 (2): ['k__Bacteria|p__Firmicutes|c__Bacilli', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales']
+2012-10-13 11:35:45,038       INFO dataset.hierarchy@205 Cluster 33 (8): ['k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_buccalis', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_disiens', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus|s__Streptococcus_anginosus', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiales_Family_XI_Incertae_Sedis|g__Anaerococcus|s__Anaerococcus_lactolyticus', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiales_Family_XI_Incertae_Sedis|g__Anaerococcus|s__Anaerococcus_vaginalis', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Peptostreptococcaceae|g__Peptostreptococcus', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Peptostreptococcaceae|g__Peptostreptococcus|s__Peptostreptococcus_anaerobius', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Peptostreptococcaceae|g__Peptostreptococcus|s__Peptostreptococcus_unclassified']
+2012-10-13 11:35:45,038       INFO dataset.hierarchy@205 Cluster 34 (4): ['k__Bacteria|p__Bacteroidetes', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_iners']
+2012-10-13 11:35:45,038       INFO dataset.hierarchy@205 Cluster 35 (3): ['k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_timonensis', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiales_Family_XI_Incertae_Sedis|g__Peptoniphilus', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiales_Family_XI_Incertae_Sedis|g__Peptoniphilus|s__Peptoniphilus_unclassified']
+2012-10-13 11:35:45,038       INFO dataset.hierarchy@205 Cluster 36 (4): ['k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_bivia', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiales_Family_XI_Incertae_Sedis|g__Anaerococcus', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiales_Family_XI_Incertae_Sedis|g__Anaerococcus|s__Anaerococcus_unclassified', 'k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiales_Family_XI_Incertae_Sedis|g__Finegoldia|s__Finegoldia_magna']
+2012-10-13 11:35:45,038       INFO dataset.hierarchy@205 Cluster 37 (3): ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_gasseri', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_jensenii', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_vaginalis']
+2012-10-13 11:35:45,039       INFO dataset.hierarchy@205 Cluster 38 (4): ['k__Bacteria|p__Tenericutes|c__Mollicutes|o__Mycoplasmatales|f__Mycoplasmataceae', 'k__Bacteria|p__Tenericutes|c__Mollicutes|o__Mycoplasmatales|f__Mycoplasmataceae|g__Ureaplasma', 'k__Bacteria|p__Tenericutes|c__Mollicutes|o__Mycoplasmatales|f__Mycoplasmataceae|g__Ureaplasma|s__Ureaplasma_parvum', 'k__Bacteria|p__Tenericutes|c__Mollicutes|o__Mycoplasmatales|f__Mycoplasmataceae|g__Ureaplasma|s__Ureaplasma_unclassified']
+2012-10-13 11:35:45,039       INFO dataset.hierarchy@205 Cluster 39 (2): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Gardnerella|s__Gardnerella_vaginalis']
+2012-10-13 11:35:45,039       INFO dataset.hierarchy@205 Cluster 40 (2): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Mycobacteriaceae|g__Mycobacterium', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Mycobacteriaceae|g__Mycobacterium|s__Mycobacterium_unclassified']
+2012-10-13 11:35:45,039       INFO dataset.hierarchy@205 Cluster 41 (2): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_unclassified']
+2012-10-13 11:35:45,039       INFO dataset.hierarchy@205 Cluster 42 (5): ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_dentium', 'k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Coriobacteriales|f__Coriobacteriaceae|g__Atopobium|s__Atopobium_parvulum', 'k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_multiformis', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_delbrueckii', 'k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus|s__Streptococcus_agalactiae']
+2012-10-13 11:35:45,039       INFO dataset.hierarchy@205 Cluster 43 (6): ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_fermentum', 'k__Bacteria|p__Proteobacteria|c__Betaproteobacteria|o__Burkholderiales', 'k__Bacteria|p__Proteobacteria|c__Betaproteobacteria|o__Burkholderiales|f__Burkholderiaceae', 'k__Bacteria|p__Proteobacteria|c__Betaproteobacteria|o__Burkholderiales|f__Burkholderiaceae|g__Burkholderia', 'k__Bacteria|p__Proteobacteria|c__Betaproteobacteria|o__Burkholderiales|f__Burkholderiaceae|g__Burkholderia|s__Burkholderia_cenocepacia', 'k__Bacteria|p__Proteobacteria|c__Betaproteobacteria|o__Burkholderiales|f__Burkholderiaceae|g__Burkholderia|s__Burkholderia_unclassified']
+2012-10-13 11:35:45,039       INFO dataset.bootstrap@104 Generating 100 bootstraps
+2012-10-13 11:35:45,039       INFO dataset.bootstrap@107 Bootstrap 0/100
+2012-10-13 11:35:45,999       INFO dataset.bootstrap@107 Bootstrap 1/100
+2012-10-13 11:35:46,958       INFO dataset.bootstrap@107 Bootstrap 2/100
+2012-10-13 11:35:47,928       INFO dataset.bootstrap@107 Bootstrap 3/100
+2012-10-13 11:35:48,868       INFO dataset.bootstrap@107 Bootstrap 4/100
+2012-10-13 11:35:49,828       INFO dataset.bootstrap@107 Bootstrap 5/100
+2012-10-13 11:35:50,776       INFO dataset.bootstrap@107 Bootstrap 6/100
+2012-10-13 11:35:51,746       INFO dataset.bootstrap@107 Bootstrap 7/100
+2012-10-13 11:35:52,695       INFO dataset.bootstrap@107 Bootstrap 8/100
+2012-10-13 11:35:53,634       INFO dataset.bootstrap@107 Bootstrap 9/100
+2012-10-13 11:35:54,594       INFO dataset.bootstrap@107 Bootstrap 10/100
+2012-10-13 11:35:55,525       INFO dataset.bootstrap@107 Bootstrap 11/100
+2012-10-13 11:35:56,453       INFO dataset.bootstrap@107 Bootstrap 12/100
+2012-10-13 11:35:57,411       INFO dataset.bootstrap@107 Bootstrap 13/100
+2012-10-13 11:35:58,381       INFO dataset.bootstrap@107 Bootstrap 14/100
+2012-10-13 11:35:59,339       INFO dataset.bootstrap@107 Bootstrap 15/100
+2012-10-13 11:36:00,276       INFO dataset.bootstrap@107 Bootstrap 16/100
+2012-10-13 11:36:01,242       INFO dataset.bootstrap@107 Bootstrap 17/100
+2012-10-13 11:36:02,175       INFO dataset.bootstrap@107 Bootstrap 18/100
+2012-10-13 11:36:03,136       INFO dataset.bootstrap@107 Bootstrap 19/100
+2012-10-13 11:36:04,100       INFO dataset.bootstrap@107 Bootstrap 20/100
+2012-10-13 11:36:05,050       INFO dataset.bootstrap@107 Bootstrap 21/100
+2012-10-13 11:36:06,012       INFO dataset.bootstrap@107 Bootstrap 22/100
+2012-10-13 11:36:06,973       INFO dataset.bootstrap@107 Bootstrap 23/100
+2012-10-13 11:36:07,925       INFO dataset.bootstrap@107 Bootstrap 24/100
+2012-10-13 11:36:08,884       INFO dataset.bootstrap@107 Bootstrap 25/100
+2012-10-13 11:36:09,842       INFO dataset.bootstrap@107 Bootstrap 26/100
+2012-10-13 11:36:10,784       INFO dataset.bootstrap@107 Bootstrap 27/100
+2012-10-13 11:36:11,748       INFO dataset.bootstrap@107 Bootstrap 28/100
+2012-10-13 11:36:12,685       INFO dataset.bootstrap@107 Bootstrap 29/100
+2012-10-13 11:36:13,645       INFO dataset.bootstrap@107 Bootstrap 30/100
+2012-10-13 11:36:14,612       INFO dataset.bootstrap@107 Bootstrap 31/100
+2012-10-13 11:36:15,573       INFO dataset.bootstrap@107 Bootstrap 32/100
+2012-10-13 11:36:16,495       INFO dataset.bootstrap@107 Bootstrap 33/100
+2012-10-13 11:36:17,453       INFO dataset.bootstrap@107 Bootstrap 34/100
+2012-10-13 11:36:18,414       INFO dataset.bootstrap@107 Bootstrap 35/100
+2012-10-13 11:36:19,360       INFO dataset.bootstrap@107 Bootstrap 36/100
+2012-10-13 11:36:20,322       INFO dataset.bootstrap@107 Bootstrap 37/100
+2012-10-13 11:36:21,264       INFO dataset.bootstrap@107 Bootstrap 38/100
+2012-10-13 11:36:22,221       INFO dataset.bootstrap@107 Bootstrap 39/100
+2012-10-13 11:36:23,176       INFO dataset.bootstrap@107 Bootstrap 40/100
+2012-10-13 11:36:24,149       INFO dataset.bootstrap@107 Bootstrap 41/100
+2012-10-13 11:36:25,111       INFO dataset.bootstrap@107 Bootstrap 42/100
+2012-10-13 11:36:26,050       INFO dataset.bootstrap@107 Bootstrap 43/100
+2012-10-13 11:36:27,013       INFO dataset.bootstrap@107 Bootstrap 44/100
+2012-10-13 11:36:27,980       INFO dataset.bootstrap@107 Bootstrap 45/100
+2012-10-13 11:36:28,924       INFO dataset.bootstrap@107 Bootstrap 46/100
+2012-10-13 11:36:29,861       INFO dataset.bootstrap@107 Bootstrap 47/100
+2012-10-13 11:36:30,827       INFO dataset.bootstrap@107 Bootstrap 48/100
+2012-10-13 11:36:31,788       INFO dataset.bootstrap@107 Bootstrap 49/100
+2012-10-13 11:36:32,730       INFO dataset.bootstrap@107 Bootstrap 50/100
+2012-10-13 11:36:33,676       INFO dataset.bootstrap@107 Bootstrap 51/100
+2012-10-13 11:36:34,630       INFO dataset.bootstrap@107 Bootstrap 52/100
+2012-10-13 11:36:35,567       INFO dataset.bootstrap@107 Bootstrap 53/100
+Traceback (most recent call last):
+  File "/n/home10/chuttenhower/hg/sfle/input/halla/src/halla.py", line 153, in <module>
+    _main( )
+  File "/n/home10/chuttenhower/hg/sfle/input/halla/src/halla.py", line 150, in _main
+    halla( args.istm, args.ostm, args.dP, args.dPMI, args.iBootstrap, args.iUnique )
+  File "/n/home10/chuttenhower/hg/sfle/input/halla/src/halla.py", line 109, in halla
+    _halla_test( ostm, pData, hashClusters, dP, iBootstrap )
+  File "/n/home10/chuttenhower/hg/sfle/input/halla/src/halla.py", line 51, in _halla_test
+    pData.bootstrap( iBootstrap )
+  File "/n/home10/chuttenhower/hg/sfle/input/halla/src/dataset.py", line 113, in bootstrap
+    self.m_aadBootstraps.append( self._pdist( self.m_apData, hashBootstrap ) )
+  File "/n/home10/chuttenhower/hg/sfle/input/halla/src/dataset.py", line 66, in _pdist
+    adRet.append( self.m_funcDist( pOne, pTwo, hashIndices, aCache[iOne], aCache[iTwo] ) )
+  File "/n/home10/chuttenhower/hg/sfle/input/halla/src/datum.py", line 379, in mutual_information_distance
+    return ( 1 - self.mutual_information_relative( pDatum, hashIndices, pCacheSelf, pCacheDatum ) )
+  File "/n/home10/chuttenhower/hg/sfle/input/halla/src/datum.py", line 359, in mutual_information_relative
+    dMI = self.mutual_information( pDatum, hashIndices, pCacheSelf, pCacheDatum )
+  File "/n/home10/chuttenhower/hg/sfle/input/halla/src/datum.py", line 310, in mutual_information
+    if not dYProbability:
+KeyboardInterrupt
