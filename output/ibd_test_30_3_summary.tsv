@@ -1,0 +1,6 @@
+Var1	Var2	pPerm	pPearson	rPearson
+taxis	thiamin_biosynthetic_process	0.0	0.994841597319	0.000427695384504
+tryptophan_metabolic_process	vitamin_metabolic_process	0.0	0.969674186349	0.00251496933846
+tryptophan_metabolic_process	vitamin_biosynthetic_process	0.0	0.969674186349	0.00251496933846
+transcription_termination	two_component_signal_transduction_system__phosphorelay_	0.0	0.968802981431	-0.00258725588232
+translation	transmembrane_transport	0.0	0.770630350068	-0.0192854475139
