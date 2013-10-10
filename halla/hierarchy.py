@@ -14,8 +14,7 @@ import itertools
 ## halla-specific modules 
 
 from distance import mi, l2 
-from datum import discretize 
-
+from stats import discretize 
 
 ## statistics packages 
 
@@ -71,7 +70,6 @@ def hclust( pArray, pdist_metric = mi, cluster_metric = l2 ):
 	linkage_data = linkage( pdist_data, metric=l2 ) 
 	return linkage_data  
 
-
 ## this is the most useful function 
 def reduce_tree( pClusterNode, pFunction = lambda x: x.id, aOut = [] ):
 	func = pFunction
@@ -88,34 +86,6 @@ def reduce_trees( pClusterNode1, pClusterNode2, pFunction = lambda x: x.id, aOut
 	Meta version of reduce tree. 
 	Can perform hierarchical all-against-all testing 
 	""" 
-	
-	
-
-## this is garbage 
-def traverse( apClusterNode, pFunction = lambda x: x.id, aOut = [] ):
-
-	def _compare( pClusterNode ):
-		node = pClusterNode 
-		get_representative( node.left ) 
-		get_representative( node.right ) 
-		 
-
-	if len(apClusterNode) == 1:
-		return reduce_tree( pClusterNode, pFunction )
-	else:
-
-
-
-
-	""" 
-	Map/reduce like function for the scipy ClusterNode object.
-	Perform all-against-all actions between clusters per layer on the tree
-
-	"""
-
-	ttest = lambda ttest_ind( )
-
-	reduce_tree( pClusterNode, lambda ttest )
 
 
 #==========================================================================#

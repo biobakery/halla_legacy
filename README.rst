@@ -51,9 +51,9 @@ Dependencies
 * Required
 	* Python (>= 2.7)
 	* Numpy (>= 1.7.1)
-	* Scipy (>= 0.12)
-	* SCons (>= 1.7.1) 
+	* Scipy (>= 0.12) 
 	* Scikit-learn (>=0.13)  
+	* rpy (>=2.0)
 
 * Recommended Tools for documentation 
 	* Docutils

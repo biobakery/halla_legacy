@@ -3,6 +3,13 @@
 """
 An object-oriented halla prototype 
 Aim to be as self-containied as possible 
+
+Global namespace conventions: 
+
+	m() <- map for arrays 
+	r() <- reduce for arrays 
+	rd() <- generic reduce-dimension method 
+	
 """
 
 ## native python packages 
@@ -17,7 +24,7 @@ import os
 import pprint 
 
 ## halla modules 
-from datum import discretize  
+from stats import discretize  
 from distance import mi, adj_mi, l2, mid, adj_mid 
 
 ## statistics packages 
