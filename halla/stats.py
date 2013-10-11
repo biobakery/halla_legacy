@@ -7,6 +7,22 @@ unified statistics module
 import numpy as np 
 import scipy as sp 
 
+
+
+############ Decomposition ###############
+
+def pca( pArray, iComponents = 2 ):
+	 """
+	 Input: N x D matrix 
+	 Output: D x N matrix 
+	 """
+	 from sklearn.decomposition import PCA
+	 pPCA = PCA( n_components = iComponents )
+	 return pPCA.transform( pArray.T ).T 
+
+def mca( pArray, iComponents = 2):
+	pass
+
 def discretize( pArray ):
 	def _discretize_continuous( astrValues, iN = None ):
 		"""

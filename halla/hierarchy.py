@@ -61,14 +61,14 @@ def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
 
 ## this should be in dimensionality reduction script 
 def get_representative( pArray, pMethod = None ):
-	hash_method = {None: get_medoid}
+	hash_method = {None: get_medoid, "pca": }
 	return hash_method[pMethod]( pArray )
 
-def hclust( pArray, pdist_metric = mi, cluster_metric = l2 ):
+def hclust( pArray, pdist_metric = mi, cluster_metric = l2, bTree = False ):
 	#returns linkage matrix 
 	pdist_data = pdist( pArray, metric= pdist_metric )  
 	linkage_data = linkage( pdist_data, metric=l2 ) 
-	return linkage_data  
+	return to_tree( linkage_data ) if bTree else linkage_data 
 
 ## this is the most useful function 
 def reduce_tree( pClusterNode, pFunction = lambda x: x.id, aOut = [] ):
@@ -86,6 +86,13 @@ def reduce_trees( pClusterNode1, pClusterNode2, pFunction = lambda x: x.id, aOut
 	Meta version of reduce tree. 
 	Can perform hierarchical all-against-all testing 
 	""" 
+
+def traverse_by_layer( pClusterNode1, pClusterNode2, pFunction ):
+	"""
+	traverse two trees at once, applying function `pFunction` to each layer pair 
+
+	latex: $pFunction: data1 \times data2 \rightarrow \mathbb{R}$
+	"""
 
 
 #==========================================================================#
@@ -198,8 +205,3 @@ class Gardener():
 # OBJECT WRAPPERS
 #==========================================================================#
 
-def HAC( pDataset ):
-	"""
-	Hierarchical Agglomerative Clustering
-	"""
-	
