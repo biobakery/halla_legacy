@@ -5,14 +5,17 @@ unified statistics module
 
 
 import numpy as np 
+from numpy import array 
 import scipy as sp 
+from scipy.stats import percentileofscore
+from distance import mi, l2 
 
 
 #=========================================================
 # Decomposition wrappers 
 #=========================================================
 
-def pca( pArray, iComponents = 2 ):
+def pca( pArray, iComponents = 1 ):
 	 """
 	 Input: N x D matrix 
 	 Output: D x N matrix 
@@ -21,8 +24,35 @@ def pca( pArray, iComponents = 2 ):
 	 pPCA = PCA( n_components = iComponents )
 	 return pPCA.fit_transform( pArray.T ).T 
 
-def mca( pArray, iComponents = 2):
+def mca( pArray, iComponents = 1 ):
 	pass
+
+
+#=========================================================
+# Statistical test 
+#=========================================================
+
+def permutation_test( pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 100):
+	
+	pHashDecomposition = {"mca": mca, "pca": pca}
+	pHashMetric = {"mi": mi}
+
+	def _permutation( pVec ):
+		return np.random.permutation( pVec )
+
+	pDe = pHashDecomposition[decomposition]
+	pMe = pHashMetric["mi"] 
+
+	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ]
+
+	dMI = pMe( pRep1, pRep2 ) 
+
+	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
+	pArrayPerm = np.array( [ pMe( _permutation( pRep1 ), pRep2 ) for i in xrange( iIter ) ] )
+
+	dPPerm = percentileofscore( pArrayPerm, dMI ) / 100 	
+
+	return dPPerm
 
 #=========================================================
 # Density estimation 
@@ -111,7 +141,7 @@ def discretize( pArray ):
 				min( iPrev + 1, int(iN * i / float(len( astrValues ))) )
 		
 		return astrRet
-	return array([CDatum._discretize_continuous(line) for line in pArray])
+	return array([_discretize_continuous(line) for line in pArray])
 
 
 #=========================================================
@@ -151,15 +181,14 @@ def yekutieli( afPVAL, fQ = 0.05 ):
 	afPVAL_sorted = np.sort( afPVAL )
 
 	def _find_max( afPVAL_sorted, fQ ):
-		dummyMax = 0 
+		dummyMax = -1 
 		for i, pval in enumerate(afPVAL_sorted):
-			fVal = i* fQ * 1.0/len(afPVAL_sorted)
+			fVal = i * fQ * 1.0/len(afPVAL_sorted)
 			if pval <= fVal:
 				dummyMax = i
 		return dummyMax
 
 	rt = _find_max( afPVAL_sorted , fQ )
 
-	return [1] * rt + [0] * (len(afPVAL) - rt)
-	
+	return [1] * (rt + 1) + [0] * ( len(afPVAL) - (rt+1) ) 
 
