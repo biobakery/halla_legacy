@@ -18,7 +18,7 @@ def pca( pArray, iComponents = 2 ):
 	 """
 	 from sklearn.decomposition import PCA
 	 pPCA = PCA( n_components = iComponents )
-	 return pPCA.transform( pArray.T ).T 
+	 return pPCA.fit_transform( pArray.T ).T 
 
 def mca( pArray, iComponents = 2):
 	pass

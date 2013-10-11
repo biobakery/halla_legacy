@@ -10,11 +10,12 @@ import sys
 import re 
 import math 
 import itertools
+from itertools import product 
 
 ## halla-specific modules 
 
 from distance import mi, l2 
-from stats import discretize 
+from stats import discretize,pca, mca 
 
 ## statistics packages 
 
@@ -31,6 +32,7 @@ import random
 from numpy.random import normal 
 from scipy.misc import * 
 import pandas as pd 
+
 
 
 ## this should be in dimensionality reduction script 
@@ -61,7 +63,7 @@ def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
 
 ## this should be in dimensionality reduction script 
 def get_representative( pArray, pMethod = None ):
-	hash_method = {None: get_medoid, "pca": }
+	hash_method = {None: get_medoid, "pca": pca, "mca", mca}
 	return hash_method[pMethod]( pArray )
 
 def hclust( pArray, pdist_metric = mi, cluster_metric = l2, bTree = False ):
@@ -80,19 +82,47 @@ def reduce_tree( pClusterNode, pFunction = lambda x: x.id, aOut = [] ):
 		return reduce_tree( pClusterNode.left, func, aOut ) + \
 			reduce_tree( pClusterNode.right, func, aOut ) 
 
-
-def reduce_trees( pClusterNode1, pClusterNode2, pFunction = lambda x: x.id, aOut = [] ): 
+def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction ):
 	"""
-	Meta version of reduce tree. 
-	Can perform hierarchical all-against-all testing 
-	""" 
+	Depends: reduce_tree 
 
-def traverse_by_layer( pClusterNode1, pClusterNode2, pFunction ):
-	"""
 	traverse two trees at once, applying function `pFunction` to each layer pair 
 
 	latex: $pFunction: data1 \times data2 \rightarrow \mathbb{R}$
 	"""
+
+	def _traverse_helper( apParents, iLevel = 0, iStop = None ):
+		
+		return [(iLevel, reduce_tree(p)) for p in apParents ] + _traverse_helper( [ q.left for q in apParents ] + [ r.right for r in apParents ], iLevel = iLevel+1 ) 
+
+	def _get_min( tData ):
+		
+		return np.min([i[0] for i in tData)
+
+	def _get_layer( tData, iLayer ):
+		"""
+		Get output from `_traverse_helper` and parse 
+		"""
+
+		dummyOut = [] 
+
+		for couple in tData:
+			if couple[0] < iLayer:
+				continue 
+			elif couple[0] == iLayer:
+				dummyOut.append(couple[1])
+				tData = tData[1:]
+			else:
+				break
+		return dummyOut, tData 
+
+	tData1, tData2 = [ _transverse_helper( [pC] ) for pC in [pClusterNode1, pClusterNode2] ]
+
+	iMin = np.min( [_get_min(tData1), _get_min(tData2)] ) 
+
+	product(  )
+
+
 
 
 #==========================================================================#
