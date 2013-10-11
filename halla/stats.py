@@ -8,8 +8,9 @@ import numpy as np
 import scipy as sp 
 
 
-
-############ Decomposition ###############
+#=========================================================
+# Decomposition wrappers 
+#=========================================================
 
 def pca( pArray, iComponents = 2 ):
 	 """
@@ -22,6 +23,10 @@ def pca( pArray, iComponents = 2 ):
 
 def mca( pArray, iComponents = 2):
 	pass
+
+#=========================================================
+# Density estimation 
+#=========================================================
 
 def discretize( pArray ):
 	def _discretize_continuous( astrValues, iN = None ):
@@ -107,4 +112,54 @@ def discretize( pArray ):
 		
 		return astrRet
 	return array([CDatum._discretize_continuous(line) for line in pArray])
+
+
+#=========================================================
+# FDR correcting procedure  
+#=========================================================
+
+def yekutieli( afPVAL, fQ = 0.05 ):
+	"""
+	Implement the yekutieli hierarchical hypothesis testing criterion 
+
+	latex: $q$ BH procedure on $\mathcal{T}_t$:
+
+	\begin{enumerate}
+		\item $P_{(1)}^{t} \leq \cdots \leq P_{(m_t)^{t} $
+		\item $r+t := \max\{i: P_{(i)}^{t} \leq i \cdot q / m_t \}
+		\item If $r_t >0,$ reject $r_t$ hypotheses corresponding to $P_{(1)}^t, \ldots, P_{(r_t)}^t$
+	\end{enumerate}
+
+	Then FDR is approximately 
+
+	\begin{equation}
+		FDR = q \cdot \delta^{*} \cdot(observed no. of idscoveries + observed no. of families tested)/(observed no. of discoveries+1)
+	\end{equation}
+
+	Universal bound: the full tree FDR is $< q \cdot \delta^{*} \cdot 2$ 
+
+	INPUT 
+
+	afPVAL: list of p-values 
+
+	OUTPUT 
+
+	abOUT: boolean vector corresponding to which hypothesis test rejected, corresponding to p-value 
+
+	"""
+
+	afPVAL_sorted = np.sort( afPVAL )
+
+	def _find_max( afPVAL_sorted, fQ ):
+		dummyMax = 0 
+		for i, pval in enumerate(afPVAL_sorted):
+			fVal = i* fQ * 1.0/len(afPVAL_sorted)
+			if pval <= fVal:
+				dummyMax = i
+		return dummyMax
+
+	rt = _find_max( afPVAL_sorted , fQ )
+
+	return [1] * rt + [0] * (len(afPVAL) - rt)
+	
 

@@ -86,6 +86,8 @@ def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
 	"""
 	Depends: reduce_tree 
 
+	Useful function for doing all-against-all comparison between nodes in each layer 
+
 	traverse two trees at once, applying function `pFunction` to each layer pair 
 
 	latex: $pFunction: data1 \times data2 \rightarrow \mathbb{R}$
@@ -120,10 +122,16 @@ def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
 
 	iMin = np.min( [_get_min(tData1), _get_min(tData2)] ) 
 
-	product(  )
+	for iLevel in range(iMin):
+		pLayer1, pLayer2 = _get_layer( tData1, iLevel )[0], _get_layer( tData2, iLevel )[0]
+		iLayer1, iLayer2 = len(pLayer1), len(pLayer2)
+
+		for i,j in product( range(iLayer1), range(iLayer2) ):
+			yield (i,j), pFunction( pArray1[:,i], pArray2[:,j] ) 
 
 
-
+def htest():
+	pass 
 
 #==========================================================================#
 # DATA STRUCTURES 
