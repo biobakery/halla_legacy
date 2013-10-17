@@ -27,7 +27,6 @@ def pca( pArray, iComponents = 1 ):
 def mca( pArray, iComponents = 1 ):
 	pass
 
-
 #=========================================================
 # Statistical test 
 #=========================================================
@@ -148,9 +147,10 @@ def discretize( pArray ):
 # FDR correcting procedure  
 #=========================================================
 
-def yekutieli( afPVAL, fQ = 0.05 ):
+def bh( afPVAL, fQ = 0.05 ):
 	"""
-	Implement the yekutieli hierarchical hypothesis testing criterion 
+	Implement the benjamini-hochberg hierarchical hypothesis testing criterion 
+	In practice, used for implementing Yekutieli criterion PER layer 
 
 	latex: $q$ BH procedure on $\mathcal{T}_t$:
 
