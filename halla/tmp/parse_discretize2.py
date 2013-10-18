@@ -1,6 +1,6 @@
 #!/usr/bin/env python 
 
-from datum import discretize 
+from stats import discretize 
 import csv
 import sys 
 import numpy as np 

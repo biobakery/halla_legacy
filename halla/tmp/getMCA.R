@@ -12,8 +12,6 @@ inputargs <- commandArgs(TRUE)
 input.file <-  inputargs[1] 
 output.file <- inputargs[2]
 
-
-
 library( FactoMineR )
 
 input.matrix <- read.csv( input.file, sep="\t" ) 

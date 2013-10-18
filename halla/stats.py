@@ -10,7 +10,9 @@ import scipy as sp
 from scipy.stats import percentileofscore
 from distance import mi, l2 
 import rpy 
-
+# doesn't play nice with other python extensions like numpy
+# remember to cast to native python objects before passing!
+# good for prototyping, not good for optimizing.  
 
 #=========================================================
 # Decomposition wrappers 
@@ -26,7 +28,16 @@ def pca( pArray, iComponents = 1 ):
 	 return pPCA.fit_transform( pArray.T ).T 
 
 def mca( pArray, iComponents = 1 ):
-	pass 
+	"""
+	Input: D x N STRING DISCRETIZED matrix #Caution! must pass in strings  
+	Output: D x N FLOAT matrix 
+	"""
+	aastrData = [map(str,l) for l in pArray.T]
+	astrKeys = ["Dim " + str(i) for i in range(1,iComponents+1)]
+	r = rpy.r 
+	r.library( "FactoMineR" )
+	residues = r.MCA( aastrData ) 
+	return array( [residues["var"]["eta2"][x] for x in astrKeys] )	
 
 #=========================================================
 # Statistical test 
