@@ -130,10 +130,10 @@ def l2( pData1, pData2 ):
 def mi( pData1, pData2 ):
 	"""
 	static implementation of mutual information, 
-	caveat: returns nats, not bits 
+	caveat: already normalized by CMutualInformation  
 	"""
 
-	return math.log(math.e, 2) * CMutualInformation( pData1, pData2 ).get_distance()
+	return CMutualInformation( pData1, pData2 ).get_distance()
 
 def mi_nats( pData1, pData2 ):
 	"""
