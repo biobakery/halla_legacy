@@ -9,6 +9,7 @@ from numpy import array
 import scipy as sp 
 from scipy.stats import percentileofscore
 from distance import mi, l2 
+import rpy 
 
 
 #=========================================================
@@ -25,7 +26,7 @@ def pca( pArray, iComponents = 1 ):
 	 return pPCA.fit_transform( pArray.T ).T 
 
 def mca( pArray, iComponents = 1 ):
-	pass
+	pass 
 
 #=========================================================
 # Statistical test 
@@ -178,7 +179,9 @@ def bh( afPVAL, fQ = 0.05 ):
 
 	"""
 
-	afPVAL_sorted = np.sort( afPVAL )
+	afPVAL_args = np.argsort( afPVAL ) # permutation \pi
+	afPVAL_reverse = np.argsort( afPVAL_args ) # unique inverse permutation \pi \; \pi \circ \pi^{-1} = 1
+	afPVAL_sorted = array( afPVAL )[afPVAL_args]
 
 	def _find_max( afPVAL_sorted, fQ ):
 		dummyMax = -1 
@@ -190,5 +193,5 @@ def bh( afPVAL, fQ = 0.05 ):
 
 	rt = _find_max( afPVAL_sorted , fQ )
 
-	return [1] * (rt + 1) + [0] * ( len(afPVAL) - (rt+1) ) 
+	return array( [1] * (rt + 1) + [0] * ( len(afPVAL) - (rt+1) ) )[ afPVAL_reverse ]
 
