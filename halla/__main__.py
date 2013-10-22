@@ -6,6 +6,7 @@ import itertools
 
 from numpy import array 
 
+import halla 
 import csv 
 import sys 
 import re 
@@ -68,11 +69,14 @@ def _main():
 	#print Data2[0]
 
 
-	CH = HAllA( Data1, Data2 )
+	CH = halla.HAllA( Data1, Data2 )
 
 	#c_strOutputPath = "/home/ysupmoon/Dropbox/halla/output/"
 	#CH.set_directory( c_strOutputPath )
 	
+	CH.run_rev1_test() 
+
+	"""
 	pOutHash = CH.run_pr_test()
 
 	csvw = csv.writer( sys.stdout , csv.excel_tab )
@@ -88,5 +92,5 @@ def _main():
 
 	sys.stderr.write("Done!\n")
 	#sys.stderr.write( str( pOutHash ) ) 
-
+	"""
 _main() 

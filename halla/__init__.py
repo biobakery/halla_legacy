@@ -26,6 +26,7 @@ import pprint
 ## halla modules 
 from stats import discretize  
 from distance import mi, adj_mi, l2, mid, adj_mid 
+import hierarchy 
 
 ## statistics packages 
 
@@ -273,6 +274,23 @@ class HAllA():
 
 		return self.outhash 
 
+	def _htest_rev1( self ):
+		"""
+		Run htest for revision 1 
+		Simple discretized hypothesis tree, 
+
+		"""
+
+		pRaw1, pRaw2 = self.meta_array[0], self.meta_array[1]
+
+		pData1, pData2 = self.meta_discretize[0], self.meta_discretize[1]
+
+		pClusterNode1, pClusterNode2 = hierarchy.hclust( pData1 , bTree = True ), hierarchy.hclust( pData2, bTree = True)
+
+		pBags = hierarchy.recursive_all_against_all( [pClusterNode1], [pClusterNode2], pRaw1, pRaw2, pOut = [] )
+
+		print pBags  
+
 	def _htest_pr( self ):
 		""" 
 		Run htest for the progress report 
@@ -372,5 +390,8 @@ class HAllA():
 
 		return self.outhash 
 
+	def run_rev1_test( self ):
+		self._discretize()
+		self._htest_rev1()
 
 

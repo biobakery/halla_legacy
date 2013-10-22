@@ -201,7 +201,7 @@ def discretize( pArray ):
 # FDR correcting procedure  
 #=========================================================
 
-def bh( afPVAL, fQ = 0.05 ):
+def bh( afPVAL, fQ = 0.9 ):
 	"""
 	Implement the benjamini-hochberg hierarchical hypothesis testing criterion 
 	In practice, used for implementing Yekutieli criterion PER layer 
@@ -246,5 +246,8 @@ def bh( afPVAL, fQ = 0.05 ):
 
 	rt = _find_max( afPVAL_sorted , fQ )
 
-	return array( [1] * (rt + 1) + [0] * ( len(afPVAL) - (rt+1) ) )[ afPVAL_reverse ]
+	if len(afPVAL) == 1:
+		return [1] if afPVAL[0] < fQ else [0]
+	else:
+		return array( [1] * (rt + 1) + [0] * ( len(afPVAL) - (rt+1) ) )[ afPVAL_reverse ]
 

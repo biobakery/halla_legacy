@@ -110,11 +110,11 @@ def one_against_one( pClusterNode1, pClusterNode2, pArray1, pArray2 ):
 	
 	Input: pClusterNode1, pClusterNode2, pArray1, pArray2
 
-	Output: pVal
+	Output: aiIndex1, aiIndex2, pVal
 	
 	"""
 
-	aiIndex1, aiIndex2 = reduce_tree( pClusterNode1 ) ), reduce_tree( pClusterNode2 )
+	aiIndex1, aiIndex2 = reduce_tree( pClusterNode1 ) , reduce_tree( pClusterNode2 )
 
 	pData1, pData2 = pArray1[array(aiIndex1)], pArray2[array(aiIndex2)]
 
@@ -127,7 +127,7 @@ def all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2 ):
 
 	Input: apClusterNode1, apClusterNode2, pArray1, pArray2
 
-	Output: a list of ( (i,j), pVal )
+	Output: a list of ( (i,j), (aiIndex1, aiIndex2, pVal) )
 	"""
 
 	dummyOut = [] 
@@ -150,7 +150,12 @@ def recursive_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2,
 
 	"""
 
+	pOutNew = pOut 
+
 	atAll = all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2 )
+
+	print "This is all against all atAll"
+	print atAll 
 
 	atIJ, atOAO = zip(*atAll)
 	aaN, aaM, aPVAL = zip(*atOAO)
@@ -158,7 +163,7 @@ def recursive_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2,
 	aBool = pFDR(aPVAL)
 
 	if not any(aBool):
-		return pOut 
+		return pOutNew 
 	else:
 		apC1, apC2, = [],[] 
 		for k, couple in enumerate( atIJ ):
@@ -166,14 +171,14 @@ def recursive_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2,
 			if aBool[k]: #if hypothesis was rejected, then go down to lower layers 
 
 				pNode1Left, pNode1Right = apClusterNode1[i].left, apClusterNode1[i].right
-				pNode2Left, pNode2Right = apClusterNode2[j].left, apClusterNode2.right
+				pNode2Left, pNode2Right = apClusterNode2[j].left, apClusterNode2[j].right
 
-				apC1.append( x for x in apClusterNode1[i] )
-				apC2.append( y for x in apClusterNode2[j] )
+				apC1.append( apClusterNode1[i].left ); apC1.append( apClusterNode1[i].right )
+				apC2.append( apClusterNode2[j].left ); apC2.append( apClusterNode2[j].right )
 
 				pOut.append( ( (aaN[k], apClusterNode1[i] ), (aaM[k], apClusterNode2[j] ) ) )
 
-		return recursive_all_against_all( apC1, apC2, pArray1, pArray2, pOut = pOut , pFDR = pFDR )
+		return recursive_all_against_all( apC1, apC2, pArray1, pArray2, pOut = pOutNew , pFDR = pFDR )
 
 
 ## I probably don't need this anymore? 
@@ -197,7 +202,7 @@ def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
 
 	def _get_min( tData ):
 		
-		return np.min([i[0] for i in tData)
+		return np.min([i[0] for i in tData])
 
 	tData1, tData2 = [ reduce_tree_by_layer( [pC] ) for pC in [pClusterNode1, pClusterNode2] ]
 
@@ -209,7 +214,6 @@ def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
 
 		for i,j in product( range(iLayer1), range(iLayer2) ):
 			dummyOut.append( ( (i,j), pFunction( pArray1[:,i], pArray2[:,j] ) ) )
-
 
 #==========================================================================#
 # DATA STRUCTURES 
