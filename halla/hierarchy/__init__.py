@@ -26,7 +26,7 @@ import sklearn.decomposition
 from sklearn.decomposition import PCA #remember that the matrix is X = (n_samples,n_features)
 import csv 
 from scipy.spatial.distance import pdist, cdist, squareform
-from scipy.cluster.hierarchy import linkage, dendrogram, to_tree, leaves_list
+from scipy.cluster.hierarchy import linkage, dendrogram, to_tree, leaves_list 
 import pylab as pl 
 import random  
 from numpy.random import normal 
@@ -43,14 +43,22 @@ def truncate_tree( apClusterNode, iSkip, iLevel = 0 ):
 	"""
 	Chop tree from root, returning smaller tree towards the leaves 
 
-	Input: apClusterNode, iLevel 
+	Input: pClusterNode, iLevel 
 
-	Output: apClusterNode 
+	Output: list of ClusterNodes 
 
 	"""
 
-	return None 
- 
+	if iLevel < iSkip:
+		return truncate_tree( [p.right for p in apClusterNode] + [q.left for q in apClusterNode], iSkip, iLevel = iLevel+1 ) 
+
+	elif iSkip == iLevel:
+		if any(apClusterNode):
+			return filter( lambda x: bool(x), apClusterNode )
+	
+		else:
+			raise Exception("truncated tree is malformed--empty!")
+
 def reduce_tree( pClusterNode, pFunction = lambda x: x.id, aOut = [] ):
 	"""
 	Recursive
@@ -154,8 +162,8 @@ def recursive_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2,
 
 	atAll = all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2 )
 
-	print "This is all against all atAll"
-	print atAll 
+	#print "This is all against all atAll"
+	#print atAll 
 
 	atIJ, atOAO = zip(*atAll)
 	aaN, aaM, aPVAL = zip(*atOAO)
@@ -163,20 +171,36 @@ def recursive_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2,
 	aBool = pFDR(aPVAL)
 
 	if not any(aBool):
-		return pOutNew 
+		print "END!"
+		return pOut  
 	else:
+		"CONTINUE!"
 		apC1, apC2, = [],[] 
 		for k, couple in enumerate( atIJ ):
 			i,j = couple  
 			if aBool[k]: #if hypothesis was rejected, then go down to lower layers 
 
-				pNode1Left, pNode1Right = apClusterNode1[i].left, apClusterNode1[i].right
-				pNode2Left, pNode2Right = apClusterNode2[j].left, apClusterNode2[j].right
+				#pNode1Left, pNode1Right = apClusterNode1[i].left, apClusterNode1[i].right
+				#pNode2Left, pNode2Right = apClusterNode2[j].left, apClusterNode2[j].right
 
-				apC1.append( apClusterNode1[i].left ); apC1.append( apClusterNode1[i].right )
-				apC2.append( apClusterNode2[j].left ); apC2.append( apClusterNode2[j].right )
+				#if pNode1Left.is_leaf or pNode1Right.is_leaf or pNode2Left.is_leaf or pNode2Right.is_leaf: 
+				#	continue  
+				#else: 
+				#	print "Down!"
+				
+				for item in [ apClusterNode1[i].left, apClusterNode1[i].right ]:
+					if not item.is_leaf():
+						apC1.append( item )
 
-				pOut.append( ( (aaN[k], apClusterNode1[i] ), (aaM[k], apClusterNode2[j] ) ) )
+				for item in [ apClusterNode2[j].left, apClusterNode2[j].right ]:
+					if not item.is_leaf():
+						apC2.append( item )
+				
+				#apC1.append( apClusterNode1[i].left ) ; apC1.append( apClusterNode1[i].right )
+				#apC2.append( apClusterNode2[j].left ); apC2.append( apClusterNode2[j].right )
+
+				#pOutNew.append( ( (aaN[k], apClusterNode1[i] ), (aaM[k], apClusterNode2[j] ) ) )
+				pOutNew.append( (aaN[k],aaM[k]) )
 
 		return recursive_all_against_all( apC1, apC2, pArray1, pArray2, pOut = pOutNew , pFDR = pFDR )
 

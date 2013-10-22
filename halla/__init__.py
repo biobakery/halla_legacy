@@ -35,7 +35,7 @@ import scipy as sp
 from numpy import array 
 import sklearn.decomposition
 import matplotlib 
-matplotlib.use("Agg") #disable X-windows display backend 
+#matplotlib.use("Agg") #disable X-windows display backend 
 from sklearn.decomposition import PCA #remember that the matrix is X = (n_samples,n_features)
 import csv 
 from scipy.spatial.distance import pdist, cdist, squareform
@@ -254,8 +254,7 @@ class HAllA():
 		if pClusterNode.is_leaf():
 			return ( aOut + [func(pClusterNode)] )
 		else:
-			return _reduce_tree( pClusterNode.left, func, aOut ) + \
-				_reduce_tree( pClusterNode.right, func, aOut ) 
+			return _reduce_tree( pClusterNode.left, func, aOut ) + _reduce_tree( pClusterNode.right, func, aOut ) 
 	
 	def _reduce_children( pClusterNode ):
 		
@@ -281,15 +280,30 @@ class HAllA():
 
 		"""
 
+		iSkip = 2
+
 		pRaw1, pRaw2 = self.meta_array[0], self.meta_array[1]
 
 		pData1, pData2 = self.meta_discretize[0], self.meta_discretize[1]
 
-		pClusterNode1, pClusterNode2 = hierarchy.hclust( pData1 , bTree = True ), hierarchy.hclust( pData2, bTree = True)
+		pClusterNode1Tmp, pClusterNode2Tmp = hierarchy.hclust( pData1 , bTree = True ), hierarchy.hclust( pData2, bTree = True)
 
-		pBags = hierarchy.recursive_all_against_all( [pClusterNode1], [pClusterNode2], pRaw1, pRaw2, pOut = [] )
+		apClusterNode1, apClusterNode2 = hierarchy.truncate_tree( [pClusterNode1Tmp], iSkip ), hierarchy.truncate_tree( [pClusterNode2Tmp], iSkip )
 
-		print pBags  
+		#Z1, Z2 = hierarchy.hclust( pData1 ), hierarchy.hclust( pData2 ) 
+
+		#Plot to see 
+		#sp.cluster.hierarchy.dendrogram( Z1 )
+		#sp.cluster.hierarchy.dendrogram( Z2 )
+
+		pBags = hierarchy.recursive_all_against_all( apClusterNode1, apClusterNode2, pRaw1, pRaw2, pOut = [] )
+		#pBags = hierarchy.recursive_all_against_all( [pClusterNode1], [pClusterNode2], pRaw1, pRaw2, pOut = [] )
+
+		print "pBags"
+
+		for item in pBags:
+			print item 
+
 
 	def _htest_pr( self ):
 		""" 

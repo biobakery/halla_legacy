@@ -49,7 +49,7 @@ def _main():
 							line = map(float, line) #is it continuous? 
 						except ValueError:
 							line = line #we are forced to conclude that it is implicitly categorical, with some lexical ordering 
-					sys.stderr.write( "\t".join( map(str,line)  ) + "\n" ) 
+					#sys.stderr.write( "\t".join( map(str,line)  ) + "\n" ) 
 					aOut.append(line)
 		
 		Data = array( aOut )
@@ -67,7 +67,6 @@ def _main():
 
 	#print Data1[0]
 	#print Data2[0]
-
 
 	CH = halla.HAllA( Data1, Data2 )
 
