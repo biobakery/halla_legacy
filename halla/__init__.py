@@ -280,7 +280,7 @@ class HAllA():
 
 		"""
 
-		iSkip = 2
+		iSkip = 0
 
 		pRaw1, pRaw2 = self.meta_array[0], self.meta_array[1]
 

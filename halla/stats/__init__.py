@@ -201,7 +201,7 @@ def discretize( pArray ):
 # FDR correcting procedure  
 #=========================================================
 
-def bh( afPVAL, fQ = 0.5 ):
+def bh( afPVAL, fQ = 0.9 ):
 	"""
 	Implement the benjamini-hochberg hierarchical hypothesis testing criterion 
 	In practice, used for implementing Yekutieli criterion PER layer 
