@@ -20,7 +20,7 @@ from halla.distance import mi, l2
 # good for prototyping, not good for optimizing.  
 
 #=========================================================
-# Decomposition wrappers 
+# Feature Selection 
 #=========================================================
 
 def pca( pArray, iComponents = 1 ):
@@ -44,11 +44,41 @@ def mca( pArray, iComponents = 1 ):
 	residues = r.MCA( aastrData ) 
 	return array( [residues["var"]["eta2"][x] for x in astrKeys] )	
 
+
+def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
+	"""
+	Input: numpy array 
+	Output: float
+	
+	For lack of better way, compute centroid, then compute medoid 
+	by looking at an element that is closest to the centroid. 
+
+	Can define arbitrary metric passed in as a function to pMetric 
+
+	"""
+
+	d = pMetric 
+
+	pArray = ( pArray.T if bool(iAxis) else pArray  ) 
+
+	print pArray.shape 
+
+	mean_vec = np.mean(pArray, 0) 
+	
+	pArrayCenter = pArray - ( mean_vec * np.ones(pArray.shape) )
+
+	return pArray[np.argsort( map( np.linalg.norm, pArrayCenter) )[0],:]
+
+
+def get_representative( pArray, pMethod = None ):
+	hash_method = {None: get_medoid, "pca": pca, "mca": mca}
+	return hash_method[pMethod]( pArray )
+
 #=========================================================
 # Statistical test 
 #=========================================================
 
-def permutation_test( pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 100):
+def permutation_test_by_representative( pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 100):
 	"""
 	Input: 
 	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 100

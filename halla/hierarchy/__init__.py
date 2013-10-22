@@ -14,8 +14,8 @@ from itertools import product
 
 ## halla-specific modules 
 
-from distance import mi, l2 
-from stats import discretize,pca, mca 
+from halla.distance import mi, l2 
+from halla.stats import discretize,pca, mca, bh, permutation_test_by_representative 
 
 ## statistics packages 
 
@@ -33,109 +33,189 @@ from numpy.random import normal
 from scipy.misc import * 
 import pandas as pd 
 
-
-
-## this should be in dimensionality reduction script 
-def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
-	"""
-	Input: numpy array 
-	Output: float
-	
-	For lack of better way, compute centroid, then compute medoid 
-	by looking at an element that is closest to the centroid. 
-
-	Can define arbitrary metric passed in as a function to pMetric 
-
-	"""
-
-	d = pMetric 
-
-	pArray = ( pArray.T if bool(iAxis) else pArray  ) 
-
-	print pArray.shape 
-
-	mean_vec = np.mean(pArray, 0) 
-	
-	pArrayCenter = pArray - ( mean_vec * np.ones(pArray.shape) )
-
-	return pArray[np.argsort( map( np.linalg.norm, pArrayCenter) )[0],:]
-
-
-## this should be in dimensionality reduction script 
-def get_representative( pArray, pMethod = None ):
-	hash_method = {None: get_medoid, "pca": pca, "mca": mca}
-	return hash_method[pMethod]( pArray )
-
 def hclust( pArray, pdist_metric = mi, cluster_metric = l2, bTree = False ):
 	#returns linkage matrix 
 	pdist_data = pdist( pArray, metric= pdist_metric )  
 	linkage_data = linkage( pdist_data, metric=l2 ) 
 	return to_tree( linkage_data ) if bTree else linkage_data 
 
-## this is the most useful function 
+def truncate_tree( apClusterNode, iSkip, iLevel = 0 ):
+	"""
+	Chop tree from root, returning smaller tree towards the leaves 
+
+	Input: apClusterNode, iLevel 
+
+	Output: apClusterNode 
+
+	"""
+
+	return None 
+ 
 def reduce_tree( pClusterNode, pFunction = lambda x: x.id, aOut = [] ):
+	"""
+	Recursive
+
+	Input: pClusterNode, pFunction = lambda x: x.id, aOut = []
+
+	Output: a list of pFunction calls (node ids by default)
+	"""
+
 	func = pFunction
 
 	if pClusterNode.is_leaf():
 		return ( aOut + [func(pClusterNode)] )
 	else:
-		return reduce_tree( pClusterNode.left, func, aOut ) + \
-			reduce_tree( pClusterNode.right, func, aOut ) 
+		return reduce_tree( pClusterNode.left, func, aOut ) + reduce_tree( pClusterNode.right, func, aOut ) 
+
+def reduce_tree_by_layer( apParents, iLevel = 0, iStop = None ):
+	"""
+
+	Traverse one tree. 
+
+	Input: apParents, iLevel = 0, iStop = None
+
+	Output: a list of (iLevel, list_of_nodes_at_iLevel)
+	"""
+	
+	if iStop and (iLevel > iStop):
+		return [] 
+	else:
+		return [(iLevel, reduce_tree(p)) for p in apParents ] + reduce_tree_by_layer( [ q.left for q in apParents ] + [ r.right for r in apParents ], iLevel = iLevel+1 ) 
+
+
+def get_layer( atData, iLayer ):
+	"""
+	Get output from `reduce_tree_by_layer` and parse 
+
+	Input: atData = a list of (iLevel, list_of_nodes_at_iLevel), iLayer = zero-indexed layer number 
+	"""
+
+	dummyOut = [] 
+
+	for couple in atData:
+		if couple[0] < iLayer:
+			continue 
+		elif couple[0] == iLayer:
+			dummyOut.append(couple[1])
+			atData = atData[1:]
+		else:
+			break
+	return dummyOut, atData 
+
+
+def one_against_one( pClusterNode1, pClusterNode2, pArray1, pArray2 ):
+	"""
+
+	one_against_one hypothesis testing for a particular layer 
+	
+	Input: pClusterNode1, pClusterNode2, pArray1, pArray2
+
+	Output: pVal
+	
+	"""
+
+	aiIndex1, aiIndex2 = reduce_tree( pClusterNode1 ) ), reduce_tree( pClusterNode2 )
+
+	pData1, pData2 = pArray1[array(aiIndex1)], pArray2[array(aiIndex2)]
+
+	return aiIndex1, aiIndex2, permutation_test_by_representative( pData1, pData2 )
+
+
+def all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2 ):
+	""" 
+	Perform all-against-all per layer 
+
+	Input: apClusterNode1, apClusterNode2, pArray1, pArray2
+
+	Output: a list of ( (i,j), pVal )
+	"""
+
+	dummyOut = [] 
+
+	iC1, iC2 = map( len, [apClusterNode1, apClusterNode2] )
+
+	for i,j in product(range(iC1), range(iC2)):
+		dummyOut.append( ( (i,j), one_against_one( apClusterNode1[i], apClusterNode2[j], pArray1, pArray2 ) ) )
+
+	return dummyOut 
+
+def recursive_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2, pOut = [], pFDR = bh ):
+	"""
+
+	Performs recursive all-against-all (the default HAllA routine) with fdr correction
+
+	Input: apClusterNode1, apClusterNode2, pArray1, pArray2, pFDR
+
+	Output: a list of ( (aiIndex1, pBag1), (aiIndex2, pBag2) )
+
+	"""
+
+	atAll = all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2 )
+
+	atIJ, atOAO = zip(*atAll)
+	aaN, aaM, aPVAL = zip(*atOAO)
+
+	aBool = pFDR(aPVAL)
+
+	if not any(aBool):
+		return pOut 
+	else:
+		apC1, apC2, = [],[] 
+		for k, couple in enumerate( atIJ ):
+			i,j = couple  
+			if aBool[k]: #if hypothesis was rejected, then go down to lower layers 
+
+				pNode1Left, pNode1Right = apClusterNode1[i].left, apClusterNode1[i].right
+				pNode2Left, pNode2Right = apClusterNode2[j].left, apClusterNode2.right
+
+				apC1.append( x for x in apClusterNode1[i] )
+				apC2.append( y for x in apClusterNode2[j] )
+
+				pOut.append( ( (aaN[k], apClusterNode1[i] ), (aaM[k], apClusterNode2[j] ) ) )
+
+		return recursive_all_against_all( apC1, apC2, pArray1, pArray2, pOut = pOut , pFDR = pFDR )
+
+
+## I probably don't need this anymore? 
 
 def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction ):
 	"""
-	Depends: reduce_tree 
 
 	Useful function for doing all-against-all comparison between nodes in each layer 
 
 	traverse two trees at once, applying function `pFunction` to each layer pair 
 
-	latex: $pFunction: data1 \times data2 \rightarrow \mathbb{R}$
+	latex: $pFunction: data1 \times data2 \rightarrow \mathbb{R}^k, $ for $k$ the size of the cross-product set per layer 
+
+	Input: pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
+	Output: (i,j), pFunction( pArray[:,i], pArray2[:,j])
+
+
 	"""
 
-	def _traverse_helper( apParents, iLevel = 0, iStop = None ):
-		
-		return [(iLevel, reduce_tree(p)) for p in apParents ] + _traverse_helper( [ q.left for q in apParents ] + [ r.right for r in apParents ], iLevel = iLevel+1 ) 
+	dummyOut = [] 
 
 	def _get_min( tData ):
 		
 		return np.min([i[0] for i in tData)
 
-	def _get_layer( tData, iLayer ):
-		"""
-		Get output from `_traverse_helper` and parse 
-		"""
-
-		dummyOut = [] 
-
-		for couple in tData:
-			if couple[0] < iLayer:
-				continue 
-			elif couple[0] == iLayer:
-				dummyOut.append(couple[1])
-				tData = tData[1:]
-			else:
-				break
-		return dummyOut, tData 
-
-	tData1, tData2 = [ _transverse_helper( [pC] ) for pC in [pClusterNode1, pClusterNode2] ]
+	tData1, tData2 = [ reduce_tree_by_layer( [pC] ) for pC in [pClusterNode1, pClusterNode2] ]
 
 	iMin = np.min( [_get_min(tData1), _get_min(tData2)] ) 
 
 	for iLevel in range(iMin):
-		pLayer1, pLayer2 = _get_layer( tData1, iLevel )[0], _get_layer( tData2, iLevel )[0]
+		pLayer1, pLayer2 = get_layer( tData1, iLevel )[0], get_layer( tData2, iLevel )[0]
 		iLayer1, iLayer2 = len(pLayer1), len(pLayer2)
 
 		for i,j in product( range(iLayer1), range(iLayer2) ):
-			yield (i,j), pFunction( pArray1[:,i], pArray2[:,j] ) 
+			dummyOut.append( ( (i,j), pFunction( pArray1[:,i], pArray2[:,j] ) ) )
 
-
-def htest():
-	pass 
 
 #==========================================================================#
 # DATA STRUCTURES 
 #==========================================================================#
+
+## Probably don't need this anymore -- keep for now. 
 
 class Tree():
 	''' 
