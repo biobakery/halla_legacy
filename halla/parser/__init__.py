@@ -1,6 +1,19 @@
-"""
-Initializer for halla python module 
-"""
+#!/usr/bin/env python 
+'''
+Parses input/output formats, 
+manages transformations
+'''
 
-print "Hey this is running!"
+import csv 
+import numpy as np 
 
+
+class CInput:
+	def __init__( self, strFileName ):
+		self.strFileName = strFileName
+		self.csvr = csv.reader( open( strFileName ), csv.excel_tab )
+		self._load( ) 
+	def _load( self ):
+		self.inputData = np.array( [x for x in self.csvr] ) 
+
+		
