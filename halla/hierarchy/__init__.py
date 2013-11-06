@@ -33,6 +33,9 @@ from numpy.random import normal
 from scipy.misc import * 
 import pandas as pd 
 
+### BUGBUG: this hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV's, not just single ones 
+### Use the "grouping property" as discussed by Kraskov paper. 
+
 def hclust( pArray, pdist_metric = mi, cluster_metric = l2, bTree = False ):
 	#returns linkage matrix 
 	pdist_data = pdist( pArray, metric= pdist_metric )  

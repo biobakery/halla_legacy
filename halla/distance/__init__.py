@@ -135,14 +135,6 @@ def mi( pData1, pData2 ):
 
 	return CMutualInformation( pData1, pData2 ).get_distance()
 
-def mi_nats( pData1, pData2 ):
-	"""
-	static implementation of mutual information, 
-	caveat: returns nats, not bits 
-	"""
-
-	return CMutualInformation( pData1, pData2 ).get_distance()
-
 def norm_mi( pData1, pData2 ):
 	"""
 	static implementation of normalized mutual information 

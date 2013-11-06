@@ -30,6 +30,7 @@ def pca( pArray, iComponents = 1 ):
 	 """
 	 from sklearn.decomposition import PCA
 	 pPCA = PCA( n_components = iComponents )
+	 ## doing this matrix inversion twice doesn't seem to be a good idea 
 	 return pPCA.fit_transform( pArray.T ).T 
 
 def mca( pArray, iComponents = 1 ):
@@ -60,8 +61,6 @@ def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
 	d = pMetric 
 
 	pArray = ( pArray.T if bool(iAxis) else pArray  ) 
-
-	print pArray.shape 
 
 	mean_vec = np.mean(pArray, 0) 
 	
@@ -110,6 +109,8 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "mi", decompo
 #=========================================================
 # Density estimation 
 #=========================================================
+
+## BUGBUG: this discretize function is not so kosher, need better way to do density estimate for MI
 
 def discretize( pArray ):
 	def _discretize_continuous( astrValues, iN = None ):
