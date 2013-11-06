@@ -10,6 +10,8 @@ from numpy import array
 import scipy as sp 
 from scipy.stats import percentileofscore
 import rpy 
+from numpy.random import shuffle 
+import math 
 
 # Internal dependencies 
 
@@ -100,11 +102,97 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "mi", decompo
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
 	pArrayPerm = np.array( [ pMe( _permutation( pRep1 ), pRep2 ) for i in xrange( iIter ) ] )
 
-	print pArrayPerm 
+	#print pArrayPerm 
 
 	dPPerm = percentileofscore( pArrayPerm, dMI ) / 100 	
 
 	return dPPerm
+
+
+#=========================================================
+# Cake Cutting 
+#=========================================================
+
+def log_cut( cake_length, iBase = 2 ):
+	"""
+	Input: cake_length <- length of array, iBase <- base of logarithm 
+
+	Output: array of indices corresponding to the slice 
+
+	Note: Probably don't want size-1 cake slices, but for proof-of-concept, this should be okay. 
+	Avoid the "all" case 
+
+	Caveat: returns smaller slices first 
+	"""
+
+	aOut = [] 
+
+	iLength = cake_length 
+
+	iSize = int( math.floor( math.log( iLength , iBase ) ) )
+	aSize = [2**i for i in range(iSize)] 
+
+	iStart = 0 
+	for item in aSize:
+		iStop =  iStart + item 
+		if iStop == iLength - 1:
+			iStop += 1 
+			# ensure that the rest of the cake gets included in the tail case  
+		aOut.append( array( range(iStart, iStop) ) ) 
+		iStart = iStop 
+
+	aOut.reverse()
+	return aOut 
+
+
+def CP_cut( D ):
+	pass 	
+
+
+def p_val_plot( pArray1, pArray2, pCut = log_cut, iIter = 100 ):
+	"""
+	Returns p value plot of combinatorial cuts 
+
+	In practice, works best when arrays are of similar size, since I implement the minimum ... 
+	For future think about implementing the correct step function 
+
+	"""
+
+	aOut = None 
+	D1, D2 = pArray1[:], pArray2[:]
+
+	for i in range(iIter):
+		shuffle(D1)
+		shuffle(D2)
+
+		print "shuffled data"
+		print D1 
+
+		len1, len2 = len( D1 ), len( D2 )
+		cut1, cut2 = pCut( len1 ), pCut( len2 )
+		lencut1, lencut2 = len(cut1), len(cut2)
+		iMin = min( lencut1, lencut2 )
+		if not aOut:
+			aOut = [[] for _ in range(iMin)] 
+
+		print "cut1"
+		print cut1
+		print "cut2"
+		print cut2
+
+		for j in range(iMin):
+			dP = permutation_test_by_representative( pArray1[cut1[j]], pArray2[cut2[j]] )
+
+			print "pval"
+			print dP 
+
+			aOut[j].append( dP )
+
+	#boxplot( aOut, '', 0)
+	#show() 
+
+	return aOut 
+
 
 #=========================================================
 # Density estimation 

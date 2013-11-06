@@ -73,7 +73,9 @@ def _main():
 	#c_strOutputPath = "/home/ysupmoon/Dropbox/halla/output/"
 	#CH.set_directory( c_strOutputPath )
 	
-	CH.run_rev1_test() 
+	#CH.run_rev1_test() 
+
+	CH.run_caketest()
 
 	"""
 	pOutHash = CH.run_pr_test()
@@ -92,4 +94,6 @@ def _main():
 	sys.stderr.write("Done!\n")
 	#sys.stderr.write( str( pOutHash ) ) 
 	"""
+
+
 _main() 

@@ -24,9 +24,11 @@ import os
 import pprint 
 
 ## halla modules 
-from stats import discretize  
+from stats import discretize, p_val_plot
 from distance import mi, adj_mi, l2, mid, adj_mid 
 import hierarchy 
+from test import * 
+
 
 ## statistics packages 
 
@@ -273,6 +275,20 @@ class HAllA():
 
 		return self.outhash 
 
+	def _cakecut( self ):
+		"""
+		Run tests for cake cutting procedure 
+		"""
+
+		rand_sample = rand( (100,1) ).flatten()  
+		rand_mixture = array( uniformly_spaced_gaussian( 8 ) )
+
+		pRaw1, pRaw2 = self.meta_array[0], self.meta_array[1]
+
+		pOut = p_val_plot( pRaw1, pRaw2, iIter = 100 )
+
+		return pOut 
+
 	def _htest_rev1( self ):
 		"""
 		Run htest for revision 1 
@@ -407,5 +423,27 @@ class HAllA():
 	def run_rev1_test( self ):
 		self._discretize()
 		self._htest_rev1()
+
+	def run_caketest( self ):
+		from pylab import * 
+		import numpy 
+
+		print "running caketest ... "
+		print "OUTPUT"
+		pOut = self._cakecut() 
+
+		print "length"
+		print len(pOut)
+
+		for item in pOut:
+			print "average"
+			print numpy.average(item)
+
+
+
+
+
+		#return self._cakecut()
+
 
 
