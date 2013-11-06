@@ -116,6 +116,39 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "mi", decompo
 #=========================================================
 # Cake Cutting 
 #=========================================================
+"""
+Think about the differences between pdf and cdf 
+"""
+
+def uniform_cut( cake_length, iCuts = 10 ):
+	assert( cake_length > iCuts )
+
+	aOut = [] 
+
+	iSize = int( math.floor( float(cake_length)/iCuts ) )
+
+	for iStep in range(1,iSize+1):
+		if iStep!= iSize:
+			aOut.append( range(cake_length)[(iStep-1)*iCuts:iStep*iCuts] )
+		else:
+			aOut.append( range(cake_length)[(iStep-1)*iCuts:] )
+
+	return aOut 
+
+def cumulative_uniform_cut( cake_length, iCuts = 10):
+	assert( cake_length > iCuts )
+
+	aOut = [] 
+
+	iSize = int( math.floor( float(cake_length)/iCuts ) )
+
+	for iStep in range(1,iSize+1):
+		if iStep!= iSize:
+			aOut.append( range(cake_length)[:iStep*iCuts] )
+		else:
+			aOut.append( range(cake_length)[:] )
+
+	return aOut 
 
 def log_cut( cake_length, iBase = 2 ):
 	"""
@@ -126,7 +159,6 @@ def log_cut( cake_length, iBase = 2 ):
 	Note: Probably don't want size-1 cake slices, but for proof-of-concept, this should be okay. 
 	Avoid the "all" case 
 
-	Caveat: returns smaller slices first 
 	"""
 
 	aOut = [] 
@@ -145,16 +177,38 @@ def log_cut( cake_length, iBase = 2 ):
 		aOut.append( array( range(iStart, iStop) ) ) 
 		iStart = iStop 
 
-	aOut.reverse()
+	aOut.reverse() #bigger ones first 
 	return aOut 
+
+def cumulative_log_cut( cake_length, iBase = 2 ):
+	"""
+	Input: cake_length <- length of array, iBase <- base of logarithm 
+
+	Output: array of indices corresponding to the slice 
+
+	Note: Probably don't want size-1 cake slices, but for proof-of-concept, this should be okay. 
+	Avoid the "all" case 
+
+	"""
+
+	aOut = [] 
+
+	iLength = cake_length 
+
+	iSize = int( math.floor( math.log( iLength , iBase ) ) )
+	aSize = [2**i for i in range(iSize+1)] 
+
+	aOut = [ range(cake_length)[:x] for x in aSize]
+	aOut.reverse()
+	return map( array, aOut )
 
 def tables_to_probability( aaTable ):
 	if not aaTable:
 		raise Exception("Empty table.")
 	
 	aOut = [] 
-
-	iN = reduce( lambda x,y: len(x)+y, aaTable, 0 ) #number of elements 
+	iN = sum( [len(x) for x in aaTable] )
+	#iN = reduce( lambda x,y: len(x)+y, aaTable, 0 ) #number of elements 
 
 	for aTable in aaTable:
 		iB = len(aTable)
@@ -165,7 +219,7 @@ def tables_to_probability( aaTable ):
 
 	return aOut 
 
-def CP_cut( cake_length ):
+def CRP_cut( cake_length ):
 	
 	iLength = cake_length 
 
@@ -176,8 +230,9 @@ def CP_cut( cake_length ):
 			aOut = [[i]] 
 			continue 
 		else:
-			pBool = multinomial( tables_to_probability( aOut ) ) 
-			iK = compress( range(pBool), pBool )
+			pBool = multinomial( 1, tables_to_probability( aOut ) ) 
+		
+			iK = [x for x in compress( range(len(pBool)), pBool )][0]
 			if iK+1 > len(aOut): # create new table 
 				aOut.append([i])
 			else:
@@ -185,6 +240,11 @@ def CP_cut( cake_length ):
 
 	return map( array, aOut ) # return as numpy array, so we can vectorize 
 
+def cumulative_CRP_cut( cake_length ):
+	aTmp = sorted( CRP_cut( cake_length ), key=lambda x: -1*len(x) )
+	iLength = len( aTmp )
+
+	return [ np.hstack( aTmp[:i] ) for i in range(1,iLength) ]
 
 def PY_cut( cake_length ):
 	""" 
@@ -200,7 +260,6 @@ def IBP_cut( cake_length ):
 
 	pass 
 	
-
 
 def p_val_plot( pArray1, pArray2, pCut = log_cut, iIter = 100 ):
 	"""
@@ -222,7 +281,7 @@ def p_val_plot( pArray1, pArray2, pCut = log_cut, iIter = 100 ):
 		print D1 
 
 		len1, len2 = len( D1 ), len( D2 )
-		cut1, cut2 = pCut( len1 ), pCut( len2 )
+		cut1, cut2 = sorted(pCut( len1 ), key= lambda x: -1.0* len(x)), sorted( pCut( len2 ), key = lambda x: -1.0 * len(x) )
 		lencut1, lencut2 = len(cut1), len(cut2)
 		iMin = min( lencut1, lencut2 )
 		if not aOut:
@@ -239,10 +298,12 @@ def p_val_plot( pArray1, pArray2, pCut = log_cut, iIter = 100 ):
 			print "pval"
 			print dP 
 
-			aOut[j].append( dP )
-
-	#boxplot( aOut, '', 0)
-	#show() 
+			#be careful when using CRP/PYP, don't know the cluster size in advance 
+			try: 
+				aOut[j].append( dP )
+			except IndexError: 
+				aOut += [[] for _ in range(j-len(aOut)+1)]
+				aOut[j].append( dP )
 
 	return aOut 
 

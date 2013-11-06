@@ -285,7 +285,7 @@ class HAllA():
 
 		pRaw1, pRaw2 = self.meta_array[0], self.meta_array[1]
 
-		pOut = p_val_plot( pRaw1, pRaw2, iIter = 100 )
+		pOut = p_val_plot( pRaw1, pRaw2, pCut = lambda x: stats.log_cut(x), iIter = 100 )
 
 		return pOut 
 
@@ -439,8 +439,10 @@ class HAllA():
 			print "average"
 			print numpy.average(item)
 
+		pOut.reverse()
 
-
+		boxplot( pOut, 0, '', 0)
+		show() 
 
 
 		#return self._cakecut()
