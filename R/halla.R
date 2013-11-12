@@ -11,11 +11,13 @@ require("entropy")
 require("energy")
 require("combinat")
 require("rJava")
+require("ggplot2")
+require("matrixStats")
 
 ## External Dependencies 
 # load MINE 
 
-source("MINE.r")
+#source("MINE.r")
 # It's saved like this: "<specified.prefix>,allpairs,cv=0.0,B=n^0.6,Results.csv"
 
 ### Tibshirani wrapper for MINE (adapted from http://www-stat.stanford.edu/~tibs/reshef/script.R)
@@ -24,9 +26,9 @@ get.MINE <-function(x,y){
   xx=cbind(x,y)
   write("x,y",file="test.csv")
   write(t(xx),sep=",",file="test.csv",ncol=2,append=T)
-  command <- 'java -jar MINE.jar "test.csv" -allPairs'
+  command <- 'java -jar ../java/MINE.jar "test.csv" -allPairs'
   system(command)
-  res=scan("test.csv,B=n^0.6,k=15.0x,Results.csv",what="",sep=",")
+  res=scan("example.csv,allpairs,cv=0.0,B=n^0.6,Results.csv",what="",sep=",")
   val=as.numeric(res[11])
   return(val)
 }
@@ -38,18 +40,21 @@ generate.test <- function(number.instance, suf.stat1=1, suf.stat2=2, noise.ratio
  theta1 <- suf.stat1 
  theta2 <- suf.stat2 
 
- vec.noise <- function(float.noise){ rnorm( N, 0,0.1 )*float.noise}
-
+ vec.noise <- function(float.noise){ rnorm( N, 0,1 )*float.noise}
+ 
+ #x0 <- runif( N, -10,10)
  x0 <- rnorm( N, theta1, theta2 ) #without noise parameter  
+ 
  x1 <- (1+vec.noise(noise.ratio))*x0 #linear transformation with noise 
  x2 <- (1+vec.noise(noise.ratio))*log( 10 + x0 )
  x3 <- (1+vec.noise(noise.ratio))*x0^2    
  x4 <- (1+vec.noise(noise.ratio))*sin(x0)
  x5 <- (1+vec.noise(noise.ratio))*sin(x0^2)
- x6 <- (1+vec.noise(noise.ratio))*tan(x0)
+ x6 <- (1+vec.noise(noise.ratio))*tan(x0) 
+ #x7 <- (2*rbinom(N,1,0.5)-1) * (sqrt(1 - (2*x0 - 1)^2)) + vec.noise(noise.ratio) * rnorm(N) #circle 
  
  
- return(rbind(x0,x1,x2,x3,x4,x5,x6 )) 
+ return(rbind(x0,x1,x2,x3,x4,x5,x6)) 
 }
 
 meta.generate.test <- function(number.copies, number.instance, suf.stat1=0, suf.stat2=1, noise.ratio=0.1){
@@ -106,7 +111,7 @@ grouped.test <- function( matrix.in, group.size=2 ){
  
  matrix.out <- NULL #initialize 
  vec.colnames <- NULL 
- vec.rownames <- c("pearson", "spearman", "kendall", "dcor", "ami")
+ vec.rownames <- c("pearson", "spearman", "kendall", "dcor", "ami", "mine")
  #vec.rownames <- c("pearson", "spearman", "kendall", "dcor")
  tmp <- NULL 
  
@@ -137,9 +142,10 @@ grouped.test <- function( matrix.in, group.size=2 ){
   tmp$kendall <- cor( vec.x, vec.y, method="kendall")
   tmp$dcor <- dcor(vec.x,vec.y)
   tmp$ami <- get.ami( vec.x,vec.y ) 
+  tmp$mine <- get.MINE( vec.x, vec.y)
   
   vec.colnames <- c(vec.colnames, label.pair)
-  matrix.out <- cbind( matrix.out, c(tmp$pearson,tmp$spearman,tmp$kendall,tmp$dcor,tmp$ami))
+  matrix.out <- cbind( matrix.out, c(tmp$pearson,tmp$spearman,tmp$kendall,tmp$dcor,tmp$ami, tmp$mine))
  }
   
   df.out <- data.frame( matrix.out, row.names=vec.rownames )
@@ -155,16 +161,44 @@ grouped.test <- function( matrix.in, group.size=2 ){
 M <- generate.test( 500 )
 df.M <- grouped.test( M )
 
-par(mfrow=c(3,2))
+### Set up 
+#par(mfrow=c(2,1))
+#layout(matrix(c(1,0,0,2),4,1, byrow=TRUE))
+
+### 1. 
 boxplot(t(abs(df.M)))
+
+# Mean and Variance 
+
+vec.mean <- rowMeans( df.M )
+vec.var <- rowVars( df.M )
+
+summary.table <- data.frame( rbind( vec.mean, vec.var ) )
+rownames(summary.table) <- c("mean", "variance")
+
+### 2. 
+
+grid.table(t(summary.table))
+#heatmap(summary.table)
+
+plot.new()
+frame() 
+
+par(mfrow=c(3,2))
+### 3. 
 plot( M[1,], M[2,] )
+### 4. 
 plot( M[1,], M[3,] )
+### 5. 
 plot( M[1,], M[4,] )
+### 6. 
 plot( M[1,], M[5,] )
+### 7. 
 plot( M[1,], M[6,] )
+### 8. 
 #plot( M[1,], M[7,] )
 
-print( rowMeans(abs(df.M)) )
+
 
 
 
