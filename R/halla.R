@@ -10,22 +10,46 @@
 require("entropy")
 require("energy")
 require("combinat")
+require("rJava")
+
+## External Dependencies 
+# load MINE 
+
+source("MINE.r")
+# It's saved like this: "<specified.prefix>,allpairs,cv=0.0,B=n^0.6,Results.csv"
+
+### Tibshirani wrapper for MINE (adapted from http://www-stat.stanford.edu/~tibs/reshef/script.R)
+
+get.MINE <-function(x,y){
+  xx=cbind(x,y)
+  write("x,y",file="test.csv")
+  write(t(xx),sep=",",file="test.csv",ncol=2,append=T)
+  command <- 'java -jar MINE.jar "test.csv" -allPairs'
+  system(command)
+  res=scan("test.csv,B=n^0.6,k=15.0x,Results.csv",what="",sep=",")
+  val=as.numeric(res[11])
+  return(val)
+}
 
 ### Set up test data 
 
-generate.test <- function(number.instance, suf.stat1=0, suf.stat2=1, noise.ratio=0.1){
+generate.test <- function(number.instance, suf.stat1=1, suf.stat2=2, noise.ratio=0.1){
  N <- number.instance 
  theta1 <- suf.stat1 
  theta2 <- suf.stat2 
 
- vec.noise <- function(float.noise){ rnorm( N, 0,1 )*float.noise}
+ vec.noise <- function(float.noise){ rnorm( N, 0,0.1 )*float.noise}
 
  x0 <- rnorm( N, theta1, theta2 ) #without noise parameter  
  x1 <- (1+vec.noise(noise.ratio))*x0 #linear transformation with noise 
- x2 <- (1+vec.noise(noise.ratio))*x0^(1/3)
- x3 <- (1+vec.noise(noise.ratio))*x0^2 
-
- return(rbind(x0,x1,x2,x3)) 
+ x2 <- (1+vec.noise(noise.ratio))*log( 10 + x0 )
+ x3 <- (1+vec.noise(noise.ratio))*x0^2    
+ x4 <- (1+vec.noise(noise.ratio))*sin(x0)
+ x5 <- (1+vec.noise(noise.ratio))*sin(x0^2)
+ x6 <- (1+vec.noise(noise.ratio))*tan(x0)
+ 
+ 
+ return(rbind(x0,x1,x2,x3,x4,x5,x6 )) 
 }
 
 meta.generate.test <- function(number.copies, number.instance, suf.stat1=0, suf.stat2=1, noise.ratio=0.1){
@@ -127,6 +151,20 @@ grouped.test <- function( matrix.in, group.size=2 ){
 }
 
 ### Runtime 
+
+M <- generate.test( 500 )
+df.M <- grouped.test( M )
+
+par(mfrow=c(3,2))
+boxplot(t(abs(df.M)))
+plot( M[1,], M[2,] )
+plot( M[1,], M[3,] )
+plot( M[1,], M[4,] )
+plot( M[1,], M[5,] )
+plot( M[1,], M[6,] )
+#plot( M[1,], M[7,] )
+
+print( rowMeans(abs(df.M)) )
 
 
 
