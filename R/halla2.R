@@ -35,26 +35,22 @@ get.MINE <-function(x,y){
 
 ### Set up test data 
 
-generate.test <- function(number.instance, suf.stat1=1, suf.stat2=2, noise.ratio=0.1){
- N <- number.instance 
- theta1 <- suf.stat1 
- theta2 <- suf.stat2 
-
- vec.noise <- function(float.noise){ rnorm( N, 0,1 )*float.noise}
+generate.test <- function(){
+  
+ table.predictor <- read.table("~/hg/halla/input/predictor.txt", header=FALSE, sep="\t")
+ table.response <- read.table("~/hg/halla/input/response.txt", header=FALSE, sep="\t")
  
- #x0 <- runif( N, -1,1)
- x0 <- rnorm( N, theta1, theta2 ) #without noise parameter  
+ x1 <- as.numeric( table.predictor[1,] ) 
+ x2 <- as.numeric( table.predictor[2,] )
+ x3 <- as.numeric( table.predictor[3,] )
  
- x1 <- (1+vec.noise(noise.ratio))*x0 #linear transformation with noise 
- x2 <- (1+vec.noise(noise.ratio))*log( 10 + x0 )
- x3 <- (1+vec.noise(noise.ratio))*x0^2    
- x4 <- (1+vec.noise(noise.ratio))*sin(x0)
- x5 <- (1+vec.noise(noise.ratio))*sin(x0^2)
- x6 <- (1+vec.noise(noise.ratio))*tan(x0) 
- #x7 <- (2*rbinom(N,1,0.5)-1) * (sqrt(1 - (2*x0 - 1)^2)) + vec.noise(noise.ratio) * rnorm(N) #circle 
+ y1 <- as.numeric( table.response[1,] )
+ y2 <- as.numeric( table.response[2,] )
+ y3 <- as.numeric( table.response[3,] )
  
  
- return(rbind(x0,x1,x2,x3,x4,x5,x6)) 
+ return(rbind(x1,x2,x3,y1,y2,y3)) 
+  
 }
 
 meta.generate.test <- function(number.copies, number.instance, suf.stat1=0, suf.stat2=1, noise.ratio=0.1){
@@ -77,8 +73,12 @@ meta.generate.test <- function(number.copies, number.instance, suf.stat1=0, suf.
 }
 
 get.ami <- function( matrix.x, matrix.y ){
- x <- matrix.x 
- y <- matrix.y 
+ x <- matrix( matrix.x )
+ print("x is")
+ print(x)
+ y <- matrix( matrix.y )
+ print("y is")
+ print(y)
  bin.x <- sqrt( length(x) )
  print("length of bin.x is")
  print(bin.x)
@@ -158,7 +158,7 @@ grouped.test <- function( matrix.in, group.size=2 ){
 
 ### Runtime 
 
-M <- generate.test( 500 )
+M <- generate.test( )
 df.M <- grouped.test( M )
 
 ### Set up 
