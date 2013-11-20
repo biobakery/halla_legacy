@@ -61,4 +61,8 @@ def uniformly_spaced_gaussian( N, K = 4, fD = 2.0, tPi = (0.25,0.25,0.25,0.25) )
 	"""
 	return randmix( N, pDist = normal, atParam = [(m,1.0) for m in [fD*i for i in range(K)]], tPi = tPi )
 
-def 
+
+#================================================================================
+# Pipelines  
+#================================================================================
+

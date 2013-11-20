@@ -127,6 +127,9 @@ class CAdjustedMutualInformation( CDistance ):
 def l2( pData1, pData2 ):
 	return numpy.linalg.norm(pData1 - pData2)
 
+def absl2( pData1, pData2 ):
+	return numpy.abs( l2( pData1, pData2 ) )
+
 def mi( pData1, pData2 ):
 	"""
 	static implementation of mutual information, 

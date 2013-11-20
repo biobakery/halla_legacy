@@ -14,7 +14,7 @@ from itertools import product
 
 ## halla-specific modules 
 
-from halla.distance import mi, l2 
+from halla.distance import mi, l2, absl2, norm_mid
 from halla.stats import discretize,pca, mca, bh, permutation_test_by_representative 
 
 ## statistics packages 
@@ -36,11 +36,24 @@ import pandas as pd
 ### BUGBUG: this hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV's, not just single ones 
 ### Use the "grouping property" as discussed by Kraskov paper. 
 
+"""
+Old hclust
+
 def hclust( pArray, pdist_metric = mi, cluster_metric = l2, bTree = False ):
 	#returns linkage matrix 
 	pdist_data = pdist( pArray, metric= pdist_metric )  
 	linkage_data = linkage( pdist_data, metric=l2 ) 
 	return to_tree( linkage_data ) if bTree else linkage_data 
+
+"""
+
+def hclust( pArray, pdist_metric = norm_mid, cluster_metric = absl2, bTree = False ):
+	#returns linkage matrix 
+	pdist_data = pdist( pArray, metric= pdist_metric )  
+	print pdist_data 
+	linkage_data = linkage( pdist_data, metric=cluster_metric ) 
+	return to_tree( linkage_data ) if bTree else linkage_data 
+
 
 def truncate_tree( apClusterNode, iSkip, iLevel = 0 ):
 	"""
@@ -165,17 +178,18 @@ def recursive_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2,
 
 	atAll = all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2 )
 
-	#print "This is all against all atAll"
-	#print atAll 
+	print "This is all against all atAll"
+	print atAll 
 
 	atIJ, atOAO = zip(*atAll)
 	aaN, aaM, aPVAL = zip(*atOAO)
 
 	aBool = pFDR(aPVAL)
+	print aPVAL
 
 	if not any(aBool):
 		print "END!"
-		return pOut  
+		return pOutNew  
 	else:
 		"CONTINUE!"
 		apC1, apC2, = [],[] 

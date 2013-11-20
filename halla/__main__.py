@@ -75,9 +75,8 @@ def _main():
 	
 	#CH.run_rev1_test() 
 
-	CH.run_caketest()
+	#CH.run_caketest()
 
-	"""
 	pOutHash = CH.run_pr_test()
 
 	csvw = csv.writer( sys.stdout , csv.excel_tab )
@@ -93,7 +92,6 @@ def _main():
 
 	sys.stderr.write("Done!\n")
 	#sys.stderr.write( str( pOutHash ) ) 
-	"""
 
 
 _main() 
