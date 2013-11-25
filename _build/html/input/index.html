@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>HAllA &mdash; HAllA: Hierarchical All-against All 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="HAllA: Hierarchical All-against All 0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HAllA: Hierarchical All-against All 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="toctree-wrapper compound">
+</div>
+<div class="section" id="id1">
+<h1>HAllA<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="http://huttenhower.sph.harvard.edu/halla">HAllA</a> (pronounced &#8220;<a class="reference external" href="http://en.wikipedia.org/wiki/Challah">challah</a>&#8221;) is an
+end-to-end statistical method for Hierarchical All-against-All discovery of
+significant relationships among data features with high power.  <a class="reference external" href="http://huttenhower.sph.harvard.edu/halla">HAllA</a> is robust
+to data type, operating both on continuous and categorical values, and works well
+both on homogeneous datasets (where all measurements are of the same type, e.g.
+gene expression microarrays) and on heterogeneous data (containing measurements
+with different units or types, e.g. patient clinical metadata).  Finally, it is
+also aware of multiple input, multiple output problems, in which data might
+contain of two (or more) distinct subsets sharing an index (e.g. clinical metadata,
+genotypes, microarrays, and microbiomes all drawn from the same subjects).  In
+all of these cases, <a class="reference external" href="http://huttenhower.sph.harvard.edu/halla">HAllA</a> will identify which pairs of features (genes,
+microbes, loci, etc.) share statistically significant co-variation, without
+getting tripped up by high-dimensionality.</p>
+<p>In short, <a class="reference external" href="http://huttenhower.sph.harvard.edu/halla">HAllA</a> is like testing for correlation among all pairs of variables
+in a high-dimensional dataset, but without tripping over multiple hypothesis
+testing, the problem of figuring out what &#8220;correlation&#8221; means for different
+units or scales, or differentiating between predictor/input or response/output
+variables.  It&#8217;s your one-stop shop for statistical signficance!</p>
+<p>If you use this tool, the included scripts, or any related code in your work,
+please let us know, sign up for the <a class="reference external" href="http://groups.google.com/d/forum/halla-users">HAllA users group</a>
+(<a class="reference external" href="mailto:halla-users&#37;&#52;&#48;googlegroups&#46;com">halla-users<span>&#64;</span>googlegroups<span>&#46;</span>com</a>), and pass along any issues or feedback.</p>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="components.html">HAllA Components</a></li>
+</ul>
+</div>
+<span class="target" id="module-halla"></span><div class="section" id="halla-hiearchical-all-against-all">
+<h3>HAllA: Hiearchical All-against All<a class="headerlink" href="#halla-hiearchical-all-against-all" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Description</dt>
+<dd>An object-oriented halla implementation 
+Aim to be as self-contained as possible</dd>
+</dl>
+<p>Global namespace conventions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><cite>m()</cite> &lt;- map for arrays</li>
+<li><cite>r()</cite> &lt;- reduce for arrays</li>
+<li><cite>rd()</cite> &lt;- generic reduce-dimension method</li>
+</ul>
+</div></blockquote>
+<dl class="function">
+<dt id="halla.multinomial">
+<tt class="descclassname">halla.</tt><tt class="descname">multinomial</tt><big>(</big><em>n</em>, <em>pvals</em>, <em>size=None</em><big>)</big><a class="headerlink" href="#halla.multinomial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw samples from a multinomial distribution.</p>
+<p>The multinomial distribution is a multivariate generalisation of the
+binomial distribution.  Take an experiment with one of <tt class="docutils literal"><span class="pre">p</span></tt>
+possible outcomes.  An example of such an experiment is throwing a dice,
+where the outcome can be 1 through 6.  Each sample drawn from the
+distribution represents <cite>n</cite> such experiments.  Its values,
+<tt class="docutils literal"><span class="pre">X_i</span> <span class="pre">=</span> <span class="pre">[X_0,</span> <span class="pre">X_1,</span> <span class="pre">...,</span> <span class="pre">X_p]</span></tt>, represent the number of times the outcome
+was <tt class="docutils literal"><span class="pre">i</span></tt>.</p>
+<dl class="docutils">
+<dt>n <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>Number of experiments.</dd>
+<dt>pvals <span class="classifier-delimiter">:</span> <span class="classifier">sequence of floats, length p</span></dt>
+<dd>Probabilities of each of the <tt class="docutils literal"><span class="pre">p</span></tt> different outcomes.  These
+should sum to 1 (however, the last element is always assumed to
+account for the remaining probability, as long as
+<tt class="docutils literal"><span class="pre">sum(pvals[:-1])</span> <span class="pre">&lt;=</span> <span class="pre">1)</span></tt>.</dd>
+<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
+<dd>Given a <cite>size</cite> of <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K)</span></tt>, then <tt class="docutils literal"><span class="pre">M*N*K</span></tt> samples are drawn,
+and the output shape becomes <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K,</span> <span class="pre">p)</span></tt>, since each sample
+has shape <tt class="docutils literal"><span class="pre">(p,)</span></tt>.</dd>
+</dl>
+<p>Throw a dice 20 times:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mf">6.</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">array([[4, 1, 7, 5, 2, 1]])</span>
+</pre></div>
+</div>
+<p>It landed 4 times on 1, once on 2, etc.</p>
+<p>Now, throw the dice 20 times, and 20 times again:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mf">6.</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">array([[3, 4, 3, 3, 4, 3],</span>
+<span class="go">       [2, 4, 3, 4, 0, 7]])</span>
+</pre></div>
+</div>
+<p>For the first run, we threw 3 times 1, 4 times 2, etc.  For the second,
+we threw 2 times 1, 4 times 2, etc.</p>
+<p>A loaded dice is more likely to land on number 6:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mf">7.</span><span class="p">]</span><span class="o">*</span><span class="mi">5</span><span class="p">)</span>
+<span class="go">array([13, 16, 13, 16, 42])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="halla.normal">
+<tt class="descclassname">halla.</tt><tt class="descname">normal</tt><big>(</big><em>loc=0.0</em>, <em>scale=1.0</em>, <em>size=None</em><big>)</big><a class="headerlink" href="#halla.normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw random samples from a normal (Gaussian) distribution.</p>
+<p>The probability density function of the normal distribution, first
+derived by De Moivre and 200 years later by both Gauss and Laplace
+independently <a class="footnote-reference" href="#id6" id="id2">[2]</a>, is often called the bell curve because of
+its characteristic shape (see the example below).</p>
+<p>The normal distributions occurs often in nature.  For example, it
+describes the commonly occurring distribution of samples influenced
+by a large number of tiny, random disturbances, each with its own
+unique distribution <a class="footnote-reference" href="#id6" id="id3">[2]</a>.</p>
+<dl class="docutils">
+<dt>loc <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>Mean (&#8220;centre&#8221;) of the distribution.</dd>
+<dt>scale <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>Standard deviation (spread or &#8220;width&#8221;) of the distribution.</dd>
+<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
+<dd>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
+<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</dd>
+</dl>
+<dl class="docutils">
+<dt>scipy.stats.distributions.norm <span class="classifier-delimiter">:</span> <span class="classifier">probability density function,</span></dt>
+<dd>distribution or cumulative density function, etc.</dd>
+</dl>
+<p>The probability density for the Gaussian distribution is</p>
+<div class="math">
+\[p(x) = \frac{1}{\sqrt{ 2 \pi \sigma^2 }}
+e^{ - \frac{ (x - \mu)^2 } {2 \sigma^2} },\]</div>
+<p>where <span class="math">\(\mu\)</span> is the mean and <span class="math">\(\sigma\)</span> the standard deviation.
+The square of the standard deviation, <span class="math">\(\sigma^2\)</span>, is called the
+variance.</p>
+<p>The function has its peak at the mean, and its &#8220;spread&#8221; increases with
+the standard deviation (the function reaches 0.607 times its maximum at
+<span class="math">\(x + \sigma\)</span> and <span class="math">\(x - \sigma\)</span> <a class="footnote-reference" href="#id6" id="id4">[2]</a>).  This implies that
+<cite>numpy.random.normal</cite> is more likely to return samples lying close to the
+mean, rather than those far away.</p>
+<table class="docutils footnote" frame="void" id="id5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>Wikipedia, &#8220;Normal distribution&#8221;,
+<a class="reference external" href="http://en.wikipedia.org/wiki/Normal_distribution">http://en.wikipedia.org/wiki/Normal_distribution</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[2]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>, <a class="fn-backref" href="#id4">3</a>)</em> P. R. Peebles Jr., &#8220;Central Limit Theorem&#8221; in &#8220;Probability, Random
+Variables and Random Signal Principles&#8221;, 4th ed., 2001,
+pp. 51, 51, 125.</td></tr>
+</tbody>
+</table>
+<p>Draw samples from the distribution:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span> <span class="c"># mean and standard deviation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Verify the mean and the variance:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">abs</span><span class="p">(</span><span class="n">mu</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">0.01</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">abs</span><span class="p">(</span><span class="n">sigma</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">0.01</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Display the histogram of the samples, along with
+the probability density function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">count</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">ignored</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">normed</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">*</span>
+<span class="gp">... </span>               <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span> <span class="p">(</span><span class="n">bins</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="p">),</span>
+<span class="gp">... </span>         <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="../genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="../py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="../search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">HAllA</a><ul>
+<li><a class="reference internal" href="#contents">Contents</a><ul>
+<li><a class="reference internal" href="#halla-hiearchical-all-against-all">HAllA: Hiearchical All-against All</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/input/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HAllA: Hierarchical All-against All 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yo Sup Moon, Curtis Huttenhower.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

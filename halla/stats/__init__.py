@@ -315,66 +315,66 @@ def p_val_plot( pArray1, pArray2, pCut = log_cut, iIter = 100 ):
 ## BUGBUG: this discretize function is not so kosher, need better way to do density estimate for MI
 
 def discretize( pArray ):
-	def _discretize_continuous( astrValues, iN = None ):
+	def _discretize_continuous( astrValues, iN = None ): 
 		"""
-		>>> CDatum._discretize_continuous( [0] )
+		>>> _discretize_continuous( [0] )
 		[0]
 
-		>>> CDatum._discretize_continuous( [0, 1] )
+		>>> _discretize_continuous( [0, 1] )
 		[0, 0]
 
-		>>> CDatum._discretize_continuous( [0, 1], 2 )
+		>>> _discretize_continuous( [0, 1], 2 )
 		[0, 1]
 
-		>>> CDatum._discretize_continuous( [1, 0], 2 )
+		>>> _discretize_continuous( [1, 0], 2 )
 		[1, 0]
 
-		>>> CDatum._discretize_continuous( [0.2, 0.1, 0.3], 3 )
+		>>> _discretize_continuous( [0.2, 0.1, 0.3], 3 )
 		[1, 0, 2]
 
-		>>> CDatum._discretize_continuous( [0.2, 0.1, 0.3], 1 )
+		>>> _discretize_continuous( [0.2, 0.1, 0.3], 1 )
 		[0, 0, 0]
 
-		>>> CDatum._discretize_continuous( [0.2, 0.1, 0.3], 2 )
+		>>> _discretize_continuous( [0.2, 0.1, 0.3], 2 )
 		[0, 0, 1]
 
-		>>> CDatum._discretize_continuous( [0.4, 0.2, 0.1, 0.3], 2 )
+		>>> _discretize_continuous( [0.4, 0.2, 0.1, 0.3], 2 )
 		[1, 0, 0, 1]
 
 		>>> CDatum._discretize_continuous( [4, 0.2, 0.1, 0.3], 2 )
 		[1, 0, 0, 1]
 
-		>>> CDatum._discretize_continuous( [0.4, 0.2, 0.1, 0.3, 0.5] )
+		>>> _discretize_continuous( [0.4, 0.2, 0.1, 0.3, 0.5] )
 		[1, 0, 0, 0, 1]
 
-		>>> CDatum._discretize_continuous( [0.4, 0.2, 0.1, 0.3, 0.5], 3 )
+		>>> _discretize_continuous( [0.4, 0.2, 0.1, 0.3, 0.5], 3 )
 		[1, 0, 0, 1, 2]
 
-		>>> CDatum._discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5] )
+		>>> _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5] )
 		[1, 0, 1, 0, 0, 1]
 
-		>>> CDatum._discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 3 )
+		>>> _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 3 )
 		[1, 0, 2, 0, 1, 2]
 
-		>>> CDatum._discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 0 )
+		>>> _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 0 )
 		[3, 1, 5, 0, 2, 4]
 
-		>>> CDatum._discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 6 )
+		>>> _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 6 )
 		[3, 1, 5, 0, 2, 4]
 
-		>>> CDatum._discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 60 )
+		>>> _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 60 )
 		[3, 1, 5, 0, 2, 4]
 
-		>>> CDatum._discretize_continuous( [0, 0, 0, 0, 0, 0, 1, 2], 2 )
+		>>> _discretize_continuous( [0, 0, 0, 0, 0, 0, 1, 2], 2 )
 		[0, 0, 0, 0, 0, 0, 1, 1]
 
-		>>> CDatum._discretize_continuous( [0, 0, 0, 0, 1, 2, 2, 2, 2, 3], 3 )
+		>>> _discretize_continuous( [0, 0, 0, 0, 1, 2, 2, 2, 2, 3], 3 )
 		[0, 0, 0, 0, 1, 1, 1, 1, 1, 2]
 
-		>>> CDatum._discretize_continuous( [0.1, 0, 0, 0, 0, 0, 0, 0, 0] )
+		>>> _discretize_continuous( [0.1, 0, 0, 0, 0, 0, 0, 0, 0] )
 		[1, 0, 0, 0, 0, 0, 0, 0, 0]
 		
-		>>> CDatum._discretize_continuous( [0.992299, 1, 1, 0.999696, 0.999605, 0.663081, 0.978293, 0.987621, 0.997237, 0.999915, 0.984792, 0.998338, 0.999207, 0.98051, 0.997984, 0.999219, 0.579824, 0.998983, 0.720498, 1, 0.803619, 0.970992, 1, 0.952881, 0.999866, 0.997153, 0.014053, 0.998049, 0.977727, 0.971233, 0.995309, 0.0010376, 1, 0.989373, 0.989161, 0.91637, 1, 0.99977, 0.960816, 0.998025, 1, 0.998852, 0.960849, 0.957963, 0.998733, 0.999426, 0.876182, 0.998509, 0.988527, 0.998265, 0.943673] )
+		>>> _discretize_continuous( [0.992299, 1, 1, 0.999696, 0.999605, 0.663081, 0.978293, 0.987621, 0.997237, 0.999915, 0.984792, 0.998338, 0.999207, 0.98051, 0.997984, 0.999219, 0.579824, 0.998983, 0.720498, 1, 0.803619, 0.970992, 1, 0.952881, 0.999866, 0.997153, 0.014053, 0.998049, 0.977727, 0.971233, 0.995309, 0.0010376, 1, 0.989373, 0.989161, 0.91637, 1, 0.99977, 0.960816, 0.998025, 1, 0.998852, 0.960849, 0.957963, 0.998733, 0.999426, 0.876182, 0.998509, 0.988527, 0.998265, 0.943673] )
 		[3, 6, 6, 5, 5, 0, 2, 2, 3, 5, 2, 4, 4, 2, 3, 5, 0, 4, 0, 6, 0, 1, 6, 1, 5, 3, 0, 3, 2, 1, 3, 0, 6, 3, 2, 0, 6, 5, 1, 3, 6, 4, 1, 1, 4, 5, 0, 4, 2, 4, 1]
 		"""
 
@@ -397,14 +397,19 @@ def discretize( pArray ):
 				min( iPrev + 1, int(iN * i / float(len( astrValues ))) )
 		
 		return astrRet
-	return array([_discretize_continuous(line) for line in pArray])
+
+	try:
+		iRow1, iCol = pArray.shape 
+		return array([_discretize_continuous(line) for line in pArray])
+	except ValueError:
+		return _discretize_continuous(pArray)
 
 
 #=========================================================
 # FDR correcting procedure  
 #=========================================================
 
-def bh( afPVAL, fQ = 0.9 ):
+def bh( afPVAL, fQ = 1.0 ):
 	"""
 	Implement the benjamini-hochberg hierarchical hypothesis testing criterion 
 	In practice, used for implementing Yekutieli criterion PER layer 

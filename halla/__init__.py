@@ -1,14 +1,17 @@
 #!/usr/bin/env python 
 
 """
-An object-oriented halla prototype 
-Aim to be as self-containied as possible 
+HAllA: Hiearchical All-against All 
+==============================================
+Description
+ An object-oriented halla implementation 
+ Aim to be as self-contained as possible 
 
 Global namespace conventions: 
 
-	m() <- map for arrays 
-	r() <- reduce for arrays 
-	rd() <- generic reduce-dimension method 
+	* `m()` <- map for arrays 
+	* `r()` <- reduce for arrays 
+	* `rd()` <- generic reduce-dimension method 
 	
 """
 
@@ -30,6 +33,7 @@ import hierarchy
 from test import * 
 
 
+
 ## statistics packages 
 
 import numpy as np
@@ -47,7 +51,7 @@ import random
 from numpy.random import normal 
 from scipy.misc import * 
 from scipy.stats import kruskal, ttest_ind, ttest_1samp, percentileofscore, pearsonr
-import pandas as pd 
+
 
 class HAllA():
 	
@@ -85,8 +89,14 @@ class HAllA():
 		self.m_iIter = 100
 	
 	def _issingle( self ):
-		
-		return ( self.meta_array[0] == self.meta_array[1] ).all()
+		bOut = False
+		aTmp = ( self.meta_array[0] == self.meta_array[1] )
+		try:
+			bOut = aTmp.all()
+		except Exception:
+			pass  
+
+		return bOut 
 
 	def set_directory( self, strDir ):
 		self.directory = strDir 
@@ -306,14 +316,18 @@ class HAllA():
 
 		apClusterNode1, apClusterNode2 = hierarchy.truncate_tree( [pClusterNode1Tmp], iSkip ), hierarchy.truncate_tree( [pClusterNode2Tmp], iSkip )
 
+		"""
+		View
+
 		#Z1, Z2 = hierarchy.hclust( pData1 ), hierarchy.hclust( pData2 ) 
 
 		#Plot to see 
 		#sp.cluster.hierarchy.dendrogram( Z1 )
 		#sp.cluster.hierarchy.dendrogram( Z2 )
+		"""
 
 		pBags = hierarchy.recursive_all_against_all( apClusterNode1, apClusterNode2, pRaw1, pRaw2, pOut = [] )
-		#pBags = hierarchy.recursive_all_against_all( [pClusterNode1], [pClusterNode2], pRaw1, pRaw2, pOut = [] )
+		
 
 		print "pBags"
 

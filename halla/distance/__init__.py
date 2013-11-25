@@ -125,7 +125,17 @@ class CAdjustedMutualInformation( CDistance ):
 #==========================================================================#
 
 def l2( pData1, pData2 ):
+	"""
+	>>> x = numpy.array([1,2,3]); y = numpy.array([4,5,6])
+	>>> l2(x,y)
+	5.196152422706632
+	>>> l2(x,y)
+	0.000
+	"""
 	return numpy.linalg.norm(pData1 - pData2)
+
+def absl2( pData1, pData2 ):
+	return numpy.abs( l2( pData1, pData2 ) )
 
 def mi( pData1, pData2 ):
 	"""

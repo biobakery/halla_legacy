@@ -7,6 +7,7 @@ import itertools
 from numpy import array 
 
 import halla 
+from halla.parser import Input, Output 
 import csv 
 import sys 
 import re 
@@ -19,81 +20,89 @@ def _main():
 	elif len(sys.argv[1:]) == 1:
 		strFile1, strFile2 = sys.argv[1], sys.argv[1]
 
-	def _parser( strFile ):
-		aOut = [] 
-		csvr = csv.reader(open( strFile ), csv.excel_tab )
+	
+	aOut1, aOut2 = Input( strFile1, strFile2 )
 
-		astrHeaders = None 
-		astrNames = []
+	aOutData1, aOutName1, aOutType1, aOutHead1 = aOut1 
+	aOutData2, aOutName2, aOutType2, aOutHead2 = aOut2 
 
-		for line in csvr:
-			def _dec( x ):
-				return ( x.strip() if bool(x.strip()) else None )
 
-			if not astrHeaders:
-				astrHeaders = line 
-			
-			else: 
-				strName = line[0]
-				 
-				line = line[1:]
-				line = map( _dec , line )
-				
-				if all(line):
-
-					astrNames.append( strName )
-					try: 
-						line = map(int, line) #is it explicitly categorical?  
-					except ValueError:
-						try:
-							line = map(float, line) #is it continuous? 
-						except ValueError:
-							line = line #we are forced to conclude that it is implicitly categorical, with some lexical ordering 
-					#sys.stderr.write( "\t".join( map(str,line)  ) + "\n" ) 
-					aOut.append(line)
-		
-		Data = array( aOut )
-		Name = array( astrNames )
-		
-		assert( len(Data) == len(Name) )
-		#At this point, all empty data should have been thrown out 
-
-		#Name, Data = Array[:,0][1:], Array[1:][:,1:]
-
-		return Name, Data 
-
-	Name1, Data1 = _parser( strFile1 )
-	Name2, Data2 = _parser( strFile2 )
-
-	#print Data1[0]
-	#print Data2[0]
-
-	CH = halla.HAllA( Data1, Data2 )
+	H = halla.HAllA( Data1, Data2 )
 
 	#c_strOutputPath = "/home/ysupmoon/Dropbox/halla/output/"
-	#CH.set_directory( c_strOutputPath )
-	
-	#CH.run_rev1_test() 
+	#H.set_directory( c_strOutputPath )
 
-	CH.run_caketest()
+	def pr1():
+		
+		pOutHash = H.run_pr_test()
+		csvw = csv.writer( sys.stdout , csv.excel_tab )
+		astrHeaders = ["Var1", "Var2", "MID", "pPerm", "pPearson", "rPearson"]
 
-	"""
-	pOutHash = CH.run_pr_test()
+		#Write the header
+		csvw.writerow( astrHeaders )
 
-	csvw = csv.writer( sys.stdout , csv.excel_tab )
+		for k,v in pOutHash.items():
+			iX, iY = k 
+			csvw.writerow( [Name1[iX], Name2[iY]] + [v[j] for j in astrHeaders[2:]] )
 
-	astrHeaders = ["Var1", "Var2", "MID", "pPerm", "pPearson", "rPearson"]
+		sys.stderr.write("Done!\n")
+		#sys.stderr.write( str( pOutHash ) ) 
 
-	#Write the header
-	csvw.writerow( astrHeaders )
+	def rev1():
+		H.run_rev1_test() 
 
-	for k,v in pOutHash.items():
-		iX, iY = k 
-		csvw.writerow( [Name1[iX], Name2[iY]] + [v[j] for j in astrHeaders[2:]] )
-
-	sys.stderr.write("Done!\n")
-	#sys.stderr.write( str( pOutHash ) ) 
-	"""
+	def cake1():
+		H.run_caketest()
 
 
-_main() 
+"""
+def halla( istm, ostm, dP, dPMI, iBootstrap ):
+
+        pData = dataset.CDataset( datum.CDatum.mutual_information_distance )
+        pData.open( istm )
+        hashClusters = pData.hierarchy( dPMI )
+        _halla_clusters( ostm, hashClusters, pData )
+        _halla_test( ostm, pData, hashClusters, dP, iBootstrap )
+
+argp = argparse.ArgumentParser( prog = "halla.py",
+        description = """Hierarchical All-against-All significance association testing.""" )
+argp.add_argument( "istm",              metavar = "input.txt",
+        type = argparse.FileType( "r" ),        default = sys.stdin,    nargs = "?",
+        help = "Tab-delimited text input file, one row per feature, one column per measurement" )
+argp.add_argument( "-o",                dest = "ostm",                  metavar = "output.txt",
+        type = argparse.FileType( "w" ),        default = sys.stdout,
+        help = "Optional output file for association significance tests" )
+argp.add_argument( "-p",                dest = "dP",                    metavar = "p_value",
+        type = float,   default = 0.05,
+        help = "P-value for overall significance tests" )
+argp.add_argument( "-P",                dest = "dPMI",                  metavar = "p_mi",
+        type = float,   default = 0.05,
+        help = "P-value for permutation equivalence of MI clusters" )
+argp.add_argument( "-b",                dest = "iBootstrap",    metavar = "bootstraps",
+        type = int,             default = 100,
+        help = "Number of bootstraps for significance testing" )
+argp.add_argument( "-v",                dest = "iDebug",                metavar = "verbosity",
+        type = int,             default = 10 - ( logging.WARNING / 10 ),
+        help = "Debug logging level; increase for greater verbosity" )
+"""
+argp.add_argument( "-f",                dest = "fFlag",         action = "store_true",
+        help = "A flag set to true if provided" )
+argp.add_argument( "strString", metavar = "string",
+        help = "A required free text string" )
+"""
+__doc__ = "::\n\n\t" + argp.format_help( ).replace( "\n", "\n\t" ) + __doc__
+
+def _main( ):
+        args = argp.parse_args( )
+
+        lghn = logging.StreamHandler( sys.stderr )
+        lghn.setFormatter( logging.Formatter( '%(asctime)s %(levelname)10s %(module)s.%(funcName)s@%(lineno)d %(message)s' ) )
+        c_logrHAllA.addHandler( lghn )
+        c_logrHAllA.setLevel( ( 10 - args.iDebug ) * 10 )
+
+        halla( args.istm, args.ostm, args.dP, args.dPMI, args.iBootstrap )
+
+if __name__ == "__main__":
+        _main( )
+"""
+

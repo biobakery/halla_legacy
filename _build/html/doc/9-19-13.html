@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>&lt;no title&gt; &mdash; HAllA: Hierarchical All-against All 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="HAllA: Hierarchical All-against All 0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HAllA: Hierarchical All-against All 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <ul class="simple">
+<li>HAllA</li>
+</ul>
+<p>** Current algorithm:
+<strong>* Matrices provided as input
+*</strong> Quality control
+<strong>* Each matrix hierarchically clustered by MI
+*</strong> Minimum similarity threshold chosen for indistinguishable features
+<strong>* Starting at the top of the tree down:
+**</strong> Compare all pairs of clusters at that level by MI
+<a href="#id1"><span class="problematic" id="id2">**</span></a>** Compute significance by:
+<strong>*</strong> Permutation test to determine if value is nonrandom
+<strong>*</strong> Bootstrap (?) to determine if value is (also) unusual in comparison to dataset distribution
+<a href="#id3"><span class="problematic" id="id4">**</span></a>** Stop if ???
+<strong>*</strong> Geometric falloff (equivalent to repeated tests)?
+<strong>*</strong> Adapt Yekutieli criterion to hierarchy of data?
+<strong>*</strong> Test strong negative version of the hypothesis, i.e. no relationships exist below these nodes?
+<a href="#id5"><span class="problematic" id="id6">**</span></a>** Repeat at ~half of the previous tree depth
+** Curtis will put in touch with Giovanni&#8217;s group for consultation
+** Goals for next meeting
+<strong>* Take over repository
+*</strong> Run a demo on a reasonable but small test dataset
+<strong>* Have some measurements for timing on large datasets
+*</strong> Have a &gt;=1 proposal(s) for our stopping criterion with justification</p>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/doc/9-19-13.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HAllA: Hierarchical All-against All 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yo Sup Moon, Curtis Huttenhower.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>
