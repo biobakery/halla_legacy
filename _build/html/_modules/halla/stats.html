@@ -1,0 +1,555 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>halla.stats &mdash; HAllA: Hierarchical All-against All 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="HAllA: Hierarchical All-against All 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="halla" href="../halla.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">HAllA: Hierarchical All-against All 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../halla.html" accesskey="U">halla</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for halla.stats</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python </span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">unified statistics module </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># native python </span>
+
+<span class="kn">import</span> <span class="nn">math</span> 
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">compress</span> 
+
+<span class="c"># External dependencies </span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> 
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span> 
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="kn">as</span> <span class="nn">sp</span> 
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">percentileofscore</span>
+<span class="kn">import</span> <span class="nn">rpy</span> 
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">binomial</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="n">multinomial</span> 
+
+<span class="c"># Internal dependencies </span>
+
+<span class="kn">from</span> <span class="nn">halla.distance</span> <span class="kn">import</span> <span class="n">mi</span><span class="p">,</span> <span class="n">l2</span> 
+
+<span class="c"># doesn&#39;t play nice with other python extensions like numpy</span>
+<span class="c"># remember to cast to native python objects before passing!</span>
+<span class="c"># good for prototyping, not good for optimizing.  </span>
+
+<span class="c">#=========================================================</span>
+<span class="c"># Feature Selection </span>
+<span class="c">#=========================================================</span>
+
+<div class="viewcode-block" id="pca"><a class="viewcode-back" href="../../index.html#halla.stats.pca">[docs]</a><span class="k">def</span> <span class="nf">pca</span><span class="p">(</span> <span class="n">pArray</span><span class="p">,</span> <span class="n">iComponents</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">):</span>
+	 <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	 Input: N x D matrix </span>
+<span class="sd">	 Output: D x N matrix </span>
+<span class="sd">	 &quot;&quot;&quot;</span>
+	 <span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
+	 <span class="n">pPCA</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span> <span class="n">n_components</span> <span class="o">=</span> <span class="n">iComponents</span> <span class="p">)</span>
+	 <span class="c">## doing this matrix inversion twice doesn&#39;t seem to be a good idea </span>
+	 <span class="k">return</span> <span class="n">pPCA</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span> <span class="n">pArray</span><span class="o">.</span><span class="n">T</span> <span class="p">)</span><span class="o">.</span><span class="n">T</span> 
+</div>
+<div class="viewcode-block" id="mca"><a class="viewcode-back" href="../../index.html#halla.stats.mca">[docs]</a><span class="k">def</span> <span class="nf">mca</span><span class="p">(</span> <span class="n">pArray</span><span class="p">,</span> <span class="n">iComponents</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Input: D x N STRING DISCRETIZED matrix #Caution! must pass in strings  </span>
+<span class="sd">	Output: D x N FLOAT matrix </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">aastrData</span> <span class="o">=</span> <span class="p">[</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">pArray</span><span class="o">.</span><span class="n">T</span><span class="p">]</span>
+	<span class="n">astrKeys</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;Dim &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">iComponents</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+	<span class="n">r</span> <span class="o">=</span> <span class="n">rpy</span><span class="o">.</span><span class="n">r</span> 
+	<span class="n">r</span><span class="o">.</span><span class="n">library</span><span class="p">(</span> <span class="s">&quot;FactoMineR&quot;</span> <span class="p">)</span>
+	<span class="n">residues</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">MCA</span><span class="p">(</span> <span class="n">aastrData</span> <span class="p">)</span> 
+	<span class="k">return</span> <span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="n">residues</span><span class="p">[</span><span class="s">&quot;var&quot;</span><span class="p">][</span><span class="s">&quot;eta2&quot;</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">astrKeys</span><span class="p">]</span> <span class="p">)</span>	
+
+</div>
+<div class="viewcode-block" id="get_medoid"><a class="viewcode-back" href="../../index.html#halla.stats.get_medoid">[docs]</a><span class="k">def</span> <span class="nf">get_medoid</span><span class="p">(</span> <span class="n">pArray</span><span class="p">,</span> <span class="n">iAxis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pMetric</span> <span class="o">=</span> <span class="n">l2</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Input: numpy array </span>
+<span class="sd">	Output: float</span>
+<span class="sd">	</span>
+<span class="sd">	For lack of better way, compute centroid, then compute medoid </span>
+<span class="sd">	by looking at an element that is closest to the centroid. </span>
+
+<span class="sd">	Can define arbitrary metric passed in as a function to pMetric </span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">d</span> <span class="o">=</span> <span class="n">pMetric</span> 
+
+	<span class="n">pArray</span> <span class="o">=</span> <span class="p">(</span> <span class="n">pArray</span><span class="o">.</span><span class="n">T</span> <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">iAxis</span><span class="p">)</span> <span class="k">else</span> <span class="n">pArray</span>  <span class="p">)</span> 
+
+	<span class="n">mean_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pArray</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> 
+	
+	<span class="n">pArrayCenter</span> <span class="o">=</span> <span class="n">pArray</span> <span class="o">-</span> <span class="p">(</span> <span class="n">mean_vec</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">pArray</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="p">)</span>
+
+	<span class="k">return</span> <span class="n">pArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span> <span class="nb">map</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">pArrayCenter</span><span class="p">)</span> <span class="p">)[</span><span class="mi">0</span><span class="p">],:]</span>
+
+</div>
+<span class="k">def</span> <span class="nf">get_representative</span><span class="p">(</span> <span class="n">pArray</span><span class="p">,</span> <span class="n">pMethod</span> <span class="o">=</span> <span class="bp">None</span> <span class="p">):</span>
+	<span class="n">hash_method</span> <span class="o">=</span> <span class="p">{</span><span class="bp">None</span><span class="p">:</span> <span class="n">get_medoid</span><span class="p">,</span> <span class="s">&quot;pca&quot;</span><span class="p">:</span> <span class="n">pca</span><span class="p">,</span> <span class="s">&quot;mca&quot;</span><span class="p">:</span> <span class="n">mca</span><span class="p">}</span>
+	<span class="k">return</span> <span class="n">hash_method</span><span class="p">[</span><span class="n">pMethod</span><span class="p">](</span> <span class="n">pArray</span> <span class="p">)</span>
+
+<span class="c">#=========================================================</span>
+<span class="c"># Statistical test </span>
+<span class="c">#=========================================================</span>
+
+<div class="viewcode-block" id="permutation_test_by_representative"><a class="viewcode-back" href="../../index.html#halla.stats.permutation_test_by_representative">[docs]</a><span class="k">def</span> <span class="nf">permutation_test_by_representative</span><span class="p">(</span> <span class="n">pArray1</span><span class="p">,</span> <span class="n">pArray2</span><span class="p">,</span> <span class="n">metric</span> <span class="o">=</span> <span class="s">&quot;mi&quot;</span><span class="p">,</span> <span class="n">decomposition</span> <span class="o">=</span> <span class="s">&quot;pca&quot;</span><span class="p">,</span> <span class="n">iIter</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Input: </span>
+<span class="sd">	pArray1, pArray2, metric = &quot;mi&quot;, decomposition = &quot;pca&quot;, iIter = 100</span>
+
+<span class="sd">	metric = {&quot;mca&quot;: mca, &quot;pca&quot;: pca} </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">pHashDecomposition</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;mca&quot;</span><span class="p">:</span> <span class="n">mca</span><span class="p">,</span> <span class="s">&quot;pca&quot;</span><span class="p">:</span> <span class="n">pca</span><span class="p">}</span>
+	<span class="n">pHashMetric</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;mi&quot;</span><span class="p">:</span> <span class="n">mi</span><span class="p">}</span>
+
+	<span class="k">def</span> <span class="nf">_permutation</span><span class="p">(</span> <span class="n">pVec</span> <span class="p">):</span>
+		<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span> <span class="n">pVec</span> <span class="p">)</span>
+
+	<span class="n">pDe</span> <span class="o">=</span> <span class="n">pHashDecomposition</span><span class="p">[</span><span class="n">decomposition</span><span class="p">]</span>
+	<span class="n">pMe</span> <span class="o">=</span> <span class="n">pHashMetric</span><span class="p">[</span><span class="s">&quot;mi&quot;</span><span class="p">]</span> 
+
+	<span class="n">pRep1</span><span class="p">,</span> <span class="n">pRep2</span> <span class="o">=</span> <span class="p">[</span> <span class="n">discretize</span><span class="p">(</span> <span class="n">pDe</span><span class="p">(</span> <span class="n">pA</span> <span class="p">)</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">pA</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pArray1</span><span class="p">,</span><span class="n">pArray2</span><span class="p">]</span> <span class="p">]</span>
+
+	<span class="n">dMI</span> <span class="o">=</span> <span class="n">pMe</span><span class="p">(</span> <span class="n">pRep1</span><span class="p">,</span> <span class="n">pRep2</span> <span class="p">)</span> 
+
+	<span class="c"># WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. </span>
+	<span class="n">pArrayPerm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span> <span class="n">pMe</span><span class="p">(</span> <span class="n">_permutation</span><span class="p">(</span> <span class="n">pRep1</span> <span class="p">),</span> <span class="n">pRep2</span> <span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span> <span class="n">iIter</span> <span class="p">)</span> <span class="p">]</span> <span class="p">)</span>
+
+	<span class="c">#print pArrayPerm </span>
+
+	<span class="n">dPPerm</span> <span class="o">=</span> <span class="n">percentileofscore</span><span class="p">(</span> <span class="n">pArrayPerm</span><span class="p">,</span> <span class="n">dMI</span> <span class="p">)</span> <span class="o">/</span> <span class="mi">100</span> 	
+
+	<span class="k">return</span> <span class="n">dPPerm</span>
+
+
+<span class="c">#=========================================================</span>
+<span class="c"># Cake Cutting </span>
+<span class="c">#=========================================================</span></div>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Think about the differences between pdf and cdf </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">def</span> <span class="nf">uniform_cut</span><span class="p">(</span> <span class="n">cake_length</span><span class="p">,</span> <span class="n">iCuts</span> <span class="o">=</span> <span class="mi">10</span> <span class="p">):</span>
+	<span class="k">assert</span><span class="p">(</span> <span class="n">cake_length</span> <span class="o">&gt;</span> <span class="n">iCuts</span> <span class="p">)</span>
+
+	<span class="n">aOut</span> <span class="o">=</span> <span class="p">[]</span> 
+
+	<span class="n">iSize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span> <span class="nb">float</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)</span><span class="o">/</span><span class="n">iCuts</span> <span class="p">)</span> <span class="p">)</span>
+
+	<span class="k">for</span> <span class="n">iStep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">iSize</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">iStep</span><span class="o">!=</span> <span class="n">iSize</span><span class="p">:</span>
+			<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)[(</span><span class="n">iStep</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">iCuts</span><span class="p">:</span><span class="n">iStep</span><span class="o">*</span><span class="n">iCuts</span><span class="p">]</span> <span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)[(</span><span class="n">iStep</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">iCuts</span><span class="p">:]</span> <span class="p">)</span>
+
+	<span class="k">return</span> <span class="n">aOut</span> 
+
+<span class="k">def</span> <span class="nf">cumulative_uniform_cut</span><span class="p">(</span> <span class="n">cake_length</span><span class="p">,</span> <span class="n">iCuts</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
+	<span class="k">assert</span><span class="p">(</span> <span class="n">cake_length</span> <span class="o">&gt;</span> <span class="n">iCuts</span> <span class="p">)</span>
+
+	<span class="n">aOut</span> <span class="o">=</span> <span class="p">[]</span> 
+
+	<span class="n">iSize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span> <span class="nb">float</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)</span><span class="o">/</span><span class="n">iCuts</span> <span class="p">)</span> <span class="p">)</span>
+
+	<span class="k">for</span> <span class="n">iStep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">iSize</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">iStep</span><span class="o">!=</span> <span class="n">iSize</span><span class="p">:</span>
+			<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)[:</span><span class="n">iStep</span><span class="o">*</span><span class="n">iCuts</span><span class="p">]</span> <span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)[:]</span> <span class="p">)</span>
+
+	<span class="k">return</span> <span class="n">aOut</span> 
+
+<div class="viewcode-block" id="log_cut"><a class="viewcode-back" href="../../index.html#halla.stats.log_cut">[docs]</a><span class="k">def</span> <span class="nf">log_cut</span><span class="p">(</span> <span class="n">cake_length</span><span class="p">,</span> <span class="n">iBase</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Input: cake_length &lt;- length of array, iBase &lt;- base of logarithm </span>
+
+<span class="sd">	Output: array of indices corresponding to the slice </span>
+
+<span class="sd">	Note: Probably don&#39;t want size-1 cake slices, but for proof-of-concept, this should be okay. </span>
+<span class="sd">	Avoid the &quot;all&quot; case </span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">aOut</span> <span class="o">=</span> <span class="p">[]</span> 
+
+	<span class="n">iLength</span> <span class="o">=</span> <span class="n">cake_length</span> 
+
+	<span class="n">iSize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span> <span class="n">iLength</span> <span class="p">,</span> <span class="n">iBase</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+	<span class="n">aSize</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="o">**</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iSize</span><span class="p">)]</span> 
+
+	<span class="n">iStart</span> <span class="o">=</span> <span class="mi">0</span> 
+	<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">aSize</span><span class="p">:</span>
+		<span class="n">iStop</span> <span class="o">=</span>  <span class="n">iStart</span> <span class="o">+</span> <span class="n">item</span> 
+		<span class="k">if</span> <span class="n">iStop</span> <span class="o">==</span> <span class="n">iLength</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="n">iStop</span> <span class="o">+=</span> <span class="mi">1</span> 
+			<span class="c"># ensure that the rest of the cake gets included in the tail case  </span>
+		<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">array</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="n">iStart</span><span class="p">,</span> <span class="n">iStop</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span> 
+		<span class="n">iStart</span> <span class="o">=</span> <span class="n">iStop</span> 
+
+	<span class="n">aOut</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span> <span class="c">#bigger ones first </span>
+	<span class="k">return</span> <span class="n">aOut</span> 
+</div>
+<div class="viewcode-block" id="cumulative_log_cut"><a class="viewcode-back" href="../../index.html#halla.stats.cumulative_log_cut">[docs]</a><span class="k">def</span> <span class="nf">cumulative_log_cut</span><span class="p">(</span> <span class="n">cake_length</span><span class="p">,</span> <span class="n">iBase</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Input: cake_length &lt;- length of array, iBase &lt;- base of logarithm </span>
+
+<span class="sd">	Output: array of indices corresponding to the slice </span>
+
+<span class="sd">	Note: Probably don&#39;t want size-1 cake slices, but for proof-of-concept, this should be okay. </span>
+<span class="sd">	Avoid the &quot;all&quot; case </span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">aOut</span> <span class="o">=</span> <span class="p">[]</span> 
+
+	<span class="n">iLength</span> <span class="o">=</span> <span class="n">cake_length</span> 
+
+	<span class="n">iSize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span> <span class="n">iLength</span> <span class="p">,</span> <span class="n">iBase</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+	<span class="n">aSize</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="o">**</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iSize</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span> 
+
+	<span class="n">aOut</span> <span class="o">=</span> <span class="p">[</span> <span class="nb">range</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)[:</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">aSize</span><span class="p">]</span>
+	<span class="n">aOut</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+	<span class="k">return</span> <span class="nb">map</span><span class="p">(</span> <span class="n">array</span><span class="p">,</span> <span class="n">aOut</span> <span class="p">)</span>
+</div>
+<span class="k">def</span> <span class="nf">tables_to_probability</span><span class="p">(</span> <span class="n">aaTable</span> <span class="p">):</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">aaTable</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Empty table.&quot;</span><span class="p">)</span>
+	
+	<span class="n">aOut</span> <span class="o">=</span> <span class="p">[]</span> 
+	<span class="n">iN</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">aaTable</span><span class="p">]</span> <span class="p">)</span>
+	<span class="c">#iN = reduce( lambda x,y: len(x)+y, aaTable, 0 ) #number of elements </span>
+
+	<span class="k">for</span> <span class="n">aTable</span> <span class="ow">in</span> <span class="n">aaTable</span><span class="p">:</span>
+		<span class="n">iB</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">aTable</span><span class="p">)</span>
+		<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">iB</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">iN</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+
+	<span class="c">#probability of creating new table </span>
+	<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">iN</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+
+	<span class="k">return</span> <span class="n">aOut</span> 
+
+<span class="k">def</span> <span class="nf">CRP_cut</span><span class="p">(</span> <span class="n">cake_length</span> <span class="p">):</span>
+	
+	<span class="n">iLength</span> <span class="o">=</span> <span class="n">cake_length</span> 
+
+	<span class="n">aOut</span> <span class="o">=</span> <span class="bp">None</span> 
+
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iLength</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">aOut</span><span class="p">:</span>
+			<span class="n">aOut</span> <span class="o">=</span> <span class="p">[[</span><span class="n">i</span><span class="p">]]</span> 
+			<span class="k">continue</span> 
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">pBool</span> <span class="o">=</span> <span class="n">multinomial</span><span class="p">(</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tables_to_probability</span><span class="p">(</span> <span class="n">aOut</span> <span class="p">)</span> <span class="p">)</span> 
+		
+			<span class="n">iK</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">compress</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pBool</span><span class="p">)),</span> <span class="n">pBool</span> <span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
+			<span class="k">if</span> <span class="n">iK</span><span class="o">+</span><span class="mi">1</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">aOut</span><span class="p">):</span> <span class="c"># create new table </span>
+				<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">])</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">aOut</span><span class="p">[</span><span class="n">iK</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="c"># seat the customer on an existing table </span>
+
+	<span class="k">return</span> <span class="nb">map</span><span class="p">(</span> <span class="n">array</span><span class="p">,</span> <span class="n">aOut</span> <span class="p">)</span> <span class="c"># return as numpy array, so we can vectorize </span>
+
+<span class="k">def</span> <span class="nf">cumulative_CRP_cut</span><span class="p">(</span> <span class="n">cake_length</span> <span class="p">):</span>
+	<span class="n">aTmp</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span> <span class="n">CRP_cut</span><span class="p">(</span> <span class="n">cake_length</span> <span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">)</span>
+	<span class="n">iLength</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span> <span class="n">aTmp</span> <span class="p">)</span>
+
+	<span class="k">return</span> <span class="p">[</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span> <span class="n">aTmp</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">iLength</span><span class="p">)</span> <span class="p">]</span>
+
+<div class="viewcode-block" id="PY_cut"><a class="viewcode-back" href="../../index.html#halla.stats.PY_cut">[docs]</a><span class="k">def</span> <span class="nf">PY_cut</span><span class="p">(</span> <span class="n">cake_length</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">	random cut generated by pitman-yor process prior</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="IBP_cut"><a class="viewcode-back" href="../../index.html#halla.stats.IBP_cut">[docs]</a><span class="k">def</span> <span class="nf">IBP_cut</span><span class="p">(</span> <span class="n">cake_length</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	random cut generated by Indian Buffet Process prior</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">pass</span> 
+	
+</div>
+<div class="viewcode-block" id="p_val_plot"><a class="viewcode-back" href="../../index.html#halla.stats.p_val_plot">[docs]</a><span class="k">def</span> <span class="nf">p_val_plot</span><span class="p">(</span> <span class="n">pArray1</span><span class="p">,</span> <span class="n">pArray2</span><span class="p">,</span> <span class="n">pCut</span> <span class="o">=</span> <span class="n">log_cut</span><span class="p">,</span> <span class="n">iIter</span> <span class="o">=</span> <span class="mi">100</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Returns p value plot of combinatorial cuts </span>
+
+<span class="sd">	In practice, works best when arrays are of similar size, since I implement the minimum ... </span>
+<span class="sd">	For future think about implementing the correct step function </span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">aOut</span> <span class="o">=</span> <span class="bp">None</span> 
+	<span class="n">D1</span><span class="p">,</span> <span class="n">D2</span> <span class="o">=</span> <span class="n">pArray1</span><span class="p">[:],</span> <span class="n">pArray2</span><span class="p">[:]</span>
+
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iIter</span><span class="p">):</span>
+		<span class="n">shuffle</span><span class="p">(</span><span class="n">D1</span><span class="p">)</span>
+		<span class="n">shuffle</span><span class="p">(</span><span class="n">D2</span><span class="p">)</span>
+
+		<span class="k">print</span> <span class="s">&quot;shuffled data&quot;</span>
+		<span class="k">print</span> <span class="n">D1</span> 
+
+		<span class="n">len1</span><span class="p">,</span> <span class="n">len2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span> <span class="n">D1</span> <span class="p">),</span> <span class="nb">len</span><span class="p">(</span> <span class="n">D2</span> <span class="p">)</span>
+		<span class="n">cut1</span><span class="p">,</span> <span class="n">cut2</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">pCut</span><span class="p">(</span> <span class="n">len1</span> <span class="p">),</span> <span class="n">key</span><span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="nb">sorted</span><span class="p">(</span> <span class="n">pCut</span><span class="p">(</span> <span class="n">len2</span> <span class="p">),</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">)</span>
+		<span class="n">lencut1</span><span class="p">,</span> <span class="n">lencut2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut2</span><span class="p">)</span>
+		<span class="n">iMin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span> <span class="n">lencut1</span><span class="p">,</span> <span class="n">lencut2</span> <span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">aOut</span><span class="p">:</span>
+			<span class="n">aOut</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iMin</span><span class="p">)]</span> 
+
+		<span class="k">print</span> <span class="s">&quot;cut1&quot;</span>
+		<span class="k">print</span> <span class="n">cut1</span>
+		<span class="k">print</span> <span class="s">&quot;cut2&quot;</span>
+		<span class="k">print</span> <span class="n">cut2</span>
+
+		<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iMin</span><span class="p">):</span>
+			<span class="n">dP</span> <span class="o">=</span> <span class="n">permutation_test_by_representative</span><span class="p">(</span> <span class="n">pArray1</span><span class="p">[</span><span class="n">cut1</span><span class="p">[</span><span class="n">j</span><span class="p">]],</span> <span class="n">pArray2</span><span class="p">[</span><span class="n">cut2</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span> <span class="p">)</span>
+
+			<span class="k">print</span> <span class="s">&quot;pval&quot;</span>
+			<span class="k">print</span> <span class="n">dP</span> 
+
+			<span class="c">#be careful when using CRP/PYP, don&#39;t know the cluster size in advance </span>
+			<span class="k">try</span><span class="p">:</span> 
+				<span class="n">aOut</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">dP</span> <span class="p">)</span>
+			<span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span> 
+				<span class="n">aOut</span> <span class="o">+=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">aOut</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+				<span class="n">aOut</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">dP</span> <span class="p">)</span>
+
+	<span class="k">return</span> <span class="n">aOut</span> 
+
+
+<span class="c">#=========================================================</span>
+<span class="c"># Density estimation </span>
+<span class="c">#=========================================================</span>
+
+<span class="c">## BUGBUG: this discretize function is not so kosher, need better way to do density estimate for MI</span>
+</div>
+<span class="k">def</span> <span class="nf">discretize</span><span class="p">(</span> <span class="n">pArray</span> <span class="p">):</span>
+	<span class="k">def</span> <span class="nf">_discretize_continuous</span><span class="p">(</span> <span class="n">astrValues</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span> <span class="p">):</span> 
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0] )</span>
+<span class="sd">		[0]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0, 1] )</span>
+<span class="sd">		[0, 0]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0, 1], 2 )</span>
+<span class="sd">		[0, 1]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [1, 0], 2 )</span>
+<span class="sd">		[1, 0]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.2, 0.1, 0.3], 3 )</span>
+<span class="sd">		[1, 0, 2]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.2, 0.1, 0.3], 1 )</span>
+<span class="sd">		[0, 0, 0]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.2, 0.1, 0.3], 2 )</span>
+<span class="sd">		[0, 0, 1]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.1, 0.3], 2 )</span>
+<span class="sd">		[1, 0, 0, 1]</span>
+
+<span class="sd">		&gt;&gt;&gt; CDatum._discretize_continuous( [4, 0.2, 0.1, 0.3], 2 )</span>
+<span class="sd">		[1, 0, 0, 1]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.1, 0.3, 0.5] )</span>
+<span class="sd">		[1, 0, 0, 0, 1]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.1, 0.3, 0.5], 3 )</span>
+<span class="sd">		[1, 0, 0, 1, 2]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5] )</span>
+<span class="sd">		[1, 0, 1, 0, 0, 1]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 3 )</span>
+<span class="sd">		[1, 0, 2, 0, 1, 2]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 0 )</span>
+<span class="sd">		[3, 1, 5, 0, 2, 4]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 6 )</span>
+<span class="sd">		[3, 1, 5, 0, 2, 4]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 60 )</span>
+<span class="sd">		[3, 1, 5, 0, 2, 4]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0, 0, 0, 0, 0, 0, 1, 2], 2 )</span>
+<span class="sd">		[0, 0, 0, 0, 0, 0, 1, 1]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0, 0, 0, 0, 1, 2, 2, 2, 2, 3], 3 )</span>
+<span class="sd">		[0, 0, 0, 0, 1, 1, 1, 1, 1, 2]</span>
+
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.1, 0, 0, 0, 0, 0, 0, 0, 0] )</span>
+<span class="sd">		[1, 0, 0, 0, 0, 0, 0, 0, 0]</span>
+<span class="sd">		</span>
+<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.992299, 1, 1, 0.999696, 0.999605, 0.663081, 0.978293, 0.987621, 0.997237, 0.999915, 0.984792, 0.998338, 0.999207, 0.98051, 0.997984, 0.999219, 0.579824, 0.998983, 0.720498, 1, 0.803619, 0.970992, 1, 0.952881, 0.999866, 0.997153, 0.014053, 0.998049, 0.977727, 0.971233, 0.995309, 0.0010376, 1, 0.989373, 0.989161, 0.91637, 1, 0.99977, 0.960816, 0.998025, 1, 0.998852, 0.960849, 0.957963, 0.998733, 0.999426, 0.876182, 0.998509, 0.988527, 0.998265, 0.943673] )</span>
+<span class="sd">		[3, 6, 6, 5, 5, 0, 2, 2, 3, 5, 2, 4, 4, 2, 3, 5, 0, 4, 0, 6, 0, 1, 6, 1, 5, 3, 0, 3, 2, 1, 3, 0, 6, 3, 2, 0, 6, 5, 1, 3, 6, 4, 1, 1, 4, 5, 0, 4, 2, 4, 1]</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="k">if</span> <span class="n">iN</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+			<span class="c"># Default to rounded sqrt(n) if no bin count requested</span>
+			<span class="n">iN</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span> <span class="n">astrValues</span> <span class="p">)</span><span class="o">**</span><span class="mf">0.5</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">iN</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">iN</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span> <span class="n">astrValues</span> <span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">iN</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span> <span class="n">iN</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span> <span class="nb">set</span><span class="p">(</span><span class="n">astrValues</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+			
+		<span class="c"># This is still a bit buggy since ( [0, 0, 0, 1, 2, 2, 2, 2], 3 ) will exhibit suboptimal behavior</span>
+		<span class="n">aiIndices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span> <span class="n">astrValues</span> <span class="p">)</span> <span class="p">),</span> <span class="nb">cmp</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">cmp</span><span class="p">(</span> <span class="n">astrValues</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">astrValues</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="p">)</span> <span class="p">)</span>
+		<span class="n">astrRet</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span> <span class="n">astrValues</span> <span class="p">)</span>
+		<span class="n">iPrev</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">iIndex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span> <span class="n">aiIndices</span> <span class="p">):</span>
+			<span class="c"># If you&#39;re on a tie, you can&#39;t increase the bin number</span>
+			<span class="c"># Otherwise, increase by at most one</span>
+			<span class="n">iPrev</span> <span class="o">=</span> <span class="n">astrRet</span><span class="p">[</span><span class="n">iIndex</span><span class="p">]</span> <span class="o">=</span> <span class="n">iPrev</span> <span class="k">if</span> <span class="p">(</span> <span class="n">i</span> <span class="ow">and</span> <span class="p">(</span> <span class="n">astrValues</span><span class="p">[</span><span class="n">iIndex</span><span class="p">]</span> <span class="o">==</span> <span class="n">astrValues</span><span class="p">[</span><span class="n">aiIndices</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]]</span> <span class="p">)</span> <span class="p">)</span> <span class="k">else</span> \
+				<span class="nb">min</span><span class="p">(</span> <span class="n">iPrev</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">iN</span> <span class="o">*</span> <span class="n">i</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span> <span class="n">astrValues</span> <span class="p">)))</span> <span class="p">)</span>
+		
+		<span class="k">return</span> <span class="n">astrRet</span>
+
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">iRow1</span><span class="p">,</span> <span class="n">iCol</span> <span class="o">=</span> <span class="n">pArray</span><span class="o">.</span><span class="n">shape</span> 
+		<span class="k">return</span> <span class="n">array</span><span class="p">([</span><span class="n">_discretize_continuous</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">pArray</span><span class="p">])</span>
+	<span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">_discretize_continuous</span><span class="p">(</span><span class="n">pArray</span><span class="p">)</span>
+
+
+<span class="c">#=========================================================</span>
+<span class="c"># FDR correcting procedure  </span>
+<span class="c">#=========================================================</span>
+
+<div class="viewcode-block" id="bh"><a class="viewcode-back" href="../../index.html#halla.stats.bh">[docs]</a><span class="k">def</span> <span class="nf">bh</span><span class="p">(</span> <span class="n">afPVAL</span><span class="p">,</span> <span class="n">fQ</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Implement the benjamini-hochberg hierarchical hypothesis testing criterion </span>
+<span class="sd">	In practice, used for implementing Yekutieli criterion PER layer </span>
+
+<span class="sd">	latex: $q$ BH procedure on $\mathcal{T}_t$:</span>
+
+<span class="sd">	\begin{enumerate}</span>
+<span class="sd">		\item $P_{(1)}^{t} \leq \cdots \leq P_{(m_t)^{t} $</span>
+<span class="sd">		\item $r+t := \max\{i: P_{(i)}^{t} \leq i \cdot q / m_t \}</span>
+<span class="sd">		\item If $r_t &gt;0,$ reject $r_t$ hypotheses corresponding to $P_{(1)}^t, \ldots, P_{(r_t)}^t$</span>
+<span class="sd">	\end{enumerate}</span>
+
+<span class="sd">	Then FDR is approximately </span>
+
+<span class="sd">	\begin{equation}</span>
+<span class="sd">		FDR = q \cdot \delta^{*} \cdot(observed no. of idscoveries + observed no. of families tested)/(observed no. of discoveries+1)</span>
+<span class="sd">	\end{equation}</span>
+
+<span class="sd">	Universal bound: the full tree FDR is $&lt; q \cdot \delta^{*} \cdot 2$ </span>
+
+<span class="sd">	INPUT </span>
+
+<span class="sd">	afPVAL: list of p-values </span>
+
+<span class="sd">	OUTPUT </span>
+
+<span class="sd">	abOUT: boolean vector corresponding to which hypothesis test rejected, corresponding to p-value </span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">afPVAL_args</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span> <span class="n">afPVAL</span> <span class="p">)</span> <span class="c"># permutation \pi</span>
+	<span class="n">afPVAL_reverse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span> <span class="n">afPVAL_args</span> <span class="p">)</span> <span class="c"># unique inverse permutation \pi \; \pi \circ \pi^{-1} = 1</span>
+	<span class="n">afPVAL_sorted</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span> <span class="n">afPVAL</span> <span class="p">)[</span><span class="n">afPVAL_args</span><span class="p">]</span>
+
+	<span class="k">def</span> <span class="nf">_find_max</span><span class="p">(</span> <span class="n">afPVAL_sorted</span><span class="p">,</span> <span class="n">fQ</span> <span class="p">):</span>
+		<span class="n">dummyMax</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> 
+		<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pval</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">afPVAL_sorted</span><span class="p">):</span>
+			<span class="n">fVal</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">fQ</span> <span class="o">*</span> <span class="mf">1.0</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">afPVAL_sorted</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">pval</span> <span class="o">&lt;=</span> <span class="n">fVal</span><span class="p">:</span>
+				<span class="n">dummyMax</span> <span class="o">=</span> <span class="n">i</span>
+		<span class="k">return</span> <span class="n">dummyMax</span>
+
+	<span class="n">rt</span> <span class="o">=</span> <span class="n">_find_max</span><span class="p">(</span> <span class="n">afPVAL_sorted</span> <span class="p">,</span> <span class="n">fQ</span> <span class="p">)</span>
+
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">afPVAL</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+		<span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">afPVAL</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">fQ</span> <span class="k">else</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">rt</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">afPVAL</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">rt</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span> <span class="p">)[</span> <span class="n">afPVAL_reverse</span> <span class="p">]</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">HAllA: Hierarchical All-against All 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../halla.html" >halla</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yo Sup Moon, Curtis Huttenhower.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

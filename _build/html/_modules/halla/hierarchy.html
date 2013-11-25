@@ -1,0 +1,464 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>halla.hierarchy &mdash; HAllA: Hierarchical All-against All 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="HAllA: Hierarchical All-against All 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="halla" href="../halla.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">HAllA: Hierarchical All-against All 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../halla.html" accesskey="U">halla</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for halla.hierarchy</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python </span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Hiearchy module, used to build trees and other data structures.</span>
+<span class="sd">Handles clustering and other organization schemes. </span>
+<span class="sd">&#39;&#39;&#39;</span>
+ 
+<span class="c">## structural packages </span>
+
+<span class="kn">import</span> <span class="nn">sys</span> 
+<span class="kn">import</span> <span class="nn">re</span> 
+<span class="kn">import</span> <span class="nn">math</span> 
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span> 
+
+<span class="c">## halla-specific modules </span>
+
+<span class="kn">from</span> <span class="nn">halla.distance</span> <span class="kn">import</span> <span class="n">mi</span><span class="p">,</span> <span class="n">l2</span><span class="p">,</span> <span class="n">absl2</span><span class="p">,</span> <span class="n">norm_mid</span>
+<span class="kn">from</span> <span class="nn">halla.stats</span> <span class="kn">import</span> <span class="n">discretize</span><span class="p">,</span><span class="n">pca</span><span class="p">,</span> <span class="n">mca</span><span class="p">,</span> <span class="n">bh</span><span class="p">,</span> <span class="n">permutation_test_by_representative</span> 
+
+<span class="c">## statistics packages </span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span> 
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="kn">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">sklearn.decomposition</span>
+<span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span> <span class="c">#remember that the matrix is X = (n_samples,n_features)</span>
+<span class="kn">import</span> <span class="nn">csv</span> 
+<span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">pdist</span><span class="p">,</span> <span class="n">cdist</span><span class="p">,</span> <span class="n">squareform</span>
+<span class="kn">from</span> <span class="nn">scipy.cluster.hierarchy</span> <span class="kn">import</span> <span class="n">linkage</span><span class="p">,</span> <span class="n">dendrogram</span><span class="p">,</span> <span class="n">to_tree</span><span class="p">,</span> <span class="n">leaves_list</span> 
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span> 
+<span class="kn">import</span> <span class="nn">random</span>  
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">normal</span> 
+<span class="kn">from</span> <span class="nn">scipy.misc</span> <span class="kn">import</span> <span class="o">*</span> 
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span> 
+
+<span class="c">### BUGBUG: this hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV&#39;s, not just single ones </span>
+<span class="c">### Use the &quot;grouping property&quot; as discussed by Kraskov paper. </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Old hclust</span>
+
+<span class="sd">def hclust( pArray, pdist_metric = mi, cluster_metric = l2, bTree = False ):</span>
+<span class="sd">	#returns linkage matrix </span>
+<span class="sd">	pdist_data = pdist( pArray, metric= pdist_metric )  </span>
+<span class="sd">	linkage_data = linkage( pdist_data, metric=l2 ) </span>
+<span class="sd">	return to_tree( linkage_data ) if bTree else linkage_data </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">def</span> <span class="nf">hclust</span><span class="p">(</span> <span class="n">pArray</span><span class="p">,</span> <span class="n">pdist_metric</span> <span class="o">=</span> <span class="n">norm_mid</span><span class="p">,</span> <span class="n">cluster_metric</span> <span class="o">=</span> <span class="n">absl2</span><span class="p">,</span> <span class="n">bTree</span> <span class="o">=</span> <span class="bp">False</span> <span class="p">):</span>
+	<span class="c">#returns linkage matrix </span>
+	<span class="n">pdist_data</span> <span class="o">=</span> <span class="n">pdist</span><span class="p">(</span> <span class="n">pArray</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span> <span class="n">pdist_metric</span> <span class="p">)</span>  
+	<span class="k">print</span> <span class="n">pdist_data</span> 
+	<span class="n">linkage_data</span> <span class="o">=</span> <span class="n">linkage</span><span class="p">(</span> <span class="n">pdist_data</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">cluster_metric</span> <span class="p">)</span> 
+	<span class="k">return</span> <span class="n">to_tree</span><span class="p">(</span> <span class="n">linkage_data</span> <span class="p">)</span> <span class="k">if</span> <span class="n">bTree</span> <span class="k">else</span> <span class="n">linkage_data</span> 
+
+
+<div class="viewcode-block" id="truncate_tree"><a class="viewcode-back" href="../../index.html#halla.hierarchy.truncate_tree">[docs]</a><span class="k">def</span> <span class="nf">truncate_tree</span><span class="p">(</span> <span class="n">apClusterNode</span><span class="p">,</span> <span class="n">iSkip</span><span class="p">,</span> <span class="n">iLevel</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Chop tree from root, returning smaller tree towards the leaves </span>
+
+<span class="sd">	Input: pClusterNode, iLevel </span>
+
+<span class="sd">	Output: list of ClusterNodes </span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">if</span> <span class="n">iLevel</span> <span class="o">&lt;</span> <span class="n">iSkip</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">truncate_tree</span><span class="p">(</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">right</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">apClusterNode</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">q</span><span class="o">.</span><span class="n">left</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">apClusterNode</span><span class="p">],</span> <span class="n">iSkip</span><span class="p">,</span> <span class="n">iLevel</span> <span class="o">=</span> <span class="n">iLevel</span><span class="o">+</span><span class="mi">1</span> <span class="p">)</span> 
+
+	<span class="k">elif</span> <span class="n">iSkip</span> <span class="o">==</span> <span class="n">iLevel</span><span class="p">:</span>
+		<span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">apClusterNode</span><span class="p">):</span>
+			<span class="k">return</span> <span class="nb">filter</span><span class="p">(</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">apClusterNode</span> <span class="p">)</span>
+	
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;truncated tree is malformed--empty!&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="reduce_tree"><a class="viewcode-back" href="../../index.html#halla.hierarchy.reduce_tree">[docs]</a><span class="k">def</span> <span class="nf">reduce_tree</span><span class="p">(</span> <span class="n">pClusterNode</span><span class="p">,</span> <span class="n">pFunction</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">aOut</span> <span class="o">=</span> <span class="p">[]</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Recursive</span>
+
+<span class="sd">	Input: pClusterNode, pFunction = lambda x: x.id, aOut = []</span>
+
+<span class="sd">	Output: a list of pFunction calls (node ids by default)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">func</span> <span class="o">=</span> <span class="n">pFunction</span>
+
+	<span class="k">if</span> <span class="n">pClusterNode</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">():</span>
+		<span class="k">return</span> <span class="p">(</span> <span class="n">aOut</span> <span class="o">+</span> <span class="p">[</span><span class="n">func</span><span class="p">(</span><span class="n">pClusterNode</span><span class="p">)]</span> <span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">reduce_tree</span><span class="p">(</span> <span class="n">pClusterNode</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">aOut</span> <span class="p">)</span> <span class="o">+</span> <span class="n">reduce_tree</span><span class="p">(</span> <span class="n">pClusterNode</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">aOut</span> <span class="p">)</span> 
+</div>
+<div class="viewcode-block" id="reduce_tree_by_layer"><a class="viewcode-back" href="../../index.html#halla.hierarchy.reduce_tree_by_layer">[docs]</a><span class="k">def</span> <span class="nf">reduce_tree_by_layer</span><span class="p">(</span> <span class="n">apParents</span><span class="p">,</span> <span class="n">iLevel</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">iStop</span> <span class="o">=</span> <span class="bp">None</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">	Traverse one tree. </span>
+
+<span class="sd">	Input: apParents, iLevel = 0, iStop = None</span>
+
+<span class="sd">	Output: a list of (iLevel, list_of_nodes_at_iLevel)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">if</span> <span class="n">iStop</span> <span class="ow">and</span> <span class="p">(</span><span class="n">iLevel</span> <span class="o">&gt;</span> <span class="n">iStop</span><span class="p">):</span>
+		<span class="k">return</span> <span class="p">[]</span> 
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">return</span> <span class="p">[(</span><span class="n">iLevel</span><span class="p">,</span> <span class="n">reduce_tree</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">apParents</span> <span class="p">]</span> <span class="o">+</span> <span class="n">reduce_tree_by_layer</span><span class="p">(</span> <span class="p">[</span> <span class="n">q</span><span class="o">.</span><span class="n">left</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">apParents</span> <span class="p">]</span> <span class="o">+</span> <span class="p">[</span> <span class="n">r</span><span class="o">.</span><span class="n">right</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">apParents</span> <span class="p">],</span> <span class="n">iLevel</span> <span class="o">=</span> <span class="n">iLevel</span><span class="o">+</span><span class="mi">1</span> <span class="p">)</span> 
+
+</div>
+<div class="viewcode-block" id="get_layer"><a class="viewcode-back" href="../../index.html#halla.hierarchy.get_layer">[docs]</a><span class="k">def</span> <span class="nf">get_layer</span><span class="p">(</span> <span class="n">atData</span><span class="p">,</span> <span class="n">iLayer</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Get output from `reduce_tree_by_layer` and parse </span>
+
+<span class="sd">	Input: atData = a list of (iLevel, list_of_nodes_at_iLevel), iLayer = zero-indexed layer number </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">dummyOut</span> <span class="o">=</span> <span class="p">[]</span> 
+
+	<span class="k">for</span> <span class="n">couple</span> <span class="ow">in</span> <span class="n">atData</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">couple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">iLayer</span><span class="p">:</span>
+			<span class="k">continue</span> 
+		<span class="k">elif</span> <span class="n">couple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">iLayer</span><span class="p">:</span>
+			<span class="n">dummyOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">couple</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+			<span class="n">atData</span> <span class="o">=</span> <span class="n">atData</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">break</span>
+	<span class="k">return</span> <span class="n">dummyOut</span><span class="p">,</span> <span class="n">atData</span> 
+
+</div>
+<div class="viewcode-block" id="one_against_one"><a class="viewcode-back" href="../../index.html#halla.hierarchy.one_against_one">[docs]</a><span class="k">def</span> <span class="nf">one_against_one</span><span class="p">(</span> <span class="n">pClusterNode1</span><span class="p">,</span> <span class="n">pClusterNode2</span><span class="p">,</span> <span class="n">pArray1</span><span class="p">,</span> <span class="n">pArray2</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">	one_against_one hypothesis testing for a particular layer </span>
+<span class="sd">	</span>
+<span class="sd">	Input: pClusterNode1, pClusterNode2, pArray1, pArray2</span>
+
+<span class="sd">	Output: aiIndex1, aiIndex2, pVal</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">aiIndex1</span><span class="p">,</span> <span class="n">aiIndex2</span> <span class="o">=</span> <span class="n">reduce_tree</span><span class="p">(</span> <span class="n">pClusterNode1</span> <span class="p">)</span> <span class="p">,</span> <span class="n">reduce_tree</span><span class="p">(</span> <span class="n">pClusterNode2</span> <span class="p">)</span>
+
+	<span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="o">=</span> <span class="n">pArray1</span><span class="p">[</span><span class="n">array</span><span class="p">(</span><span class="n">aiIndex1</span><span class="p">)],</span> <span class="n">pArray2</span><span class="p">[</span><span class="n">array</span><span class="p">(</span><span class="n">aiIndex2</span><span class="p">)]</span>
+
+	<span class="k">return</span> <span class="n">aiIndex1</span><span class="p">,</span> <span class="n">aiIndex2</span><span class="p">,</span> <span class="n">permutation_test_by_representative</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="all_against_all"><a class="viewcode-back" href="../../index.html#halla.hierarchy.all_against_all">[docs]</a><span class="k">def</span> <span class="nf">all_against_all</span><span class="p">(</span> <span class="n">apClusterNode1</span><span class="p">,</span> <span class="n">apClusterNode2</span><span class="p">,</span> <span class="n">pArray1</span><span class="p">,</span> <span class="n">pArray2</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">	Perform all-against-all per layer </span>
+
+<span class="sd">	Input: apClusterNode1, apClusterNode2, pArray1, pArray2</span>
+
+<span class="sd">	Output: a list of ( (i,j), (aiIndex1, aiIndex2, pVal) )</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">dummyOut</span> <span class="o">=</span> <span class="p">[]</span> 
+
+	<span class="n">iC1</span><span class="p">,</span> <span class="n">iC2</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span> <span class="nb">len</span><span class="p">,</span> <span class="p">[</span><span class="n">apClusterNode1</span><span class="p">,</span> <span class="n">apClusterNode2</span><span class="p">]</span> <span class="p">)</span>
+
+	<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">iC1</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">iC2</span><span class="p">)):</span>
+		<span class="n">dummyOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">one_against_one</span><span class="p">(</span> <span class="n">apClusterNode1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">apClusterNode2</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">pArray1</span><span class="p">,</span> <span class="n">pArray2</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+
+	<span class="k">return</span> <span class="n">dummyOut</span> 
+</div>
+<div class="viewcode-block" id="recursive_all_against_all"><a class="viewcode-back" href="../../index.html#halla.hierarchy.recursive_all_against_all">[docs]</a><span class="k">def</span> <span class="nf">recursive_all_against_all</span><span class="p">(</span> <span class="n">apClusterNode1</span><span class="p">,</span> <span class="n">apClusterNode2</span><span class="p">,</span> <span class="n">pArray1</span><span class="p">,</span> <span class="n">pArray2</span><span class="p">,</span> <span class="n">pOut</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">pFDR</span> <span class="o">=</span> <span class="n">bh</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">	Performs recursive all-against-all (the default HAllA routine) with fdr correction</span>
+
+<span class="sd">	Input: apClusterNode1, apClusterNode2, pArray1, pArray2, pFDR</span>
+
+<span class="sd">	Output: a list of ( (aiIndex1, pBag1), (aiIndex2, pBag2) )</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">pOutNew</span> <span class="o">=</span> <span class="n">pOut</span> 
+
+	<span class="n">atAll</span> <span class="o">=</span> <span class="n">all_against_all</span><span class="p">(</span> <span class="n">apClusterNode1</span><span class="p">,</span> <span class="n">apClusterNode2</span><span class="p">,</span> <span class="n">pArray1</span><span class="p">,</span> <span class="n">pArray2</span> <span class="p">)</span>
+
+	<span class="k">print</span> <span class="s">&quot;This is all against all atAll&quot;</span>
+	<span class="k">print</span> <span class="n">atAll</span> 
+
+	<span class="n">atIJ</span><span class="p">,</span> <span class="n">atOAO</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">atAll</span><span class="p">)</span>
+	<span class="n">aaN</span><span class="p">,</span> <span class="n">aaM</span><span class="p">,</span> <span class="n">aPVAL</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">atOAO</span><span class="p">)</span>
+
+	<span class="n">aBool</span> <span class="o">=</span> <span class="n">pFDR</span><span class="p">(</span><span class="n">aPVAL</span><span class="p">)</span>
+	<span class="k">print</span> <span class="n">aPVAL</span>
+
+	<span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">aBool</span><span class="p">):</span>
+		<span class="k">print</span> <span class="s">&quot;END!&quot;</span>
+		<span class="k">return</span> <span class="n">pOutNew</span>  
+	<span class="k">else</span><span class="p">:</span>
+		<span class="s">&quot;CONTINUE!&quot;</span>
+		<span class="n">apC1</span><span class="p">,</span> <span class="n">apC2</span><span class="p">,</span> <span class="o">=</span> <span class="p">[],[]</span> 
+		<span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">couple</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span> <span class="n">atIJ</span> <span class="p">):</span>
+			<span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="o">=</span> <span class="n">couple</span>  
+			<span class="k">if</span> <span class="n">aBool</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span> <span class="c">#if hypothesis was rejected, then go down to lower layers </span>
+
+				<span class="c">#pNode1Left, pNode1Right = apClusterNode1[i].left, apClusterNode1[i].right</span>
+				<span class="c">#pNode2Left, pNode2Right = apClusterNode2[j].left, apClusterNode2[j].right</span>
+
+				<span class="c">#if pNode1Left.is_leaf or pNode1Right.is_leaf or pNode2Left.is_leaf or pNode2Right.is_leaf: </span>
+				<span class="c">#	continue  </span>
+				<span class="c">#else: </span>
+				<span class="c">#	print &quot;Down!&quot;</span>
+				
+				<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">[</span> <span class="n">apClusterNode1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">apClusterNode1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">right</span> <span class="p">]:</span>
+					<span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">():</span>
+						<span class="n">apC1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">item</span> <span class="p">)</span>
+
+				<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">[</span> <span class="n">apClusterNode2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">apClusterNode2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">right</span> <span class="p">]:</span>
+					<span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">():</span>
+						<span class="n">apC2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">item</span> <span class="p">)</span>
+				
+				<span class="c">#apC1.append( apClusterNode1[i].left ) ; apC1.append( apClusterNode1[i].right )</span>
+				<span class="c">#apC2.append( apClusterNode2[j].left ); apC2.append( apClusterNode2[j].right )</span>
+
+				<span class="c">#pOutNew.append( ( (aaN[k], apClusterNode1[i] ), (aaM[k], apClusterNode2[j] ) ) )</span>
+				<span class="n">pOutNew</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">aaN</span><span class="p">[</span><span class="n">k</span><span class="p">],</span><span class="n">aaM</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">recursive_all_against_all</span><span class="p">(</span> <span class="n">apC1</span><span class="p">,</span> <span class="n">apC2</span><span class="p">,</span> <span class="n">pArray1</span><span class="p">,</span> <span class="n">pArray2</span><span class="p">,</span> <span class="n">pOut</span> <span class="o">=</span> <span class="n">pOutNew</span> <span class="p">,</span> <span class="n">pFDR</span> <span class="o">=</span> <span class="n">pFDR</span> <span class="p">)</span>
+
+
+<span class="c">## I probably don&#39;t need this anymore? </span>
+</div>
+<div class="viewcode-block" id="traverse_by_layer"><a class="viewcode-back" href="../../index.html#halla.hierarchy.traverse_by_layer">[docs]</a><span class="k">def</span> <span class="nf">traverse_by_layer</span><span class="p">(</span> <span class="n">pClusterNode1</span><span class="p">,</span> <span class="n">pClusterNode2</span><span class="p">,</span> <span class="n">pArray1</span><span class="p">,</span> <span class="n">pArray2</span><span class="p">,</span> <span class="n">pFunction</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">	Useful function for doing all-against-all comparison between nodes in each layer </span>
+
+<span class="sd">	traverse two trees at once, applying function `pFunction` to each layer pair </span>
+
+<span class="sd">	latex: $pFunction: data1 \times data2 \rightarrow \mathbb{R}^k, $ for $k$ the size of the cross-product set per layer </span>
+
+<span class="sd">	Input: pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction</span>
+<span class="sd">	Output: (i,j), pFunction( pArray[:,i], pArray2[:,j])</span>
+
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">dummyOut</span> <span class="o">=</span> <span class="p">[]</span> 
+
+	<span class="k">def</span> <span class="nf">_get_min</span><span class="p">(</span> <span class="n">tData</span> <span class="p">):</span>
+		
+		<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tData</span><span class="p">])</span>
+
+	<span class="n">tData1</span><span class="p">,</span> <span class="n">tData2</span> <span class="o">=</span> <span class="p">[</span> <span class="n">reduce_tree_by_layer</span><span class="p">(</span> <span class="p">[</span><span class="n">pC</span><span class="p">]</span> <span class="p">)</span> <span class="k">for</span> <span class="n">pC</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pClusterNode1</span><span class="p">,</span> <span class="n">pClusterNode2</span><span class="p">]</span> <span class="p">]</span>
+
+	<span class="n">iMin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span> <span class="p">[</span><span class="n">_get_min</span><span class="p">(</span><span class="n">tData1</span><span class="p">),</span> <span class="n">_get_min</span><span class="p">(</span><span class="n">tData2</span><span class="p">)]</span> <span class="p">)</span> 
+
+	<span class="k">for</span> <span class="n">iLevel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iMin</span><span class="p">):</span>
+		<span class="n">pLayer1</span><span class="p">,</span> <span class="n">pLayer2</span> <span class="o">=</span> <span class="n">get_layer</span><span class="p">(</span> <span class="n">tData1</span><span class="p">,</span> <span class="n">iLevel</span> <span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">get_layer</span><span class="p">(</span> <span class="n">tData2</span><span class="p">,</span> <span class="n">iLevel</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">iLayer1</span><span class="p">,</span> <span class="n">iLayer2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pLayer1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">pLayer2</span><span class="p">)</span>
+
+		<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="n">iLayer1</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">iLayer2</span><span class="p">)</span> <span class="p">):</span>
+			<span class="n">dummyOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">pFunction</span><span class="p">(</span> <span class="n">pArray1</span><span class="p">[:,</span><span class="n">i</span><span class="p">],</span> <span class="n">pArray2</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+
+<span class="c">#==========================================================================#</span>
+<span class="c"># DATA STRUCTURES </span>
+<span class="c">#==========================================================================#</span>
+
+<span class="c">## Probably don&#39;t need this anymore -- keep for now. </span>
+</div>
+<div class="viewcode-block" id="Tree"><a class="viewcode-back" href="../../index.html#halla.hierarchy.Tree">[docs]</a><span class="k">class</span> <span class="nc">Tree</span><span class="p">():</span>
+	<span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">	A hierarchically nested structure containing nodes as</span>
+<span class="sd">	a basic core unit	</span>
+<span class="sd">	&#39;&#39;&#39;</span>	
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">m_pData</span> <span class="o">=</span> <span class="bp">None</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">m_arrayChildren</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">m_iLayer</span> <span class="o">=</span> <span class="mi">0</span> 
+    
+	<span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="c"># pop one of the children, else return none, since this amounts to killing the singleton </span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_arrayChildren</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_arrayChildren</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+		
+	<span class="k">def</span> <span class="nf">is_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_pData</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_arrayChildren</span><span class="p">))</span>
+
+	<span class="k">def</span> <span class="nf">is_degenerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="p">(</span> <span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_pData</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_arrayChildren</span><span class="p">)</span> <span class="p">)</span>			
+
+	<span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_object</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">m_arrayChildren</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node_object</span><span class="p">)</span>
+		
+	<span class="k">def</span> <span class="nf">get_children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_arrayChildren</span>
+	
+	<span class="k">def</span> <span class="nf">get_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">iIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_arrayChildren</span><span class="p">[</span><span class="n">iIndex</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">]</span>
+	
+	<span class="k">def</span> <span class="nf">add_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pDatum</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">m_pData</span> <span class="o">=</span> <span class="n">pDatum</span> 
+		<span class="k">return</span> <span class="bp">self</span> 
+	
+	<span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_pData</span> 
+
+
+<span class="c">#==========================================================================#</span>
+<span class="c"># METHODS  </span>
+<span class="c">#==========================================================================#</span>
+
+
+<span class="c">#==========================================================================#</span>
+<span class="c"># META</span>
+<span class="c">#==========================================================================#</span>
+</div>
+<div class="viewcode-block" id="Gardener"><a class="viewcode-back" href="../../index.html#halla.hierarchy.Gardener">[docs]</a><span class="k">class</span> <span class="nc">Gardener</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A gardener object is a handler for the different types of hierarchical data structures (&quot;trees&quot;)</span>
+<span class="sd">	Can collapse and manipulate data structures and wrap them in different objects, depending on the </span>
+<span class="sd">	context. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="nd">@staticmethod</span> 
+<div class="viewcode-block" id="Gardener.PlantTree"><a class="viewcode-back" href="../../index.html#halla.hierarchy.Gardener.PlantTree">[docs]</a>	<span class="k">def</span> <span class="nf">PlantTree</span><span class="p">():</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Input: halla.Dataset object </span>
+<span class="sd">		Output: halla.hierarchy.Tree object </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="k">return</span> <span class="bp">None</span> 
+</div>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">pass</span> 
+
+<div class="viewcode-block" id="Gardener.next"><a class="viewcode-back" href="../../index.html#halla.hierarchy.Gardener.next">[docs]</a>	<span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		return the data of the tree, layer by layer</span>
+<span class="sd">		input: None </span>
+<span class="sd">		output: a list of data pointers  </span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">():</span>
+			<span class="k">return</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Empty Tree&quot;</span><span class="p">)</span>
+
+		<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_pData</span><span class="p">:</span>
+			<span class="n">pTmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_pData</span> 
+			<span class="bp">self</span><span class="o">.</span><span class="n">m_queue</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_arrayChildren</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">m_arrayChildren</span> <span class="o">=</span> <span class="bp">None</span> 
+			<span class="bp">self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_queue</span> 
+			<span class="k">assert</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_degenerate</span><span class="p">()</span> <span class="p">)</span>
+			<span class="k">return</span> <span class="n">pTmp</span> 	
+		
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">assert</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_degenerate</span><span class="p">()</span> <span class="p">)</span>
+			<span class="n">aOut</span> <span class="o">=</span> <span class="p">[]</span> 
+	
+			<span class="k">for</span> <span class="n">pTree</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_queue</span><span class="p">:</span>
+				<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">pTree</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span> <span class="p">)</span>
+
+	
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_queue</span><span class="p">:</span>
+			<span class="bp">self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_queue</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+		<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_arrayChildren</span><span class="p">:</span>
+			<span class="n">pSelf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_arrayChildren</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span> 
+			<span class="bp">self</span><span class="o">.</span><span class="n">m_queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_arrayChildren</span>
+			<span class="bp">self</span> <span class="o">=</span> <span class="n">pSelf</span> 
+		<span class="k">return</span> <span class="n">pTmp</span> 
+
+
+<span class="c">#==========================================================================#</span>
+<span class="c"># OBJECT WRAPPERS</span>
+<span class="c">#==========================================================================#</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">HAllA: Hierarchical All-against All 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../halla.html" >halla</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yo Sup Moon, Curtis Huttenhower.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+* HAllA
+** Current algorithm:
+*** Matrices provided as input
+*** Quality control
+*** Each matrix hierarchically clustered by MI
+*** Minimum similarity threshold chosen for indistinguishable features
+*** Starting at the top of the tree down:
+**** Compare all pairs of clusters at that level by MI
+**** Compute significance by:
+***** Permutation test to determine if value is nonrandom
+***** Bootstrap (?) to determine if value is (also) unusual in comparison to dataset distribution
+**** Stop if ???
+***** Geometric falloff (equivalent to repeated tests)?
+***** Adapt Yekutieli criterion to hierarchy of data?
+***** Test strong negative version of the hypothesis, i.e. no relationships exist below these nodes?
+**** Repeat at ~half of the previous tree depth
+** Curtis will put in touch with Giovanni's group for consultation
+** Goals for next meeting
+*** Take over repository
+*** Run a demo on a reasonable but small test dataset
+*** Have some measurements for timing on large datasets
+*** Have a >=1 proposal(s) for our stopping criterion with justification
