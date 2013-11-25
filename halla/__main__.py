@@ -6,7 +6,7 @@ import itertools
 
 from numpy import array 
 
-import halla 
+#import halla 
 import csv 
 import sys 
 import re 
@@ -49,7 +49,7 @@ def _main():
 							line = map(float, line) #is it continuous? 
 						except ValueError:
 							line = line #we are forced to conclude that it is implicitly categorical, with some lexical ordering 
-					#sys.stderr.write( "\t".join( map(str,line)  ) + "\n" ) 
+				
 					aOut.append(line)
 		
 		Data = array( aOut )
@@ -94,4 +94,4 @@ def _main():
 	#sys.stderr.write( str( pOutHash ) ) 
 
 
-_main() 
+#_main() 
