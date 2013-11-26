@@ -21,7 +21,9 @@ from halla.stats import discretize,pca, mca, bh, permutation_test_by_representat
 
 import numpy as np
 from numpy import array 
-import scipy as sp
+import scipy 
+import scipy.stats 
+import matplotlib 
 import sklearn.decomposition
 from sklearn.decomposition import PCA #remember that the matrix is X = (n_samples,n_features)
 import csv 
@@ -32,6 +34,8 @@ import random
 from numpy.random import normal 
 from scipy.misc import * 
 import pandas as pd 
+
+
 
 """
 Old hclust
@@ -46,27 +50,59 @@ def hclust( pArray, pdist_metric = mi, cluster_metric = l2, bTree = False ):
 
 def hclust( pArray, pdist_metric = norm_mid, cluster_method = "single", bTree = False ):
 	"""
+
+	.. plot::
+
+		import pylab 
+		import halla 
+		from numpy import array 
+		import scipy.stats
+		from scipy.cluster.hierarchy import dendrogram, linkage
+
+		x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+
+		#Pearson
+		lxpearson	= linkage(x, metric="correlation")
+
+		dendrogram(lxpearson)
+
 	Returns hierarchically clustered object 
 
 	Parameters:
-	---------------
 
 	Returns:
-	----------------
 
 	Examples ::
-	-----------------
 
 	Notes 
-	------------------
-	This hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV's, not just single ones 
-	Use the "grouping property" as discussed by Kraskov paper. 
+
+		This hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV's, not just single ones 
+		Use the "grouping property" as discussed by Kraskov paper. 
+
+
+
 
 	"""
 	pdist_data = pdist( pArray, metric= pdist_metric )   
 	linkage_data = linkage( pdist_data, metric=cluster_method ) 
 	return to_tree( linkage_data ) if bTree else linkage_data 
 
+
+def couple_tree( pClusterNode1, pClusterNode2, method = "unif" ):
+	"""
+	Couples two data trees to produce a hypothesis tree 
+
+	Parameters:
+
+
+
+	Returns:
+
+	Examples: ::
+
+
+
+	"""
 
 def truncate_tree( apClusterNode, iSkip, iLevel = 0 ):
 	"""

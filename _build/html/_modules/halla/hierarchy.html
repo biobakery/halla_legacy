@@ -98,14 +98,14 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="k">def</span> <span class="nf">hclust</span><span class="p">(</span> <span class="n">pArray</span><span class="p">,</span> <span class="n">pdist_metric</span> <span class="o">=</span> <span class="n">norm_mid</span><span class="p">,</span> <span class="n">cluster_metric</span> <span class="o">=</span> <span class="n">absl2</span><span class="p">,</span> <span class="n">bTree</span> <span class="o">=</span> <span class="bp">False</span> <span class="p">):</span>
+<div class="viewcode-block" id="hclust"><a class="viewcode-back" href="../../index.html#halla.hierarchy.hclust">[docs]</a><span class="k">def</span> <span class="nf">hclust</span><span class="p">(</span> <span class="n">pArray</span><span class="p">,</span> <span class="n">pdist_metric</span> <span class="o">=</span> <span class="n">norm_mid</span><span class="p">,</span> <span class="n">cluster_metric</span> <span class="o">=</span> <span class="n">absl2</span><span class="p">,</span> <span class="n">bTree</span> <span class="o">=</span> <span class="bp">False</span> <span class="p">):</span>
 	<span class="c">#returns linkage matrix </span>
 	<span class="n">pdist_data</span> <span class="o">=</span> <span class="n">pdist</span><span class="p">(</span> <span class="n">pArray</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span> <span class="n">pdist_metric</span> <span class="p">)</span>  
 	<span class="k">print</span> <span class="n">pdist_data</span> 
 	<span class="n">linkage_data</span> <span class="o">=</span> <span class="n">linkage</span><span class="p">(</span> <span class="n">pdist_data</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">cluster_metric</span> <span class="p">)</span> 
 	<span class="k">return</span> <span class="n">to_tree</span><span class="p">(</span> <span class="n">linkage_data</span> <span class="p">)</span> <span class="k">if</span> <span class="n">bTree</span> <span class="k">else</span> <span class="n">linkage_data</span> 
 
-
+</div>
 <div class="viewcode-block" id="truncate_tree"><a class="viewcode-back" href="../../index.html#halla.hierarchy.truncate_tree">[docs]</a><span class="k">def</span> <span class="nf">truncate_tree</span><span class="p">(</span> <span class="n">apClusterNode</span><span class="p">,</span> <span class="n">iSkip</span><span class="p">,</span> <span class="n">iLevel</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Chop tree from root, returning smaller tree towards the leaves </span>

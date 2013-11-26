@@ -33,6 +33,7 @@ def pca( pArray, iComponents = 1 ):
 	 """
 	 Input: N x D matrix 
 	 Output: D x N matrix 
+
 	 """
 	 from sklearn.decomposition import PCA
 	 pPCA = PCA( n_components = iComponents )

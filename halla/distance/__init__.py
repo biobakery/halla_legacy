@@ -17,6 +17,8 @@ import halla.stats
 
 from scipy.stats import pearsonr, spearmanr
 
+import pylab 
+
 #mi-based distances from scikit-learn; (log e)-based.  
 from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, adjusted_mutual_info_score 
 

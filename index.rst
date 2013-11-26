@@ -53,6 +53,7 @@ Dependencies
 	* Scipy (>= 0.12) 
 	* Scikit-learn (>=0.13)  
 	* rpy (>=2.0)
+	* sampledoc-master
 
 * Recommended Tools for documentation 
 	* Docutils
