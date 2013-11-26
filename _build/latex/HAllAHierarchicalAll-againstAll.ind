@@ -1,0 +1,109 @@
+\begin{theindex}
+\def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
+
+  \bigletter A
+  \item adj\_mi() (in module halla.distance), \hyperpage{10}
+  \item adj\_mid() (in module halla.distance), \hyperpage{11}
+  \item AdjustedMutualInformation (class in halla.distance), \hyperpage{10}
+  \item all\_against\_all() (in module halla.hierarchy), \hyperpage{16}
+
+  \indexspace
+  \bigletter B
+  \item bh() (in module halla.stats), \hyperpage{5}
+  \item binomial() (in module halla.stats), \hyperpage{5}
+
+  \indexspace
+  \bigletter C
+  \item cor() (in module halla.distance), \hyperpage{11}
+  \item couple\_tree() (in module halla.hierarchy), \hyperpage{16}
+  \item cumulative\_log\_cut() (in module halla.stats), \hyperpage{6}
+
+  \indexspace
+  \bigletter D
+  \item discretize() (in module halla.stats), \hyperpage{6}
+  \item Distance (class in halla.distance), \hyperpage{10}
+
+  \indexspace
+  \bigletter G
+  \item Gardener (class in halla.hierarchy), \hyperpage{16}
+  \item get\_layer() (in module halla.hierarchy), \hyperpage{16}
+  \item get\_medoid() (in module halla.stats), \hyperpage{8}
+
+  \indexspace
+  \bigletter H
+  \item halla (module), \hyperpage{3}
+  \item halla.distance (module), \hyperpage{10}
+  \item halla.hierarchy (module), \hyperpage{16}
+  \item halla.logger (module), \hyperpage{14}
+  \item halla.parser (module), \hyperpage{14}
+  \item halla.stats (module), \hyperpage{5}
+  \item halla.test (module), \hyperpage{14}
+  \item hclust() (in module halla.hierarchy), \hyperpage{16}
+
+  \indexspace
+  \bigletter I
+  \item IBP\_cut() (in module halla.stats), \hyperpage{5}
+  \item Input (class in halla.parser), \hyperpage{14}
+
+  \indexspace
+  \bigletter L
+  \item l2() (in module halla.distance), \hyperpage{12}
+  \item log\_cut() (in module halla.stats), \hyperpage{8}
+
+  \indexspace
+  \bigletter M
+  \item mca() (in module halla.stats), \hyperpage{8}
+  \item mi() (in module halla.distance), \hyperpage{12}
+  \item mid() (in module halla.distance), \hyperpage{12}
+  \item multinomial() (in module halla), \hyperpage{3}
+  \item multinomial() (in module halla.stats), \hyperpage{8}
+  \item multinomial() (in module halla.test), \hyperpage{14}
+  \item MutualInformation (class in halla.distance), \hyperpage{10}
+
+  \indexspace
+  \bigletter N
+  \item next() (halla.hierarchy.Gardener method), \hyperpage{16}
+  \item norm\_mi() (in module halla.distance), \hyperpage{13}
+  \item norm\_mid() (in module halla.distance), \hyperpage{13}
+  \item normal() (in module halla), \hyperpage{4}
+  \item normal() (in module halla.hierarchy), \hyperpage{17}
+  \item normal() (in module halla.stats), \hyperpage{8}
+  \item normal() (in module halla.test), \hyperpage{15}
+  \item NormalizedMutualInformation (class in halla.distance), \hyperpage{10}
+
+  \indexspace
+  \bigletter O
+  \item one\_against\_one() (in module halla.hierarchy), \hyperpage{18}
+  \item Output (class in halla.parser), \hyperpage{14}
+
+  \indexspace
+  \bigletter P
+  \item p\_val\_plot() (in module halla.stats), \hyperpage{9}
+  \item pca() (in module halla.stats), \hyperpage{9}
+  \item permutation\_test\_by\_representative() (in module halla.stats), \hyperpage{9}
+  \item PlantTree() (halla.hierarchy.Gardener static method), \hyperpage{16}
+  \item PY\_cut() (in module halla.stats), \hyperpage{5}
+
+  \indexspace
+  \bigletter R
+  \item randmat() (in module halla.test), \hyperpage{15}
+  \item randmix() (in module halla.test), \hyperpage{16}
+  \item recursive\_all\_against\_all() (in module halla.hierarchy), \hyperpage{18}
+  \item reduce\_tree() (in module halla.hierarchy), \hyperpage{18}
+  \item reduce\_tree\_by\_layer() (in module halla.hierarchy), \hyperpage{18}
+
+  \indexspace
+  \bigletter S
+  \item shuffle() (in module halla.stats), \hyperpage{10}
+
+  \indexspace
+  \bigletter T
+  \item traverse\_by\_layer() (in module halla.hierarchy), \hyperpage{19}
+  \item Tree (class in halla.hierarchy), \hyperpage{16}
+  \item truncate\_tree() (in module halla.hierarchy), \hyperpage{19}
+
+  \indexspace
+  \bigletter U
+  \item uniformly\_spaced\_gaussian() (in module halla.test), \hyperpage{16}
+
+\end{theindex}

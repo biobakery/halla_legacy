@@ -52,7 +52,6 @@ from numpy.random import normal
 from scipy.misc import * 
 from scipy.stats import kruskal, ttest_ind, ttest_1samp, percentileofscore, pearsonr
 
-
 class HAllA():
 	
 	def __init__( self, *ta ): 
@@ -74,8 +73,8 @@ class HAllA():
 		
 		self.rep = None 
 		self.meta_array = array( ta )
-
 		self.meta_discretize = None 
+
 		self.meta_linkage = None 
 		self.meta_distance = None 
 		self.directory = None 
@@ -87,7 +86,13 @@ class HAllA():
 		## this is not so efficient for huge arrays, fix later 
 
 		self.m_iIter = 100
-	
+
+
+
+
+
+
+
 	def _issingle( self ):
 		bOut = False
 		aTmp = ( self.meta_array[0] == self.meta_array[1] )

@@ -21,13 +21,19 @@ def _main():
 		strFile1, strFile2 = sys.argv[1], sys.argv[1]
 
 	
-	aOut1, aOut2 = Input( strFile1, strFile2 )
+	aOut1, aOut2 = Input( strFile1, strFile2 ).get()
 
 	aOutData1, aOutName1, aOutType1, aOutHead1 = aOut1 
 	aOutData2, aOutName2, aOutType2, aOutHead2 = aOut2 
 
 
-	H = halla.HAllA( Data1, Data2 )
+	H = halla.HAllA( aOutData1, aOutData2 )
+
+	print aOutData1[:2]
+	print aOutData2[:2]
+
+	print aOutType1[:2]
+	print aOutType2[:2]
 
 	#c_strOutputPath = "/home/ysupmoon/Dropbox/halla/output/"
 	#H.set_directory( c_strOutputPath )
@@ -54,6 +60,9 @@ def _main():
 	def cake1():
 		H.run_caketest()
 
+	pr1()
+
+_main( )
 
 """
 def halla( istm, ostm, dP, dPMI, iBootstrap ):
@@ -65,7 +74,7 @@ def halla( istm, ostm, dP, dPMI, iBootstrap ):
         _halla_test( ostm, pData, hashClusters, dP, iBootstrap )
 
 argp = argparse.ArgumentParser( prog = "halla.py",
-        description = """Hierarchical All-against-All significance association testing.""" )
+        description = "Hierarchical All-against-All significance association testing." )
 argp.add_argument( "istm",              metavar = "input.txt",
         type = argparse.FileType( "r" ),        default = sys.stdin,    nargs = "?",
         help = "Tab-delimited text input file, one row per feature, one column per measurement" )
@@ -84,13 +93,13 @@ argp.add_argument( "-b",                dest = "iBootstrap",    metavar = "boots
 argp.add_argument( "-v",                dest = "iDebug",                metavar = "verbosity",
         type = int,             default = 10 - ( logging.WARNING / 10 ),
         help = "Debug logging level; increase for greater verbosity" )
-"""
 argp.add_argument( "-f",                dest = "fFlag",         action = "store_true",
         help = "A flag set to true if provided" )
 argp.add_argument( "strString", metavar = "string",
         help = "A required free text string" )
-"""
+
 __doc__ = "::\n\n\t" + argp.format_help( ).replace( "\n", "\n\t" ) + __doc__
+
 
 def _main( ):
         args = argp.parse_args( )

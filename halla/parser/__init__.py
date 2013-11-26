@@ -6,6 +6,7 @@ manages transformations
 
 import csv 
 import numpy as np 
+from numpy import array
 
 
 class Input:
@@ -61,14 +62,15 @@ class Input:
 		self._load( ) 
 		self._parse( )
 		self._check( )
-		self._out( )
+
+	def get( self ):
+		return [(self.outData1, self.outName1, self.outType1, self.outHead1), (self.outData2, self.outName2, self.outType2, self.outHead2)] 
 
 	def _load( self ):
 		self.outData1 = np.array( [x for x in self.csvr1] ) 
 		self.outData2 = np.array( [x for x in self.csvr2] )
 
 	def _parse( self ):
-		@staticmethod 
 		def __parse( pArray, bVar, bHeaders ):
 			aOut = [] 
 			aNames = []
@@ -77,11 +79,11 @@ class Input:
 			
 			## Parse headers and variable names 
 			if bHeaders:
-				aHeaders = pArray[0]
+				aHeaders = list(pArray[0])
 				pArray = pArray[1:]
 
 			if bVar: 
-				aNames = pArray[:,0]
+				aNames = list(pArray[:,0])
 				pArray = pArray[:,1:]
 
 			## Parse data types, missing values, and whitespace 
@@ -102,11 +104,16 @@ class Input:
 						except ValueError:
 							line = line #we are forced to conclude that it is implicitly categorical, with some lexical ordering 
 							aTypes.append("LEX")
+				else: # delete corresponding name from namespace 
+					try:
+						aNames.remove(aNames[i])
+					except Exception:
+						pass  
 
 			return aOut, aNames, aTypes, aHeaders 
 
-		self.outData1, self.outName1, self.outType1, self.outHead1 = _parse( self.outData1, self.varNames, self.headers )
-		self.outData2, self.outName2, self.outType2, self.outHead2 = _parse( self.outData2, self.varNames, self.headers )
+		self.outData1, self.outName1, self.outType1, self.outHead1 = __parse( self.outData1, self.varNames, self.headers )
+		self.outData2, self.outName2, self.outType2, self.outHead2 = __parse( self.outData2, self.varNames, self.headers )
 
 	def _check( self ):
 		"""
@@ -125,10 +132,7 @@ class Input:
 		if self.outHead2:
 			assert( len( self.outData2 ) == len( self.outHead2 ) )
 
-	def _out( self ):
-		return [(self.outData1, self.outName1, self.outType1, self.outHead1), (self.outData2, self.outName2, self.outType2, self.outHead2)] 
-
-
+	
 class Output:
 	"""
 	Parser class for output 
