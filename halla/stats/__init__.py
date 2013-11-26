@@ -312,72 +312,103 @@ def p_val_plot( pArray1, pArray2, pCut = log_cut, iIter = 100 ):
 # Density estimation 
 #=========================================================
 
-## BUGBUG: this discretize function is not so kosher, need better way to do density estimate for MI
+def discretize( pArray, iN = None, method = None, aiSkip = [] ):
+	"""
+	>>> discretize( [0.1, 0.2, 0.3, 0.4] )
+	[0, 0, 1, 1]
 
-def discretize( pArray ):
-	def _discretize_continuous( astrValues, iN = None ): 
-		"""
-		>>> _discretize_continuous( [0] )
-		[0]
+	>>> discretize( [0.01, 0.04, 0.09, 0.16] )
+	[0, 0, 1, 1]
 
-		>>> _discretize_continuous( [0, 1] )
-		[0, 0]
+	>>> discretize( [-0.1, -0.2, -0.3, -0.4] )
+	[1, 1, 0, 0]
 
-		>>> _discretize_continuous( [0, 1], 2 )
-		[0, 1]
+	>>> discretize( [0.25, 0.5, 0.75, 1.00] )
+	[0, 0, 1, 1]
 
-		>>> _discretize_continuous( [1, 0], 2 )
-		[1, 0]
+	>>> discretize( [0.015625, 0.125, 0.421875, 1] )
+	[0, 0, 1, 1]
 
-		>>> _discretize_continuous( [0.2, 0.1, 0.3], 3 )
-		[1, 0, 2]
+	>>> discretize( [0] )
+	[0]
 
-		>>> _discretize_continuous( [0.2, 0.1, 0.3], 1 )
-		[0, 0, 0]
+	>>> discretize( [0, 1] )
+	[0, 0]
 
-		>>> _discretize_continuous( [0.2, 0.1, 0.3], 2 )
-		[0, 0, 1]
+	>>> discretize( [0, 1], 2 )
+	[0, 1]
 
-		>>> _discretize_continuous( [0.4, 0.2, 0.1, 0.3], 2 )
-		[1, 0, 0, 1]
+	>>> discretize( [1, 0], 2 )
+	[1, 0]
 
-		>>> CDatum._discretize_continuous( [4, 0.2, 0.1, 0.3], 2 )
-		[1, 0, 0, 1]
+	>>> discretize( [0.2, 0.1, 0.3], 3 )
+	[1, 0, 2]
 
-		>>> _discretize_continuous( [0.4, 0.2, 0.1, 0.3, 0.5] )
-		[1, 0, 0, 0, 1]
+	>>> discretize( [0.2, 0.1, 0.3], 1 )
+	[0, 0, 0]
 
-		>>> _discretize_continuous( [0.4, 0.2, 0.1, 0.3, 0.5], 3 )
-		[1, 0, 0, 1, 2]
+	>>> discretize( [0.2, 0.1, 0.3], 2 )
+	[0, 0, 1]
 
-		>>> _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5] )
-		[1, 0, 1, 0, 0, 1]
+	>>> discretize( [0.4, 0.2, 0.1, 0.3], 2 )
+	[1, 0, 0, 1]
 
-		>>> _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 3 )
-		[1, 0, 2, 0, 1, 2]
+	>>> discretize( [4, 0.2, 0.1, 0.3], 2 )
+	[1, 0, 0, 1]
 
-		>>> _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 0 )
-		[3, 1, 5, 0, 2, 4]
+	>>> discretize( [0.4, 0.2, 0.1, 0.3, 0.5] )
+	[1, 0, 0, 0, 1]
 
-		>>> _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 6 )
-		[3, 1, 5, 0, 2, 4]
+	>>> discretize( [0.4, 0.2, 0.1, 0.3, 0.5], 3 )
+	[1, 0, 0, 1, 2]
 
-		>>> _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 60 )
-		[3, 1, 5, 0, 2, 4]
+	>>> discretize( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5] )
+	[1, 0, 1, 0, 0, 1]
 
-		>>> _discretize_continuous( [0, 0, 0, 0, 0, 0, 1, 2], 2 )
-		[0, 0, 0, 0, 0, 0, 1, 1]
+	>>> discretize( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 3 )
+	[1, 0, 2, 0, 1, 2]
 
-		>>> _discretize_continuous( [0, 0, 0, 0, 1, 2, 2, 2, 2, 3], 3 )
-		[0, 0, 0, 0, 1, 1, 1, 1, 1, 2]
+	>>> discretize( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 0 )
+	[3, 1, 5, 0, 2, 4]
 
-		>>> _discretize_continuous( [0.1, 0, 0, 0, 0, 0, 0, 0, 0] )
-		[1, 0, 0, 0, 0, 0, 0, 0, 0]
+	>>> discretize( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 6 )
+	[3, 1, 5, 0, 2, 4]
+
+	>>> discretize( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 60 )
+	[3, 1, 5, 0, 2, 4]
+
+	>>> discretize( [0, 0, 0, 0, 0, 0, 1, 2], 2 )
+	[0, 0, 0, 0, 0, 0, 1, 1]
+
+	>>> discretize( [0, 0, 0, 0, 1, 2, 2, 2, 2, 3], 3 )
+	[0, 0, 0, 0, 1, 1, 1, 1, 1, 2]
+
+	>>> discretize( [0.1, 0, 0, 0, 0, 0, 0, 0, 0] )
+	[1, 0, 0, 0, 0, 0, 0, 0, 0]
+
+	>>> discretize( [0.992299, 1, 1, 0.999696, 0.999605, 0.663081, 0.978293, 0.987621, 0.997237, 0.999915, 0.984792, 0.998338, 0.999207, 0.98051, 0.997984, 0.999219, 0.579824, 0.998983, 0.720498, 1, 0.803619, 0.970992, 1, 0.952881, 0.999866, 0.997153, 0.014053, 0.998049, 0.977727, 0.971233, 0.995309, 0.0010376, 1, 0.989373, 0.989161, 0.91637, 1, 0.99977, 0.960816, 0.998025, 1, 0.998852, 0.960849, 0.957963, 0.998733, 0.999426, 0.876182, 0.998509, 0.988527, 0.998265, 0.943673] )
+	[3, 6, 6, 5, 5, 0, 2, 2, 3, 5, 2, 4, 4, 2, 3, 5, 0, 4, 0, 6, 0, 1, 6, 1, 5, 3, 0, 3, 2, 1, 3, 0, 6, 3, 2, 0, 6, 5, 1, 3, 6, 4, 1, 1, 4, 5, 0, 4, 2, 4, 1]
+	
+	>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+	>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
+	>>> dx = discretize( x, iN = None, method = None, aiSkip = [1,3] )
+	>>> dx
+	array([[ 0.,  0.,  1.,  1.],
+	       [ 1.,  1.,  1.,  0.],
+	       [ 0.,  0.,  1.,  1.],
+	       [ 0.,  0.,  0.,  1.]])
+	>>> dy = discretize( y, iN = None, method = None, aiSkip = [1] )
+	>>> dy 
+	array([[ 1.,  1.,  0.,  0.],
+	       [ 1.,  1.,  0.,  0.],
+	       [ 0.,  0.,  1.,  1.],
+	       [ 0.,  0.,  1.,  1.]])
+
+	"""
+
+
+	def _discretize_continuous( astrValues, iN = iN ): 
 		
-		>>> _discretize_continuous( [0.992299, 1, 1, 0.999696, 0.999605, 0.663081, 0.978293, 0.987621, 0.997237, 0.999915, 0.984792, 0.998338, 0.999207, 0.98051, 0.997984, 0.999219, 0.579824, 0.998983, 0.720498, 1, 0.803619, 0.970992, 1, 0.952881, 0.999866, 0.997153, 0.014053, 0.998049, 0.977727, 0.971233, 0.995309, 0.0010376, 1, 0.989373, 0.989161, 0.91637, 1, 0.99977, 0.960816, 0.998025, 1, 0.998852, 0.960849, 0.957963, 0.998733, 0.999426, 0.876182, 0.998509, 0.988527, 0.998265, 0.943673] )
-		[3, 6, 6, 5, 5, 0, 2, 2, 3, 5, 2, 4, 4, 2, 3, 5, 0, 4, 0, 6, 0, 1, 6, 1, 5, 3, 0, 3, 2, 1, 3, 0, 6, 3, 2, 0, 6, 5, 1, 3, 6, 4, 1, 1, 4, 5, 0, 4, 2, 4, 1]
-		"""
-
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
 			iN = int(len( astrValues )**0.5 + 0.5)
@@ -400,9 +431,22 @@ def discretize( pArray ):
 
 	try:
 		iRow1, iCol = pArray.shape 
-		return array([_discretize_continuous(line) for line in pArray])
-	except ValueError:
-		return _discretize_continuous(pArray)
+
+		aOut = [] 
+		
+		for i, line in enumerate( pArray ):
+			if i in aiSkip:
+				aOut.append( line )
+			else:
+				aOut.append( _discretize_continuous( line ) )
+
+		return array( aOut )
+
+	except Exception:
+		return _discretize_continuous( pArray )
+
+def discretize2d( pX, pY, method = None ):
+	pass 
 
 
 #=========================================================
@@ -412,31 +456,23 @@ def discretize( pArray ):
 def bh( afPVAL, fQ = 1.0 ):
 	"""
 	Implement the benjamini-hochberg hierarchical hypothesis testing criterion 
-	In practice, used for implementing Yekutieli criterion PER layer 
+	In practice, used for implementing Yekutieli criterion *per layer*.  
 
-	latex: $q$ BH procedure on $\mathcal{T}_t$:
+	When BH is performed per layer, FDR is approximately 
 
-	\begin{enumerate}
-		\item $P_{(1)}^{t} \leq \cdots \leq P_{(m_t)^{t} $
-		\item $r+t := \max\{i: P_{(i)}^{t} \leq i \cdot q / m_t \}
-		\item If $r_t >0,$ reject $r_t$ hypotheses corresponding to $P_{(1)}^t, \ldots, P_{(r_t)}^t$
-	\end{enumerate}
+	.. math::
+		FDR = q \cdot \delta^{*} \cdot(m_0 + m_1)/(m_0+1)
 
-	Then FDR is approximately 
+	where :math:`m_0` is the observed number of discoveries and :math:`m_1` is the observed number of families tested. 
 
-	\begin{equation}
-		FDR = q \cdot \delta^{*} \cdot(observed no. of idscoveries + observed no. of families tested)/(observed no. of discoveries+1)
-	\end{equation}
+	Universal bound: the full tree FDR is :math:`< q \cdot \delta^{*} \cdot 2`
 
-	Universal bound: the full tree FDR is $< q \cdot \delta^{*} \cdot 2$ 
-
-	INPUT 
-
-	afPVAL: list of p-values 
-
-	OUTPUT 
-
-	abOUT: boolean vector corresponding to which hypothesis test rejected, corresponding to p-value 
+	
+	`afPVAL`
+	 list of p-values 
+ 
+	`abOUT`
+	 boolean vector corresponding to which hypothesis test rejected, corresponding to p-value 
 
 	"""
 

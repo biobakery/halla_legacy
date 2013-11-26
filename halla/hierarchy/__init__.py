@@ -33,9 +33,6 @@ from numpy.random import normal
 from scipy.misc import * 
 import pandas as pd 
 
-### BUGBUG: this hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV's, not just single ones 
-### Use the "grouping property" as discussed by Kraskov paper. 
-
 """
 Old hclust
 
@@ -47,11 +44,27 @@ def hclust( pArray, pdist_metric = mi, cluster_metric = l2, bTree = False ):
 
 """
 
-def hclust( pArray, pdist_metric = norm_mid, cluster_metric = absl2, bTree = False ):
-	#returns linkage matrix 
-	pdist_data = pdist( pArray, metric= pdist_metric )  
-	print pdist_data 
-	linkage_data = linkage( pdist_data, metric=cluster_metric ) 
+def hclust( pArray, pdist_metric = norm_mid, cluster_method = "single", bTree = False ):
+	"""
+	Returns hierarchically clustered object 
+
+	Parameters:
+	---------------
+
+	Returns:
+	----------------
+
+	Examples ::
+	-----------------
+
+	Notes 
+	------------------
+	This hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV's, not just single ones 
+	Use the "grouping property" as discussed by Kraskov paper. 
+
+	"""
+	pdist_data = pdist( pArray, metric= pdist_metric )   
+	linkage_data = linkage( pdist_data, metric=cluster_method ) 
 	return to_tree( linkage_data ) if bTree else linkage_data 
 
 

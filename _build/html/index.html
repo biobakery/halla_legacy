@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>HAllA: Hierarchical All-against-All association testing &mdash; HAllA: Hierarchical All-against All 0.1 documentation</title>
+    <title>HAllA: Hierarchical All-against-All association testing &mdash; HAllA: Hierarchical All-against All 0.0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1',
+        VERSION:     '0.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="HAllA: Hierarchical All-against All 0.1 documentation" href="#" /> 
+    <link rel="top" title="HAllA: Hierarchical All-against All 0.0.1 documentation" href="#" /> 
   </head>
   <body>
     <div class="related">
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">HAllA: Hierarchical All-against All 0.1 documentation</a> &raquo;</li> 
+        <li><a href="#">HAllA: Hierarchical All-against All 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -340,26 +340,18 @@ the probability density function:</p>
 <dt id="halla.stats.bh">
 <tt class="descclassname">halla.stats.</tt><tt class="descname">bh</tt><big>(</big><em>afPVAL</em>, <em>fQ=1.0</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#bh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.bh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implement the benjamini-hochberg hierarchical hypothesis testing criterion 
-In practice, used for implementing Yekutieli criterion PER layer</p>
-<p>latex: $q$ BH procedure on $mathcal{T}_t$:</p>
+In practice, used for implementing Yekutieli criterion <em>per layer</em>.</p>
+<p>When BH is performed per layer, FDR is approximately</p>
+<div class="math">
+\[FDR = q \cdot \delta^{*} \cdot(m_0 + m_1)/(m_0+1)\]</div>
+<p>where <span class="math">\(m_0\)</span> is the observed number of discoveries and <span class="math">\(m_1\)</span> is the observed number of families tested.</p>
+<p>Universal bound: the full tree FDR is <span class="math">\(&lt; q \cdot \delta^{*} \cdot 2\)</span></p>
 <dl class="docutils">
-<dt>egin{enumerate}</dt>
-<dd>item $P_{(1)}^{t} leq cdots leq P_{(m_t)^{t} $
-item $r+t := max{i: P_{(i)}^{t} leq i cdot q / m_t }
-item If $r_t &gt;0,$ reject $r_t$ hypotheses corresponding to $P_{(1)}^t, ldots, P_{(r_t)}^t$</dd>
+<dt><cite>afPVAL</cite></dt>
+<dd>list of p-values</dd>
+<dt><cite>abOUT</cite></dt>
+<dd>boolean vector corresponding to which hypothesis test rejected, corresponding to p-value</dd>
 </dl>
-<p>end{enumerate}</p>
-<p>Then FDR is approximately</p>
-<dl class="docutils">
-<dt>egin{equation}</dt>
-<dd>FDR = q cdot delta^{*} cdot(observed no. of idscoveries + observed no. of families tested)/(observed no. of discoveries+1)</dd>
-</dl>
-<p>end{equation}</p>
-<p>Universal bound: the full tree FDR is $&lt; q cdot delta^{*} cdot 2$</p>
-<p>INPUT</p>
-<p>afPVAL: list of p-values</p>
-<p>OUTPUT</p>
-<p>abOUT: boolean vector corresponding to which hypothesis test rejected, corresponding to p-value</p>
 </dd></dl>
 
 <dl class="function">
@@ -462,8 +454,113 @@ Avoid the &#8220;all&#8221; case</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="halla.stats.discretize">
+<tt class="descclassname">halla.stats.</tt><tt class="descname">discretize</tt><big>(</big><em>pArray</em>, <em>iN=None</em>, <em>method=None</em>, <em>aiSkip=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="_modules/halla/stats.html#discretize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.discretize" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]</span> <span class="p">)</span>
+<span class="go">[0, 0, 1, 1]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.09</span><span class="p">,</span> <span class="mf">0.16</span><span class="p">]</span> <span class="p">)</span>
+<span class="go">[0, 0, 1, 1]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="p">]</span> <span class="p">)</span>
+<span class="go">[1, 1, 0, 0]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">]</span> <span class="p">)</span>
+<span class="go">[0, 0, 1, 1]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.015625</span><span class="p">,</span> <span class="mf">0.125</span><span class="p">,</span> <span class="mf">0.421875</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+<span class="go">[0, 0, 1, 1]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span>
+<span class="go">[0]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+<span class="go">[0, 0]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="go">[0, 1]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="go">[1, 0]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="mi">3</span> <span class="p">)</span>
+<span class="go">[1, 0, 2]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="go">[0, 0, 0]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="go">[0, 0, 1]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="go">[1, 0, 0, 1]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="go">[1, 0, 0, 1]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span> <span class="p">)</span>
+<span class="go">[1, 0, 0, 0, 1]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="mi">3</span> <span class="p">)</span>
+<span class="go">[1, 0, 0, 1, 2]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span> <span class="p">)</span>
+<span class="go">[1, 0, 1, 0, 0, 1]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="mi">3</span> <span class="p">)</span>
+<span class="go">[1, 0, 2, 0, 1, 2]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="mi">0</span> <span class="p">)</span>
+<span class="go">[3, 1, 5, 0, 2, 4]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="mi">6</span> <span class="p">)</span>
+<span class="go">[3, 1, 5, 0, 2, 4]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="mi">60</span> <span class="p">)</span>
+<span class="go">[3, 1, 5, 0, 2, 4]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="go">[0, 0, 0, 0, 0, 0, 1, 1]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="mi">3</span> <span class="p">)</span>
+<span class="go">[0, 0, 0, 0, 1, 1, 1, 1, 1, 2]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="p">)</span>
+<span class="go">[1, 0, 0, 0, 0, 0, 0, 0, 0]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">discretize</span><span class="p">(</span> <span class="p">[</span><span class="mf">0.992299</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.999696</span><span class="p">,</span> <span class="mf">0.999605</span><span class="p">,</span> <span class="mf">0.663081</span><span class="p">,</span> <span class="mf">0.978293</span><span class="p">,</span> <span class="mf">0.987621</span><span class="p">,</span> <span class="mf">0.997237</span><span class="p">,</span> <span class="mf">0.999915</span><span class="p">,</span> <span class="mf">0.984792</span><span class="p">,</span> <span class="mf">0.998338</span><span class="p">,</span> <span class="mf">0.999207</span><span class="p">,</span> <span class="mf">0.98051</span><span class="p">,</span> <span class="mf">0.997984</span><span class="p">,</span> <span class="mf">0.999219</span><span class="p">,</span> <span class="mf">0.579824</span><span class="p">,</span> <span class="mf">0.998983</span><span class="p">,</span> <span class="mf">0.720498</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.803619</span><span class="p">,</span> <span class="mf">0.970992</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.952881</span><span class="p">,</span> <span class="mf">0.999866</span><span class="p">,</span> <span class="mf">0.997153</span><span class="p">,</span> <span class="mf">0.014053</span><span class="p">,</span> <span class="mf">0.998049</span><span class="p">,</span> <span class="mf">0.977727</span><span class="p">,</span> <span class="mf">0.971233</span><span class="p">,</span> <span class="mf">0.995309</span><span class="p">,</span> <span class="mf">0.0010376</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.989373</span><span class="p">,</span> <span class="mf">0.989161</span><span class="p">,</span> <span class="mf">0.91637</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.99977</span><span class="p">,</span> <span class="mf">0.960816</span><span class="p">,</span> <span class="mf">0.998025</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.998852</span><span class="p">,</span> <span class="mf">0.960849</span><span class="p">,</span> <span class="mf">0.957963</span><span class="p">,</span> <span class="mf">0.998733</span><span class="p">,</span> <span class="mf">0.999426</span><span class="p">,</span> <span class="mf">0.876182</span><span class="p">,</span> <span class="mf">0.998509</span><span class="p">,</span> <span class="mf">0.988527</span><span class="p">,</span> <span class="mf">0.998265</span><span class="p">,</span> <span class="mf">0.943673</span><span class="p">]</span> <span class="p">)</span>
+<span class="go">[3, 6, 6, 5, 5, 0, 2, 2, 3, 5, 2, 4, 4, 2, 3, 5, 0, 4, 0, 6, 0, 1, 6, 1, 5, 3, 0, 3, 2, 1, 3, 0, 6, 3, 2, 0, 6, 5, 1, 3, 6, 4, 1, 1, 4, 5, 0, 4, 2, 4, 1]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
 <dt id="halla.stats.get_medoid">
-<tt class="descclassname">halla.stats.</tt><tt class="descname">get_medoid</tt><big>(</big><em>pArray</em>, <em>iAxis=0</em>, <em>pMetric=&lt;function l2 at 0x6af95f0&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#get_medoid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.get_medoid" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.stats.</tt><tt class="descname">get_medoid</tt><big>(</big><em>pArray</em>, <em>iAxis=0</em>, <em>pMetric=&lt;function l2 at 0x5c77ed8&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#get_medoid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.get_medoid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Input: numpy array 
 Output: float</p>
 <p>For lack of better way, compute centroid, then compute medoid 
@@ -612,7 +709,7 @@ the probability density function:</p>
 
 <dl class="function">
 <dt id="halla.stats.p_val_plot">
-<tt class="descclassname">halla.stats.</tt><tt class="descname">p_val_plot</tt><big>(</big><em>pArray1</em>, <em>pArray2</em>, <em>pCut=&lt;function log_cut at 0x6af9cf8&gt;</em>, <em>iIter=100</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#p_val_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.p_val_plot" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.stats.</tt><tt class="descname">p_val_plot</tt><big>(</big><em>pArray1</em>, <em>pArray2</em>, <em>pCut=&lt;function log_cut at 0x5c7b668&gt;</em>, <em>iIter=100</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#p_val_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.p_val_plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns p value plot of combinatorial cuts</p>
 <p>In practice, works best when arrays are of similar size, since I implement the minimum ... 
 For future think about implementing the correct step function</p>
@@ -662,27 +759,27 @@ multi-dimensional array:</p>
 
 <span class="target" id="module-halla.distance"></span><p>Abstract distance module providing different notions of distance</p>
 <dl class="class">
-<dt id="halla.distance.CAdjustedMutualInformation">
-<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">CAdjustedMutualInformation</tt><big>(</big><em>c_array1</em>, <em>c_array2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#CAdjustedMutualInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.CAdjustedMutualInformation" title="Permalink to this definition">¶</a></dt>
+<dt id="halla.distance.AdjustedMutualInformation">
+<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">AdjustedMutualInformation</tt><big>(</big><em>c_array1</em>, <em>c_array2</em><big>)</big><a class="headerlink" href="#halla.distance.AdjustedMutualInformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>adjusted for chance</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="halla.distance.CDistance">
-<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">CDistance</tt><big>(</big><em>c_array1</em>, <em>c_array2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#CDistance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.CDistance" title="Permalink to this definition">¶</a></dt>
+<dt id="halla.distance.Distance">
+<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">Distance</tt><big>(</big><em>c_array1</em>, <em>c_array2</em><big>)</big><a class="headerlink" href="#halla.distance.Distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>abstract distance, handles numpy arrays (probably should support lists for compatibility issues)</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="halla.distance.CMutualInformation">
-<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">CMutualInformation</tt><big>(</big><em>c_array1</em>, <em>c_array2</em>, <em>bSym=False</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#CMutualInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.CMutualInformation" title="Permalink to this definition">¶</a></dt>
+<dt id="halla.distance.MutualInformation">
+<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">MutualInformation</tt><big>(</big><em>c_array1</em>, <em>c_array2</em>, <em>bSym=False</em><big>)</big><a class="headerlink" href="#halla.distance.MutualInformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scikit-learn uses the convention log = ln
 Adjust multiplicative factor of log(e,2)</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="halla.distance.CNormalizedMutualInformation">
-<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">CNormalizedMutualInformation</tt><big>(</big><em>c_array1</em>, <em>c_array2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#CNormalizedMutualInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.CNormalizedMutualInformation" title="Permalink to this definition">¶</a></dt>
+<dt id="halla.distance.NormalizedMutualInformation">
+<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">NormalizedMutualInformation</tt><big>(</big><em>c_array1</em>, <em>c_array2</em><big>)</big><a class="headerlink" href="#halla.distance.NormalizedMutualInformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>normalized by sqrt(H1*H2) so the range is [0,1]</p>
 </dd></dl>
 
@@ -699,13 +796,50 @@ Adjust multiplicative factor of log(e,2)</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="halla.distance.cor">
+<tt class="descclassname">halla.distance.</tt><tt class="descname">cor</tt><big>(</big><em>pData1</em>, <em>pData2</em>, <em>method='pearson'</em><big>)</big><a class="headerlink" href="#halla.distance.cor" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt><cite>pData1, pData2</cite></dt>
+<dd>Numpy array</dd>
+<dt><cite>method</cite></dt>
+<dd>{&#8220;pearson&#8221;, &#8220;spearman&#8221;}</dd>
+</dl>
+<dl class="docutils">
+<dt><cite>rho</cite></dt>
+<dd>float</dd>
+<dt><cite>p-value</cite></dt>
+<dd>float</dd>
+</dl>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">0.015625</span><span class="p">,</span><span class="mf">0.125</span><span class="p">,</span><span class="mf">0.421875</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="o">=</span> <span class="n">item</span><span class="p">;</span> <span class="k">print</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span><span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">pearsonr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span><span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">spearmanr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">(0, 0) -1.0 -1.0</span>
+<span class="go">(0, 1) -0.894427191 -0.894427191</span>
+<span class="go">(0, 2) 1.0 1.0</span>
+<span class="go">(0, 3) 0.951369855792 1.0</span>
+<span class="go">(1, 0) 0.774596669241 0.774596669241</span>
+<span class="go">(1, 1) 0.57735026919 0.57735026919</span>
+<span class="go">(1, 2) -0.774596669241 -0.774596669241</span>
+<span class="go">(1, 3) -0.921159901892 -0.774596669241</span>
+<span class="go">(2, 0) -0.984374038698 -1.0</span>
+<span class="go">(2, 1) -0.880450906326 -0.894427191</span>
+<span class="go">(2, 2) 0.984374038698 1.0</span>
+<span class="go">(2, 3) 0.99053285189 1.0</span>
+<span class="go">(3, 0) -0.774596669241 -0.774596669241</span>
+<span class="go">(3, 1) -0.57735026919 -0.57735026919</span>
+<span class="go">(3, 2) 0.774596669241 0.774596669241</span>
+<span class="go">(3, 3) 0.921159901892 0.774596669241</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
 <dt id="halla.distance.l2">
 <tt class="descclassname">halla.distance.</tt><tt class="descname">l2</tt><big>(</big><em>pData1</em>, <em>pData2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#l2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.l2" title="Permalink to this definition">¶</a></dt>
 <dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]);</span> <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">l2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
 <span class="go">5.196152422706632</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">l2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
-<span class="go">0.000</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -713,8 +847,40 @@ Adjust multiplicative factor of log(e,2)</p>
 <dl class="function">
 <dt id="halla.distance.mi">
 <tt class="descclassname">halla.distance.</tt><tt class="descname">mi</tt><big>(</big><em>pData1</em>, <em>pData2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#mi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.mi" title="Permalink to this definition">¶</a></dt>
-<dd><p>static implementation of mutual information, 
-caveat: already normalized by CMutualInformation</p>
+<dd><p>Static implementation of mutual information, returns bits</p>
+<dl class="docutils">
+<dt><cite>pData1, pData2</cite></dt>
+<dd>Numpy arrays</dd>
+</dl>
+<dl class="docutils">
+<dt><cite>mi</cite></dt>
+<dd>float</dd>
+</dl>
+<p>Examples:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">0.015625</span><span class="p">,</span><span class="mf">0.125</span><span class="p">,</span><span class="mf">0.421875</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dx</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dy</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span> <span class="n">y</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="o">=</span> <span class="n">item</span><span class="p">;</span> <span class="k">print</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">mi</span><span class="p">(</span> <span class="n">dx</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">dy</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="p">)</span>
+<span class="go">(0, 0) 1.0</span>
+<span class="go">(0, 1) 1.0</span>
+<span class="go">(0, 2) 1.0</span>
+<span class="go">(0, 3) 1.0</span>
+<span class="go">(1, 0) 0.311278124459</span>
+<span class="go">(1, 1) 0.311278124459</span>
+<span class="go">(1, 2) 0.311278124459</span>
+<span class="go">(1, 3) 0.311278124459</span>
+<span class="go">(2, 0) 1.0</span>
+<span class="go">(2, 1) 1.0</span>
+<span class="go">(2, 2) 1.0</span>
+<span class="go">(2, 3) 1.0</span>
+<span class="go">(3, 0) 0.311278124459</span>
+<span class="go">(3, 1) 0.311278124459</span>
+<span class="go">(3, 2) 0.311278124459</span>
+<span class="go">(3, 3) 0.311278124459</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -886,7 +1052,7 @@ the probability density function:</p>
 
 <dl class="function">
 <dt id="halla.test.randmat">
-<tt class="descclassname">halla.test.</tt><tt class="descname">randmat</tt><big>(</big><em>tShape=(10</em>, <em>10)</em>, <em>pDist=&lt;built-in method normal of mtrand.RandomState object at 0x39c2c18&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/test.html#randmat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.test.randmat" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.test.</tt><tt class="descname">randmat</tt><big>(</big><em>tShape=(10</em>, <em>10)</em>, <em>pDist=&lt;built-in method normal of mtrand.RandomState object at 0x2b33c00&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/test.html#randmat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.test.randmat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a tShape-dimensional matrix given by base distribution pDist 
 Order: Row, Col</p>
 </dd></dl>
@@ -1045,7 +1211,7 @@ the probability density function:</p>
 
 <dl class="function">
 <dt id="halla.hierarchy.recursive_all_against_all">
-<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">recursive_all_against_all</tt><big>(</big><em>apClusterNode1</em>, <em>apClusterNode2</em>, <em>pArray1</em>, <em>pArray2</em>, <em>pOut=</em><span class="optional">[</span><span class="optional">]</span>, <em>pFDR=&lt;function bh at 0x6afc1b8&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#recursive_all_against_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.recursive_all_against_all" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">recursive_all_against_all</tt><big>(</big><em>apClusterNode1</em>, <em>apClusterNode2</em>, <em>pArray1</em>, <em>pArray2</em>, <em>pOut=</em><span class="optional">[</span><span class="optional">]</span>, <em>pFDR=&lt;function bh at 0x5c7bb18&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#recursive_all_against_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.recursive_all_against_all" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs recursive all-against-all (the default HAllA routine) with fdr correction</p>
 <p>Input: apClusterNode1, apClusterNode2, pArray1, pArray2, pFDR</p>
 <p>Output: a list of ( (aiIndex1, pBag1), (aiIndex2, pBag2) )</p>
@@ -1053,7 +1219,7 @@ the probability density function:</p>
 
 <dl class="function">
 <dt id="halla.hierarchy.reduce_tree">
-<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">reduce_tree</tt><big>(</big><em>pClusterNode</em>, <em>pFunction=&lt;function &lt;lambda&gt; at 0x7e907d0&gt;</em>, <em>aOut=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#reduce_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.reduce_tree" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">reduce_tree</tt><big>(</big><em>pClusterNode</em>, <em>pFunction=&lt;function &lt;lambda&gt; at 0x703c230&gt;</em>, <em>aOut=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#reduce_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.reduce_tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Recursive</p>
 <p>Input: pClusterNode, pFunction = lambda x: x.id, aOut = []</p>
 <p>Output: a list of pFunction calls (node ids by default)</p>
@@ -1101,7 +1267,7 @@ Output: (i,j), pFunction( pArray[:,i], pArray2[:,j])</div></blockquote>
 <div class="section" id="license">
 <h3>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h3>
 <p>This software is licensed under the MIT license.</p>
-<p>Copyright (c) 2013 Yo Sup Moon, Levi Waldron, and Curtis Huttenhower</p>
+<p>Copyright (c) 2013 Yo Sup Moon, Curtis Huttenhower</p>
 <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &#8220;Software&#8221;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
 <p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
 <p>THE SOFTWARE IS PROVIDED &#8220;AS IS&#8221;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
@@ -1177,7 +1343,7 @@ Output: (i,j), pFunction( pArray[:,i], pArray2[:,j])</div></blockquote>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="#">HAllA: Hierarchical All-against All 0.1 documentation</a> &raquo;</li> 
+        <li><a href="#">HAllA: Hierarchical All-against All 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

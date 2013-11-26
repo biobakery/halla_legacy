@@ -395,7 +395,8 @@ class HAllA():
 			#self._bootstrap_test( pData1, pData2, pMedoid1, pMedoid2, iOne, iTwo )
 			self._permute_test( pData1, pData2, pMedoid1, pMedoid2, iOne, iTwo )
 
-	def _htest_baseline( self ):
+
+	def _baseline( self ):
 		pass 
 
 	def _htest( self ):
@@ -439,7 +440,7 @@ class HAllA():
 		self._htest_rev1()
 
 	def run_caketest( self ):
-		from pylab import * 
+
 		import numpy 
 
 		print "running caketest ... "
@@ -460,6 +461,10 @@ class HAllA():
 
 
 		#return self._cakecut()
+
+	def run_baseline( self ):
+		self._discretize( ) 
+		self._baseline( )
 
 
 
