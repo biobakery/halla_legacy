@@ -227,22 +227,6 @@ def hclust( pArray, pdist_metric = norm_mid, cluster_method = "single", bTree = 
 def dendrogram( Z ):
 	return scipy.cluster.hierarchy.dendrogram( Z )
 
-def couple_tree( pClusterNode1, pClusterNode2, method = "unif" ):
-	"""
-	Couples two data trees to produce a hypothesis tree 
-
-	Parameters:
-
-
-
-	Returns:
-
-	Examples: ::
-
-
-
-	"""
-
 def truncate_tree( apClusterNode, iSkip, iLevel = 0 ):
 	"""
 	Chop tree from root, returning smaller tree towards the leaves 
@@ -322,6 +306,18 @@ def get_layer( atData, iLayer ):
 			break
 	return dummyOut, atData 
 
+def couple_tree( pClusterNode1, pClusterNode2, method = "unif" ):
+	"""
+	Couples two data trees to produce a hypothesis tree 
+
+	Examples
+	----------------
+
+	>>> depth1 = depth_tree( pClusterNode1 )
+	>>> depth2 = depth_tree( pClusterNode2 )
+	"""
+
+	pass 
 
 def one_against_one( pClusterNode1, pClusterNode2, pArray1, pArray2 ):
 	"""
