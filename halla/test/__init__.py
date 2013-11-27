@@ -100,10 +100,10 @@ def nov_27_2013():
 	for k, item in enumerate(aL):
 		i,j = item
 		i,j = numpy.abs(i), numpy.abs(j)
-		matplotlib.pyplot.figure(aNames[k])
-		matplotlib.pyplot.subplot(1,2,1)
+		#matplotlib.pyplot.figure(aNames[k])
+		#matplotlib.pyplot.subplot(1,2,1)
 		dendrogram(i)
-		matplotlib.pyplot.subplot(1,2,2)
+		#matplotlib.pyplot.subplot(1,2,2)
 		dendrogram(j)
 
 

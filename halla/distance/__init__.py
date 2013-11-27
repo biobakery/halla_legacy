@@ -14,7 +14,7 @@ import scipy
 import sklearn as sk 
  
 import halla.stats
-
+import scipy.stats 
 from scipy.stats import pearsonr, spearmanr
 
 import pylab 
@@ -133,54 +133,141 @@ class AdjustedMutualInformation( Distance ):
 # FUNCTIONS  
 #==========================================================================#
 
-def cor( pData1, pData2, method = "pearson"):
+def cor( pData1, pData2, method = "pearson", pval = False ):
 	"""
-	Parameters:
-	----------------
+	Get correlation coefficient and corresponding parametric p-value (t-test)
 
-	`pData1, pData2`
-	 Numpy array
+	Parameters
+	------------
+	pData1, pData2 : numpy arrays
+		 data matrices 
+	method : str 
+		{"pearson", "spearman"}
+		"abs"
+	pval : bool
+		True if parametric estimate of p-value requested 
 
-	`method`
-	 {"pearson", "spearman"}
+	Returns
+	-----------
+	rho: float
+		correlation coefficient 
+	p: float
+ 		p-value  
+	
+	Example Usage within HAllA
+	-----------------------------
+	View pairwise correlation measures (pearson,spearman) between two datasets `x` and `y`:
 
+	>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+	>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
+	>>> p = [_ for _ in itertools.product( range(len(x)), range(len(y)) )]
+	>>> for item in p: i,j = item; print (i,j),cor(x[i],y[j], method="pearson"),cor(x[i],y[j], method="spearman")
+	(0, 0) -1.0 -1.0
+	(0, 1) -0.894427191 -0.894427191
+	(0, 2) 1.0 1.0 
+	(0, 3) 0.951369855792 1.0
+	(1, 0) 0.774596669241 0.774596669241
+	(1, 1) 0.57735026919 0.57735026919
+	(1, 2) -0.774596669241 -0.774596669241
+	(1, 3) -0.921159901892 -0.774596669241
+	(2, 0) -0.984374038698 -1.0
+	(2, 1) -0.880450906326 -0.894427191
+	(2, 2) 0.984374038698 1.0
+	(2, 3) 0.99053285189 1.0
+	(3, 0) -0.774596669241 -0.774596669241
+	(3, 1) -0.57735026919 -0.57735026919
+	(3, 2) 0.774596669241 0.774596669241
+	(3, 3) 0.921159901892 0.774596669241
 
-	Returns:
-	---------------------
+	Generate p-values for pearson correlation:
 
-	`rho`
-	 float 
-	`p-value`
-	 float 
+	>>> pval_pearson = sorted( [cor(x[i],y[j], method="pearson", pval=True)[1] for i,j in p] )
+	>>> pval_pearson
+	[0.0, 0.0, 0.0094671481098304033, 0.01562596130230276, 0.015625961302302867, 0.048630144207595816, 0.07884009810806647, 0.07884009810806647, 0.10557280900008403, 0.11954909367437615, 0.22540333075851643, 0.22540333075851643, 0.2254033307585166, 0.2254033307585166, 0.42264973081037405, 0.42264973081037405]
 
-	Examples ::
-	----------------------
+	View plot::
 
-		>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-		>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
-		>>> p = itertools.product( range(len(x)), range(len(y)) )
-		>>> for item in p: i,j = item; print (i,j),scipy.stats.pearsonr(x[i],y[j])[0],scipy.stats.spearmanr(x[i],y[j])[0]
-		(0, 0) -1.0 -1.0
-		(0, 1) -0.894427191 -0.894427191
-		(0, 2) 1.0 1.0
-		(0, 3) 0.951369855792 1.0
-		(1, 0) 0.774596669241 0.774596669241
-		(1, 1) 0.57735026919 0.57735026919
-		(1, 2) -0.774596669241 -0.774596669241
-		(1, 3) -0.921159901892 -0.774596669241
-		(2, 0) -0.984374038698 -1.0
-		(2, 1) -0.880450906326 -0.894427191
-		(2, 2) 0.984374038698 1.0
-		(2, 3) 0.99053285189 1.0
-		(3, 0) -0.774596669241 -0.774596669241
-		(3, 1) -0.57735026919 -0.57735026919
-		(3, 2) 0.774596669241 0.774596669241
-		(3, 3) 0.921159901892 0.774596669241
-	""" 
+		plt.plot( pval_pearson )
+		plt.show()
+
+	.. plot::
+
+		import matplotlib.pyplot as plt 
+		plt.plot( [0.0, 0.0, 0.0094671481098304033, 0.01562596130230276, 0.015625961302302867, 0.048630144207595816, 
+			0.07884009810806647, 0.07884009810806647, 0.10557280900008403, 0.11954909367437615, 0.22540333075851643, 
+			0.22540333075851643, 0.2254033307585166, 0.2254033307585166, 0.42264973081037405, 0.42264973081037405], 
+			linestyle='--', marker='o' )
+		plt.show()
+
+	Generate p-values for spearman correlation:
+
+	>>> pval_spearman = sorted( [cor(x[i],y[j], method="spearman", pval=True)[1] for i,j in p] )
+	>>> pval_spearman
+	[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.10557280900008413, 0.10557280900008413, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.42264973081037427, 0.42264973081037427]
+
+	View plot::
+		
+		plt.plot(pval_pearson)
+		plt.show()
+
+	.. plot::
+		
+		import matplotlib.pyplot as plt 
+		plt.plot( [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.10557280900008413, 0.10557280900008413, 0.22540333075851657, 
+			0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 
+			0.42264973081037427, 0.42264973081037427], linestyle='--', marker='o')
+		plt.show()			
+	
+		""" 
+	try:
+		str(method)
+		if not(method == "pearson") and not(method=="spearman"):
+			raise ValueError  
+		pMethod = scipy.stats.spearmanr if method == "spearman" else scipy.stats.pearsonr
+	except Exception:
+		pMethod = method 
+
+	return pMethod( pData1, pData2 )[0] if not pval else pMethod( pData1, pData2 )
+
+def cord( pData, pData2, method = "pearson", inversion_method = "abs", pval=False ):
+	"""
+	Get correlation divergence 
+
+	Parameters
+	-----------
+	pData1, pData2 : numpy arrays
+		 data matrices 
+	method : str 
+		{"pearson", "spearman"}
+	inversion_method : str
+		"abs"
+	pval : bool
+		True if parametric estimate of p-value requested 
+
+	Returns
+	-----------
+	rho: float
+		correlation coefficient 
+	p: float
+ 		p-value  
+
+	Examples
+	----------
+	>>> x = [0.1,0.2,0.3,0.4]
+	>>> y = [-0.1,-0.2,-0.3,-0.4]
+	>>> cord( x,y )
+	0.0
+	"""
+
+	pMethod, pPval = method, pval 
+	pCor = cor( pData, pData2, method=pMethod, pval=pPval )
+	return (1.0-abs(pCor[0]), pCor[1]) if pval else 1.0-abs(pCor)
 
 
 def l2( pData1, pData2 ):
 	"""
+	Returns the l2 distance
+
 	>>> x = numpy.array([1,2,3]); y = numpy.array([4,5,6])
 	>>> l2(x,y)
 	5.196152422706632
@@ -194,74 +281,72 @@ def mi( pData1, pData2 ):
 	"""
 	Static implementation of mutual information, returns bits 
 
-	Parameters:
+	Parameters
+	--------------
+	pData1, pData2 : Numpy arrays
+
+	Returns
+	---------------
+	mi : float 
+
+	Examples
 	--------------
 
-	`pData1, pData2`
-	 Numpy arrays
-
-	Returns:
-	---------------
-	`mi`
-	 float 
-
-	Examples:: 
-
-		>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-		>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
-		>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
-		>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
-		>>> p = itertools.product( range(len(x)), range(len(y)) )
-		>>> for item in p: i,j = item; print (i,j), mi( dx[i], dy[j] )
-		(0, 0) 1.0
-		(0, 1) 1.0
-		(0, 2) 1.0
-		(0, 3) 1.0
-		(1, 0) 0.311278124459
-		(1, 1) 0.311278124459
-		(1, 2) 0.311278124459
-		(1, 3) 0.311278124459
-		(2, 0) 1.0
-		(2, 1) 1.0
-		(2, 2) 1.0
-		(2, 3) 1.0
-		(3, 0) 0.311278124459
-		(3, 1) 0.311278124459
-		(3, 2) 0.311278124459
-		(3, 3) 0.311278124459
-
+	>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+	>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
+	>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
+	>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
+	>>> p = itertools.product( range(len(x)), range(len(y)) )
+	>>> for item in p: i,j = item; print (i,j), mi( dx[i], dy[j] )
+	(0, 0) 1.0
+	(0, 1) 1.0
+	(0, 2) 1.0
+	(0, 3) 1.0
+	(1, 0) 0.311278124459
+	(1, 1) 0.311278124459
+	(1, 2) 0.311278124459
+	(1, 3) 0.311278124459
+	(2, 0) 1.0
+	(2, 1) 1.0
+	(2, 2) 1.0
+	(2, 3) 1.0
+	(3, 0) 0.311278124459
+	(3, 1) 0.311278124459
+	(3, 2) 0.311278124459
+	(3, 3) 0.311278124459
 	"""
 
 	return MutualInformation( pData1, pData2 ).get_distance()
 
 def norm_mi( pData1, pData2 ):
 	"""
-	static implementation of normalized mutual information 
+	Static implementation of normalized mutual information 
 
-	Examples ::
+	Examples
+	---------------
 
-		>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-		>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
-		>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
-		>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
-		>>> p = itertools.product( range(len(x)), range(len(y)) )
-		>>> for item in p: i,j = item; print (i,j), norm_mi( dx[i], dy[j] )
-		(0, 0) 1.0
-		(0, 1) 1.0
-		(0, 2) 1.0
-		(0, 3) 1.0
-		(1, 0) 0.345592029944
-		(1, 1) 0.345592029944
-		(1, 2) 0.345592029944
-		(1, 3) 0.345592029944
-		(2, 0) 1.0
-		(2, 1) 1.0
-		(2, 2) 1.0
-		(2, 3) 1.0
-		(3, 0) 0.345592029944
-		(3, 1) 0.345592029944
-		(3, 2) 0.345592029944
-		(3, 3) 0.345592029944
+	>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+	>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
+	>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
+	>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
+	>>> p = itertools.product( range(len(x)), range(len(y)) )
+	>>> for item in p: i,j = item; print (i,j), norm_mi( dx[i], dy[j] )
+	(0, 0) 1.0
+	(0, 1) 1.0
+	(0, 2) 1.0
+	(0, 3) 1.0
+	(1, 0) 0.345592029944
+	(1, 1) 0.345592029944
+	(1, 2) 0.345592029944
+	(1, 3) 0.345592029944
+	(2, 0) 1.0
+	(2, 1) 1.0
+	(2, 2) 1.0
+	(2, 3) 1.0
+	(3, 0) 0.345592029944
+	(3, 1) 0.345592029944
+	(3, 2) 0.345592029944
+	(3, 3) 0.345592029944
 
 	"""
 
@@ -269,32 +354,33 @@ def norm_mi( pData1, pData2 ):
 
 def adj_mi( pData1, pData2 ):
 	""" 
-	static implementation of adjusted distance 
+	Static implementation of adjusted distance 
 
-	Examples ::
+	Examples
+	-----------
 
-		>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-		>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
-		>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
-		>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
-		>>> p = itertools.product( range(len(x)), range(len(y)) )
-		>>> for item in p: i,j = item; print (i,j), adj_mi( dx[i], dy[j] )
-		(0, 0) 1.0
-		(0, 1) 1.0
-		(0, 2) 1.0
-		(0, 3) 1.0
-		(1, 0) 2.51758394487e-08
-		(1, 1) 2.51758394487e-08
-		(1, 2) 2.51758394487e-08
-		(1, 3) 2.51758394487e-08
-		(2, 0) 1.0
-		(2, 1) 1.0
-		(2, 2) 1.0
-		(2, 3) 1.0
-		(3, 0) -3.72523550982e-08
-		(3, 1) -3.72523550982e-08
-		(3, 2) -3.72523550982e-08
-		(3, 3) -3.72523550982e-08
+	>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+	>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
+	>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
+	>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
+	>>> p = itertools.product( range(len(x)), range(len(y)) )
+	>>> for item in p: i,j = item; print (i,j), adj_mi( dx[i], dy[j] )
+	(0, 0) 1.0
+	(0, 1) 1.0
+	(0, 2) 1.0
+	(0, 3) 1.0
+	(1, 0) 2.51758394487e-08
+	(1, 1) 2.51758394487e-08
+	(1, 2) 2.51758394487e-08
+	(1, 3) 2.51758394487e-08
+	(2, 0) 1.0
+	(2, 1) 1.0
+	(2, 2) 1.0
+	(2, 3) 1.0
+	(3, 0) -3.72523550982e-08
+	(3, 1) -3.72523550982e-08
+	(3, 2) -3.72523550982e-08
+	(3, 3) -3.72523550982e-08
 
 	"""
 
@@ -302,33 +388,35 @@ def adj_mi( pData1, pData2 ):
 
 def mid( pData1, pData2 ):
 	"""
-	static implementation of mutual information, 
-	caveat: returns nats, not bits 
+	Static implementation of mutual information, 
 
 
-	Examples::
-		>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-		>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
-		>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
-		>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
-		>>> p = itertools.product( range(len(x)), range(len(y)) )
-		>>> for item in p: i,j = item; print (i,j), mid( dx[i], dy[j] )
-		(0, 0) 0.0
-		(0, 1) 0.0
-		(0, 2) 0.0
-		(0, 3) 0.0
-		(1, 0) 0.688721875541
-		(1, 1) 0.688721875541
-		(1, 2) 0.688721875541
-		(1, 3) 0.688721875541
-		(2, 0) 0.0
-		(2, 1) 0.0
-		(2, 2) 0.0
-		(2, 3) 0.0
-		(3, 0) 0.688721875541
-		(3, 1) 0.688721875541
-		(3, 2) 0.688721875541
-		(3, 3) 0.688721875541
+
+	Examples 
+	-------------
+
+	>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+	>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
+	>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
+	>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
+	>>> p = itertools.product( range(len(x)), range(len(y)) )
+	>>> for item in p: i,j = item; print (i,j), mid( dx[i], dy[j] )
+	(0, 0) 0.0
+	(0, 1) 0.0
+	(0, 2) 0.0
+	(0, 3) 0.0
+	(1, 0) 0.688721875541
+	(1, 1) 0.688721875541
+	(1, 2) 0.688721875541
+	(1, 3) 0.688721875541
+	(2, 0) 0.0
+	(2, 1) 0.0
+	(2, 2) 0.0
+	(2, 3) 0.0
+	(3, 0) 0.688721875541
+	(3, 1) 0.688721875541
+	(3, 2) 0.688721875541
+	(3, 3) 0.688721875541
 
 	"""
 
@@ -336,66 +424,68 @@ def mid( pData1, pData2 ):
 
 def norm_mid( pData1, pData2 ):
 	"""
-	static implementation of normalized mutual information 
+	Static implementation of normalized mutual information 
 
-	Examples::
+	Examples
+	-------------
 
 
-		>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-		>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
-		>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
-		>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
-		>>> p = itertools.product( range(len(x)), range(len(y)) )
-		>>> for item in p: i,j = item; print (i,j), norm_mid( dx[i], dy[j] )
-		(0, 0) 0.0
-		(0, 1) 0.0
-		(0, 2) 0.0
-		(0, 3) 0.0
-		(1, 0) 0.654407970056
-		(1, 1) 0.654407970056
-		(1, 2) 0.654407970056
-		(1, 3) 0.654407970056
-		(2, 0) 0.0
-		(2, 1) 0.0
-		(2, 2) 0.0
-		(2, 3) 0.0
-		(3, 0) 0.654407970056
-		(3, 1) 0.654407970056
-		(3, 2) 0.654407970056
-		(3, 3) 0.654407970056
+	>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+	>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
+	>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
+	>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
+	>>> p = itertools.product( range(len(x)), range(len(y)) )
+	>>> for item in p: i,j = item; print (i,j), norm_mid( dx[i], dy[j] )
+	(0, 0) 0.0
+	(0, 1) 0.0
+	(0, 2) 0.0
+	(0, 3) 0.0
+	(1, 0) 0.654407970056
+	(1, 1) 0.654407970056
+	(1, 2) 0.654407970056
+	(1, 3) 0.654407970056
+	(2, 0) 0.0
+	(2, 1) 0.0
+	(2, 2) 0.0
+	(2, 3) 0.0
+	(3, 0) 0.654407970056
+	(3, 1) 0.654407970056
+	(3, 2) 0.654407970056
+	(3, 3) 0.654407970056
 	"""
 
 	return 1 - NormalizedMutualInformation( pData1, pData2 ).get_distance() 
 
 def adj_mid( pData1, pData2 ):
 	""" 
-	static implementation of adjusted distance 
+	Static implementation of adjusted distance 
 
 
-	Examples::
+	Examples
+	-----------
 
-		>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-		>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
-		>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
-		>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
-		>>> p = itertools.product( range(len(x)), range(len(y)) )
-		>>> for item in p: i,j = item; print (i,j), adj_mid( dx[i], dy[j] )
-		(0, 0) 0.0
-		(0, 1) 0.0
-		(0, 2) 0.0
-		(0, 3) 0.0
-		(1, 0) 0.999999974824
-		(1, 1) 0.999999974824
-		(1, 2) 0.999999974824
-		(1, 3) 0.999999974824
-		(2, 0) 0.0
-		(2, 1) 0.0
-		(2, 2) 0.0
-		(2, 3) 0.0
-		(3, 0) 1.00000003725
-		(3, 1) 1.00000003725
-		(3, 2) 1.00000003725
-		(3, 3) 1.00000003725
+	>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+	>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
+	>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
+	>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
+	>>> p = itertools.product( range(len(x)), range(len(y)) )
+	>>> for item in p: i,j = item; print (i,j), adj_mid( dx[i], dy[j] )
+	(0, 0) 0.0
+	(0, 1) 0.0
+	(0, 2) 0.0
+	(0, 3) 0.0
+	(1, 0) 0.999999974824
+	(1, 1) 0.999999974824
+	(1, 2) 0.999999974824
+	(1, 3) 0.999999974824
+	(2, 0) 0.0
+	(2, 1) 0.0
+	(2, 2) 0.0
+	(2, 3) 0.0
+	(3, 0) 1.00000003725
+	(3, 1) 1.00000003725
+	(3, 2) 1.00000003725
+	(3, 3) 1.00000003725
 	"""
 
 	return 1 - AdjustedMutualInformation( pData1, pData2 ).get_distance()

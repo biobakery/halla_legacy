@@ -20,7 +20,7 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
-sys.path.append(os.path.abspath('sphinxetc'))
+sys.path.append(os.path.abspath('sphinxext'))
 
 
 # -- General configuration ------------------------------------------------
@@ -44,7 +44,9 @@ extensions = [
     'matplotlib.sphinxext.only_directives',
     'matplotlib.sphinxext.plot_directive',
     'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',]
+    'sphinx.ext.doctest',
+    'numpydoc',
+    ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

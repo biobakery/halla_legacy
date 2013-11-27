@@ -50,31 +50,202 @@ def hclust( pArray, pdist_metric = mi, cluster_metric = l2, bTree = False ):
 
 def hclust( pArray, pdist_metric = norm_mid, cluster_method = "single", bTree = False ):
 	"""
+	Performs hierarchical clustering on an numpy array 
+
+	Parameters
+	------------
+		pArray : numpy array 
+		pdist_metric : str 
+		cluster_method : str
+		bTree : boolean 
+
+	Returns
+	-------------
+
+		Z : numpy array or ClusterNode object 
+
+	Examples
+	---------------
+
+	* Pearson correlation 1::
+
+		from numpy import array, abs
+		from scipy.cluster.hierarchy import dendrogram, linkage
+		from scipy.cluster.hierarchy.distance import pdist 
+		import halla
+
+		x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+		D = pdist( x, metric=halla.distance.cord ) 
+
+		lxpearson = linkage(D)  
+		dendrogram(lxpearson)	 
 
 	.. plot::
 
-		import pylab 
-		import halla 
 		from numpy import array 
-		import scipy.stats
 		from scipy.cluster.hierarchy import dendrogram, linkage
+		import scipy.cluster.hierarchy 
+		import halla
 
 		x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
 
-		#Pearson
-		lxpearson	= linkage(x, metric="correlation")
+		D = scipy.cluster.hierarchy.distance.pdist( x, metric=halla.distance.cord ) 
 
-		dendrogram(lxpearson)
+		lxpearson = linkage(D)  
+		dendrogram(lxpearson)	
 
-	Returns hierarchically clustered object 
+	* Pearson correlation 2::
 
-	Parameters:
+		from numpy import array 
+		from scipy.cluster.hierarchy import dendrogram, linkage
+		import scipy.cluster.hierarchy 
+		import halla
 
-	Returns:
+		y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
 
-	Examples ::
+		D = scipy.cluster.hierarchy.distance.pdist(y, metric=halla.distance.cord) 
+		lypearson = linkage( D )
+
+		dendrogram(lypearson)
+	
+	.. plot::
+
+		from numpy import array 
+		from scipy.cluster.hierarchy import dendrogram, linkage
+		import scipy.cluster.hierarchy 
+		import halla
+
+		y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
+
+		D = scipy.cluster.hierarchy.distance.pdist(y, metric=halla.distance.cord) 
+		lypearson = linkage( D )
+
+		dendrogram(lypearson)
+
+	* Spearman correlation 1::
+
+		from numpy import array 
+		from scipy.cluster.hierarchy import dendrogram, linkage
+		import scipy.cluster.hierarchy 
+		import halla
+
+		x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+
+		D = scipy.cluster.hierarchy.distance.pdist(x, metric= lambda u,v: halla.distance.cord(u,v,method="spearman")) 
+		lxspearman = linkage( D )
+
+		dendrogram(lxspearman)
+
+	.. plot::
+
+		from numpy import array 
+		from scipy.cluster.hierarchy import dendrogram, linkage
+		import scipy.cluster.hierarchy 
+		import halla
+
+		x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+
+		D = scipy.cluster.hierarchy.distance.pdist(x, metric= lambda u,v: halla.distance.cord(u,v,method="spearman")) 
+		lxspearman = linkage( D )
+
+		dendrogram(lxspearman)
+
+	* Spearman correlation 2::
+
+		from numpy import array 
+		from scipy.cluster.hierarchy import dendrogram, linkage
+		import scipy.cluster.hierarchy 
+		import halla
+
+		y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
+
+		D = scipy.cluster.hierarchy.distance.pdist(y, metric= lambda u,v: halla.distance.cord(u,v,method="spearman")) 
+		lyspearman = linkage( D )
+
+		dendrogram(lyspearman)
+
+	.. plot::
+		
+		from numpy import array 
+		from scipy.cluster.hierarchy import dendrogram, linkage
+		import scipy.cluster.hierarchy 
+		import halla
+
+		y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
+
+		D = scipy.cluster.hierarchy.distance.pdist(y, metric= lambda u,v: halla.distance.cord(u,v,method="spearman")) 
+		lyspearman = linkage( D )
+
+		dendrogram(lyspearman)
+	
+	* Mutual Information 1::
+
+		from numpy import array 
+		from scipy.cluster.hierarchy import dendrogram, linkage
+		import scipy.cluster.hierarchy 
+		import halla
+
+		x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+		dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
+
+		D = scipy.cluster.hierarchy.distance.pdist(x, metrichalla.distance.adj_mid) 
+
+		lxmi = linkage( D )
+
+		dendrogram(lxmi)
+
+	.. plot::
+
+		from numpy import array 
+		from scipy.cluster.hierarchy import dendrogram, linkage
+		import scipy.cluster.hierarchy 
+		import halla
+
+		x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+		dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
+
+		D = scipy.cluster.hierarchy.distance.pdist(x, metric = halla.distance.adj_mid) 
+
+		lxmi = linkage( D )
+
+		dendrogram(lxmi)
+
+	* Mutual Information 2::
+
+		from numpy import array 
+		from scipy.cluster.hierarchy import dendrogram, linkage
+		import scipy.cluster.hierarchy 
+		import halla
+		
+		y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
+		dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )		
+
+		D = scipy.cluster.hierarchy.distance.pdist(y, metric = halla.distance.adj_mid) 
+
+		lymi = linkage( D )
+
+		dendrogram(lymi)
+
+	.. plot::
+
+		from numpy import array 
+		from scipy.cluster.hierarchy import dendrogram, linkage
+		import scipy.cluster.hierarchy 
+		import halla
+		
+		y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
+		dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )		
+
+		D = scipy.cluster.hierarchy.distance.pdist(y, metric = halla.distance.adj_mid) 
+
+		lymi = linkage( D )
+
+		dendrogram(lymi)
+
+
 
 	Notes 
+	-----------
 
 		This hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV's, not just single ones 
 		Use the "grouping property" as discussed by Kraskov paper. 

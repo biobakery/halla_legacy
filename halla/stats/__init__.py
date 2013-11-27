@@ -122,19 +122,25 @@ Think about the differences between pdf and cdf
 """
 
 def uniform_cut( cake_length, iCuts = 10 ):
-	assert( cake_length > iCuts )
+	"""
+	Cut cake uniformly 
+	"""
+	assert( cake_length >= iCuts )
 
-	aOut = [] 
+	if cake_length == iCuts:
+		return [[i] for i in range(cake_length)]
+	else:
+		aOut = [] 
 
-	iSize = int( math.floor( float(cake_length)/iCuts ) )
+		iSize = int( math.floor( float(cake_length)/iCuts ) )
 
-	for iStep in range(1,iSize+1):
-		if iStep!= iSize:
-			aOut.append( range(cake_length)[(iStep-1)*iCuts:iStep*iCuts] )
-		else:
-			aOut.append( range(cake_length)[(iStep-1)*iCuts:] )
+		for iStep in range(1,iSize+1):
+			if iStep!= iSize:
+				aOut.append( range(cake_length)[(iStep-1)*iCuts:iStep*iCuts] )
+			else:
+				aOut.append( range(cake_length)[(iStep-1)*iCuts:] )
 
-	return aOut 
+		return aOut 
 
 def cumulative_uniform_cut( cake_length, iCuts = 10):
 	assert( cake_length > iCuts )
