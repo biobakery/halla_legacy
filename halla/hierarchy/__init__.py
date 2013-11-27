@@ -227,7 +227,8 @@ def hclust( pArray, pdist_metric = norm_mid, cluster_method = "single", bTree = 
 def dendrogram( Z ):
 	return scipy.cluster.hierarchy.dendrogram( Z )
 
-def depth_tree( ):
+def depth_tree( pClusterNode ):
+
 	pass 
 
 
@@ -293,10 +294,12 @@ def reduce_tree_by_layer( apParents, iLevel = 0, iStop = None ):
 	Output: a list of (iLevel, list_of_nodes_at_iLevel)
 	"""
 	
-	if iStop and (iLevel > iStop):
+	if (iStop and (iLevel > iStop)) or not(apParents):
 		return [] 
 	else:
-		return [(iLevel, reduce_tree(p)) for p in apParents ] + reduce_tree_by_layer( [ q.left for q in apParents ] + [ r.right for r in apParents ], iLevel = iLevel+1 ) 
+	
+		return [(iLevel, reduce_tree(p)) for p in apParents ] + reduce_tree_by_layer( [ q.left for q in filter( lambda x: not(x.is_leaf()) , apParents ) ] + \
+			[ r.right for r in filter( lambda x: not(x.is_leaf()) , apParents ) ], iLevel = iLevel+1 ) 
 
 
 def get_layer( atData, iLayer ):
