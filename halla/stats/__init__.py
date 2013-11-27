@@ -121,6 +121,10 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "mi", decompo
 Think about the differences between pdf and cdf 
 """
 
+def identity_cut( cake_length, iCuts ):
+	cake = range(cake_length)
+	return [[i] for i in cake]
+
 def uniform_cut( cake_length, iCuts = 10 ):
 	"""
 	Cut cake uniformly
@@ -129,7 +133,7 @@ def uniform_cut( cake_length, iCuts = 10 ):
 	------
 
 	Code still observes sub-optimal behavior; fix. 
-	
+
 	"""
 
 	cake = range(cake_length)

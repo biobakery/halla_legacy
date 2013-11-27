@@ -175,6 +175,10 @@
 <span class="sd">Think about the differences between pdf and cdf </span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="k">def</span> <span class="nf">identity_cut</span><span class="p">(</span> <span class="n">cake_length</span><span class="p">,</span> <span class="n">iCuts</span> <span class="p">):</span>
+	<span class="n">cake</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)</span>
+	<span class="k">return</span> <span class="p">[[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cake</span><span class="p">]</span>
+
 <div class="viewcode-block" id="uniform_cut"><a class="viewcode-back" href="../../index.html#halla.stats.uniform_cut">[docs]</a><span class="k">def</span> <span class="nf">uniform_cut</span><span class="p">(</span> <span class="n">cake_length</span><span class="p">,</span> <span class="n">iCuts</span> <span class="o">=</span> <span class="mi">10</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Cut cake uniformly</span>
@@ -183,7 +187,7 @@
 <span class="sd">	------</span>
 
 <span class="sd">	Code still observes sub-optimal behavior; fix. </span>
-<span class="sd">	</span>
+
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">cake</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)</span>

@@ -11,15 +11,12 @@ from abc import ABCMeta
 import numpy 
 from numpy import array 
 import scipy 
-import sklearn as sk 
- 
+import sklearn as sk  
 import halla.stats
 import scipy.stats 
-from scipy.stats import pearsonr, spearmanr
+import scipy.cluster 
 
-import pylab 
-
-#mi-based distances from scikit-learn; (log e)-based.  
+#mi-based distances from scikit-learn; (log e)-based (i.e. returns nats instead of bits)
 from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, adjusted_mutual_info_score 
 
 #==========================================================================#
@@ -130,7 +127,7 @@ class AdjustedMutualInformation( Distance ):
 
 
 #==========================================================================#
-# FUNCTIONS  
+# DISTANCE FUNCTIONS  
 #==========================================================================#
 
 def cor( pData1, pData2, method = "pearson", pval = False ):
@@ -164,7 +161,7 @@ def cor( pData1, pData2, method = "pearson", pval = False ):
 	>>> for item in p: i,j = item; print (i,j),cor(x[i],y[j], method="pearson"),cor(x[i],y[j], method="spearman")
 	(0, 0) -1.0 -1.0
 	(0, 1) -0.894427191 -0.894427191
-	(0, 2) 1.0 1.0 
+	(0, 2) 1.0 1.0
 	(0, 3) 0.951369855792 1.0
 	(1, 0) 0.774596669241 0.774596669241
 	(1, 1) 0.57735026919 0.57735026919
@@ -489,4 +486,51 @@ def adj_mid( pData1, pData2 ):
 	"""
 
 	return 1 - AdjustedMutualInformation( pData1, pData2 ).get_distance()
+
+#==========================================================================#
+# STRUCTURAL FUNCTIONS   
+#==========================================================================#
+
+def squareform( pArray ):
+	"""
+	Switches back and forth between square and flat distance matrices 
+	"""
+	return scipy.cluster.hierarchy.distance.squareform( pArray )
+
+def pdist( pArray, metric="euclidean" ):
+	"""
+	Performs pairwise distance computation 
+
+	Parameters
+	------------
+
+	pArray : numpy array 
+	metric : str 
+
+	Returns
+	---------
+	D : redundancy-checked distance matrix (flat)
+	
+	Examples
+	-----------
+
+	>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+	>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
+	>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
+	>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
+	>>> list( halla.distance.pdist( x, halla.distance.cord ) )
+	[0.22540333075851648, 0.015625961302302871, 0.22540333075851648, 0.1358414347819068, 0.0, 0.1358414347819068]
+	>>> list( halla.distance.pdist( y, halla.distance.cord ) )
+	[0.10557280900008403, 0.0, 0.048630144207595816, 0.10557280900008414, 0.16134197652754312, 0.048630144207595594]
+	>>> list( halla.distance.pdist( x, lambda u,v: halla.distance.cord(u,v, method="spearman") ) )
+	[0.2254033307585166, 0.0, 0.2254033307585166, 0.2254033307585166, 0.0, 0.2254033307585166]
+	>>> list( halla.distance.pdist( y, lambda u,v: halla.distance.cord(u,v, method="spearman") ) )
+	[0.10557280900008414, 0.0, 0.0, 0.10557280900008414, 0.10557280900008414, 0.0]
+	>>> list( halla.distance.pdist( dx, halla.distance.norm_mid ) )
+	[0.65440797005578877, 0.0, 0.65440797005578877, 0.65440797005578877, 0.0, 0.65440797005578877]
+	>>> list( halla.distance.pdist( dy, halla.distance.norm_mid ) )
+	[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+	""" 
+	pMetric = metric 
+	return scipy.cluster.hierarchy.distance.pdist( pArray, pMetric )
 

@@ -227,11 +227,6 @@ def hclust( pArray, pdist_metric = norm_mid, cluster_method = "single", bTree = 
 def dendrogram( Z ):
 	return scipy.cluster.hierarchy.dendrogram( Z )
 
-def depth_tree( pClusterNode ):
-
-	pass 
-
-
 def couple_tree( pClusterNode1, pClusterNode2, method = "unif" ):
 	"""
 	Couples two data trees to produce a hypothesis tree 
@@ -296,11 +291,17 @@ def reduce_tree_by_layer( apParents, iLevel = 0, iStop = None ):
 	
 	if (iStop and (iLevel > iStop)) or not(apParents):
 		return [] 
-	else:
-	
-		return [(iLevel, reduce_tree(p)) for p in apParents ] + reduce_tree_by_layer( [ q.left for q in filter( lambda x: not(x.is_leaf()) , apParents ) ] + \
+	else:	
+		return [(iLevel, reduce_tree(p)) for p in apParents ] + reduce_tree_by_layer( [ q.left for q in filter( lambda x: not(x.is_leaf()) , apParents ) ] + 
 			[ r.right for r in filter( lambda x: not(x.is_leaf()) , apParents ) ], iLevel = iLevel+1 ) 
 
+def depth_tree( pClusterNode ):
+	"""
+	Get the depth of a tree 
+	"""
+	
+	aOut = reduce_tree_by_layer( pClusterNode )
+	return max(aOut)+1
 
 def get_layer( atData, iLayer ):
 	"""

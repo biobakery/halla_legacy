@@ -65,15 +65,12 @@
 <span class="kn">import</span> <span class="nn">numpy</span> 
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span> 
 <span class="kn">import</span> <span class="nn">scipy</span> 
-<span class="kn">import</span> <span class="nn">sklearn</span> <span class="kn">as</span> <span class="nn">sk</span> 
- 
+<span class="kn">import</span> <span class="nn">sklearn</span> <span class="kn">as</span> <span class="nn">sk</span>  
 <span class="kn">import</span> <span class="nn">halla.stats</span>
 <span class="kn">import</span> <span class="nn">scipy.stats</span> 
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">pearsonr</span><span class="p">,</span> <span class="n">spearmanr</span>
+<span class="kn">import</span> <span class="nn">scipy.cluster</span> 
 
-<span class="kn">import</span> <span class="nn">pylab</span> 
-
-<span class="c">#mi-based distances from scikit-learn; (log e)-based.  </span>
+<span class="c">#mi-based distances from scikit-learn; (log e)-based (i.e. returns nats instead of bits)</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mutual_info_score</span><span class="p">,</span> <span class="n">normalized_mutual_info_score</span><span class="p">,</span> <span class="n">adjusted_mutual_info_score</span> 
 
 <span class="c">#==========================================================================#</span>
@@ -184,7 +181,7 @@
 
 
 <span class="c">#==========================================================================#</span>
-<span class="c"># FUNCTIONS  </span>
+<span class="c"># DISTANCE FUNCTIONS  </span>
 <span class="c">#==========================================================================#</span>
 </div>
 <div class="viewcode-block" id="cor"><a class="viewcode-back" href="../../index.html#halla.distance.cor">[docs]</a><span class="k">def</span> <span class="nf">cor</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s">&quot;pearson&quot;</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="bp">False</span> <span class="p">):</span>
@@ -543,6 +540,58 @@
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">AdjustedMutualInformation</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span>
+
+<span class="c">#==========================================================================#</span>
+<span class="c"># STRUCTURAL FUNCTIONS   </span>
+<span class="c">#==========================================================================#</span>
+</div>
+<div class="viewcode-block" id="squareform"><a class="viewcode-back" href="../../index.html#halla.distance.squareform">[docs]</a><span class="k">def</span> <span class="nf">squareform</span><span class="p">(</span> <span class="n">pArray</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Switches back and forth between square and flat distance matrices </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">hierarchy</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">squareform</span><span class="p">(</span> <span class="n">pArray</span> <span class="p">)</span>
+</div>
+<div class="viewcode-block" id="pdist"><a class="viewcode-back" href="../../index.html#halla.distance.pdist">[docs]</a><span class="k">def</span> <span class="nf">pdist</span><span class="p">(</span> <span class="n">pArray</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s">&quot;euclidean&quot;</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Performs pairwise distance computation </span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	------------</span>
+
+<span class="sd">	pArray : numpy array </span>
+<span class="sd">	metric : str </span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	---------</span>
+<span class="sd">	D : redundancy-checked distance matrix (flat)</span>
+<span class="sd">	</span>
+<span class="sd">	Examples</span>
+<span class="sd">	-----------</span>
+
+<span class="sd">	&gt;&gt;&gt; x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])</span>
+<span class="sd">	&gt;&gt;&gt; y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])</span>
+<span class="sd">	&gt;&gt;&gt; dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )</span>
+<span class="sd">	&gt;&gt;&gt; dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )</span>
+<span class="sd">	&gt;&gt;&gt; halla.distance.pdist( x, halla.distance.cord )</span>
+<span class="sd">	array([ 0.22540333,  0.01562596,  0.22540333,  0.13584143,  0.        ,</span>
+<span class="sd">        0.13584143])</span>
+<span class="sd">	&gt;&gt;&gt; halla.distance.pdist( y, halla.distance.cord )</span>
+<span class="sd">	array([ 0.10557281,  0.        ,  0.04863014,  0.10557281,  0.16134198,</span>
+<span class="sd">        0.04863014])</span>
+<span class="sd">	&gt;&gt;&gt; halla.distance.pdist( x, lambda u,v: halla.distance.cord(u,v, method=&quot;spearman&quot;) )</span>
+<span class="sd">	array([ 0.22540333,  0.        ,  0.22540333,  0.22540333,  0.        ,</span>
+<span class="sd">        0.22540333])</span>
+<span class="sd">	&gt;&gt;&gt; halla.distance.pdist( y, lambda u,v: halla.distance.cord(u,v, method=&quot;spearman&quot;) )</span>
+<span class="sd">	array([ 0.10557281,  0.        ,  0.        ,  0.10557281,  0.10557281,  0.        ])	</span>
+<span class="sd">	&gt;&gt;&gt; halla.distance.pdist( dx, halla.distance.norm_mid )</span>
+<span class="sd">	array([ 0.65440797,  0.        ,  0.65440797,  0.65440797,  0.        ,</span>
+<span class="sd">        0.65440797])</span>
+<span class="sd">	&gt;&gt;&gt; halla.distance.pdist( dy, halla.distance.norm_mid )</span>
+<span class="sd">	array([ 0.,  0.,  0.,  0.,  0.,  0.])</span>
+
+<span class="sd">	&quot;&quot;&quot;</span> 
+	<span class="n">pMetric</span> <span class="o">=</span> <span class="n">metric</span> 
+	<span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">hierarchy</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">pdist</span><span class="p">(</span> <span class="n">pArray</span><span class="p">,</span> <span class="n">pMetric</span> <span class="p">)</span>
 </pre></div></div>
 
           </div>

@@ -624,7 +624,7 @@ Avoid the &#8220;all&#8221; case</p>
 
 <dl class="function">
 <dt id="halla.stats.get_medoid">
-<tt class="descclassname">halla.stats.</tt><tt class="descname">get_medoid</tt><big>(</big><em>pArray</em>, <em>iAxis=0</em>, <em>pMetric=&lt;function l2 at 0x609fb18&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#get_medoid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.get_medoid" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.stats.</tt><tt class="descname">get_medoid</tt><big>(</big><em>pArray</em>, <em>iAxis=0</em>, <em>pMetric=&lt;function l2 at 0x5de2f50&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#get_medoid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.get_medoid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Input: numpy array 
 Output: float</p>
 <p>For lack of better way, compute centroid, then compute medoid 
@@ -801,7 +801,7 @@ the probability density function:</p>
 
 <dl class="function">
 <dt id="halla.stats.p_val_plot">
-<tt class="descclassname">halla.stats.</tt><tt class="descname">p_val_plot</tt><big>(</big><em>pArray1</em>, <em>pArray2</em>, <em>pCut=&lt;function log_cut at 0x60a22a8&gt;</em>, <em>iIter=100</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#p_val_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.p_val_plot" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.stats.</tt><tt class="descname">p_val_plot</tt><big>(</big><em>pArray1</em>, <em>pArray2</em>, <em>pCut=&lt;function log_cut at 0x5de5848&gt;</em>, <em>iIter=100</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#p_val_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.p_val_plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns p value plot of combinatorial cuts</p>
 <p>In practice, works best when arrays are of similar size, since I implement the minimum ... 
 For future think about implementing the correct step function</p>
@@ -1241,6 +1241,54 @@ Adjust multiplicative factor of log(e,2)</p>
 </div>
 </dd></dl>
 
+<dl class="function">
+<dt id="halla.distance.pdist">
+<tt class="descclassname">halla.distance.</tt><tt class="descname">pdist</tt><big>(</big><em>pArray</em>, <em>metric='euclidean'</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#pdist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.pdist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs pairwise distance computation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>pArray</strong> : numpy array</p>
+<p><strong>metric</strong> : str</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>D</strong> : redundancy-checked distance matrix (flat)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">0.015625</span><span class="p">,</span><span class="mf">0.125</span><span class="p">,</span><span class="mf">0.421875</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dx</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dy</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span> <span class="n">y</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">pdist</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">cord</span> <span class="p">)</span>
+<span class="go">array([ 0.22540333,  0.01562596,  0.22540333,  0.13584143,  0.        ,</span>
+<span class="go">0.13584143])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">pdist</span><span class="p">(</span> <span class="n">y</span><span class="p">,</span> <span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">cord</span> <span class="p">)</span>
+<span class="go">array([ 0.10557281,  0.        ,  0.04863014,  0.10557281,  0.16134198,</span>
+<span class="go">0.04863014])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">pdist</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">cord</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&quot;spearman&quot;</span><span class="p">)</span> <span class="p">)</span>
+<span class="go">array([ 0.22540333,  0.        ,  0.22540333,  0.22540333,  0.        ,</span>
+<span class="go">0.22540333])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">pdist</span><span class="p">(</span> <span class="n">y</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">cord</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&quot;spearman&quot;</span><span class="p">)</span> <span class="p">)</span>
+<span class="go">array([ 0.10557281,  0.        ,  0.        ,  0.10557281,  0.10557281,  0.        ])   </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">pdist</span><span class="p">(</span> <span class="n">dx</span><span class="p">,</span> <span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">norm_mid</span> <span class="p">)</span>
+<span class="go">array([ 0.65440797,  0.        ,  0.65440797,  0.65440797,  0.        ,</span>
+<span class="go">0.65440797])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">pdist</span><span class="p">(</span> <span class="n">dy</span><span class="p">,</span> <span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">norm_mid</span> <span class="p">)</span>
+<span class="go">array([ 0.,  0.,  0.,  0.,  0.,  0.])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="halla.distance.squareform">
+<tt class="descclassname">halla.distance.</tt><tt class="descname">squareform</tt><big>(</big><em>pArray</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#squareform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.squareform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switches back and forth between square and flat distance matrices</p>
+</dd></dl>
+
 <span class="target" id="module-halla.parser"></span><p>Parses input/output formats, 
 manages transformations</p>
 <dl class="class">
@@ -1408,7 +1456,7 @@ the probability density function:</p>
 
 <dl class="function">
 <dt id="halla.test.randmat">
-<tt class="descclassname">halla.test.</tt><tt class="descname">randmat</tt><big>(</big><em>tShape=(10</em>, <em>10)</em>, <em>pDist=&lt;built-in method normal of mtrand.RandomState object at 0x2598b10&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/test.html#randmat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.test.randmat" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.test.</tt><tt class="descname">randmat</tt><big>(</big><em>tShape=(10</em>, <em>10)</em>, <em>pDist=&lt;built-in method normal of mtrand.RandomState object at 0x22e6b10&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/test.html#randmat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.test.randmat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a tShape-dimensional matrix given by base distribution pDist 
 Order: Row, Col</p>
 </dd></dl>
@@ -1484,6 +1532,12 @@ a basic core unit</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="halla.hierarchy.depth_tree">
+<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">depth_tree</tt><big>(</big><em>pClusterNode</em><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#depth_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.depth_tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the depth of a tree</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="halla.hierarchy.get_layer">
 <tt class="descclassname">halla.hierarchy.</tt><tt class="descname">get_layer</tt><big>(</big><em>atData</em>, <em>iLayer</em><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#get_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.get_layer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get output from <cite>reduce_tree_by_layer</cite> and parse</p>
@@ -1492,7 +1546,7 @@ a basic core unit</p>
 
 <dl class="function">
 <dt id="halla.hierarchy.hclust">
-<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">hclust</tt><big>(</big><em>pArray</em>, <em>pdist_metric=&lt;function norm_mid at 0x609fde8&gt;</em>, <em>cluster_method='single'</em>, <em>bTree=False</em><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#hclust"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.hclust" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">hclust</tt><big>(</big><em>pArray</em>, <em>pdist_metric=&lt;function norm_mid at 0x5de52a8&gt;</em>, <em>cluster_method='single'</em>, <em>bTree=False</em><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#hclust"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.hclust" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs hierarchical clustering on an numpy array</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1741,7 +1795,7 @@ the probability density function:</p>
 
 <dl class="function">
 <dt id="halla.hierarchy.recursive_all_against_all">
-<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">recursive_all_against_all</tt><big>(</big><em>apClusterNode1</em>, <em>apClusterNode2</em>, <em>pArray1</em>, <em>pArray2</em>, <em>pOut=</em><span class="optional">[</span><span class="optional">]</span>, <em>pFDR=&lt;function bh at 0x60a2758&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#recursive_all_against_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.recursive_all_against_all" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">recursive_all_against_all</tt><big>(</big><em>apClusterNode1</em>, <em>apClusterNode2</em>, <em>pArray1</em>, <em>pArray2</em>, <em>pOut=</em><span class="optional">[</span><span class="optional">]</span>, <em>pFDR=&lt;function bh at 0x5de5cf8&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#recursive_all_against_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.recursive_all_against_all" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs recursive all-against-all (the default HAllA routine) with fdr correction</p>
 <p>Input: apClusterNode1, apClusterNode2, pArray1, pArray2, pFDR</p>
 <p>Output: a list of ( (aiIndex1, pBag1), (aiIndex2, pBag2) )</p>
@@ -1749,7 +1803,7 @@ the probability density function:</p>
 
 <dl class="function">
 <dt id="halla.hierarchy.reduce_tree">
-<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">reduce_tree</tt><big>(</big><em>pClusterNode</em>, <em>pFunction=&lt;function &lt;lambda&gt; at 0x6953b90&gt;</em>, <em>aOut=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#reduce_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.reduce_tree" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">reduce_tree</tt><big>(</big><em>pClusterNode</em>, <em>pFunction=&lt;function &lt;lambda&gt; at 0x66a3c80&gt;</em>, <em>aOut=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#reduce_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.reduce_tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Recursive</p>
 <p>Input: pClusterNode, pFunction = lambda x: x.id, aOut = []</p>
 <p>Output: a list of pFunction calls (node ids by default)</p>

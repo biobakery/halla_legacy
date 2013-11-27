@@ -281,10 +281,6 @@
 <span class="k">def</span> <span class="nf">dendrogram</span><span class="p">(</span> <span class="n">Z</span> <span class="p">):</span>
 	<span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">hierarchy</span><span class="o">.</span><span class="n">dendrogram</span><span class="p">(</span> <span class="n">Z</span> <span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">depth_tree</span><span class="p">(</span> <span class="p">):</span>
-	<span class="k">pass</span> 
-
-
 <div class="viewcode-block" id="couple_tree"><a class="viewcode-back" href="../../index.html#halla.hierarchy.couple_tree">[docs]</a><span class="k">def</span> <span class="nf">couple_tree</span><span class="p">(</span> <span class="n">pClusterNode1</span><span class="p">,</span> <span class="n">pClusterNode2</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s">&quot;unif&quot;</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Couples two data trees to produce a hypothesis tree </span>
@@ -347,11 +343,19 @@
 <span class="sd">	Output: a list of (iLevel, list_of_nodes_at_iLevel)</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
-	<span class="k">if</span> <span class="n">iStop</span> <span class="ow">and</span> <span class="p">(</span><span class="n">iLevel</span> <span class="o">&gt;</span> <span class="n">iStop</span><span class="p">):</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">iStop</span> <span class="ow">and</span> <span class="p">(</span><span class="n">iLevel</span> <span class="o">&gt;</span> <span class="n">iStop</span><span class="p">))</span> <span class="ow">or</span> <span class="ow">not</span><span class="p">(</span><span class="n">apParents</span><span class="p">):</span>
 		<span class="k">return</span> <span class="p">[]</span> 
-	<span class="k">else</span><span class="p">:</span>
-		<span class="k">return</span> <span class="p">[(</span><span class="n">iLevel</span><span class="p">,</span> <span class="n">reduce_tree</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">apParents</span> <span class="p">]</span> <span class="o">+</span> <span class="n">reduce_tree_by_layer</span><span class="p">(</span> <span class="p">[</span> <span class="n">q</span><span class="o">.</span><span class="n">left</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">apParents</span> <span class="p">]</span> <span class="o">+</span> <span class="p">[</span> <span class="n">r</span><span class="o">.</span><span class="n">right</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">apParents</span> <span class="p">],</span> <span class="n">iLevel</span> <span class="o">=</span> <span class="n">iLevel</span><span class="o">+</span><span class="mi">1</span> <span class="p">)</span> 
-
+	<span class="k">else</span><span class="p">:</span>	
+		<span class="k">return</span> <span class="p">[(</span><span class="n">iLevel</span><span class="p">,</span> <span class="n">reduce_tree</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">apParents</span> <span class="p">]</span> <span class="o">+</span> <span class="n">reduce_tree_by_layer</span><span class="p">(</span> <span class="p">[</span> <span class="n">q</span><span class="o">.</span><span class="n">left</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="ow">not</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">())</span> <span class="p">,</span> <span class="n">apParents</span> <span class="p">)</span> <span class="p">]</span> <span class="o">+</span> 
+			<span class="p">[</span> <span class="n">r</span><span class="o">.</span><span class="n">right</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="ow">not</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">())</span> <span class="p">,</span> <span class="n">apParents</span> <span class="p">)</span> <span class="p">],</span> <span class="n">iLevel</span> <span class="o">=</span> <span class="n">iLevel</span><span class="o">+</span><span class="mi">1</span> <span class="p">)</span> 
+</div>
+<div class="viewcode-block" id="depth_tree"><a class="viewcode-back" href="../../index.html#halla.hierarchy.depth_tree">[docs]</a><span class="k">def</span> <span class="nf">depth_tree</span><span class="p">(</span> <span class="n">pClusterNode</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Get the depth of a tree </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">aOut</span> <span class="o">=</span> <span class="n">reduce_tree_by_layer</span><span class="p">(</span> <span class="n">pClusterNode</span> <span class="p">)</span>
+	<span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">aOut</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
 </div>
 <div class="viewcode-block" id="get_layer"><a class="viewcode-back" href="../../index.html#halla.hierarchy.get_layer">[docs]</a><span class="k">def</span> <span class="nf">get_layer</span><span class="p">(</span> <span class="n">atData</span><span class="p">,</span> <span class="n">iLayer</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
