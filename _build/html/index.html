@@ -36,6 +36,9 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li><a href="#">HAllA: Hierarchical All-against All 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -211,19 +214,32 @@ where the outcome can be 1 through 6.  Each sample drawn from the
 distribution represents <cite>n</cite> such experiments.  Its values,
 <tt class="docutils literal"><span class="pre">X_i</span> <span class="pre">=</span> <span class="pre">[X_0,</span> <span class="pre">X_1,</span> <span class="pre">...,</span> <span class="pre">X_p]</span></tt>, represent the number of times the outcome
 was <tt class="docutils literal"><span class="pre">i</span></tt>.</p>
-<dl class="docutils">
-<dt>n <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Number of experiments.</dd>
-<dt>pvals <span class="classifier-delimiter">:</span> <span class="classifier">sequence of floats, length p</span></dt>
-<dd>Probabilities of each of the <tt class="docutils literal"><span class="pre">p</span></tt> different outcomes.  These
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n</strong> : int</p>
+<blockquote>
+<div><p>Number of experiments.</p>
+</div></blockquote>
+<p><strong>pvals</strong> : sequence of floats, length p</p>
+<blockquote>
+<div><p>Probabilities of each of the <tt class="docutils literal"><span class="pre">p</span></tt> different outcomes.  These
 should sum to 1 (however, the last element is always assumed to
 account for the remaining probability, as long as
-<tt class="docutils literal"><span class="pre">sum(pvals[:-1])</span> <span class="pre">&lt;=</span> <span class="pre">1)</span></tt>.</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
-<dd>Given a <cite>size</cite> of <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K)</span></tt>, then <tt class="docutils literal"><span class="pre">M*N*K</span></tt> samples are drawn,
+<tt class="docutils literal"><span class="pre">sum(pvals[:-1])</span> <span class="pre">&lt;=</span> <span class="pre">1)</span></tt>.</p>
+</div></blockquote>
+<p><strong>size</strong> : tuple of ints</p>
+<blockquote class="last">
+<div><p>Given a <cite>size</cite> of <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K)</span></tt>, then <tt class="docutils literal"><span class="pre">M*N*K</span></tt> samples are drawn,
 and the output shape becomes <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K,</span> <span class="pre">p)</span></tt>, since each sample
-has shape <tt class="docutils literal"><span class="pre">(p,)</span></tt>.</dd>
-</dl>
+has shape <tt class="docutils literal"><span class="pre">(p,)</span></tt>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
 <p>Throw a dice 20 times:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mf">6.</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">array([[4, 1, 7, 5, 2, 1]])</span>
@@ -251,49 +267,67 @@ we threw 2 times 1, 4 times 2, etc.</p>
 <dd><p>Draw random samples from a normal (Gaussian) distribution.</p>
 <p>The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently <a href="#id26"><span class="problematic" id="id27"><span id="id1"></span>[2]_</span></a>, is often called the bell curve because of
+independently <a class="reference internal" href="#r2" id="id1">[R2]</a>, is often called the bell curve because of
 its characteristic shape (see the example below).</p>
 <p>The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution <a href="#id28"><span class="problematic" id="id29"><span id="id2"></span>[2]_</span></a>.</p>
-<dl class="docutils">
-<dt>loc <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Mean (&#8220;centre&#8221;) of the distribution.</dd>
-<dt>scale <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Standard deviation (spread or &#8220;width&#8221;) of the distribution.</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
-<dd>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
-<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</dd>
+unique distribution <a class="reference internal" href="#r2" id="id2">[R2]</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>loc</strong> : float</p>
+<blockquote>
+<div><p>Mean (&#8220;centre&#8221;) of the distribution.</p>
+</div></blockquote>
+<p><strong>scale</strong> : float</p>
+<blockquote>
+<div><p>Standard deviation (spread or &#8220;width&#8221;) of the distribution.</p>
+</div></blockquote>
+<p><strong>size</strong> : tuple of ints</p>
+<blockquote class="last">
+<div><p>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
+<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><tt class="xref py py-obj docutils literal"><span class="pre">scipy.stats.distributions.norm</span></tt></dt>
+<dd>probability density function, distribution or cumulative density function, etc.</dd>
 </dl>
-<dl class="docutils">
-<dt>scipy.stats.distributions.norm <span class="classifier-delimiter">:</span> <span class="classifier">probability density function,</span></dt>
-<dd>distribution or cumulative density function, etc.</dd>
-</dl>
+</div>
+<p class="rubric">Notes</p>
 <p>The probability density for the Gaussian distribution is</p>
 <img src="_images/mathmpl/math-b24c0fb115.png" class="center" /><p>where <img src="_images/mathmpl/math-3488de1d0a.png" /> is the mean and <img src="_images/mathmpl/math-293c147d21.png" /> the standard deviation.
 The square of the standard deviation, <img src="_images/mathmpl/math-54bf156f7e.png" />, is called the
 variance.</p>
 <p>The function has its peak at the mean, and its &#8220;spread&#8221; increases with
 the standard deviation (the function reaches 0.607 times its maximum at
-<img src="_images/mathmpl/math-655d89f5c9.png" /> and <img src="_images/mathmpl/math-a5e0617d55.png" /> <a href="#id30"><span class="problematic" id="id31"><span id="id3"></span>[2]_</span></a>).  This implies that
+<img src="_images/mathmpl/math-655d89f5c9.png" /> and <img src="_images/mathmpl/math-a5e0617d55.png" /> <a class="reference internal" href="#r2" id="id3">[R2]</a>).  This implies that
 <cite>numpy.random.normal</cite> is more likely to return samples lying close to the
 mean, rather than those far away.</p>
-<table class="docutils footnote" frame="void" id="id4" rules="none">
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td>Wikipedia, &#8220;Normal distribution&#8221;,
+<tr><td class="label"><a class="fn-backref" href="#id4">[R1]</a></td><td>Wikipedia, &#8220;Normal distribution&#8221;,
 <a class="reference external" href="http://en.wikipedia.org/wiki/Normal_distribution">http://en.wikipedia.org/wiki/Normal_distribution</a></td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id5" rules="none">
+<table class="docutils citation" frame="void" id="r2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[2]</td><td>P. R. Peebles Jr., &#8220;Central Limit Theorem&#8221; in &#8220;Probability, Random
+<tr><td class="label">[R2]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>, <a class="fn-backref" href="#id3">3</a>, <a class="fn-backref" href="#id5">4</a>)</em> P. R. Peebles Jr., &#8220;Central Limit Theorem&#8221; in &#8220;Probability, Random
 Variables and Random Signal Principles&#8221;, 4th ed., 2001,
 pp. 51, 51, 125.</td></tr>
 </tbody>
 </table>
+<p class="rubric">Examples</p>
 <p>Draw samples from the distribution:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span> <span class="c"># mean and standard deviation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
@@ -358,23 +392,41 @@ In practice, used for implementing Yekutieli criterion <em>per layer</em>.</p>
 parameters, n trials and p probability of success where
 n an integer &gt; 0 and p is in the interval [0,1]. (n may be
 input as a float, but it is truncated to an integer in use)</p>
-<dl class="docutils">
-<dt>n <span class="classifier-delimiter">:</span> <span class="classifier">float (but truncated to an integer)</span></dt>
-<dd>parameter, &gt; 0.</dd>
-<dt>p <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>parameter, &gt;= 0 and &lt;=1.</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">{tuple, int}</span></dt>
-<dd>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
-<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</dd>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n</strong> : float (but truncated to an integer)</p>
+<blockquote>
+<div><p>parameter, &gt; 0.</p>
+</div></blockquote>
+<p><strong>p</strong> : float</p>
+<blockquote>
+<div><p>parameter, &gt;= 0 and &lt;=1.</p>
+</div></blockquote>
+<p><strong>size</strong> : {tuple, int}</p>
+<blockquote>
+<div><p>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
+<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>samples</strong> : {ndarray, scalar}</p>
+<blockquote class="last">
+<div><p>where the values are all integers in  [0, n].</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><tt class="xref py py-obj docutils literal"><span class="pre">scipy.stats.distributions.binom</span></tt></dt>
+<dd>probability density function, distribution or cumulative density function, etc.</dd>
 </dl>
-<dl class="docutils">
-<dt>samples <span class="classifier-delimiter">:</span> <span class="classifier">{ndarray, scalar}</span></dt>
-<dd>where the values are all integers in  [0, n].</dd>
-</dl>
-<dl class="docutils">
-<dt>scipy.stats.distributions.binom <span class="classifier-delimiter">:</span> <span class="classifier">probability density function,</span></dt>
-<dd>distribution or cumulative density function, etc.</dd>
-</dl>
+</div>
+<p class="rubric">Notes</p>
 <p>The probability density for the Binomial distribution is</p>
 <img src="_images/mathmpl/math-2418dd8355.png" class="center" /><p>where <img src="_images/mathmpl/math-e7b31363a1.png" /> is the number of trials, <img src="_images/mathmpl/math-fb97a8c47a.png" /> is the probability
 of success, and <img src="_images/mathmpl/math-1922d1ceaa.png" /> is the number of successes.</p>
@@ -385,42 +437,44 @@ number of samples, in which case the binomial distribution is used
 instead. For example, a sample of 15 people shows 4 who are left
 handed, and 11 who are right handed. Then p = 4/15 = 27%. 0.27*15 = 4,
 so the binomial distribution should be used in this case.</p>
-<table class="docutils footnote" frame="void" id="id6" rules="none">
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r3" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td>Dalgaard, Peter, &#8220;Introductory Statistics with R&#8221;,
+<tr><td class="label"><a class="fn-backref" href="#id6">[R3]</a></td><td>Dalgaard, Peter, &#8220;Introductory Statistics with R&#8221;,
 Springer-Verlag, 2002.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id7" rules="none">
+<table class="docutils citation" frame="void" id="r4" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[2]</td><td>Glantz, Stanton A. &#8220;Primer of Biostatistics.&#8221;, McGraw-Hill,
+<tr><td class="label"><a class="fn-backref" href="#id7">[R4]</a></td><td>Glantz, Stanton A. &#8220;Primer of Biostatistics.&#8221;, McGraw-Hill,
 Fifth Edition, 2002.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id8" rules="none">
+<table class="docutils citation" frame="void" id="r5" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[3]</td><td>Lentner, Marvin, &#8220;Elementary Applied Statistics&#8221;, Bogden
+<tr><td class="label"><a class="fn-backref" href="#id8">[R5]</a></td><td>Lentner, Marvin, &#8220;Elementary Applied Statistics&#8221;, Bogden
 and Quigley, 1972.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id9" rules="none">
+<table class="docutils citation" frame="void" id="r6" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[4]</td><td>Weisstein, Eric W. &#8220;Binomial Distribution.&#8221; From MathWorld&#8211;A
+<tr><td class="label"><a class="fn-backref" href="#id9">[R6]</a></td><td>Weisstein, Eric W. &#8220;Binomial Distribution.&#8221; From MathWorld&#8211;A
 Wolfram Web Resource.
 <a class="reference external" href="http://mathworld.wolfram.com/BinomialDistribution.html">http://mathworld.wolfram.com/BinomialDistribution.html</a></td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id10" rules="none">
+<table class="docutils citation" frame="void" id="r7" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[5]</td><td>Wikipedia, &#8220;Binomial-distribution&#8221;,
+<tr><td class="label"><a class="fn-backref" href="#id10">[R7]</a></td><td>Wikipedia, &#8220;Binomial-distribution&#8221;,
 <a class="reference external" href="http://en.wikipedia.org/wiki/Binomial_distribution">http://en.wikipedia.org/wiki/Binomial_distribution</a></td></tr>
 </tbody>
 </table>
+<p class="rubric">Examples</p>
 <p>Draw samples from the distribution:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span> <span class="c"># number of trials, probability of each trial</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
@@ -570,7 +624,7 @@ Avoid the &#8220;all&#8221; case</p>
 
 <dl class="function">
 <dt id="halla.stats.get_medoid">
-<tt class="descclassname">halla.stats.</tt><tt class="descname">get_medoid</tt><big>(</big><em>pArray</em>, <em>iAxis=0</em>, <em>pMetric=&lt;function l2 at 0x6a7f410&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#get_medoid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.get_medoid" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.stats.</tt><tt class="descname">get_medoid</tt><big>(</big><em>pArray</em>, <em>iAxis=0</em>, <em>pMetric=&lt;function l2 at 0x609fb18&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#get_medoid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.get_medoid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Input: numpy array 
 Output: float</p>
 <p>For lack of better way, compute centroid, then compute medoid 
@@ -605,19 +659,32 @@ where the outcome can be 1 through 6.  Each sample drawn from the
 distribution represents <cite>n</cite> such experiments.  Its values,
 <tt class="docutils literal"><span class="pre">X_i</span> <span class="pre">=</span> <span class="pre">[X_0,</span> <span class="pre">X_1,</span> <span class="pre">...,</span> <span class="pre">X_p]</span></tt>, represent the number of times the outcome
 was <tt class="docutils literal"><span class="pre">i</span></tt>.</p>
-<dl class="docutils">
-<dt>n <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Number of experiments.</dd>
-<dt>pvals <span class="classifier-delimiter">:</span> <span class="classifier">sequence of floats, length p</span></dt>
-<dd>Probabilities of each of the <tt class="docutils literal"><span class="pre">p</span></tt> different outcomes.  These
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n</strong> : int</p>
+<blockquote>
+<div><p>Number of experiments.</p>
+</div></blockquote>
+<p><strong>pvals</strong> : sequence of floats, length p</p>
+<blockquote>
+<div><p>Probabilities of each of the <tt class="docutils literal"><span class="pre">p</span></tt> different outcomes.  These
 should sum to 1 (however, the last element is always assumed to
 account for the remaining probability, as long as
-<tt class="docutils literal"><span class="pre">sum(pvals[:-1])</span> <span class="pre">&lt;=</span> <span class="pre">1)</span></tt>.</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
-<dd>Given a <cite>size</cite> of <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K)</span></tt>, then <tt class="docutils literal"><span class="pre">M*N*K</span></tt> samples are drawn,
+<tt class="docutils literal"><span class="pre">sum(pvals[:-1])</span> <span class="pre">&lt;=</span> <span class="pre">1)</span></tt>.</p>
+</div></blockquote>
+<p><strong>size</strong> : tuple of ints</p>
+<blockquote class="last">
+<div><p>Given a <cite>size</cite> of <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K)</span></tt>, then <tt class="docutils literal"><span class="pre">M*N*K</span></tt> samples are drawn,
 and the output shape becomes <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K,</span> <span class="pre">p)</span></tt>, since each sample
-has shape <tt class="docutils literal"><span class="pre">(p,)</span></tt>.</dd>
-</dl>
+has shape <tt class="docutils literal"><span class="pre">(p,)</span></tt>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
 <p>Throw a dice 20 times:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mf">6.</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">array([[4, 1, 7, 5, 2, 1]])</span>
@@ -645,49 +712,67 @@ we threw 2 times 1, 4 times 2, etc.</p>
 <dd><p>Draw random samples from a normal (Gaussian) distribution.</p>
 <p>The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently <a href="#id32"><span class="problematic" id="id33"><span id="id11"></span>[2]_</span></a>, is often called the bell curve because of
+independently <a class="reference internal" href="#r9" id="id11">[R9]</a>, is often called the bell curve because of
 its characteristic shape (see the example below).</p>
 <p>The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution <a href="#id34"><span class="problematic" id="id35"><span id="id12"></span>[2]_</span></a>.</p>
-<dl class="docutils">
-<dt>loc <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Mean (&#8220;centre&#8221;) of the distribution.</dd>
-<dt>scale <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Standard deviation (spread or &#8220;width&#8221;) of the distribution.</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
-<dd>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
-<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</dd>
+unique distribution <a class="reference internal" href="#r9" id="id12">[R9]</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>loc</strong> : float</p>
+<blockquote>
+<div><p>Mean (&#8220;centre&#8221;) of the distribution.</p>
+</div></blockquote>
+<p><strong>scale</strong> : float</p>
+<blockquote>
+<div><p>Standard deviation (spread or &#8220;width&#8221;) of the distribution.</p>
+</div></blockquote>
+<p><strong>size</strong> : tuple of ints</p>
+<blockquote class="last">
+<div><p>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
+<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><tt class="xref py py-obj docutils literal"><span class="pre">scipy.stats.distributions.norm</span></tt></dt>
+<dd>probability density function, distribution or cumulative density function, etc.</dd>
 </dl>
-<dl class="docutils">
-<dt>scipy.stats.distributions.norm <span class="classifier-delimiter">:</span> <span class="classifier">probability density function,</span></dt>
-<dd>distribution or cumulative density function, etc.</dd>
-</dl>
+</div>
+<p class="rubric">Notes</p>
 <p>The probability density for the Gaussian distribution is</p>
 <img src="_images/mathmpl/math-b24c0fb115.png" class="center" /><p>where <img src="_images/mathmpl/math-3488de1d0a.png" /> is the mean and <img src="_images/mathmpl/math-293c147d21.png" /> the standard deviation.
 The square of the standard deviation, <img src="_images/mathmpl/math-54bf156f7e.png" />, is called the
 variance.</p>
 <p>The function has its peak at the mean, and its &#8220;spread&#8221; increases with
 the standard deviation (the function reaches 0.607 times its maximum at
-<img src="_images/mathmpl/math-655d89f5c9.png" /> and <img src="_images/mathmpl/math-a5e0617d55.png" /> <a href="#id36"><span class="problematic" id="id37"><span id="id13"></span>[2]_</span></a>).  This implies that
+<img src="_images/mathmpl/math-655d89f5c9.png" /> and <img src="_images/mathmpl/math-a5e0617d55.png" /> <a class="reference internal" href="#r9" id="id13">[R9]</a>).  This implies that
 <cite>numpy.random.normal</cite> is more likely to return samples lying close to the
 mean, rather than those far away.</p>
-<table class="docutils footnote" frame="void" id="id14" rules="none">
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r8" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td>Wikipedia, &#8220;Normal distribution&#8221;,
+<tr><td class="label"><a class="fn-backref" href="#id14">[R8]</a></td><td>Wikipedia, &#8220;Normal distribution&#8221;,
 <a class="reference external" href="http://en.wikipedia.org/wiki/Normal_distribution">http://en.wikipedia.org/wiki/Normal_distribution</a></td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id15" rules="none">
+<table class="docutils citation" frame="void" id="r9" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[2]</td><td>P. R. Peebles Jr., &#8220;Central Limit Theorem&#8221; in &#8220;Probability, Random
+<tr><td class="label">[R9]</td><td><em>(<a class="fn-backref" href="#id11">1</a>, <a class="fn-backref" href="#id12">2</a>, <a class="fn-backref" href="#id13">3</a>, <a class="fn-backref" href="#id15">4</a>)</em> P. R. Peebles Jr., &#8220;Central Limit Theorem&#8221; in &#8220;Probability, Random
 Variables and Random Signal Principles&#8221;, 4th ed., 2001,
 pp. 51, 51, 125.</td></tr>
 </tbody>
 </table>
+<p class="rubric">Examples</p>
 <p>Draw samples from the distribution:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span> <span class="c"># mean and standard deviation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
@@ -716,7 +801,7 @@ the probability density function:</p>
 
 <dl class="function">
 <dt id="halla.stats.p_val_plot">
-<tt class="descclassname">halla.stats.</tt><tt class="descname">p_val_plot</tt><big>(</big><em>pArray1</em>, <em>pArray2</em>, <em>pCut=&lt;function log_cut at 0x6a7fb18&gt;</em>, <em>iIter=100</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#p_val_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.p_val_plot" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.stats.</tt><tt class="descname">p_val_plot</tt><big>(</big><em>pArray1</em>, <em>pArray2</em>, <em>pCut=&lt;function log_cut at 0x60a22a8&gt;</em>, <em>iIter=100</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#p_val_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.p_val_plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns p value plot of combinatorial cuts</p>
 <p>In practice, works best when arrays are of similar size, since I implement the minimum ... 
 For future think about implementing the correct step function</p>
@@ -741,11 +826,22 @@ pArray1, pArray2, metric = &#8220;mi&#8221;, decomposition = &#8220;pca&#8221;, 
 <dt id="halla.stats.shuffle">
 <tt class="descclassname">halla.stats.</tt><tt class="descname">shuffle</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#halla.stats.shuffle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Modify a sequence in-place by shuffling its contents.</p>
-<dl class="docutils">
-<dt>x <span class="classifier-delimiter">:</span> <span class="classifier">array_like</span></dt>
-<dd>The array or list to be shuffled.</dd>
-</dl>
-<p>None</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x</strong> : array_like</p>
+<blockquote>
+<div><p>The array or list to be shuffled.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>None</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">arr</span>
@@ -764,37 +860,47 @@ multi-dimensional array:</p>
 </div>
 </dd></dl>
 
+<dl class="function">
+<dt id="halla.stats.uniform_cut">
+<tt class="descclassname">halla.stats.</tt><tt class="descname">uniform_cut</tt><big>(</big><em>cake_length</em>, <em>iCuts=10</em><big>)</big><a class="reference internal" href="_modules/halla/stats.html#uniform_cut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.stats.uniform_cut" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cut cake uniformly</p>
+</dd></dl>
+
 <span class="target" id="module-halla.distance"></span><p>Abstract distance module providing different notions of distance</p>
 <dl class="class">
 <dt id="halla.distance.AdjustedMutualInformation">
-<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">AdjustedMutualInformation</tt><big>(</big><em>c_array1</em>, <em>c_array2</em><big>)</big><a class="headerlink" href="#halla.distance.AdjustedMutualInformation" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">AdjustedMutualInformation</tt><big>(</big><em>c_array1</em>, <em>c_array2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#AdjustedMutualInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.AdjustedMutualInformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>adjusted for chance</p>
+<p class="rubric">Methods</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="halla.distance.Distance">
-<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">Distance</tt><big>(</big><em>c_array1</em>, <em>c_array2</em><big>)</big><a class="headerlink" href="#halla.distance.Distance" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">Distance</tt><big>(</big><em>c_array1</em>, <em>c_array2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#Distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.Distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>abstract distance, handles numpy arrays (probably should support lists for compatibility issues)</p>
+<p class="rubric">Methods</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="halla.distance.MutualInformation">
-<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">MutualInformation</tt><big>(</big><em>c_array1</em>, <em>c_array2</em>, <em>bSym=False</em><big>)</big><a class="headerlink" href="#halla.distance.MutualInformation" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">MutualInformation</tt><big>(</big><em>c_array1</em>, <em>c_array2</em>, <em>bSym=False</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#MutualInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.MutualInformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scikit-learn uses the convention log = ln
 Adjust multiplicative factor of log(e,2)</p>
+<p class="rubric">Methods</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="halla.distance.NormalizedMutualInformation">
-<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">NormalizedMutualInformation</tt><big>(</big><em>c_array1</em>, <em>c_array2</em><big>)</big><a class="headerlink" href="#halla.distance.NormalizedMutualInformation" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">halla.distance.</tt><tt class="descname">NormalizedMutualInformation</tt><big>(</big><em>c_array1</em>, <em>c_array2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#NormalizedMutualInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.NormalizedMutualInformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>normalized by sqrt(H1*H2) so the range is [0,1]</p>
+<p class="rubric">Methods</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="halla.distance.adj_mi">
 <tt class="descclassname">halla.distance.</tt><tt class="descname">adj_mi</tt><big>(</big><em>pData1</em>, <em>pData2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#adj_mi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.adj_mi" title="Permalink to this definition">¶</a></dt>
-<dd><p>static implementation of adjusted distance</p>
-<p>Examples</p>
+<dd><p>Static implementation of adjusted distance</p>
+<p class="rubric">Examples</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">0.015625</span><span class="p">,</span><span class="mf">0.125</span><span class="p">,</span><span class="mf">0.421875</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dx</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="p">)</span>
@@ -824,8 +930,8 @@ Adjust multiplicative factor of log(e,2)</p>
 <dl class="function">
 <dt id="halla.distance.adj_mid">
 <tt class="descclassname">halla.distance.</tt><tt class="descname">adj_mid</tt><big>(</big><em>pData1</em>, <em>pData2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#adj_mid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.adj_mid" title="Permalink to this definition">¶</a></dt>
-<dd><p>static implementation of adjusted distance</p>
-<p>Examples:</p>
+<dd><p>Static implementation of adjusted distance</p>
+<p class="rubric">Examples</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">0.015625</span><span class="p">,</span><span class="mf">0.125</span><span class="p">,</span><span class="mf">0.421875</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dx</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="p">)</span>
@@ -854,26 +960,48 @@ Adjust multiplicative factor of log(e,2)</p>
 
 <dl class="function">
 <dt id="halla.distance.cor">
-<tt class="descclassname">halla.distance.</tt><tt class="descname">cor</tt><big>(</big><em>pData1</em>, <em>pData2</em>, <em>method='pearson'</em><big>)</big><a class="headerlink" href="#halla.distance.cor" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt><cite>pData1, pData2</cite></dt>
-<dd>Numpy array</dd>
-<dt><cite>method</cite></dt>
-<dd>{&#8220;pearson&#8221;, &#8220;spearman&#8221;}</dd>
-</dl>
-<dl class="docutils">
-<dt><cite>rho</cite></dt>
-<dd>float</dd>
-<dt><cite>p-value</cite></dt>
-<dd>float</dd>
-</dl>
+<tt class="descclassname">halla.distance.</tt><tt class="descname">cor</tt><big>(</big><em>pData1</em>, <em>pData2</em>, <em>method='pearson'</em>, <em>pval=False</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#cor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.cor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get correlation coefficient and corresponding parametric p-value (t-test)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>pData1, pData2</strong> : numpy arrays</p>
+<blockquote>
+<div><p>data matrices</p>
+</div></blockquote>
+<p><strong>method</strong> : str</p>
+<blockquote>
+<div><p>{&#8220;pearson&#8221;, &#8220;spearman&#8221;}
+&#8220;abs&#8221;</p>
+</div></blockquote>
+<p><strong>pval</strong> : bool</p>
+<blockquote>
+<div><p>True if parametric estimate of p-value requested</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>rho: float</strong> :</p>
+<blockquote>
+<div><p>correlation coefficient</p>
+</div></blockquote>
+<p><strong>p: float</strong> :</p>
+<blockquote class="last">
+<div><p>p-value</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>View pairwise correlation measures (pearson,spearman) between two datasets <cite>x</cite> and <cite>y</cite>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">0.015625</span><span class="p">,</span><span class="mf">0.125</span><span class="p">,</span><span class="mf">0.421875</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="o">=</span> <span class="n">item</span><span class="p">;</span> <span class="k">print</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span><span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">pearsonr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span><span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">spearmanr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="n">_</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="o">=</span> <span class="n">item</span><span class="p">;</span> <span class="k">print</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span><span class="n">cor</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s">&quot;pearson&quot;</span><span class="p">),</span><span class="n">cor</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s">&quot;spearman&quot;</span><span class="p">)</span>
 <span class="go">(0, 0) -1.0 -1.0</span>
 <span class="go">(0, 1) -0.894427191 -0.894427191</span>
-<span class="go">(0, 2) 1.0 1.0</span>
+<span class="go">(0, 2) 1.0 1.0 </span>
 <span class="go">(0, 3) 0.951369855792 1.0</span>
 <span class="go">(1, 0) 0.774596669241 0.774596669241</span>
 <span class="go">(1, 1) 0.57735026919 0.57735026919</span>
@@ -889,12 +1017,90 @@ Adjust multiplicative factor of log(e,2)</p>
 <span class="go">(3, 3) 0.921159901892 0.774596669241</span>
 </pre></div>
 </div>
+<p>Generate p-values for pearson correlation:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pval_pearson</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span> <span class="p">[</span><span class="n">cor</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s">&quot;pearson&quot;</span><span class="p">,</span> <span class="n">pval</span><span class="o">=</span><span class="bp">True</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="n">p</span><span class="p">]</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pval_pearson</span>
+<span class="go">[0.0, 0.0, 0.0094671481098304033, 0.01562596130230276, 0.015625961302302867, 0.048630144207595816, 0.07884009810806647, 0.07884009810806647, 0.10557280900008403, 0.11954909367437615, 0.22540333075851643, 0.22540333075851643, 0.2254033307585166, 0.2254033307585166, 0.42264973081037405, 0.42264973081037405]</span>
+</pre></div>
+</div>
+<p>View plot:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span> <span class="n">pval_pearson</span> <span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href=".//index-1.py">Source code</a>, <a class="reference external" href=".//index-1.png">png</a>, <a class="reference external" href=".//index-1.hires.png">hires.png</a>, <a class="reference external" href=".//index-1.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/index-1.png" src="_images/index-1.png" />
+</div>
+<p>Generate p-values for spearman correlation:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pval_spearman</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span> <span class="p">[</span><span class="n">cor</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s">&quot;spearman&quot;</span><span class="p">,</span> <span class="n">pval</span><span class="o">=</span><span class="bp">True</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="n">p</span><span class="p">]</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pval_spearman</span>
+<span class="go">[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.10557280900008413, 0.10557280900008413, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.42264973081037427, 0.42264973081037427]</span>
+</pre></div>
+</div>
+<p>View plot:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pval_pearson</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href=".//index-2.py">Source code</a>, <a class="reference external" href=".//index-2.png">png</a>, <a class="reference external" href=".//index-2.hires.png">hires.png</a>, <a class="reference external" href=".//index-2.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/index-2.png" src="_images/index-2.png" />
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="halla.distance.cord">
+<tt class="descclassname">halla.distance.</tt><tt class="descname">cord</tt><big>(</big><em>pData</em>, <em>pData2</em>, <em>method='pearson'</em>, <em>inversion_method='abs'</em>, <em>pval=False</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#cord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.cord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get correlation divergence</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>pData1, pData2</strong> : numpy arrays</p>
+<blockquote>
+<div><p>data matrices</p>
+</div></blockquote>
+<p><strong>method</strong> : str</p>
+<blockquote>
+<div><p>{&#8220;pearson&#8221;, &#8220;spearman&#8221;}</p>
+</div></blockquote>
+<p><strong>inversion_method</strong> : str</p>
+<blockquote>
+<div><p>&#8220;abs&#8221;</p>
+</div></blockquote>
+<p><strong>pval</strong> : bool</p>
+<blockquote>
+<div><p>True if parametric estimate of p-value requested</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>rho: float</strong> :</p>
+<blockquote>
+<div><p>correlation coefficient</p>
+</div></blockquote>
+<p><strong>p: float</strong> :</p>
+<blockquote class="last">
+<div><p>p-value</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cord</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">)</span>
+<span class="go">0.0</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="halla.distance.l2">
 <tt class="descclassname">halla.distance.</tt><tt class="descname">l2</tt><big>(</big><em>pData1</em>, <em>pData2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#l2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.l2" title="Permalink to this definition">¶</a></dt>
-<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]);</span> <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">])</span>
+<dd><p>Returns the l2 distance</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]);</span> <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">l2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
 <span class="go">5.196152422706632</span>
 </pre></div>
@@ -905,15 +1111,17 @@ Adjust multiplicative factor of log(e,2)</p>
 <dt id="halla.distance.mi">
 <tt class="descclassname">halla.distance.</tt><tt class="descname">mi</tt><big>(</big><em>pData1</em>, <em>pData2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#mi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.mi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Static implementation of mutual information, returns bits</p>
-<dl class="docutils">
-<dt><cite>pData1, pData2</cite></dt>
-<dd>Numpy arrays</dd>
-</dl>
-<dl class="docutils">
-<dt><cite>mi</cite></dt>
-<dd>float</dd>
-</dl>
-<p>Examples:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pData1, pData2</strong> : Numpy arrays</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>mi</strong> : float</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">0.015625</span><span class="p">,</span><span class="mf">0.125</span><span class="p">,</span><span class="mf">0.421875</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dx</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="p">)</span>
@@ -943,11 +1151,9 @@ Adjust multiplicative factor of log(e,2)</p>
 <dl class="function">
 <dt id="halla.distance.mid">
 <tt class="descclassname">halla.distance.</tt><tt class="descname">mid</tt><big>(</big><em>pData1</em>, <em>pData2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#mid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.mid" title="Permalink to this definition">¶</a></dt>
-<dd><p>static implementation of mutual information, 
-caveat: returns nats, not bits</p>
-<dl class="docutils">
-<dt>Examples::</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+<dd><p>Static implementation of mutual information,</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">0.015625</span><span class="p">,</span><span class="mf">0.125</span><span class="p">,</span><span class="mf">0.421875</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dx</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dy</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span> <span class="n">y</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
@@ -971,15 +1177,13 @@ caveat: returns nats, not bits</p>
 <span class="go">(3, 3) 0.688721875541</span>
 </pre></div>
 </div>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="halla.distance.norm_mi">
 <tt class="descclassname">halla.distance.</tt><tt class="descname">norm_mi</tt><big>(</big><em>pData1</em>, <em>pData2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#norm_mi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.norm_mi" title="Permalink to this definition">¶</a></dt>
-<dd><p>static implementation of normalized mutual information</p>
-<p>Examples</p>
+<dd><p>Static implementation of normalized mutual information</p>
+<p class="rubric">Examples</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">0.015625</span><span class="p">,</span><span class="mf">0.125</span><span class="p">,</span><span class="mf">0.421875</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dx</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="p">)</span>
@@ -1009,8 +1213,8 @@ caveat: returns nats, not bits</p>
 <dl class="function">
 <dt id="halla.distance.norm_mid">
 <tt class="descclassname">halla.distance.</tt><tt class="descname">norm_mid</tt><big>(</big><em>pData1</em>, <em>pData2</em><big>)</big><a class="reference internal" href="_modules/halla/distance.html#norm_mid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.distance.norm_mid" title="Permalink to this definition">¶</a></dt>
-<dd><p>static implementation of normalized mutual information</p>
-<p>Examples:</p>
+<dd><p>Static implementation of normalized mutual information</p>
+<p class="rubric">Examples</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">0.015625</span><span class="p">,</span><span class="mf">0.125</span><span class="p">,</span><span class="mf">0.421875</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dx</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="p">)</span>
@@ -1042,24 +1246,13 @@ manages transformations</p>
 <dl class="class">
 <dt id="halla.parser.Input">
 <em class="property">class </em><tt class="descclassname">halla.parser.</tt><tt class="descname">Input</tt><big>(</big><em>strFileName1</em>, <em>strFileName2=None</em>, <em>var_names=True</em>, <em>headers=False</em><big>)</big><a class="reference internal" href="_modules/halla/parser.html#Input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.parser.Input" title="Permalink to this definition">¶</a></dt>
-<dd><ul class="simple">
-<li><cite>CON</cite> &lt;- continous</li>
-<li><cite>CAT</cite> &lt;- categorical</li>
-<li><cite>BIN</cite> &lt;- binary</li>
-<li><cite>LEX</cite> &lt;- lexical</li>
-</ul>
+<dd><p class="rubric">Methods</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="halla.parser.Output">
 <em class="property">class </em><tt class="descclassname">halla.parser.</tt><tt class="descname">Output</tt><a class="reference internal" href="_modules/halla/parser.html#Output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.parser.Output" title="Permalink to this definition">¶</a></dt>
-<dd><ul class="simple">
-<li><cite>CON</cite> &lt;- continous</li>
-<li><cite>CAT</cite> &lt;- categorical</li>
-<li><cite>BIN</cite> &lt;- binary</li>
-<li><cite>LEX</cite> &lt;- lexical</li>
-</ul>
-</dd></dl>
+<dd></dd></dl>
 
 <span class="target" id="module-halla.logger"></span><span class="target" id="module-halla.test"></span><p>Wrappers for testing procedures, random data generation, etc</p>
 <dl class="function">
@@ -1073,19 +1266,32 @@ where the outcome can be 1 through 6.  Each sample drawn from the
 distribution represents <cite>n</cite> such experiments.  Its values,
 <tt class="docutils literal"><span class="pre">X_i</span> <span class="pre">=</span> <span class="pre">[X_0,</span> <span class="pre">X_1,</span> <span class="pre">...,</span> <span class="pre">X_p]</span></tt>, represent the number of times the outcome
 was <tt class="docutils literal"><span class="pre">i</span></tt>.</p>
-<dl class="docutils">
-<dt>n <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Number of experiments.</dd>
-<dt>pvals <span class="classifier-delimiter">:</span> <span class="classifier">sequence of floats, length p</span></dt>
-<dd>Probabilities of each of the <tt class="docutils literal"><span class="pre">p</span></tt> different outcomes.  These
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n</strong> : int</p>
+<blockquote>
+<div><p>Number of experiments.</p>
+</div></blockquote>
+<p><strong>pvals</strong> : sequence of floats, length p</p>
+<blockquote>
+<div><p>Probabilities of each of the <tt class="docutils literal"><span class="pre">p</span></tt> different outcomes.  These
 should sum to 1 (however, the last element is always assumed to
 account for the remaining probability, as long as
-<tt class="docutils literal"><span class="pre">sum(pvals[:-1])</span> <span class="pre">&lt;=</span> <span class="pre">1)</span></tt>.</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
-<dd>Given a <cite>size</cite> of <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K)</span></tt>, then <tt class="docutils literal"><span class="pre">M*N*K</span></tt> samples are drawn,
+<tt class="docutils literal"><span class="pre">sum(pvals[:-1])</span> <span class="pre">&lt;=</span> <span class="pre">1)</span></tt>.</p>
+</div></blockquote>
+<p><strong>size</strong> : tuple of ints</p>
+<blockquote class="last">
+<div><p>Given a <cite>size</cite> of <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K)</span></tt>, then <tt class="docutils literal"><span class="pre">M*N*K</span></tt> samples are drawn,
 and the output shape becomes <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K,</span> <span class="pre">p)</span></tt>, since each sample
-has shape <tt class="docutils literal"><span class="pre">(p,)</span></tt>.</dd>
-</dl>
+has shape <tt class="docutils literal"><span class="pre">(p,)</span></tt>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
 <p>Throw a dice 20 times:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mf">6.</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">array([[4, 1, 7, 5, 2, 1]])</span>
@@ -1113,49 +1319,67 @@ we threw 2 times 1, 4 times 2, etc.</p>
 <dd><p>Draw random samples from a normal (Gaussian) distribution.</p>
 <p>The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently <a href="#id38"><span class="problematic" id="id39"><span id="id16"></span>[2]_</span></a>, is often called the bell curve because of
+independently <a class="reference internal" href="#r11" id="id16">[R11]</a>, is often called the bell curve because of
 its characteristic shape (see the example below).</p>
 <p>The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution <a href="#id40"><span class="problematic" id="id41"><span id="id17"></span>[2]_</span></a>.</p>
-<dl class="docutils">
-<dt>loc <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Mean (&#8220;centre&#8221;) of the distribution.</dd>
-<dt>scale <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Standard deviation (spread or &#8220;width&#8221;) of the distribution.</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
-<dd>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
-<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</dd>
+unique distribution <a class="reference internal" href="#r11" id="id17">[R11]</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>loc</strong> : float</p>
+<blockquote>
+<div><p>Mean (&#8220;centre&#8221;) of the distribution.</p>
+</div></blockquote>
+<p><strong>scale</strong> : float</p>
+<blockquote>
+<div><p>Standard deviation (spread or &#8220;width&#8221;) of the distribution.</p>
+</div></blockquote>
+<p><strong>size</strong> : tuple of ints</p>
+<blockquote class="last">
+<div><p>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
+<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><tt class="xref py py-obj docutils literal"><span class="pre">scipy.stats.distributions.norm</span></tt></dt>
+<dd>probability density function, distribution or cumulative density function, etc.</dd>
 </dl>
-<dl class="docutils">
-<dt>scipy.stats.distributions.norm <span class="classifier-delimiter">:</span> <span class="classifier">probability density function,</span></dt>
-<dd>distribution or cumulative density function, etc.</dd>
-</dl>
+</div>
+<p class="rubric">Notes</p>
 <p>The probability density for the Gaussian distribution is</p>
 <img src="_images/mathmpl/math-b24c0fb115.png" class="center" /><p>where <img src="_images/mathmpl/math-3488de1d0a.png" /> is the mean and <img src="_images/mathmpl/math-293c147d21.png" /> the standard deviation.
 The square of the standard deviation, <img src="_images/mathmpl/math-54bf156f7e.png" />, is called the
 variance.</p>
 <p>The function has its peak at the mean, and its &#8220;spread&#8221; increases with
 the standard deviation (the function reaches 0.607 times its maximum at
-<img src="_images/mathmpl/math-655d89f5c9.png" /> and <img src="_images/mathmpl/math-a5e0617d55.png" /> <a href="#id42"><span class="problematic" id="id43"><span id="id18"></span>[2]_</span></a>).  This implies that
+<img src="_images/mathmpl/math-655d89f5c9.png" /> and <img src="_images/mathmpl/math-a5e0617d55.png" /> <a class="reference internal" href="#r11" id="id18">[R11]</a>).  This implies that
 <cite>numpy.random.normal</cite> is more likely to return samples lying close to the
 mean, rather than those far away.</p>
-<table class="docutils footnote" frame="void" id="id19" rules="none">
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r10" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td>Wikipedia, &#8220;Normal distribution&#8221;,
+<tr><td class="label"><a class="fn-backref" href="#id19">[R10]</a></td><td>Wikipedia, &#8220;Normal distribution&#8221;,
 <a class="reference external" href="http://en.wikipedia.org/wiki/Normal_distribution">http://en.wikipedia.org/wiki/Normal_distribution</a></td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id20" rules="none">
+<table class="docutils citation" frame="void" id="r11" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[2]</td><td>P. R. Peebles Jr., &#8220;Central Limit Theorem&#8221; in &#8220;Probability, Random
+<tr><td class="label">[R11]</td><td><em>(<a class="fn-backref" href="#id16">1</a>, <a class="fn-backref" href="#id17">2</a>, <a class="fn-backref" href="#id18">3</a>, <a class="fn-backref" href="#id20">4</a>)</em> P. R. Peebles Jr., &#8220;Central Limit Theorem&#8221; in &#8220;Probability, Random
 Variables and Random Signal Principles&#8221;, 4th ed., 2001,
 pp. 51, 51, 125.</td></tr>
 </tbody>
 </table>
+<p class="rubric">Examples</p>
 <p>Draw samples from the distribution:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span> <span class="c"># mean and standard deviation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
@@ -1184,7 +1408,7 @@ the probability density function:</p>
 
 <dl class="function">
 <dt id="halla.test.randmat">
-<tt class="descclassname">halla.test.</tt><tt class="descname">randmat</tt><big>(</big><em>tShape=(10</em>, <em>10)</em>, <em>pDist=&lt;built-in method normal of mtrand.RandomState object at 0x2eccb10&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/test.html#randmat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.test.randmat" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.test.</tt><tt class="descname">randmat</tt><big>(</big><em>tShape=(10</em>, <em>10)</em>, <em>pDist=&lt;built-in method normal of mtrand.RandomState object at 0x2598b10&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/test.html#randmat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.test.randmat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a tShape-dimensional matrix given by base distribution pDist 
 Order: Row, Col</p>
 </dd></dl>
@@ -1216,6 +1440,7 @@ Handles clustering and other organization schemes.</p>
 <dd><p>A gardener object is a handler for the different types of hierarchical data structures (&#8220;trees&#8221;)
 Can collapse and manipulate data structures and wrap them in different objects, depending on the 
 context.</p>
+<p class="rubric">Methods</p>
 <dl class="staticmethod">
 <dt id="halla.hierarchy.Gardener.PlantTree">
 <em class="property">static </em><tt class="descname">PlantTree</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#Gardener.PlantTree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.Gardener.PlantTree" title="Permalink to this definition">¶</a></dt>
@@ -1238,6 +1463,7 @@ output: a list of data pointers</p>
 <em class="property">class </em><tt class="descclassname">halla.hierarchy.</tt><tt class="descname">Tree</tt><a class="reference internal" href="_modules/halla/hierarchy.html#Tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.Tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>A hierarchically nested structure containing nodes as
 a basic core unit</p>
+<p class="rubric">Methods</p>
 </dd></dl>
 
 <dl class="function">
@@ -1250,7 +1476,7 @@ a basic core unit</p>
 
 <dl class="function">
 <dt id="halla.hierarchy.couple_tree">
-<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">couple_tree</tt><big>(</big><em>pClusterNode1</em>, <em>pClusterNode2</em>, <em>method='unif'</em><big>)</big><a class="headerlink" href="#halla.hierarchy.couple_tree" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">couple_tree</tt><big>(</big><em>pClusterNode1</em>, <em>pClusterNode2</em>, <em>method='unif'</em><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#couple_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.couple_tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Couples two data trees to produce a hypothesis tree</p>
 <p>Parameters:</p>
 <p>Returns:</p>
@@ -1266,19 +1492,150 @@ a basic core unit</p>
 
 <dl class="function">
 <dt id="halla.hierarchy.hclust">
-<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">hclust</tt><big>(</big><em>pArray</em>, <em>pdist_metric=&lt;function norm_mid at 0x6a7f6e0&gt;</em>, <em>cluster_method='single'</em>, <em>bTree=False</em><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#hclust"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.hclust" title="Permalink to this definition">¶</a></dt>
-<dd><p>(<a class="reference external" href=".//index-1.py">Source code</a>, <a class="reference external" href=".//index-1.png">png</a>, <a class="reference external" href=".//index-1.hires.png">hires.png</a>, <a class="reference external" href=".//index-1.pdf">pdf</a>)</p>
-<div class="figure">
-<img alt="_images/index-1.png" src="_images/index-1.png" />
-</div>
-<p>Returns hierarchically clustered object</p>
-<p>Parameters:</p>
-<p>Returns:</p>
-<p>Examples</p>
-<p>Notes</p>
+<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">hclust</tt><big>(</big><em>pArray</em>, <em>pdist_metric=&lt;function norm_mid at 0x609fde8&gt;</em>, <em>cluster_method='single'</em>, <em>bTree=False</em><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#hclust"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.hclust" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs hierarchical clustering on an numpy array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>pArray</strong> : numpy array</p>
 <blockquote>
-<div>This hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV&#8217;s, not just single ones 
-Use the &#8220;grouping property&#8221; as discussed by Kraskov paper.</div></blockquote>
+<div><p>pdist_metric : str 
+cluster_method : str
+bTree : boolean</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>Z</strong> : numpy array or ClusterNode object</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV&#8217;s, not just single ones 
+Use the &#8220;grouping property&#8221; as discussed by Kraskov paper.</p>
+<p class="rubric">Examples</p>
+<ul>
+<li><p class="first">Pearson correlation 1:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span> 
+<span class="kn">from</span> <span class="nn">scipy.cluster.hierarchy</span> <span class="kn">import</span> <span class="n">dendrogram</span><span class="p">,</span> <span class="n">linkage</span>
+<span class="kn">import</span> <span class="nn">scipy.cluster.hierarchy</span> 
+<span class="kn">import</span> <span class="nn">halla</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+
+<span class="n">lxpearson</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">hierarchy</span><span class="o">.</span><span class="n">hclust</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">pdist_metric</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">cord</span> <span class="p">)</span>
+
+<span class="n">dendrogram</span><span class="p">(</span><span class="n">lxpearson</span><span class="p">)</span>   
+</pre></div>
+</div>
+</li>
+</ul>
+<p>(<a class="reference external" href=".//index-3.py">Source code</a>, <a class="reference external" href=".//index-3.png">png</a>, <a class="reference external" href=".//index-3.hires.png">hires.png</a>, <a class="reference external" href=".//index-3.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/index-3.png" src="_images/index-3.png" />
+</div>
+<ul>
+<li><p class="first">Pearson correlation 2:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span> 
+<span class="kn">from</span> <span class="nn">scipy.cluster.hierarchy</span> <span class="kn">import</span> <span class="n">dendrogram</span><span class="p">,</span> <span class="n">linkage</span>
+<span class="kn">import</span> <span class="nn">scipy.cluster.hierarchy</span> 
+<span class="kn">import</span> <span class="nn">halla</span>
+
+<span class="n">y</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.015625</span><span class="p">,</span><span class="mf">0.125</span><span class="p">,</span><span class="mf">0.421875</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
+
+<span class="n">lypearson</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">hierarchy</span><span class="o">.</span><span class="n">hclust</span><span class="p">(</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdist_metric</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">cord</span> <span class="p">)</span>
+
+<span class="n">dendrogram</span><span class="p">(</span><span class="n">lypearson</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>(<a class="reference external" href=".//index-4.py">Source code</a>, <a class="reference external" href=".//index-4.png">png</a>, <a class="reference external" href=".//index-4.hires.png">hires.png</a>, <a class="reference external" href=".//index-4.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/index-4.png" src="_images/index-4.png" />
+</div>
+<ul>
+<li><p class="first">Spearman correlation 1:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span> 
+<span class="kn">from</span> <span class="nn">scipy.cluster.hierarchy</span> <span class="kn">import</span> <span class="n">dendrogram</span><span class="p">,</span> <span class="n">linkage</span>
+<span class="kn">import</span> <span class="nn">scipy.cluster.hierarchy</span> 
+<span class="kn">import</span> <span class="nn">halla</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+
+<span class="n">lxspearman</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">hierarchy</span><span class="o">.</span><span class="n">hclust</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">pdist_metric</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">cord</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s">&quot;spearman&quot;</span><span class="p">)</span> <span class="p">)</span>
+
+<span class="n">dendrogram</span><span class="p">(</span><span class="n">lxspearman</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>(<a class="reference external" href=".//index-5.py">Source code</a>, <a class="reference external" href=".//index-5.png">png</a>, <a class="reference external" href=".//index-5.hires.png">hires.png</a>, <a class="reference external" href=".//index-5.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/index-5.png" src="_images/index-5.png" />
+</div>
+<ul>
+<li><p class="first">Spearman correlation 2:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span> 
+<span class="kn">from</span> <span class="nn">scipy.cluster.hierarchy</span> <span class="kn">import</span> <span class="n">dendrogram</span><span class="p">,</span> <span class="n">linkage</span>
+<span class="kn">import</span> <span class="nn">scipy.cluster.hierarchy</span> 
+<span class="kn">import</span> <span class="nn">halla</span>
+
+<span class="n">y</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.015625</span><span class="p">,</span><span class="mf">0.125</span><span class="p">,</span><span class="mf">0.421875</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
+
+<span class="n">lyspearman</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">hierarchy</span><span class="o">.</span><span class="n">hclust</span><span class="p">(</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdist_metric</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">cord</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s">&quot;spearman&quot;</span><span class="p">)</span> <span class="p">)</span>
+
+<span class="n">dendrogram</span><span class="p">(</span><span class="n">lyspearman</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>(<a class="reference external" href=".//index-6.py">Source code</a>, <a class="reference external" href=".//index-6.png">png</a>, <a class="reference external" href=".//index-6.hires.png">hires.png</a>, <a class="reference external" href=".//index-6.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/index-6.png" src="_images/index-6.png" />
+</div>
+<ul>
+<li><p class="first">Mutual Information 1:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span> 
+<span class="kn">from</span> <span class="nn">scipy.cluster.hierarchy</span> <span class="kn">import</span> <span class="n">dendrogram</span><span class="p">,</span> <span class="n">linkage</span>
+<span class="kn">import</span> <span class="nn">scipy.cluster.hierarchy</span> 
+<span class="kn">import</span> <span class="nn">halla</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.04</span><span class="p">,</span><span class="mf">0.09</span><span class="p">,</span><span class="mf">0.16</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+<span class="n">dx</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="p">)</span>
+
+<span class="n">lxmi</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">hierarchy</span><span class="o">.</span><span class="n">hclust</span><span class="p">(</span> <span class="n">dx</span><span class="p">,</span> <span class="n">pdist_metric</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">norm_mid</span> <span class="p">)</span>
+
+<span class="n">dendrogram</span><span class="p">(</span><span class="n">lxmi</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>(<a class="reference external" href=".//index-7.py">Source code</a>, <a class="reference external" href=".//index-7.png">png</a>, <a class="reference external" href=".//index-7.hires.png">hires.png</a>, <a class="reference external" href=".//index-7.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/index-7.png" src="_images/index-7.png" />
+</div>
+<ul>
+<li><p class="first">Mutual Information 2:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span> 
+<span class="kn">from</span> <span class="nn">scipy.cluster.hierarchy</span> <span class="kn">import</span> <span class="n">dendrogram</span> 
+<span class="kn">import</span> <span class="nn">halla</span>
+
+<span class="n">y</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.015625</span><span class="p">,</span><span class="mf">0.125</span><span class="p">,</span><span class="mf">0.421875</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
+<span class="n">dy</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span> <span class="n">y</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>                
+
+<span class="n">lymi</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">hierarchy</span><span class="o">.</span><span class="n">hclust</span><span class="p">(</span> <span class="n">dy</span><span class="p">,</span> <span class="n">pdist_metric</span> <span class="o">=</span> <span class="n">halla</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">norm_mid</span> <span class="p">)</span>
+
+<span class="n">dendrogram</span><span class="p">(</span> <span class="n">lymi</span> <span class="p">)</span>      
+</pre></div>
+</div>
+</li>
+</ul>
+<p>(<a class="reference external" href=".//index-8.py">Source code</a>, <a class="reference external" href=".//index-8.png">png</a>, <a class="reference external" href=".//index-8.hires.png">hires.png</a>, <a class="reference external" href=".//index-8.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/index-8.png" src="_images/index-8.png" />
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -1287,49 +1644,67 @@ Use the &#8220;grouping property&#8221; as discussed by Kraskov paper.</div></bl
 <dd><p>Draw random samples from a normal (Gaussian) distribution.</p>
 <p>The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently <a href="#id44"><span class="problematic" id="id45"><span id="id21"></span>[2]_</span></a>, is often called the bell curve because of
+independently <a class="reference internal" href="#r13" id="id21">[R13]</a>, is often called the bell curve because of
 its characteristic shape (see the example below).</p>
 <p>The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution <a href="#id46"><span class="problematic" id="id47"><span id="id22"></span>[2]_</span></a>.</p>
-<dl class="docutils">
-<dt>loc <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Mean (&#8220;centre&#8221;) of the distribution.</dd>
-<dt>scale <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Standard deviation (spread or &#8220;width&#8221;) of the distribution.</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
-<dd>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
-<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</dd>
+unique distribution <a class="reference internal" href="#r13" id="id22">[R13]</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>loc</strong> : float</p>
+<blockquote>
+<div><p>Mean (&#8220;centre&#8221;) of the distribution.</p>
+</div></blockquote>
+<p><strong>scale</strong> : float</p>
+<blockquote>
+<div><p>Standard deviation (spread or &#8220;width&#8221;) of the distribution.</p>
+</div></blockquote>
+<p><strong>size</strong> : tuple of ints</p>
+<blockquote class="last">
+<div><p>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
+<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><tt class="xref py py-obj docutils literal"><span class="pre">scipy.stats.distributions.norm</span></tt></dt>
+<dd>probability density function, distribution or cumulative density function, etc.</dd>
 </dl>
-<dl class="docutils">
-<dt>scipy.stats.distributions.norm <span class="classifier-delimiter">:</span> <span class="classifier">probability density function,</span></dt>
-<dd>distribution or cumulative density function, etc.</dd>
-</dl>
+</div>
+<p class="rubric">Notes</p>
 <p>The probability density for the Gaussian distribution is</p>
 <img src="_images/mathmpl/math-b24c0fb115.png" class="center" /><p>where <img src="_images/mathmpl/math-3488de1d0a.png" /> is the mean and <img src="_images/mathmpl/math-293c147d21.png" /> the standard deviation.
 The square of the standard deviation, <img src="_images/mathmpl/math-54bf156f7e.png" />, is called the
 variance.</p>
 <p>The function has its peak at the mean, and its &#8220;spread&#8221; increases with
 the standard deviation (the function reaches 0.607 times its maximum at
-<img src="_images/mathmpl/math-655d89f5c9.png" /> and <img src="_images/mathmpl/math-a5e0617d55.png" /> <a href="#id48"><span class="problematic" id="id49"><span id="id23"></span>[2]_</span></a>).  This implies that
+<img src="_images/mathmpl/math-655d89f5c9.png" /> and <img src="_images/mathmpl/math-a5e0617d55.png" /> <a class="reference internal" href="#r13" id="id23">[R13]</a>).  This implies that
 <cite>numpy.random.normal</cite> is more likely to return samples lying close to the
 mean, rather than those far away.</p>
-<table class="docutils footnote" frame="void" id="id24" rules="none">
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r12" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td>Wikipedia, &#8220;Normal distribution&#8221;,
+<tr><td class="label"><a class="fn-backref" href="#id24">[R12]</a></td><td>Wikipedia, &#8220;Normal distribution&#8221;,
 <a class="reference external" href="http://en.wikipedia.org/wiki/Normal_distribution">http://en.wikipedia.org/wiki/Normal_distribution</a></td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id25" rules="none">
+<table class="docutils citation" frame="void" id="r13" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[2]</td><td>P. R. Peebles Jr., &#8220;Central Limit Theorem&#8221; in &#8220;Probability, Random
+<tr><td class="label">[R13]</td><td><em>(<a class="fn-backref" href="#id21">1</a>, <a class="fn-backref" href="#id22">2</a>, <a class="fn-backref" href="#id23">3</a>, <a class="fn-backref" href="#id25">4</a>)</em> P. R. Peebles Jr., &#8220;Central Limit Theorem&#8221; in &#8220;Probability, Random
 Variables and Random Signal Principles&#8221;, 4th ed., 2001,
 pp. 51, 51, 125.</td></tr>
 </tbody>
 </table>
+<p class="rubric">Examples</p>
 <p>Draw samples from the distribution:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span> <span class="c"># mean and standard deviation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
@@ -1366,7 +1741,7 @@ the probability density function:</p>
 
 <dl class="function">
 <dt id="halla.hierarchy.recursive_all_against_all">
-<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">recursive_all_against_all</tt><big>(</big><em>apClusterNode1</em>, <em>apClusterNode2</em>, <em>pArray1</em>, <em>pArray2</em>, <em>pOut=</em><span class="optional">[</span><span class="optional">]</span>, <em>pFDR=&lt;function bh at 0x6a81050&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#recursive_all_against_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.recursive_all_against_all" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">recursive_all_against_all</tt><big>(</big><em>apClusterNode1</em>, <em>apClusterNode2</em>, <em>pArray1</em>, <em>pArray2</em>, <em>pOut=</em><span class="optional">[</span><span class="optional">]</span>, <em>pFDR=&lt;function bh at 0x60a2758&gt;</em><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#recursive_all_against_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.recursive_all_against_all" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs recursive all-against-all (the default HAllA routine) with fdr correction</p>
 <p>Input: apClusterNode1, apClusterNode2, pArray1, pArray2, pFDR</p>
 <p>Output: a list of ( (aiIndex1, pBag1), (aiIndex2, pBag2) )</p>
@@ -1374,7 +1749,7 @@ the probability density function:</p>
 
 <dl class="function">
 <dt id="halla.hierarchy.reduce_tree">
-<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">reduce_tree</tt><big>(</big><em>pClusterNode</em>, <em>pFunction=&lt;function &lt;lambda&gt; at 0x7388410&gt;</em>, <em>aOut=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#reduce_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.reduce_tree" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">halla.hierarchy.</tt><tt class="descname">reduce_tree</tt><big>(</big><em>pClusterNode</em>, <em>pFunction=&lt;function &lt;lambda&gt; at 0x6953b90&gt;</em>, <em>aOut=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="_modules/halla/hierarchy.html#reduce_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#halla.hierarchy.reduce_tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Recursive</p>
 <p>Input: pClusterNode, pFunction = lambda x: x.id, aOut = []</p>
 <p>Output: a list of pFunction calls (node ids by default)</p>
@@ -1497,6 +1872,9 @@ Output: (i,j), pFunction( pArray[:,i], pArray2[:,j])</div></blockquote>
              >index</a></li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="np-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="#">HAllA: Hierarchical All-against All 0.0.1 documentation</a> &raquo;</li> 
       </ul>

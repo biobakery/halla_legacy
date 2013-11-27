@@ -37,6 +37,9 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="../../np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li><a href="../../index.html">HAllA: Hierarchical All-against All 0.0.1 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../halla.html" accesskey="U">halla</a> &raquo;</li> 
@@ -54,12 +57,21 @@
 <span class="sd">Abstract distance module providing different notions of distance</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
+<span class="kn">import</span> <span class="nn">itertools</span> 
 <span class="kn">import</span> <span class="nn">abc</span> 
+<span class="kn">import</span> <span class="nn">math</span>
+
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span>
 <span class="kn">import</span> <span class="nn">numpy</span> 
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span> 
+<span class="kn">import</span> <span class="nn">scipy</span> 
 <span class="kn">import</span> <span class="nn">sklearn</span> <span class="kn">as</span> <span class="nn">sk</span> 
-<span class="kn">import</span> <span class="nn">math</span> 
+ 
+<span class="kn">import</span> <span class="nn">halla.stats</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span> 
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">pearsonr</span><span class="p">,</span> <span class="n">spearmanr</span>
+
+<span class="kn">import</span> <span class="nn">pylab</span> 
 
 <span class="c">#mi-based distances from scikit-learn; (log e)-based.  </span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mutual_info_score</span><span class="p">,</span> <span class="n">normalized_mutual_info_score</span><span class="p">,</span> <span class="n">adjusted_mutual_info_score</span> 
@@ -68,7 +80,7 @@
 <span class="c"># DIVERGENCE CLASSES</span>
 <span class="c">#==========================================================================#</span>
 
-<div class="viewcode-block" id="CDistance"><a class="viewcode-back" href="../../index.html#halla.distance.CDistance">[docs]</a><span class="k">class</span> <span class="nc">CDistance</span><span class="p">:</span>
+<div class="viewcode-block" id="Distance"><a class="viewcode-back" href="../../index.html#halla.distance.Distance">[docs]</a><span class="k">class</span> <span class="nc">Distance</span><span class="p">:</span>
 	<span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">	abstract distance, handles numpy arrays (probably should support lists for compatibility issues)</span>
 <span class="sd">	&#39;&#39;&#39;</span>
@@ -84,7 +96,7 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">m_data2</span> <span class="o">=</span> <span class="n">c_array2</span> 
  
 	<span class="k">def</span> <span class="nf">get_inverted_distance</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">strFunc</span> <span class="o">=</span> <span class="bp">None</span> <span class="p">):</span>
-		<span class="n">pFunc</span> <span class="o">=</span> <span class="n">CDistance</span><span class="o">.</span><span class="n">c_hashInvertFunctions</span><span class="p">[</span><span class="n">strFunc</span> <span class="ow">or</span> <span class="s">&quot;flip&quot;</span><span class="p">]</span> 
+		<span class="n">pFunc</span> <span class="o">=</span> <span class="n">Distance</span><span class="o">.</span><span class="n">c_hashInvertFunctions</span><span class="p">[</span><span class="n">strFunc</span> <span class="ow">or</span> <span class="s">&quot;flip&quot;</span><span class="p">]</span> 
 		<span class="k">return</span> <span class="n">pFunc</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span> <span class="p">)</span> 
 						
 	<span class="nd">@abc.abstractmethod</span>
@@ -94,7 +106,7 @@
 	<span class="k">def</span> <span class="nf">get_distance_type</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span> <span class="k">pass</span>
 	
 	</div>
-<span class="k">class</span> <span class="nc">CEuclideanDistance</span><span class="p">(</span> <span class="n">CDistance</span> <span class="p">):</span>
+<span class="k">class</span> <span class="nc">EuclideanDistance</span><span class="p">(</span> <span class="n">Distance</span> <span class="p">):</span>
 
 	<span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span> 
 
@@ -109,7 +121,7 @@
 	<span class="k">def</span> <span class="nf">get_distance_type</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_distance_type</span> 	
 	
-<div class="viewcode-block" id="CMutualInformation"><a class="viewcode-back" href="../../index.html#halla.distance.CMutualInformation">[docs]</a><span class="k">class</span> <span class="nc">CMutualInformation</span><span class="p">(</span> <span class="n">CDistance</span> <span class="p">):</span>
+<div class="viewcode-block" id="MutualInformation"><a class="viewcode-back" href="../../index.html#halla.distance.MutualInformation">[docs]</a><span class="k">class</span> <span class="nc">MutualInformation</span><span class="p">(</span> <span class="n">Distance</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Scikit-learn uses the convention log = ln</span>
 <span class="sd">	Adjust multiplicative factor of log(e,2) </span>
@@ -121,7 +133,7 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">m_data1</span> <span class="o">=</span> <span class="n">c_array1</span> 
 		<span class="bp">self</span><span class="o">.</span><span class="n">m_data2</span> <span class="o">=</span> <span class="n">c_array2</span> 
 		<span class="bp">self</span><span class="o">.</span><span class="n">bSym</span> <span class="o">=</span> <span class="n">bSym</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">c_distance_type</span> <span class="o">=</span> <span class="n">CDistance</span><span class="o">.</span><span class="n">EMetricType</span><span class="o">.</span><span class="n">NONMETRIC</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">c_distance_type</span> <span class="o">=</span> <span class="n">Distance</span><span class="o">.</span><span class="n">EMetricType</span><span class="o">.</span><span class="n">NONMETRIC</span> 
 	
 	<span class="k">def</span> <span class="nf">get_distance</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
 		<span class="c">#assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )</span>
@@ -129,7 +141,7 @@
 	<span class="k">def</span> <span class="nf">get_distance_type</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_distance_type</span> 	
 </div>
-<div class="viewcode-block" id="CNormalizedMutualInformation"><a class="viewcode-back" href="../../index.html#halla.distance.CNormalizedMutualInformation">[docs]</a><span class="k">class</span> <span class="nc">CNormalizedMutualInformation</span><span class="p">(</span> <span class="n">CDistance</span> <span class="p">):</span>
+<div class="viewcode-block" id="NormalizedMutualInformation"><a class="viewcode-back" href="../../index.html#halla.distance.NormalizedMutualInformation">[docs]</a><span class="k">class</span> <span class="nc">NormalizedMutualInformation</span><span class="p">(</span> <span class="n">Distance</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	normalized by sqrt(H1*H2) so the range is [0,1]</span>
 <span class="sd">	&quot;&quot;&quot;</span>	
@@ -138,7 +150,7 @@
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">c_array1</span><span class="p">,</span> <span class="n">c_array2</span> <span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">m_data1</span> <span class="o">=</span> <span class="n">c_array1</span> 
 		<span class="bp">self</span><span class="o">.</span><span class="n">m_data2</span> <span class="o">=</span> <span class="n">c_array2</span> 
-		<span class="bp">self</span><span class="o">.</span><span class="n">c_distance_type</span> <span class="o">=</span> <span class="n">CDistance</span><span class="o">.</span><span class="n">EMetricType</span><span class="o">.</span><span class="n">NONMETRIC</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">c_distance_type</span> <span class="o">=</span> <span class="n">Distance</span><span class="o">.</span><span class="n">EMetricType</span><span class="o">.</span><span class="n">NONMETRIC</span> 
 	
 	<span class="k">def</span> <span class="nf">get_distance</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
 		<span class="c">#assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )</span>
@@ -147,7 +159,7 @@
 	<span class="k">def</span> <span class="nf">get_distance_type</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_distance_type</span> 	
 	</div>
-<div class="viewcode-block" id="CAdjustedMutualInformation"><a class="viewcode-back" href="../../index.html#halla.distance.CAdjustedMutualInformation">[docs]</a><span class="k">class</span> <span class="nc">CAdjustedMutualInformation</span><span class="p">(</span> <span class="n">CDistance</span> <span class="p">):</span>
+<div class="viewcode-block" id="AdjustedMutualInformation"><a class="viewcode-back" href="../../index.html#halla.distance.AdjustedMutualInformation">[docs]</a><span class="k">class</span> <span class="nc">AdjustedMutualInformation</span><span class="p">(</span> <span class="n">Distance</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	adjusted for chance</span>
 <span class="sd">	&quot;&quot;&quot;</span> 
@@ -157,7 +169,7 @@
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">c_array1</span><span class="p">,</span> <span class="n">c_array2</span> <span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">m_data1</span> <span class="o">=</span> <span class="n">c_array1</span> 
 		<span class="bp">self</span><span class="o">.</span><span class="n">m_data2</span> <span class="o">=</span> <span class="n">c_array2</span> 
-		<span class="bp">self</span><span class="o">.</span><span class="n">c_distance_type</span> <span class="o">=</span> <span class="n">CDistance</span><span class="o">.</span><span class="n">EMetricType</span><span class="o">.</span><span class="n">NONMETRIC</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">c_distance_type</span> <span class="o">=</span> <span class="n">Distance</span><span class="o">.</span><span class="n">EMetricType</span><span class="o">.</span><span class="n">NONMETRIC</span> 
 	
 	<span class="k">def</span> <span class="nf">get_distance</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
 		<span class="c">#assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )</span>
@@ -175,13 +187,144 @@
 <span class="c"># FUNCTIONS  </span>
 <span class="c">#==========================================================================#</span>
 </div>
+<div class="viewcode-block" id="cor"><a class="viewcode-back" href="../../index.html#halla.distance.cor">[docs]</a><span class="k">def</span> <span class="nf">cor</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s">&quot;pearson&quot;</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="bp">False</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Get correlation coefficient and corresponding parametric p-value (t-test)</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	------------</span>
+<span class="sd">	pData1, pData2 : numpy arrays</span>
+<span class="sd">		 data matrices </span>
+<span class="sd">	method : str </span>
+<span class="sd">		{&quot;pearson&quot;, &quot;spearman&quot;}</span>
+<span class="sd">		&quot;abs&quot;</span>
+<span class="sd">	pval : bool</span>
+<span class="sd">		True if parametric estimate of p-value requested </span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	-----------</span>
+<span class="sd">	rho: float</span>
+<span class="sd">		correlation coefficient </span>
+<span class="sd">	p: float</span>
+<span class="sd"> 		p-value  </span>
+<span class="sd">	</span>
+<span class="sd">	Examples</span>
+<span class="sd">	---------</span>
+<span class="sd">	View pairwise correlation measures (pearson,spearman) between two datasets `x` and `y`:</span>
+
+<span class="sd">	&gt;&gt;&gt; x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])</span>
+<span class="sd">	&gt;&gt;&gt; y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])</span>
+<span class="sd">	&gt;&gt;&gt; p = [_ for _ in itertools.product( range(len(x)), range(len(y)) )]</span>
+<span class="sd">	&gt;&gt;&gt; for item in p: i,j = item; print (i,j),cor(x[i],y[j], method=&quot;pearson&quot;),cor(x[i],y[j], method=&quot;spearman&quot;)</span>
+<span class="sd">	(0, 0) -1.0 -1.0</span>
+<span class="sd">	(0, 1) -0.894427191 -0.894427191</span>
+<span class="sd">	(0, 2) 1.0 1.0 </span>
+<span class="sd">	(0, 3) 0.951369855792 1.0</span>
+<span class="sd">	(1, 0) 0.774596669241 0.774596669241</span>
+<span class="sd">	(1, 1) 0.57735026919 0.57735026919</span>
+<span class="sd">	(1, 2) -0.774596669241 -0.774596669241</span>
+<span class="sd">	(1, 3) -0.921159901892 -0.774596669241</span>
+<span class="sd">	(2, 0) -0.984374038698 -1.0</span>
+<span class="sd">	(2, 1) -0.880450906326 -0.894427191</span>
+<span class="sd">	(2, 2) 0.984374038698 1.0</span>
+<span class="sd">	(2, 3) 0.99053285189 1.0</span>
+<span class="sd">	(3, 0) -0.774596669241 -0.774596669241</span>
+<span class="sd">	(3, 1) -0.57735026919 -0.57735026919</span>
+<span class="sd">	(3, 2) 0.774596669241 0.774596669241</span>
+<span class="sd">	(3, 3) 0.921159901892 0.774596669241</span>
+
+<span class="sd">	Generate p-values for pearson correlation:</span>
+
+<span class="sd">	&gt;&gt;&gt; pval_pearson = sorted( [cor(x[i],y[j], method=&quot;pearson&quot;, pval=True)[1] for i,j in p] )</span>
+<span class="sd">	&gt;&gt;&gt; pval_pearson</span>
+<span class="sd">	[0.0, 0.0, 0.0094671481098304033, 0.01562596130230276, 0.015625961302302867, 0.048630144207595816, 0.07884009810806647, 0.07884009810806647, 0.10557280900008403, 0.11954909367437615, 0.22540333075851643, 0.22540333075851643, 0.2254033307585166, 0.2254033307585166, 0.42264973081037405, 0.42264973081037405]</span>
+
+<span class="sd">	View plot::</span>
+
+<span class="sd">		plt.plot( pval_pearson )</span>
+<span class="sd">		plt.show()</span>
+
+<span class="sd">	.. plot::</span>
+
+<span class="sd">		import matplotlib.pyplot as plt </span>
+<span class="sd">		plt.plot( [0.0, 0.0, 0.0094671481098304033, 0.01562596130230276, 0.015625961302302867, 0.048630144207595816, </span>
+<span class="sd">			0.07884009810806647, 0.07884009810806647, 0.10557280900008403, 0.11954909367437615, 0.22540333075851643, </span>
+<span class="sd">			0.22540333075851643, 0.2254033307585166, 0.2254033307585166, 0.42264973081037405, 0.42264973081037405], </span>
+<span class="sd">			linestyle=&#39;--&#39;, marker=&#39;o&#39; )</span>
+<span class="sd">		plt.show()</span>
+
+<span class="sd">	Generate p-values for spearman correlation:</span>
+
+<span class="sd">	&gt;&gt;&gt; pval_spearman = sorted( [cor(x[i],y[j], method=&quot;spearman&quot;, pval=True)[1] for i,j in p] )</span>
+<span class="sd">	&gt;&gt;&gt; pval_spearman</span>
+<span class="sd">	[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.10557280900008413, 0.10557280900008413, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.42264973081037427, 0.42264973081037427]</span>
+
+<span class="sd">	View plot::</span>
+<span class="sd">		</span>
+<span class="sd">		plt.plot(pval_pearson)</span>
+<span class="sd">		plt.show()</span>
+
+<span class="sd">	.. plot::</span>
+<span class="sd">		</span>
+<span class="sd">		import matplotlib.pyplot as plt </span>
+<span class="sd">		plt.plot( [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.10557280900008413, 0.10557280900008413, 0.22540333075851657, </span>
+<span class="sd">			0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, </span>
+<span class="sd">			0.42264973081037427, 0.42264973081037427], linestyle=&#39;--&#39;, marker=&#39;o&#39;)</span>
+<span class="sd">		plt.show()			</span>
+<span class="sd">	</span>
+<span class="sd">		&quot;&quot;&quot;</span> 
+	<span class="k">try</span><span class="p">:</span>
+		<span class="nb">str</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">method</span> <span class="o">==</span> <span class="s">&quot;pearson&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">method</span><span class="o">==</span><span class="s">&quot;spearman&quot;</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span>  
+		<span class="n">pMethod</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">spearmanr</span> <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&quot;spearman&quot;</span> <span class="k">else</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">pearsonr</span>
+	<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+		<span class="n">pMethod</span> <span class="o">=</span> <span class="n">method</span> 
+
+	<span class="k">return</span> <span class="n">pMethod</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">pval</span> <span class="k">else</span> <span class="n">pMethod</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span>
+</div>
+<div class="viewcode-block" id="cord"><a class="viewcode-back" href="../../index.html#halla.distance.cord">[docs]</a><span class="k">def</span> <span class="nf">cord</span><span class="p">(</span> <span class="n">pData</span><span class="p">,</span> <span class="n">pData2</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s">&quot;pearson&quot;</span><span class="p">,</span> <span class="n">inversion_method</span> <span class="o">=</span> <span class="s">&quot;abs&quot;</span><span class="p">,</span> <span class="n">pval</span><span class="o">=</span><span class="bp">False</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Get correlation divergence </span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	-----------</span>
+<span class="sd">	pData1, pData2 : numpy arrays</span>
+<span class="sd">		 data matrices </span>
+<span class="sd">	method : str </span>
+<span class="sd">		{&quot;pearson&quot;, &quot;spearman&quot;}</span>
+<span class="sd">	inversion_method : str</span>
+<span class="sd">		&quot;abs&quot;</span>
+<span class="sd">	pval : bool</span>
+<span class="sd">		True if parametric estimate of p-value requested </span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	-----------</span>
+<span class="sd">	rho: float</span>
+<span class="sd">		correlation coefficient </span>
+<span class="sd">	p: float</span>
+<span class="sd"> 		p-value  </span>
+
+<span class="sd">	Examples</span>
+<span class="sd">	----------</span>
+<span class="sd">	&gt;&gt;&gt; x = [0.1,0.2,0.3,0.4]</span>
+<span class="sd">	&gt;&gt;&gt; y = [-0.1,-0.2,-0.3,-0.4]</span>
+<span class="sd">	&gt;&gt;&gt; cord( x,y )</span>
+<span class="sd">	0.0</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">pMethod</span><span class="p">,</span> <span class="n">pPval</span> <span class="o">=</span> <span class="n">method</span><span class="p">,</span> <span class="n">pval</span> 
+	<span class="n">pCor</span> <span class="o">=</span> <span class="n">cor</span><span class="p">(</span> <span class="n">pData</span><span class="p">,</span> <span class="n">pData2</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">pMethod</span><span class="p">,</span> <span class="n">pval</span><span class="o">=</span><span class="n">pPval</span> <span class="p">)</span>
+	<span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="nb">abs</span><span class="p">(</span><span class="n">pCor</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">pCor</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">pval</span> <span class="k">else</span> <span class="mf">1.0</span><span class="o">-</span><span class="nb">abs</span><span class="p">(</span><span class="n">pCor</span><span class="p">)</span>
+
+</div>
 <div class="viewcode-block" id="l2"><a class="viewcode-back" href="../../index.html#halla.distance.l2">[docs]</a><span class="k">def</span> <span class="nf">l2</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Returns the l2 distance</span>
+
 <span class="sd">	&gt;&gt;&gt; x = numpy.array([1,2,3]); y = numpy.array([4,5,6])</span>
 <span class="sd">	&gt;&gt;&gt; l2(x,y)</span>
 <span class="sd">	5.196152422706632</span>
-<span class="sd">	&gt;&gt;&gt; l2(x,y)</span>
-<span class="sd">	0.000</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">pData1</span> <span class="o">-</span> <span class="n">pData2</span><span class="p">)</span>
 </div>
@@ -190,50 +333,217 @@
 
 <div class="viewcode-block" id="mi"><a class="viewcode-back" href="../../index.html#halla.distance.mi">[docs]</a><span class="k">def</span> <span class="nf">mi</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	static implementation of mutual information, </span>
-<span class="sd">	caveat: already normalized by CMutualInformation  </span>
+<span class="sd">	Static implementation of mutual information, returns bits </span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	--------------</span>
+<span class="sd">	pData1, pData2 : Numpy arrays</span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	---------------</span>
+<span class="sd">	mi : float </span>
+
+<span class="sd">	Examples</span>
+<span class="sd">	--------------</span>
+
+<span class="sd">	&gt;&gt;&gt; x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])</span>
+<span class="sd">	&gt;&gt;&gt; y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])</span>
+<span class="sd">	&gt;&gt;&gt; dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )</span>
+<span class="sd">	&gt;&gt;&gt; dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )</span>
+<span class="sd">	&gt;&gt;&gt; p = itertools.product( range(len(x)), range(len(y)) )</span>
+<span class="sd">	&gt;&gt;&gt; for item in p: i,j = item; print (i,j), mi( dx[i], dy[j] )</span>
+<span class="sd">	(0, 0) 1.0</span>
+<span class="sd">	(0, 1) 1.0</span>
+<span class="sd">	(0, 2) 1.0</span>
+<span class="sd">	(0, 3) 1.0</span>
+<span class="sd">	(1, 0) 0.311278124459</span>
+<span class="sd">	(1, 1) 0.311278124459</span>
+<span class="sd">	(1, 2) 0.311278124459</span>
+<span class="sd">	(1, 3) 0.311278124459</span>
+<span class="sd">	(2, 0) 1.0</span>
+<span class="sd">	(2, 1) 1.0</span>
+<span class="sd">	(2, 2) 1.0</span>
+<span class="sd">	(2, 3) 1.0</span>
+<span class="sd">	(3, 0) 0.311278124459</span>
+<span class="sd">	(3, 1) 0.311278124459</span>
+<span class="sd">	(3, 2) 0.311278124459</span>
+<span class="sd">	(3, 3) 0.311278124459</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
-	<span class="k">return</span> <span class="n">CMutualInformation</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span>
+	<span class="k">return</span> <span class="n">MutualInformation</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span>
 </div>
 <div class="viewcode-block" id="norm_mi"><a class="viewcode-back" href="../../index.html#halla.distance.norm_mi">[docs]</a><span class="k">def</span> <span class="nf">norm_mi</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	static implementation of normalized mutual information </span>
+<span class="sd">	Static implementation of normalized mutual information </span>
+
+<span class="sd">	Examples</span>
+<span class="sd">	---------------</span>
+
+<span class="sd">	&gt;&gt;&gt; x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])</span>
+<span class="sd">	&gt;&gt;&gt; y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])</span>
+<span class="sd">	&gt;&gt;&gt; dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )</span>
+<span class="sd">	&gt;&gt;&gt; dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )</span>
+<span class="sd">	&gt;&gt;&gt; p = itertools.product( range(len(x)), range(len(y)) )</span>
+<span class="sd">	&gt;&gt;&gt; for item in p: i,j = item; print (i,j), norm_mi( dx[i], dy[j] )</span>
+<span class="sd">	(0, 0) 1.0</span>
+<span class="sd">	(0, 1) 1.0</span>
+<span class="sd">	(0, 2) 1.0</span>
+<span class="sd">	(0, 3) 1.0</span>
+<span class="sd">	(1, 0) 0.345592029944</span>
+<span class="sd">	(1, 1) 0.345592029944</span>
+<span class="sd">	(1, 2) 0.345592029944</span>
+<span class="sd">	(1, 3) 0.345592029944</span>
+<span class="sd">	(2, 0) 1.0</span>
+<span class="sd">	(2, 1) 1.0</span>
+<span class="sd">	(2, 2) 1.0</span>
+<span class="sd">	(2, 3) 1.0</span>
+<span class="sd">	(3, 0) 0.345592029944</span>
+<span class="sd">	(3, 1) 0.345592029944</span>
+<span class="sd">	(3, 2) 0.345592029944</span>
+<span class="sd">	(3, 3) 0.345592029944</span>
 
 <span class="sd">	&quot;&quot;&quot;</span>
 
-	<span class="k">return</span> <span class="n">CNormalizedMutualInformation</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span> 
+	<span class="k">return</span> <span class="n">NormalizedMutualInformation</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span> 
 </div>
 <div class="viewcode-block" id="adj_mi"><a class="viewcode-back" href="../../index.html#halla.distance.adj_mi">[docs]</a><span class="k">def</span> <span class="nf">adj_mi</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">	static implementation of adjusted distance </span>
+<span class="sd">	Static implementation of adjusted distance </span>
+
+<span class="sd">	Examples</span>
+<span class="sd">	-----------</span>
+
+<span class="sd">	&gt;&gt;&gt; x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])</span>
+<span class="sd">	&gt;&gt;&gt; y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])</span>
+<span class="sd">	&gt;&gt;&gt; dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )</span>
+<span class="sd">	&gt;&gt;&gt; dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )</span>
+<span class="sd">	&gt;&gt;&gt; p = itertools.product( range(len(x)), range(len(y)) )</span>
+<span class="sd">	&gt;&gt;&gt; for item in p: i,j = item; print (i,j), adj_mi( dx[i], dy[j] )</span>
+<span class="sd">	(0, 0) 1.0</span>
+<span class="sd">	(0, 1) 1.0</span>
+<span class="sd">	(0, 2) 1.0</span>
+<span class="sd">	(0, 3) 1.0</span>
+<span class="sd">	(1, 0) 2.51758394487e-08</span>
+<span class="sd">	(1, 1) 2.51758394487e-08</span>
+<span class="sd">	(1, 2) 2.51758394487e-08</span>
+<span class="sd">	(1, 3) 2.51758394487e-08</span>
+<span class="sd">	(2, 0) 1.0</span>
+<span class="sd">	(2, 1) 1.0</span>
+<span class="sd">	(2, 2) 1.0</span>
+<span class="sd">	(2, 3) 1.0</span>
+<span class="sd">	(3, 0) -3.72523550982e-08</span>
+<span class="sd">	(3, 1) -3.72523550982e-08</span>
+<span class="sd">	(3, 2) -3.72523550982e-08</span>
+<span class="sd">	(3, 3) -3.72523550982e-08</span>
+
 <span class="sd">	&quot;&quot;&quot;</span>
 
-	<span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">CAdjustedMutualInformation</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span>
+	<span class="k">return</span> <span class="n">AdjustedMutualInformation</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span>
 </div>
 <div class="viewcode-block" id="mid"><a class="viewcode-back" href="../../index.html#halla.distance.mid">[docs]</a><span class="k">def</span> <span class="nf">mid</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	static implementation of mutual information, </span>
-<span class="sd">	caveat: returns nats, not bits </span>
+<span class="sd">	Static implementation of mutual information, </span>
+
+
+
+<span class="sd">	Examples </span>
+<span class="sd">	-------------</span>
+
+<span class="sd">	&gt;&gt;&gt; x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])</span>
+<span class="sd">	&gt;&gt;&gt; y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])</span>
+<span class="sd">	&gt;&gt;&gt; dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )</span>
+<span class="sd">	&gt;&gt;&gt; dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )</span>
+<span class="sd">	&gt;&gt;&gt; p = itertools.product( range(len(x)), range(len(y)) )</span>
+<span class="sd">	&gt;&gt;&gt; for item in p: i,j = item; print (i,j), mid( dx[i], dy[j] )</span>
+<span class="sd">	(0, 0) 0.0</span>
+<span class="sd">	(0, 1) 0.0</span>
+<span class="sd">	(0, 2) 0.0</span>
+<span class="sd">	(0, 3) 0.0</span>
+<span class="sd">	(1, 0) 0.688721875541</span>
+<span class="sd">	(1, 1) 0.688721875541</span>
+<span class="sd">	(1, 2) 0.688721875541</span>
+<span class="sd">	(1, 3) 0.688721875541</span>
+<span class="sd">	(2, 0) 0.0</span>
+<span class="sd">	(2, 1) 0.0</span>
+<span class="sd">	(2, 2) 0.0</span>
+<span class="sd">	(2, 3) 0.0</span>
+<span class="sd">	(3, 0) 0.688721875541</span>
+<span class="sd">	(3, 1) 0.688721875541</span>
+<span class="sd">	(3, 2) 0.688721875541</span>
+<span class="sd">	(3, 3) 0.688721875541</span>
+
 <span class="sd">	&quot;&quot;&quot;</span>
 
-	<span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">CMutualInformation</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span>
+	<span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">MutualInformation</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span>
 </div>
 <div class="viewcode-block" id="norm_mid"><a class="viewcode-back" href="../../index.html#halla.distance.norm_mid">[docs]</a><span class="k">def</span> <span class="nf">norm_mid</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	static implementation of normalized mutual information </span>
+<span class="sd">	Static implementation of normalized mutual information </span>
 
+<span class="sd">	Examples</span>
+<span class="sd">	-------------</span>
+
+
+<span class="sd">	&gt;&gt;&gt; x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])</span>
+<span class="sd">	&gt;&gt;&gt; y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])</span>
+<span class="sd">	&gt;&gt;&gt; dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )</span>
+<span class="sd">	&gt;&gt;&gt; dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )</span>
+<span class="sd">	&gt;&gt;&gt; p = itertools.product( range(len(x)), range(len(y)) )</span>
+<span class="sd">	&gt;&gt;&gt; for item in p: i,j = item; print (i,j), norm_mid( dx[i], dy[j] )</span>
+<span class="sd">	(0, 0) 0.0</span>
+<span class="sd">	(0, 1) 0.0</span>
+<span class="sd">	(0, 2) 0.0</span>
+<span class="sd">	(0, 3) 0.0</span>
+<span class="sd">	(1, 0) 0.654407970056</span>
+<span class="sd">	(1, 1) 0.654407970056</span>
+<span class="sd">	(1, 2) 0.654407970056</span>
+<span class="sd">	(1, 3) 0.654407970056</span>
+<span class="sd">	(2, 0) 0.0</span>
+<span class="sd">	(2, 1) 0.0</span>
+<span class="sd">	(2, 2) 0.0</span>
+<span class="sd">	(2, 3) 0.0</span>
+<span class="sd">	(3, 0) 0.654407970056</span>
+<span class="sd">	(3, 1) 0.654407970056</span>
+<span class="sd">	(3, 2) 0.654407970056</span>
+<span class="sd">	(3, 3) 0.654407970056</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
-	<span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">CNormalizedMutualInformation</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span> 
+	<span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">NormalizedMutualInformation</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span> 
 </div>
 <div class="viewcode-block" id="adj_mid"><a class="viewcode-back" href="../../index.html#halla.distance.adj_mid">[docs]</a><span class="k">def</span> <span class="nf">adj_mid</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">	static implementation of adjusted distance </span>
+<span class="sd">	Static implementation of adjusted distance </span>
+
+
+<span class="sd">	Examples</span>
+<span class="sd">	-----------</span>
+
+<span class="sd">	&gt;&gt;&gt; x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])</span>
+<span class="sd">	&gt;&gt;&gt; y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])</span>
+<span class="sd">	&gt;&gt;&gt; dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )</span>
+<span class="sd">	&gt;&gt;&gt; dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )</span>
+<span class="sd">	&gt;&gt;&gt; p = itertools.product( range(len(x)), range(len(y)) )</span>
+<span class="sd">	&gt;&gt;&gt; for item in p: i,j = item; print (i,j), adj_mid( dx[i], dy[j] )</span>
+<span class="sd">	(0, 0) 0.0</span>
+<span class="sd">	(0, 1) 0.0</span>
+<span class="sd">	(0, 2) 0.0</span>
+<span class="sd">	(0, 3) 0.0</span>
+<span class="sd">	(1, 0) 0.999999974824</span>
+<span class="sd">	(1, 1) 0.999999974824</span>
+<span class="sd">	(1, 2) 0.999999974824</span>
+<span class="sd">	(1, 3) 0.999999974824</span>
+<span class="sd">	(2, 0) 0.0</span>
+<span class="sd">	(2, 1) 0.0</span>
+<span class="sd">	(2, 2) 0.0</span>
+<span class="sd">	(2, 3) 0.0</span>
+<span class="sd">	(3, 0) 1.00000003725</span>
+<span class="sd">	(3, 1) 1.00000003725</span>
+<span class="sd">	(3, 2) 1.00000003725</span>
+<span class="sd">	(3, 3) 1.00000003725</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
-	<span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">CAdjustedMutualInformation</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span></div>
-</pre></div>
+	<span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">AdjustedMutualInformation</span><span class="p">(</span> <span class="n">pData1</span><span class="p">,</span> <span class="n">pData2</span> <span class="p">)</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span>
+</pre></div></div>
 
           </div>
         </div>
@@ -265,6 +575,9 @@
              >index</a></li>
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../np-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../../index.html">HAllA: Hierarchical All-against All 0.0.1 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>

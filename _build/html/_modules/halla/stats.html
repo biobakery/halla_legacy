@@ -37,6 +37,9 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="../../np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li><a href="../../index.html">HAllA: Hierarchical All-against All 0.0.1 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../halla.html" accesskey="U">halla</a> &raquo;</li> 
@@ -84,6 +87,7 @@
 	 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	 Input: N x D matrix </span>
 <span class="sd">	 Output: D x N matrix </span>
+
 <span class="sd">	 &quot;&quot;&quot;</span>
 	 <span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
 	 <span class="n">pPCA</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span> <span class="n">n_components</span> <span class="o">=</span> <span class="n">iComponents</span> <span class="p">)</span>
@@ -171,21 +175,24 @@
 <span class="sd">Think about the differences between pdf and cdf </span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="k">def</span> <span class="nf">uniform_cut</span><span class="p">(</span> <span class="n">cake_length</span><span class="p">,</span> <span class="n">iCuts</span> <span class="o">=</span> <span class="mi">10</span> <span class="p">):</span>
-	<span class="k">assert</span><span class="p">(</span> <span class="n">cake_length</span> <span class="o">&gt;</span> <span class="n">iCuts</span> <span class="p">)</span>
+<div class="viewcode-block" id="uniform_cut"><a class="viewcode-back" href="../../index.html#halla.stats.uniform_cut">[docs]</a><span class="k">def</span> <span class="nf">uniform_cut</span><span class="p">(</span> <span class="n">cake_length</span><span class="p">,</span> <span class="n">iCuts</span> <span class="o">=</span> <span class="mi">10</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Cut cake uniformly</span>
 
+<span class="sd">	Note</span>
+<span class="sd">	------</span>
+
+<span class="sd">	Code still observes sub-optimal behavior; fix. </span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">cake</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)</span>
 	<span class="n">aOut</span> <span class="o">=</span> <span class="p">[]</span> 
-
-	<span class="n">iSize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span> <span class="nb">float</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)</span><span class="o">/</span><span class="n">iCuts</span> <span class="p">)</span> <span class="p">)</span>
-
-	<span class="k">for</span> <span class="n">iStep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">iSize</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-		<span class="k">if</span> <span class="n">iStep</span><span class="o">!=</span> <span class="n">iSize</span><span class="p">:</span>
-			<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)[(</span><span class="n">iStep</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">iCuts</span><span class="p">:</span><span class="n">iStep</span><span class="o">*</span><span class="n">iCuts</span><span class="p">]</span> <span class="p">)</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)[(</span><span class="n">iStep</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">iCuts</span><span class="p">:]</span> <span class="p">)</span>
-
+	<span class="n">iSize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span> <span class="nb">float</span><span class="p">(</span><span class="n">cake_length</span><span class="p">)</span><span class="o">/</span><span class="n">iCuts</span> <span class="p">)</span> <span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+	<span class="k">while</span> <span class="n">cake</span><span class="p">:</span>
+		<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cake</span><span class="p">[:</span><span class="n">iSize</span><span class="p">])</span> <span class="p">;</span> <span class="n">cake</span> <span class="o">=</span> <span class="n">cake</span><span class="p">[</span><span class="n">iSize</span><span class="p">:]</span>
 	<span class="k">return</span> <span class="n">aOut</span> 
-
+</div>
 <span class="k">def</span> <span class="nf">cumulative_uniform_cut</span><span class="p">(</span> <span class="n">cake_length</span><span class="p">,</span> <span class="n">iCuts</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
 	<span class="k">assert</span><span class="p">(</span> <span class="n">cake_length</span> <span class="o">&gt;</span> <span class="n">iCuts</span> <span class="p">)</span>
 
@@ -362,73 +369,104 @@
 <span class="c">#=========================================================</span>
 <span class="c"># Density estimation </span>
 <span class="c">#=========================================================</span>
-
-<span class="c">## BUGBUG: this discretize function is not so kosher, need better way to do density estimate for MI</span>
 </div>
-<div class="viewcode-block" id="discretize"><a class="viewcode-back" href="../../index.html#halla.stats.discretize">[docs]</a><span class="k">def</span> <span class="nf">discretize</span><span class="p">(</span> <span class="n">pArray</span> <span class="p">):</span>
-	<span class="k">def</span> <span class="nf">_discretize_continuous</span><span class="p">(</span> <span class="n">astrValues</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span> <span class="p">):</span> 
-		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0] )</span>
-<span class="sd">		[0]</span>
+<div class="viewcode-block" id="discretize"><a class="viewcode-back" href="../../index.html#halla.stats.discretize">[docs]</a><span class="k">def</span> <span class="nf">discretize</span><span class="p">(</span> <span class="n">pArray</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">aiSkip</span> <span class="o">=</span> <span class="p">[]</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0.1, 0.2, 0.3, 0.4] )</span>
+<span class="sd">	[0, 0, 1, 1]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0, 1] )</span>
-<span class="sd">		[0, 0]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0.01, 0.04, 0.09, 0.16] )</span>
+<span class="sd">	[0, 0, 1, 1]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0, 1], 2 )</span>
-<span class="sd">		[0, 1]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [-0.1, -0.2, -0.3, -0.4] )</span>
+<span class="sd">	[1, 1, 0, 0]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [1, 0], 2 )</span>
-<span class="sd">		[1, 0]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0.25, 0.5, 0.75, 1.00] )</span>
+<span class="sd">	[0, 0, 1, 1]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.2, 0.1, 0.3], 3 )</span>
-<span class="sd">		[1, 0, 2]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0.015625, 0.125, 0.421875, 1] )</span>
+<span class="sd">	[0, 0, 1, 1]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.2, 0.1, 0.3], 1 )</span>
-<span class="sd">		[0, 0, 0]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0] )</span>
+<span class="sd">	[0]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.2, 0.1, 0.3], 2 )</span>
-<span class="sd">		[0, 0, 1]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0, 1] )</span>
+<span class="sd">	[0, 0]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.1, 0.3], 2 )</span>
-<span class="sd">		[1, 0, 0, 1]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0, 1], 2 )</span>
+<span class="sd">	[0, 1]</span>
 
-<span class="sd">		&gt;&gt;&gt; CDatum._discretize_continuous( [4, 0.2, 0.1, 0.3], 2 )</span>
-<span class="sd">		[1, 0, 0, 1]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [1, 0], 2 )</span>
+<span class="sd">	[1, 0]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.1, 0.3, 0.5] )</span>
-<span class="sd">		[1, 0, 0, 0, 1]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0.2, 0.1, 0.3], 3 )</span>
+<span class="sd">	[1, 0, 2]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.1, 0.3, 0.5], 3 )</span>
-<span class="sd">		[1, 0, 0, 1, 2]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0.2, 0.1, 0.3], 1 )</span>
+<span class="sd">	[0, 0, 0]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5] )</span>
-<span class="sd">		[1, 0, 1, 0, 0, 1]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0.2, 0.1, 0.3], 2 )</span>
+<span class="sd">	[0, 0, 1]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 3 )</span>
-<span class="sd">		[1, 0, 2, 0, 1, 2]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0.4, 0.2, 0.1, 0.3], 2 )</span>
+<span class="sd">	[1, 0, 0, 1]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 0 )</span>
-<span class="sd">		[3, 1, 5, 0, 2, 4]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [4, 0.2, 0.1, 0.3], 2 )</span>
+<span class="sd">	[1, 0, 0, 1]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 6 )</span>
-<span class="sd">		[3, 1, 5, 0, 2, 4]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0.4, 0.2, 0.1, 0.3, 0.5] )</span>
+<span class="sd">	[1, 0, 0, 0, 1]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 60 )</span>
-<span class="sd">		[3, 1, 5, 0, 2, 4]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0.4, 0.2, 0.1, 0.3, 0.5], 3 )</span>
+<span class="sd">	[1, 0, 0, 1, 2]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0, 0, 0, 0, 0, 0, 1, 2], 2 )</span>
-<span class="sd">		[0, 0, 0, 0, 0, 0, 1, 1]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5] )</span>
+<span class="sd">	[1, 0, 1, 0, 0, 1]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0, 0, 0, 0, 1, 2, 2, 2, 2, 3], 3 )</span>
-<span class="sd">		[0, 0, 0, 0, 1, 1, 1, 1, 1, 2]</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 3 )</span>
+<span class="sd">	[1, 0, 2, 0, 1, 2]</span>
 
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.1, 0, 0, 0, 0, 0, 0, 0, 0] )</span>
-<span class="sd">		[1, 0, 0, 0, 0, 0, 0, 0, 0]</span>
-<span class="sd">		</span>
-<span class="sd">		&gt;&gt;&gt; _discretize_continuous( [0.992299, 1, 1, 0.999696, 0.999605, 0.663081, 0.978293, 0.987621, 0.997237, 0.999915, 0.984792, 0.998338, 0.999207, 0.98051, 0.997984, 0.999219, 0.579824, 0.998983, 0.720498, 1, 0.803619, 0.970992, 1, 0.952881, 0.999866, 0.997153, 0.014053, 0.998049, 0.977727, 0.971233, 0.995309, 0.0010376, 1, 0.989373, 0.989161, 0.91637, 1, 0.99977, 0.960816, 0.998025, 1, 0.998852, 0.960849, 0.957963, 0.998733, 0.999426, 0.876182, 0.998509, 0.988527, 0.998265, 0.943673] )</span>
-<span class="sd">		[3, 6, 6, 5, 5, 0, 2, 2, 3, 5, 2, 4, 4, 2, 3, 5, 0, 4, 0, 6, 0, 1, 6, 1, 5, 3, 0, 3, 2, 1, 3, 0, 6, 3, 2, 0, 6, 5, 1, 3, 6, 4, 1, 1, 4, 5, 0, 4, 2, 4, 1]</span>
-<span class="sd">		&quot;&quot;&quot;</span>
+<span class="sd">	&gt;&gt;&gt; discretize( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 0 )</span>
+<span class="sd">	[3, 1, 5, 0, 2, 4]</span>
 
+<span class="sd">	&gt;&gt;&gt; discretize( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 6 )</span>
+<span class="sd">	[3, 1, 5, 0, 2, 4]</span>
+
+<span class="sd">	&gt;&gt;&gt; discretize( [0.4, 0.2, 0.6, 0.1, 0.3, 0.5], 60 )</span>
+<span class="sd">	[3, 1, 5, 0, 2, 4]</span>
+
+<span class="sd">	&gt;&gt;&gt; discretize( [0, 0, 0, 0, 0, 0, 1, 2], 2 )</span>
+<span class="sd">	[0, 0, 0, 0, 0, 0, 1, 1]</span>
+
+<span class="sd">	&gt;&gt;&gt; discretize( [0, 0, 0, 0, 1, 2, 2, 2, 2, 3], 3 )</span>
+<span class="sd">	[0, 0, 0, 0, 1, 1, 1, 1, 1, 2]</span>
+
+<span class="sd">	&gt;&gt;&gt; discretize( [0.1, 0, 0, 0, 0, 0, 0, 0, 0] )</span>
+<span class="sd">	[1, 0, 0, 0, 0, 0, 0, 0, 0]</span>
+
+<span class="sd">	&gt;&gt;&gt; discretize( [0.992299, 1, 1, 0.999696, 0.999605, 0.663081, 0.978293, 0.987621, 0.997237, 0.999915, 0.984792, 0.998338, 0.999207, 0.98051, 0.997984, 0.999219, 0.579824, 0.998983, 0.720498, 1, 0.803619, 0.970992, 1, 0.952881, 0.999866, 0.997153, 0.014053, 0.998049, 0.977727, 0.971233, 0.995309, 0.0010376, 1, 0.989373, 0.989161, 0.91637, 1, 0.99977, 0.960816, 0.998025, 1, 0.998852, 0.960849, 0.957963, 0.998733, 0.999426, 0.876182, 0.998509, 0.988527, 0.998265, 0.943673] )</span>
+<span class="sd">	[3, 6, 6, 5, 5, 0, 2, 2, 3, 5, 2, 4, 4, 2, 3, 5, 0, 4, 0, 6, 0, 1, 6, 1, 5, 3, 0, 3, 2, 1, 3, 0, 6, 3, 2, 0, 6, 5, 1, 3, 6, 4, 1, 1, 4, 5, 0, 4, 2, 4, 1]</span>
+<span class="sd">	</span>
+<span class="sd">	&gt;&gt;&gt; x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])</span>
+<span class="sd">	&gt;&gt;&gt; y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])</span>
+<span class="sd">	&gt;&gt;&gt; dx = discretize( x, iN = None, method = None, aiSkip = [1,3] )</span>
+<span class="sd">	&gt;&gt;&gt; dx</span>
+<span class="sd">	array([[ 0.,  0.,  1.,  1.],</span>
+<span class="sd">	       [ 1.,  1.,  1.,  0.],</span>
+<span class="sd">	       [ 0.,  0.,  1.,  1.],</span>
+<span class="sd">	       [ 0.,  0.,  0.,  1.]])</span>
+<span class="sd">	&gt;&gt;&gt; dy = discretize( y, iN = None, method = None, aiSkip = [1] )</span>
+<span class="sd">	&gt;&gt;&gt; dy </span>
+<span class="sd">	array([[ 1.,  1.,  0.,  0.],</span>
+<span class="sd">	       [ 1.,  1.,  0.,  0.],</span>
+<span class="sd">	       [ 0.,  0.,  1.,  1.],</span>
+<span class="sd">	       [ 0.,  0.,  1.,  1.]])</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+
+	<span class="k">def</span> <span class="nf">_discretize_continuous</span><span class="p">(</span> <span class="n">astrValues</span><span class="p">,</span> <span class="n">iN</span> <span class="o">=</span> <span class="n">iN</span> <span class="p">):</span> 
+		
 		<span class="k">if</span> <span class="n">iN</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
 			<span class="c"># Default to rounded sqrt(n) if no bin count requested</span>
 			<span class="n">iN</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span> <span class="n">astrValues</span> <span class="p">)</span><span class="o">**</span><span class="mf">0.5</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
@@ -451,43 +489,48 @@
 
 	<span class="k">try</span><span class="p">:</span>
 		<span class="n">iRow1</span><span class="p">,</span> <span class="n">iCol</span> <span class="o">=</span> <span class="n">pArray</span><span class="o">.</span><span class="n">shape</span> 
-		<span class="k">return</span> <span class="n">array</span><span class="p">([</span><span class="n">_discretize_continuous</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">pArray</span><span class="p">])</span>
-	<span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-		<span class="k">return</span> <span class="n">_discretize_continuous</span><span class="p">(</span><span class="n">pArray</span><span class="p">)</span>
+
+		<span class="n">aOut</span> <span class="o">=</span> <span class="p">[]</span> 
+		
+		<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span> <span class="n">pArray</span> <span class="p">):</span>
+			<span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">aiSkip</span><span class="p">:</span>
+				<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">line</span> <span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">aOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">_discretize_continuous</span><span class="p">(</span> <span class="n">line</span> <span class="p">)</span> <span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">array</span><span class="p">(</span> <span class="n">aOut</span> <span class="p">)</span>
+
+	<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">_discretize_continuous</span><span class="p">(</span> <span class="n">pArray</span> <span class="p">)</span>
+</div>
+<span class="k">def</span> <span class="nf">discretize2d</span><span class="p">(</span> <span class="n">pX</span><span class="p">,</span> <span class="n">pY</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="bp">None</span> <span class="p">):</span>
+	<span class="k">pass</span> 
 
 
 <span class="c">#=========================================================</span>
 <span class="c"># FDR correcting procedure  </span>
 <span class="c">#=========================================================</span>
-</div>
+
 <div class="viewcode-block" id="bh"><a class="viewcode-back" href="../../index.html#halla.stats.bh">[docs]</a><span class="k">def</span> <span class="nf">bh</span><span class="p">(</span> <span class="n">afPVAL</span><span class="p">,</span> <span class="n">fQ</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Implement the benjamini-hochberg hierarchical hypothesis testing criterion </span>
-<span class="sd">	In practice, used for implementing Yekutieli criterion PER layer </span>
+<span class="sd">	In practice, used for implementing Yekutieli criterion *per layer*.  </span>
 
-<span class="sd">	latex: $q$ BH procedure on $\mathcal{T}_t$:</span>
+<span class="sd">	When BH is performed per layer, FDR is approximately </span>
 
-<span class="sd">	\begin{enumerate}</span>
-<span class="sd">		\item $P_{(1)}^{t} \leq \cdots \leq P_{(m_t)^{t} $</span>
-<span class="sd">		\item $r+t := \max\{i: P_{(i)}^{t} \leq i \cdot q / m_t \}</span>
-<span class="sd">		\item If $r_t &gt;0,$ reject $r_t$ hypotheses corresponding to $P_{(1)}^t, \ldots, P_{(r_t)}^t$</span>
-<span class="sd">	\end{enumerate}</span>
+<span class="sd">	.. math::</span>
+<span class="sd">		FDR = q \cdot \delta^{*} \cdot(m_0 + m_1)/(m_0+1)</span>
 
-<span class="sd">	Then FDR is approximately </span>
+<span class="sd">	where :math:`m_0` is the observed number of discoveries and :math:`m_1` is the observed number of families tested. </span>
 
-<span class="sd">	\begin{equation}</span>
-<span class="sd">		FDR = q \cdot \delta^{*} \cdot(observed no. of idscoveries + observed no. of families tested)/(observed no. of discoveries+1)</span>
-<span class="sd">	\end{equation}</span>
+<span class="sd">	Universal bound: the full tree FDR is :math:`&lt; q \cdot \delta^{*} \cdot 2`</span>
 
-<span class="sd">	Universal bound: the full tree FDR is $&lt; q \cdot \delta^{*} \cdot 2$ </span>
-
-<span class="sd">	INPUT </span>
-
-<span class="sd">	afPVAL: list of p-values </span>
-
-<span class="sd">	OUTPUT </span>
-
-<span class="sd">	abOUT: boolean vector corresponding to which hypothesis test rejected, corresponding to p-value </span>
+<span class="sd">	</span>
+<span class="sd">	`afPVAL`</span>
+<span class="sd">	 list of p-values </span>
+<span class="sd"> </span>
+<span class="sd">	`abOUT`</span>
+<span class="sd">	 boolean vector corresponding to which hypothesis test rejected, corresponding to p-value </span>
 
 <span class="sd">	&quot;&quot;&quot;</span>
 
@@ -541,6 +584,9 @@
              >index</a></li>
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../np-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../../index.html">HAllA: Hierarchical All-against All 0.0.1 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>

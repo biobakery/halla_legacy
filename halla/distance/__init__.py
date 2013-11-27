@@ -154,8 +154,8 @@ def cor( pData1, pData2, method = "pearson", pval = False ):
 	p: float
  		p-value  
 	
-	Example Usage within HAllA
-	-----------------------------
+	Examples
+	---------
 	View pairwise correlation measures (pearson,spearman) between two datasets `x` and `y`:
 
 	>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])

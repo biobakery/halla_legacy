@@ -36,6 +36,9 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="../np-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li><a href="../index.html">HAllA: Hierarchical All-against All 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -103,19 +106,32 @@ where the outcome can be 1 through 6.  Each sample drawn from the
 distribution represents <cite>n</cite> such experiments.  Its values,
 <tt class="docutils literal"><span class="pre">X_i</span> <span class="pre">=</span> <span class="pre">[X_0,</span> <span class="pre">X_1,</span> <span class="pre">...,</span> <span class="pre">X_p]</span></tt>, represent the number of times the outcome
 was <tt class="docutils literal"><span class="pre">i</span></tt>.</p>
-<dl class="docutils">
-<dt>n <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Number of experiments.</dd>
-<dt>pvals <span class="classifier-delimiter">:</span> <span class="classifier">sequence of floats, length p</span></dt>
-<dd>Probabilities of each of the <tt class="docutils literal"><span class="pre">p</span></tt> different outcomes.  These
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n</strong> : int</p>
+<blockquote>
+<div><p>Number of experiments.</p>
+</div></blockquote>
+<p><strong>pvals</strong> : sequence of floats, length p</p>
+<blockquote>
+<div><p>Probabilities of each of the <tt class="docutils literal"><span class="pre">p</span></tt> different outcomes.  These
 should sum to 1 (however, the last element is always assumed to
 account for the remaining probability, as long as
-<tt class="docutils literal"><span class="pre">sum(pvals[:-1])</span> <span class="pre">&lt;=</span> <span class="pre">1)</span></tt>.</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
-<dd>Given a <cite>size</cite> of <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K)</span></tt>, then <tt class="docutils literal"><span class="pre">M*N*K</span></tt> samples are drawn,
+<tt class="docutils literal"><span class="pre">sum(pvals[:-1])</span> <span class="pre">&lt;=</span> <span class="pre">1)</span></tt>.</p>
+</div></blockquote>
+<p><strong>size</strong> : tuple of ints</p>
+<blockquote class="last">
+<div><p>Given a <cite>size</cite> of <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K)</span></tt>, then <tt class="docutils literal"><span class="pre">M*N*K</span></tt> samples are drawn,
 and the output shape becomes <tt class="docutils literal"><span class="pre">(M,</span> <span class="pre">N,</span> <span class="pre">K,</span> <span class="pre">p)</span></tt>, since each sample
-has shape <tt class="docutils literal"><span class="pre">(p,)</span></tt>.</dd>
-</dl>
+has shape <tt class="docutils literal"><span class="pre">(p,)</span></tt>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
 <p>Throw a dice 20 times:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mf">6.</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">array([[4, 1, 7, 5, 2, 1]])</span>
@@ -143,49 +159,67 @@ we threw 2 times 1, 4 times 2, etc.</p>
 <dd><p>Draw random samples from a normal (Gaussian) distribution.</p>
 <p>The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently <a class="footnote-reference" href="#id6" id="id2">[2]</a>, is often called the bell curve because of
+independently <a class="reference internal" href="#r15" id="id2">[R15]</a>, is often called the bell curve because of
 its characteristic shape (see the example below).</p>
 <p>The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution <a class="footnote-reference" href="#id6" id="id3">[2]</a>.</p>
-<dl class="docutils">
-<dt>loc <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Mean (&#8220;centre&#8221;) of the distribution.</dd>
-<dt>scale <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Standard deviation (spread or &#8220;width&#8221;) of the distribution.</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
-<dd>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
-<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</dd>
+unique distribution <a class="reference internal" href="#r15" id="id3">[R15]</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>loc</strong> : float</p>
+<blockquote>
+<div><p>Mean (&#8220;centre&#8221;) of the distribution.</p>
+</div></blockquote>
+<p><strong>scale</strong> : float</p>
+<blockquote>
+<div><p>Standard deviation (spread or &#8220;width&#8221;) of the distribution.</p>
+</div></blockquote>
+<p><strong>size</strong> : tuple of ints</p>
+<blockquote class="last">
+<div><p>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
+<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><tt class="xref py py-obj docutils literal"><span class="pre">scipy.stats.distributions.norm</span></tt></dt>
+<dd>probability density function, distribution or cumulative density function, etc.</dd>
 </dl>
-<dl class="docutils">
-<dt>scipy.stats.distributions.norm <span class="classifier-delimiter">:</span> <span class="classifier">probability density function,</span></dt>
-<dd>distribution or cumulative density function, etc.</dd>
-</dl>
+</div>
+<p class="rubric">Notes</p>
 <p>The probability density for the Gaussian distribution is</p>
 <img src="../_images/mathmpl/math-b24c0fb115.png" class="center" /><p>where <img src="../_images/mathmpl/math-3488de1d0a.png" /> is the mean and <img src="../_images/mathmpl/math-293c147d21.png" /> the standard deviation.
 The square of the standard deviation, <img src="../_images/mathmpl/math-54bf156f7e.png" />, is called the
 variance.</p>
 <p>The function has its peak at the mean, and its &#8220;spread&#8221; increases with
 the standard deviation (the function reaches 0.607 times its maximum at
-<img src="../_images/mathmpl/math-655d89f5c9.png" /> and <img src="../_images/mathmpl/math-a5e0617d55.png" /> <a class="footnote-reference" href="#id6" id="id4">[2]</a>).  This implies that
+<img src="../_images/mathmpl/math-655d89f5c9.png" /> and <img src="../_images/mathmpl/math-a5e0617d55.png" /> <a class="reference internal" href="#r15" id="id4">[R15]</a>).  This implies that
 <cite>numpy.random.normal</cite> is more likely to return samples lying close to the
 mean, rather than those far away.</p>
-<table class="docutils footnote" frame="void" id="id5" rules="none">
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r14" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td>Wikipedia, &#8220;Normal distribution&#8221;,
+<tr><td class="label"><a class="fn-backref" href="#id5">[R14]</a></td><td>Wikipedia, &#8220;Normal distribution&#8221;,
 <a class="reference external" href="http://en.wikipedia.org/wiki/Normal_distribution">http://en.wikipedia.org/wiki/Normal_distribution</a></td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id6" rules="none">
+<table class="docutils citation" frame="void" id="r15" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[2]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>, <a class="fn-backref" href="#id4">3</a>)</em> P. R. Peebles Jr., &#8220;Central Limit Theorem&#8221; in &#8220;Probability, Random
+<tr><td class="label">[R15]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>, <a class="fn-backref" href="#id4">3</a>, <a class="fn-backref" href="#id6">4</a>)</em> P. R. Peebles Jr., &#8220;Central Limit Theorem&#8221; in &#8220;Probability, Random
 Variables and Random Signal Principles&#8221;, 4th ed., 2001,
 pp. 51, 51, 125.</td></tr>
 </tbody>
 </table>
+<p class="rubric">Examples</p>
 <p>Draw samples from the distribution:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span> <span class="c"># mean and standard deviation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
@@ -272,6 +306,9 @@ the probability density function:</p>
              >index</a></li>
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../np-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../index.html">HAllA: Hierarchical All-against All 0.0.1 documentation</a> &raquo;</li> 
       </ul>

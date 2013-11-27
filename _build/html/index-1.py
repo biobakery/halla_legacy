@@ -1,12 +1,6 @@
-import pylab 
-import halla 
-from numpy import array 
-import scipy.stats
-from scipy.cluster.hierarchy import dendrogram, linkage
-
-x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-
-#Pearson
-lxpearson       = linkage(x, metric="correlation")
-
-dendrogram(lxpearson)
+import matplotlib.pyplot as plt 
+plt.plot( [0.0, 0.0, 0.0094671481098304033, 0.01562596130230276, 0.015625961302302867, 0.048630144207595816, 
+        0.07884009810806647, 0.07884009810806647, 0.10557280900008403, 0.11954909367437615, 0.22540333075851643, 
+        0.22540333075851643, 0.2254033307585166, 0.2254033307585166, 0.42264973081037405, 0.42264973081037405], 
+        linestyle='--', marker='o' )
+plt.show()
