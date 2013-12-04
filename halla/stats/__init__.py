@@ -7,6 +7,7 @@ unified statistics module
 
 import math 
 from itertools import compress 
+import sys 
 
 # External dependencies 
 
@@ -121,13 +122,28 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "mi", decompo
 Think about the differences between pdf and cdf 
 """
 
-def identity_cut( cake_length, iCuts ):
-	cake = range(cake_length)
+def identity_cut( data_length, iCuts ):
+	cake = range(data_length)
 	return [[i] for i in cake]
 
-def uniform_cut( cake_length, iCuts ):
+def uniform_cut( pArray, iCuts, iAxis = 1):
 	"""
-	Cut cake uniformly
+	Uniform cuts of the data 
+
+	Parameters
+	-------------
+
+	pArray : numpy array, array-like 
+		Input array 
+	iCuts : int 
+		Number of cuts 
+	iAxis : int 
+
+	Returns 
+	----------
+
+	C : list  
+		Divided array 
 
 	Note
 	------
@@ -136,12 +152,28 @@ def uniform_cut( cake_length, iCuts ):
 
 	"""
 
-	cake = range(cake_length)
-	aOut = [] 
-	iSize = int( math.floor( float(cake_length)/iCuts ) ) + 1
-	while cake:
-		aOut.append(cake[:iSize]) ; cake = cake[iSize:]
-	return aOut 
+	def _uniform_cut( iData, iCuts ):
+		pData = range( iData )
+		if iCuts > iData:
+			sys.stderr.write("Number of cuts exceed the length of the data\n")
+			return [[i] for i in pData]
+		else:		
+			iMod = iData % iCuts 
+			iStep = iData/iCuts 
+			aOut = [pData[i*iStep:(i+1)*iStep] for i in range(iCuts)]
+			pRemain = pData[iCuts*iStep:] 
+			assert( iMod == len(pRemain) )
+			for j,x in enumerate( pRemain ):
+				aOut[j].append(x)
+		return aOut 
+
+	if not iCuts: 
+		iCuts = math.floor( math.log( len(pArray), 2 ) )
+
+	pArray = array( pArray )
+
+	aIndex = map( array, _uniform_cut( len(pArray), iCuts = iCuts ) ) #Make sure each subset is an array so we can map with numpy 
+	return [pArray[x] for x in aIndex]
 
 def cumulative_uniform_cut( cake_length, iCuts ):
 	assert( cake_length > iCuts )
