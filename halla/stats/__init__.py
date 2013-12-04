@@ -6,11 +6,13 @@ unified statistics module
 # native python 
 
 import math 
+import itertools 
 from itertools import compress 
 import sys 
 
 # External dependencies 
 
+import numpy 
 import numpy as np 
 from numpy import array 
 import scipy as sp 
@@ -19,8 +21,9 @@ import rpy
 from numpy.random import shuffle, binomial, normal, multinomial 
 
 # Internal dependencies 
+import halla 
 
-from halla.distance import mi, l2 
+from halla.distance import mi, l2, adj_mid, mid, norm_mid, norm_mi, adj_mi 
 
 # doesn't play nice with other python extensions like numpy
 # remember to cast to native python objects before passing!
@@ -85,23 +88,26 @@ def get_representative( pArray, pMethod = None ):
 # Statistical test 
 #=========================================================
 
-def permutation_test_by_representative( pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 100):
+def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 100):
 	"""
 	Input: 
 	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 100
 
 	metric = {"mca": mca, "pca": pca} 
 	"""
+
+	strMetric = metric 
 	pHashDecomposition = {"mca": mca, "pca": pca}
-	pHashMetric = {"mi": mi}
+	pHashMetric = {"mi": mi, "adj_mid" : adj_mid, "norm_mid" : norm_mid, "norm_mi" : norm_mi, "pearsonr" : halla.distance.cor,
+		 "spearmanr" : lambda x,y: halla.distance.cor(x,y, method="spearman") }
 
 	def _permutation( pVec ):
 		return np.random.permutation( pVec )
 
 	pDe = pHashDecomposition[decomposition]
-	pMe = pHashMetric["mi"] 
+	pMe = pHashMetric[strMetric] 
 
-	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ]
+	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if "mi" in strMetric else [pDe( pA ) for pA in [pArray1, pArray2]]
 
 	dMI = pMe( pRep1, pRep2 ) 
 
@@ -114,6 +120,37 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "mi", decompo
 
 	return dPPerm
 
+def permutation_test_by_average( pArray1, pArray2, metric = "norm_mi", iIter = 100 ):
+	pHashDecomposition = {"mca": mca, "pca": pca}
+	pHashMetric = {"mi": mi, "adj_mid" : adj_mid, "norm_mid" : norm_mid, "norm_mi" : norm_mi, "pearsonr" : halla.distance.cor,
+		 "spearmanr" : lambda x,y: halla.distance.cor(x,y, method="spearman") }
+	def _permutation( pVec ):
+		return np.random.permutation( pVec )
+
+	strMetric = metric 
+	pMe = pHashMetric[strMetric] 
+	
+	pFun = lambda x,y: numpy.average( [pMe(i,j) for i,j in itertools.product( x, y )] )
+
+	dVal = pFun( pArray1, pArray2 )
+
+	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
+	pArrayPerm = np.array( [ pFun( array( [_permutation( x ) for x in pArray1] ), pArray2 ) for i in xrange( iIter ) ] )
+
+	dPPerm = percentileofscore( pArrayPerm, dVal ) / 100 	
+
+	return dPPerm
+
+
+def parametric_test( pArray1, pArray2 ):
+	
+	pMe1 = lambda x,y: halla.distance.cor( x,y, method = "pearson", pval = True)
+	pMe2 = lambda x,y: halla.distance.cor( x,y, method = "spearman", pval = True)
+
+	pVal1 = [pMe1(i,j)[1] for i,j in itertools.product( pArray1, pArray2 )]
+ 	pVal2 = [pMe2(i,j)[1] for i,j in itertools.product( pArray1, pArray2 )]
+
+	return numpy.average(pVal1), numpy.average(pVal2)
 
 #=========================================================
 # Cake Cutting 

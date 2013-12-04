@@ -13,6 +13,7 @@ import itertools
 
 ## halla-specific modules 
 
+import halla 
 import halla.stats 
 
 from halla.distance import mi, l2, absl2, norm_mid
@@ -383,7 +384,7 @@ def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
 		iLayer1, iLayer2 = len(pLayer1), len(pLayer2)
 
 		for i,j in itertools.product( range(iLayer1), range(iLayer2) ):
-			dummyOut.append( ( (i,j), pFunction( pArray1[:,i], pArray2[:,j] ) ) )
+			dummyOut.append( [ (i,j), pFunction( pArray1[:,i], pArray2[:,j] ) ] )
 
 
 def depth_tree( pClusterNode, bLayerform = False ):
@@ -466,22 +467,51 @@ def couple_tree( pClusterNode1, pClusterNode2, method = "uniform", linkage = "mi
 
 	#implement min version first 
 
-	itertools.product( )
+	
+	aOut = [] 
 
-	bStop = False 
+	layer_form1, layer_form2 = pClusterNode1, pClusterNode2 
+	depth1, depth2 = depth_tree( layer_form1 ), depth_tree( pClusterNode2 )
 
-	while bStop:
-
-		pBags1, layer_form1 = get_layer( pClusterNode1, bTuple = True ) 
-		pBags2, layer_form2 = get_layer( pClusterNode2, bTuple = True )
+	for i in range(depth1):
+		pBags1 = get_layer( layer_form1, i )
+		pBags2 = get_layer( layer_form2, i )
 
 		if not pBags1 or not pBags2:
-			bStop = True
 			break 
-
 		else:
-			pass
 
+			pP = itertools.product( pBags1, pBags2 )
+			aOut.append( [(item[0],item[1]) for item in pP] )
+
+	return aOut 
+
+
+def all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi"):
+	"""
+	Get output from couple_tree and perform all_against_all 
+	"""
+
+	aOut = [] 
+
+	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
+					"permutation_test_by_average" : halla.stats.permutation_test_by_average,
+					"parametric_test" : halla.stats.parametric_test}
+	strMethod = method 
+
+	pMethod = phashMethods[strMethod]
+
+	pCouple = couple_tree( pClusterNode1, pClusterNode2 )
+	for aLayer in pCouple:
+		for pPair in aLayer:
+			pOne, pTwo = map( array, pPair )
+			aOut.append( [pPair, pMethod( pArray1[pOne], pArray2[pTwo] )] )
+
+	return aOut 
+
+#=======================================#
+#### Old code; clean later 
+#=======================================#
 
 
 
@@ -554,7 +584,7 @@ def old_couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage
 		#pTreeNew.add_child( couple_tree( apClusterNodeNew1, apClusterNodeNew2, method= pMethod, linkage= pLinkage, pTree = pTreeNew ) ) 
 		
 
-def one_against_one( pClusterNode1, pClusterNode2, pArray1, pArray2 ):
+def old_one_against_one( pClusterNode1, pClusterNode2, pArray1, pArray2 ):
 	"""
 
 	one_against_one hypothesis testing for a particular layer 
@@ -572,7 +602,7 @@ def one_against_one( pClusterNode1, pClusterNode2, pArray1, pArray2 ):
 	return aiIndex1, aiIndex2, permutation_test_by_representative( pData1, pData2 )
 
 
-def all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2 ):
+def old_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2 ):
 	""" 
 	Perform all-against-all per layer 
 
@@ -590,7 +620,7 @@ def all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2 ):
 
 	return dummyOut 
 
-def recursive_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2, pOut = [], pFDR = bh ):
+def old_recursive_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2, pOut = [], pFDR = bh ):
 	"""
 
 	Performs recursive all-against-all (the default HAllA routine) with fdr correction
