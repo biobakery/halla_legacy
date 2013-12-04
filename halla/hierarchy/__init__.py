@@ -283,7 +283,6 @@ def depth_tree( pClusterNode ):
 	"""
 	Get the depth of a tree 
 	"""
-	
 	aOut = reduce_tree_by_layer( pClusterNode )
 	return max(aOut)+1
 
@@ -310,12 +309,26 @@ def couple_tree( pClusterNode1, pClusterNode2, method = "unif" ):
 	"""
 	Couples two data trees to produce a hypothesis tree 
 
+	Parameters 
+	---------------
+
+	pClusterNode1, pClusterNode2 : ClusterNode object 
+	method : str 
+
+	Returns 
+	-------------
+
+	T : ClusterNode object 
+
+
 	Examples
 	----------------
 
 	>>> depth1 = depth_tree( pClusterNode1 )
 	>>> depth2 = depth_tree( pClusterNode2 )
 	"""
+
+	
 
 	pass 
 
