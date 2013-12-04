@@ -125,7 +125,7 @@ def identity_cut( cake_length, iCuts ):
 	cake = range(cake_length)
 	return [[i] for i in cake]
 
-def uniform_cut( cake_length, iCuts = 10 ):
+def uniform_cut( cake_length, iCuts ):
 	"""
 	Cut cake uniformly
 
@@ -143,7 +143,7 @@ def uniform_cut( cake_length, iCuts = 10 ):
 		aOut.append(cake[:iSize]) ; cake = cake[iSize:]
 	return aOut 
 
-def cumulative_uniform_cut( cake_length, iCuts = 10):
+def cumulative_uniform_cut( cake_length, iCuts ):
 	assert( cake_length > iCuts )
 
 	aOut = [] 

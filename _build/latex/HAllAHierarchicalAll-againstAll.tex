@@ -14,7 +14,7 @@
 
 
 \title{HAllA: Hierarchical All-against All Documentation}
-\date{November 26, 2013}
+\date{November 27, 2013}
 \release{0.0.1}
 \author{Yo Sup Moon, Curtis Huttenhower}
 \newcommand{\sphinxlogo}{}
@@ -331,22 +331,33 @@ where the outcome can be 1 through 6.  Each sample drawn from the
 distribution represents \emph{n} such experiments.  Its values,
 \code{X\_i = {[}X\_0, X\_1, ..., X\_p{]}}, represent the number of times the outcome
 was \code{i}.
-\begin{description}
-\item[{n}] \leavevmode{[}int{]}
-Number of experiments.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{n} : int
+\begin{quote}
 
-\item[{pvals}] \leavevmode{[}sequence of floats, length p{]}
+Number of experiments.
+\end{quote}
+
+\textbf{pvals} : sequence of floats, length p
+\begin{quote}
+
 Probabilities of each of the \code{p} different outcomes.  These
 should sum to 1 (however, the last element is always assumed to
 account for the remaining probability, as long as
 \code{sum(pvals{[}:-1{]}) \textless{}= 1)}.
+\end{quote}
 
-\item[{size}] \leavevmode{[}tuple of ints{]}
+\textbf{size} : tuple of ints
+\begin{quote}
+
 Given a \emph{size} of \code{(M, N, K)}, then \code{M*N*K} samples are drawn,
 and the output shape becomes \code{(M, N, K, p)}, since each sample
 has shape \code{(p,)}.
+\end{quote}
 
-\end{description}
+\end{description}\end{quote}
+\paragraph{Examples}
 
 Throw a dice 20 times:
 
@@ -385,30 +396,47 @@ Draw random samples from a normal (Gaussian) distribution.
 
 The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently {\color{red}\bfseries{}{[}2{]}\_}, is often called the bell curve because of
+independently {[}R2{]}, is often called the bell curve because of
 its characteristic shape (see the example below).
 
 The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution {\color{red}\bfseries{}{[}2{]}\_}.
-\begin{description}
-\item[{loc}] \leavevmode{[}float{]}
+unique distribution {[}R2{]}.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{loc} : float
+\begin{quote}
+
 Mean (``centre'') of the distribution.
+\end{quote}
 
-\item[{scale}] \leavevmode{[}float{]}
+\textbf{scale} : float
+\begin{quote}
+
 Standard deviation (spread or ``width'') of the distribution.
+\end{quote}
 
-\item[{size}] \leavevmode{[}tuple of ints{]}
+\textbf{size} : tuple of ints
+\begin{quote}
+
 Output shape.  If the given shape is, e.g., \code{(m, n, k)}, then
 \code{m * n * k} samples are drawn.
+\end{quote}
 
-\end{description}
+\end{description}\end{quote}
+
+
+\strong{See also:}
+
 \begin{description}
-\item[{scipy.stats.distributions.norm}] \leavevmode{[}probability density function,{]}
-distribution or cumulative density function, etc.
+\item[{\code{scipy.stats.distributions.norm}}] \leavevmode
+probability density function, distribution or cumulative density function, etc.
 
 \end{description}
+
+
+\paragraph{Notes}
 
 The probability density for the Gaussian distribution is
 \begin{equation}p(x) = \frac{1}{\sqrt{ 2 \pi \sigma^2 }}e^{ - \frac{ (x - \mu)^2 } {2 \sigma^2} },\end{equation}
@@ -418,9 +446,13 @@ variance.
 
 The function has its peak at the mean, and its ``spread'' increases with
 the standard deviation (the function reaches 0.607 times its maximum at
-$x + \sigma$ and $x - \sigma$ {\color{red}\bfseries{}{[}2{]}\_}).  This implies that
+$x + \sigma$ and $x - \sigma$ {[}R2{]}).  This implies that
 \emph{numpy.random.normal} is more likely to return samples lying close to the
 mean, rather than those far away.
+\paragraph{References}
+
+{[}R1{]}, {[}R2{]}
+\paragraph{Examples}
 
 Draw samples from the distribution:
 
@@ -506,28 +538,47 @@ Samples are drawn from a Binomial distribution with specified
 parameters, n trials and p probability of success where
 n an integer \textgreater{} 0 and p is in the interval {[}0,1{]}. (n may be
 input as a float, but it is truncated to an integer in use)
-\begin{description}
-\item[{n}] \leavevmode{[}float (but truncated to an integer){]}
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{n} : float (but truncated to an integer)
+\begin{quote}
+
 parameter, \textgreater{} 0.
+\end{quote}
 
-\item[{p}] \leavevmode{[}float{]}
+\textbf{p} : float
+\begin{quote}
+
 parameter, \textgreater{}= 0 and \textless{}=1.
+\end{quote}
 
-\item[{size}] \leavevmode{[}\{tuple, int\}{]}
+\textbf{size} : \{tuple, int\}
+\begin{quote}
+
 Output shape.  If the given shape is, e.g., \code{(m, n, k)}, then
 \code{m * n * k} samples are drawn.
+\end{quote}
 
-\end{description}
-\begin{description}
-\item[{samples}] \leavevmode{[}\{ndarray, scalar\}{]}
+\item[{Returns}] \leavevmode
+\textbf{samples} : \{ndarray, scalar\}
+\begin{quote}
+
 where the values are all integers in  {[}0, n{]}.
+\end{quote}
 
-\end{description}
+\end{description}\end{quote}
+
+
+\strong{See also:}
+
 \begin{description}
-\item[{scipy.stats.distributions.binom}] \leavevmode{[}probability density function,{]}
-distribution or cumulative density function, etc.
+\item[{\code{scipy.stats.distributions.binom}}] \leavevmode
+probability density function, distribution or cumulative density function, etc.
 
 \end{description}
+
+
+\paragraph{Notes}
 
 The probability density for the Binomial distribution is
 \begin{equation}P(N) = \binom{n}{N}p^N(1-p)^{n-N},\end{equation}
@@ -541,6 +592,10 @@ number of samples, in which case the binomial distribution is used
 instead. For example, a sample of 15 people shows 4 who are left
 handed, and 11 who are right handed. Then p = 4/15 = 27\%. 0.27*15 = 4,
 so the binomial distribution should be used in this case.
+\paragraph{References}
+
+{\hyperref[index:r3]{{[}R3{]}}}, {\hyperref[index:r4]{{[}R4{]}}}, {\hyperref[index:r5]{{[}R5{]}}}, {\hyperref[index:r6]{{[}R6{]}}}, {\hyperref[index:r7]{{[}R7{]}}}
+\paragraph{Examples}
 
 Draw samples from the distribution:
 
@@ -728,7 +783,7 @@ Avoid the ``all'' case
 \index{get\_medoid() (in module halla.stats)}
 
 \begin{fulllineitems}
-\phantomsection\label{index:halla.stats.get_medoid}\pysiglinewithargsret{\code{halla.stats.}\bfcode{get\_medoid}}{\emph{pArray}, \emph{iAxis=0}, \emph{pMetric=\textless{}function l2 at 0x6f7ccf8\textgreater{}}}{}
+\phantomsection\label{index:halla.stats.get_medoid}\pysiglinewithargsret{\code{halla.stats.}\bfcode{get\_medoid}}{\emph{pArray}, \emph{iAxis=0}, \emph{pMetric=\textless{}function l2 at 0x7313f50\textgreater{}}}{}
 Input: numpy array 
 Output: float
 
@@ -774,22 +829,33 @@ where the outcome can be 1 through 6.  Each sample drawn from the
 distribution represents \emph{n} such experiments.  Its values,
 \code{X\_i = {[}X\_0, X\_1, ..., X\_p{]}}, represent the number of times the outcome
 was \code{i}.
-\begin{description}
-\item[{n}] \leavevmode{[}int{]}
-Number of experiments.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{n} : int
+\begin{quote}
 
-\item[{pvals}] \leavevmode{[}sequence of floats, length p{]}
+Number of experiments.
+\end{quote}
+
+\textbf{pvals} : sequence of floats, length p
+\begin{quote}
+
 Probabilities of each of the \code{p} different outcomes.  These
 should sum to 1 (however, the last element is always assumed to
 account for the remaining probability, as long as
 \code{sum(pvals{[}:-1{]}) \textless{}= 1)}.
+\end{quote}
 
-\item[{size}] \leavevmode{[}tuple of ints{]}
+\textbf{size} : tuple of ints
+\begin{quote}
+
 Given a \emph{size} of \code{(M, N, K)}, then \code{M*N*K} samples are drawn,
 and the output shape becomes \code{(M, N, K, p)}, since each sample
 has shape \code{(p,)}.
+\end{quote}
 
-\end{description}
+\end{description}\end{quote}
+\paragraph{Examples}
 
 Throw a dice 20 times:
 
@@ -828,30 +894,47 @@ Draw random samples from a normal (Gaussian) distribution.
 
 The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently {\color{red}\bfseries{}{[}2{]}\_}, is often called the bell curve because of
+independently {\hyperref[index:r9]{{[}R9{]}}}, is often called the bell curve because of
 its characteristic shape (see the example below).
 
 The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution {\color{red}\bfseries{}{[}2{]}\_}.
-\begin{description}
-\item[{loc}] \leavevmode{[}float{]}
+unique distribution {\hyperref[index:r9]{{[}R9{]}}}.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{loc} : float
+\begin{quote}
+
 Mean (``centre'') of the distribution.
+\end{quote}
 
-\item[{scale}] \leavevmode{[}float{]}
+\textbf{scale} : float
+\begin{quote}
+
 Standard deviation (spread or ``width'') of the distribution.
+\end{quote}
 
-\item[{size}] \leavevmode{[}tuple of ints{]}
+\textbf{size} : tuple of ints
+\begin{quote}
+
 Output shape.  If the given shape is, e.g., \code{(m, n, k)}, then
 \code{m * n * k} samples are drawn.
+\end{quote}
 
-\end{description}
+\end{description}\end{quote}
+
+
+\strong{See also:}
+
 \begin{description}
-\item[{scipy.stats.distributions.norm}] \leavevmode{[}probability density function,{]}
-distribution or cumulative density function, etc.
+\item[{\code{scipy.stats.distributions.norm}}] \leavevmode
+probability density function, distribution or cumulative density function, etc.
 
 \end{description}
+
+
+\paragraph{Notes}
 
 The probability density for the Gaussian distribution is
 \begin{equation}p(x) = \frac{1}{\sqrt{ 2 \pi \sigma^2 }}e^{ - \frac{ (x - \mu)^2 } {2 \sigma^2} },\end{equation}
@@ -861,9 +944,13 @@ variance.
 
 The function has its peak at the mean, and its ``spread'' increases with
 the standard deviation (the function reaches 0.607 times its maximum at
-$x + \sigma$ and $x - \sigma$ {\color{red}\bfseries{}{[}2{]}\_}).  This implies that
+$x + \sigma$ and $x - \sigma$ {\hyperref[index:r9]{{[}R9{]}}}).  This implies that
 \emph{numpy.random.normal} is more likely to return samples lying close to the
 mean, rather than those far away.
+\paragraph{References}
+
+{\hyperref[index:r8]{{[}R8{]}}}, {\hyperref[index:r9]{{[}R9{]}}}
+\paragraph{Examples}
 
 Draw samples from the distribution:
 
@@ -901,7 +988,7 @@ the probability density function:
 \index{p\_val\_plot() (in module halla.stats)}
 
 \begin{fulllineitems}
-\phantomsection\label{index:halla.stats.p_val_plot}\pysiglinewithargsret{\code{halla.stats.}\bfcode{p\_val\_plot}}{\emph{pArray1}, \emph{pArray2}, \emph{pCut=\textless{}function log\_cut at 0x6f80488\textgreater{}}, \emph{iIter=100}}{}
+\phantomsection\label{index:halla.stats.p_val_plot}\pysiglinewithargsret{\code{halla.stats.}\bfcode{p\_val\_plot}}{\emph{pArray1}, \emph{pArray2}, \emph{pCut=\textless{}function log\_cut at 0x7316848\textgreater{}}, \emph{iIter=100}}{}
 Returns p value plot of combinatorial cuts
 
 In practice, works best when arrays are of similar size, since I implement the minimum ... 
@@ -934,13 +1021,19 @@ metric = \{``mca'': mca, ``pca'': pca\}
 \begin{fulllineitems}
 \phantomsection\label{index:halla.stats.shuffle}\pysiglinewithargsret{\code{halla.stats.}\bfcode{shuffle}}{\emph{x}}{}
 Modify a sequence in-place by shuffling its contents.
-\begin{description}
-\item[{x}] \leavevmode{[}array\_like{]}
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{x} : array\_like
+\begin{quote}
+
 The array or list to be shuffled.
+\end{quote}
 
-\end{description}
+\item[{Returns}] \leavevmode
+\textbf{None} :
 
-None
+\end{description}\end{quote}
+\paragraph{Examples}
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{arr} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{l+m+mi}{10}\PYG{p}{)}
@@ -963,6 +1056,14 @@ multi-dimensional array:
 
 \end{fulllineitems}
 
+\index{uniform\_cut() (in module halla.stats)}
+
+\begin{fulllineitems}
+\phantomsection\label{index:halla.stats.uniform_cut}\pysiglinewithargsret{\code{halla.stats.}\bfcode{uniform\_cut}}{\emph{cake\_length}, \emph{iCuts=10}}{}
+Cut cake uniformly
+
+\end{fulllineitems}
+
 \phantomsection\label{index:module-halla.distance}\index{halla.distance (module)}
 Abstract distance module providing different notions of distance
 \index{AdjustedMutualInformation (class in halla.distance)}
@@ -970,6 +1071,7 @@ Abstract distance module providing different notions of distance
 \begin{fulllineitems}
 \phantomsection\label{index:halla.distance.AdjustedMutualInformation}\pysiglinewithargsret{\strong{class }\code{halla.distance.}\bfcode{AdjustedMutualInformation}}{\emph{c\_array1}, \emph{c\_array2}}{}
 adjusted for chance
+\paragraph{Methods}
 
 \end{fulllineitems}
 
@@ -978,6 +1080,7 @@ adjusted for chance
 \begin{fulllineitems}
 \phantomsection\label{index:halla.distance.Distance}\pysiglinewithargsret{\strong{class }\code{halla.distance.}\bfcode{Distance}}{\emph{c\_array1}, \emph{c\_array2}}{}
 abstract distance, handles numpy arrays (probably should support lists for compatibility issues)
+\paragraph{Methods}
 
 \end{fulllineitems}
 
@@ -987,6 +1090,7 @@ abstract distance, handles numpy arrays (probably should support lists for compa
 \phantomsection\label{index:halla.distance.MutualInformation}\pysiglinewithargsret{\strong{class }\code{halla.distance.}\bfcode{MutualInformation}}{\emph{c\_array1}, \emph{c\_array2}, \emph{bSym=False}}{}
 Scikit-learn uses the convention log = ln
 Adjust multiplicative factor of log(e,2)
+\paragraph{Methods}
 
 \end{fulllineitems}
 
@@ -995,6 +1099,7 @@ Adjust multiplicative factor of log(e,2)
 \begin{fulllineitems}
 \phantomsection\label{index:halla.distance.NormalizedMutualInformation}\pysiglinewithargsret{\strong{class }\code{halla.distance.}\bfcode{NormalizedMutualInformation}}{\emph{c\_array1}, \emph{c\_array2}}{}
 normalized by sqrt(H1*H2) so the range is {[}0,1{]}
+\paragraph{Methods}
 
 \end{fulllineitems}
 
@@ -1002,9 +1107,8 @@ normalized by sqrt(H1*H2) so the range is {[}0,1{]}
 
 \begin{fulllineitems}
 \phantomsection\label{index:halla.distance.adj_mi}\pysiglinewithargsret{\code{halla.distance.}\bfcode{adj\_mi}}{\emph{pData1}, \emph{pData2}}{}
-static implementation of adjusted distance
-
-Examples
+Static implementation of adjusted distance
+\paragraph{Examples}
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.01}\PYG{p}{,}\PYG{l+m+mf}{0.04}\PYG{p}{,}\PYG{l+m+mf}{0.09}\PYG{p}{,}\PYG{l+m+mf}{0.16}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
@@ -1037,9 +1141,8 @@ Examples
 
 \begin{fulllineitems}
 \phantomsection\label{index:halla.distance.adj_mid}\pysiglinewithargsret{\code{halla.distance.}\bfcode{adj\_mid}}{\emph{pData1}, \emph{pData2}}{}
-static implementation of adjusted distance
-
-Examples:
+Static implementation of adjusted distance
+\paragraph{Examples}
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.01}\PYG{p}{,}\PYG{l+m+mf}{0.04}\PYG{p}{,}\PYG{l+m+mf}{0.09}\PYG{p}{,}\PYG{l+m+mf}{0.16}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
@@ -1071,28 +1174,52 @@ Examples:
 \index{cor() (in module halla.distance)}
 
 \begin{fulllineitems}
-\phantomsection\label{index:halla.distance.cor}\pysiglinewithargsret{\code{halla.distance.}\bfcode{cor}}{\emph{pData1}, \emph{pData2}, \emph{method='pearson'}}{}~\begin{description}
-\item[{\emph{pData1, pData2}}] \leavevmode
-Numpy array
+\phantomsection\label{index:halla.distance.cor}\pysiglinewithargsret{\code{halla.distance.}\bfcode{cor}}{\emph{pData1}, \emph{pData2}, \emph{method='pearson'}, \emph{pval=False}}{}
+Get correlation coefficient and corresponding parametric p-value (t-test)
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{pData1, pData2} : numpy arrays
+\begin{quote}
 
-\item[{\emph{method}}] \leavevmode
+data matrices
+\end{quote}
+
+\textbf{method} : str
+\begin{quote}
+
 \{``pearson'', ``spearman''\}
+``abs''
+\end{quote}
 
-\end{description}
-\begin{description}
-\item[{\emph{rho}}] \leavevmode
-float
+\textbf{pval} : bool
+\begin{quote}
 
-\item[{\emph{p-value}}] \leavevmode
-float
+True if parametric estimate of p-value requested
+\end{quote}
 
-\end{description}
+\item[{Returns}] \leavevmode
+\textbf{rho: float} :
+\begin{quote}
+
+correlation coefficient
+\end{quote}
+
+\textbf{p: float} :
+\begin{quote}
+
+p-value
+\end{quote}
+
+\end{description}\end{quote}
+\paragraph{Examples}
+
+View pairwise correlation measures (pearson,spearman) between two datasets \emph{x} and \emph{y}:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.01}\PYG{p}{,}\PYG{l+m+mf}{0.04}\PYG{p}{,}\PYG{l+m+mf}{0.09}\PYG{p}{,}\PYG{l+m+mf}{0.16}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{y} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.25}\PYG{p}{,}\PYG{l+m+mf}{0.5}\PYG{p}{,}\PYG{l+m+mf}{0.75}\PYG{p}{,}\PYG{l+m+mf}{1.0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.015625}\PYG{p}{,}\PYG{l+m+mf}{0.125}\PYG{p}{,}\PYG{l+m+mf}{0.421875}\PYG{p}{,}\PYG{l+m+mf}{1.0}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{p} \PYG{o}{=} \PYG{n}{itertools}\PYG{o}{.}\PYG{n}{product}\PYG{p}{(} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{x}\PYG{p}{)}\PYG{p}{)}\PYG{p}{,} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{y}\PYG{p}{)}\PYG{p}{)} \PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k}{for} \PYG{n}{item} \PYG{o+ow}{in} \PYG{n}{p}\PYG{p}{:} \PYG{n}{i}\PYG{p}{,}\PYG{n}{j} \PYG{o}{=} \PYG{n}{item}\PYG{p}{;} \PYG{k}{print} \PYG{p}{(}\PYG{n}{i}\PYG{p}{,}\PYG{n}{j}\PYG{p}{)}\PYG{p}{,}\PYG{n}{scipy}\PYG{o}{.}\PYG{n}{stats}\PYG{o}{.}\PYG{n}{pearsonr}\PYG{p}{(}\PYG{n}{x}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{p}{,}\PYG{n}{y}\PYG{p}{[}\PYG{n}{j}\PYG{p}{]}\PYG{p}{)}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{n}{scipy}\PYG{o}{.}\PYG{n}{stats}\PYG{o}{.}\PYG{n}{spearmanr}\PYG{p}{(}\PYG{n}{x}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{p}{,}\PYG{n}{y}\PYG{p}{[}\PYG{n}{j}\PYG{p}{]}\PYG{p}{)}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{p} \PYG{o}{=} \PYG{p}{[}\PYG{n}{\PYGZus{}} \PYG{k}{for} \PYG{n}{\PYGZus{}} \PYG{o+ow}{in} \PYG{n}{itertools}\PYG{o}{.}\PYG{n}{product}\PYG{p}{(} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{x}\PYG{p}{)}\PYG{p}{)}\PYG{p}{,} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{y}\PYG{p}{)}\PYG{p}{)} \PYG{p}{)}\PYG{p}{]}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k}{for} \PYG{n}{item} \PYG{o+ow}{in} \PYG{n}{p}\PYG{p}{:} \PYG{n}{i}\PYG{p}{,}\PYG{n}{j} \PYG{o}{=} \PYG{n}{item}\PYG{p}{;} \PYG{k}{print} \PYG{p}{(}\PYG{n}{i}\PYG{p}{,}\PYG{n}{j}\PYG{p}{)}\PYG{p}{,}\PYG{n}{cor}\PYG{p}{(}\PYG{n}{x}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{p}{,}\PYG{n}{y}\PYG{p}{[}\PYG{n}{j}\PYG{p}{]}\PYG{p}{,} \PYG{n}{method}\PYG{o}{=}\PYG{l+s}{\PYGZdq{}}\PYG{l+s}{pearson}\PYG{l+s}{\PYGZdq{}}\PYG{p}{)}\PYG{p}{,}\PYG{n}{cor}\PYG{p}{(}\PYG{n}{x}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{p}{,}\PYG{n}{y}\PYG{p}{[}\PYG{n}{j}\PYG{p}{]}\PYG{p}{,} \PYG{n}{method}\PYG{o}{=}\PYG{l+s}{\PYGZdq{}}\PYG{l+s}{spearman}\PYG{l+s}{\PYGZdq{}}\PYG{p}{)}
 \PYG{g+go}{(0, 0) \PYGZhy{}1.0 \PYGZhy{}1.0}
 \PYG{g+go}{(0, 1) \PYGZhy{}0.894427191 \PYGZhy{}0.894427191}
 \PYG{g+go}{(0, 2) 1.0 1.0}
@@ -1111,12 +1238,104 @@ float
 \PYG{g+go}{(3, 3) 0.921159901892 0.774596669241}
 \end{Verbatim}
 
+Generate p-values for pearson correlation:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{pval\PYGZus{}pearson} \PYG{o}{=} \PYG{n+nb}{sorted}\PYG{p}{(} \PYG{p}{[}\PYG{n}{cor}\PYG{p}{(}\PYG{n}{x}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{p}{,}\PYG{n}{y}\PYG{p}{[}\PYG{n}{j}\PYG{p}{]}\PYG{p}{,} \PYG{n}{method}\PYG{o}{=}\PYG{l+s}{\PYGZdq{}}\PYG{l+s}{pearson}\PYG{l+s}{\PYGZdq{}}\PYG{p}{,} \PYG{n}{pval}\PYG{o}{=}\PYG{n+nb+bp}{True}\PYG{p}{)}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{k}{for} \PYG{n}{i}\PYG{p}{,}\PYG{n}{j} \PYG{o+ow}{in} \PYG{n}{p}\PYG{p}{]} \PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{pval\PYGZus{}pearson}
+\PYG{g+go}{[0.0, 0.0, 0.0094671481098304033, 0.01562596130230276, 0.015625961302302867, 0.048630144207595816, 0.07884009810806647, 0.07884009810806647, 0.10557280900008403, 0.11954909367437615, 0.22540333075851643, 0.22540333075851643, 0.2254033307585166, 0.2254033307585166, 0.42264973081037405, 0.42264973081037405]}
+\end{Verbatim}
+
+View plot:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(} \PYG{n}{pval\PYGZus{}pearson} \PYG{p}{)}
+\PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{Verbatim}
+
+\includegraphics{index-1.pdf}
+
+Generate p-values for spearman correlation:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{pval\PYGZus{}spearman} \PYG{o}{=} \PYG{n+nb}{sorted}\PYG{p}{(} \PYG{p}{[}\PYG{n}{cor}\PYG{p}{(}\PYG{n}{x}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{p}{,}\PYG{n}{y}\PYG{p}{[}\PYG{n}{j}\PYG{p}{]}\PYG{p}{,} \PYG{n}{method}\PYG{o}{=}\PYG{l+s}{\PYGZdq{}}\PYG{l+s}{spearman}\PYG{l+s}{\PYGZdq{}}\PYG{p}{,} \PYG{n}{pval}\PYG{o}{=}\PYG{n+nb+bp}{True}\PYG{p}{)}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{k}{for} \PYG{n}{i}\PYG{p}{,}\PYG{n}{j} \PYG{o+ow}{in} \PYG{n}{p}\PYG{p}{]} \PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{pval\PYGZus{}spearman}
+\PYG{g+go}{[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.10557280900008413, 0.10557280900008413, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.22540333075851657, 0.42264973081037427, 0.42264973081037427]}
+\end{Verbatim}
+
+View plot:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{plt}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{(}\PYG{n}{pval\PYGZus{}pearson}\PYG{p}{)}
+\PYG{n}{plt}\PYG{o}{.}\PYG{n}{show}\PYG{p}{(}\PYG{p}{)}
+\end{Verbatim}
+
+\includegraphics{index-2.pdf}
+
+\end{fulllineitems}
+
+\index{cord() (in module halla.distance)}
+
+\begin{fulllineitems}
+\phantomsection\label{index:halla.distance.cord}\pysiglinewithargsret{\code{halla.distance.}\bfcode{cord}}{\emph{pData}, \emph{pData2}, \emph{method='pearson'}, \emph{inversion\_method='abs'}, \emph{pval=False}}{}
+Get correlation divergence
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{pData1, pData2} : numpy arrays
+\begin{quote}
+
+data matrices
+\end{quote}
+
+\textbf{method} : str
+\begin{quote}
+
+\{``pearson'', ``spearman''\}
+\end{quote}
+
+\textbf{inversion\_method} : str
+\begin{quote}
+
+``abs''
+\end{quote}
+
+\textbf{pval} : bool
+\begin{quote}
+
+True if parametric estimate of p-value requested
+\end{quote}
+
+\item[{Returns}] \leavevmode
+\textbf{rho: float} :
+\begin{quote}
+
+correlation coefficient
+\end{quote}
+
+\textbf{p: float} :
+\begin{quote}
+
+p-value
+\end{quote}
+
+\end{description}\end{quote}
+\paragraph{Examples}
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{y} \PYG{o}{=} \PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.4}\PYG{p}{]}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{cord}\PYG{p}{(} \PYG{n}{x}\PYG{p}{,}\PYG{n}{y} \PYG{p}{)}
+\PYG{g+go}{0.0}
+\end{Verbatim}
+
 \end{fulllineitems}
 
 \index{l2() (in module halla.distance)}
 
 \begin{fulllineitems}
-\phantomsection\label{index:halla.distance.l2}\pysiglinewithargsret{\code{halla.distance.}\bfcode{l2}}{\emph{pData1}, \emph{pData2}}{}~
+\phantomsection\label{index:halla.distance.l2}\pysiglinewithargsret{\code{halla.distance.}\bfcode{l2}}{\emph{pData1}, \emph{pData2}}{}
+Returns the l2 distance
+
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{numpy}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{]}\PYG{p}{)}\PYG{p}{;} \PYG{n}{y} \PYG{o}{=} \PYG{n}{numpy}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{l+m+mi}{4}\PYG{p}{,}\PYG{l+m+mi}{5}\PYG{p}{,}\PYG{l+m+mi}{6}\PYG{p}{]}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{l2}\PYG{p}{(}\PYG{n}{x}\PYG{p}{,}\PYG{n}{y}\PYG{p}{)}
@@ -1130,18 +1349,15 @@ float
 \begin{fulllineitems}
 \phantomsection\label{index:halla.distance.mi}\pysiglinewithargsret{\code{halla.distance.}\bfcode{mi}}{\emph{pData1}, \emph{pData2}}{}
 Static implementation of mutual information, returns bits
-\begin{description}
-\item[{\emph{pData1, pData2}}] \leavevmode
-Numpy arrays
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{pData1, pData2} : Numpy arrays
 
-\end{description}
-\begin{description}
-\item[{\emph{mi}}] \leavevmode
-float
+\item[{Returns}] \leavevmode
+\textbf{mi} : float
 
-\end{description}
-
-Examples:
+\end{description}\end{quote}
+\paragraph{Examples}
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.01}\PYG{p}{,}\PYG{l+m+mf}{0.04}\PYG{p}{,}\PYG{l+m+mf}{0.09}\PYG{p}{,}\PYG{l+m+mf}{0.16}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
@@ -1174,10 +1390,9 @@ Examples:
 
 \begin{fulllineitems}
 \phantomsection\label{index:halla.distance.mid}\pysiglinewithargsret{\code{halla.distance.}\bfcode{mid}}{\emph{pData1}, \emph{pData2}}{}
-static implementation of mutual information, 
-caveat: returns nats, not bits
-\begin{description}
-\item[{Examples::}] \leavevmode
+Static implementation of mutual information,
+\paragraph{Examples}
+
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.01}\PYG{p}{,}\PYG{l+m+mf}{0.04}\PYG{p}{,}\PYG{l+m+mf}{0.09}\PYG{p}{,}\PYG{l+m+mf}{0.16}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{y} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.25}\PYG{p}{,}\PYG{l+m+mf}{0.5}\PYG{p}{,}\PYG{l+m+mf}{0.75}\PYG{p}{,}\PYG{l+m+mf}{1.0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.015625}\PYG{p}{,}\PYG{l+m+mf}{0.125}\PYG{p}{,}\PYG{l+m+mf}{0.421875}\PYG{p}{,}\PYG{l+m+mf}{1.0}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
@@ -1203,17 +1418,14 @@ caveat: returns nats, not bits
 \PYG{g+go}{(3, 3) 0.688721875541}
 \end{Verbatim}
 
-\end{description}
-
 \end{fulllineitems}
 
 \index{norm\_mi() (in module halla.distance)}
 
 \begin{fulllineitems}
 \phantomsection\label{index:halla.distance.norm_mi}\pysiglinewithargsret{\code{halla.distance.}\bfcode{norm\_mi}}{\emph{pData1}, \emph{pData2}}{}
-static implementation of normalized mutual information
-
-Examples
+Static implementation of normalized mutual information
+\paragraph{Examples}
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.01}\PYG{p}{,}\PYG{l+m+mf}{0.04}\PYG{p}{,}\PYG{l+m+mf}{0.09}\PYG{p}{,}\PYG{l+m+mf}{0.16}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
@@ -1246,9 +1458,8 @@ Examples
 
 \begin{fulllineitems}
 \phantomsection\label{index:halla.distance.norm_mid}\pysiglinewithargsret{\code{halla.distance.}\bfcode{norm\_mid}}{\emph{pData1}, \emph{pData2}}{}
-static implementation of normalized mutual information
-
-Examples:
+Static implementation of normalized mutual information
+\paragraph{Examples}
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.01}\PYG{p}{,}\PYG{l+m+mf}{0.04}\PYG{p}{,}\PYG{l+m+mf}{0.09}\PYG{p}{,}\PYG{l+m+mf}{0.16}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
@@ -1277,47 +1488,66 @@ Examples:
 
 \end{fulllineitems}
 
+\index{pdist() (in module halla.distance)}
+
+\begin{fulllineitems}
+\phantomsection\label{index:halla.distance.pdist}\pysiglinewithargsret{\code{halla.distance.}\bfcode{pdist}}{\emph{pArray}, \emph{metric='euclidean'}}{}
+Performs pairwise distance computation
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{pArray} : numpy array
+
+\textbf{metric} : str
+
+\item[{Returns}] \leavevmode
+\textbf{D} : redundancy-checked distance matrix (flat)
+
+\end{description}\end{quote}
+\paragraph{Examples}
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.01}\PYG{p}{,}\PYG{l+m+mf}{0.04}\PYG{p}{,}\PYG{l+m+mf}{0.09}\PYG{p}{,}\PYG{l+m+mf}{0.16}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{y} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.25}\PYG{p}{,}\PYG{l+m+mf}{0.5}\PYG{p}{,}\PYG{l+m+mf}{0.75}\PYG{p}{,}\PYG{l+m+mf}{1.0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.015625}\PYG{p}{,}\PYG{l+m+mf}{0.125}\PYG{p}{,}\PYG{l+m+mf}{0.421875}\PYG{p}{,}\PYG{l+m+mf}{1.0}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{dx} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{stats}\PYG{o}{.}\PYG{n}{discretize}\PYG{p}{(} \PYG{n}{x}\PYG{p}{,} \PYG{n}{iN} \PYG{o}{=} \PYG{n+nb+bp}{None}\PYG{p}{,} \PYG{n}{method} \PYG{o}{=} \PYG{n+nb+bp}{None}\PYG{p}{,} \PYG{n}{aiSkip} \PYG{o}{=} \PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{]} \PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{dy} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{stats}\PYG{o}{.}\PYG{n}{discretize}\PYG{p}{(} \PYG{n}{y}\PYG{p}{,} \PYG{n}{iN} \PYG{o}{=} \PYG{n+nb+bp}{None}\PYG{p}{,} \PYG{n}{method} \PYG{o}{=} \PYG{n+nb+bp}{None}\PYG{p}{,} \PYG{n}{aiSkip} \PYG{o}{=} \PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n+nb}{list}\PYG{p}{(} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{pdist}\PYG{p}{(} \PYG{n}{x}\PYG{p}{,} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{cord} \PYG{p}{)} \PYG{p}{)}
+\PYG{g+go}{[0.22540333075851648, 0.015625961302302871, 0.22540333075851648, 0.1358414347819068, 0.0, 0.1358414347819068]}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n+nb}{list}\PYG{p}{(} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{pdist}\PYG{p}{(} \PYG{n}{y}\PYG{p}{,} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{cord} \PYG{p}{)} \PYG{p}{)}
+\PYG{g+go}{[0.10557280900008403, 0.0, 0.048630144207595816, 0.10557280900008414, 0.16134197652754312, 0.048630144207595594]}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n+nb}{list}\PYG{p}{(} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{pdist}\PYG{p}{(} \PYG{n}{x}\PYG{p}{,} \PYG{k}{lambda} \PYG{n}{u}\PYG{p}{,}\PYG{n}{v}\PYG{p}{:} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{cord}\PYG{p}{(}\PYG{n}{u}\PYG{p}{,}\PYG{n}{v}\PYG{p}{,} \PYG{n}{method}\PYG{o}{=}\PYG{l+s}{\PYGZdq{}}\PYG{l+s}{spearman}\PYG{l+s}{\PYGZdq{}}\PYG{p}{)} \PYG{p}{)} \PYG{p}{)}
+\PYG{g+go}{[0.2254033307585166, 0.0, 0.2254033307585166, 0.2254033307585166, 0.0, 0.2254033307585166]}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n+nb}{list}\PYG{p}{(} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{pdist}\PYG{p}{(} \PYG{n}{y}\PYG{p}{,} \PYG{k}{lambda} \PYG{n}{u}\PYG{p}{,}\PYG{n}{v}\PYG{p}{:} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{cord}\PYG{p}{(}\PYG{n}{u}\PYG{p}{,}\PYG{n}{v}\PYG{p}{,} \PYG{n}{method}\PYG{o}{=}\PYG{l+s}{\PYGZdq{}}\PYG{l+s}{spearman}\PYG{l+s}{\PYGZdq{}}\PYG{p}{)} \PYG{p}{)} \PYG{p}{)}
+\PYG{g+go}{[0.10557280900008414, 0.0, 0.0, 0.10557280900008414, 0.10557280900008414, 0.0]}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n+nb}{list}\PYG{p}{(} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{pdist}\PYG{p}{(} \PYG{n}{dx}\PYG{p}{,} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{norm\PYGZus{}mid} \PYG{p}{)} \PYG{p}{)}
+\PYG{g+go}{[0.65440797005578877, 0.0, 0.65440797005578877, 0.65440797005578877, 0.0, 0.65440797005578877]}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n+nb}{list}\PYG{p}{(} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{pdist}\PYG{p}{(} \PYG{n}{dy}\PYG{p}{,} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{norm\PYGZus{}mid} \PYG{p}{)} \PYG{p}{)}
+\PYG{g+go}{[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
+\end{Verbatim}
+
+\end{fulllineitems}
+
+\index{squareform() (in module halla.distance)}
+
+\begin{fulllineitems}
+\phantomsection\label{index:halla.distance.squareform}\pysiglinewithargsret{\code{halla.distance.}\bfcode{squareform}}{\emph{pArray}}{}
+Switches back and forth between square and flat distance matrices
+
+\end{fulllineitems}
+
 \phantomsection\label{index:module-halla.parser}\index{halla.parser (module)}
 Parses input/output formats, 
 manages transformations
 \index{Input (class in halla.parser)}
 
 \begin{fulllineitems}
-\phantomsection\label{index:halla.parser.Input}\pysiglinewithargsret{\strong{class }\code{halla.parser.}\bfcode{Input}}{\emph{strFileName1}, \emph{strFileName2=None}, \emph{var\_names=True}, \emph{headers=False}}{}~\begin{itemize}
-\item {} 
-\emph{CON} \textless{}- continous
-
-\item {} 
-\emph{CAT} \textless{}- categorical
-
-\item {} 
-\emph{BIN} \textless{}- binary
-
-\item {} 
-\emph{LEX} \textless{}- lexical
-
-\end{itemize}
+\phantomsection\label{index:halla.parser.Input}\pysiglinewithargsret{\strong{class }\code{halla.parser.}\bfcode{Input}}{\emph{strFileName1}, \emph{strFileName2=None}, \emph{var\_names=True}, \emph{headers=False}}{}~\paragraph{Methods}
 
 \end{fulllineitems}
 
 \index{Output (class in halla.parser)}
 
 \begin{fulllineitems}
-\phantomsection\label{index:halla.parser.Output}\pysigline{\strong{class }\code{halla.parser.}\bfcode{Output}}~\begin{itemize}
-\item {} 
-\emph{CON} \textless{}- continous
-
-\item {} 
-\emph{CAT} \textless{}- categorical
-
-\item {} 
-\emph{BIN} \textless{}- binary
-
-\item {} 
-\emph{LEX} \textless{}- lexical
-
-\end{itemize}
-
+\phantomsection\label{index:halla.parser.Output}\pysigline{\strong{class }\code{halla.parser.}\bfcode{Output}}
 \end{fulllineitems}
 
 \phantomsection\label{index:module-halla.logger}\index{halla.logger (module)}\phantomsection\label{index:module-halla.test}\index{halla.test (module)}
@@ -1335,22 +1565,33 @@ where the outcome can be 1 through 6.  Each sample drawn from the
 distribution represents \emph{n} such experiments.  Its values,
 \code{X\_i = {[}X\_0, X\_1, ..., X\_p{]}}, represent the number of times the outcome
 was \code{i}.
-\begin{description}
-\item[{n}] \leavevmode{[}int{]}
-Number of experiments.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{n} : int
+\begin{quote}
 
-\item[{pvals}] \leavevmode{[}sequence of floats, length p{]}
+Number of experiments.
+\end{quote}
+
+\textbf{pvals} : sequence of floats, length p
+\begin{quote}
+
 Probabilities of each of the \code{p} different outcomes.  These
 should sum to 1 (however, the last element is always assumed to
 account for the remaining probability, as long as
 \code{sum(pvals{[}:-1{]}) \textless{}= 1)}.
+\end{quote}
 
-\item[{size}] \leavevmode{[}tuple of ints{]}
+\textbf{size} : tuple of ints
+\begin{quote}
+
 Given a \emph{size} of \code{(M, N, K)}, then \code{M*N*K} samples are drawn,
 and the output shape becomes \code{(M, N, K, p)}, since each sample
 has shape \code{(p,)}.
+\end{quote}
 
-\end{description}
+\end{description}\end{quote}
+\paragraph{Examples}
 
 Throw a dice 20 times:
 
@@ -1389,30 +1630,47 @@ Draw random samples from a normal (Gaussian) distribution.
 
 The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently {\color{red}\bfseries{}{[}2{]}\_}, is often called the bell curve because of
+independently {\hyperref[index:r11]{{[}R11{]}}}, is often called the bell curve because of
 its characteristic shape (see the example below).
 
 The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution {\color{red}\bfseries{}{[}2{]}\_}.
-\begin{description}
-\item[{loc}] \leavevmode{[}float{]}
+unique distribution {\hyperref[index:r11]{{[}R11{]}}}.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{loc} : float
+\begin{quote}
+
 Mean (``centre'') of the distribution.
+\end{quote}
 
-\item[{scale}] \leavevmode{[}float{]}
+\textbf{scale} : float
+\begin{quote}
+
 Standard deviation (spread or ``width'') of the distribution.
+\end{quote}
 
-\item[{size}] \leavevmode{[}tuple of ints{]}
+\textbf{size} : tuple of ints
+\begin{quote}
+
 Output shape.  If the given shape is, e.g., \code{(m, n, k)}, then
 \code{m * n * k} samples are drawn.
+\end{quote}
 
-\end{description}
+\end{description}\end{quote}
+
+
+\strong{See also:}
+
 \begin{description}
-\item[{scipy.stats.distributions.norm}] \leavevmode{[}probability density function,{]}
-distribution or cumulative density function, etc.
+\item[{\code{scipy.stats.distributions.norm}}] \leavevmode
+probability density function, distribution or cumulative density function, etc.
 
 \end{description}
+
+
+\paragraph{Notes}
 
 The probability density for the Gaussian distribution is
 \begin{equation}p(x) = \frac{1}{\sqrt{ 2 \pi \sigma^2 }}e^{ - \frac{ (x - \mu)^2 } {2 \sigma^2} },\end{equation}
@@ -1422,9 +1680,13 @@ variance.
 
 The function has its peak at the mean, and its ``spread'' increases with
 the standard deviation (the function reaches 0.607 times its maximum at
-$x + \sigma$ and $x - \sigma$ {\color{red}\bfseries{}{[}2{]}\_}).  This implies that
+$x + \sigma$ and $x - \sigma$ {\hyperref[index:r11]{{[}R11{]}}}).  This implies that
 \emph{numpy.random.normal} is more likely to return samples lying close to the
 mean, rather than those far away.
+\paragraph{References}
+
+{\hyperref[index:r10]{{[}R10{]}}}, {\hyperref[index:r11]{{[}R11{]}}}
+\paragraph{Examples}
 
 Draw samples from the distribution:
 
@@ -1462,7 +1724,7 @@ the probability density function:
 \index{randmat() (in module halla.test)}
 
 \begin{fulllineitems}
-\phantomsection\label{index:halla.test.randmat}\pysiglinewithargsret{\code{halla.test.}\bfcode{randmat}}{\emph{tShape=(10}, \emph{10)}, \emph{pDist=\textless{}built-in method normal of mtrand.RandomState object at 0x33e0b10\textgreater{}}}{}
+\phantomsection\label{index:halla.test.randmat}\pysiglinewithargsret{\code{halla.test.}\bfcode{randmat}}{\emph{tShape=(10}, \emph{10)}, \emph{pDist=\textless{}built-in method normal of mtrand.RandomState object at 0x3815b10\textgreater{}}}{}
 Returns a tShape-dimensional matrix given by base distribution pDist 
 Order: Row, Col
 
@@ -1504,6 +1766,7 @@ Handles clustering and other organization schemes.
 A gardener object is a handler for the different types of hierarchical data structures (``trees'')
 Can collapse and manipulate data structures and wrap them in different objects, depending on the 
 context.
+\paragraph{Methods}
 \index{PlantTree() (halla.hierarchy.Gardener static method)}
 
 \begin{fulllineitems}
@@ -1532,6 +1795,7 @@ output: a list of data pointers
 \phantomsection\label{index:halla.hierarchy.Tree}\pysigline{\strong{class }\code{halla.hierarchy.}\bfcode{Tree}}
 A hierarchically nested structure containing nodes as
 a basic core unit
+\paragraph{Methods}
 
 \end{fulllineitems}
 
@@ -1552,12 +1816,20 @@ Output: a list of ( (i,j), (aiIndex1, aiIndex2, pVal) )
 \begin{fulllineitems}
 \phantomsection\label{index:halla.hierarchy.couple_tree}\pysiglinewithargsret{\code{halla.hierarchy.}\bfcode{couple\_tree}}{\emph{pClusterNode1}, \emph{pClusterNode2}, \emph{method='unif'}}{}
 Couples two data trees to produce a hypothesis tree
+\paragraph{Examples}
 
-Parameters:
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{depth1} \PYG{o}{=} \PYG{n}{depth\PYGZus{}tree}\PYG{p}{(} \PYG{n}{pClusterNode1} \PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{depth2} \PYG{o}{=} \PYG{n}{depth\PYGZus{}tree}\PYG{p}{(} \PYG{n}{pClusterNode2} \PYG{p}{)}
+\end{Verbatim}
 
-Returns:
+\end{fulllineitems}
 
-Examples:
+\index{depth\_tree() (in module halla.hierarchy)}
+
+\begin{fulllineitems}
+\phantomsection\label{index:halla.hierarchy.depth_tree}\pysiglinewithargsret{\code{halla.hierarchy.}\bfcode{depth\_tree}}{\emph{pClusterNode}}{}
+Get the depth of a tree
 
 \end{fulllineitems}
 
@@ -1574,23 +1846,148 @@ Input: atData = a list of (iLevel, list\_of\_nodes\_at\_iLevel), iLayer = zero-i
 \index{hclust() (in module halla.hierarchy)}
 
 \begin{fulllineitems}
-\phantomsection\label{index:halla.hierarchy.hclust}\pysiglinewithargsret{\code{halla.hierarchy.}\bfcode{hclust}}{\emph{pArray}, \emph{pdist\_metric=\textless{}function norm\_mid at 0x6f80050\textgreater{}}, \emph{cluster\_method='single'}, \emph{bTree=False}}{}~
-\includegraphics{index-1.pdf}
-
-Returns hierarchically clustered object
-
-Parameters:
-
-Returns:
-
-Examples
-
-Notes
+\phantomsection\label{index:halla.hierarchy.hclust}\pysiglinewithargsret{\code{halla.hierarchy.}\bfcode{hclust}}{\emph{pArray}, \emph{pdist\_metric=\textless{}function norm\_mid at 0x73162a8\textgreater{}}, \emph{cluster\_method='single'}, \emph{bTree=False}}{}
+Performs hierarchical clustering on an numpy array
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{pArray} : numpy array
 \begin{quote}
+
+pdist\_metric : str 
+cluster\_method : str
+bTree : boolean
+\end{quote}
+
+\item[{Returns}] \leavevmode
+\textbf{Z} : numpy array or ClusterNode object
+
+\end{description}\end{quote}
+\paragraph{Notes}
 
 This hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV's, not just single ones 
 Use the ``grouping property'' as discussed by Kraskov paper.
-\end{quote}
+\paragraph{Examples}
+\begin{itemize}
+\item {} 
+Pearson correlation 1:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{from} \PYG{n+nn}{numpy} \PYG{k+kn}{import} \PYG{n}{array} 
+\PYG{k+kn}{from} \PYG{n+nn}{scipy.cluster.hierarchy} \PYG{k+kn}{import} \PYG{n}{dendrogram}\PYG{p}{,} \PYG{n}{linkage}
+\PYG{k+kn}{import} \PYG{n+nn}{scipy.cluster.hierarchy} 
+\PYG{k+kn}{import} \PYG{n+nn}{halla}
+
+\PYG{n}{x} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.01}\PYG{p}{,}\PYG{l+m+mf}{0.04}\PYG{p}{,}\PYG{l+m+mf}{0.09}\PYG{p}{,}\PYG{l+m+mf}{0.16}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
+
+\PYG{n}{lxpearson} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{hierarchy}\PYG{o}{.}\PYG{n}{hclust}\PYG{p}{(} \PYG{n}{x}\PYG{p}{,} \PYG{n}{pdist\PYGZus{}metric} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{cord} \PYG{p}{)}
+
+\PYG{n}{dendrogram}\PYG{p}{(}\PYG{n}{lxpearson}\PYG{p}{)}
+\end{Verbatim}
+
+\end{itemize}
+
+\includegraphics{index-3.pdf}
+\begin{itemize}
+\item {} 
+Pearson correlation 2:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{from} \PYG{n+nn}{numpy} \PYG{k+kn}{import} \PYG{n}{array} 
+\PYG{k+kn}{from} \PYG{n+nn}{scipy.cluster.hierarchy} \PYG{k+kn}{import} \PYG{n}{dendrogram}\PYG{p}{,} \PYG{n}{linkage}
+\PYG{k+kn}{import} \PYG{n+nn}{scipy.cluster.hierarchy} 
+\PYG{k+kn}{import} \PYG{n+nn}{halla}
+
+\PYG{n}{y} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.25}\PYG{p}{,}\PYG{l+m+mf}{0.5}\PYG{p}{,}\PYG{l+m+mf}{0.75}\PYG{p}{,}\PYG{l+m+mf}{1.0}\PYG{p}{]}\PYG{p}{,} \PYG{p}{[}\PYG{l+m+mf}{0.015625}\PYG{p}{,}\PYG{l+m+mf}{0.125}\PYG{p}{,}\PYG{l+m+mf}{0.421875}\PYG{p}{,}\PYG{l+m+mf}{1.0}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
+
+\PYG{n}{lypearson} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{hierarchy}\PYG{o}{.}\PYG{n}{hclust}\PYG{p}{(} \PYG{n}{y}\PYG{p}{,} \PYG{n}{pdist\PYGZus{}metric} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{cord} \PYG{p}{)}
+
+\PYG{n}{dendrogram}\PYG{p}{(}\PYG{n}{lypearson}\PYG{p}{)}
+\end{Verbatim}
+
+\end{itemize}
+
+\includegraphics{index-4.pdf}
+\begin{itemize}
+\item {} 
+Spearman correlation 1:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{from} \PYG{n+nn}{numpy} \PYG{k+kn}{import} \PYG{n}{array} 
+\PYG{k+kn}{from} \PYG{n+nn}{scipy.cluster.hierarchy} \PYG{k+kn}{import} \PYG{n}{dendrogram}\PYG{p}{,} \PYG{n}{linkage}
+\PYG{k+kn}{import} \PYG{n+nn}{scipy.cluster.hierarchy} 
+\PYG{k+kn}{import} \PYG{n+nn}{halla}
+
+\PYG{n}{x} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.01}\PYG{p}{,}\PYG{l+m+mf}{0.04}\PYG{p}{,}\PYG{l+m+mf}{0.09}\PYG{p}{,}\PYG{l+m+mf}{0.16}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
+
+\PYG{n}{lxspearman} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{hierarchy}\PYG{o}{.}\PYG{n}{hclust}\PYG{p}{(} \PYG{n}{x}\PYG{p}{,} \PYG{n}{pdist\PYGZus{}metric} \PYG{o}{=} \PYG{k}{lambda} \PYG{n}{u}\PYG{p}{,}\PYG{n}{v}\PYG{p}{:} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{cord}\PYG{p}{(}\PYG{n}{u}\PYG{p}{,}\PYG{n}{v}\PYG{p}{,}\PYG{n}{method}\PYG{o}{=}\PYG{l+s}{\PYGZdq{}}\PYG{l+s}{spearman}\PYG{l+s}{\PYGZdq{}}\PYG{p}{)} \PYG{p}{)}
+
+\PYG{n}{dendrogram}\PYG{p}{(}\PYG{n}{lxspearman}\PYG{p}{)}
+\end{Verbatim}
+
+\end{itemize}
+
+\includegraphics{index-5.pdf}
+\begin{itemize}
+\item {} 
+Spearman correlation 2:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{from} \PYG{n+nn}{numpy} \PYG{k+kn}{import} \PYG{n}{array} 
+\PYG{k+kn}{from} \PYG{n+nn}{scipy.cluster.hierarchy} \PYG{k+kn}{import} \PYG{n}{dendrogram}\PYG{p}{,} \PYG{n}{linkage}
+\PYG{k+kn}{import} \PYG{n+nn}{scipy.cluster.hierarchy} 
+\PYG{k+kn}{import} \PYG{n+nn}{halla}
+
+\PYG{n}{y} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.25}\PYG{p}{,}\PYG{l+m+mf}{0.5}\PYG{p}{,}\PYG{l+m+mf}{0.75}\PYG{p}{,}\PYG{l+m+mf}{1.0}\PYG{p}{]}\PYG{p}{,} \PYG{p}{[}\PYG{l+m+mf}{0.015625}\PYG{p}{,}\PYG{l+m+mf}{0.125}\PYG{p}{,}\PYG{l+m+mf}{0.421875}\PYG{p}{,}\PYG{l+m+mf}{1.0}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
+
+\PYG{n}{lyspearman} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{hierarchy}\PYG{o}{.}\PYG{n}{hclust}\PYG{p}{(} \PYG{n}{y}\PYG{p}{,} \PYG{n}{pdist\PYGZus{}metric} \PYG{o}{=} \PYG{k}{lambda} \PYG{n}{u}\PYG{p}{,}\PYG{n}{v}\PYG{p}{:} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{cord}\PYG{p}{(}\PYG{n}{u}\PYG{p}{,}\PYG{n}{v}\PYG{p}{,}\PYG{n}{method}\PYG{o}{=}\PYG{l+s}{\PYGZdq{}}\PYG{l+s}{spearman}\PYG{l+s}{\PYGZdq{}}\PYG{p}{)} \PYG{p}{)}
+
+\PYG{n}{dendrogram}\PYG{p}{(}\PYG{n}{lyspearman}\PYG{p}{)}
+\end{Verbatim}
+
+\end{itemize}
+
+\includegraphics{index-6.pdf}
+\begin{itemize}
+\item {} 
+Mutual Information 1:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{from} \PYG{n+nn}{numpy} \PYG{k+kn}{import} \PYG{n}{array} 
+\PYG{k+kn}{from} \PYG{n+nn}{scipy.cluster.hierarchy} \PYG{k+kn}{import} \PYG{n}{dendrogram}\PYG{p}{,} \PYG{n}{linkage}
+\PYG{k+kn}{import} \PYG{n+nn}{scipy.cluster.hierarchy} 
+\PYG{k+kn}{import} \PYG{n+nn}{halla}
+
+\PYG{n}{x} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.01}\PYG{p}{,}\PYG{l+m+mf}{0.04}\PYG{p}{,}\PYG{l+m+mf}{0.09}\PYG{p}{,}\PYG{l+m+mf}{0.16}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
+\PYG{n}{dx} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{stats}\PYG{o}{.}\PYG{n}{discretize}\PYG{p}{(} \PYG{n}{x}\PYG{p}{,} \PYG{n}{iN} \PYG{o}{=} \PYG{n+nb+bp}{None}\PYG{p}{,} \PYG{n}{method} \PYG{o}{=} \PYG{n+nb+bp}{None}\PYG{p}{,} \PYG{n}{aiSkip} \PYG{o}{=} \PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{p}{]} \PYG{p}{)}
+
+\PYG{n}{lxmi} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{hierarchy}\PYG{o}{.}\PYG{n}{hclust}\PYG{p}{(} \PYG{n}{dx}\PYG{p}{,} \PYG{n}{pdist\PYGZus{}metric} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{norm\PYGZus{}mid} \PYG{p}{)}
+
+\PYG{n}{dendrogram}\PYG{p}{(}\PYG{n}{lxmi}\PYG{p}{)}
+\end{Verbatim}
+
+\end{itemize}
+
+\includegraphics{index-7.pdf}
+\begin{itemize}
+\item {} 
+Mutual Information 2:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{from} \PYG{n+nn}{numpy} \PYG{k+kn}{import} \PYG{n}{array} 
+\PYG{k+kn}{from} \PYG{n+nn}{scipy.cluster.hierarchy} \PYG{k+kn}{import} \PYG{n}{dendrogram} 
+\PYG{k+kn}{import} \PYG{n+nn}{halla}
+
+\PYG{n}{y} \PYG{o}{=} \PYG{n}{array}\PYG{p}{(}\PYG{p}{[}\PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.1}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.2}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.3}\PYG{p}{,}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.4}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}\PYG{p}{[}\PYG{l+m+mf}{0.25}\PYG{p}{,}\PYG{l+m+mf}{0.5}\PYG{p}{,}\PYG{l+m+mf}{0.75}\PYG{p}{,}\PYG{l+m+mf}{1.0}\PYG{p}{]}\PYG{p}{,} \PYG{p}{[}\PYG{l+m+mf}{0.015625}\PYG{p}{,}\PYG{l+m+mf}{0.125}\PYG{p}{,}\PYG{l+m+mf}{0.421875}\PYG{p}{,}\PYG{l+m+mf}{1.0}\PYG{p}{]}\PYG{p}{]}\PYG{p}{)}
+\PYG{n}{dy} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{stats}\PYG{o}{.}\PYG{n}{discretize}\PYG{p}{(} \PYG{n}{y}\PYG{p}{,} \PYG{n}{iN} \PYG{o}{=} \PYG{n+nb+bp}{None}\PYG{p}{,} \PYG{n}{method} \PYG{o}{=} \PYG{n+nb+bp}{None}\PYG{p}{,} \PYG{n}{aiSkip} \PYG{o}{=} \PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{p}{)}                
+
+\PYG{n}{lymi} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{hierarchy}\PYG{o}{.}\PYG{n}{hclust}\PYG{p}{(} \PYG{n}{dy}\PYG{p}{,} \PYG{n}{pdist\PYGZus{}metric} \PYG{o}{=} \PYG{n}{halla}\PYG{o}{.}\PYG{n}{distance}\PYG{o}{.}\PYG{n}{norm\PYGZus{}mid} \PYG{p}{)}
+
+\PYG{n}{dendrogram}\PYG{p}{(} \PYG{n}{lymi} \PYG{p}{)}
+\end{Verbatim}
+
+\end{itemize}
+
+\includegraphics{index-8.pdf}
 
 \end{fulllineitems}
 
@@ -1602,30 +1999,47 @@ Draw random samples from a normal (Gaussian) distribution.
 
 The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently {\color{red}\bfseries{}{[}2{]}\_}, is often called the bell curve because of
+independently {\hyperref[index:r13]{{[}R13{]}}}, is often called the bell curve because of
 its characteristic shape (see the example below).
 
 The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution {\color{red}\bfseries{}{[}2{]}\_}.
-\begin{description}
-\item[{loc}] \leavevmode{[}float{]}
+unique distribution {\hyperref[index:r13]{{[}R13{]}}}.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{loc} : float
+\begin{quote}
+
 Mean (``centre'') of the distribution.
+\end{quote}
 
-\item[{scale}] \leavevmode{[}float{]}
+\textbf{scale} : float
+\begin{quote}
+
 Standard deviation (spread or ``width'') of the distribution.
+\end{quote}
 
-\item[{size}] \leavevmode{[}tuple of ints{]}
+\textbf{size} : tuple of ints
+\begin{quote}
+
 Output shape.  If the given shape is, e.g., \code{(m, n, k)}, then
 \code{m * n * k} samples are drawn.
+\end{quote}
 
-\end{description}
+\end{description}\end{quote}
+
+
+\strong{See also:}
+
 \begin{description}
-\item[{scipy.stats.distributions.norm}] \leavevmode{[}probability density function,{]}
-distribution or cumulative density function, etc.
+\item[{\code{scipy.stats.distributions.norm}}] \leavevmode
+probability density function, distribution or cumulative density function, etc.
 
 \end{description}
+
+
+\paragraph{Notes}
 
 The probability density for the Gaussian distribution is
 \begin{equation}p(x) = \frac{1}{\sqrt{ 2 \pi \sigma^2 }}e^{ - \frac{ (x - \mu)^2 } {2 \sigma^2} },\end{equation}
@@ -1635,9 +2049,13 @@ variance.
 
 The function has its peak at the mean, and its ``spread'' increases with
 the standard deviation (the function reaches 0.607 times its maximum at
-$x + \sigma$ and $x - \sigma$ {\color{red}\bfseries{}{[}2{]}\_}).  This implies that
+$x + \sigma$ and $x - \sigma$ {\hyperref[index:r13]{{[}R13{]}}}).  This implies that
 \emph{numpy.random.normal} is more likely to return samples lying close to the
 mean, rather than those far away.
+\paragraph{References}
+
+{\hyperref[index:r12]{{[}R12{]}}}, {\hyperref[index:r13]{{[}R13{]}}}
+\paragraph{Examples}
 
 Draw samples from the distribution:
 
@@ -1687,7 +2105,7 @@ Output: aiIndex1, aiIndex2, pVal
 \index{recursive\_all\_against\_all() (in module halla.hierarchy)}
 
 \begin{fulllineitems}
-\phantomsection\label{index:halla.hierarchy.recursive_all_against_all}\pysiglinewithargsret{\code{halla.hierarchy.}\bfcode{recursive\_all\_against\_all}}{\emph{apClusterNode1}, \emph{apClusterNode2}, \emph{pArray1}, \emph{pArray2}, \emph{pOut=}\optional{}, \emph{pFDR=\textless{}function bh at 0x6f80938\textgreater{}}}{}
+\phantomsection\label{index:halla.hierarchy.recursive_all_against_all}\pysiglinewithargsret{\code{halla.hierarchy.}\bfcode{recursive\_all\_against\_all}}{\emph{apClusterNode1}, \emph{apClusterNode2}, \emph{pArray1}, \emph{pArray2}, \emph{pOut=}\optional{}, \emph{pFDR=\textless{}function bh at 0x7316cf8\textgreater{}}}{}
 Performs recursive all-against-all (the default HAllA routine) with fdr correction
 
 Input: apClusterNode1, apClusterNode2, pArray1, pArray2, pFDR
@@ -1699,7 +2117,7 @@ Output: a list of ( (aiIndex1, pBag1), (aiIndex2, pBag2) )
 \index{reduce\_tree() (in module halla.hierarchy)}
 
 \begin{fulllineitems}
-\phantomsection\label{index:halla.hierarchy.reduce_tree}\pysiglinewithargsret{\code{halla.hierarchy.}\bfcode{reduce\_tree}}{\emph{pClusterNode}, \emph{pFunction=\textless{}function \textless{}lambda\textgreater{} at 0x7840cf8\textgreater{}}, \emph{aOut=}\optional{}}{}
+\phantomsection\label{index:halla.hierarchy.reduce_tree}\pysiglinewithargsret{\code{halla.hierarchy.}\bfcode{reduce\_tree}}{\emph{pClusterNode}, \emph{pFunction=\textless{}function \textless{}lambda\textgreater{} at 0x7bd4c08\textgreater{}}, \emph{aOut=}\optional{}}{}
 Recursive
 
 Input: pClusterNode, pFunction = lambda x: x.id, aOut = {[}{]}
@@ -1781,7 +2199,78 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+\begin{thebibliography}{R10}
+\bibitem[R1]{R1}{\phantomsection\label{index:r1} 
+Wikipedia, ``Normal distribution'',
+\href{http://en.wikipedia.org/wiki/Normal\_distribution}{http://en.wikipedia.org/wiki/Normal\_distribution}
+}
+\bibitem[R2]{R2}{\phantomsection\label{index:r2} 
+P. R. Peebles Jr., ``Central Limit Theorem'' in ``Probability, Random
+Variables and Random Signal Principles'', 4th ed., 2001,
+pp. 51, 51, 125.
+}
+\bibitem[R3]{R3}{\phantomsection\label{index:r3} 
+Dalgaard, Peter, ``Introductory Statistics with R'',
+Springer-Verlag, 2002.
+}
+\bibitem[R4]{R4}{\phantomsection\label{index:r4} 
+Glantz, Stanton A. ``Primer of Biostatistics.'', McGraw-Hill,
+Fifth Edition, 2002.
+}
+\bibitem[R5]{R5}{\phantomsection\label{index:r5} 
+Lentner, Marvin, ``Elementary Applied Statistics'', Bogden
+and Quigley, 1972.
+}
+\bibitem[R6]{R6}{\phantomsection\label{index:r6} 
+Weisstein, Eric W. ``Binomial Distribution.'' From MathWorld--A
+Wolfram Web Resource.
+\href{http://mathworld.wolfram.com/BinomialDistribution.html}{http://mathworld.wolfram.com/BinomialDistribution.html}
+}
+\bibitem[R7]{R7}{\phantomsection\label{index:r7} 
+Wikipedia, ``Binomial-distribution'',
+\href{http://en.wikipedia.org/wiki/Binomial\_distribution}{http://en.wikipedia.org/wiki/Binomial\_distribution}
+}
+\bibitem[R8]{R8}{\phantomsection\label{index:r8} 
+Wikipedia, ``Normal distribution'',
+\href{http://en.wikipedia.org/wiki/Normal\_distribution}{http://en.wikipedia.org/wiki/Normal\_distribution}
+}
+\bibitem[R9]{R9}{\phantomsection\label{index:r9} 
+P. R. Peebles Jr., ``Central Limit Theorem'' in ``Probability, Random
+Variables and Random Signal Principles'', 4th ed., 2001,
+pp. 51, 51, 125.
+}
+\bibitem[R10]{R10}{\phantomsection\label{index:r10} 
+Wikipedia, ``Normal distribution'',
+\href{http://en.wikipedia.org/wiki/Normal\_distribution}{http://en.wikipedia.org/wiki/Normal\_distribution}
+}
+\bibitem[R11]{R11}{\phantomsection\label{index:r11} 
+P. R. Peebles Jr., ``Central Limit Theorem'' in ``Probability, Random
+Variables and Random Signal Principles'', 4th ed., 2001,
+pp. 51, 51, 125.
+}
+\bibitem[R12]{R12}{\phantomsection\label{index:r12} 
+Wikipedia, ``Normal distribution'',
+\href{http://en.wikipedia.org/wiki/Normal\_distribution}{http://en.wikipedia.org/wiki/Normal\_distribution}
+}
+\bibitem[R13]{R13}{\phantomsection\label{index:r13} 
+P. R. Peebles Jr., ``Central Limit Theorem'' in ``Probability, Random
+Variables and Random Signal Principles'', 4th ed., 2001,
+pp. 51, 51, 125.
+}
+\end{thebibliography}
 
+
+\renewcommand{\indexname}{Python Module Index}
+\begin{theindex}
+\def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
+\bigletter{h}
+\item {\texttt{halla.distance}}, \pageref{index:module-halla.distance}
+\item {\texttt{halla.hierarchy}}, \pageref{index:module-halla.hierarchy}
+\item {\texttt{halla.logger}}, \pageref{index:module-halla.logger}
+\item {\texttt{halla.parser}}, \pageref{index:module-halla.parser}
+\item {\texttt{halla.stats}}, \pageref{index:module-halla.stats}
+\item {\texttt{halla.test}}, \pageref{index:module-halla.test}
+\end{theindex}
 \renewcommand{\indexname}{Python Module Index}
 \begin{theindex}
 \def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}

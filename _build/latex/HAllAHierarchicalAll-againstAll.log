@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.10.24)  26 NOV 2013 15:31
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.10.24)  27 NOV 2013 18:03
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -942,73 +942,165 @@ File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <10> not available
 (Font)              Font shape `T1/pcr/b/n' tried instead on input line 324.
  [3]
+LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <9> not available
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 360.
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <9> not available
-(Font)              Font shape `T1/pcr/b/n' tried instead on input line 354.
+(Font)              Font shape `T1/pcr/b/n' tried instead on input line 365.
  [4]
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <9> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 428.
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 460.
+
+[5]
 LaTeX Font Info:    Font shape `T1/ptm/bx/it' in size <10> not available
-(Font)              Font shape `T1/ptm/b/it' tried instead on input line 489.
-
-[5] [6] [7] [8] [9] [10] [11] [12] [13] [14] [15]
-Underfull \hbox (badness 10000) in paragraph at lines 1577--1577
-[]\T1/ptm/m/it/10 pArray\T1/ptm/m/n/10 , \T1/ptm/m/it/10 pdist_metric=<function
- norm_mid at 0x6f80050>\T1/ptm/m/n/10 , \T1/ptm/m/it/10 clus-
- []
-
-<index-1.pdf, id=210, 578.16pt x 433.62pt>
+(Font)              Font shape `T1/ptm/b/it' tried instead on input line 521.
+ [6] [7] [8] [9] [10] [11] [12] [13]
+<index-1.pdf, id=234, 578.16pt x 433.62pt>
 File: index-1.pdf Graphic file (type pdf)
  <use index-1.pdf>
-Package pdftex.def Info: index-1.pdf used on input line 1578.
+Package pdftex.def Info: index-1.pdf used on input line 1256.
 (pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
 File: index-1.pdf Graphic file (type pdf)
  <use index-1.pdf>
-Package pdftex.def Info: index-1.pdf used on input line 1578.
+Package pdftex.def Info: index-1.pdf used on input line 1256.
 (pdftex.def)             Requested size: 444.75497pt x 333.56422pt.
 
-[16] [17 <./index-1.pdf>]
-Underfull \hbox (badness 7685) in paragraph at lines 1690--1690
+[14 <./index-1.pdf>] <index-2.pdf, id=255, 578.16pt x 433.62pt>
+File: index-2.pdf Graphic file (type pdf)
+
+<use index-2.pdf>
+Package pdftex.def Info: index-2.pdf used on input line 1273.
+(pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
+File: index-2.pdf Graphic file (type pdf)
+ <use index-2.pdf>
+Package pdftex.def Info: index-2.pdf used on input line 1273.
+(pdftex.def)             Requested size: 444.75497pt x 333.56422pt.
+ [15 <./index-2.pdf>] [16] [17] [18]
+[19] [20]
+Underfull \hbox (badness 10000) in paragraph at lines 1849--1849
+[]\T1/ptm/m/it/10 pArray\T1/ptm/m/n/10 , \T1/ptm/m/it/10 pdist_metric=<function
+ norm_mid at 0x73162a8>\T1/ptm/m/n/10 , \T1/ptm/m/it/10 clus-
+ []
+
+[21] <index-3.pdf, id=353, 578.16pt x 433.62pt>
+File: index-3.pdf Graphic file (type pdf)
+ <use index-3.pdf>
+Package pdftex.def Info: index-3.pdf used on input line 1889.
+(pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
+File: index-3.pdf Graphic file (type pdf)
+
+<use index-3.pdf>
+Package pdftex.def Info: index-3.pdf used on input line 1889.
+(pdftex.def)             Requested size: 444.75497pt x 333.56422pt.
+ [22 <./index-3.pdf>]
+<index-4.pdf, id=374, 578.16pt x 433.62pt>
+File: index-4.pdf Graphic file (type pdf)
+ <use index-4.pdf>
+Package pdftex.def Info: index-4.pdf used on input line 1909.
+(pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
+File: index-4.pdf Graphic file (type pdf)
+ <use index-4.pdf>
+Package pdftex.def Info: index-4.pdf used on input line 1909.
+(pdftex.def)             Requested size: 444.75497pt x 333.56422pt.
+
+<index-5.pdf, id=375, 578.16pt x 433.62pt>
+File: index-5.pdf Graphic file (type pdf)
+ <use index-5.pdf>
+Package pdftex.def Info: index-5.pdf used on input line 1929.
+(pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
+File: index-5.pdf Graphic file (type pdf)
+ <use index-5.pdf>
+Package pdftex.def Info: index-5.pdf used on input line 1929.
+(pdftex.def)             Requested size: 444.75497pt x 333.56422pt.
+
+[23 <./index-4.pdf>] <index-6.pdf, id=394, 578.16pt x 433.62pt>
+File: index-6.pdf Graphic file (type pdf)
+
+<use index-6.pdf>
+Package pdftex.def Info: index-6.pdf used on input line 1949.
+(pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
+File: index-6.pdf Graphic file (type pdf)
+ <use index-6.pdf>
+Package pdftex.def Info: index-6.pdf used on input line 1949.
+(pdftex.def)             Requested size: 444.75497pt x 333.56422pt.
+ [24 <./index-5.pdf>]
+<index-7.pdf, id=411, 578.16pt x 433.62pt>
+File: index-7.pdf Graphic file (type pdf)
+ <use index-7.pdf>
+Package pdftex.def Info: index-7.pdf used on input line 1970.
+(pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
+File: index-7.pdf Graphic file (type pdf)
+ <use index-7.pdf>
+Package pdftex.def Info: index-7.pdf used on input line 1970.
+(pdftex.def)             Requested size: 444.75497pt x 333.56422pt.
+
+[25 <./index-6.pdf>] <index-8.pdf, id=430, 578.16pt x 433.62pt>
+File: index-8.pdf Graphic file (type pdf)
+
+<use index-8.pdf>
+Package pdftex.def Info: index-8.pdf used on input line 1990.
+(pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
+File: index-8.pdf Graphic file (type pdf)
+ <use index-8.pdf>
+Package pdftex.def Info: index-8.pdf used on input line 1990.
+(pdftex.def)             Requested size: 444.75497pt x 333.56422pt.
+ [26 <./index-7.pdf>] [27 <./index-8.pdf>]
+Underfull \hbox (badness 7685) in paragraph at lines 2108--2108
 []\T1/ptm/m/it/10 apClusterNode1\T1/ptm/m/n/10 , \T1/ptm/m/it/10 ap-Clus-terN-o
 de2\T1/ptm/m/n/10 , \T1/ptm/m/it/10 pAr-ray1\T1/ptm/m/n/10 ,
  []
 
-[18] [19] [20
+[28] [29] [30]
+Underfull \hbox (badness 10000) in paragraph at lines 2225--2229
+[]\T1/ptm/m/n/10 Weisstein, Eric W. ``Bi-no-mial Dis-tri-bu-tion.'' From MathWo
+rld--A Wol-fram Web Re-source.
+ []
 
-] [21
+[31
 
 
-] (./HAllAHierarchicalAll-againstAll.ind [22
+] [32
+
+] [33
+
+
+] [34
+
+
+] [35
+
+
+] (./HAllAHierarchicalAll-againstAll.ind [36
 
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 83--84
+Underfull \hbox (badness 10000) in paragraph at lines 86--87
 []\T1/ptm/m/n/10 permutation_test_by_representative() (in mod-ule
  []
 
-[23
+[37
 
-] [24
+] [38
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1799.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1799.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2288.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2288.
  (./HAllAHierarchicalAll-againstAll.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1799.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1799.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2288.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2288.
 
 Package rerunfilecheck Info: File `HAllAHierarchicalAll-againstAll.out' has not
  changed.
-(rerunfilecheck)             Checksum: 1B25C0CB50F03493220D73A745EA3E25;523.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1799.
+(rerunfilecheck)             Checksum: DE39BE7174C608988CC199C757724E2C;634.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2288.
  ) 
 Here is how much of TeX's memory you used:
- 9262 strings out of 493308
- 130310 string characters out of 6137821
- 238480 words of memory out of 5000000
- 12354 multiletter control sequences out of 15000+600000
- 65427 words of font info for 73 fonts, out of 8000000 for 9000
+ 9427 strings out of 493308
+ 132293 string characters out of 6137821
+ 238479 words of memory out of 5000000
+ 12423 multiletter control sequences out of 15000+600000
+ 69893 words of font info for 76 fonts, out of 8000000 for 9000
  958 hyphenation exceptions out of 8191
- 36i,12n,49p,1777b,537s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 36i,12n,49p,1777b,570s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2013/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/te
 xlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/tex
@@ -1029,11 +1121,11 @@ pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/
 local/texlive/2013/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/local/tex
 live/2013/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2013/
 texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on HAllAHierarchicalAll-againstAll.pdf (28 pages, 264976 bytes).
+Output written on HAllAHierarchicalAll-againstAll.pdf (42 pages, 305667 bytes).
 
 PDF statistics:
- 436 PDF objects out of 1000 (max. 8388607)
- 370 compressed objects within 4 object streams
- 110 named destinations out of 1000 (max. 500000)
- 98 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 739 PDF objects out of 1000 (max. 8388607)
+ 591 compressed objects within 6 object streams
+ 196 named destinations out of 1000 (max. 500000)
+ 149 words of extra memory for PDF output out of 10000 (max. 10000000)
 

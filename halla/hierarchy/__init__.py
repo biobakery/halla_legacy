@@ -14,6 +14,8 @@ from itertools import product
 
 ## halla-specific modules 
 
+import halla.stats 
+
 from halla.distance import mi, l2, absl2, norm_mid
 from halla.stats import discretize,pca, mca, bh, permutation_test_by_representative 
 
@@ -223,7 +225,8 @@ def hclust( pArray, pdist_metric = norm_mid, cluster_method = "single", bTree = 
 	D = pdist( pArray, metric= pdist_metric )   
 	Z = linkage( D ) 
 	return to_tree( Z ) if bTree else Z 
-	
+
+
 def dendrogram( Z ):
 	return scipy.cluster.hierarchy.dendrogram( Z )
 
@@ -284,8 +287,8 @@ def depth_tree( pClusterNode ):
 	Get the depth of a tree 
 	"""
 	
-	aOut = reduce_tree_by_layer( pClusterNode )
-	return max(aOut)+1
+	aOut = reduce_tree_by_layer( [pClusterNode] )
+	return max(zip(*aOut)[0])+1
 
 def get_layer( atData, iLayer ):
 	"""
@@ -306,7 +309,7 @@ def get_layer( atData, iLayer ):
 			break
 	return dummyOut, atData 
 
-def couple_tree( pClusterNode1, pClusterNode2, method = "unif" ):
+def couple_tree( pClusterNode1, pClusterNode2, method = "uniform" ):
 	"""
 	Couples two data trees to produce a hypothesis tree 
 
@@ -317,7 +320,10 @@ def couple_tree( pClusterNode1, pClusterNode2, method = "unif" ):
 	>>> depth2 = depth_tree( pClusterNode2 )
 	"""
 
-	pass 
+	hashMethods = {"uniform": halla.stats.uniform_cut }
+	pFun = hashMethods[method]
+
+	iX, iY = depth_tree( pClusterNode1 ), depth_tree( pClusterNode2 )
 
 def one_against_one( pClusterNode1, pClusterNode2, pArray1, pArray2 ):
 	"""
