@@ -21,6 +21,7 @@ from halla.stats import discretize,pca, mca, bh, permutation_test_by_representat
 
 ## statistics packages 
 
+import numpy 
 import numpy as np
 from numpy import array 
 import scipy 
@@ -509,11 +510,22 @@ def all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, method = "p
 
 	return aOut 
 
+def naive_all_against_all( pArray, metric = "norm_mi" ):
+
+	iRow = len(pArray)
+
+	X = numpy.zeros((iRow,iRow))
+
+	for i,j in itertools.product( range(iRow), range(iRow) ):
+		fVal = halla.distance.norm_mi( pArray[i], pArray[j] )
+		X[i][j] = fVal ; X[j][i] = fVal 
+
+	return X 
+
+
 #=======================================#
 #### Old code; clean later 
 #=======================================#
-
-
 
 
 def old_couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "min", pTree = Tree() ):

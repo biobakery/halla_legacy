@@ -12,6 +12,7 @@ import sys
 
 # External dependencies 
 
+import pylab as pl
 import numpy 
 import numpy as np 
 from numpy import array 
@@ -19,6 +20,10 @@ import scipy as sp
 from scipy.stats import percentileofscore
 import rpy 
 from numpy.random import shuffle, binomial, normal, multinomial 
+
+# ML plug-in 
+import sklearn 
+from sklearn.metrics import roc_curve, auc 
 
 # Internal dependencies 
 import halla 
@@ -572,3 +577,49 @@ def bh( afPVAL, fQ = 1.0 ):
 	else:
 		return array( [1] * (rt + 1) + [0] * ( len(afPVAL) - (rt+1) ) )[ afPVAL_reverse ]
 
+#=========================================================
+# Classification and Validation 
+#=========================================================
+
+## Estimation value should be probability of the positive label (i.e. "1")
+
+
+def plot_roc( fpr, tpr, roc_auc ):
+	pl.clf()
+	pl.plot(fpr, tpr, label='ROC curve (area = %0.2f)' % roc_auc)
+	pl.plot([0, 1], [0, 1], 'k--')
+	pl.xlim([0.0, 1.0])
+	pl.ylim([0.0, 1.0])
+	pl.xlabel('False Positive Rate')
+	pl.ylabel('True Positive Rate')
+	pl.title('Receiver operating characteristic example')
+	pl.legend(loc="lower right")
+	pl.show()
+
+	
+"""
+Example auc and roc plot
+
+
+# Run classifier
+classifier = svm.SVC(kernel='linear', probability=True, random_state=0)
+probas_ = classifier.fit(X_train, y_train).predict_proba(X_test)
+
+# Compute ROC curve and area the curve
+fpr, tpr, thresholds = roc_curve(y_test, probas_[:, 1])
+roc_auc = auc(fpr, tpr)
+print("Area under the ROC curve : %f" % roc_auc)
+
+# Plot ROC curve
+pl.clf()
+pl.plot(fpr, tpr, label='ROC curve (area = %0.2f)' % roc_auc)
+pl.plot([0, 1], [0, 1], 'k--')
+pl.xlim([0.0, 1.0])
+pl.ylim([0.0, 1.0])
+pl.xlabel('False Positive Rate')
+pl.ylabel('True Positive Rate')
+pl.title('Receiver operating characteristic example')
+pl.legend(loc="lower right")
+pl.show()
+
+"""
