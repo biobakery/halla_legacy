@@ -584,7 +584,8 @@ def bh( afPVAL, fQ = 1.0 ):
 ## Estimation value should be probability of the positive label (i.e. "1")
 
 
-def plot_roc( fpr, tpr, roc_auc ):
+def plot_roc( fpr, tpr ):
+	roc_auc = auc(fpr, tpr) 
 	pl.clf()
 	pl.plot(fpr, tpr, label='ROC curve (area = %0.2f)' % roc_auc)
 	pl.plot([0, 1], [0, 1], 'k--')
