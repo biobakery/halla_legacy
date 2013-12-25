@@ -27,21 +27,22 @@ import os
 import pprint 
 
 ## halla modules 
-from stats import discretize, p_val_plot
-from distance import mi, adj_mi, l2, mid, adj_mid 
+#from stats import discretize, p_val_plot
+#from distance import mi, adj_mi, l2, mid, adj_mid 
 import hierarchy 
 from test import * 
-
-
+from stats import * 
+from distance import * 
+from hierarchy import * 
 
 ## statistics packages 
 
+#matplotlib.use("Agg") #disable X-windows display backend; this is for batch mode ; remember! 
 import numpy as np
 import scipy as sp
 from numpy import array 
 import sklearn.decomposition
 import matplotlib 
-#matplotlib.use("Agg") #disable X-windows display backend 
 from sklearn.decomposition import PCA #remember that the matrix is X = (n_samples,n_features)
 import csv 
 from scipy.spatial.distance import pdist, cdist, squareform
@@ -55,18 +56,9 @@ from scipy.stats import kruskal, ttest_ind, ttest_1samp, percentileofscore, pear
 class HAllA():
 	
 	def __init__( self, *ta ): 
-		
-		self.hashMethods = {
-					"id":			lambda x: x.id, 
-					"l2":			lambda x,y: np.linalg.norm(x-y),
-					"ttest": 		lambda x,y: ttest_ind(x,y), 
-					"kruskal":		lambda x,y: kruskal(x,y),
-
-					}  
 
 		## Think about lazy implementation to save time during run-time;
 		## Don't have to keep everything in memory 
-
 
 		self.htest = ttest_ind
 		self.distance = adj_mid 
@@ -86,12 +78,6 @@ class HAllA():
 		## this is not so efficient for huge arrays, fix later 
 
 		self.m_iIter = 100
-
-
-
-
-
-
 
 	def _issingle( self ):
 		bOut = False
@@ -401,9 +387,6 @@ class HAllA():
 			self._permute_test( pData1, pData2, pMedoid1, pMedoid2, iOne, iTwo )
 
 
-	def _baseline( self ):
-		pass 
-
 	def _htest( self ):
 		pass 
 
@@ -466,10 +449,5 @@ class HAllA():
 
 
 		#return self._cakecut()
-
-	def run_baseline( self ):
-		self._discretize( ) 
-		self._baseline( )
-
 
 

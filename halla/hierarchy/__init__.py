@@ -301,18 +301,37 @@ def hclust( pArray, pdist_metric = norm_mid, cluster_method = "single", bTree = 
 def dendrogram( Z ):
 	return scipy.cluster.hierarchy.dendrogram( Z )
 
-def truncate_tree( apClusterNode, iSkip, iLevel = 0 ):
+def truncate_tree( list_clusternode, level = 0, skip = 0 ):
 	"""
 	Chop tree from root, returning smaller tree towards the leaves 
 
-	Input: pClusterNode, iLevel 
+	Parameters
+	---------------
+		
+		list_clusternode : list of ClusterNode objects 
+		level : int 
+		skip : int 
 
-	Output: list of ClusterNodes 
+	Output 
+	----------
+
+		lC = list of ClusterNode objects 
 
 	"""
 
+	apClusterNode = None 
+
+	if isinstance( list_clusternode, scipy.cluster.hierarchy.ClusterNode ):
+		apClusterNode = [list_clusternode]
+	else:
+		apClusterNode = list_clusternode
+
+	iSkip = skip 
+	iLevel = level 
+
 	if iLevel < iSkip:
-		return truncate_tree( [p.right for p in apClusterNode] + [q.left for q in apClusterNode], iSkip, iLevel = iLevel+1 ) 
+		return truncate_tree( filter( lambda x: bool(x), [(p.right if p.right else None) for p in apClusterNode]) \
+			+ filter( lambda x: bool(x), [(q.left if p.left else None) for q in apClusterNode] ), level = iLevel+1, skip = iSkip ) 
 
 	elif iSkip == iLevel:
 		if any(apClusterNode):
@@ -387,6 +406,8 @@ def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
 		for i,j in itertools.product( range(iLayer1), range(iLayer2) ):
 			dummyOut.append( [ (i,j), pFunction( pArray1[:,i], pArray2[:,j] ) ] )
 
+	return dummyOut 
+
 
 def depth_tree( pClusterNode, bLayerform = False ):
 	"""
@@ -449,7 +470,7 @@ def cross_section_tree( pClusterNode, method = "uniform", cuts = "complete" ):
 
 	return aOut 
 
-def couple_tree( pClusterNode1, pClusterNode2, method = "uniform", linkage = "min" ):
+def naive_couple_tree( pClusterNode1, pClusterNode2, method = "uniform", linkage = "min" ):
 	"""
 	Couples two trees to make a hypothesis tree 
 
@@ -487,48 +508,7 @@ def couple_tree( pClusterNode1, pClusterNode2, method = "uniform", linkage = "mi
 
 	return aOut 
 
-
-def all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi"):
-	"""
-	Get output from couple_tree and perform all_against_all 
-	"""
-
-	aOut = [] 
-
-	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
-					"permutation_test_by_average" : halla.stats.permutation_test_by_average,
-					"parametric_test" : halla.stats.parametric_test}
-	strMethod = method 
-
-	pMethod = phashMethods[strMethod]
-
-	pCouple = couple_tree( pClusterNode1, pClusterNode2 )
-	for aLayer in pCouple:
-		for pPair in aLayer:
-			pOne, pTwo = map( array, pPair )
-			aOut.append( [pPair, pMethod( pArray1[pOne], pArray2[pTwo] )] )
-
-	return aOut 
-
-def naive_all_against_all( pArray, metric = "norm_mi" ):
-
-	iRow = len(pArray)
-
-	X = numpy.zeros((iRow,iRow))
-
-	for i,j in itertools.product( range(iRow), range(iRow) ):
-		fVal = halla.distance.norm_mi( pArray[i], pArray[j] )
-		X[i][j] = fVal ; X[j][i] = fVal 
-
-	return X 
-
-
-#=======================================#
-#### Old code; clean later 
-#=======================================#
-
-
-def old_couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "min", pTree = Tree() ):
+def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "min", pTree = Tree() ):
 	"""
 	Couples two data trees to produce a hypothesis tree 
 
@@ -595,6 +575,45 @@ def old_couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage
 		
 		#pTreeNew.add_child( couple_tree( apClusterNodeNew1, apClusterNodeNew2, method= pMethod, linkage= pLinkage, pTree = pTreeNew ) ) 
 		
+
+def naive_all_against_all( pArray, metric = "norm_mi" ):
+
+	iRow = len(pArray)
+
+	X = numpy.zeros((iRow,iRow))
+
+	for i,j in itertools.product( range(iRow), range(iRow) ):
+		fVal = halla.distance.norm_mi( pArray[i], pArray[j] )
+		X[i][j] = fVal ; X[j][i] = fVal 
+
+	return X 
+
+def all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi"):
+	"""
+	Get output from couple_tree and perform all_against_all 
+	"""
+
+	aOut = [] 
+
+	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
+					"permutation_test_by_average" : halla.stats.permutation_test_by_average,
+					"parametric_test" : halla.stats.parametric_test}
+	strMethod = method 
+
+	pMethod = phashMethods[strMethod]
+
+	pCouple = couple_tree( pClusterNode1, pClusterNode2 )
+	for aLayer in pCouple:
+		for pPair in aLayer:
+			pOne, pTwo = map( array, pPair )
+			aOut.append( [pPair, pMethod( pArray1[pOne], pArray2[pTwo] )] )
+
+	return aOut 
+
+
+#=========================================================================================#
+# OLD CODE 
+#=========================================================================================#
 
 def old_one_against_one( pClusterNode1, pClusterNode2, pArray1, pArray2 ):
 	"""
