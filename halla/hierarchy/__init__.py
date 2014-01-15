@@ -427,11 +427,16 @@ def reduce_tree_by_layer( apParents, iLevel = 0, iStop = None ):
 
 	if (iStop and (iLevel > iStop)) or not(apParents):
 		return [] 
-	else:	
-		return [(iLevel, reduce_tree(p)) for p in apParents ] + reduce_tree_by_layer( [ q.left for q in filter( lambda x: not(x.is_leaf()) , apParents ) ] + 
-			[ r.right for r in filter( lambda x: not(x.is_leaf()) , apParents ) ], iLevel = iLevel+1 ) 
+	else:
+		filtered_apParents = filter( lambda x: not(x.is_leaf()) , apParents )
+		new_apParents = [] 
+		for q in filtered_apParents:
+			new_apParents.append( q.left ); new_apParents.append( q.right )
 
-##### BUGBUG: I need to fix so that the reducing behavior 
+		return [(iLevel, reduce_tree(p)) for p in apParents ] + reduce_tree_by_layer( new_apParents, iLevel = iLevel+1 )
+
+		#reduce_tree_by_layer( [ q.left for q in filter( lambda x: not(x.is_leaf()) , apParents ) ] + 
+			#[ r.right for r in filter( lambda x: not(x.is_leaf()) , apParents ) ], iLevel = iLevel+1 ) 
 
 def depth_tree( pClusterNode, bLayerform = False ):
 	"""
@@ -503,8 +508,18 @@ def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
 
 	latex: $pFunction: index1 \times index2 \times data1 \times data2 \rightarrow \mathbb{R}^k, $ for $k$ the size of the cross-product set per layer 
 
-	Input: pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
-	Output: All-against-all per layer 
+	Parameters
+	----------------
+		pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
+	
+	Returns 
+	---------
+		All-against-all per layer 
+
+	Note
+	--------
+		The way it is written now, the function performs all-against-all per layer without regard to the inheritance pattern. 
+
 	"""
 
 	aOut = [] 
@@ -540,6 +555,36 @@ def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
 
 	return aOut 
 
+
+def layerwise_all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, adjust_method = "BH" ):
+	"""
+	Perform layer-wise all against all 
+	"""
+	aOut = [] 
+
+	traverse_out = traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2 )
+	for layer in traverse_out:
+		aLayerOut = [] 
+		aPval = [] 
+		for item in layer:
+			fPval = halla.stats.permutation_test_by_representative( pArray1[array(item[0])], pArray2[array(item[1])] )
+			aPval.append(fPval)
+		
+		#print aPval 
+
+		adjusted_pval = halla.stats.p_adjust( aPval )
+		if not isinstance( adjusted_pval, list ):
+			## keep type consistency 
+			adjusted_pval = [adjusted_pval]
+
+		#print adjusted_pval 
+
+		for i,item in enumerate(layer):
+			aLayerOut.append( (item[0], item[1], adjusted_pval[i]) )
+
+		aOut.append(aLayerOut)
+
+	return aOut 
 
 def naive_couple_tree( pClusterNode1, pClusterNode2, method = "uniform", linkage = "min" ):
 	"""
