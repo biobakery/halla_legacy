@@ -61,6 +61,18 @@ def mca( pArray, iComponents = 1 ):
 	residues = r.MCA( aastrData ) 
 	return array( [residues["var"]["eta2"][x] for x in astrKeys] )	
 
+def p_adjust( pval, method = "BH" ):
+	"""
+	Wrapper for R implementation of p value adjustment.
+	NOTE: This is slightly different from one that is described verbatim in the paper. 
+	"""
+
+	afP = pval 
+	strMethod = method 
+
+	r = rpy.r
+	adjusted_afP = r("p.adjust")( afP, strMethod )
+	return adjusted_afP
 
 def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
 	"""

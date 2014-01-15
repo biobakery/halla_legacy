@@ -38,6 +38,9 @@ from numpy.random import normal
 from scipy.misc import * 
 import pandas as pd 
 
+## hutlab tools 
+
+import strudel 
 
 #==========================================================================#
 # DATA STRUCTURES 
@@ -104,10 +107,63 @@ class Tree():
 	def get_data(self):
 		return self.m_pData 
 
+class Gardener():
+	"""
+	A gardener object is a handler for the different types of hierarchical data structures ("trees")
+	Can collapse and manipulate data structures and wrap them in different objects, depending on the 
+	context. 
+	"""
+
+	@staticmethod 
+	def PlantTree():
+		"""
+		Input: halla.Dataset object 
+		Output: halla.hierarchy.Tree object 
+		"""
+
+		return None 
+
+	def __init__(self):
+		pass 
+
+	def next(self):
+		'''
+		return the data of the tree, layer by layer
+		input: None 
+		output: a list of data pointers  
+		'''
+		
+		if self.is_leaf():
+			return Exception("Empty Tree")
+
+		elif self.m_pData:
+			pTmp = self.m_pData 
+			self.m_queue.extend(self.m_arrayChildren)
+			self.m_arrayChildren = None 
+			self = self.m_queue 
+			assert( self.is_degenerate() )
+			return pTmp 	
+		
+		else:
+			assert( self.is_degenerate() )
+			aOut = [] 
+	
+			for pTree in self.m_queue:
+				aOut.append( pTree.get_data() )
+
+	
+		if self.m_queue:
+			self = self.m_queue.pop()
+		elif self.m_arrayChildren:
+			pSelf = self.m_arrayChildren.pop() 
+			self.m_queue = self.m_arrayChildren
+			self = pSelf 
+		return pTmp 
 
 #==========================================================================#
 # METHODS  
 #==========================================================================#
+
 
 def hclust( pArray, pdist_metric = norm_mid, cluster_method = "single", bTree = False ):
 	"""
@@ -375,39 +431,7 @@ def reduce_tree_by_layer( apParents, iLevel = 0, iStop = None ):
 		return [(iLevel, reduce_tree(p)) for p in apParents ] + reduce_tree_by_layer( [ q.left for q in filter( lambda x: not(x.is_leaf()) , apParents ) ] + 
 			[ r.right for r in filter( lambda x: not(x.is_leaf()) , apParents ) ], iLevel = iLevel+1 ) 
 
-def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction ):
-	"""
-
-	Useful function for doing all-against-all comparison between nodes in each layer 
-
-	traverse two trees at once, applying function `pFunction` to each layer pair 
-
-	latex: $pFunction: data1 \times data2 \rightarrow \mathbb{R}^k, $ for $k$ the size of the cross-product set per layer 
-
-	Input: pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
-	Output: (i,j), pFunction( pArray[:,i], pArray2[:,j])
-
-	"""
-
-	dummyOut = [] 
-
-	def _get_min( tData ):
-		
-		return np.min([i[0] for i in tData])
-
-	tData1, tData2 = [ reduce_tree_by_layer( [pC] ) for pC in [pClusterNode1, pClusterNode2] ]
-
-	iMin = np.min( [_get_min(tData1), _get_min(tData2)] ) 
-
-	for iLevel in range(iMin):
-		pLayer1, pLayer2 = get_layer( tData1, iLevel )[0], get_layer( tData2, iLevel )[0]
-		iLayer1, iLayer2 = len(pLayer1), len(pLayer2)
-
-		for i,j in itertools.product( range(iLayer1), range(iLayer2) ):
-			dummyOut.append( [ (i,j), pFunction( pArray1[:,i], pArray2[:,j] ) ] )
-
-	return dummyOut 
-
+##### BUGBUG: I need to fix so that the reducing behavior 
 
 def depth_tree( pClusterNode, bLayerform = False ):
 	"""
@@ -470,6 +494,53 @@ def cross_section_tree( pClusterNode, method = "uniform", cuts = "complete" ):
 
 	return aOut 
 
+def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction = None ):
+	"""
+
+	Useful function for doing all-against-all comparison between nodes in each layer 
+
+	traverse two trees at once, applying function `pFunction` to each layer pair 
+
+	latex: $pFunction: index1 \times index2 \times data1 \times data2 \rightarrow \mathbb{R}^k, $ for $k$ the size of the cross-product set per layer 
+
+	Input: pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
+	Output: All-against-all per layer 
+	"""
+
+	aOut = [] 
+
+	def _link( i1, i2, a1, a2 ):
+		return (i1,i2)
+
+	if not pFunction:
+		pFunction = _link 
+
+	def _get_max( tData ):
+		
+		return np.max([i[0] for i in tData])
+
+	tData1, tData2 = [ reduce_tree_by_layer( [pC] ) for pC in [pClusterNode1, pClusterNode2] ]
+
+	iMin = np.min( [_get_max(tData1), _get_max(tData2)] ) 
+
+	for iLevel in range(iMin+1):
+		
+		aLayerOut = [] 
+
+		aLayer1, aLayer2 = get_layer( tData1, iLevel ), get_layer( tData2, iLevel )
+		iLayer1, iLayer2 = len(aLayer1), len(aLayer2)
+
+		## See if this lines up 
+		assert( iLayer1 == iLayer2 )
+
+		for i,j in itertools.product( range(iLayer1), range(iLayer2) ):
+			aLayerOut.append( pFunction( aLayer1[i], aLayer2[j], pArray1, pArray2 ) )
+
+		aOut.append(aLayerOut)
+
+	return aOut 
+
+
 def naive_couple_tree( pClusterNode1, pClusterNode2, method = "uniform", linkage = "min" ):
 	"""
 	Couples two trees to make a hypothesis tree in layerform. 
@@ -528,6 +599,10 @@ def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "
 	Examples
 	----------------
 	"""
+
+	lf1 
+	lf2 
+
 
 def naive_all_against_all( pArray, metric = "norm_mi" ):
 
@@ -732,69 +807,6 @@ def old_recursive_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArr
 
 		return recursive_all_against_all( apC1, apC2, pArray1, pArray2, pOut = pOutNew , pFDR = pFDR )
 
-
-#==========================================================================#
-# META
-#==========================================================================#
-
-class Gardener():
-	"""
-	A gardener object is a handler for the different types of hierarchical data structures ("trees")
-	Can collapse and manipulate data structures and wrap them in different objects, depending on the 
-	context. 
-	"""
-
-	@staticmethod 
-	def PlantTree():
-		"""
-		Input: halla.Dataset object 
-		Output: halla.hierarchy.Tree object 
-		"""
-
-		return None 
-
-	def __init__(self):
-		pass 
-
-	def next(self):
-		'''
-		return the data of the tree, layer by layer
-		input: None 
-		output: a list of data pointers  
-		'''
-		
-		if self.is_leaf():
-			return Exception("Empty Tree")
-
-		elif self.m_pData:
-			pTmp = self.m_pData 
-			self.m_queue.extend(self.m_arrayChildren)
-			self.m_arrayChildren = None 
-			self = self.m_queue 
-			assert( self.is_degenerate() )
-			return pTmp 	
-		
-		else:
-			assert( self.is_degenerate() )
-			aOut = [] 
-	
-			for pTree in self.m_queue:
-				aOut.append( pTree.get_data() )
-
-	
-		if self.m_queue:
-			self = self.m_queue.pop()
-		elif self.m_arrayChildren:
-			pSelf = self.m_arrayChildren.pop() 
-			self.m_queue = self.m_arrayChildren
-			self = pSelf 
-		return pTmp 
-
-
-#==========================================================================#
-# OBJECT WRAPPERS
-#==========================================================================#
-
 """
 	def _all_against_all( iLayer1, iLayer2, pNodes1, pNodes2 ):
 		
@@ -854,3 +866,27 @@ class Gardener():
 
 	iX, iY = depth_tree( pClusterNode1 ), depth_tree( pClusterNode2 )
 	"""
+
+#==========================================================================#
+# TEST DATA  
+#==========================================================================#
+
+def randtree( n = 10, sparsity = 0.5, obj = True, disc = True ):
+	""" 
+	generate random trees 
+	if obj is True, return ClusterNode object, else return in matrix form 
+	"""
+	
+	iSamples = n 
+	fSpar = sparsity 
+	bObj = obj 
+	bDisc = disc 
+
+	s = strudel.Strudel() 
+
+	X,A = s.generate_synthetic_data( iSamples, fSpar )
+	X = discretize( X ) if bDisc else X 
+
+	T = hclust( X, bTree = obj )
+
+	return T 
