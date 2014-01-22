@@ -89,10 +89,12 @@ class Tree():
 		else:
 			pChild = data 
 		self.m_arrayChildren.append( pChild )
+		return self 
 		
 	def add_children(self, aData):
 		for item in aData:
 			self.add_child( item )
+		return self 
 
 	def get_children(self): 
 		return self.m_arrayChildren
@@ -164,6 +166,17 @@ class Gardener():
 # METHODS  
 #==========================================================================#
 
+def is_tree( pObj ):
+	"""
+	duck type implementation for checking if
+	object is ClusterNode or Tree, more or less
+	"""
+
+	try:
+		pObj.get_data 
+		return True 
+	except Exception:
+		return False 
 
 def hclust( pArray, pdist_metric = norm_mid, cluster_method = "single", bTree = False ):
 	"""
@@ -403,14 +416,26 @@ def reduce_tree( pClusterNode, pFunction = lambda x: x.id, aOut = [] ):
 	Input: pClusterNode, pFunction = lambda x: x.id, aOut = []
 
 	Output: a list of pFunction calls (node ids by default)
-	"""
 
-	func = pFunction
+	Should be designed to handle both ClusterNode and Tree types 
+	""" 
 
-	if pClusterNode.is_leaf():
-		return ( aOut + [func(pClusterNode)] )
-	else:
-		return reduce_tree( pClusterNode.left, func, aOut ) + reduce_tree( pClusterNode.right, func, aOut ) 
+	bTree = is_tree( pClusterNode )
+
+	func = pFunction if not bTree else lambda x: x.get_data() 
+
+	if not bTree:
+		if pClusterNode.is_leaf():
+			return ( aOut + [func(pClusterNode)] )
+		else:
+			return reduce_tree( pClusterNode.left, func, aOut ) + reduce_tree( pClusterNode.right, func, aOut ) 
+	elif bTree:
+		if pClusterNode.is_leaf():
+			return ( aOut + [func(pClusterNode)] )
+		else:
+			pChildren = pClusterNode.get_children()
+			iChildren = len( pChildren )
+			return reduce( lambda x,y: x+y, [reduce_tree( pClusterNode.get_child(i), func, aOut) for i in range(iChildren)], [] )
 
 def reduce_tree_by_layer( apParents, iLevel = 0, iStop = None ):
 	"""
@@ -421,9 +446,17 @@ def reduce_tree_by_layer( apParents, iLevel = 0, iStop = None ):
 
 	Output: a list of (iLevel, list_of_nodes_at_iLevel)
 	"""
+
+	bTree = False 
 	
 	if not isinstance( apParents, list ):
+		bTree = is_tree( apParents )
 		apParents = [apParents]
+	else:
+		try:
+			bTree = is_tree( apParents[0] )
+		except IndexError:
+			pass 
 
 	if (iStop and (iLevel > iStop)) or not(apParents):
 		return [] 
@@ -431,9 +464,15 @@ def reduce_tree_by_layer( apParents, iLevel = 0, iStop = None ):
 		filtered_apParents = filter( lambda x: not(x.is_leaf()) , apParents )
 		new_apParents = [] 
 		for q in filtered_apParents:
-			new_apParents.append( q.left ); new_apParents.append( q.right )
-
-		return [(iLevel, reduce_tree(p)) for p in apParents ] + reduce_tree_by_layer( new_apParents, iLevel = iLevel+1 )
+			if not bTree:
+				new_apParents.append( q.left ); new_apParents.append( q.right )
+			else:
+				for item in q.get_children():
+					new_apParents.append(item)
+		if not bTree:
+			return [(iLevel, reduce_tree(p)) for p in apParents ] + reduce_tree_by_layer( new_apParents, iLevel = iLevel+1 )
+		else:
+			return [(iLevel, p.get_data()) for p in apParents ] + reduce_tree_by_layer( new_apParents, iLevel = iLevel+1 )
 
 		#reduce_tree_by_layer( [ q.left for q in filter( lambda x: not(x.is_leaf()) , apParents ) ] + 
 			#[ r.right for r in filter( lambda x: not(x.is_leaf()) , apParents ) ], iLevel = iLevel+1 ) 
@@ -625,7 +664,7 @@ def naive_couple_tree( pClusterNode1, pClusterNode2, method = "uniform", linkage
 
 	return aOut 
 
-def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "min", pTree = Tree() ):
+def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "min" ):
 	"""
 	Couples two data trees to produce a hypothesis tree 
 
@@ -645,6 +684,53 @@ def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "
 	----------------
 	"""
 
+	## initialize 
+
+	strMethod = method 
+	strLinkage = linkage
+
+	## decider functions 
+
+	def _filter_true( x ):
+		return filter( lambda y: bool(y), x )
+
+	def _decider_min( node1, node2 ):
+		return ( not(_filter_true( [node1.left, node1.right] ) ) or not(_filter_true( [node2.left, node2.right] ) ) )
+
+	def _decider_max( node1, node2 ):
+		pass
+
+	def _next( ):
+		"""
+		gives the next node on the chain of linkages 
+		"""
+		pass
+
+	## hash containing string mappings for deciders 
+
+	hashMethod = {"min": _decider_min, 
+				"max": _decider_max, 
+				}
+
+	pMethod = hashMethod[linkage] ##returns 'aNode x aNode -> bool' object 
+
+	## main 
+
+	aOut = [] 
+
+	for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
+		
+		data1, data2 = [ reduce_tree( x ) for x in [a,b] ]
+
+		pStump = Tree([data1,data2])
+
+		if pMethod( a,b ): # design choice: pMethod has priority; this is when algorithm determines that it can stop. 
+			aOut.append( pStump )
+		else: # can go on recursively 
+			## in actuality, need linkage function to give the desired behavior for node pattern 
+			aOut.append( pStump.add_children( couple_tree( [a.left, a.right], [b.left, b.right], method = strMethod, linkage = strLinkage ) ) )
+
+	return aOut 
 
 
 def naive_all_against_all( pArray, metric = "norm_mi" ):

@@ -74,8 +74,8 @@ class HAllA():
 		# archetypes are presets set by the programmer which is determined to be useful for the user 
 		self.hash_archetype = {"default"	: None, 
 								"time"		: None, 
-								"accuracy"	: None 
-								"parallel"	: None }
+								"accuracy"	: None, 
+								"parallel"	: None, }
 
 		## Mutable Meta Objects 
 		self.meta_array = array( ta ) if ta else None 
@@ -199,7 +199,7 @@ class HAllA():
 
 def legacy():
 
-		def _issingle( self ):
+	def _issingle( self ):
 		bOut = False
 		aTmp = ( self.meta_array[0] == self.meta_array[1] )
 		try:
