@@ -1,8 +1,7 @@
-#!/usr/bin/env python 
-
 """
 HAllA: Hiearchical All-against All 
 ==============================================
+
 Description
  An object-oriented halla implementation 
  Aim to be as self-contained as possible 
@@ -15,10 +14,9 @@ Global namespace conventions:
 
 Design direction: 
 
-never ever import anything directly from an external module; 
-first wrap around interal module, so that abstraction even within 
-development is strictly enforced. 
-
+	* never ever import anything directly from an external module; 
+	first wrap around interal module, so that abstraction even within 
+	development is strictly enforced. 
 
 """
 
@@ -49,7 +47,6 @@ from numpy import array
 import matplotlib 
 
 ## miscellaneous 
-
 #matplotlib.use("Agg") #disable X-windows display backend; this is for batch mode ; remember! 
 
 class HAllA():
@@ -58,23 +55,36 @@ class HAllA():
 
 		## Think about lazy implementation to save time during run-time;
 		## Don't have to keep everything in memory 
+		## Write so that you can feed in a tuple of numpy.ndarrays; in practice the core unit of comparison is always
+		## the pair of arrays
 
-		self.htest = ttest_ind
+		## Parameters  
+		self.q = 0.05 
 		self.distance = adj_mid 
+		self.iterations = 100		
+		self.reduce_method = "pca" 
+		self.step_function = "uniform"
+
+		self.ebar_method = "permutation" #method to generate error bars 
 		
-		self.rep = None 
-		self.meta_array = array( ta )
-		self.meta_discretize = None 
+		## Static Meta Objects 
+		self.hash_reduce_method = {"pca"	: None, 
+									"mca"	: None, }
 
-		self.meta_linkage = None 
-		self.meta_distance = None 
+		# archetypes are presets set by the programmer which is determined to be useful for the user 
+		self.hash_archetype = {"default"	: None, 
+								"time"		: None, 
+								"accuracy"	: None 
+								"parallel"	: None }
+
+		## Mutable Meta Objects 
+		self.meta_array = array( ta ) if ta else None 
+		self.meta_discretize = None
+
+		## Output 
 		self.directory = None 
-		self.outhash = {} 
-		self.outtable = None
-
-		self.header = ["Var", "MID", "pBoot", "pPerm"]
-
-		self.m_iIter = 100
+		self.hashOut = {} 
+		self.tableOut = None
 
 	#==========================================================#
 	# Static Methods 
@@ -103,8 +113,93 @@ class HAllA():
 	def rd( ):
 		pass 
 
+	#==========================================================#
+	# Helper Functions 
+	#==========================================================# 
 
-	def _issingle( self ):
+	def _discretize( self ):
+		self.meta_discretize = self.m( self.meta_array, discretize )
+		# Should do a better job at detecting whether dataset is categorical or continuous
+		# Take information from the parser module 
+		return self.meta_discretize 
+
+	def _hclust( self ):
+		pass 
+
+	def _tcouple( self ):
+		pass 
+
+	def _all_against_all( self ):
+		pass 
+
+	def _compare( self ):
+		pass 
+
+	def _report( self ):
+		"""
+		helper function for reporting the output to the user 
+		"""
+		pass 
+
+	#==========================================================#
+	# Set parameters 
+	#==========================================================# 
+
+	def set_q( self, fQ ):
+		self.q = fQ
+		return self.q 
+
+	def set_metric( self, pMetric ):
+		self.distance = pMetric 
+		return self.distance 
+
+	def set_iterations( self, iIterations ):
+		self.m_iIter = iIterations or 100 
+		return self.iterations 
+
+	def set_step_function( self, strFun ):
+		"""
+		set step function used to couple tree to make hypothesis tree 
+		"""
+		pass 
+
+	def set_archetype( self ):
+		pass 
+
+	#==========================================================#
+	# Archetypes  
+	#==========================================================# 
+
+	def __archetype_default( self ):
+		pass 
+
+	def __archetype_time( self ):
+		pass 
+
+	#==========================================================#
+	# Main Pipeline 
+	#==========================================================# 	
+
+	def get_attribute( self ):
+		"""
+		returns current attributes and statistics about HAllA object implementation 
+		"""
+		pass 
+
+	def run( self ):
+		"""
+		Main run module 
+		"""
+		pass 
+
+
+#=======================================================================#
+# LEGACY CODE -- to be incoroporated into later or to be tossed away 
+#=======================================================================#
+
+def legacy():
+
+		def _issingle( self ):
 		bOut = False
 		aTmp = ( self.meta_array[0] == self.meta_array[1] )
 		try:
@@ -113,8 +208,6 @@ class HAllA():
 			pass  
 
 		return bOut 
-
-	
 	 
 	def permute_by_column( self, pArray ):
 		return array( [np.random.permutation( pArray[:,i] ) for i in range(pArray.shape[1])] ).T 
@@ -182,18 +275,6 @@ class HAllA():
 		self.outhash[(iX,iY)]["pPerm"] = dPPerm
 
 		return dPPerm
-
-	def _discretize( self ):
-		self.meta_discretize = self.m( self.meta_array, discretize )
-		## Should do a better job at detecting whether dataset is 
-		return self.meta_discretize 
-
-
-#======================================================#
-# LEGACY CODE -- to be incoroporated into later 
-#======================================================#
-
-def legacy():
 
 	def _distance_matrix( self ):
 		self.meta_distance =  self.m( self.meta_array, lambda x: pdist( x, metric=self.distance ) )
