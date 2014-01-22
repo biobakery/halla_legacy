@@ -645,8 +645,6 @@ def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "
 	----------------
 	"""
 
-	lf1 
-	lf2 
 
 
 def naive_all_against_all( pArray, metric = "norm_mi" ):

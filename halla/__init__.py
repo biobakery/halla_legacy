@@ -12,7 +12,14 @@ Global namespace conventions:
 	* `m()` <- map for arrays 
 	* `r()` <- reduce for arrays 
 	* `rd()` <- generic reduce-dimension method 
-	
+
+Design direction: 
+
+never ever import anything directly from an external module; 
+first wrap around interal module, so that abstraction even within 
+development is strictly enforced. 
+
+
 """
 
 ## native python packages 
@@ -25,11 +32,10 @@ import sys
 import re 
 import os 
 import pprint 
+import csv
+import random 
 
 ## halla modules 
-#from stats import discretize, p_val_plot
-#from distance import mi, adj_mi, l2, mid, adj_mid 
-import hierarchy 
 from test import * 
 from stats import * 
 from distance import * 
@@ -37,21 +43,14 @@ from hierarchy import *
 
 ## statistics packages 
 
-#matplotlib.use("Agg") #disable X-windows display backend; this is for batch mode ; remember! 
 import numpy as np
 import scipy as sp
 from numpy import array 
-import sklearn.decomposition
 import matplotlib 
-from sklearn.decomposition import PCA #remember that the matrix is X = (n_samples,n_features)
-import csv 
-from scipy.spatial.distance import pdist, cdist, squareform
-from scipy.cluster.hierarchy import linkage, dendrogram, to_tree, leaves_list
-import pylab as pl 
-import random  
-from numpy.random import normal 
-from scipy.misc import * 
-from scipy.stats import kruskal, ttest_ind, ttest_1samp, percentileofscore, pearsonr
+
+## miscellaneous 
+
+#matplotlib.use("Agg") #disable X-windows display backend; this is for batch mode ; remember! 
 
 class HAllA():
 	
@@ -75,27 +74,11 @@ class HAllA():
 
 		self.header = ["Var", "MID", "pBoot", "pPerm"]
 
-		## this is not so efficient for huge arrays, fix later 
-
 		self.m_iIter = 100
 
-	def _issingle( self ):
-		bOut = False
-		aTmp = ( self.meta_array[0] == self.meta_array[1] )
-		try:
-			bOut = aTmp.all()
-		except Exception:
-			pass  
-
-		return bOut 
-
-	def set_directory( self, strDir ):
-		self.directory = strDir 
-		#return self.directory 
-
-	#@staticmethod 
-	#def reduce_tree( pClusterNode ):
-	#	return reduce_tree( pClusterNode ) 
+	#==========================================================#
+	# Static Methods 
+	#==========================================================# 
 
 	@staticmethod 
 	def m( pArray, pFunc, axis = 0 ):
@@ -112,6 +95,26 @@ class HAllA():
 		else: #generic function type
 			return array( [pFunc(item) for item in pArray] ) 
 
+	@staticmethod 
+	def r( ):
+		pass 
+
+	@staticmethod 
+	def rd( ):
+		pass 
+
+
+	def _issingle( self ):
+		bOut = False
+		aTmp = ( self.meta_array[0] == self.meta_array[1] )
+		try:
+			bOut = aTmp.all()
+		except Exception:
+			pass  
+
+		return bOut 
+
+	
 	 
 	def permute_by_column( self, pArray ):
 		return array( [np.random.permutation( pArray[:,i] ) for i in range(pArray.shape[1])] ).T 
@@ -171,37 +174,12 @@ class HAllA():
 		iIter = self.m_iIter 
 
 		dMID = self.outhash[(iX,iY)]["MID"]
-		#pArrayPerm = [ self.distance( self.permute_by_column( pArray1 )[iX], pMedoid2 ) for i in xrange( iIter )]  
-
-		#print "Perm is "
-		#print self.permute_by_row( pArray1 )[iX]
-		
-		#print np.sort( self.permute_by_row( pArray1 )[iX] ) 
-		#print np.sort( pMedoid1 ) 
-
-		#print "Permuted distance"
-		#print self.distance( self.permute_by_row( pArray1 )[iX], pMedoid2 )	
-		#print "sorted distance"
-		#print self.distance( np.sort( self.permute_by_row( pArray1 )[iX] ) , np.sort( pMedoid1 ) )
-		#print "normal"
-		#print self.distance( pMedoid1, pMedoid2 ) 
-
-		#assert( self.distance( self.permute_by_row( pArray1 )[iX], pMedoid2 ) == self.distance( pMedoid1, pMedoid2 ) )
 		
 		pArrayPerm = [ self.distance( self.permute_by_row( pArray1 )[iX], pMedoid2 ) for i in xrange( iIter )]  
-
-		#print "ArrayPerm is " 
-		#print pArrayPerm
-		
-		#dPPerm = 1- ( percentileofscore( [dMID-1] + pArrayPerm, dMID ) / 100 )
-
-		## smaller distance means closer 
 
 		dPPerm = percentileofscore( pArrayPerm, dMID ) / 100
 
 		self.outhash[(iX,iY)]["pPerm"] = dPPerm
-
-		#print "dPPerm is " + str( dPPerm )
 
 		return dPPerm
 
@@ -209,6 +187,13 @@ class HAllA():
 		self.meta_discretize = self.m( self.meta_array, discretize )
 		## Should do a better job at detecting whether dataset is 
 		return self.meta_discretize 
+
+
+#======================================================#
+# LEGACY CODE -- to be incoroporated into later 
+#======================================================#
+
+def legacy():
 
 	def _distance_matrix( self ):
 		self.meta_distance =  self.m( self.meta_array, lambda x: pdist( x, metric=self.distance ) )
@@ -250,22 +235,6 @@ class HAllA():
 	def _representative( self, pArray, pMethod = None ):
 		hash_method = {None: self._get_medoid}
 		return hash_method[pMethod]( pArray )
-
-	def _reduce_tree( self, pClusterNode, pFunction = lambda x: x.id, aOut = [] ):
-		func = pFunction
-
-		if pClusterNode.is_leaf():
-			return ( aOut + [func(pClusterNode)] )
-		else:
-			return _reduce_tree( pClusterNode.left, func, aOut ) + _reduce_tree( pClusterNode.right, func, aOut ) 
-	
-	def _reduce_children( pClusterNode ):
-		
-		node = pClusterNode 
-		node_left, node_right = node.left, node.right 
-		if node_left.get_id() and node_right.get_id():
-			return (array( self._reduce_tree( node_left ) ), 
-				array( self._reduce_tree( node_right ) ) )  	
 
 	def _htestpair( self ):
 		assert( len( self.meta_array ) >= 2 )
@@ -319,12 +288,10 @@ class HAllA():
 
 		pBags = hierarchy.recursive_all_against_all( apClusterNode1, apClusterNode2, pRaw1, pRaw2, pOut = [] )
 		
-
 		print "pBags"
 
 		for item in pBags:
 			print item 
-
 
 	def _htest_pr( self ):
 		""" 
@@ -446,8 +413,3 @@ class HAllA():
 
 		boxplot( pOut, 0, '', 0)
 		show() 
-
-
-		#return self._cakecut()
-
-
