@@ -105,7 +105,7 @@ def get_representative( pArray, pMethod = None ):
 # Statistical test 
 #=========================================================
 
-def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 100):
+def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mid", decomposition = "pca", iIter = 100):
 	"""
 	Input: 
 	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 100
@@ -124,6 +124,7 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	pDe = pHashDecomposition[decomposition]
 	pMe = pHashMetric[strMetric] 
 
+	## implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if "mi" in strMetric else [pDe( pA ) for pA in [pArray1, pArray2]]
 
 	dMI = pMe( pRep1, pRep2 ) 
@@ -131,11 +132,15 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
 	pArrayPerm = np.array( [ pMe( _permutation( pRep1 ), pRep2 ) for i in xrange( iIter ) ] )
 
-	#print pArrayPerm 
-
 	dPPerm = percentileofscore( pArrayPerm, dMI ) / 100 	
 
 	return dPPerm
+
+def permutation_test_by_cca( ):
+	pass 
+
+def permutation_test_by_copula( ):
+	pass 
 
 def permutation_test_by_average( pArray1, pArray2, metric = "norm_mi", iIter = 100 ):
 	pHashDecomposition = {"mca": mca, "pca": pca}

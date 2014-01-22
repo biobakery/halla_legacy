@@ -162,6 +162,42 @@ class Gardener():
 			self = pSelf 
 		return pTmp 
 
+
+#==========================================================================#
+# FUNCTORS   
+#==========================================================================#
+
+def lf2tree( lf ):
+	"""
+	Functor converting from a layerform object to halla Tree object 
+
+	Parameters
+	------------
+		lf : layerform 
+
+	Returns 
+	-------------
+		t : halla Tree object 
+	""" 
+
+	pass 
+
+def tree2clust( pTree, exact = True ):
+	"""
+	Functor converting from a halla Tree object to a scipy ClusterNode object.
+	When exact is True, gives error when the map Tree() -> ClusterNode is not injective (more than 2 children per node)
+	"""
+
+	pass 
+
+def clust2tree( pTree ):
+	"""
+	Functor converting from a scipy ClusterNode to a halla Tree object; 
+	can always be done 
+	"""
+
+	pass 
+
 #==========================================================================#
 # METHODS  
 #==========================================================================#
@@ -177,6 +213,8 @@ def is_tree( pObj ):
 		return True 
 	except Exception:
 		return False 
+
+
 
 def hclust( pArray, pdist_metric = norm_mid, cluster_method = "single", bTree = False ):
 	"""
@@ -474,8 +512,11 @@ def reduce_tree_by_layer( apParents, iLevel = 0, iStop = None ):
 		else:
 			return [(iLevel, p.get_data()) for p in apParents ] + reduce_tree_by_layer( new_apParents, iLevel = iLevel+1 )
 
-		#reduce_tree_by_layer( [ q.left for q in filter( lambda x: not(x.is_leaf()) , apParents ) ] + 
-			#[ r.right for r in filter( lambda x: not(x.is_leaf()) , apParents ) ], iLevel = iLevel+1 ) 
+def tree2lf( apParents, iLevel = 0, iStop = None ):
+	"""
+	An alias of reduce_tree_by_layer, for consistency with functor definitions 
+	"""
+	return reduce_tree_by_layer 
 
 def depth_tree( pClusterNode, bLayerform = False ):
 	"""
@@ -484,10 +525,6 @@ def depth_tree( pClusterNode, bLayerform = False ):
 	
 	aOut = reduce_tree_by_layer( [pClusterNode] ) if not bLayerform else pClusterNode 
 	return max(zip(*aOut)[0])+1
-
-def get_children( pClusterNode ):
-	if not pClusterNode.is_leaf( ):
-		return [pClusterNode.left, pClusterNode.right]
 
 def get_layer( atData, iLayer = None, bTuple = False, bIndex = False ):
 	"""
@@ -643,9 +680,6 @@ def naive_couple_tree( pClusterNode1, pClusterNode2, method = "uniform", linkage
 	lf : layer_form 
 	"""
 
-	#implement min version first 
-
-	
 	aOut = [] 
 
 	layer_form1, layer_form2 = pClusterNode1, pClusterNode2 
@@ -732,269 +766,34 @@ def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "
 
 	return aOut 
 
-
-def naive_all_against_all( pArray, metric = "norm_mi" ):
-
-	iRow = len(pArray)
-
-	X = numpy.zeros((iRow,iRow))
-
-	for i,j in itertools.product( range(iRow), range(iRow) ):
-		fVal = halla.distance.norm_mi( pArray[i], pArray[j] )
-		X[i][j] = fVal ; X[j][i] = fVal 
-
-	return X 
-
-def all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi"):
+def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", verbose = True ):
 	"""
-	Get output from couple_tree and perform all_against_all 
+	Perform all-against-all on a hypothesis tree.
+
+	Notes:
+
+		Assumes that pArray1, pArray2 have been properly discretized, if mi-based metric is being used
+
 	"""
 
 	aOut = [] 
 
 	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
-					"permutation_test_by_average" : halla.stats.permutation_test_by_average,
-					"parametric_test" : halla.stats.parametric_test}
+						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
+						"parametric_test" : halla.stats.parametric_test}
+
 	strMethod = method 
 
 	pMethod = phashMethods[strMethod]
 
-	pCouple = couple_tree( pClusterNode1, pClusterNode2 )
-	for aLayer in pCouple:
-		for pPair in aLayer:
-			pOne, pTwo = map( array, pPair )
-			aOut.append( [pPair, pMethod( pArray1[pOne], pArray2[pTwo] )] )
+	aLayer = [t[1] for t in reduce_tree_by_layer( pTree )]
+
+	for pPair in aLayer:
+		pOne, pTwo = map( array, pPair )
+		aOut.append( [pPair, pMethod( pArray1[pOne], pArray2[pTwo] )] )
 
 	return aOut 
 
-
-#=========================================================================================#
-# OLD CODE 
-#=========================================================================================#
-
-def old_couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "min", pTree = Tree() ):
-	"""
-	Couples two data trees to produce a hypothesis tree 
-
-	Parameters
-	------------
-	pClusterNode1, pClusterNode2 : ClusterNode objects
-	method : str 
-		{"uniform", "2-uniform", "log-uniform"}
-	linkage : str 
-		{"max", "min"}
-
-	Returns
-	-----------
-	tH : halla.Tree object 
-
-	Examples
-	----------------
-	"""
-
-	#pTreeNew = pTree 
-	pMethod = method 
-	pLinkage = linkage 
-
-	def _decider( pClusterNode1, pClusterNode2, linkage = "min" ):
-		if linkage == "max": #max linkage 
-			if pClusterNode1.is_leaf() and pClusterNode2.is_leaf():
-				pOut1, pOut2 = [], [] 
-			elif pClusterNode1.is_leaf() and not pClusterNode2.is_leaf():
-				pOut1, pOut2 = [pClusterNode1], get_children( pClusterNode2 ) 
-			elif not pClusterNode1.is_leaf() and pClusterNode2.is_leaf():
-				pOut1, pOut2 = get_children( pClusterNode1 ), [pClusterNode2]
-			else:
-				pOut1, pOut2 = get_children( pClusterNode1 ), get_children( pClusterNode2 )
-			return pOut1, pOut2 
-		else: # minimum linkage by default 
-			if pClusterNode1.is_leaf() or pClusterNode2.is_leaf(): #if one of them is a leaf, then stop the process
-				return [],[] 
-			else:
-				return get_children( pClusterNode1 ), get_children( pClusterNode2 )
-
-	if not isinstance( apClusterNode1, list ):
-		apClusterNode1 = [apClusterNode1]
-	if not isinstance( apClusterNode2, list ):
-		apClusterNode2 = [apClusterNode2]
-
-	if not apClusterNode1 and not apClusterNode2:
-		return pTree
-	else:
-		aChildren = [] 
-		pP = itertools.product( apClusterNode1, apClusterNode2 )
-		for i,j in pP:
-			#the first has only has one instance
-			aIndices1, aIndices2 = get_layer( i ), get_layer( j )
-			#pTreeNew.add_data( (aIndices1, aIndices2) )
-			pTreeNew = Tree()
-			pTreeNew.add_data( (aIndices1, aIndices2) )
-			apClusterNodeNew1, apClusterNodeNew2 = _decider( i,j, linkage = pLinkage )
-			
-			aChildren += [old_couple_tree( apClusterNodeNew1, apClusterNodeNew2, method = pMethod, linkage = pLinkage )]
-
-
-		return aChildren 
-		#pTree.add_children( aChildren )
-		
-		#pTreeNew.add_child( couple_tree( apClusterNodeNew1, apClusterNodeNew2, method= pMethod, linkage= pLinkage, pTree = pTreeNew ) ) 
-		
-
-
-
-def old_one_against_one( pClusterNode1, pClusterNode2, pArray1, pArray2 ):
-	"""
-
-	one_against_one hypothesis testing for a particular layer 
-	
-	Input: pClusterNode1, pClusterNode2, pArray1, pArray2
-
-	Output: aiIndex1, aiIndex2, pVal
-	
-	"""
-
-	aiIndex1, aiIndex2 = reduce_tree( pClusterNode1 ) , reduce_tree( pClusterNode2 )
-
-	pData1, pData2 = pArray1[array(aiIndex1)], pArray2[array(aiIndex2)]
-
-	return aiIndex1, aiIndex2, permutation_test_by_representative( pData1, pData2 )
-
-
-def old_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2 ):
-	""" 
-	Perform all-against-all per layer 
-
-	Input: apClusterNode1, apClusterNode2, pArray1, pArray2
-
-	Output: a list of ( (i,j), (aiIndex1, aiIndex2, pVal) )
-	"""
-
-	dummyOut = [] 
-
-	iC1, iC2 = map( len, [apClusterNode1, apClusterNode2] )
-
-	for i,j in itertools.product(range(iC1), range(iC2)):
-		dummyOut.append( ( (i,j), one_against_one( apClusterNode1[i], apClusterNode2[j], pArray1, pArray2 ) ) )
-
-	return dummyOut 
-
-def old_recursive_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2, pOut = [], pFDR = bh ):
-	"""
-
-	Performs recursive all-against-all (the default HAllA routine) with fdr correction
-
-	Input: apClusterNode1, apClusterNode2, pArray1, pArray2, pFDR
-
-	Output: a list of ( (aiIndex1, pBag1), (aiIndex2, pBag2) )
-
-	"""
-
-	pOutNew = pOut 
-
-	atAll = all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2 )
-
-	print "This is all against all atAll"
-	print atAll 
-
-	atIJ, atOAO = zip(*atAll)
-	aaN, aaM, aPVAL = zip(*atOAO)
-
-	aBool = pFDR(aPVAL)
-	print aPVAL
-
-	if not any(aBool):
-		print "END!"
-		return pOutNew  
-	else:
-		"CONTINUE!"
-		apC1, apC2, = [],[] 
-		for k, couple in enumerate( atIJ ):
-			i,j = couple  
-			if aBool[k]: #if hypothesis was rejected, then go down to lower layers 
-
-				#pNode1Left, pNode1Right = apClusterNode1[i].left, apClusterNode1[i].right
-				#pNode2Left, pNode2Right = apClusterNode2[j].left, apClusterNode2[j].right
-
-				#if pNode1Left.is_leaf or pNode1Right.is_leaf or pNode2Left.is_leaf or pNode2Right.is_leaf: 
-				#	continue  
-				#else: 
-				#	print "Down!"
-				
-				for item in [ apClusterNode1[i].left, apClusterNode1[i].right ]:
-					if not item.is_leaf():
-						apC1.append( item )
-
-				for item in [ apClusterNode2[j].left, apClusterNode2[j].right ]:
-					if not item.is_leaf():
-						apC2.append( item )
-				
-				#apC1.append( apClusterNode1[i].left ) ; apC1.append( apClusterNode1[i].right )
-				#apC2.append( apClusterNode2[j].left ); apC2.append( apClusterNode2[j].right )
-
-				#pOutNew.append( ( (aaN[k], apClusterNode1[i] ), (aaM[k], apClusterNode2[j] ) ) )
-				pOutNew.append( (aaN[k],aaM[k]) )
-
-		return recursive_all_against_all( apC1, apC2, pArray1, pArray2, pOut = pOutNew , pFDR = pFDR )
-
-"""
-	def _all_against_all( iLayer1, iLayer2, pNodes1, pNodes2 ):
-		
-		pT = Tree() 
-		pP = itertools.product( pNodes1, pNodes2 )
-		
-		
-
-		for tNodes in pP:
-			pT.add_child( ((iLayer1,iLayer2), tNodes)  )
-
-		return pT 
-
-
-
-	aIndices = [] 
-	aBags = [] 
-
-	hashMethods = {"uniform": halla.stats.uniform_cut }
-
-	layer_form1 = cross_section_tree( pClusterNode1, method=method )
-	layer_form2 = cross_section_tree( pClusterNode2, method=method )
-
-	lf1, lf2 = layer_form1, layer_form2 
-
-	#depth1, depth2 = depth_tree( layer_form1, bLayerform = True ), depth_tree( pClusterNode2, bLayerform = True )
-
-	bOne = ( depth1 >= depth2 ) #is the first layer_form greater in depth?
-	#lf_big = layer_form1 if bOne else layer_form2
-	#lf_small = layer_form1 if not bOne else layer_form2 
-
-	#minDepth, maxDepth = min( [depth1, depth2] ), max( [depth1, depth2] )
-	
-	## First perform the min formulation 
-
-	bStop = False 
-
-	pNew1, pNew2 = lf1, lf2 
-
-	while not bStop:
-		pLayerOut1 = get_layer( pNew1, bLayerform = True, bTuple = True, bIndex = True )
-		pLayerOut2 = get_layer( pNew2, bLayerform = True, bTuple = True, bIndex = True )
-		if not pLayerOut1 or not pLayerOut2:
-			bStop = True
-			break 
-
-		else:
-			pOut1, pNew1 = pLayerOut1
-			iIndex1, pData1 = pOut1
-			
-			pOut2, pNew2 = pLayerOut2 
-			iIndex2, pData2 = pOut2 
-
-			pT = _all_against_all( iIndex1, iIndex2, pData1, pData2 )
-
-
-
-	iX, iY = depth_tree( pClusterNode1 ), depth_tree( pClusterNode2 )
-	"""
 
 #==========================================================================#
 # TEST DATA  
@@ -1019,3 +818,289 @@ def randtree( n = 10, sparsity = 0.5, obj = True, disc = True ):
 	T = hclust( X, bTree = obj )
 
 	return T 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#=========================================================================================#
+# OLD CODE 
+#=========================================================================================#
+
+def legacy():
+
+	def naive_all_against_all( pArray, metric = "norm_mi" ):
+
+		iRow = len(pArray)
+
+		X = numpy.zeros((iRow,iRow))
+
+		for i,j in itertools.product( range(iRow), range(iRow) ):
+			fVal = halla.distance.norm_mi( pArray[i], pArray[j] )
+			X[i][j] = fVal ; X[j][i] = fVal 
+
+		return X 
+
+	def all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi"):
+		"""
+		Get output from couple_tree and perform all_against_all 
+		"""
+
+		aOut = [] 
+
+		phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
+						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
+						"parametric_test" : halla.stats.parametric_test}
+		strMethod = method 
+
+		pMethod = phashMethods[strMethod]
+
+		pCouple = couple_tree( pClusterNode1, pClusterNode2 )
+		for aLayer in pCouple:
+			for pPair in aLayer:
+				pOne, pTwo = map( array, pPair )
+				aOut.append( [pPair, pMethod( pArray1[pOne], pArray2[pTwo] )] )
+
+		return aOut 
+
+
+	def old_couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "min", pTree = Tree() ):
+		"""
+		Couples two data trees to produce a hypothesis tree 
+
+		Parameters
+		------------
+		pClusterNode1, pClusterNode2 : ClusterNode objects
+		method : str 
+			{"uniform", "2-uniform", "log-uniform"}
+		linkage : str 
+			{"max", "min"}
+
+		Returns
+		-----------
+		tH : halla.Tree object 
+
+		Examples
+		----------------
+		"""
+
+		#pTreeNew = pTree 
+		pMethod = method 
+		pLinkage = linkage 
+
+		def _decider( pClusterNode1, pClusterNode2, linkage = "min" ):
+			if linkage == "max": #max linkage 
+				if pClusterNode1.is_leaf() and pClusterNode2.is_leaf():
+					pOut1, pOut2 = [], [] 
+				elif pClusterNode1.is_leaf() and not pClusterNode2.is_leaf():
+					pOut1, pOut2 = [pClusterNode1], get_children( pClusterNode2 ) 
+				elif not pClusterNode1.is_leaf() and pClusterNode2.is_leaf():
+					pOut1, pOut2 = get_children( pClusterNode1 ), [pClusterNode2]
+				else:
+					pOut1, pOut2 = get_children( pClusterNode1 ), get_children( pClusterNode2 )
+				return pOut1, pOut2 
+			else: # minimum linkage by default 
+				if pClusterNode1.is_leaf() or pClusterNode2.is_leaf(): #if one of them is a leaf, then stop the process
+					return [],[] 
+				else:
+					return get_children( pClusterNode1 ), get_children( pClusterNode2 )
+
+		if not isinstance( apClusterNode1, list ):
+			apClusterNode1 = [apClusterNode1]
+		if not isinstance( apClusterNode2, list ):
+			apClusterNode2 = [apClusterNode2]
+
+		if not apClusterNode1 and not apClusterNode2:
+			return pTree
+		else:
+			aChildren = [] 
+			pP = itertools.product( apClusterNode1, apClusterNode2 )
+			for i,j in pP:
+				#the first has only has one instance
+				aIndices1, aIndices2 = get_layer( i ), get_layer( j )
+				#pTreeNew.add_data( (aIndices1, aIndices2) )
+				pTreeNew = Tree()
+				pTreeNew.add_data( (aIndices1, aIndices2) )
+				apClusterNodeNew1, apClusterNodeNew2 = _decider( i,j, linkage = pLinkage )
+				
+				aChildren += [old_couple_tree( apClusterNodeNew1, apClusterNodeNew2, method = pMethod, linkage = pLinkage )]
+
+
+			return aChildren 
+			#pTree.add_children( aChildren )
+			
+			#pTreeNew.add_child( couple_tree( apClusterNodeNew1, apClusterNodeNew2, method= pMethod, linkage= pLinkage, pTree = pTreeNew ) ) 
+			
+
+	def old_one_against_one( pClusterNode1, pClusterNode2, pArray1, pArray2 ):
+		"""
+
+		one_against_one hypothesis testing for a particular layer 
+		
+		Input: pClusterNode1, pClusterNode2, pArray1, pArray2
+
+		Output: aiIndex1, aiIndex2, pVal
+		
+		"""
+
+		aiIndex1, aiIndex2 = reduce_tree( pClusterNode1 ) , reduce_tree( pClusterNode2 )
+
+		pData1, pData2 = pArray1[array(aiIndex1)], pArray2[array(aiIndex2)]
+
+		return aiIndex1, aiIndex2, permutation_test_by_representative( pData1, pData2 )
+
+
+	def old_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2 ):
+		""" 
+		Perform all-against-all per layer 
+
+		Input: apClusterNode1, apClusterNode2, pArray1, pArray2
+
+		Output: a list of ( (i,j), (aiIndex1, aiIndex2, pVal) )
+		"""
+
+		dummyOut = [] 
+
+		iC1, iC2 = map( len, [apClusterNode1, apClusterNode2] )
+
+		for i,j in itertools.product(range(iC1), range(iC2)):
+			dummyOut.append( ( (i,j), one_against_one( apClusterNode1[i], apClusterNode2[j], pArray1, pArray2 ) ) )
+
+		return dummyOut 
+
+	def old_recursive_all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2, pOut = [], pFDR = bh ):
+		"""
+
+		Performs recursive all-against-all (the default HAllA routine) with fdr correction
+
+		Input: apClusterNode1, apClusterNode2, pArray1, pArray2, pFDR
+
+		Output: a list of ( (aiIndex1, pBag1), (aiIndex2, pBag2) )
+
+		"""
+
+		pOutNew = pOut 
+
+		atAll = all_against_all( apClusterNode1, apClusterNode2, pArray1, pArray2 )
+
+		print "This is all against all atAll"
+		print atAll 
+
+		atIJ, atOAO = zip(*atAll)
+		aaN, aaM, aPVAL = zip(*atOAO)
+
+		aBool = pFDR(aPVAL)
+		print aPVAL
+
+		if not any(aBool):
+			print "END!"
+			return pOutNew  
+		else:
+			"CONTINUE!"
+			apC1, apC2, = [],[] 
+			for k, couple in enumerate( atIJ ):
+				i,j = couple  
+				if aBool[k]: #if hypothesis was rejected, then go down to lower layers 
+
+					#pNode1Left, pNode1Right = apClusterNode1[i].left, apClusterNode1[i].right
+					#pNode2Left, pNode2Right = apClusterNode2[j].left, apClusterNode2[j].right
+
+					#if pNode1Left.is_leaf or pNode1Right.is_leaf or pNode2Left.is_leaf or pNode2Right.is_leaf: 
+					#	continue  
+					#else: 
+					#	print "Down!"
+					
+					for item in [ apClusterNode1[i].left, apClusterNode1[i].right ]:
+						if not item.is_leaf():
+							apC1.append( item )
+
+					for item in [ apClusterNode2[j].left, apClusterNode2[j].right ]:
+						if not item.is_leaf():
+							apC2.append( item )
+					
+					#apC1.append( apClusterNode1[i].left ) ; apC1.append( apClusterNode1[i].right )
+					#apC2.append( apClusterNode2[j].left ); apC2.append( apClusterNode2[j].right )
+
+					#pOutNew.append( ( (aaN[k], apClusterNode1[i] ), (aaM[k], apClusterNode2[j] ) ) )
+					pOutNew.append( (aaN[k],aaM[k]) )
+
+			return recursive_all_against_all( apC1, apC2, pArray1, pArray2, pOut = pOutNew , pFDR = pFDR )
+
+	"""
+		def _all_against_all( iLayer1, iLayer2, pNodes1, pNodes2 ):
+			
+			pT = Tree() 
+			pP = itertools.product( pNodes1, pNodes2 )
+			
+			
+
+			for tNodes in pP:
+				pT.add_child( ((iLayer1,iLayer2), tNodes)  )
+
+			return pT 
+
+
+
+		aIndices = [] 
+		aBags = [] 
+
+		hashMethods = {"uniform": halla.stats.uniform_cut }
+
+		layer_form1 = cross_section_tree( pClusterNode1, method=method )
+		layer_form2 = cross_section_tree( pClusterNode2, method=method )
+
+		lf1, lf2 = layer_form1, layer_form2 
+
+		#depth1, depth2 = depth_tree( layer_form1, bLayerform = True ), depth_tree( pClusterNode2, bLayerform = True )
+
+		bOne = ( depth1 >= depth2 ) #is the first layer_form greater in depth?
+		#lf_big = layer_form1 if bOne else layer_form2
+		#lf_small = layer_form1 if not bOne else layer_form2 
+
+		#minDepth, maxDepth = min( [depth1, depth2] ), max( [depth1, depth2] )
+		
+		## First perform the min formulation 
+
+		bStop = False 
+
+		pNew1, pNew2 = lf1, lf2 
+
+		while not bStop:
+			pLayerOut1 = get_layer( pNew1, bLayerform = True, bTuple = True, bIndex = True )
+			pLayerOut2 = get_layer( pNew2, bLayerform = True, bTuple = True, bIndex = True )
+			if not pLayerOut1 or not pLayerOut2:
+				bStop = True
+				break 
+
+			else:
+				pOut1, pNew1 = pLayerOut1
+				iIndex1, pData1 = pOut1
+				
+				pOut2, pNew2 = pLayerOut2 
+				iIndex2, pData2 = pOut2 
+
+				pT = _all_against_all( iIndex1, iIndex2, pData1, pData2 )
+
+
+
+		iX, iY = depth_tree( pClusterNode1 ), depth_tree( pClusterNode2 )
+		"""
+
+
