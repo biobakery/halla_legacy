@@ -46,6 +46,9 @@ import strudel
 # DATA STRUCTURES 
 #==========================================================================#
 
+# Use decorators 
+# @ClusterNode 
+
 class Tree():
 	''' 
 	A hierarchically nested structure containing nodes as
