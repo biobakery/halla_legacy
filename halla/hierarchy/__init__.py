@@ -17,7 +17,7 @@ import halla
 import halla.stats 
 
 from halla.distance import mi, l2, absl2, norm_mid
-from halla.stats import discretize,pca, mca, bh, permutation_test_by_representative 
+from halla.stats import discretize,pca, mca, bh, permutation_test_by_representative, p_adjust
 
 ## statistics packages 
 
@@ -216,7 +216,6 @@ def is_tree( pObj ):
 		return True 
 	except Exception:
 		return False 
-
 
 
 def hclust( pArray, pdist_metric = norm_mid, cluster_method = "single", bTree = False ):
@@ -829,13 +828,13 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		
 		bPPrior = bP
 
-		iLen = length( aP )
+		iLen = len( aP )
 
-		aBool = [[True] for _ in iLen] 
+		aBool = [[True] for _ in range(iLen)] 
 
 		bTest = False 
 
-		aP_adjusted = stats.p_adjust( aP ) 
+		aP_adjusted = p_adjust( aP ) 
 
 		# See if children pass test 
 		for i, p in enumerate( aP_adjusted ): 
@@ -862,7 +861,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 			aP = [ _actor( c ) for c in pChildren ]
 			
-			aP_adjusted = stats.p_adjust( aP )
+			aP_adjusted = halla.stats.p_adjust( aP )
 
 			aPursuer = _pursuer( pChildren, aP_adjusted, bP=bP, fQ = q )
 
@@ -875,7 +874,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 	_fw_operator( pTree )
 
 	return aOut 
-	
+
 def all_all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", verbose = True ):
 	"""
 	Perform all-against-all on a hypothesis tree.

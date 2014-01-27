@@ -71,6 +71,8 @@ class HAllA():
 		self.hash_reduce_method = {"pca"	: None, 
 									"mca"	: None, }
 
+		self.hash_metric 		= {"norm_mid" : norm_mid }
+
 		# Presets set by the programmer which is determined to be useful for the user 
 		self.hash_preset = 	{"default"		: None, 
 								"time"		: None, 
@@ -153,11 +155,14 @@ class HAllA():
 		return self.q 
 
 	def set_metric( self, pMetric ):
-		self.distance = pMetric 
+		if isinstance( pMetric, str ):
+			self.distance = self.hash_metric[pMetric]
+		else:
+			self.distance = pMetric 
 		return self.distance 
 
 	def set_iterations( self, iIterations ):
-		self.m_iIter = iIterations or 100 
+		self.m_iIter = iIterations
 		return self.iterations 
 
 	def set_step_function( self, strFun ):
@@ -166,17 +171,17 @@ class HAllA():
 		"""
 		pass 
 
-	def set_archetype( self ):
+	def set_preset( self ):
 		pass 
 
 	#==========================================================#
-	# Archetypes  
+	# Presets  
 	#==========================================================# 
 
-	def __archetype_default( self ):
+	def __preset_default( self ):
 		pass 
 
-	def __archetype_time( self ):
+	def __preset_time( self ):
 		pass 
 
 	#==========================================================#
@@ -193,7 +198,16 @@ class HAllA():
 		"""
 		Main run module 
 		"""
-		pass 
+		X,Y = self.meta_array 
+		dX, dY = self._discretize( )
+
+		tX, tY = hclust( X, bTree = True ), hclust( Y, bTree = True )
+
+		tH = couple_tree( [tX], [tY] )[0]
+
+		aOut = all_against_all( tH, X, Y )
+
+		return aOut 
 
 
 ####################################################################################
