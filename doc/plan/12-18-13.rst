@@ -1,0 +1,68 @@
+* HAllA
+  ** Synthetic data generation makes sense so far
+  *** First hiccup seems to be in associativity of association - changes gold standard
+  *** Will need to make relationships sparser as a result
+  ** To handle predictions for groups from the tree:
+  *** When HAllA says there's a significant association, it applies equally to all elements in the group
+  *** Make sure to apply this AFTER multiple hypothesis correction
+  ** Right now, HAllA tests for positive association at each node
+  *** This is very similar to taking a MI-based MDS and correlating components
+  *** I would recommend switching this to an exclusion rather than inclusion criterion
+  *** That is, test whether a particular node CANNOT include an association
+  *** Then you combine with a positive test for "identity" that's equivalent to stopping at a minimum depth in tree
+  ** Two next steps
+  *** Implement that change for Monday (circulate)
+  *** Implement the rest of the evaluation for Jan. 6th
+
+----
+
+## halla.py should be just a barebones script file, but loading various functions from its submodules.
+## in particular its __init__.py should be sparse.
+## look at the coding examples from numpy/scipy/scikit-learn projects as a reference 
+
+In retrospect, I think an object-oriented method to handling datasets may be useful. For example, 
+
+X = halla.load( fileX )
+Y = halla.load( fileY )
+
+X = halla.dataset( X, categorical_list = [0,1,3] ) ##dataset objects, automatically goes through parser and "sniffer" for datatype, else can specify 
+Y = halla.dataset( Y, categorical_list = None ) ##dataset objects; tell halla to automatically infer the list 
+
+This was kind of how it was before, but the datum themselves were object oriented, which was a bit of a hassel. 
+But making two datasets OO keeps a nice abstraction barrier. 
+
+X.discretize(method="CRP") ## keep track of which ones to discretize, either automatically, or from manual input from the user 
+## This is a _destructive method_. Not recommended. 
+
+dXY = halla.discretize2d( X,Y, method={"CRP", "uniform", "bayesian"} ) ## Can either take numpy vectors X and Y, numpy arrays X and Y, or halla dataset objects X and Y. 
+
+tX = halla.hclust( X, to_tree = True ) 
+tY = halla.hclust( Y, to_tree = True ) 
+
+tXY = halla.couple_tree( tX, tY ) ##Hypothesis tree 
+
+B = halla.all_against_all( method = {"full, "naive"}, correction_method = {"fdr","bh", "by", "bonferroni", etc}, q = 0.05, step = {"linear", "log", 1,2,3,... } ) ##returns bags with FDR correction 
+
+halla.visualize( B ) ## in interactive mode, can see graphs and hopefully d3 node.js objects that are interactive 
+
+#==============================================#
+# OR can perform in a nicely wrapped OO object #
+#==============================================#
+
+h = halla.HAllA( X= None,Y = None, preset="mi1" )
+h.load(strFileIn) 
+h.run(fileout = None) ##holds in memory 
+h.save(strFileOut) ##saves file from memory 
+h.run(fileout = strFileOut) ##file is saved as strFileOut with matrix containing summary information   
+
+h = halla.HAllA( preset = "batch" ) ##batch mode, conserve memory, parallelize if possible, suppress figures and IO sockets 
+h.run( strFileOut ) ##saves the file 
+
+## Make sure there is a robust error log system with system times and pertinent information for debugging 
+
+
+Some things to note so I don't forget:
+
+* Grouping property of information theoretic measures 
+  * Jensen-Shannon divergence as a smoothed and symmetrized version of the KL divergence 
+    * kernel MI (http://www.gatsby.ucl.ac.uk/~gretton/papers/GreHerSmoBouSch05.pdf, http://jmlr.org/papers/volume10/martins09a/martins09a.pdf)

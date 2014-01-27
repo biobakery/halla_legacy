@@ -1,0 +1,95 @@
+Programming Notes 
+--------------------
+
+° You can use decorators to extend classes easily: `@ClusterNode` 
+
+Packaging Notes
+-----------------
+
+* Prepare for George meeting 
+* `python -m` to run module as a script (gets rid of option list)
+* Think about naming conventions for auxillary files (plots, etc)
+    + Make sure conventions are consistent so files can be sought after easily 
+
+* Input
+    + 1 or 2 tab-delimited matrix files
+    + (Optional) parameter for tree-coupling 
+    + (Optional) type of metric used: by default normalized information distance 
+        - Note: probably should focus on the notion of "farness" as opposed to "closeness" (e.g. use "distances" instead of "correlations")
+    + (Optional) type of hierarchical clustering done (single, complete, ... ?)
+    + (Optional) type of multiple hypothesis test procedures 
+    + (Optional) q-value, if above
+    + (Optional) iteration value for permutation test  
+    + (Optional) type of transformation done on data to be normalized 
+        - Copula transformation, beta warping, regular-old 2-d discretization? Who knows?
+    + Notion of "presets" important: instead of manually entering all that information, should be able to specify a string that corresponds to a specified set of 
+     instructions in the "preset" directory.  
+
+* Output 
+    + Output files 
+        - Main text file contains "bags" association and corresponding metric and p-value (or other interpretable value) 
+        - Plots with various 
+    + Think about the "exploitation" phase, where exploration ends and further scans are done on the output of the program.  
+
+General Notes 
+----------------
+
+* Can't do bootstrap in the traditional sense, so focus on permutation test 
+* But probably is viable through coupled bootstrap -- this will generate error bars based on uncertainty due to noise and sampling error
+* Metrics should be able to give non-parametric p-values, just like in the implementation of the t-test in scipy. This way, things are more consistent. 
+* Remember to make functions as intuitive as possible: there exist (1) structure hypothesis tree and (2) actual data arrays. Should **never** have to carry around discretized and raw arrays if written properly. 
+    + Should keep it as an object inside the main halla object, for separate functions that I write, I should adhere to the "simple is best" New Jersey style convention. 
+
+Old Runtime
+----------------
+
+argparse::
+    
+    def halla( istm, ostm, dP, dPMI, iBootstrap ):
+
+        pData = dataset.CDataset( datum.CDatum.mutual_information_distance )
+        pData.open( istm )
+        hashClusters = pData.hierarchy( dPMI )
+        _halla_clusters( ostm, hashClusters, pData )
+        _halla_test( ostm, pData, hashClusters, dP, iBootstrap )
+
+    argp = argparse.ArgumentParser( prog = "halla.py",
+            description = "Hierarchical All-against-All significance association testing." )
+    argp.add_argument( "istm",              metavar = "input.txt",
+            type = argparse.FileType( "r" ),        default = sys.stdin,    nargs = "?",
+            help = "Tab-delimited text input file, one row per feature, one column per measurement" )
+    argp.add_argument( "-o",                dest = "ostm",                  metavar = "output.txt",
+            type = argparse.FileType( "w" ),        default = sys.stdout,
+            help = "Optional output file for association significance tests" )
+    argp.add_argument( "-p",                dest = "dP",                    metavar = "p_value",
+            type = float,   default = 0.05,
+            help = "P-value for overall significance tests" )
+    argp.add_argument( "-P",                dest = "dPMI",                  metavar = "p_mi",
+            type = float,   default = 0.05,
+            help = "P-value for permutation equivalence of MI clusters" )
+    argp.add_argument( "-b",                dest = "iBootstrap",    metavar = "bootstraps",
+            type = int,             default = 100,
+            help = "Number of bootstraps for significance testing" )
+    argp.add_argument( "-v",                dest = "iDebug",                metavar = "verbosity",
+            type = int,             default = 10 - ( logging.WARNING / 10 ),
+            help = "Debug logging level; increase for greater verbosity" )
+    argp.add_argument( "-f",                dest = "fFlag",         action = "store_true",
+            help = "A flag set to true if provided" )
+    argp.add_argument( "strString", metavar = "string",
+            help = "A required free text string" )
+
+    __doc__ = "::\n\n\t" + argp.format_help( ).replace( "\n", "\n\t" ) + __doc__
+
+
+    def _main( ):
+            args = argp.parse_args( )
+
+            lghn = logging.StreamHandler( sys.stderr )
+            lghn.setFormatter( logging.Formatter( '%(asctime)s %(levelname)10s %(module)s.%(funcName)s@%(lineno)d %(message)s' ) )
+            c_logrHAllA.addHandler( lghn )
+            c_logrHAllA.setLevel( ( 10 - args.iDebug ) * 10 )
+
+            halla( args.istm, args.ostm, args.dP, args.dPMI, args.iBootstrap )
+
+    if __name__ == "__main__":
+            _main( )

@@ -1,0 +1,25 @@
+* HAllA
+** Draft
+*** Condense Introduction - probably don't need to be that long
+**** These are good topics to touch on, but probably not all in separate subsections
+**** "Previous work has defined useful generalized measures for high-dimensional data, but not how to use them."
+*** Methods - similarity scoring might want its own subsection
+*** Results - need to include theory results either at start (for stats) or end (otherwise)
+*** Discussion - include summary as first subsection/paragraph
+**** Good point to include later on is the combination of parametric + nonparamtric benefits
+*** Include the asymptotics/bounds in Results, not Discussion
+**** Can recap the importance of these results in Discussion, but need to present them first
+*** Results - can pare down applications
+**** Microbiome + cancer + malaria are gimmes
+**** Survival is a maybe, molecular network we probably don't need
+*** Comparison is really key
+**** Do this first, make this a priority
+**** About two other systems are appropriate for testing against
+*** A similar problem framing occurs in Christoph Lange's block linear models
+**** Fah worked on BBER, which blocks correlated SNP/gene tests for eQTL analysis
+*** Algorithm is right in spirit but needs notation help
+** For next time
+*** Run this on simple concrete data
+*** Show me the data
+*** Run a SIMPLE implementation of HAllA using VERY BASIC choices for each option
+*** Compare this to something even simpler like Pearson/Spearman correlation

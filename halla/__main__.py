@@ -1,20 +1,43 @@
-## native python packages 
+"""
+Run-time behavior of halla -- "batch mode" behavior
 
-import itertools 
+Run `halla.py --help` for more details 
+
+"""
+
 
 ## structural packages 
-
+import itertools 
+import logging 
+import argparse 
 from numpy import array 
-
-import halla 
-from halla.parser import Input, Output 
 import csv 
 import sys 
-import re 
 import os 
-import pprint 
+
+## internal dependencies 
+import halla
+from . import parser  
+from parser import Input, Output 
+
+
+#=============================================#
+# Wrapper  
+#=============================================#
 
 def _main():
+	""" 
+	
+	Design principle: be as flexible and modularized as possible. 
+
+	Have native Input/Ouput objects in the halla.parser module.
+
+	All the different runs and tests I am doing in batch mode should be available in the "run" directory with separate files, 
+
+	then loaded into memory like so: `execute( strFile ) ; function_call(  )`
+	
+	"""
+
 	if len(sys.argv[1:]) > 1:
 		strFile1, strFile2 = sys.argv[1:3]
 	elif len(sys.argv[1:]) == 1:
@@ -29,49 +52,10 @@ def _main():
 
 	H = halla.HAllA( aOutData1, aOutData2 )
 
-	print aOutData1[:2]
-	print aOutData2[:2]
 
-	print aOutType1[:2]
-	print aOutType2[:2]
-
-	#c_strOutputPath = "/home/ysupmoon/Dropbox/halla/output/"
-	#H.set_directory( c_strOutputPath )
-
-	def pr1():
-		
-		pOutHash = H.run_pr_test()
-		csvw = csv.writer( sys.stdout , csv.excel_tab )
-		astrHeaders = ["Var1", "Var2", "MID", "pPerm", "pPearson", "rPearson"]
-
-		#Write the header
-		csvw.writerow( astrHeaders )
-
-		for k,v in pOutHash.items():
-			iX, iY = k 
-			csvw.writerow( [Name1[iX], Name2[iY]] + [v[j] for j in astrHeaders[2:]] )
-
-		sys.stderr.write("Done!\n")
-		#sys.stderr.write( str( pOutHash ) ) 
-
-	def rev1():
-		H.run_rev1_test() 
-
-	def cake1():
-		H.run_caketest()
-
-	pr1()
-
-_main( )
-
-"""
-def halla( istm, ostm, dP, dPMI, iBootstrap ):
-
-        pData = dataset.CDataset( datum.CDatum.mutual_information_distance )
-        pData.open( istm )
-        hashClusters = pData.hierarchy( dPMI )
-        _halla_clusters( ostm, hashClusters, pData )
-        _halla_test( ostm, pData, hashClusters, dP, iBootstrap )
+#=============================================#
+# Execute 
+#=============================================#
 
 argp = argparse.ArgumentParser( prog = "halla.py",
         description = "Hierarchical All-against-All significance association testing." )
@@ -81,37 +65,31 @@ argp.add_argument( "istm",              metavar = "input.txt",
 argp.add_argument( "-o",                dest = "ostm",                  metavar = "output.txt",
         type = argparse.FileType( "w" ),        default = sys.stdout,
         help = "Optional output file for association significance tests" )
-argp.add_argument( "-p",                dest = "dP",                    metavar = "p_value",
+
+argp.add_argument( "-q",                dest = "dQ",                    metavar = "q_value",
         type = float,   default = 0.05,
-        help = "P-value for overall significance tests" )
-argp.add_argument( "-P",                dest = "dPMI",                  metavar = "p_mi",
-        type = float,   default = 0.05,
-        help = "P-value for permutation equivalence of MI clusters" )
-argp.add_argument( "-b",                dest = "iBootstrap",    metavar = "bootstraps",
+        help = "Q-value for overall significance tests" )
+
+argp.add_argument( "-i",                dest = "iIter",    metavar = "iterations",
         type = int,             default = 100,
-        help = "Number of bootstraps for significance testing" )
+        help = "Number of iterations for nonparametric significance testing" )
+
 argp.add_argument( "-v",                dest = "iDebug",                metavar = "verbosity",
         type = int,             default = 10 - ( logging.WARNING / 10 ),
         help = "Debug logging level; increase for greater verbosity" )
+
 argp.add_argument( "-f",                dest = "fFlag",         action = "store_true",
         help = "A flag set to true if provided" )
-argp.add_argument( "strString", metavar = "string",
-        help = "A required free text string" )
+argp.add_argument( "strString", 		dest = "strPreset", 	metavar = "preset",
+		type  = string, 		default = None,
+        help = "Instead of specifying parameters separately, use a preset" )
 
-__doc__ = "::\n\n\t" + argp.format_help( ).replace( "\n", "\n\t" ) + __doc__
+
+args = argp.parse_args( ) 
+_main( args.foo, args.foo, args.foo, args.foo )
 
 
-def _main( ):
-        args = argp.parse_args( )
+"""
 
-        lghn = logging.StreamHandler( sys.stderr )
-        lghn.setFormatter( logging.Formatter( '%(asctime)s %(levelname)10s %(module)s.%(funcName)s@%(lineno)d %(message)s' ) )
-        c_logrHAllA.addHandler( lghn )
-        c_logrHAllA.setLevel( ( 10 - args.iDebug ) * 10 )
-
-        halla( args.istm, args.ostm, args.dP, args.dPMI, args.iBootstrap )
-
-if __name__ == "__main__":
-        _main( )
 """
 

@@ -71,8 +71,8 @@ class HAllA():
 		self.hash_reduce_method = {"pca"	: None, 
 									"mca"	: None, }
 
-		# archetypes are presets set by the programmer which is determined to be useful for the user 
-		self.hash_archetype = {"default"	: None, 
+		# Presets set by the programmer which is determined to be useful for the user 
+		self.hash_preset = 	{"default"		: None, 
 								"time"		: None, 
 								"accuracy"	: None, 
 								"parallel"	: None, }
@@ -141,6 +141,9 @@ class HAllA():
 		"""
 		pass 
 
+	def _load_preset( self ):
+		pass 
+
 	#==========================================================#
 	# Set parameters 
 	#==========================================================# 
@@ -193,24 +196,7 @@ class HAllA():
 		pass 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+####################################################################################
 
 #=======================================================================#
 # LEGACY CODE -- to be incoroporated into later or to be tossed away 

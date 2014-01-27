@@ -775,6 +775,15 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 	Notes:
 
+
+	"""
+
+def old_all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", verbose = True ):
+	"""
+	Perform all-against-all on a hypothesis tree.
+
+	Notes:
+
 		Assumes that pArray1, pArray2 have been properly discretized, if mi-based metric is being used
 
 	"""
