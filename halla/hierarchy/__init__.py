@@ -769,7 +769,7 @@ def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "
 
 	return aOut 
 
-def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", verbose = True ):
+def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", correction = "BH", q = 0.05, verbose = True ):
 	"""
 	Perform all-against-all on a hypothesis tree.
 
@@ -778,7 +778,105 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 	"""
 
-def old_all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", verbose = True ):
+	aOut = [] ## Full log 
+
+	aFinal = [] ## Only the ones that passes test 
+
+	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
+						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
+						"parametric_test" : halla.stats.parametric_test}
+
+	strMethod = method 
+
+	pMethod = phashMethods[strMethod]
+
+	def _actor( pNode ):
+		"""
+		Performs a certain action at the node
+
+			* E.g. compares two bags, reports distance and p-values 
+		"""
+
+		aIndicies = pNode.get_data( ) 
+
+		aIndiciesMapped = map( array, pNode.get_data( ) )
+
+		dP = pMethod( pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]] )
+
+		aOut.append( [aIndicies, dP] )
+
+		return dP 
+
+	def _pursuer( apChildren, aP, bP, fQ ):
+		"""
+		Decides if you want to continue pursuing down recursively
+
+		Right now, do as follows: 
+
+			* if not bP and no current passes test, continue on 
+			* elif not bP and passes test, change bP to True and continue 
+			* elif bP and passes test, go on
+			* else bP and does not pass test, STOP 
+
+		Returns indices and status of children to be purused 
+
+			* E.g. aOut = [(True, False), (True, True), (True, False), (True, False)]
+
+		IMPORTANT:
+
+			* Right now, just greedily go down, without any filtration. Maybe change this to the smallest p-value 
+		"""
+		
+		bPPrior = bP
+
+		iLen = length( aP )
+
+		aBool = [[True] for _ in iLen] 
+
+		bTest = False 
+
+		aP_adjusted = stats.p_adjust( aP ) 
+
+		# See if children pass test 
+		for i, p in enumerate( aP_adjusted ): 
+			if p <= fQ:
+				aBool[i].append( True )
+			else:
+				#if bPPrior: 
+					### Stop criterion; previous p-value cutoff passed, but now failed 
+					
+				aBool[i].append( False )
+
+		return aBool 
+
+	def _fw_operator( pNode, bP = False ):
+		"""
+		Family-wise operator
+
+			* Gets fed in a node, do stuff with its children 
+		"""
+
+		pChildren = pNode.get_children( )
+		
+		if pChildren:
+
+			aP = [ _actor( c ) for c in pChildren ]
+			
+			aP_adjusted = stats.p_adjust( aP )
+
+			aPursuer = _pursuer( pChildren, aP_adjusted, bP=bP, fQ = q )
+
+			for j, tB in enumerate( aPursuer ):
+				if tB[0]:
+					_fw_operator( pChildren[j], tB[1] )
+
+	### This should give the exactly same output as before, since there is no filtration
+
+	_fw_operator( pTree )
+
+	return aOut 
+	
+def all_all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", verbose = True ):
 	"""
 	Perform all-against-all on a hypothesis tree.
 
