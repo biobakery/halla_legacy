@@ -107,7 +107,9 @@ class HAllA():
 		self.hash_preset = 	{"default"		: self.__preset_default, 
 								"time"		: self.__preset_time, 
 								"accuracy"	: self.__preset_accuracy, 
-								"parallel"	: self.__preset_parallel, }
+								"parallel"	: self.__preset_parallel, 
+								"flat"		: self.__preset_flat,
+							}
 
 		
 		#==================================================================#
@@ -209,6 +211,10 @@ class HAllA():
 		self.meta_hypothesis_tree = self.m( self.bp( self.m(self.meta_data_tree, lambda x: [x]), couple_tree ), lambda y: y[0] ) 
 		## remember, `couple_tree` returns object wrapped in list 
 		return self.meta_hypothesis_tree 
+
+	def _naive_all_against_all( self ):
+		self.meta_alla = naive_all_against_all( self.meta_array[0], self.meta_array[1] )
+		return self.meta_alla 
 
 	def _all_against_all( self ):
 		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1] ) 
@@ -371,8 +377,7 @@ class HAllA():
 		"""
 
 		self._featurize( )
-		self._all_against_all( )
-
+		return self._naive_all_against_all( )
 
 	#==========================================================#
 	# Public Functions / Main Pipeline  
@@ -401,7 +406,7 @@ class HAllA():
 			sys.stderr.write( "\t".join( [item,str(getattr( self, item ))] ) + "\n" ) 
 
 
-	def run( self, method = "custom" ):
+	def run( self, strMethod = "default" ):
 		"""
 		Main run module 
 
@@ -436,21 +441,11 @@ class HAllA():
 
 		"""
 
-		bRun = True 
-		strPrefix = "__preset_"
-
-
-		if method == "custom":
-			bRun = True  
-		else:
-			try:
-				getattr(self, strPrefix + method)( )
-				bRun = True 
-			except Exception:
-				bRun = False 
-				raise Exception( "Invalid Method.")
-
-		return self._run( )
+		try:
+			pMethod = self.hash_preset[strMethod]
+			return pMethod( )
+		except KeyError:			
+			raise Exception( "Invalid Method.")
 
 
 ####################################################################################

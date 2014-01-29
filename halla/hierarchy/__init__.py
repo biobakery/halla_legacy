@@ -768,19 +768,24 @@ def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "
 
 	return aOut 
 
-def naive_all_against_all( pArray1, pArray2, metric = "norm_mid" ):
+def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_representative" ):
+
+	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
+						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
+						"parametric_test" : halla.stats.parametric_test}
 
 	iRow = len(pArray1)
 	iCol = len(pArray2)
 
-	X = numpy.zeros((iRow,iCol))
+	aOut = [] 
 
 	for i,j in itertools.product( range(iRow), range(iCol) ):
-		pDist = getattr( halla.distance, metric )
-		fVal = pDist( pArray[i], pArray[j] )
-		X[i][j] = fVal ; X[j][i] = fVal 
 
-	return X 
+		pDist = phashMethods[strMethod]
+		fVal = pDist( array([pArray1[i]]), array([pArray2[j]]) )
+		aOut.append([(i,j), fVal])
+
+	return aOut 
 
 def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", correction = "BH", q = 0.05, verbose = True ):
 	"""
