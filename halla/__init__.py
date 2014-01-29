@@ -121,14 +121,7 @@ class HAllA():
 		self.meta_data_tree = None 
 		self.meta_hypothesis_tree = None 
 		self.meta_alla = None # results of all-against-all
-
-		#==================================================================#
-		# Output 
-		#==================================================================#
-
-		self.directory = None 
-		self.hashOut = {} 
-		self.tableOut = None
+		self.meta_out = None # final output array; some methods (e.g. all_against_all) have multiple outputs piped to both self.meta_alla and self.meta_out 
 
 		## END INIT 
 
