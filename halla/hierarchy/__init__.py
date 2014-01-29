@@ -768,6 +768,20 @@ def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "
 
 	return aOut 
 
+def naive_all_against_all( pArray1, pArray2, metric = "norm_mid" ):
+
+	iRow = len(pArray1)
+	iCol = len(pArray2)
+
+	X = numpy.zeros((iRow,iCol))
+
+	for i,j in itertools.product( range(iRow), range(iCol) ):
+		pDist = getattr( halla.distance, metric )
+		fVal = pDist( pArray[i], pArray[j] )
+		X[i][j] = fVal ; X[j][i] = fVal 
+
+	return X 
+
 def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", correction = "BH", q = 0.05, verbose = True ):
 	"""
 	Perform all-against-all on a hypothesis tree.
@@ -955,17 +969,6 @@ def randtree( n = 10, sparsity = 0.5, obj = True, disc = True ):
 
 def legacy():
 
-	def naive_all_against_all( pArray, metric = "norm_mi" ):
-
-		iRow = len(pArray)
-
-		X = numpy.zeros((iRow,iRow))
-
-		for i,j in itertools.product( range(iRow), range(iRow) ):
-			fVal = halla.distance.norm_mi( pArray[i], pArray[j] )
-			X[i][j] = fVal ; X[j][i] = fVal 
-
-		return X 
 
 	def all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi"):
 		"""

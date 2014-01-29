@@ -91,7 +91,7 @@ class HAllA():
 		# Static Objects  
 		#==================================================================#
 
-		self.__version__ 		= 0.1 
+		self.__version__ 		= "0.1.1"
 
 		self.hash_reduce_method = {"pca"	: pca, 
 									"mca"	: mca, }
@@ -118,6 +118,7 @@ class HAllA():
 		self.meta_feature = None
 		self.meta_data_tree = None 
 		self.meta_hypothesis_tree = None 
+		self.meta_alla = None # results of all-against-all
 
 		#==================================================================#
 		# Output 
@@ -148,11 +149,30 @@ class HAllA():
 			return array( [pFunc(item) for item in pArray] ) 
 
 	@staticmethod 
-	def r( ):
+	def bp( pArray, pFunc, axis = 0 ):
+		"""
+		Map _by pairs_ ; i.e. apply pFunc over all possible pairs in pArray 
+		"""
+
+		if bool(axis): 
+			pArray = pArray.T
+
+		pIndices = itertools.combinations( range(pArray.shape[0]), 2 )
+
+		return array([pFunc(pArray[i],pArray[j]) for i,j in pIndices])
+
+	@staticmethod 
+	def r( pArray, pFunc, axis = 0 ):
 		"""
 		Reduce over array 
+
+		pFunc is X x Y -> R 
+
 		"""
-		pass 
+		if bool(axis):
+			pArray = pArray.T
+
+		return reduce( pFunc, pArray )
 
 	@staticmethod 
 	def rd( ):
@@ -164,19 +184,6 @@ class HAllA():
 	#==========================================================#
 	# Helper Functions 
 	#==========================================================# 
-
-
-	#X,Y = self.meta_array 
-	#dX, dY = self._discretize( )
-
-	#tX, tY = hclust( dX, bTree = True ), hclust( dY, bTree = True )
-
-	#tH = couple_tree( [tX], [tY] )[0]
-
-	#aOut = all_against_all( tH, X, Y )
-
-	#return aOut 
-
 
 	def _discretize( self ):
 		self.meta_feature = self.m( self.meta_array, discretize )
@@ -195,30 +202,31 @@ class HAllA():
 			return pMethod( )
 
 	def _hclust( self ):
-		pass 
+		self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x,bTree=True) )
+		return self.meta_data_tree 
 
 	def _couple( self ):
-		pass 
+		self.meta_hypothesis_tree = self.m( self.bp( self.m(self.meta_data_tree, lambda x: [x]), couple_tree ), lambda y: y[0] ) 
+		## remember, `couple_tree` returns object wrapped in list 
+		return self.meta_hypothesis_tree 
 
 	def _all_against_all( self ):
-		pass 
+		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1] ) 
+		## Choose to keep to 2 arrays for now -- change later to generalize 
+		return self.meta_alla 
 
 	def _report( self ):
 		"""
 		helper function for reporting the output to the user 
 		"""
-		pass 
+		return self.meta_alla  
 
 	def _run( self ):
 		"""
 		helper function: runs vanilla run of HAllA _as is_. 
 		"""
 
-		self._featurize( )
-		self._hclust( )
-		self._couple( )
-		self._alla( )
-		return self._report( )
+		pass 
 
 	#==========================================================#
 	# Load and set data 
@@ -298,7 +306,7 @@ class HAllA():
 		"""
 
 		## Constants for this preset 
-		fQ = 0.05
+		fQ = 0.1
 		pDistance = adj_mid 
 		iIter = 100
 		strReduce = "pca"
@@ -315,6 +323,14 @@ class HAllA():
 		self.set_p_adjust_method( strAdjust )
 		self.set_ebar_method( strEbar )
 
+		## Run 		
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( )
+		return self._report( )
+
+
 	def __preset_default( self ):
 		return self.__preset_mid( )
 
@@ -322,10 +338,40 @@ class HAllA():
 		pass 
 
 	def __preset_accuracy( self ):
-		pass 
+		## Constants for this preset 
+		fQ = 0.05
+		pDistance = adj_mid 
+		iIter = 1000
+		strReduce = "pca"
+		strStep = "uniform"
+		strAdjust = "BH"
+		strEbar = "permutation"
 
+		## Set 
+		self.set_q( fQ ) 
+		self.set_metric( adj_mid )
+		self.set_iterations( iIter )
+		self.set_reduce_method( strReduce )
+		self.set_step_function( strStep )
+		self.set_p_adjust_method( strAdjust )
+		self.set_ebar_method( strEbar )
+
+		## Run 
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		return self._all_against_all( )
+ 
 	def __preset_parallel( self ):
 		pass 
+
+	def __preset_flat( self ):
+		"""
+		Regular all-against-all pairwise, without hierarchical clustering 
+		"""
+
+		self._featurize( )
+		self._all_against_all( )
 
 
 	#==========================================================#
@@ -391,30 +437,20 @@ class HAllA():
 		"""
 
 		bRun = True 
+		strPrefix = "__preset_"
 
-		if not method == "custom":
+
+		if method == "custom":
 			bRun = True  
 		else:
 			try:
-				getattr(self, method)( )
+				getattr(self, strPrefix + method)( )
 				bRun = True 
 			except Exception:
 				bRun = False 
 				raise Exception( "Invalid Method.")
 
 		return self._run( )
-
-
-		#X,Y = self.meta_array 
-		#dX, dY = self._discretize( )
-
-		#tX, tY = hclust( dX, bTree = True ), hclust( dY, bTree = True )
-
-		#tH = couple_tree( [tX], [tY] )[0]
-
-		#aOut = all_against_all( tH, X, Y )
-
-		#return aOut 
 
 
 ####################################################################################

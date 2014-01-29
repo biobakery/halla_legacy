@@ -45,9 +45,18 @@ def pca( pArray, iComponents = 1 ):
 
 	 """
 	 from sklearn.decomposition import PCA
-	 pPCA = PCA( n_components = iComponents )
-	 ## doing this matrix inversion twice doesn't seem to be a good idea 
-	 return pPCA.fit_transform( pArray.T ).T 
+
+	 try:
+	 	iRow, iCol = pArray.shape 
+	 	pPCA = PCA( n_components = iComponents )
+		## doing this matrix inversion twice doesn't seem to be a good idea 
+		return pPCA.fit_transform( pArray.T ).T 
+
+	 except ValueError:
+	 	iRow = pArray.shape
+	 	iCol = None 
+
+	 	return pArray
 
 def mca( pArray, iComponents = 1 ):
 	"""
