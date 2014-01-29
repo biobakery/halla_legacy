@@ -14,10 +14,11 @@ Global namespace conventions:
 
 Design direction: 
 
-	* never ever import anything directly from an external module; 
+	* Never ever import anything directly from an external module; 
 	first wrap around interal module, so that abstraction even within 
 	development is strictly enforced. 
-
+	* Try to keep around string pointers as much as possible, as opposed to pointers to actual implementation, this string can then be passed 
+	to hashes within specific functions in external submodules. 
 """
 
 ## native python packages 
@@ -58,32 +59,50 @@ class HAllA():
 		## Write so that you can feed in a tuple of numpy.ndarrays; in practice the core unit of comparison is always
 		## the pair of arrays
 
-		## Parameters  
+		#==================================================================#
+		# Parameters  
+		#==================================================================#
+
 		self.q = 0.05 
 		self.distance = adj_mid 
 		self.iterations = 100		
 		self.reduce_method = "pca" 
 		self.step_function = "uniform"
-
+		self.p_adjust_method = "BH"
 		self.ebar_method = "permutation" #method to generate error bars 
 		
+		#------------------------------------------------------------------#
+		# Discretization Parameters 
+		#------------------------------------------------------------------#
+
+		self.
+
 		## Static Meta Objects 
-		self.hash_reduce_method = {"pca"	: None, 
-									"mca"	: None, }
+		self.hash_reduce_method = {"pca"	: pca, 
+									"mca"	: mca, }
 
 		self.hash_metric 		= {"norm_mid" : norm_mid }
 
 		# Presets set by the programmer which is determined to be useful for the user 
-		self.hash_preset = 	{"default"		: None, 
-								"time"		: None, 
-								"accuracy"	: None, 
-								"parallel"	: None, }
+		self.hash_preset = 	{"default"		: self.__preset_default, 
+								"time"		: self.__preset_time, 
+								"accuracy"	: self.__preset_accuracy, 
+								"parallel"	: self.__preset_parallel, }
 
-		## Mutable Meta Objects 
+		
+		#==================================================================#
+		# Mutable Meta Objects  
+		#==================================================================#
+ 
 		self.meta_array = array( ta ) if ta else None 
 		self.meta_discretize = None
+		self.meta_data_tree = None 
+		self.meta_hypothesis_tree = None 
 
-		## Output 
+		#==================================================================#
+		# Output 
+		#==================================================================#
+
 		self.directory = None 
 		self.hashOut = {} 
 		self.tableOut = None
@@ -143,8 +162,17 @@ class HAllA():
 		"""
 		pass 
 
-	def _load_preset( self ):
-		pass 
+	#==========================================================#
+	# Load and set data 
+	#==========================================================# 
+
+	def set_data( self, *ta ):
+		if ta:
+			self.meta_array = ta 
+			return self.meta_array 
+		else:
+			raise Exception("Data empty")
+
 
 	#==========================================================#
 	# Set parameters 
@@ -153,6 +181,16 @@ class HAllA():
 	def set_q( self, fQ ):
 		self.q = fQ
 		return self.q 
+
+	def set_p_adjust_method( self, strMethod ):
+		"""
+		Set multiple hypothesis test correction method 
+
+			{"BH", "FDR", "Bonferroni", "BHY"}
+		"""
+
+		self.p_adjust_method = strMethod 
+		return self.p_adjust_method 
 
 	def set_metric( self, pMetric ):
 		if isinstance( pMetric, str ):
@@ -165,24 +203,43 @@ class HAllA():
 		self.m_iIter = iIterations
 		return self.iterations 
 
+	def set_ebar_method( self, strMethod ):
+		self.ebar_method = strMethod 
+		return self.ebar_method 
+
 	def set_step_function( self, strFun ):
 		"""
 		set step function used to couple tree to make hypothesis tree 
 		"""
 		pass 
 
-	def set_preset( self ):
-		pass 
+	def set_preset( self, strPreset ):
+		try:
+			pPreset = self.hash_preset[strPreset] 
+			pPreset() ## run method 
+		except KeyError:
+			raise Exception("Preset not found. For the default preset, try set_preset('default')")
 
 	#==========================================================#
 	# Presets  
 	#==========================================================# 
+	"""
+	These are hard-coded presets deemed useful for the user 
+	"""
+
 
 	def __preset_default( self ):
 		pass 
 
 	def __preset_time( self ):
 		pass 
+
+	def __preset_accuracy( self ):
+		pass 
+
+	def __preset_parallel( self ):
+		pass 
+
 
 	#==========================================================#
 	# Main Pipeline 
@@ -191,17 +248,49 @@ class HAllA():
 	def get_attribute( self ):
 		"""
 		returns current attributes and statistics about HAllA object implementation 
+
+			* Print parameters in a text-table style 
 		"""
 		pass 
 
-	def run( self ):
+	def run( self, method = "custom" ):
 		"""
 		Main run module 
+
+		Parameters
+		------------
+
+			method : str 
+				Specifies what method to use; e.g. which preset to follow 
+				{"default", "custom", "time", "accuracy", "parallel"}
+
+				* Custom: 
+				* Default:  
+
+		Returns 
+		-----------
+
+			Z : HAllA output object 
+		
+		Notes 
+		---------
+
+		* Main steps
+
+			+ Parse input and clean data 
+			+ Feature selection (discretization for MI, beta warping, copula selection)
+			+ Hierarchical clustering 
+			+ Hypothesis generation (tree coupling via appropriate step function)
+			+ Hypothesis testing and agglomeration of test statistics, with multiple hypothesis correction 
+			+ Parse output 
+
+		* Visually, looks much nicer and is much nicely wrapped if functions are entirely self-contained and we do not have to pass around pointers 
+
 		"""
 		X,Y = self.meta_array 
 		dX, dY = self._discretize( )
 
-		tX, tY = hclust( X, bTree = True ), hclust( Y, bTree = True )
+		tX, tY = hclust( dX, bTree = True ), hclust( dY, bTree = True )
 
 		tH = couple_tree( [tX], [tY] )[0]
 

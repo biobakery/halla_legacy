@@ -40,6 +40,8 @@ General Notes
 * Remember to make functions as intuitive as possible: there exist (1) structure hypothesis tree and (2) actual data arrays. Should **never** have to carry around discretized and raw arrays if written properly. 
     + Should keep it as an object inside the main halla object, for separate functions that I write, I should adhere to the "simple is best" New Jersey style convention. 
 
+* Should keep more specific hashes in specified modules, and not in the main HAllA object 
+
 Old Runtime
 ----------------
 
