@@ -53,11 +53,14 @@ import matplotlib
 class HAllA():
 	
 	def __init__( self, *ta ): 
+		"""
+		Think about lazy implementation to save time during run-time;
+		Don't have to keep everything in memory 
+		Write so that you can feed in a tuple of numpy.ndarrays; in practice the core unit of comparison is always
+		the pair of arrays
+		"""
 
-		## Think about lazy implementation to save time during run-time;
-		## Don't have to keep everything in memory 
-		## Write so that you can feed in a tuple of numpy.ndarrays; in practice the core unit of comparison is always
-		## the pair of arrays
+		## BEGIN INIT
 
 		#==================================================================#
 		# Parameters  
@@ -72,18 +75,35 @@ class HAllA():
 		self.ebar_method = "permutation" #method to generate error bars 
 		
 		#------------------------------------------------------------------#
-		# Discretization Parameters 
+		# Discretization  
 		#------------------------------------------------------------------#
 
-		self.
+		self.meta_disc_skip = None # which indices to skip when discretizing? 
 
-		## Static Meta Objects 
+
+		#------------------------------------------------------------------#
+		# Feature Normalization   
+		#------------------------------------------------------------------#
+
+		## Beta warping, copulas? 
+
+		#==================================================================#
+		# Static Objects  
+		#==================================================================#
+
+		self.__version__ 		= 0.1 
+
 		self.hash_reduce_method = {"pca"	: pca, 
 									"mca"	: mca, }
 
 		self.hash_metric 		= {"norm_mid" : norm_mid }
 
-		# Presets set by the programmer which is determined to be useful for the user 
+		self.keys_attribute = ["__version__", "q","distance","iterations", "reduce_method", "step_function", "p_adjust_method","ebar_method"]
+
+		#==================================================================#
+		# Presets
+		#==================================================================#
+
 		self.hash_preset = 	{"default"		: self.__preset_default, 
 								"time"		: self.__preset_time, 
 								"accuracy"	: self.__preset_accuracy, 
@@ -95,7 +115,7 @@ class HAllA():
 		#==================================================================#
  
 		self.meta_array = array( ta ) if ta else None 
-		self.meta_discretize = None
+		self.meta_feature = None
 		self.meta_data_tree = None 
 		self.meta_hypothesis_tree = None 
 
@@ -106,6 +126,8 @@ class HAllA():
 		self.directory = None 
 		self.hashOut = {} 
 		self.tableOut = None
+
+		## END INIT 
 
 	#==========================================================#
 	# Static Methods 
@@ -120,40 +142,65 @@ class HAllA():
 		if bool(axis): 
 			pArray = pArray.T
 			# Set the axis as per numpy convention 
-
-		if type(pFunc) == np.ndarray:
+		if isinstance( pFunc ,np.ndarray ):
 			return pArray[pFunc]
 		else: #generic function type
 			return array( [pFunc(item) for item in pArray] ) 
 
 	@staticmethod 
 	def r( ):
+		"""
+		Reduce over array 
+		"""
 		pass 
 
 	@staticmethod 
 	def rd( ):
+		"""
+		General reduce-dimension method 
+		"""
 		pass 
 
 	#==========================================================#
 	# Helper Functions 
 	#==========================================================# 
 
+
+	#X,Y = self.meta_array 
+	#dX, dY = self._discretize( )
+
+	#tX, tY = hclust( dX, bTree = True ), hclust( dY, bTree = True )
+
+	#tH = couple_tree( [tX], [tY] )[0]
+
+	#aOut = all_against_all( tH, X, Y )
+
+	#return aOut 
+
+
 	def _discretize( self ):
-		self.meta_discretize = self.m( self.meta_array, discretize )
+		self.meta_feature = self.m( self.meta_array, discretize )
 		# Should do a better job at detecting whether dataset is categorical or continuous
 		# Take information from the parser module 
-		return self.meta_discretize 
+		return self.meta_feature
+
+	def _featurize( self, strMethod = "_discretize" ):
+		pMethod = None 
+		try:
+			pMethod = getattr( self, strMethod )
+		except AttributeError:
+			raise Exception("Invalid Method.")
+
+		if pMethod:
+			return pMethod( )
 
 	def _hclust( self ):
 		pass 
 
-	def _tcouple( self ):
+	def _couple( self ):
 		pass 
 
 	def _all_against_all( self ):
-		pass 
-
-	def _compare( self ):
 		pass 
 
 	def _report( self ):
@@ -161,6 +208,17 @@ class HAllA():
 		helper function for reporting the output to the user 
 		"""
 		pass 
+
+	def _run( self ):
+		"""
+		helper function: runs vanilla run of HAllA _as is_. 
+		"""
+
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._alla( )
+		return self._report( )
 
 	#==========================================================#
 	# Load and set data 
@@ -199,6 +257,13 @@ class HAllA():
 			self.distance = pMetric 
 		return self.distance 
 
+	def set_reduce_method( self, strMethod ):
+		if isinstance( strMethod, str ):
+			self.reduce_method = self.hash_reduce_method[strMethod]
+		else:
+			self.reduce_method = strMethod 
+		return self.reduce_method
+
 	def set_iterations( self, iIterations ):
 		self.m_iIter = iIterations
 		return self.iterations 
@@ -227,9 +292,31 @@ class HAllA():
 	These are hard-coded presets deemed useful for the user 
 	"""
 
+	def __preset_mid( self ):
+		"""
+		Mutual Information Distance Preset 
+		"""
+
+		## Constants for this preset 
+		fQ = 0.05
+		pDistance = adj_mid 
+		iIter = 100
+		strReduce = "pca"
+		strStep = "uniform"
+		strAdjust = "BH"
+		strEbar = "permutation"
+
+		## Set 
+		self.set_q( fQ ) 
+		self.set_metric( adj_mid )
+		self.set_iterations( iIter )
+		self.set_reduce_method( strReduce )
+		self.set_step_function( strStep )
+		self.set_p_adjust_method( strAdjust )
+		self.set_ebar_method( strEbar )
 
 	def __preset_default( self ):
-		pass 
+		return self.__preset_mid( )
 
 	def __preset_time( self ):
 		pass 
@@ -242,8 +329,20 @@ class HAllA():
 
 
 	#==========================================================#
-	# Main Pipeline 
+	# Public Functions / Main Pipeline  
 	#==========================================================# 	
+
+	def get_data( self ):
+		return self.meta_array 
+
+	def get_feature( self ):
+		return self.meta_feature
+
+	def get_tree( self ):
+		return self.meta_data_tree
+
+	def get_hypothesis( self ):
+		return self.meta_hypothesis_tree
 
 	def get_attribute( self ):
 		"""
@@ -251,7 +350,10 @@ class HAllA():
 
 			* Print parameters in a text-table style 
 		"""
-		pass 
+		
+		for item in self.keys_attribute:
+			sys.stderr.write( "\t".join( [item,str(getattr( self, item ))] ) + "\n" ) 
+
 
 	def run( self, method = "custom" ):
 		"""
@@ -287,16 +389,32 @@ class HAllA():
 		* Visually, looks much nicer and is much nicely wrapped if functions are entirely self-contained and we do not have to pass around pointers 
 
 		"""
-		X,Y = self.meta_array 
-		dX, dY = self._discretize( )
 
-		tX, tY = hclust( dX, bTree = True ), hclust( dY, bTree = True )
+		bRun = True 
 
-		tH = couple_tree( [tX], [tY] )[0]
+		if not method == "custom":
+			bRun = True  
+		else:
+			try:
+				getattr(self, method)( )
+				bRun = True 
+			except Exception:
+				bRun = False 
+				raise Exception( "Invalid Method.")
 
-		aOut = all_against_all( tH, X, Y )
+		return self._run( )
 
-		return aOut 
+
+		#X,Y = self.meta_array 
+		#dX, dY = self._discretize( )
+
+		#tX, tY = hclust( dX, bTree = True ), hclust( dY, bTree = True )
+
+		#tH = couple_tree( [tX], [tY] )[0]
+
+		#aOut = all_against_all( tH, X, Y )
+
+		#return aOut 
 
 
 ####################################################################################
