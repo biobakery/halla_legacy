@@ -66,7 +66,7 @@ class HAllA():
 		# Parameters  
 		#==================================================================#
 
-		self.q = 0.05 
+		self.q = 0.1
 		self.distance = adj_mid 
 		self.iterations = 100		
 		self.reduce_method = "pca" 
@@ -105,6 +105,7 @@ class HAllA():
 		#==================================================================#
 
 		self.hash_preset = 	{"default"		: self.__preset_default, 
+								"mid"		: self.__preset_mid,
 								"time"		: self.__preset_time, 
 								"accuracy"	: self.__preset_accuracy, 
 								"parallel"	: self.__preset_parallel, 

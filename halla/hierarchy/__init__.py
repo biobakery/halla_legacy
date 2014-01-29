@@ -787,12 +787,13 @@ def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_re
 
 	return aOut 
 
-def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", correction = "BH", q = 0.05, verbose = True ):
+def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", correction = "BH", q = 0.1, 
+	pursuer_method = "nonparameteric", verbose = True ):
 	"""
 	Perform all-against-all on a hypothesis tree.
 
 	Notes:
-
+		Right now, return aFinal, aOut 
 
 	"""
 
@@ -836,7 +837,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			* elif bP and passes test, go on
 			* else bP and does not pass test, STOP 
 
-		Returns indices and status of children to be purused 
+		Returns boolean value: (go down?, has the q-val criterion been met?)
 
 			* E.g. aOut = [(True, False), (True, True), (True, False), (True, False)]
 
@@ -849,25 +850,31 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 		iLen = len( aP )
 
-		aBool = [[True] for _ in range(iLen)] 
+		iMin = np.argmin( aP )
 
-		bTest = False 
+		aBool = [] 
+
+		for i in range(iLen):
+			aBool.append( [1] if i == iMin else [0] )
+
+		bTest = 0 ## By default, do not know if q-val has been met 
 
 		aP_adjusted = p_adjust( aP ) 
 
 		# See if children pass test 
 		for i, p in enumerate( aP_adjusted ): 
 			if p <= fQ:
-				aBool[i].append( True )
+				aBool[i].append( 1 )
+				aFinal.append( [apChildren[i].get_data(), aP_adjusted[i]] )
 			else:
 				#if bPPrior: 
 					### Stop criterion; previous p-value cutoff passed, but now failed 
 					
-				aBool[i].append( False )
+				aBool[i].append( 0 )
 
 		return aBool 
 
-	def _fw_operator( pNode, bP = False ):
+	def _fw_operator( pNode, bP = 0 ):
 		"""
 		Family-wise operator
 
@@ -885,14 +892,18 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			aPursuer = _pursuer( pChildren, aP_adjusted, bP=bP, fQ = q )
 
 			for j, tB in enumerate( aPursuer ):
-				if tB[0]:
-					_fw_operator( pChildren[j], tB[1] )
 
-	### This should give the exactly same output as before, since there is no filtration
+				#if tB[0] == 1:
+				#	_fw_operator( pChildren[j], tB[1] ) ##Why the hell is this not workign?  Stupid python bug
+				
+				_fw_operator( pChildren[j], tB[1] ) 
 
-	_fw_operator( pTree )
+	### bP_old = True; if not bP_new or no more children, then STOP. Append to aFinal. This is the only way to be appended here. 
+	### Note how in the current implementation the first node is automatically passed; this is probably desired behavior anyways; can add more functionality later. 
 
-	return aOut 
+	_fw_operator( pTree ) 
+
+	return aFinal, aOut
 
 def all_all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", verbose = True ):
 	"""
