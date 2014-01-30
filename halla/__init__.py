@@ -1,4 +1,5 @@
 """
+
 HAllA: Hiearchical All-against All 
 ==============================================
 
@@ -39,6 +40,7 @@ from test import *
 from stats import * 
 from distance import * 
 from hierarchy import * 
+from plot import * 
 
 ## statistics packages 
 
@@ -91,14 +93,29 @@ class HAllA():
 		# Static Objects  
 		#==================================================================#
 
+		self.__description__ 	= """
+		  _    _          _ _          
+		 | |  | |   /\   | | |   /\    
+		 | |__| |  /  \  | | |  /  \   
+		 |  __  | / /\ \ | | | / /\ \  
+		 | |  | |/ ____ \| | |/ ____ \ 
+		 |_|  |_/_/    \_\_|_/_/    \_\
+		                               
+
+		HAllA Object for hierarchical all-against-all association testing 
+		"""
+
+		self.__doc__			= __doc__ 
 		self.__version__ 		= "0.1.1"
+		self.__author__			= ["YS Joseph Moon", "Curtis Huttenhower"]
+		self.__contact__		= "moon.yosup@gmail.com"
 
 		self.hash_reduce_method = {"pca"	: pca, 
 									"mca"	: mca, }
 
 		self.hash_metric 		= {"norm_mid" : norm_mid }
 
-		self.keys_attribute = ["__version__", "q","distance","iterations", "reduce_method", "step_function", "p_adjust_method","ebar_method"]
+		self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q","distance","iterations", "reduce_method", "step_function", "p_adjust_method","ebar_method"]
 
 		#==================================================================#
 		# Presets
@@ -398,7 +415,6 @@ class HAllA():
 		
 		for item in self.keys_attribute:
 			sys.stderr.write( "\t".join( [item,str(getattr( self, item ))] ) + "\n" ) 
-
 
 	def run( self, strMethod = "default" ):
 		"""
