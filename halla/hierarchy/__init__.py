@@ -36,7 +36,7 @@ import pylab as pl
 import random  
 from numpy.random import normal 
 from scipy.misc import * 
-import pandas as pd 
+
 
 ## hutlab tools 
 

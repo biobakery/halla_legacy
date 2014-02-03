@@ -18,7 +18,7 @@ import numpy as np
 from numpy import array 
 import scipy as sp 
 from scipy.stats import percentileofscore
-import rpy 
+import rpy
 from numpy.random import shuffle, binomial, normal, multinomial 
 
 # ML plug-in 
