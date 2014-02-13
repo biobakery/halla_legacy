@@ -795,6 +795,26 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 	Notes:
 		Right now, return aFinal, aOut 
 
+
+	Parameters
+	---------------
+
+		pTree 
+		pArray1
+		pArray2
+		method 
+		metric
+		correction
+		pursuer_method 
+		verbose 
+
+	Returns 
+	----------
+
+		Z_final, Z_all: numpy.ndarray
+			Bags of associations of _final_ associations, and _all_ associations respectively. 
+
+
 	"""
 
 	aOut = [] ## Full log 

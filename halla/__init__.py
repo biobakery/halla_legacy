@@ -140,6 +140,7 @@ class HAllA():
 		self.meta_hypothesis_tree = None 
 		self.meta_alla = None # results of all-against-all
 		self.meta_out = None # final output array; some methods (e.g. all_against_all) have multiple outputs piped to both self.meta_alla and self.meta_out 
+		self.meta_summary = None # summary statistics 
 
 		## END INIT 
 
@@ -173,6 +174,19 @@ class HAllA():
 		pIndices = itertools.combinations( range(pArray.shape[0]), 2 )
 
 		return array([pFunc(pArray[i],pArray[j]) for i,j in pIndices])
+
+	@staticmethod 
+	def bc( pArray1, pArray2, pFunc, axis = 0 ):
+		"""
+		Map _by cross product_ for ; i.e. apply pFunc over all possible pairs in pArray1 X pArray2 
+		"""
+
+		if bool(axis): 
+			pArray1, pArray2 = pArray1.T, pArray2.T
+
+		pIndices = itertools.product( range(pArray1.shape[0]), range(pArray2.shape[0]) )
+
+		return array([pFunc(pArray1[i],pArray2[j]) for i,j in pIndices])
 
 	@staticmethod 
 	def r( pArray, pFunc, axis = 0 ):
@@ -232,11 +246,68 @@ class HAllA():
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
 
+	def _summary_statistics( self ): 
+		"""
+		provides summary statistics on the output given by _all_against_all 
+		"""
+
+		def __add_pval_product_wise( _x, _y, _fP ):
+			S[_x][_y] = _fP ; S[_y][_x] = _fP 
+
+		def __get_pval_from_bags( _Z, _strMethod = None ):
+			"""
+			
+			_strMethod: str 
+				{"default",}
+
+			The default option does the following: go through the bags, treating the p-value for each bag pair as applying to all the variables inside the bag. 
+			If new instance arises (e.g. [[3],[5]] following [[3,5,6],[3,5,6]] ), override the p-value to the one with more precision. 
+			"""
+
+			for aLine in _Z:
+				print aLine 
+				#break
+				aaBag, fAssoc = aLine
+				aBag1, aBag2 = aaBag 
+				aBag1, aBag2 = array(aBag1), array(aBag2)
+				self.bc( aBag1, aBag2, pFunc = lambda x,y: __add_pval_product_wise( _x = x, _y = y, _fP = fAssoc ) )
+
+		X = self.meta_array[0]
+		Y = self.meta_array[1] 
+		iX, iY = X.shape[0], Y.shape[0]
+		
+		S = numpy.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
+
+		Z = self.meta_alla 
+		Z_final, Z_all = Z ## Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree 
+		Z_final, Z_all = array(Z_final),array(Z_all)
+		assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
+
+		if Z_final.any():
+			print "Using only final p-values"
+
+			__get_pval_from_bags( Z_final )
+			assert( S.any() )
+			self.meta_summary = [S]
+			return self.meta_summary
+
+		elif Z_all.any():
+			print "Using all p-values"
+			__get_pval_from_bags( Z_all )
+			assert( S.any() )
+			self.meta_summary = [S]
+			return self.meta_summary
+
+	def _plot( self ):
+		"""
+		Wrapper for plotting facilities
+		"""
+
 	def _report( self ):
 		"""
-		helper function for reporting the output to the user 
+		helper function for reporting the output to the user,
 		"""
-		return self.meta_alla  
+		return self.meta_summary   
 
 	def _run( self ):
 		"""
@@ -317,6 +388,37 @@ class HAllA():
 	These are hard-coded presets deemed useful for the user 
 	"""
 
+	def __preset_mi( self ):
+		"""
+		Mutual Information Distance Preset 
+		"""
+
+		## Constants for this preset 
+		fQ = 0.1
+		pDistance = adj_mid 
+		iIter = 100
+		strReduce = "pca"
+		strStep = "uniform"
+		strAdjust = "BH"
+		strEbar = "permutation"
+
+		## Set 
+		self.set_q( fQ ) 
+		self.set_metric( adj_mi )
+		self.set_iterations( iIter )
+		self.set_reduce_method( strReduce )
+		self.set_step_function( strStep )
+		self.set_p_adjust_method( strAdjust )
+		self.set_ebar_method( strEbar )
+
+		## Run 		
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( )
+		return self._report( )
+
+
 	def __preset_mid( self ):
 		"""
 		Mutual Information Distance Preset 
@@ -345,6 +447,7 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( )
+		self._summary_statistics( )
 		return self._report( )
 
 
@@ -394,6 +497,9 @@ class HAllA():
 	# Public Functions / Main Pipeline  
 	#==========================================================# 	
 
+	def load_data( self ):
+		pass 
+
 	def get_data( self ):
 		return self.meta_array 
 
@@ -405,6 +511,9 @@ class HAllA():
 
 	def get_hypothesis( self ):
 		return self.meta_hypothesis_tree
+
+	def get_association( self ):
+		return self.meta_alla 
 
 	def get_attribute( self ):
 		"""
