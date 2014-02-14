@@ -33,7 +33,7 @@ __email__ = "george.weingart@gmail.com"
 __status__ = "Development"
 
 #************************************************************************************
-#*   halla.py                                                                       *
+#*   halla.py :  halla wrapper                                                                      *
 #*   Feb. 12, 2014:   George Weingart                                               *
 #*   The objective of this program is to serve as a simple wrapper for the halla    *
 #*   command.                                                                       *
