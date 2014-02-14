@@ -129,7 +129,13 @@ class HAllA():
 								"flat"		: self.__preset_flat,
 							}
 
-		
+		#==================================================================#
+		# Global Defaults 
+		#==================================================================#
+
+		self.num_iter = 1000
+		self.summary_method = "all" ## "final"
+
 		#==================================================================#
 		# Mutable Meta Objects  
 		#==================================================================#
@@ -246,10 +252,13 @@ class HAllA():
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
 
-	def _summary_statistics( self ): 
+	def _summary_statistics( self, strMethod = None ): 
 		"""
 		provides summary statistics on the output given by _all_against_all 
 		"""
+
+		if not strMethod:
+			strMethod = self.summary_method
 
 		def __add_pval_product_wise( _x, _y, _fP ):
 			S[_x][_y] = _fP ; S[_y][_x] = _fP 
@@ -276,14 +285,15 @@ class HAllA():
 		Y = self.meta_array[1] 
 		iX, iY = X.shape[0], Y.shape[0]
 		
-		S = numpy.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
+		S = -1 * numpy.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
 
 		Z = self.meta_alla 
 		Z_final, Z_all = Z ## Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree 
 		Z_final, Z_all = array(Z_final),array(Z_all)
 		assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
 
-		if Z_final.any():
+		#if Z_final.any():
+		if strMethod == "final":
 			print "Using only final p-values"
 
 			__get_pval_from_bags( Z_final )
@@ -291,7 +301,8 @@ class HAllA():
 			self.meta_summary = [S]
 			return self.meta_summary
 
-		elif Z_all.any():
+		#elif Z_all.any():
+		elif strMethod == "all":
 			print "Using all p-values"
 			__get_pval_from_bags( Z_all )
 			assert( S.any() )
