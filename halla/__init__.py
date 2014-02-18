@@ -75,13 +75,13 @@ class HAllA():
 		self.step_function = "uniform"
 		self.p_adjust_method = "BH"
 		self.ebar_method = "permutation" #method to generate error bars 
+		self.verbose = False 
 		
 		#------------------------------------------------------------------#
 		# Discretization  
 		#------------------------------------------------------------------#
 
 		self.meta_disc_skip = None # which indices to skip when discretizing? 
-
 
 		#------------------------------------------------------------------#
 		# Feature Normalization   
@@ -274,7 +274,8 @@ class HAllA():
 			"""
 
 			for aLine in _Z:
-				print aLine 
+				if self.verbose:
+					print aLine 
 				#break
 				aaBag, fAssoc = aLine
 				aBag1, aBag2 = aaBag 
@@ -294,8 +295,8 @@ class HAllA():
 
 		#if Z_final.any():
 		if strMethod == "final":
-			print "Using only final p-values"
-
+			if self.verbose:
+				print "Using only final p-values"
 			__get_pval_from_bags( Z_final )
 			assert( S.any() )
 			self.meta_summary = [S]
@@ -303,7 +304,8 @@ class HAllA():
 
 		#elif Z_all.any():
 		elif strMethod == "all":
-			print "Using all p-values"
+			if self.verbose:
+				print "Using all p-values"
 			__get_pval_from_bags( Z_all )
 			assert( S.any() )
 			self.meta_summary = [S]
