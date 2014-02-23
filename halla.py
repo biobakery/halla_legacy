@@ -27,7 +27,6 @@ from halla.distance import *
 from halla.hierarchy import *
 from halla.plot import *
 
-
 class HAllA():
 	
 	def __init__( self, *ta ): 
@@ -43,6 +42,7 @@ class HAllA():
 		#==================================================================#
 		# Parameters  
 		#==================================================================#
+
 		self.q = 0.1
 		self.distance = adj_mid 
 		self.iterations = 100		
@@ -50,13 +50,13 @@ class HAllA():
 		self.step_function = "uniform"
 		self.p_adjust_method = "BH"
 		self.ebar_method = "permutation" #method to generate error bars 
+		self.verbose = False 
 		
 		#------------------------------------------------------------------#
 		# Discretization  
 		#------------------------------------------------------------------#
 
 		self.meta_disc_skip = None # which indices to skip when discretizing? 
-
 
 		#------------------------------------------------------------------#
 		# Feature Normalization   
@@ -104,7 +104,13 @@ class HAllA():
 								"flat"		: self.__preset_flat,
 							}
 
-		
+		#==================================================================#
+		# Global Defaults 
+		#==================================================================#
+
+		self.num_iter = 1000
+		self.summary_method = "all" ## "final"
+
 		#==================================================================#
 		# Mutable Meta Objects  
 		#==================================================================#
@@ -116,6 +122,7 @@ class HAllA():
 		self.meta_alla = None # results of all-against-all
 		self.meta_out = None # final output array; some methods (e.g. all_against_all) have multiple outputs piped to both self.meta_alla and self.meta_out 
 		self.meta_summary = None # summary statistics 
+
 		## END INIT 
 
 	#==========================================================#
@@ -220,10 +227,13 @@ class HAllA():
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
 
-	def _summary_statistics( self ): 
+	def _summary_statistics( self, strMethod = None ): 
 		"""
 		provides summary statistics on the output given by _all_against_all 
 		"""
+
+		if not strMethod:
+			strMethod = self.summary_method
 
 		def __add_pval_product_wise( _x, _y, _fP ):
 			S[_x][_y] = _fP ; S[_y][_x] = _fP 
@@ -239,7 +249,8 @@ class HAllA():
 			"""
 
 			for aLine in _Z:
-				print aLine 
+				if self.verbose:
+					print aLine 
 				#break
 				aaBag, fAssoc = aLine
 				aBag1, aBag2 = aaBag 
@@ -250,23 +261,26 @@ class HAllA():
 		Y = self.meta_array[1] 
 		iX, iY = X.shape[0], Y.shape[0]
 		
-		S = numpy.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
+		S = -1 * numpy.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
 
 		Z = self.meta_alla 
 		Z_final, Z_all = Z ## Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree 
 		Z_final, Z_all = array(Z_final),array(Z_all)
 		assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
 
-		if Z_final.any():
-			print "Using only final p-values"
-
+		#if Z_final.any():
+		if strMethod == "final":
+			if self.verbose:
+				print "Using only final p-values"
 			__get_pval_from_bags( Z_final )
 			assert( S.any() )
 			self.meta_summary = [S]
 			return self.meta_summary
 
-		elif Z_all.any():
-			print "Using all p-values"
+		#elif Z_all.any():
+		elif strMethod == "all":
+			if self.verbose:
+				print "Using all p-values"
 			__get_pval_from_bags( Z_all )
 			assert( S.any() )
 			self.meta_summary = [S]
@@ -539,9 +553,6 @@ class HAllA():
 			return pMethod( )
 		except KeyError:			
 			raise Exception( "Invalid Method.")
-
-
-
 
 
 #=============================================#
