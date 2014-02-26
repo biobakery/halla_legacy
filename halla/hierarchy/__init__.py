@@ -787,7 +787,7 @@ def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_re
 
 	return aOut 
 
-def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", correction = "BH", q = 0.1, 
+def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mid", correction = "BH", q = 0.1, 
 	pursuer_method = "nonparameteric", verbose = True ):
 	"""
 	Perform all-against-all on a hypothesis tree.

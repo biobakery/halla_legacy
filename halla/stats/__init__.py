@@ -34,6 +34,19 @@ from halla.distance import mi, l2, adj_mid, mid, norm_mid, norm_mi, adj_mi
 # remember to cast to native python objects before passing!
 # good for prototyping, not good for optimizing.  
 
+c_hash_association_method_discretize = {"pearson": False,
+										"spearman": False,
+										"kw": False,
+										"anova": False,
+										"x2": False,
+										"fisher": False,
+										"norm_mi": True,
+										"mi": True,
+										"norm_mid": True,
+										"halla": False
+										}
+
+
 #=========================================================
 # Feature Selection 
 #=========================================================
@@ -57,6 +70,35 @@ def pca( pArray, iComponents = 1 ):
 	 	iCol = None 
 
 	 	return pArray
+
+def cca( pArray1, pArray2, iComponents = 1 ):
+	"""
+	Input N X D matrix 
+	Output: D x N matrix 
+	"""
+	from sklearn.cross_decomposition import CCA
+
+	pArray1, pArray2 = pArray1.T, pArray2.T
+
+	pCCA = CCA( n_components = iComponents )
+	pCCA.fit( pArray1, pArray2 )
+	X_c, Y_c = pCCA.transform( pArray1, pArray2 )
+	return X_c.T, Y_c.T
+
+def cca_score( pArray1, pArray2, strMethod = "pearson", bPval = 1, bParam = False ):
+	from sklearn.cross_decomposition import CCA
+	import strudel
+	s= strudel.Strudel( ) 
+
+	X_c, Y_c = cca( pArray1, pArray2, iComponents = 1 )
+
+	return s.association( X_c[0], Y_c[0], strMethod = strMethod, bPval = bPval, bParam = bParam)
+
+def kernel_cca( ):
+	pass
+
+def kernel_cca_score( ):
+	pass 
 
 def mca( pArray, iComponents = 1 ):
 	"""
@@ -134,24 +176,27 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mid", d
 	pMe = pHashMetric[strMetric] 
 
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function
-	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if "mi" in strMetric else [pDe( pA ) for pA in [pArray1, pArray2]]
+	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 
 	dMI = pMe( pRep1, pRep2 ) 
 
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
 	pArrayPerm = np.array( [ pMe( _permutation( pRep1 ), pRep2 ) for i in xrange( iIter ) ] )
 
-	dPPerm = percentileofscore( pArrayPerm, dMI ) / 100 	
+	dPPerm = percentileofscore( pArrayPerm, dMI ) / 100.0 	
 
 	return dPPerm
 
-def permutation_test_by_cca( ):
+def permutation_test_by_pca( pArray1, pArray2, iIter = 100 ):
+	return permutation_test_by_representative( pArray1, pArray2, iIter = iIter )
+
+def permutation_test_by_cca( pArray1, pArray2, iIter = 100 ):
 	pass 
 
 def permutation_test_by_copula( ):
 	pass 
 
-def permutation_test_by_average( pArray1, pArray2, metric = "norm_mi", iIter = 100 ):
+def permutation_test_by_average( pArray1, pArray2, metric = "norm_mid", iIter = 100 ):
 	pHashDecomposition = {"mca": mca, "pca": pca}
 	pHashMetric = {"mi": mi, "adj_mid" : adj_mid, "norm_mid" : norm_mid, "norm_mi" : norm_mi, "pearsonr" : halla.distance.cor,
 		 "spearmanr" : lambda x,y: halla.distance.cor(x,y, method="spearman") }
