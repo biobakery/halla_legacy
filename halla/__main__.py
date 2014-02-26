@@ -5,7 +5,6 @@ Run `halla.py --help` for more details
 
 """
 
-
 ## structural packages 
 import itertools 
 import logging 

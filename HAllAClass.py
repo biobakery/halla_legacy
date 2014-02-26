@@ -1,7 +1,5 @@
 """
-
 HAllA class  
-
 """
 
 
