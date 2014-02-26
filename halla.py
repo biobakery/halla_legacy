@@ -54,6 +54,7 @@ import os
 
 ## internal dependencies 
 import halla
+from halla import HAllA
 from halla import stats
 from halla import distance
 import halla.parser  
@@ -65,8 +66,6 @@ from halla.distance import *
 from halla.hierarchy import *
 from halla.plot import *
 
-
-from HAllAClass import HAllA
 
 #=============================================#
 # Wrapper  
@@ -145,5 +144,3 @@ argp.add_argument( "-m", 		dest = "strMetric", 	metavar = "metric",
 
 args = argp.parse_args( ) 
 _main( args.istm, args.ostm, args.dQ, args.iIter, args.strMetric )
-
-

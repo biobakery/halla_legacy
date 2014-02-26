@@ -5,4 +5,4 @@ from hierarchy import *
 from plot import * 
 
 
-from HAllAClass import HAllA
+from hallaclass import HAllA
