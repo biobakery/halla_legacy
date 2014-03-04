@@ -4,7 +4,6 @@ setup(
     name = "halla",
     py_modules = ["halla"],
     packages = ["halla", 
-    "halla",
     "halla/stats",
     "halla/preset",
     "halla/logger",
