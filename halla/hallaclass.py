@@ -2,7 +2,6 @@
 HAllA class  
 """
 
-
 ## structural packages 
 import itertools 
 import logging 
@@ -22,6 +21,7 @@ from halla.parser import Input, Output
 from halla.test import *
 from halla.stats import *
 from halla.distance import *
+import halla.distance
 from halla.hierarchy import *
 from halla.plot import *
 
@@ -41,13 +41,38 @@ class HAllA():
 		# Parameters  
 		#==================================================================#
 
-		self.q = 0.1
-		self.distance = adj_mid 
-		self.iterations = 100		
+		#----------------------------------#
+		# Single and cross-decomposition 
+		#----------------------------------#
+
+		self.distance = adj_mi 
 		self.reduce_method = "pca" 
+		
+		#----------------------------------#
+		# Step and jump methods 
+		#----------------------------------#
+		
 		self.step_function = "uniform"
+		self.step_parameter = 0.0 ## a value between 0.0 and 1.0; 0.0 skips none, 1.0 skips all
+
+		self.stop_function = None 
+		self.stop_parameter = 1.0 ## a value between 0.0 and 1.0; 0.0 performs the simplest comparison at the top of the tree; 
+		## 1.0 goes all the way to the bottom 
+
+		#----------------------------------#
+		# Randomization and FDR methods 
+		#----------------------------------#
+
+		self.alpha = 0.05 
+		self.q = 0.1
+		self.iterations = 100
 		self.p_adjust_method = "BH"
 		self.randomization_method = "permutation" #method to generate error bars 
+		
+		#----------------------------------#
+		# Structural flags 
+		#----------------------------------#
+
 		self.verbose = False 
 		
 		#------------------------------------------------------------------#
@@ -79,14 +104,13 @@ class HAllA():
 		"""
 
 		self.__doc__			= __doc__ 
-		self.__version__ 		= "0.1.1"
+		self.__version__ 		= "0.1.0"
 		self.__author__			= ["YS Joseph Moon", "Curtis Huttenhower"]
 		self.__contact__		= "moon.yosup@gmail.com"
 
-		self.hash_reduce_method = {"pca"	: pca, 
-									"mca"	: mca, }
+		self.hash_reduce_method = {"pca"	: pca, }
 
-		self.hash_metric 		= {"norm_mid" : norm_mid }
+		self.hash_metric 		= halla.distance.c_hash_metric 
 
 		self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q","distance","iterations", "reduce_method", "step_function", "p_adjust_method","randomization_method"]
 
@@ -95,7 +119,6 @@ class HAllA():
 		#==================================================================#
 
 		self.hash_preset = 	{"default"		: self.__preset_default, 
-								"mid"		: self.__preset_mid,
 								"time"		: self.__preset_time, 
 								"accuracy"	: self.__preset_accuracy, 
 								"parallel"	: self.__preset_parallel, 
@@ -374,14 +397,14 @@ class HAllA():
 	These are hard-coded presets deemed useful for the user 
 	"""
 
-	def __preset_mi( self ):
+	def __preset_norm_mi( self ):
 		"""
 		Mutual Information Distance Preset 
 		"""
 
 		## Constants for this preset 
 		fQ = 0.1
-		pDistance = adj_mi 
+		pDistance = norm_mi 
 		iIter = 100
 		strReduce = "pca"
 		strStep = "uniform"
@@ -402,10 +425,11 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( )
+		self._summary_statistics( )
 		return self._report( )
 
 	def __preset_default( self ):
-		return self.__preset_mid( )
+		return self.__preset_norm_mi( )
 
 	def __preset_time( self ):
 		pass 
@@ -413,7 +437,7 @@ class HAllA():
 	def __preset_accuracy( self ):
 		## Constants for this preset 
 		fQ = 0.05
-		pDistance = adj_mid 
+		pDistance = adj_mi 
 		iIter = 1000
 		strReduce = "pca"
 		strStep = "uniform"
@@ -422,7 +446,7 @@ class HAllA():
 
 		## Set 
 		self.set_q( fQ ) 
-		self.set_metric( adj_mid )
+		self.set_metric( adj_mi )
 		self.set_iterations( iIter )
 		self.set_reduce_method( strReduce )
 		self.set_step_function( strStep )
@@ -518,6 +542,13 @@ class HAllA():
 			return pMethod( )
 		except KeyError:			
 			raise Exception( "Invalid Method.")
+
+	def view_singleton( self, pBags ):
+		aOut = [] 
+		for aIndices, fP in pBags:
+			if len(aIndices[0]) == 1 and len(aIndices[1]) == 1:
+				aOut.append( [aIndices, fP] )
+		return aOut 
 
 
 

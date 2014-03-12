@@ -31,18 +31,6 @@ from halla.distance import mi, l2, norm_mi, adj_mi
 # remember to cast to native python objects before passing!
 # good for prototyping, not good for optimizing.  
 
-c_hash_association_method_discretize = {"pearson": False,
-										"spearman": False,
-										"kw": False,
-										"anova": False,
-										"x2": False,
-										"fisher": False,
-										"norm_mi": True,
-										"mi": True,
-										"norm_mid": True,
-										"halla": False
-										}
-
 
 #=========================================================
 # Feature Selection 
@@ -163,9 +151,8 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 
 	strMetric = metric 
 	pHashDecomposition = {"mca": mca, "pca": pca}
-	pHashMetric = {"mi": mi, "adj_mid" : adj_mid, "norm_mid" : norm_mid, "norm_mi" : norm_mi, "pearsonr" : halla.distance.cor,
-		 "spearmanr" : lambda x,y: halla.distance.cor(x,y, method="spearman") }
-
+	pHashMetric = halla.distance.c_hash_metric 
+	
 	def _permutation( pVec ):
 		return numpy.random.permutation( pVec )
 
@@ -173,7 +160,7 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	pMe = pHashMetric[strMetric] 
 
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function
-	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 
 	fAssociation = pMe( pRep1, pRep2 ) 
 
@@ -202,8 +189,9 @@ def permutation_test_by_copula( ):
 
 def permutation_test_by_average( pArray1, pArray2, metric = "norm_mid", iIter = 100 ):
 	pHashDecomposition = {"mca": mca, "pca": pca}
-	pHashMetric = {"mi": mi, "adj_mid" : adj_mid, "norm_mid" : norm_mid, "norm_mi" : norm_mi, "pearsonr" : halla.distance.cor,
-		 "spearmanr" : lambda x,y: halla.distance.cor(x,y, method="spearman") }
+	
+	pHashMetric = halla.distance.c_hash_metric
+
 	def _permutation( pVec ):
 		return numpy.random.permutation( pVec )
 

@@ -11,8 +11,7 @@ import math
 from abc import ABCMeta
 import numpy 
 from numpy import array 
-import scipy 
-import sklearn as sk  
+import scipy  
 import halla.stats
 import scipy.stats 
 import scipy.cluster 
@@ -21,8 +20,18 @@ import scipy.cluster
 from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, adjusted_mutual_info_score 
 
 #==========================================================================#
-# DIVERGENCE CLASSES
+# CONSTANTS 
 #==========================================================================#
+
+c_hash_association_method_discretize = {"pearson": False,
+										"spearman": False,
+										"kw": False,
+										"anova": False,
+										"x2": False,
+										"fisher": False,
+										"norm_mi": True,
+										"mi": True,
+										}
 
 class Distance:
 	''' 

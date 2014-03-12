@@ -17,7 +17,6 @@ import halla
 import halla.stats 
 
 from halla.distance import mi, l2, absl2, norm_mi
-from halla.distance import c_hash_metric 
 from halla.stats import discretize,pca, mca, bh, permutation_test_by_representative, p_adjust
 
 ## statistics packages 
@@ -169,6 +168,18 @@ class Gardener():
 #==========================================================================#
 # FUNCTORS   
 #==========================================================================#
+
+"""
+New behavior for coupling trees 
+
+CALCULATE iMaxLayer
+IF SingletonNode:
+	CALCULATE iLayer 
+	EXTEND (iMaxLayer - iLayer) times 
+ELSE:
+	Compare bags 
+"""
+
 
 def lf2tree( lf ):
 	"""
@@ -402,9 +413,14 @@ def hclust( pArray, strMetric = "norm_mi", cluster_method = "single", bTree = Fa
 		Use the "grouping property" as discussed by Kraskov paper. 
 	"""
 
-	pMetric = c_hash_metric[strMetric] 
+	pMetric = halla.distance.c_hash_metric[strMetric] 
+	## Remember, pMetric is a notion of _strength_, not _distance_ 
 
-	D = pdist( pArray, metric= pMetric )   
+	def pDistance( x,y ):
+		return 1.0 - pMetric(x,y)
+
+	D = pdist( pArray, metric = pDistance )
+	print D    
 	Z = linkage( D ) 
 	return to_tree( Z ) if bTree else Z 
 
