@@ -25,7 +25,7 @@ URL
  http://huttenhower.sph.harvard.edu/halla
 
 Citation
- Yo Sup Moon, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation)
+ Yo Sup Moon, George Weingart, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation)
 
 .. toctree::
    :maxdepth: 2
@@ -41,7 +41,7 @@ Operating System
 	* Ubuntu Linux (>= 12.04) 
 	* Mac OS X (>= 10.7)
 
-* Unsupported 
+* Untested  
 	* Windows (>= XP) 
 
 Dependencies 
@@ -52,18 +52,22 @@ Dependencies
 	* Numpy (>= 1.7.1)
 	* Scipy (>= 0.12) 
 	* Scikit-learn (>=0.13)  
-	* rpy (>=2.0)
 	* sampledoc-master
 
 * Recommended Tools for documentation 
 	* Docutils
 	* itex2MML
 
-
 Getting HAllA
 --------------------------------------------
 
 HAllA can be downloaded from its bitbucket repository: http://bitbucket.org/chuttenh/halla.
+
+Directory Structure -- What you get 
+---------------------------------------------
+
+bin/testdata (source: Put into bin any scripts you’ve written that use your towelstuff package and which you think would be useful for your users. If you don’t have any, then remove the bin directory.)
+
 
 
 Chapter 1 Basics 
@@ -72,7 +76,32 @@ Chapter 1 Basics
 Introduction
 --------------------------------------------
 
-HAllA: is a programmatic tool for performing multiple association testing between two or more heterogeneous datasets, each containing a mixture of discrete, binary, or continuous data. HAllA is a robust and efficient alternative to traditional all-against-all association testing of variables. Its robustness relies on the usage of mutual information-based measures to calculate the degree to which two variables are related. Mutual-information is well-suited to serve as an all-purpose measure since it is well-behaved even when comparing two variables of different data types. Its efficiency relies on a hierarchical clustering scheme to reduce the number of tests necessary to discover interesting associations in datasets that contain potentially millions of genotypic and phenotypic data. In a traditional all-against-all association-testing scheme, the number of pairwise tests scale quadratically with the number of features in the data (O(N^2)). The sheer number of association tests dramatically reduces the power of standard hypothesis tests to discover relationships among variables. We introduce a hierarchical hypothesis-testing scheme to perform tiered testing on clusters of data to reduce computational time for comparisons. Hierarchical false discovery rate correction is implemented to curb discoveries of associations due to noise in the data. 
+`HAllA`_ (pronounced "`challah <http://en.wikipedia.org/wiki/Challah>`_") is an
+end-to-end statistical method for Hierarchical All-against-All discovery of
+significant relationships among data features with high power.  `HAllA`_ is robust
+to data type, operating both on continuous and categorical values, and works well
+both on homogeneous datasets (where all measurements are of the same type, e.g.
+gene expression microarrays) and on heterogeneous data (containing measurements
+with different units or types, e.g. patient clinical metadata).  Finally, it is
+also aware of multiple input, multiple output problems, in which data might
+contain of two (or more) distinct subsets sharing an index (e.g. clinical metadata,
+genotypes, microarrays, and microbiomes all drawn from the same subjects).  In
+all of these cases, `HAllA`_ will identify which pairs of features (genes,
+microbes, loci, etc.) share statistically significant co-variation, without
+getting tripped up by high-dimensionality.
+
+In short, `HAllA`_ is like testing for correlation among all pairs of variables
+in a high-dimensional dataset, but without tripping over multiple hypothesis
+testing, the problem of figuring out what "correlation" means for different
+units or scales, or differentiating between predictor/input or response/output
+variables.  It's your one-stop shop for statistical signficance!
+
+If you use this tool, the included scripts, or any related code in your work,
+please let us know, sign up for the `HAllA users group`_
+(`halla-users@googlegroups.com`_), and pass along any issues or feedback.
+
+Contents
+========
 
 Input 
 ----------------------------------------------
@@ -171,19 +200,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-
-License
-==============================================
-
-This software is licensed under the MIT license.
-
-Copyright (c) 2013 Yo Sup Moon, Curtis Huttenhower
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
