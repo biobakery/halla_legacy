@@ -47,7 +47,7 @@ class HAllA():
 		self.reduce_method = "pca" 
 		self.step_function = "uniform"
 		self.p_adjust_method = "BH"
-		self.ebar_method = "permutation" #method to generate error bars 
+		self.randomization_method = "permutation" #method to generate error bars 
 		self.verbose = False 
 		
 		#------------------------------------------------------------------#
@@ -88,7 +88,7 @@ class HAllA():
 
 		self.hash_metric 		= {"norm_mid" : norm_mid }
 
-		self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q","distance","iterations", "reduce_method", "step_function", "p_adjust_method","ebar_method"]
+		self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q","distance","iterations", "reduce_method", "step_function", "p_adjust_method","randomization_method"]
 
 		#==================================================================#
 		# Presets
@@ -350,9 +350,9 @@ class HAllA():
 		self.m_iIter = iIterations
 		return self.iterations 
 
-	def set_ebar_method( self, strMethod ):
-		self.ebar_method = strMethod 
-		return self.ebar_method 
+	def set_randomization_method( self, strMethod ):
+		self.randomization_method = strMethod 
+		return self.randomization_method 
 
 	def set_step_function( self, strFun ):
 		"""
@@ -381,21 +381,21 @@ class HAllA():
 
 		## Constants for this preset 
 		fQ = 0.1
-		pDistance = adj_mid 
+		pDistance = adj_mi 
 		iIter = 100
 		strReduce = "pca"
 		strStep = "uniform"
 		strAdjust = "BH"
-		strEbar = "permutation"
+		strRandomization = "permutation"
 
 		## Set 
 		self.set_q( fQ ) 
-		self.set_metric( adj_mi )
+		self.set_metric( pDistance )
 		self.set_iterations( iIter )
 		self.set_reduce_method( strReduce )
 		self.set_step_function( strStep )
 		self.set_p_adjust_method( strAdjust )
-		self.set_ebar_method( strEbar )
+		self.set_randomization_method( strRandomization )
 
 		## Run 		
 		self._featurize( )
@@ -403,39 +403,6 @@ class HAllA():
 		self._couple( )
 		self._all_against_all( )
 		return self._report( )
-
-
-	def __preset_mid( self ):
-		"""
-		Mutual Information Distance Preset 
-		"""
-
-		## Constants for this preset 
-		fQ = 0.1
-		pDistance = adj_mid 
-		iIter = 100
-		strReduce = "pca"
-		strStep = "uniform"
-		strAdjust = "BH"
-		strEbar = "permutation"
-
-		## Set 
-		self.set_q( fQ ) 
-		self.set_metric( adj_mid )
-		self.set_iterations( iIter )
-		self.set_reduce_method( strReduce )
-		self.set_step_function( strStep )
-		self.set_p_adjust_method( strAdjust )
-		self.set_ebar_method( strEbar )
-
-		## Run 		
-		self._featurize( )
-		self._hclust( )
-		self._couple( )
-		self._all_against_all( )
-		self._summary_statistics( )
-		return self._report( )
-
 
 	def __preset_default( self ):
 		return self.__preset_mid( )
@@ -451,7 +418,7 @@ class HAllA():
 		strReduce = "pca"
 		strStep = "uniform"
 		strAdjust = "BH"
-		strEbar = "permutation"
+		strRandomization = "permutation"
 
 		## Set 
 		self.set_q( fQ ) 
@@ -460,7 +427,7 @@ class HAllA():
 		self.set_reduce_method( strReduce )
 		self.set_step_function( strStep )
 		self.set_p_adjust_method( strAdjust )
-		self.set_ebar_method( strEbar )
+		self.set_randomization_method( strRandomization )
 
 		## Run 
 		self._featurize( )
