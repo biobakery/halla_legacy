@@ -788,7 +788,7 @@ def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "
 
 def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_representative" ):
 
-	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
+	pHashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
 						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
 						"parametric_test" : halla.stats.parametric_test}
 
@@ -799,7 +799,7 @@ def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_re
 
 	for i,j in itertools.product( range(iRow), range(iCol) ):
 
-		pDist = phashMethods[strMethod]
+		pDist = pHashMethods[strMethod]
 		fVal = pDist( array([pArray1[i]]), array([pArray2[j]]) )
 		aOut.append([(i,j), fVal])
 
@@ -946,6 +946,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 def all_all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", verbose = True ):
 	"""
 	Perform all-against-all on a hypothesis tree all the way to the bottom.
+
+	Currently a corner case: jump parameter 0.0 and stop parameter 1.0 
 
 	Notes:
 
