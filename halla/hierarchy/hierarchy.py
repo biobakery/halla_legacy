@@ -38,10 +38,6 @@ from numpy.random import normal
 from scipy.misc import * 
 
 
-## hutlab tools 
-
-import strudel 
-
 #==========================================================================#
 # DATA STRUCTURES 
 #==========================================================================#
@@ -1222,14 +1218,15 @@ def randtree( n = 10, sparsity = 0.5, obj = True, disc = True ):
 	bObj = obj 
 	bDisc = disc 
 
-	s = strudel.Strudel() 
+	#s = strudel.Strudel() 
 
-	X,A = s.generate_synthetic_data( iSamples, fSpar )
-	X = discretize( X ) if bDisc else X 
+	#X,A = s.generate_synthetic_data( iSamples, fSpar )
+	#X = discretize( X ) if bDisc else X 
 
-	T = hclust( X, bTree = obj )
+	#T = hclust( X, bTree = obj )
 
-	return T 
+	#return T 
+	return None 
 
 
 

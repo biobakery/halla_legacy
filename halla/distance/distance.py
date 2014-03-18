@@ -3,7 +3,6 @@
 Abstract distance module providing different notions of distance
 '''
 
-import strudel
 import itertools 
 import abc 
 import math
