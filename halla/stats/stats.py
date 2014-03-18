@@ -109,7 +109,7 @@ def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
 
 
 def get_representative( pArray, pMethod = None ):
-	hash_method = {None: get_medoid, "pca": pca, "mca": mca}
+	hash_method = {None: get_medoid, "pca": pca, }
 	return hash_method[pMethod]( pArray )
 
 
@@ -207,11 +207,11 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	Input: 
 	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 100
 
-	metric = {"mca": mca, "pca": pca} 
+	metric = {pca": pca} 
 	"""
 
 	strMetric = metric 
-	pHashDecomposition = {"mca": mca, "pca": pca}
+	pHashDecomposition = {"pca": pca}
 	pHashMetric = halla.distance.c_hash_metric 
 	
 	def _permutation( pVec ):
@@ -249,7 +249,7 @@ def permutation_test_by_copula( ):
 	pass 
 
 def permutation_test_by_average( pArray1, pArray2, metric = "norm_mid", iIter = 100 ):
-	pHashDecomposition = {"mca": mca, "pca": pca}
+	pHashDecomposition = {"pca": pca}
 	
 	pHashMetric = halla.distance.c_hash_metric
 
