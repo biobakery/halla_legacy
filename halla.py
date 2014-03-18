@@ -138,7 +138,7 @@ argp.add_argument( "-x", 		dest = "strPreset", 	metavar = "preset",
 		type  = str, 		default = None,
         help = "Instead of specifying parameters separately, use a preset" )
 argp.add_argument( "-m", 		dest = "strMetric", 	metavar = "metric",
-		type  = str, 		default = "norm_mid",
+		type  = str, 		default = "norm_mi",
         help = "Metric to be used for hierarchical clustering" )
 
 
