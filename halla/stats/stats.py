@@ -159,18 +159,19 @@ def bh( afPVAL ):
  
 	"""
 
-	afPVAL_reduced = list(set(afPVAL)) ##duplicate elements removed 
-	iLenReduced = len(afPVAL_reduced)
+	#afPVAL_reduced = list(set(afPVAL)) ##duplicate elements removed 
+	#iLenReduced = len(afPVAL_reduced)
 
-	pRank = scipy.stats.rankdata( afPVAL, method = "dense" ) ##the "dense" method ranks ties as if the list did not contain any redundancies 
+	#pRank = scipy.stats.rankdata( afPVAL, method = "dense" ) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	## source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
 
-	aOut = [] 
+	#aOut = [] 
 
-	for i, fP in enumerate(afPVAL):
-		aOut.append(fP*iLenReduced*1.0/pRank[i])
+	#for i, fP in enumerate(afPVAL):
+	#	aOut.append(fP*iLenReduced*1.0/pRank[i])
 
-	return aOut 
+	#return aOut 
+	return None 
 
 def p_adjust( pval, method = "BH" ):
 	"""
@@ -195,7 +196,8 @@ def p_adjust( pval, method = "BH" ):
 	except TypeError:
 		pval = [pval]
 
-	return bh( pval ) 
+	#return bh( pval ) 
+	return pval 
 
 
 #=========================================================
