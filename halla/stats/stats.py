@@ -13,10 +13,10 @@ import sys
 # External dependencies 
 
 import pylab as pl
+import scipy 
 import numpy 
 from numpy import array 
 from scipy.stats import percentileofscore
-import rpy
 from numpy.random import shuffle, binomial, normal, multinomial 
 
 # ML plug-in 
@@ -85,31 +85,6 @@ def kernel_cca( ):
 def kernel_cca_score( ):
 	pass 
 
-def mca( pArray, iComponents = 1 ):
-	"""
-	Input: D x N STRING DISCRETIZED matrix #Caution! must pass in strings  
-	Output: D x N FLOAT matrix 
-	"""
-	aastrData = [map(str,l) for l in pArray.T]
-	astrKeys = ["Dim " + str(i) for i in range(1,iComponents+1)]
-	r = rpy.r 
-	r.library( "FactoMineR" )
-	residues = r.MCA( aastrData ) 
-	return array( [residues["var"]["eta2"][x] for x in astrKeys] )	
-
-def p_adjust( pval, method = "BH" ):
-	"""
-	Wrapper for R implementation of p value adjustment.
-	NOTE: This is slightly different from one that is described verbatim in the paper. 
-	"""
-
-	afP = pval 
-	strMethod = method 
-
-	r = rpy.r
-	adjusted_afP = r("p.adjust")( afP, strMethod )
-	return adjusted_afP
-
 def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
 	"""
 	Input: numpy array 
@@ -136,6 +111,92 @@ def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
 def get_representative( pArray, pMethod = None ):
 	hash_method = {None: get_medoid, "pca": pca, "mca": mca}
 	return hash_method[pMethod]( pArray )
+
+
+#=========================================================
+# Multiple comparison adjustment 
+#=========================================================
+
+def bh( afPVAL ):
+	"""
+	Implement the benjamini-hochberg hierarchical hypothesis testing criterion 
+	In practice, used for implementing Yekutieli criterion *per layer*.  
+
+
+	Parameters
+	-------------
+
+		afPVAL : list 
+		 	list of p-values 
+
+
+	Returns 
+	--------------
+
+		abOUT : list 
+			boolean vector corresponding to which hypothesis test rejected, corresponding to p-value 
+
+
+	Notes
+	---------
+
+		Reject up to highest i: max_i { p_(i) <= i*q/m }
+
+		=> p_(i)*m/i <= q 
+
+		Therefore, it is equivalent to setting the new p-value to the q-value := p_(i)*m/i 
+
+		When BH is performed per layer, FDR is approximately 
+
+		.. math::
+			FDR = q \cdot \delta^{*} \cdot(m_0 + m_1)/(m_0+1)
+
+		where :math:`m_0` is the observed number of discoveries and :math:`m_1` is the observed number of families tested. 
+
+		Universal bound: the full tree FDR is :math:`< q \cdot \delta^{*} \cdot 2`
+
+		At ties, update ranking as to remove redundancy from list 
+ 
+	"""
+
+	afPVAL_reduced = list(set(afPVAL)) ##duplicate elements removed 
+	iLenReduced = len(afPVAL_reduced)
+
+	pRank = scipy.stats.rankdata( afPVAL, method = "dense" ) ##the "dense" method ranks ties as if the list did not contain any redundancies 
+	## source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
+
+	aOut = [] 
+
+	for i, fP in enumerate(afPVAL):
+		aOut.append(fP*iLenReduced*1.0/pRank[i])
+
+	return aOut 
+
+def p_adjust( pval, method = "BH" ):
+	"""
+	
+	Parameters
+	--------------
+
+		pval : list or float 
+
+		method : str 
+			{"bh","BH"}
+	
+	Returns 
+	----------------
+
+		afPVAL : list of float 
+
+	"""
+
+	try:
+		pval[0]
+	except TypeError:
+		pval = [pval]
+
+	return bh( pval ) 
+
 
 #=========================================================
 # Statistical test 
@@ -596,51 +657,7 @@ def discretize2d( pX, pY, method = None ):
 	pass 
 
 
-#=========================================================
-# FDR correcting procedure  
-#=========================================================
 
-def bh( afPVAL, fQ = 1.0 ):
-	"""
-	Implement the benjamini-hochberg hierarchical hypothesis testing criterion 
-	In practice, used for implementing Yekutieli criterion *per layer*.  
-
-	When BH is performed per layer, FDR is approximately 
-
-	.. math::
-		FDR = q \cdot \delta^{*} \cdot(m_0 + m_1)/(m_0+1)
-
-	where :math:`m_0` is the observed number of discoveries and :math:`m_1` is the observed number of families tested. 
-
-	Universal bound: the full tree FDR is :math:`< q \cdot \delta^{*} \cdot 2`
-
-	
-	`afPVAL`
-	 list of p-values 
- 
-	`abOUT`
-	 boolean vector corresponding to which hypothesis test rejected, corresponding to p-value 
-
-	"""
-
-	afPVAL_args = numpy.argsort( afPVAL ) # permutation \pi
-	afPVAL_reverse = numpy.argsort( afPVAL_args ) # unique inverse permutation \pi \; \pi \circ \pi^{-1} = 1
-	afPVAL_sorted = array( afPVAL )[afPVAL_args]
-
-	def _find_max( afPVAL_sorted, fQ ):
-		dummyMax = -1 
-		for i, pval in enumerate(afPVAL_sorted):
-			fVal = i * fQ * 1.0/len(afPVAL_sorted)
-			if pval <= fVal:
-				dummyMax = i
-		return dummyMax
-
-	rt = _find_max( afPVAL_sorted , fQ )
-
-	if len(afPVAL) == 1:
-		return [1] if afPVAL[0] < fQ else [0]
-	else:
-		return array( [1] * (rt + 1) + [0] * ( len(afPVAL) - (rt+1) ) )[ afPVAL_reverse ]
 
 #=========================================================
 # Classification and Validation 
