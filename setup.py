@@ -31,6 +31,9 @@ setup(
         ],
     long_description = open('README.txt').read(),
     install_requires=[
-        "Numpy >= 1.8.0"
+        "Numpy >= 1.6.2",
+        "Scipy >= 0.10.1",
+        "Sklearn >= 0.14.1",
+        "Matplotlib >= 1.1.1"
     ],
 )
