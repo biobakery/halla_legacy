@@ -1,18 +1,8 @@
-#  halla setup.py
-from setuptools import setup
+##### halla setup.py
+from setuptools import setup, find_packages
 setup(
     name = "halla",
     py_modules = ["halla"],
-    packages = ["halla", 
-    "halla/stats",
-    "halla/preset",
-    "halla/logger",
-    "halla/distance",
-    "halla/plot",
-    "halla/parser",
-    "halla/test",
-    "halla/hierarchy"
-    ],
     version = "1.0.1",
     license = "MIT", 
     description = "HAllA is a programmatic tool for performing multiple association testing between two or more heterogeneous datasets, each containing a mixture of discrete, binary, or continuous data.",
@@ -33,7 +23,14 @@ setup(
     install_requires=[
         "Numpy >= 1.6.2",
         "Scipy >= 0.10.1",
-        "Sklearn >= 0.14.1",
-        "Matplotlib >= 1.1.1"
+        "Matplotlib >= 1.1.1",
+        "Scikit-learn  >= 0.14.1"
     ],
-)
+    package_data={"testdata": ['halla/testdata',]},
+    packages=find_packages(),
+    entry_points = {
+        'console_scripts': [
+            'halla = halla.halla:_main',
+        ],
+        }
+ )
