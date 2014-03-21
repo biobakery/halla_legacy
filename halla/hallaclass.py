@@ -126,6 +126,7 @@ class HAllA():
 								"parallel"	: self.__preset_parallel, 
 								"flat"		: self.__preset_flat,
 								"layerwise" : self.__preset_layerwise, 
+								"naive" 	: self.__preset_naive,
 							}
 
 		#==================================================================#
@@ -148,6 +149,94 @@ class HAllA():
 		self.meta_summary = None # summary statistics 
 
 		## END INIT 
+
+	#==================================================================#
+	# Type Checking
+	#==================================================================#
+
+	def _check( self, pObject, pType, pFun = isinstance, pClause = "or" ):
+		"""
+		Wrapper for type checking 
+		"""
+
+		if (isinstance(pType,list) or isinstance(pType,tuple) or isinstance(pType,numpy.ndarray)):
+			aType = pType 
+		else:
+			aType = [pType]
+
+		return reduce( lambda x,y: x or y, [isinstance( pObject, t ) for t in aType], False )
+
+	def _cross_check( self, pX, pY, pFun = len ):
+		"""
+		Checks that pX and pY are consistent with each other, in terms of specified function pFun. 
+		"""
+
+	def _is_meta( self, pObject ):
+		"""	
+		Is pObject an iterable of iterable? 
+		"""
+
+		try: 
+			pObject[0]
+			return self._is_iter( pObject[0] )	
+		except IndexError:
+			return False 
+
+	def _is_empty( self, pObject ):
+		"""
+		Wrapper for both numpy arrays and regular lists 
+		"""
+		
+		aObject = array(pObject)
+
+		return not aObject.any()
+
+	### These functions are absolutely unncessary; get rid of them! 
+	def _is_list( self, pObject ):
+		return self._check( pObject, list )
+
+	def _is_tuple( self, pObject ):
+		return self._check( pObject, tuple )
+
+	def _is_str( self, pObject ):
+		return self._check( pObject, str )
+
+	def _is_int( self, pObject ):
+		return self._check( pObject, int )    
+
+	def _is_array( self, pObject ):
+		return self._check( pObject, numpy.ndarray )
+
+	def _is_1d( self, pObject ):
+		"""
+		>>> import strudel 
+		>>> s = strudel.Strudel( )
+		>>> s._is_1d( [] )
+		"""
+
+		strErrorMessage = "Object empty; cannot determine type"
+		bEmpty = self._is_empty( pObject )
+
+		## Enforce non-empty invariance 
+		if bEmpty:
+			raise Exception(strErrorMessage)
+
+		## Assume that pObject is non-empty 
+		try:
+			iRow, iCol = pObject.shape 
+			return( iRow == 1 ) 
+		except ValueError: ## actual arrays but are 1-dimensional
+			return True
+		except AttributeError: ## not actual arrays but python lists 
+			return not self._is_iter( pObject[0] )
+
+	def _is_iter( self, pObject ):
+		"""
+		Is the object a list or tuple? 
+		Disqualify string as a true "iterable" in this sense 
+		"""
+
+		return self._check( pObject, [list, tuple, numpy.ndarray] )
 
 	#==========================================================#
 	# Static Methods 
@@ -514,8 +603,8 @@ class HAllA():
 		return self._report( )
 
 	def __preset_default( self ):
-		#return self.__preset_norm_mi( )
-		return self.__preset_layerwise( )
+		return self.__preset_norm_mi( )
+		#return self.__preset_layerwise( )
 
 	def __preset_time( self ):
 		pass 
@@ -553,6 +642,13 @@ class HAllA():
 		Regular all-against-all pairwise, without hierarchical clustering 
 		"""
 
+		self._featurize( )
+		return self._naive_all_against_all( )
+
+	def __preset_naive( self ):
+		"""
+		Alias for flat
+		"""
 		self._featurize( )
 		return self._naive_all_against_all( )
 

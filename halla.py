@@ -72,7 +72,7 @@ from halla.plot import *
 # Wrapper  
 #=============================================#
 
-def _main( istm, ostm, dQ, iIter, strMetric ):
+def _main( istm, ostm, dQ, iIter, strMetric, strPreset ):
 	""" 
 	
 	Design principle: be as flexible and modularized as possible. 
@@ -99,10 +99,7 @@ def _main( istm, ostm, dQ, iIter, strMetric ):
 		strFile1, strFile2 = istm[:2]
 	else:
 		strFile1, strFile2 = istm[0], istm[0]
-
-		
-		
-		
+	
 	aOut1, aOut2 = Input( strFile1.name, strFile2.name ).get()
 
 	aOutData1, aOutName1, aOutType1, aOutHead1 = aOut1 
@@ -113,14 +110,32 @@ def _main( istm, ostm, dQ, iIter, strMetric ):
 	H.set_q( dQ )
 	H.set_iterations( iIter )
 	H.set_metric( strMetric )
+	
+	if strPreset: 
+		H.set_preset( strPreset )
+		aaOut = H.run( strMethod = strPreset )
 
-	aOut = H.run()
+	else:
+		aaOut = H.run( )
 
 	csvw = csv.writer( ostm, csv.excel_tab )
 
-	for line in aOut:
-		csvw.writerow( line )
+	csvw.writerow( ["preset: " + strPreset] )
 
+	if H._is_meta( aaOut ):
+		if H._is_meta( aaOut[0] ):
+			for i,aOut in enumerate(aaOut):
+				csvw.writerow( ["output " + str(i+1)] )
+				for line in aOut:
+					csvw.writerow( line )
+		else:
+			aOut = aaOut
+			for line in aOut:
+				csvw.writerow( line )	
+	else:
+		aOut = aaOut
+		for line in aOut:
+				csvw.writerow( line )
 
 #=============================================#
 # Execute 
@@ -155,7 +170,9 @@ argp.add_argument( "-x", 		dest = "strPreset", 	metavar = "preset",
 argp.add_argument( "-m", 		dest = "strMetric", 	metavar = "metric",
 		type  = str, 		default = "norm_mi",
         help = "Metric to be used for hierarchical clustering" )
-
+argp.add_argument( "-e", "--exploration", 	dest = "strExploration", 	metavar = "exploration",
+		type  = str, 		default = "default",
+        help = "Exploration function" )
 		
 argp.add_argument( "-X",              metavar = "Xinput.txt",   
         type  =   argparse.FileType( "r" ),        default = sys.stdin,      
@@ -165,7 +182,6 @@ argp.add_argument( "-Y",              metavar = "Yinput.txt",
         type  =   argparse.FileType( "r" ),        default = None,    
         help = "Second file: Tab-delimited text input file, one row per feature, one column per measurement - If not selected, we will use the first file (-X)" )		
 
-		
 args = argp.parse_args( )
 istm = list()						#We are using now X and Y 
-_main(  istm, args.ostm, args.dQ, args.iIter, args.strMetric )
+_main(  istm, args.ostm, args.dQ, args.iIter, args.strMetric, args.strPreset )

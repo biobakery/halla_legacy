@@ -886,9 +886,9 @@ def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_re
 
 		pDist = phashMethods[strMethod]
 		fVal = pDist( array([pArray1[i]]), array([pArray2[j]]) )
-		aOut.append([(i,j), fVal])
+		aOut.append(fVal)
 
-	return aOut 
+	return numpy.reshape( aOut, (iRow,iCol) )
 
 
 def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction = None ):
