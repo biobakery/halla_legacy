@@ -1,5 +1,5 @@
 """
-Author: George Weingart
+Author: Yo Sup Moon,  George Weingart
 Description: Halla command python wrapper.
 """
 
@@ -24,9 +24,9 @@ Description: Halla command python wrapper.
 #SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #####################################################################################
 
-__author__ = "George Weingart"
+__author__ = "Yo Sup Moon, George Weingart"
 __copyright__ = "Copyright 2014"
-__credits__ = ["George Weingart"]
+__credits__ = ["Yo Sup Moon","George Weingart"]
 __license__ = "MIT"
 __maintainer__ = "George Weingart"
 __email__ = "george.weingart@gmail.com"
@@ -39,8 +39,9 @@ __status__ = "Development"
 #*   command.                                                                       *
 #*   It accepts as input the parameters that the halla command would accept and     *
 #*    passes them verbatum to the halla command                                     *
-#*    NOTE:  the strudel and halla directories have to be in $PYTHONPATH, e.g.      *
-#*   /home/gweingart/strudel:/home/gweingart/halla                                  *
+#*    NOTE:  the   halla directory has have to be in $PYTHONPATH, e.g.              *
+#*   March 18, 2014:   George Weingart                                              *
+#*   Split istm into -X and -Y                                                      *
 #************************************************************************************
 
 ## structural packages 
@@ -83,11 +84,25 @@ def _main( istm, ostm, dQ, iIter, strMetric ):
 	then loaded into memory like so: `execute( strFile ) ; function_call(  )`
 	
 	"""
+ 
+	
+	#***************************************************************
+	#We are using now X and Y - If Y was not set - we use X        *
+	#***************************************************************
+	if args.Y == None:
+		istm = [args.X,  args.X]						#Use X  
+	else:
+		istm = [args.X,  args.Y]						#Use X and Y
+
+	
 	if len(istm) > 1:
 		strFile1, strFile2 = istm[:2]
 	else:
 		strFile1, strFile2 = istm[0], istm[0]
 
+		
+		
+		
 	aOut1, aOut2 = Input( strFile1.name, strFile2.name ).get()
 
 	aOutData1, aOutName1, aOutType1, aOutHead1 = aOut1 
@@ -112,9 +127,9 @@ def _main( istm, ostm, dQ, iIter, strMetric ):
 #=============================================#
 argp = argparse.ArgumentParser( prog = "halla.py",
         description = "Hierarchical All-against-All significance association testing." )
-argp.add_argument( "istm",              metavar = "input.txt",
-        type = argparse.FileType( "r" ),        default = sys.stdin,    nargs = "+",
-        help = "Tab-delimited text input file, one row per feature, one column per measurement" )
+#argp.add_argument( "istm",              metavar = "input.txt",
+        #type = argparse.FileType( "r" ),        default = sys.stdin,    nargs = "+",
+        #help = "Tab-delimited text input file, one row per feature, one column per measurement" )
 
 argp.add_argument( "-o",                dest = "ostm",                  metavar = "output.txt",
         type = argparse.FileType( "w" ),        default = sys.stdout,
@@ -141,6 +156,16 @@ argp.add_argument( "-m", 		dest = "strMetric", 	metavar = "metric",
 		type  = str, 		default = "norm_mi",
         help = "Metric to be used for hierarchical clustering" )
 
+		
+argp.add_argument( "-X",              metavar = "Xinput.txt",   
+        type  =   argparse.FileType( "r" ),        default = sys.stdin,      
+        help = "First file: Tab-delimited text input file, one row per feature, one column per measurement" )		
+		
+argp.add_argument( "-Y",              metavar = "Yinput.txt",   
+        type  =   argparse.FileType( "r" ),        default = None,    
+        help = "Second file: Tab-delimited text input file, one row per feature, one column per measurement - If not selected, we will use the first file (-X)" )		
 
-args = argp.parse_args( ) 
-_main( args.istm, args.ostm, args.dQ, args.iIter, args.strMetric )
+		
+args = argp.parse_args( )
+istm = list()						#We are using now X and Y 
+_main(  istm, args.ostm, args.dQ, args.iIter, args.strMetric )

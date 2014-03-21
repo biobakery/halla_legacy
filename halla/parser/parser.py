@@ -66,6 +66,7 @@ class Input:
 
 	def _parse( self ):
 		def __parse( pArray, bVar, bHeaders ):
+ 
 			aOut = [] 
 			aNames = []
 			aTypes = []
@@ -82,7 +83,12 @@ class Input:
 
 			## Parse data types, missing values, and whitespace 
 			for i, line in enumerate( pArray ):
-				line = map( lambda x: ( x.strip() if bool(x.strip()) else None ), line )
+				###########line = map( lambda x: ( x.strip() if bool(x.strip()) else None ), line )
+				#*****************************************************************************************************
+				#*   Modification by George Weingart  2014/03/20                                                     *
+				#*   If the line is not full,  replace the Nones with nans                                           *
+				#*****************************************************************************************************
+				line = map( lambda x: ( x.strip() if bool(x.strip()) else np.nan ), line )    ###### Convert missings to nans
 				if all(line):
 					aOut.append(line)
 					if not aNames:
