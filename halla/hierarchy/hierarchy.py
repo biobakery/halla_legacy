@@ -516,6 +516,7 @@ def reduce_tree_by_layer( apParents, iLevel = 0, iStop = None ):
 
 	"""
 
+	apParents = list(apParents)
 	apParents = filter(bool, apParents)
 
 	bTree = False 
@@ -551,6 +552,53 @@ def tree2lf( apParents, iLevel = 0, iStop = None ):
 	"""
 	return reduce_tree_by_layer( apParents ) 
 
+def fix_layerform( lf ):
+	""" 
+	There is undesired behavior when descending down singletons
+	Fix this behavior 
+
+		Example 
+
+		[(0, [0, 7, 4, 6, 8, 2, 9, 1, 3, 5]),
+		 (1, [0]),
+		 (1, [7, 4, 6, 8, 2, 9, 1, 3, 5]),
+		 (2, [7, 4, 6, 8, 2, 9]),
+		 (2, [1, 3, 5]),
+		 (3, [7]),
+		 (3, [4, 6, 8, 2, 9]),
+		 (3, [1]),
+		 (3, [3, 5]),
+		 (4, [4]),
+		 (4, [6, 8, 2, 9]),
+		 (4, [3]),
+		 (4, [5]),
+		 (5, [6]),
+		 (5, [8, 2, 9]),
+		 (6, [8]),
+		 (6, [2, 9]),
+		 (7, [2]),
+		 (7, [9])]
+
+	"""
+
+	aOut = [] 
+
+	iDepth = depth_tree( lf, bLayerform = True ) ## how many layers? 
+	iLevel = iDepth - 1 ##layer level 
+
+	for tD in lf: ##tuple data  
+		iCurrent, aiIndices = tD[:2] 
+		if len(aiIndices)==1: ##if singleton 
+			aOut += [(i,aiIndices) for i in range(iCurrent+1,iLevel+1)]
+
+	lf += aOut 
+
+	## Need to sort to ensure correct layerform  
+	## source: http://docs.scipy.org/doc/numpy/reference/generated/numpy.sort.html
+	
+	dtype = [('layer', int), ('indices', list)]
+	return filter(bool,list(numpy.sort( array(lf, dtype=dtype ), order = 'layer' )))
+
 def get_depth( pClusterNode, bLayerform = False ):
 	"""
 	Get the depth of a tree 
@@ -571,6 +619,13 @@ def get_depth( pClusterNode, bLayerform = False ):
 	aOut = reduce_tree_by_layer( [pClusterNode] ) if not bLayerform else pClusterNode 
 	aZip = zip(*aOut)[0]
 	return max(aZip)-min(aZip) +1
+
+def depth_tree( pClusterNode, bLayerform = False ):
+	"""
+	alias for get_depth
+	"""
+
+	return get_depth( pClusterNode, bLayerform = bLayerform )
 
 def get_layer( atData, iLayer = None, bTuple = False, bIndex = False ):
 	"""
@@ -940,23 +995,16 @@ def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
 	if not pFunction:
 		pFunction = _link 
 
-	def _get_max( tData ):
-		
-		return np.max([i[0] for i in tData])
+	tData1, tData2 = [ fix_layerform( tree2lf( [pT] ) ) for pT in [pClusterNode1, pClusterNode2] ] ## adjusted layerforms 
 
-	tData1, tData2 = [ reduce_tree_by_layer( [pC] ) for pC in [pClusterNode1, pClusterNode2] ]
+	iMin = np.min( [depth_tree(tData1, bLayerform = True), depth_tree(tData2, bLayerform = True)] ) 
 
-	iMin = np.min( [_get_max(tData1), _get_max(tData2)] ) 
-
-	for iLevel in range(iMin+1):
+	for iLevel in range(iMin+1): ## min formulation 
 		
 		aLayerOut = [] 
 
 		aLayer1, aLayer2 = get_layer( tData1, iLevel ), get_layer( tData2, iLevel )
 		iLayer1, iLayer2 = len(aLayer1), len(aLayer2)
-
-		## See if this lines up 
-		assert( iLayer1 == iLayer2 )
 
 		for i,j in itertools.product( range(iLayer1), range(iLayer2) ):
 			aLayerOut.append( pFunction( aLayer1[i], aLayer2[j], pArray1, pArray2 ) )
@@ -965,7 +1013,7 @@ def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
 
 	return aOut 
 
-
+#### Perform all-against-all per layer, without adherence to hierarchical structure at first
 def layerwise_all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, adjust_method = "BH" ):
 	"""
 	Perform layer-wise all against all 
@@ -1002,7 +1050,10 @@ def layerwise_all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, a
 	"""
 	aOut = [] 
 
-	traverse_out = traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2 )
+	pPTBR = lambda ai, aj, X,Y : halla.stats.permutation_test_by_representative( X[array(ai)], Y[array(aj)] ) 
+
+	traverse_out = traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2 ) ##just gives me the coupled indices 
+
 	for layer in traverse_out:
 		aLayerOut = [] 
 		aPval = [] 
@@ -1010,22 +1061,17 @@ def layerwise_all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, a
 			fPval = halla.stats.permutation_test_by_representative( pArray1[array(item[0])], pArray2[array(item[1])] )
 			aPval.append(fPval)
 		
-		#print aPval 
-
 		adjusted_pval = halla.stats.p_adjust( aPval )
 		if not isinstance( adjusted_pval, list ):
 			## keep type consistency 
 			adjusted_pval = [adjusted_pval]
-
-		#print adjusted_pval 
-
+	
 		for i,item in enumerate(layer):
-			aLayerOut.append( (item[0], item[1], adjusted_pval[i]) )
-
+			aLayerOut.append( ([item[0], item[1]], adjusted_pval[i]) )
+		
 		aOut.append(aLayerOut)
 
-	return aOut 
-
+	return aOut
 
 def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi", correction = "BH", q = 0.1, 
 	pursuer_method = "nonparameteric", verbose = True ):
@@ -1221,12 +1267,13 @@ def randtree( n = 10, sparsity = 0.5, obj = True, disc = True ):
 	#s = strudel.Strudel() 
 
 	#X,A = s.generate_synthetic_data( iSamples, fSpar )
-	#X = discretize( X ) if bDisc else X 
 
-	#T = hclust( X, bTree = obj )
+	X = halla.randmat( ) 
+	X = discretize( X ) if bDisc else X 
 
-	#return T 
-	return None 
+	T = hclust( X, bTree = obj )
+
+	return T 
 
 
 

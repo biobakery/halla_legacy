@@ -193,7 +193,7 @@ def p_adjust( pval, method = "BH" ):
 
 	try:
 		pval[0]
-	except TypeError:
+	except (TypeError,IndexError):
 		pval = [pval]
 
 	#return bh( pval ) 

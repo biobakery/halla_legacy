@@ -52,6 +52,8 @@ class HAllA():
 		# Step and jump methods 
 		#----------------------------------#
 		
+		self.exploration_function = "layerwise" #, "greedy"
+
 		self.step_function = "uniform"
 		self.step_parameter = 0.0 ## a value between 0.0 and 1.0; 0.0 skips none, 1.0 skips all
 
@@ -123,6 +125,7 @@ class HAllA():
 								"accuracy"	: self.__preset_accuracy, 
 								"parallel"	: self.__preset_parallel, 
 								"flat"		: self.__preset_flat,
+								"layerwise" : self.__preset_layerwise, 
 							}
 
 		#==================================================================#
@@ -247,6 +250,51 @@ class HAllA():
 		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1] ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
+
+	def _layerwise_all_against_all( self ):
+
+		X, Y = self.meta_array[0], self.meta_array[1]
+		dX, dY = self.meta_feature[0], self.meta_feature[1]
+		tX, tY = self.meta_data_tree[0], self.meta_data_tree[1]
+		iX, iY = X.shape[0], Y.shape[0]
+
+		aOut = filter(bool,list(halla.hierarchy.layerwise_all_against_all( tX, tY, X, Y )))
+
+		aMetaOut = [] 
+
+		def _layer( Z ):
+
+			S = -1 * numpy.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
+
+			def __add_pval_product_wise( _x, _y, _fP ):
+				S[_x][_y] = _fP ; S[_y][_x] = _fP 
+
+			def __get_pval_from_bags( _Z, _strMethod = None ):
+				"""
+				
+				_strMethod: str 
+					{"default",}
+
+				The default option does the following: go through the bags, treating the p-value for each bag pair as applying to all the variables inside the bag. 
+				If new instance arises (e.g. [[3],[5]] following [[3,5,6],[3,5,6]] ), override the p-value to the one with more precision. 
+				"""
+
+				for aLine in _Z:
+					if self.verbose:
+						print aLine 
+					#break
+					aaBag, fAssoc = aLine
+					aBag1, aBag2 = aaBag 
+					aBag1, aBag2 = array(aBag1), array(aBag2)
+					self.bc( aBag1, aBag2, pFunc = lambda x,y: __add_pval_product_wise( _x = x, _y = y, _fP = fAssoc ) )
+
+			__get_pval_from_bags( Z )
+			return S 		
+
+		for Z in aOut:
+			aMetaOut.append(_layer(Z))
+
+		return aMetaOut 
 
 	def _summary_statistics( self, strMethod = None ): 
 		"""
@@ -383,6 +431,9 @@ class HAllA():
 		"""
 		pass 
 
+	def set_exploration_function( self, strFunction ):
+			self.exploration_function = strFunction
+
 	def set_preset( self, strPreset ):
 		try:
 			pPreset = self.hash_preset[strPreset] 
@@ -397,9 +448,43 @@ class HAllA():
 	These are hard-coded presets deemed useful for the user 
 	"""
 
+	def __preset_layerwise( self ):
+		"""
+		Layerwise MI preset 
+		"""
+
+		## Constants for this preset 
+		fQ = 0.1
+		pDistance = norm_mi 
+		iIter = 100
+		strReduce = "pca"
+		strStep = "uniform"
+		strAdjust = "BH"
+		strRandomization = "permutation"
+		strExplorationFunction = "layerwise"
+
+		## Set 
+		self.set_q( fQ ) 
+		self.set_metric( pDistance )
+		self.set_iterations( iIter )
+		self.set_reduce_method( strReduce )
+		self.set_step_function( strStep )
+		self.set_p_adjust_method( strAdjust )
+		self.set_randomization_method( strRandomization )
+		self.set_exploration_function( strExplorationFunction )
+
+		## Run 		
+		self._featurize( )
+		self._hclust( )
+		#self._couple( )
+		#self._all_against_all( )
+		return self._layerwise_all_against_all( )
+		#self._summary_statistics( )
+		#return self._report( )
+
 	def __preset_norm_mi( self ):
 		"""
-		Mutual Information Distance Preset 
+		Mutual Information Preset 
 		"""
 
 		## Constants for this preset 
@@ -429,7 +514,8 @@ class HAllA():
 		return self._report( )
 
 	def __preset_default( self ):
-		return self.__preset_norm_mi( )
+		#return self.__preset_norm_mi( )
+		return self.__preset_layerwise( )
 
 	def __preset_time( self ):
 		pass 
