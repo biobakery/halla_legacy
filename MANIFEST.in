@@ -1,3 +1,2 @@
 include *.txt
 recursive-include  testdata *.txt *.pcl
-recursive-include docs *.txt
