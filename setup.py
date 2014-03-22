@@ -2,7 +2,6 @@
 from setuptools import setup, find_packages
 setup(
     name = "halla",
-    py_modules = ["halla"],
     version = "1.0.1",
     license = "MIT", 
     description = "HAllA is a programmatic tool for performing multiple association testing between two or more heterogeneous datasets, each containing a mixture of discrete, binary, or continuous data.",
@@ -30,7 +29,7 @@ setup(
     packages=find_packages(),
     entry_points = {
         'console_scripts': [
-            'halla = halla.halla:_main',
+            'halla = halla.cli:_main',
         ],
         }
  )
