@@ -26,6 +26,7 @@ import numpy as np
 from numpy import array 
 import scipy 
 import scipy.stats 
+import scipy.cluster 
 import matplotlib 
 import sklearn.decomposition
 from sklearn.decomposition import PCA #remember that the matrix is X = (n_samples,n_features)
@@ -44,6 +45,8 @@ from scipy.misc import *
 
 # Use decorators 
 # @ClusterNode 
+
+#class ClusterNode #scipy.cluster.hierarchy.ClusterNode
 
 class Tree():
 	''' 
@@ -599,6 +602,41 @@ def fix_layerform( lf ):
 	dtype = [('layer', int), ('indices', list)]
 	return filter(bool,list(numpy.sort( array(lf, dtype=dtype ), order = 'layer' )))
 
+def fix_clusternode( apClusterNode, iCurrentIndex = 0, iGlobalDepth = None ):
+	"""
+	Same as fix_layerform, but for ClusterNode objects 
+
+	Note: should NOT alter original ClusterNode object; make a deep copy of it instead 
+	"""
+
+	import copy 
+
+	apClusterNode = [copy.deepcopy(ap) for ap in apClusterNode]
+
+	if not iGlobalDepth:
+		assert( len(apClusterNode) == 1 )
+		iGlobalDepth = get_depth( apClusterNode[0] )
+
+	if iCurrentIndex+1 == iGlobalDepth: 
+		assert( all([get_depth(ap) == 1 for ap in apClusterNode]) ) ## all are singleton clusters 
+		return apClusterNode 
+
+	else:
+		for pClusterNode in filter(bool, apClusterNode ):
+			for pChild in [copy.deepcopy(pC) for pC in [pClusterNode.left,pClusterNode.right]]:
+				iDepthChild = depth_tree( pChild )
+				if iDepthChild == 1: ## if it is single layer tree (singleton)
+					iAdd = iGlobalDepth - iCurrentIndex 
+					assert( pClusterNode.id == reduce_tree( pClusterNode )[0] )
+					assert( not(pClusterNode.left) and (iAdd >= 1) )
+					pClusterNode.left = spawn_clusternode( pData = pClusterNode.id, iCopy = iAdd )
+				elif iDepthChild > 1:
+					return fix_clusternode( [pClusterNode.left, pClusterNode.right], iCurrentIndex=iCurrentIndex+1, iGlobalDepth = iGlobalDepth )
+
+
+		for pClusterNode in apClusterNode:
+			pClusterNode.left, pClusterNode.right = _fix_singleton_stump( [pClusterNode.left, pClusterNode.right], iCurrentIndex = iCurrentIndex+1, iGlobalDepth = iGlobalDepth )[:2]
+
 def get_depth( pClusterNode, bLayerform = False ):
 	"""
 	Get the depth of a tree 
@@ -626,6 +664,22 @@ def depth_tree( pClusterNode, bLayerform = False ):
 	"""
 
 	return get_depth( pClusterNode, bLayerform = bLayerform )
+
+def depth_min( pClusterNode, bLayerform = False ):
+	"""
+	Get the index for the minimnum layer 
+	"""
+	aOut = reduce_tree_by_layer( [pClusterNode] ) if not bLayerform else pClusterNode 
+	aZip = zip(*aOut)[0]
+	return min(aZip)
+
+def depth_max( pClusterNode, bLayerform = False ):
+	"""
+	Get the index for the maximum layer
+	"""
+	aOut = reduce_tree_by_layer( [pClusterNode] ) if not bLayerform else pClusterNode 
+	aZip = zip(*aOut)[0]
+	return max(aZip)
 
 def get_layer( atData, iLayer = None, bTuple = False, bIndex = False ):
 	"""
@@ -713,7 +767,54 @@ def naive_couple_tree( pClusterNode1, pClusterNode2, method = "uniform", linkage
 
 	return aOut 
 
-def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "min", iCurrentDepth1 =0, iCurrentDepth2=0, iMaxDepth1 = None, iMaxDepth2 = None ):
+
+def spawn_clusternode( pData, iCopy = 1, iDecider = -1 ):
+	"""
+	Parameters
+	-----------------
+
+		pData: any data in node
+
+		iCopy: int
+			When iCopy > 0, makes a copy of pData and spawns children `iCopy` number of times 
+
+		iDecider: int
+			When adding copies of nodes, need to know if 
+			-1-> only add to left 
+			0 -> add both to left and right 
+			1 -> only add to right 
+
+	Returns 
+	------------------
+
+		C: scipy.cluster.hierarchy.ClusterNode instance 
+
+	"""
+
+	assert( iCopy >= 1 ), "iCopy must be a positive integer!"
+
+	def _spawn_clusternode( pData, iDecider = -1 ):
+		"""
+		spawns a "clusterstump" 
+		"""
+		return scipy.cluster.hierarchy.ClusterNode( pData ) ##should return a new instance **each time**
+
+	if iCopy == 1:
+		return _spawn_clusternode( pData )
+
+	else: 
+		pOut = _spawn_clusternode( pData )
+		pLeft = spawn_clusternode( pData, iCopy = iCopy - 1, iDecider = iDecider )
+		pOut.left = pLeft 
+		return pOut 
+
+def spawn_tree( pData, iCopy = 0, iDecider = -1 ):
+	"""
+	Extends `spawn_clusternode` to the halla.hierarchy.Tree object 
+	"""
+	return None 
+
+def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "min", iCurrentDepth1 =1, iCurrentDepth2=1, iMaxDepth1 = None, iMaxDepth2 = None ):
 	"""
 	Couples two data trees to produce a hypothesis tree 
 
@@ -733,6 +834,8 @@ def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "
 	----------------
 	"""
 
+	import copy 
+
 	#try:
 	#	apClusterNode1[0]
 	#	apClusterNode2[0] 
@@ -742,6 +845,12 @@ def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "
 
 	## initialize 
 
+	print "current depth 1:", iCurrentDepth1
+	print "current depth 2:", iCurrentDepth2
+
+	apClusterNode1 = [copy.deepcopy( ap ) for ap in apClusterNode1] ##unalias data structure so this does not alter the original data type 
+	apClusterNode2 = [copy.deepcopy( ap ) for ap in apClusterNode2] ##unalias data structure so this does not alter the original data type 
+
 	strMethod = method 
 	strLinkage = linkage
 
@@ -749,6 +858,8 @@ def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "
 		iMaxDepth1 = get_depth( apClusterNode1[0] )
 	if not iMaxDepth2:
 		iMaxDepth2 = get_depth( apClusterNode2[0] )
+
+	iMaxDepth = max(iMaxDepth1, iMaxDepth2)
 
 	#print "max depth 1 and 2 are:"
 	#print iMaxDepth1, iMaxDepth2
@@ -768,44 +879,7 @@ def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "
 		"""
 		gives the next node on the chain of linkages 
 		"""
-		pass
-
-	def _add_to_left( pNode, iIter, pOut = None ):
-		"""
-		need this to overcome incorrect termination in singleton nodes 
-		
-		watch out with deep copying 
-
-		as a general principle avoid recursion if possible! 
-		"""
-		
-		import copy
-
-		assert( not(pNode.left or pNode.right) )
-		assert( iIter >= 0 )
-
-		pData = pNode.id
-		#print "pData is"
-		#print pData 
-		#print "iIter is"
-		#print iIter
-
-		pTemp = None 
-
-		def _spawn( iID ):
-			return scipy.cluster.hierarchy.ClusterNode( iID )
-
-		if not pOut:
-			#print "should happen only once"
-			pOut = _spawn( pData )
-
-		if iIter >= 1:
-			iIter -= 1 
-			pTemp = _add_to_left( _spawn( pData ), iIter = iIter, pOut = pOut )
-			#print "should happen %s times", str(iIter)
-		
-		pOut.left = copy.copy( pTemp ) 
-		return pOut 
+		pass	
 
 	## hash containing string mappings for deciders 
 
@@ -819,42 +893,52 @@ def couple_tree( apClusterNode1, apClusterNode2, method = "uniform", linkage = "
 
 	aOut = [] 
 
-	def _fix_singleton( apChildren, iGlobalDepth, iCurrentDepth ):
+	apClusterNode1 = _filter_true( apClusterNode1 )
+	apClusterNode2 = _filter_true( apClusterNode2 )
+
+	def _fix_singleton_stump( apChildren, iGlobalDepth, iCurrentDepth ):
 		"""
 		Singleton children are converted to repeated copies of themselves;
 		a hack to preserve desired behavior 
 		"""
-		aOut = [] 
+
+		import copy 
+ 
+		apChildren = [copy.deepcopy( ap ) for ap in apChildren]
+
 		for pChild in filter(bool, apChildren ):
-				iCurrentDepth = get_depth( pChild )
-				if iCurrentDepth == 1: ## if it is singleton
-					iAdd = iGlobalDepth - iCurrentDepth 
-					#print "iAdd is:"
-					#print iAdd
-					pChildNew = _add_to_left( pChild, iAdd )
-					aOut.append( pChildNew )
-				else:
-					aOut.append( pChild )
+				iDepthChild = depth_tree( pChild )
+				if iDepthChild == 1: ## if it is single layer tree (singleton)
+					iAdd = iGlobalDepth - iCurrentDepth + 1 
+					assert( not pChild.left )
+					pChild.left = spawn_clusternode( pData = pChild.id, iCopy = iAdd )
 
-		return aOut 
-
-
+		return apChildren 
 
 	for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
 		
 		data1, data2 = [ reduce_tree( x ) for x in [a,b] ]
+		
+		print "data1", data1
+		print "data2", data2
 
 		pStump = Tree([data1,data2])
 
 		apChildren1, apChildren2 = [a.left, a.right], [b.left,b.right]
-		apChildren1New = _fix_singleton( apChildren1, iMaxDepth1, iCurrentDepth1 )
-		apChildren2New = _fix_singleton( apChildren2, iMaxDepth2, iCurrentDepth2 )
+		#apChildren1New = _fix_singleton_stump( apChildren1, iMaxDepth1, iCurrentDepth1 )
+		#apChildren2New = _fix_singleton_stump( apChildren2, iMaxDepth2, iCurrentDepth2 )
+		
+		## Going to use "max" formulation 
+		apChildren1New = _filter_true(_fix_singleton_stump( apChildren1, iMaxDepth, iCurrentDepth1 ))
+		apChildren2New = _filter_true(_fix_singleton_stump( apChildren2, iMaxDepth, iCurrentDepth2 ))
 
-		#if pMethod( apChildren1New, apChildren2New ): # design choice: pMethod has priority; this is when algorithm determines that it can stop. 
-		#	aOut.append( pStump )
+		print "children1", map(lambda x: reduce_tree_by_layer([x]), apChildren1New)
+		print "children2", map(lambda x: reduce_tree_by_layer([x]), apChildren2New)
 
-		if (iCurrentDepth1 == iMaxDepth1) or (iCurrentDepth2 == iMaxDepth2):
-			aOut.append( pStump)
+		assert( (iCurrentDepth1 <= iMaxDepth) and (iCurrentDepth2 <= iMaxDepth) )
+
+		if (iCurrentDepth1 == iMaxDepth) and (iCurrentDepth2 == iMaxDepth): ##min formulation 
+			aOut.append( pStump )
 
 		else: # can go on recursively 
 			## in actuality, need linkage function to give the desired behavior for node pattern 
