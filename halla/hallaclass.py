@@ -59,7 +59,6 @@ class HAllA():
 		# delta 
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-		self.step_function = "uniform" 
 		self.step_parameter = 0.0 ## a value between 0.0 and 1.0; a fractional value of the layers to be tested 
 
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -521,12 +520,6 @@ class HAllA():
 	def set_randomization_method( self, strMethod ):
 		self.randomization_method = strMethod 
 		return self.randomization_method 
-
-	def set_step_function( self, strFun ):
-		"""
-		set step function used to couple tree to make hypothesis tree 
-		"""
-		pass 
 
 	def set_exploration_function( self, strFunction ):
 			self.exploration_function = strFunction

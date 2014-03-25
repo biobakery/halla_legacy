@@ -114,21 +114,23 @@ class Tree():
 class Gardener():
 	"""
 	A gardener object is a handler for the different types of hierarchical data structures ("trees")
-	Can collapse and manipulate data structures and wrap them in different objects, depending on the 
-	context. 
+	
+	Always return a copied version of the tree being modified. 
+
 	"""
 
-	@staticmethod 
-	def PlantTree():
-		"""
-		Input: halla.Dataset object 
-		Output: halla.hierarchy.Tree object 
-		"""
+	import copy 
 
-		return None 
+	def __init__( self, apTree = None ):
 
-	def __init__(self):
-		pass 
+		self.delta = 1.0 ##step parameter 
+		self.sigma = 0.5 ##start parameter 
+
+		self.apTree = [copy.deepcopy(ap) for ap in apTree] ## the list of tree objects that is going to be modified 
+		## this is a list instead of a single tree object because it needs to handle any cross section of a given tree 
+
+		assert(0.0 <= self.delta <= 1.0)
+		assert(0.0 <= self.sigma <= 1.0)
 
 	def next(self):
 		'''
@@ -163,6 +165,21 @@ class Gardener():
 			self = pSelf 
 		return pTmp 
 
+	def prune( self, ):
+		"""
+		Return a pruned version of the tree, with new starting node(s) 
+
+		"""
+		pass
+
+	def slice( self, ):
+		"""
+		Slice tree, giving arise to thinner cross sections of the tree, still put together by hierarchy 
+		"""
+		pass 
+
+
+	###NOTE: I think doing the modification at run-time makes a lot more sense, and is a lot less complicated 
 
 #==========================================================================#
 # FUNCTORS   
@@ -836,13 +853,6 @@ def couple_tree( apClusterNode1, apClusterNode2, strMethod = "uniform", strLinka
 	# Parsing Steps                       #
 	#-------------------------------------#
 
-	#try:
-	#	apClusterNode1[0]
-	#	apClusterNode2[0] 
-	#except (TypeError,IndexError,AttributeError):
-	#	apClusterNode1 = [apClusterNode1]
-	#	apClusterNode2 = [apClusterNode2]
-
 	aiGlobalDepth1 = [get_depth( ap ) for ap in apClusterNode1]
 	aiGlobalDepth2 = [get_depth( ap ) for ap in apClusterNode2]
 
@@ -869,11 +879,9 @@ def couple_tree( apClusterNode1, apClusterNode2, strMethod = "uniform", strLinka
 			pStump = Tree([data1,data2])
 
 			apChildren1, apChildren2 = _filter_true([a.left, a.right]), _filter_true([b.left,b.right])
-			#print "apChildren1", apChildren1
-			#print "apChildren2", apChildren2 
+			
 
 			##Children should _already be_ adjusted for depth 
-
 			if not(any(apChildren1)) or not(any(apChildren2)):
 				aOut.append( pStump )
 
@@ -1106,8 +1114,25 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		* Weak positive: if q_hat <= q, then continue down the tree until q_hat > q. Report findings.
 		* Strong positive: if q_hat <= q, then continue down the tree until q_hat > q. If Leaf, report findings, else None.
 
+		Overwhelming conclusion is that these are all variants of the same Yekutieli criterion -- all remains to pick is the $q$ cutoff, and 
+		the starting point 
+
 	"""
 
+	def _start_parameter_to_iskip( start_parameter ):
+		"""
+		takes start_parameter, determines how many to skip
+		"""
+
+		pass 
+
+
+	def _step_parameter_to_aislice( step_parameter ):
+		"""
+		takes in step_parameter, returns a list of indices for which all-against-all will take place 
+		"""
+
+		pass 
 
 	aOut = [] ## Full log 
 	aFinal = [] ## Only the final reported values 
