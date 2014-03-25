@@ -867,7 +867,7 @@ def couple_tree( apClusterNode1, apClusterNode2, strMethod = "uniform", strLinka
 				"max": _decider_max, 
 				}
 
-	pMethod = hashMethod[linkage] ##returns 'aNode x aNode -> bool' object 
+	pMethod = hashMethod[strLinkage] ##returns 'aNode x aNode -> bool' object 
 
 
 	#-------------------------------------#
@@ -886,7 +886,6 @@ def couple_tree( apClusterNode1, apClusterNode2, strMethod = "uniform", strLinka
 
 	iMaxDepth = max(iGlobalDepth1, iGlobalDepth2)
 	iMinDepth = min(iGlobalDepth1, iGlobalDepth2)
-	iDiffDepth = iMaxDepth2 - iMinDepth 
 
 	## Unalias data structure so this does not alter the original data type
 	## Fix for depth 
@@ -897,19 +896,27 @@ def couple_tree( apClusterNode1, apClusterNode2, strMethod = "uniform", strLinka
 		"""
 		recursive function 
 		"""
-	
+		
+		aOut = []
+
 		for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
-					
+			
+			data1 = reduce_tree( a )
+			data2 = reduce_tree( b )
+
 			pStump = Tree([data1,data2])
 
-			apChildren1, apChildren2 = [a.left, a.right], [b.left,b.right]
+			apChildren1, apChildren2 = _filter_true([a.left, a.right]), _filter_true([b.left,b.right])
+			#print "apChildren1", apChildren1
+			#print "apChildren2", apChildren2 
+
 			##Children should _already be_ adjusted for depth 
 
 			if not(any(apChildren1)) or not(any(apChildren2)):
 				aOut.append( pStump )
 
 			else: 
-				aOut.append( pStump.add_children( _couple_tree( apChildren1, apChildren2, method = strMethod, linkage = strLinkage ) ) )
+				aOut.append( pStump.add_children( _couple_tree( apChildren1, apChildren2, strMethod = strMethod, strLinkage = strLinkage ) ) )
 
 		return aOut 
 
