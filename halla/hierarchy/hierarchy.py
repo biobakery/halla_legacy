@@ -602,7 +602,7 @@ def fix_layerform( lf ):
 	dtype = [('layer', int), ('indices', list)]
 	return filter(bool,list(numpy.sort( array(lf, dtype=dtype ), order = 'layer' )))
 
-def fix_clusternode( apClusterNode, iCurrentIndex = 0, iGlobalDepth = None ):
+def fix_clusternode( pClusterNode ):
 	"""
 	Same as fix_layerform, but for ClusterNode objects 
 
@@ -611,31 +611,34 @@ def fix_clusternode( apClusterNode, iCurrentIndex = 0, iGlobalDepth = None ):
 
 	import copy 
 
-	apClusterNode = [copy.deepcopy(ap) for ap in apClusterNode]
-
-	if not iGlobalDepth:
-		assert( len(apClusterNode) == 1 )
-		iGlobalDepth = get_depth( apClusterNode[0] )
-
-	if iCurrentIndex+1 == iGlobalDepth: 
-		assert( all([get_depth(ap) == 1 for ap in apClusterNode]) ) ## all are singleton clusters 
-		return apClusterNode 
-
+	def _fix_clusternode( pChild ):
+		#pChildUpdate = copy.deepcopy( pChild )
+		iChildDepth = get_depth( pChild )
+		iDiff = iGlobalDepth - iChildDepth 
+		if iChildDepth == 1:
+			#print "singleton"
+			#print "original", reduce_tree_by_layer( [pChild] ) 
+			#print "difference", iDiff 
+			assert( pChild.id == reduce_tree(pChild)[0] )
+			pChild = spawn_clusternode( pData = pChild.id, iCopy = iDiff ) 
+			#print "fixed", reduce_tree_by_layer( [pChild])
+			#pChild = pChildUpdate 
+			return pChild
+		else:
+			#print "non-singleton"
+			#print reduce_tree_by_layer( [pChild] )
+			pChild = fix_clusternode( pChild )
+			return pChild 
+			
+	pClusterNode = copy.deepcopy( pClusterNode ) ##make a fresh instance 
+	iGlobalDepth = get_depth( pClusterNode )
+	if iGlobalDepth == 1:
+		return pClusterNode
 	else:
-		for pClusterNode in filter(bool, apClusterNode ):
-			for pChild in [copy.deepcopy(pC) for pC in [pClusterNode.left,pClusterNode.right]]:
-				iDepthChild = depth_tree( pChild )
-				if iDepthChild == 1: ## if it is single layer tree (singleton)
-					iAdd = iGlobalDepth - iCurrentIndex 
-					assert( pClusterNode.id == reduce_tree( pClusterNode )[0] )
-					assert( not(pClusterNode.left) and (iAdd >= 1) )
-					pClusterNode.left = spawn_clusternode( pData = pClusterNode.id, iCopy = iAdd )
-				elif iDepthChild > 1:
-					return fix_clusternode( [pClusterNode.left, pClusterNode.right], iCurrentIndex=iCurrentIndex+1, iGlobalDepth = iGlobalDepth )
-
-
-		for pClusterNode in apClusterNode:
-			pClusterNode.left, pClusterNode.right = _fix_singleton_stump( [pClusterNode.left, pClusterNode.right], iCurrentIndex = iCurrentIndex+1, iGlobalDepth = iGlobalDepth )[:2]
+		pClusterNode.left = _fix_clusternode( pClusterNode.left )
+		pClusterNode.right = _fix_clusternode( pClusterNode.right )
+			
+		return pClusterNode 
 
 def get_depth( pClusterNode, bLayerform = False ):
 	"""
@@ -1363,3 +1366,30 @@ def randtree( n = 10, sparsity = 0.5, obj = True, disc = True ):
 
 
 
+
+### Garbage 
+"""
+if not iGlobalDepth:
+		assert( len(apClusterNode) == 1 )
+		iGlobalDepth = get_depth( apClusterNode[0] )
+
+	if iCurrentIndex+1 == iGlobalDepth: 
+		assert( all([get_depth(ap) == 1 for ap in apClusterNode]) ) ## all are singleton clusters 
+		return apClusterNode 
+
+	else:
+		for pClusterNode in filter(bool, apClusterNode ):
+			for pChild in [copy.deepcopy(pC) for pC in [pClusterNode.left,pClusterNode.right]]:
+				iDepthChild = depth_tree( pChild )
+				if iDepthChild == 1: ## if it is single layer tree (singleton)
+					iAdd = iGlobalDepth - iCurrentIndex 
+					assert( pClusterNode.id == reduce_tree( pClusterNode )[0] )
+					assert( not(pClusterNode.left) and (iAdd >= 1) )
+					pClusterNode.left = spawn_clusternode( pData = pClusterNode.id, iCopy = iAdd )
+				elif iDepthChild > 1:
+					return fix_clusternode( [pClusterNode.left, pClusterNode.right], iCurrentIndex=iCurrentIndex+1, iGlobalDepth = iGlobalDepth )
+
+
+		for pClusterNode in apClusterNode:
+			pClusterNode.left, pClusterNode.right = _fix_singleton_stump( [pClusterNode.left, pClusterNode.right], iCurrentIndex = iCurrentIndex+1, iGlobalDepth = iGlobalDepth )[:2]
+"""
