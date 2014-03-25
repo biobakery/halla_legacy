@@ -520,6 +520,9 @@ def p_val_plot( pArray1, pArray2, pCut = log_cut, iIter = 100 ):
 # Density estimation 
 #=========================================================
 
+def step_function( ):
+	pass 
+
 ### This is a very simple linear cutting method, with \sqrt{N} bins 
 ### To be tested with other estimators, like kernel density estimators for improved performance 
 def discretize( pArray, iN = None, method = None, aiSkip = [] ):
@@ -659,11 +662,8 @@ def discretize2d( pX, pY, method = None ):
 	pass 
 
 
-
-
 #=========================================================
 # Classification and Validation 
 #=========================================================
 
-### Classification and validation code resides in strudel 
 

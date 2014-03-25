@@ -52,30 +52,32 @@ class HAllA():
 		# Step and jump methods 
 		#----------------------------------#
 		
-		self.exploration_function = "layerwise" #, "greedy"
+		self.exploration_function = "default"
+			##{"layerwise", "greedy", "default"}
 
-		self.step_function = "uniform"
-		self.step_parameter = 0.0 ## a value between 0.0 and 1.0; 0.0 skips none, 1.0 skips all
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+		# delta 
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-		self.stop_function = None 
-		self.stop_parameter = 1.0 ## a value between 0.0 and 1.0; 0.0 performs the simplest comparison at the top of the tree; 
-		## 1.0 goes all the way to the bottom 
+		self.step_function = "uniform" 
+		self.step_parameter = 0.0 ## a value between 0.0 and 1.0; a fractional value of the layers to be tested 
 
-		#----------------------------------#
-		# Randomization and FDR methods 
-		#----------------------------------#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+		# sigma 
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+		self.start_parameter = 0.0 ## a value between 0.0 and 1.0; 0.0 performs the simplest comparison at the top of the tree; 
+		## 1.0 starts in the bottom 
+
+		#------------------------------------------------#
+		# Randomization and multiple correction  methods 
+		#------------------------------------------------#
 
 		self.alpha = 0.05 
 		self.q = 0.1
 		self.iterations = 100
 		self.p_adjust_method = "BH"
 		self.randomization_method = "permutation" #method to generate error bars 
-		
-		#----------------------------------#
-		# Structural flags 
-		#----------------------------------#
-
-		self.verbose = False 
 		
 		#------------------------------------------------------------------#
 		# Discretization  
@@ -88,6 +90,13 @@ class HAllA():
 		#------------------------------------------------------------------#
 
 		## Beta warping, copulas? 
+
+		#------------------------------------------------------------------#
+		# Output Parameters    
+		#------------------------------------------------------------------#
+
+		self.summary_method = "all" ## "final"
+		self.verbose = False 
 
 		#==================================================================#
 		# Static Objects  
@@ -133,8 +142,7 @@ class HAllA():
 		# Global Defaults 
 		#==================================================================#
 
-		self.num_iter = 1000
-		self.summary_method = "all" ## "final"
+		
 
 		#==================================================================#
 		# Mutable Meta Objects  
@@ -336,7 +344,7 @@ class HAllA():
 		return self.meta_alla 
 
 	def _all_against_all( self ):
-		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1] ) 
+		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], q = self.q ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
 
@@ -598,8 +606,8 @@ class HAllA():
 		self._featurize( )
 		self._hclust( )
 		self._couple( )
-		self._all_against_all( )
-		self._summary_statistics( )
+		self._all_against_all( ) 
+		self._summary_statistics( ) 
 		return self._report( )
 
 	def __preset_default( self ):
@@ -637,17 +645,9 @@ class HAllA():
 	def __preset_parallel( self ):
 		pass 
 
-	def __preset_flat( self ):
-		"""
-		Regular all-against-all pairwise, without hierarchical clustering 
-		"""
-
-		self._featurize( )
-		return self._naive_all_against_all( )
-
 	def __preset_naive( self ):
 		"""
-		Alias for flat
+		All against all 
 		"""
 		self._featurize( )
 		return self._naive_all_against_all( )

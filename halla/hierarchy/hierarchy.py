@@ -415,7 +415,7 @@ def hclust( pArray, strMetric = "norm_mi", cluster_method = "single", bTree = Fa
 def dendrogram( Z ):
 	return scipy.cluster.hierarchy.dendrogram( Z )
 
-def truncate_tree( list_clusternode, level = 0, skip = 0 ):
+def truncate_tree( apClusterNode, level = 0, skip = 0 ):
 	"""
 	Chop tree from root, returning smaller tree towards the leaves 
 
@@ -433,12 +433,10 @@ def truncate_tree( list_clusternode, level = 0, skip = 0 ):
 
 	"""
 
-	apClusterNode = None 
-
-	if isinstance( list_clusternode, scipy.cluster.hierarchy.ClusterNode ):
-		apClusterNode = [list_clusternode]
-	else:
-		apClusterNode = list_clusternode
+	#if isinstance( list_clusternode, scipy.cluster.hierarchy.ClusterNode ):
+	#	apClusterNode = [list_clusternode]
+	#else:
+	#	apClusterNode = list_clusternode
 
 	iSkip = skip 
 	iLevel = level 
@@ -692,6 +690,8 @@ def get_layer( atData, iLayer = None, bTuple = False, bIndex = False ):
 	Get output from `reduce_tree_by_layer` and parse 
 
 	Input: atData = a list of (iLevel, list_of_nodes_at_iLevel), iLayer = zero-indexed layer number 
+
+	BUGBUG: Need get_layer to work with ClusterNode and Tree objects as well! 
 	"""
 
 	if not atData:
@@ -735,44 +735,6 @@ def cross_section_tree( pClusterNode, method = "uniform", cuts = "complete" ):
 			aOut.append( (iDepth,pBag) )
 
 	return aOut 
-
-
-def naive_couple_tree( pClusterNode1, pClusterNode2, method = "uniform", linkage = "min" ):
-	"""
-	Couples two trees to make a hypothesis tree in layerform. 
-	Doesn't take dependencies into account  
-
-	Parameters
-	------------
-	pClusterNode1, pClusterNode2 : ClusterNode objects
-	method : str 
-		{"uniform", "2-uniform", "log-uniform"}
-	linkage : str 
-		{"max", "min"}
-
-	Returns
-	--------------
-	lf : layer_form 
-	"""
-
-	aOut = [] 
-
-	layer_form1, layer_form2 = pClusterNode1, pClusterNode2 
-	depth1, depth2 = depth_tree( layer_form1 ), depth_tree( pClusterNode2 )
-
-	for i in range(depth1):
-		pBags1 = get_layer( layer_form1, i )
-		pBags2 = get_layer( layer_form2, i )
-
-		if not pBags1 or not pBags2:
-			break 
-		else:
-
-			pP = itertools.product( pBags1, pBags2 )
-			aOut.append( [(item[0],item[1]) for item in pP] )
-
-	return aOut 
-
 
 def spawn_clusternode( pData, iCopy = 1, iDecider = -1 ):
 	"""
@@ -874,23 +836,23 @@ def couple_tree( apClusterNode1, apClusterNode2, strMethod = "uniform", strLinka
 	# Parsing Steps                       #
 	#-------------------------------------#
 
-	try:
-		apClusterNode1[0]
-		apClusterNode2[0] 
-	except (TypeError,IndexError):
-		apClusterNode1 = [apClusterNode1]
-		apClusterNode2 = [apClusterNode2]
+	#try:
+	#	apClusterNode1[0]
+	#	apClusterNode2[0] 
+	#except (TypeError,IndexError,AttributeError):
+	#	apClusterNode1 = [apClusterNode1]
+	#	apClusterNode2 = [apClusterNode2]
 
-	iGlobalDepth1 = get_depth( apClusterNode1[0] )
-	iGlobalDepth2 = get_depth( apClusterNode2[0] )
+	aiGlobalDepth1 = [get_depth( ap ) for ap in apClusterNode1]
+	aiGlobalDepth2 = [get_depth( ap ) for ap in apClusterNode2]
 
-	iMaxDepth = max(iGlobalDepth1, iGlobalDepth2)
-	iMinDepth = min(iGlobalDepth1, iGlobalDepth2)
+	iMaxDepth = max(max(aiGlobalDepth1),max(aiGlobalDepth2))
+	iMinDepth = min(min(aiGlobalDepth1),min(aiGlobalDepth2))
 
 	## Unalias data structure so this does not alter the original data type
 	## Fix for depth 
-	apClusterNode1 = map( lambda c: fix_clusternode(c, iExtend = iMaxDepth - iGlobalDepth1), apClusterNode1 ) 
-	apClusterNode2 = map( lambda c: fix_clusternode(c, iExtend = iMaxDepth - iGlobalDepth2), apClusterNode2 ) 
+	apClusterNode1 = [fix_clusternode(apClusterNode1[i], iExtend = iMaxDepth - aiGlobalDepth1[i]) for i in range(len(apClusterNode1))]
+	apClusterNode2 = [fix_clusternode(apClusterNode2[i], iExtend = iMaxDepth - aiGlobalDepth2[i]) for i in range(len(apClusterNode2))]
 
 	def _couple_tree( apClusterNode1, apClusterNode2, strMethod = strMethod, strLinkage = strLinkage ):
 		"""
@@ -1080,24 +1042,6 @@ def layerwise_all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, a
 			EXTEND (iMaxLayer - iLayer) times 
 		ELSE:
 			Compare bags 
-
-	lf1 = tree2lf( pClusterNode1 )	
-	lf2 = tree2lf( pClusterNode2 )
-
-	## Global depth for both trees 
-
-	iDepth1 = get_depth( lf1, True ) 
-	iDepth2 = get_depth( lf2, True )
-
-	### First for simplicity assume that lf1 and lf2 has (approximately) same number of layers 
-
-	for i in range(min([iDepth1,iDepth2])):
-		#assert non-emptyness of indices 
-		aI1, aI2 = [map( array, A ) for A in [get_layer(f) for f in [lf1,lf2]]] ## indices 
-		## Ex: [[0], [2, 6, 7], [4], [8, 9, 5, 1, 3]]
-
-		fP = halla.stats.permutation_test_by_representative( pArray1[aIndices], pArray2[] )
-
 	"""
 	aOut = [] 
 
@@ -1124,8 +1068,8 @@ def layerwise_all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, a
 
 	return aOut
 
-def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi", correction = "BH", q = 0.1, 
-	pursuer_method = "nonparameteric", verbose = True ):
+def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi", p_adjust = "BH", q = 0.1, 
+	pursuer_method = "nonparameteric", step_parameter = 1.0, start_parameter = 0.0, verbose = True ):
 	"""
 	Perform all-against-all on a hypothesis tree.
 
@@ -1141,7 +1085,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		pArray2
 		method 
 		metric
-		correction
+		p_adjust
 		pursuer_method 
 		verbose 
 
@@ -1152,11 +1096,27 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			Bags of associations of _final_ associations, and _all_ associations respectively. 
 
 
-	"""
-	aOut = [] ## Full log 
+	Notes 
+	----------
 
-	aFinal = [] ## Only the ones that passes test 
-	## These are going to represented in conditional alpha plots 
+		Descension schemes: 
+		
+		* Weak negative: if q_hat <= 1.0 - q, proceed until q_hat > 1.0 - q. Report findings. 
+		* Strong negative: if q_hat <= 1.0 - q, proceed until q_hat > 1.0 -q. If Leaf, report findings, else None.
+		* Weak positive: if q_hat <= q, then continue down the tree until q_hat > q. Report findings.
+		* Strong positive: if q_hat <= q, then continue down the tree until q_hat > q. If Leaf, report findings, else None.
+
+	"""
+
+
+	aOut = [] ## Full log 
+	aFinal = [] ## Only the final reported values 
+
+	iGlobalDepth = depth_tree( pTree )
+
+	start_parameter
+
+	
 
 	pHashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
 						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
@@ -1271,34 +1231,6 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 	return aFinal, aOut
 
-def all_all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "adj_mid", verbose = True ):
-	"""
-	Perform all-against-all on a hypothesis tree all the way to the bottom.
-
-	Notes:
-
-		Assumes that pArray1, pArray2 have been properly discretized, if mi-based metric is being used
-
-	"""
-
-	aOut = [] 
-
-	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
-						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
-						"parametric_test" : halla.stats.parametric_test}
-
-	strMethod = method 
-
-	pMethod = phashMethods[strMethod]
-
-	aLayer = [t[1] for t in reduce_tree_by_layer( pTree )]
-
-	for pPair in aLayer:
-		pOne, pTwo = map( array, pPair )
-		aOut.append( [pPair, pMethod( pArray1[pOne], pArray2[pTwo] )] )
-
-	return aOut 
-
 
 #==========================================================================#
 # TEST DATA  
@@ -1325,52 +1257,3 @@ def randtree( n = 10, sparsity = 0.5, obj = True, disc = True ):
 	T = hclust( X, bTree = obj )
 
 	return T 
-
-
-
-
-
-
-### Garbage 
-#if not iGlobalDepth:
-#		assert( len(apClusterNode) == 1 )
-#		iGlobalDepth = get_depth( apClusterNode[0] )
-#
-#	if iCurrentIndex+1 == iGlobalDepth: 
-#		assert( all([get_depth(ap) == 1 for ap in apClusterNode]) ) ## all are singleton clusters 
-#		return apClusterNode 
-#
-#	else:
-#		for pClusterNode in filter(bool, apClusterNode ):
-#			for pChild in [copy.deepcopy(pC) for pC in [pClusterNode.left,pClusterNode.right]]:
-#				iDepthChild = depth_tree( pChild )
-#				if iDepthChild == 1: ## if it is single layer tree (singleton)
-#					iAdd = iGlobalDepth - iCurrentIndex 
-#					assert( pClusterNode.id == reduce_tree( pClusterNode )[0] )
-#					assert( not(pClusterNode.left) and (iAdd >= 1) )
-#					pClusterNode.left = spawn_clusternode( pData = pClusterNode.id, iCopy = iAdd )
-#				elif iDepthChild > 1:
-#					return fix_clusternode( [pClusterNode.left, pClusterNode.right], iCurrentIndex=iCurrentIndex+1, iGlobalDepth = iGlobalDepth )
-#
-#
-#		for pClusterNode in apClusterNode:
-#			pClusterNode.left, pClusterNode.right = _fix_singleton_stump( [pClusterNode.left, pClusterNode.right], iCurrentIndex = iCurrentIndex+1, iGlobalDepth = iGlobalDepth )[:2]
-
-#def _fix_singleton_stump( apChildren, iGlobalDepth, iCurrentDepth ):
-#	"""
-#	Singleton children are converted to repeated copies of themselves;
-#	a hack to preserve desired behavior 
-#	"""
-#
-#	import copy 
-#
-#	apChildren = [copy.deepcopy( ap ) for ap in apChildren]
-#
-#	for pChild in filter(bool, apChildren ):
-#		iDepthChild = depth_tree( pChild )
-#		if iDepthChild == 1: ## if it is single layer tree (singleton)
-#			iAdd = iGlobalDepth - iCurrentDepth + 1 
-#			assert( not pChild.left )
-#			pChild.left = spawn_clusternode( pData = pChild.id, iCopy = iAdd )
-#
-#	return apChildren 
