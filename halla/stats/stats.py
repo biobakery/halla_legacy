@@ -215,19 +215,18 @@ def bh( afPVAL ):
  
 	"""
 
-	#afPVAL_reduced = list(set(afPVAL)) ##duplicate elements removed 
-	#iLenReduced = len(afPVAL_reduced)
+	afPVAL_reduced = list(set(afPVAL)) ##duplicate elements removed 
+	iLenReduced = len(afPVAL_reduced)
 
-	#pRank = scipy.stats.rankdata( afPVAL, method = "dense" ) ##the "dense" method ranks ties as if the list did not contain any redundancies 
+	pRank = scipy.stats.rankdata( afPVAL, method = "dense" ) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	## source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
 
-	#aOut = [] 
+	aOut = [] 
 
-	#for i, fP in enumerate(afPVAL):
-	#	aOut.append(fP*iLenReduced*1.0/pRank[i])
+	for i, fP in enumerate(afPVAL):
+		aOut.append(fP*iLenReduced*1.0/pRank[i])
 
-	#return aOut 
-	return None 
+	return aOut 
 
 def p_adjust( pval, method = "BH" ):
 	"""
@@ -252,9 +251,7 @@ def p_adjust( pval, method = "BH" ):
 	except (TypeError,IndexError):
 		pval = [pval]
 
-	#return bh( pval ) 
-	return pval 
-
+	return bh( pval ) 
 
 #=========================================================
 # Statistical test 
@@ -335,7 +332,7 @@ def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 100 )
 		fAssociation = cca_score( pArray1, pArray2 ) 
 		pMetric = cca_score
 	
-	aDist = [cca_score_norm_mi( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
+	aDist = [pMetric( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
 	#aDist = numpy.array([ halla.distance.norm_mi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
 	#aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
@@ -392,6 +389,30 @@ def parametric_test( pArray1, pArray2 ):
 # permutation_test_by_kpca_pearson
 # permutation_test_by_cca_pearson 
 # permutation_test_by_cca_norm_mi 
+
+def parametric_test_by_cca( pArray1, pArray2, iIter = 100 ):
+	pArray1 = array(pArray1)
+	pArray2 = array(pArray2)
+
+	if pArray1.ndim == 1:
+		pArray1 = array([pArray1])
+	if pArray2.ndim == 1:
+		pArray2 = array([pArray2])
+
+	def _permutation( pVec ):
+		return numpy.random.permutation( pVec )
+	def _permute_matrix( X ):
+		return array([numpy.random.permutation(x) for x in X])
+
+	X_c, Y_c = cca( pArray1, pArray2 )
+	
+	fAssociation = cca_score( pArray1, pArray2 ) 
+	pMetric = cca_score
+
+	fP = scipy.stats.pearsonr( X_c, Y_c )[1]
+
+	return fP
+
 
 def permutation_test_by_pca( pArray1, pArray2, iIter = 100 ):
 	return permutation_test_by_representative( pArray1, pArray2, iIter = iIter )

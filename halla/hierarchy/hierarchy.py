@@ -1170,10 +1170,10 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 						}
 
 	# permutation_test_by_representative  
-# permutation_test_by_kpca_norm_mi
-# permutation_test_by_kpca_pearson
-# permutation_test_by_cca_pearson 
-# permutation_test_by_cca_norm_mi
+	# permutation_test_by_kpca_norm_mi
+	# permutation_test_by_kpca_pearson
+	# permutation_test_by_cca_pearson 
+	# permutation_test_by_cca_norm_mi
 
 	strMethod = method 
 	pMethod = pHashMethods[strMethod]
@@ -1199,22 +1199,31 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		"""
 		Decides if you want to continue pursuing down recursively
 
-		Right now, do as follows: 
+		Parameters
+		===============
 
-			* if not bP and no current passes test, continue on 
-			* elif not bP and passes test, change bP to True and continue 
-			* elif bP and passes test, go on
-			* else bP and does not pass test, STOP 
+			apChildren: list 
+			aP: list 
+			bP: bool 
+			fQ: float 
 
-		Returns boolean value: (go down?, has the q-val criterion been met?)
+		Returns
+		===============
 
-			* E.g. aOut = [(True, False), (True, True), (True, False), (True, False)]
+			aBool: list 
+				list of bool values to see which nodes to continue on 
 
-		IMPORTANT:
+		Notes
+		===============
 
-			* Right now, just greedily go down, without any filtration. Maybe change this to the smallest p-value 
+			Greedy:
+
+				If q_hat <= q, reject null. Go as deep as possible. 
+
 		"""
 		
+		aBool = [] 
+
 		bPPrior = bP
 
 		try:
@@ -1223,41 +1232,33 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			aP = [aP]
 			iLen = 1 
 
-		iMin = np.argmin( aP )
-
-		aBool = [] 
-
-		for i in range(iLen):
-			aBool.append( [1] if i == iMin else [0] )
-
-		bTest = 0 ## By default, do not know if q-val has been met 
-
-		#aP_adjusted = p_adjust( aP ) 
-		aP_adjusted = aP
-	
-		try:
-			aP_adjusted[0]
-		except Exception:
-			aP_adjusted = [aP_adjusted]
-
 		# See if children pass test 
-		for i, p in enumerate( aP_adjusted ): 
-			if p <= fQ:
-				aBool[i].append( 1 )
-				aFinal.append( [apChildren[i].get_data(), aP_adjusted[i]] )
-			else:
-				#if bPPrior: 
-					### Stop criterion; previous p-value cutoff passed, but now failed 
+			for i, p in enumerate( aP_adjusted ): 
+				if p <= fQ:
+					aBool.append( True )
+					aFinal.append( [apChildren[i].get_data(), aP_adjusted[i]] )
+				else:
+					pass 
 					
-				aBool[i].append( 0 )
-
+		
 		return aBool 
 
-	def _fw_operator( pNode, bP = 0 ):
+	def _fw_operator( pNode, bP = False ):
 		"""
+		
+		Parameters
+		=================
+
+			pNode: halla.hierarchy.Tree 
+
+			bP: bool
+
+		Returns 
+		=================
+
 		Family-wise operator
 
-			* Gets fed in a node, do stuff with its children 
+			* Gets fed in a node, perform function to children 
 		"""
 
 		pChildren = pNode.get_children( )
@@ -1270,12 +1271,9 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 			aPursuer = _pursuer( pChildren, aP_adjusted, bP=bP, fQ = q )
 
-			for j, tB in enumerate( aPursuer ):
+			for j, bP in enumerate( aPursuer ):
 
-				#if tB[0] == 1:
-				#	_fw_operator( pChildren[j], tB[1] ) ##Why the hell is this not working?  Stupid python bug
-				
-				_fw_operator( pChildren[j], tB[1] ) 
+				_fw_operator( pChildren[j], bP ) 
 
 	### bP_old = True; if not bP_new or no more children, then STOP. Append to aFinal. This is the only way to be appended here. 
 	### Note how in the current implementation the first node is automatically passed; this is probably desired behavior anyways; can add more functionality later. 
@@ -1310,3 +1308,57 @@ def randtree( n = 10, sparsity = 0.5, obj = True, disc = True ):
 	T = hclust( X, bTree = obj )
 
 	return T 
+
+### garbage 
+
+
+#### Exploration: 
+
+#	* if not bP and no current passes test, continue on 
+#	* elif not bP and passes test, change bP to True and continue 
+#	* elif bP and passes test, go on
+#	* else bP and does not pass test, STOP 
+
+#def _explore():
+#
+#			bPPrior = bP
+#
+#			try:
+#				iLen = len( aP )
+#			except Exception:
+#				aP = [aP]
+#				iLen = 1 
+#
+#			iMin = np.argmin( aP )
+#
+#			aBool = [] 
+#
+#			for i in range(iLen):
+#				aBool.append( [1] if i == iMin else [0] )
+#
+#			bTest = 0 ## By default, do not know if q-val has been met 
+#
+#			aP_adjusted = halla.stats.p_adjust( aP ) 
+#			#aP_adjusted = aP
+#		
+#			try:
+#				aP_adjusted[0]
+#			except Exception:
+#				aP_adjusted = [aP_adjusted]
+#
+#			# See if children pass test 
+#			for i, p in enumerate( aP_adjusted ): 
+#				if p <= fQ:
+#					aBool[i].append( 1 )
+#					aFinal.append( [apChildren[i].get_data(), aP_adjusted[i]] )
+#				else:
+#					#if bPPrior: 
+#						### Stop criterion; previous p-value cutoff passed, but now failed 
+#						
+#					aBool[i].append( 0 )
+#
+#			return aBool 
+
+
+
+
