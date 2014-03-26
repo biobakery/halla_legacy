@@ -30,7 +30,7 @@ setup(
     packages=find_packages(),
     entry_points = {
         'console_scripts': [
-            'halla = halla.cli:_main',
+            'halla = halla.halla_cli:_main',
         ],
         }
  )
