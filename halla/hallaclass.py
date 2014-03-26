@@ -132,7 +132,6 @@ class HAllA():
 								"time"		: self.__preset_time, 
 								"accuracy"	: self.__preset_accuracy, 
 								"parallel"	: self.__preset_parallel, 
-								"flat"		: self.__preset_flat,
 								"layerwise" : self.__preset_layerwise, 
 								"naive" 	: self.__preset_naive,
 							}
