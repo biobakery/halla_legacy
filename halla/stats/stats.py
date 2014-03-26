@@ -63,7 +63,7 @@ def cca( pArray1, pArray2, iComponents = 1 ):
 	"""
 	from sklearn.cross_decomposition import CCA
 
-	pArray1, pArray2 = pArray1.T, pArray2.T
+	pArray1, pArray2 = array(pArray1).T, array(pArray2).T
 
 	pCCA = CCA( n_components = iComponents )
 	pCCA.fit( pArray1, pArray2 )
@@ -71,13 +71,15 @@ def cca( pArray1, pArray2, iComponents = 1 ):
 	return X_c.T, Y_c.T
 
 def cca_score( pArray1, pArray2, strMethod = "pearson", bPval = 1, bParam = False ):
-	from sklearn.cross_decomposition import CCA
-	import strudel
-	s= strudel.Strudel( ) 
+	#from sklearn.cross_decomposition import CCA
+	import scipy.stats 
+
+	pArray1 = array(pArray1)
+	pArray2 = array(pArray2)
 
 	X_c, Y_c = cca( pArray1, pArray2, iComponents = 1 )
 
-	return s.association( X_c[0], Y_c[0], strMethod = strMethod, bPval = bPval, bParam = bParam)
+	return scipy.stats.pearsonr( X_c, Y_c )[0]
 
 def kernel_cca( ):
 	pass
@@ -159,26 +161,20 @@ def bh( afPVAL ):
  
 	"""
 
-	assert( type( afPVAL ) == list )
+	#afPVAL_reduced = list(set(afPVAL)) ##duplicate elements removed 
+	#iLenReduced = len(afPVAL_reduced)
 
-	aOut = [] 
+	#pRank = scipy.stats.rankdata( afPVAL, method = "dense" ) ##the "dense" method ranks ties as if the list did not contain any redundancies 
+	## source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
 
-	if len( afPVAL ) == 0:
-		return aOut 
+	#aOut = [] 
 
-	else:
-		afPVAL_reduced = list(set(afPVAL)) ##duplicate elements removed 
-		iLenReduced = len(afPVAL_reduced)
+	#for i, fP in enumerate(afPVAL):
+	#	aOut.append(fP*iLenReduced*1.0/pRank[i])
 
-		pRank = scipy.stats.rankdata( afPVAL, method = "dense" ) ##the "dense" method ranks ties as if the list did not contain any redundancies 
-		## Note: need scipy version >= 0.13.0 
-		## source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
+	#return aOut 
+	return None 
 
-		for i, fP in enumerate(afPVAL):
-			aOut.append(fP*iLenReduced*1.0/pRank[i])
-
-		return aOut 
-	
 def p_adjust( pval, method = "BH" ):
 	"""
 	
@@ -199,10 +195,11 @@ def p_adjust( pval, method = "BH" ):
 
 	try:
 		pval[0]
-	except (IndexError,TypeError,):
+	except (TypeError,IndexError):
 		pval = [pval]
 
-	return bh( filter(bool, pval) ) 
+	#return bh( pval ) 
+	return pval 
 
 
 #=========================================================
