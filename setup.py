@@ -20,11 +20,11 @@ setup(
         "Topic :: Multiple Association Testing",
         ],
     long_description = open('README.txt').read(),
-    install_requires=[
-        "Numpy >= 1.6.2",
-        "Scipy >= 0.10.1",
+    install_requires=[ #### version numbers based on what comes with Anaconda Python, March 26, 2014 
+        "Numpy >= 1.7.1",
+        "Scipy >= 0.13.0",
         "Matplotlib >= 1.1.1",
-        "Scikit-learn  >= 0.14.1"
+        "Scikit-learn  >= 0.14.1" 
     ],
     package_data={"testdata": ['halla/testdata',]},
     packages=find_packages(),

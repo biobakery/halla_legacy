@@ -1124,8 +1124,12 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		takes start_parameter, determines how many to skip
 		"""
 
-		pass 
+		assert( type( start_parameter ) == float )
 
+		iDepth = get_depth( pTree )
+		iSkip = int(start_parameter * (iDepth-1))
+
+		return iSkip 
 
 	def _step_parameter_to_aislice( step_parameter ):
 		"""
@@ -1138,17 +1142,13 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 	aFinal = [] ## Only the final reported values 
 
 	iGlobalDepth = depth_tree( pTree )
-
-	start_parameter
-
-	
+	iSkip = _start_parameter_to_iskip( start_parameter )
 
 	pHashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
 						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
 						"parametric_test" : halla.stats.parametric_test}
 
 	strMethod = method 
-
 	pMethod = pHashMethods[strMethod]
 
 	def _actor( pNode ):

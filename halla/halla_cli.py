@@ -109,15 +109,20 @@ def _main(  ):
 			type = int,             default = 10 - ( logging.WARNING / 10 ),
 			help = "Debug logging level; increase for greater verbosity" )
 
+	argp.add_argument( "-e", "--exploration", 	dest = "strExploration", 	metavar = "exploration",
+		type  = str, 		default = "default",
+        help = "Exploration function" )
+
 	argp.add_argument( "-f",                dest = "fFlag",         action = "store_true",
 			help = "A flag set to true if provided" )
+
 	argp.add_argument( "-x", 		dest = "strPreset", 	metavar = "preset",
-			type  = str, 		default = None,
+			type  = str, 		default = "default",
 			help = "Instead of specifying parameters separately, use a preset" )
+
 	argp.add_argument( "-m", 		dest = "strMetric", 	metavar = "metric",
 			type  = str, 		default = "norm_mi",
 			help = "Metric to be used for hierarchical clustering" )
-
 			
 	argp.add_argument( "-X",              metavar = "Xinput.txt",   
 			type  =   argparse.FileType( "r" ),        default = sys.stdin,      
@@ -126,13 +131,10 @@ def _main(  ):
 	argp.add_argument( "-Y",              metavar = "Yinput.txt",   
 			type  =   argparse.FileType( "r" ),        default = None,    
 			help = "Second file: Tab-delimited text input file, one row per feature, one column per measurement - If not selected, we will use the first file (-X)" )		
-
 			
 	args = argp.parse_args( )
 	istm = list()						#We are using now X and Y 
- 
-	
-	
+ 	
 	#***************************************************************
 	#We are using now X and Y - If Y was not set - we use X        *
 	#***************************************************************
@@ -146,10 +148,27 @@ def _main(  ):
 		strFile1, strFile2 = istm[:2]
 	else:
 		strFile1, strFile2 = istm[0], istm[0]
+	
+	#aOut1, aOut2 = Input( strFile1.name, strFile2.name ).get()
 
-		
-		
-		
+	#aOutData1, aOutName1, aOutType1, aOutHead1 = aOut1 
+	#aOutData2, aOutName2, aOutType2, aOutHead2 = aOut2 
+
+	#H = HAllA( aOutData1, aOutData2 )
+
+	#H.set_q( args.dQ )
+	#H.set_iterations( args.iIter )
+	#H.set_metric( args.strMetric )
+
+	#aOut = H.run()
+
+	#csvw = csv.writer( args.ostm, csv.excel_tab )
+
+	#for line in aOut:
+	#	csvw.writerow( line )
+
+
+	##
 	aOut1, aOut2 = Input( strFile1.name, strFile2.name ).get()
 
 	aOutData1, aOutName1, aOutType1, aOutHead1 = aOut1 
@@ -160,16 +179,32 @@ def _main(  ):
 	H.set_q( args.dQ )
 	H.set_iterations( args.iIter )
 	H.set_metric( args.strMetric )
+	
+	if args.strPreset: 
+		H.set_preset( args.strPreset )
+		aaOut = H.run( strMethod = args.strPreset )
 
-	aOut = H.run()
+	else:
+		aaOut = H.run( )
 
 	csvw = csv.writer( args.ostm, csv.excel_tab )
 
-	for line in aOut:
-		csvw.writerow( line )
+	csvw.writerow( ["preset: " + args.strPreset] )
 
-
-
+	if H._is_meta( aaOut ):
+		if H._is_meta( aaOut[0] ):
+			for i,aOut in enumerate(aaOut):
+				csvw.writerow( ["p-value matrix: " + str(i+1)] )
+				for line in aOut:
+					csvw.writerow( line )
+		else:
+			aOut = aaOut
+			for line in aOut:
+				csvw.writerow( line )	
+	else:
+		aOut = aaOut
+		for line in aOut:
+				csvw.writerow( line )
 
 
 
