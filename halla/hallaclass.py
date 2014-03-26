@@ -520,7 +520,7 @@ class HAllA():
 		self.randomization_method = strMethod 
 		return self.randomization_method 
 
-	#def set_exploration_function( self, strFunction ):
+	def set_exploration_function( self, strFunction ):
 			self.exploration_function = strFunction
 
 	def set_preset( self, strPreset ):
