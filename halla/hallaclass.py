@@ -520,7 +520,7 @@ class HAllA():
 		self.randomization_method = strMethod 
 		return self.randomization_method 
 
-	def set_exploration_function( self, strFunction ):
+	#def set_exploration_function( self, strFunction ):
 			self.exploration_function = strFunction
 
 	def set_preset( self, strPreset ):
@@ -557,7 +557,6 @@ class HAllA():
 		self.set_metric( pDistance )
 		self.set_iterations( iIter )
 		self.set_reduce_method( strReduce )
-		self.set_step_function( strStep )
 		self.set_p_adjust_method( strAdjust )
 		self.set_randomization_method( strRandomization )
 		self.set_exploration_function( strExplorationFunction )
@@ -590,7 +589,6 @@ class HAllA():
 		self.set_metric( pDistance )
 		self.set_iterations( iIter )
 		self.set_reduce_method( strReduce )
-		self.set_step_function( strStep )
 		self.set_p_adjust_method( strAdjust )
 		self.set_randomization_method( strRandomization )
 
@@ -624,7 +622,6 @@ class HAllA():
 		self.set_metric( adj_mi )
 		self.set_iterations( iIter )
 		self.set_reduce_method( strReduce )
-		self.set_step_function( strStep )
 		self.set_p_adjust_method( strAdjust )
 		self.set_randomization_method( strRandomization )
 
