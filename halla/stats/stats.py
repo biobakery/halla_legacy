@@ -68,7 +68,17 @@ def cca( pArray1, pArray2, iComponents = 1 ):
 	pCCA = CCA( n_components = iComponents )
 	pCCA.fit( pArray1, pArray2 )
 	X_c, Y_c = pCCA.transform( pArray1, pArray2 )
-	return X_c.T, Y_c.T
+	X_cout, Y_cout = X_c.T, Y_c.T
+	
+	#print X_cout 
+	if X_cout.ndim > 1:
+		X_cout = X_cout[0]
+	if Y_cout.ndim > 1:
+		Y_cout = Y_cout[0]
+	#print X_cout 
+
+	#return array(X_cout), array(Y_cout)
+	return X_cout, Y_cout 
 
 def cca_score( pArray1, pArray2, strMethod = "pearson", bPval = 1, bParam = False ):
 	#from sklearn.cross_decomposition import CCA
@@ -77,9 +87,43 @@ def cca_score( pArray1, pArray2, strMethod = "pearson", bPval = 1, bParam = Fals
 	pArray1 = array(pArray1)
 	pArray2 = array(pArray2)
 
-	X_c, Y_c = cca( pArray1, pArray2, iComponents = 1 )
+	if pArray1.ndim == 1:
+		pArray1 = array([pArray1])
+	if pArray2.ndim == 1:
+		pArray2 = array([pArray2])
 
+	X_c, Y_c = cca( pArray1, pArray2, iComponents = 1 )
+	
+	if X_c.ndim > 1:
+		X_c = list(X_c[0])
+	if Y_c.ndim > 1:
+		Y_c = list(Y_c[0])
+	
 	return scipy.stats.pearsonr( X_c, Y_c )[0]
+
+def cca_score_norm_mi( pArray1, pArray2 ):
+	import scipy.stats 
+
+	pArray1 = array(pArray1)
+	pArray2 = array(pArray2)
+
+	if pArray1.ndim == 1:
+		pArray1 = array([pArray1])
+	if pArray2.ndim == 1:
+		pArray2 = array([pArray2])
+
+	X_c, Y_c = cca( pArray1, pArray2, iComponents = 1 )
+	
+	if X_c.ndim > 1:
+		X_c = list(X_c[0])
+	if Y_c.ndim > 1:
+		Y_c = list(Y_c[0])
+	
+	X_cd = halla.stats.discretize( X_c )
+	Y_cd = halla.stats.discretize( Y_c )
+
+	return halla.distance.norm_mi( X_cd, Y_cd )
+	#return scipy.stats.pearsonr( X_c, Y_c )[0]
 
 def kernel_cca( ):
 	pass
@@ -246,8 +290,45 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 def permutation_test_by_pca( pArray1, pArray2, iIter = 100 ):
 	return permutation_test_by_representative( pArray1, pArray2, iIter = iIter )
 
-def permutation_test_by_cca( pArray1, pArray2, iIter = 100 ):
-	pass 
+def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 100 ):
+
+	pArray1 = array(pArray1)
+	pArray2 = array(pArray2)
+
+	if pArray1.ndim == 1:
+		pArray1 = array([pArray1])
+	if pArray2.ndim == 1:
+		pArray2 = array([pArray2])
+
+	def _permutation( pVec ):
+		return numpy.random.permutation( pVec )
+	def _permute_matrix( X ):
+		return array([numpy.random.permutation(x) for x in X])
+
+	#pDe = pHashDecomposition[decomposition]
+	#pMe = pHashMetric[strMetric] 
+
+	## implicit assumption is that the arrays do not need to be discretized prior to input to the function
+	#pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+
+	X_c, Y_c = cca( pArray1, pArray2 )
+	
+	fAssociation = cca_score_norm_mi( pArray1, pArray2 ) 
+	aDist = [cca_score_norm_mi( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
+	#aDist = numpy.array([ halla.distance.norm_mi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
+	#aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
+	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
+	## BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iIter iterations of PCA
+
+	fPercentile = percentileofscore( aDist, fAssociation, kind="strict" ) ##source: Good 2000 
+	### \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
+	### k number of iterations, \hat{X} is randomized version of X 
+	### PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
+	### consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
+
+	fP = ((1.0-fPercentile/100.0)*iIter + 1)/(iIter+1)
+
+	return fP
 
 def permutation_test_by_copula( ):
 	pass 
