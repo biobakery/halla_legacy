@@ -18,6 +18,14 @@ import halla.stats
 
 from halla.distance import mi, l2, absl2, norm_mi
 from halla.stats import discretize,pca, bh, permutation_test_by_representative, p_adjust
+from halla.stats import permutation_test_by_kpca_norm_mi, permutation_test_by_kpca_pearson, permutation_test_by_cca_pearson, permutation_test_by_cca_norm_mi
+
+# permutation_test_by_representative  
+# permutation_test_by_kpca_norm_mi
+# permutation_test_by_kpca_pearson
+# permutation_test_by_cca_pearson 
+# permutation_test_by_cca_norm_mi
+
 
 ## statistics packages 
 
@@ -1076,6 +1084,14 @@ def layerwise_all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, a
 
 	return aOut
 
+#method
+# permutation_test_by_representative  
+# permutation_test_by_kpca_norm_mi
+# permutation_test_by_kpca_pearson
+# permutation_test_by_cca_pearson 
+# permutation_test_by_cca_norm_mi 
+
+
 def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi", p_adjust = "BH", q = 0.1, 
 	pursuer_method = "nonparameteric", step_parameter = 1.0, start_parameter = 0.0, verbose = True ):
 	"""
@@ -1146,7 +1162,18 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 	pHashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
 						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
-						"parametric_test" : halla.stats.parametric_test}
+						"parametric_test" : halla.stats.parametric_test,
+						"permutation_test_by_kpca_norm_mi" :halla.stats.permutation_test_by_kpca_norm_mi, 
+						"permutation_test_by_kpca_pearson" :halla.stats.permutation_test_by_kpca_pearson,
+						"permutation_test_by_cca_pearson" :halla.stats.permutation_test_by_cca_pearson,
+						"permutation_test_by_cca_norm_mi" :halla.stats.permutation_test_by_cca_norm_mi,
+						}
+
+	# permutation_test_by_representative  
+# permutation_test_by_kpca_norm_mi
+# permutation_test_by_kpca_pearson
+# permutation_test_by_cca_pearson 
+# permutation_test_by_cca_norm_mi
 
 	strMethod = method 
 	pMethod = pHashMethods[strMethod]

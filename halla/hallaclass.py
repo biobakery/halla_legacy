@@ -128,12 +128,25 @@ class HAllA():
 		# Presets
 		#==================================================================#
 
+
+			# permutation_test_by_representative  
+			# permutation_test_by_kpca_norm_mi
+			# permutation_test_by_kpca_pearson
+			# permutation_test_by_cca_pearson 
+			# permutation_test_by_cca_norm_mi
+
+
+
 		self.hash_preset = 	{"default"		: self.__preset_default, 
 								"time"		: self.__preset_time, 
 								"accuracy"	: self.__preset_accuracy, 
 								"parallel"	: self.__preset_parallel, 
 								"layerwise" : self.__preset_layerwise, 
 								"naive" 	: self.__preset_naive,
+								"kpca_norm_mi": self.__preset_kpca_norm_mi,
+								"kpca_pearson": self.__preset_kpca_pearson,
+								"cca_pearson": self.__preset_cca_pearson,
+								"cca_norm_mi": self.__preset_cca_norm_mi, 
 							}
 
 		#==================================================================#
@@ -341,8 +354,8 @@ class HAllA():
 		self.meta_alla = naive_all_against_all( self.meta_array[0], self.meta_array[1] )
 		return self.meta_alla 
 
-	def _all_against_all( self ):
-		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], q = self.q ) 
+	def _all_against_all( self, strMethod ="permutation_test_by_representative" ):
+		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, q = self.q ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
 
@@ -488,6 +501,10 @@ class HAllA():
 		self.q = fQ
 		return self.q 
 
+	def set_summary_method( self, strMethod ):
+		self.summary_method = strMethod 
+		return self.summary_method 
+
 	def set_p_adjust_method( self, strMethod ):
 		"""
 		Set multiple hypothesis test correction method 
@@ -536,6 +553,58 @@ class HAllA():
 	"""
 	These are hard-coded presets deemed useful for the user 
 	"""
+
+	######NEW PRESETS 
+	# permutation_test_by_representative  -> norm_mi 
+	# permutation_test_by_kpca_norm_mi -> 
+	# permutation_test_by_kpca_pearson
+	# permutation_test_by_cca_pearson 
+	# permutation_test_by_cca_norm_mi 
+
+	def __preset_kpca_norm_mi( self ):
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "permutation_test_by_kpca_norm_mi" ) 
+		self._summary_statistics( ) 
+		return self._report( )  
+
+	def __preset_kpca_pearson( self ):
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "permutation_test_by_kpca_pearson" ) 
+		self._summary_statistics( ) 
+		return self._report( ) 
+
+	def __preset_cca_pearson( self ):
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "permutation_test_by_cca_pearson" ) 
+		self._summary_statistics( ) 
+		return self._report( ) 
+
+	def __preset_cca_norm_mi( self ):
+		## Constants for this preset 
+		
+		#pDistance = norm_mi 
+		#iIter = 100
+		#strReduce = "pca"
+		#strAdjust = "BH"
+		#strRandomization = "permutation"
+
+		## Run 		
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "permutation_test_by_cca_norm_mi" ) 
+		self._summary_statistics( ) 
+		return self._report( ) 
+
+
+	######END 
+
 
 	def __preset_layerwise( self ):
 		"""

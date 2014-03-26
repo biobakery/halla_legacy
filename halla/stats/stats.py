@@ -56,6 +56,16 @@ def pca( pArray, iComponents = 1 ):
 
 	 	return pArray
 
+def kpca( pArray, iComponents = 1):
+	from sklearn.decomposition import KernelPCA
+	
+	if pArray.ndim == 1:
+		pArray = array([pArray])
+
+	kpca = KernelPCA(kernel="rbf", fit_inverse_transform=True, gamma=10)
+	
+	return kpca.fit_transform( pArray.T ).T 
+
 def cca( pArray1, pArray2, iComponents = 1 ):
 	"""
 	Input N X D matrix 
@@ -250,6 +260,14 @@ def p_adjust( pval, method = "BH" ):
 # Statistical test 
 #=========================================================
 
+def association_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 100 ):
+	"""
+	Returns the inverse of the strength of the association (smaller scores for better association)
+	"""
+
+	pass 
+
+
 def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 100 ):
 	"""
 	Input: 
@@ -259,7 +277,7 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	"""
 
 	strMetric = metric 
-	pHashDecomposition = {"pca": pca}
+	pHashDecomposition = {"pca": pca, "kpca": kpca }
 	pHashMetric = halla.distance.c_hash_metric 
 	
 	def _permutation( pVec ):
@@ -287,9 +305,6 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 
 	return fP
 
-def permutation_test_by_pca( pArray1, pArray2, iIter = 100 ):
-	return permutation_test_by_representative( pArray1, pArray2, iIter = iIter )
-
 def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 100 ):
 
 	pArray1 = array(pArray1)
@@ -313,7 +328,13 @@ def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 100 )
 
 	X_c, Y_c = cca( pArray1, pArray2 )
 	
-	fAssociation = cca_score_norm_mi( pArray1, pArray2 ) 
+	if metric == "norm_mi":
+		fAssociation = cca_score_norm_mi( pArray1, pArray2 ) 
+		pMetric = cca_score_norm_mi 
+	elif metric == "pearson":
+		fAssociation = cca_score( pArray1, pArray2 ) 
+		pMetric = cca_score
+	
 	aDist = [cca_score_norm_mi( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
 	#aDist = numpy.array([ halla.distance.norm_mi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
 	#aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
@@ -365,6 +386,31 @@ def parametric_test( pArray1, pArray2 ):
  	pVal2 = [pMe2(i,j)[1] for i,j in itertools.product( pArray1, pArray2 )]
 
 	return numpy.average(pVal1), numpy.average(pVal2)
+
+# permutation_test_by_representative  
+# permutation_test_by_kpca_norm_mi
+# permutation_test_by_kpca_pearson
+# permutation_test_by_cca_pearson 
+# permutation_test_by_cca_norm_mi 
+
+def permutation_test_by_pca( pArray1, pArray2, iIter = 100 ):
+	return permutation_test_by_representative( pArray1, pArray2, iIter = iIter )
+
+def permutation_test_by_pca_norm_mi( pArray1, pArray2, iIter = 100 ):
+	return permutation_test_by_representative( pArray1, pArray2, iIter = iIter )
+
+def permutation_test_by_cca_pearson( pArray1, pArray2 ):
+	return permutation_test_by_cca( pArray1, pArray2, metric = "pearson" )
+
+def permutation_test_by_cca_norm_mi( pArray1, pArray2 ):
+	return permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi" )
+
+def permutation_test_by_kpca_pearson( pArray1, pArray2 ):
+	return permutation_test_by_representative( pArray1, pArray2, decomposition = "kpca", metric = "pearson" )
+
+def permutation_test_by_kpca_norm_mi( pArray1, pArray2 ):
+	return permutation_test_by_representative( pArray1, pArray2, decomposition = "kpca", metric = "norm_mi" )
+
 
 #=========================================================
 # Cake Cutting 

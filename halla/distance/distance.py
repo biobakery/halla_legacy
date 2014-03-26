@@ -262,9 +262,22 @@ def adj_mi( pData1, pData2 ):
 ### For most association measures you can take 1-measure as a "distance" measure, but this should never be proscribed to a variable 
 ### The only place I can see use for this is in hierarchical clustering; otherwise, not relevant 
 
+def _pearson( X, Y ):
+	X = array(X)
+	Y = array(Y) 
+
+	if X.ndim > 1: 
+		X = X[0]
+	if Y.ndim > 1:
+		Y = Y[0]
+
+	return scipy.stats.pearsonr(X,Y)[0]
+
+
 c_hash_metric = {"norm_mi": norm_mi,
 				"mi": mi,
 				"l2": l2,
+				"pearson": _pearson
 				}
 ### Visible and shareable to the outside world 
 
