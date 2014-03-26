@@ -1,5 +1,6 @@
 ##### halla setup.py
 from setuptools import setup, find_packages
+import multiprocessing
 setup(
     name = "halla",
     version = "1.0.1",

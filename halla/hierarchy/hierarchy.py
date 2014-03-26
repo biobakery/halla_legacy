@@ -1205,8 +1205,9 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 		bTest = 0 ## By default, do not know if q-val has been met 
 
-		aP_adjusted = p_adjust( aP ) 
-
+		#aP_adjusted = p_adjust( aP ) 
+		aP_adjusted = aP
+	
 		try:
 			aP_adjusted[0]
 		except Exception:

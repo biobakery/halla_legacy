@@ -122,7 +122,7 @@ class HAllA():
 
 		self.hash_metric 		= halla.distance.c_hash_metric 
 
-		self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q","distance","iterations", "reduce_method", "step_function", "p_adjust_method","randomization_method"]
+		self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q","distance","iterations", "reduce_method", "p_adjust_method","randomization_method"]
 
 		#==================================================================#
 		# Presets
