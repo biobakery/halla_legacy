@@ -1189,7 +1189,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		aIndiciesMapped = map( array, aIndicies ) ## So we can vectorize over numpy arrays 
 		dP = pMethod( pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]] )
 
-		#aOut.append( [aIndicies, dP] )
+		aOut.append( [aIndicies, dP] )
 
 		return dP 
 
@@ -1223,38 +1223,46 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 			True, False -> stop, record value 
 			True, True -> keep on going, unless no more children. Then record value 
-
-
 		"""
 		
 		aBool = [] 
 
 		try:
-			iLen = len( aP )
+			iLen = len( aP_adjusted )
 		except Exception:
-			aP = [aP]
+			aP_adjusted = [aP_adjusted]
 			iLen = 1 
 
 		# See if children pass test 
 		for i, p in enumerate( aP_adjusted ): 
 			if p <= fQ:
 				### met significance criteria 
-				if not bool(apChildren[i].get_children()):
-					### if this is the terminal node, then do not traverse down any further
-					### furthermore, append the final p-value to the list of final association pairs 
-					aBool.append( False ) 
-					aFinal.append( [apChildren[i].get_data(), aP_adjusted[i]] ) ### only 
-				else:
-					### if not the terminal node, continue on 
-					aBool.append( True )
+				### if not the terminal node, continue on 
+				aBool.append( True )
 
 			else:
 				### did not meet significance criteria
 				aBool.append( False )
 					
+		### (*) Note the following situation:
+		### A child has 3 siblings. That child passes the significance threshold, so its children can be added to the final list. 
+		### A sibling doesn't quite cut the threshold, so the parent has to added instead. 
+		### But, the child has overlapping data with the sibling that was just added. 
+		### To combat this situation. Make sure that the lower nodes (even leaves) are always added AFTER the parent node 
+
+		### This makes sure that (*) is taken care of. 
+		### Notice that the parental addition happens prior to the continuation of the child 
+
 		if not any(aBool):
 			### if have to stop, then add to list of final association pairs 
 			aFinal.append( [pParent.get_data(), fQParent] )
+
+		for i,bB in enumerate(aBool):
+			if bB and not bool(apChildren[i].get_children()):
+				### if this is the terminal node, then do not traverse down any further
+				### furthermore, append the final p-value to the list of final association pairs 
+				aBool[i] = False 
+				aFinal.append( [apChildren[i].get_data(), aP_adjusted[i]] ) 
 
 		return aBool 
 
@@ -1285,14 +1293,14 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		if apChildren: 
 			aP = [ _actor( c ) for c in apChildren ]
 			aP_adjusted = halla.stats.p_adjust( aP )
-			aPursuer = _pursuer( apChildren, aP_adjusted = aP_adjusted, fQ = q, fQParent = fQParent )
+			aPursuer = _pursuer( apChildren, pNode, aP_adjusted = aP_adjusted, fQ = q, fQParent = fQParent )
 
 			for j, bP in enumerate( aPursuer ):
-				_fw_operator( pChildren[j], fQParent = fQParent ) 
+				_fw_operator( apChildren[j], fQParent = fQParent ) 
 
 	_fw_operator( pTree ) 
 
-	return aFinal 
+	return aFinal, aOut 
 
 #==========================================================================#
 # TEST DATA  

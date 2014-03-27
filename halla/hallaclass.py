@@ -94,7 +94,8 @@ class HAllA():
 		# Output Parameters    
 		#------------------------------------------------------------------#
 
-		self.summary_method = "all" ## "final"
+		self.summary_method = "final"
+			## {"all","final"}
 		self.verbose = False 
 
 		#==================================================================#
@@ -166,6 +167,7 @@ class HAllA():
 		self.meta_alla = None # results of all-against-all
 		self.meta_out = None # final output array; some methods (e.g. all_against_all) have multiple outputs piped to both self.meta_alla and self.meta_out 
 		self.meta_summary = None # summary statistics 
+		self.meta_report = None # summary report 
 
 		## END INIT 
 
@@ -428,14 +430,14 @@ class HAllA():
 			for aLine in _Z:
 				if self.verbose:
 					print aLine 
-				#break
+				
 				aaBag, fAssoc = aLine
 				aBag1, aBag2 = aaBag 
 				aBag1, aBag2 = array(aBag1), array(aBag2)
 				self.bc( aBag1, aBag2, pFunc = lambda x,y: __add_pval_product_wise( _x = x, _y = y, _fP = fAssoc ) )
 
 		X = self.meta_array[0]
-		Y = self.meta_array[1] 
+		Y = self.meta_array[1]
 		iX, iY = X.shape[0], Y.shape[0]
 		
 		S = -1 * numpy.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
@@ -449,7 +451,7 @@ class HAllA():
 		if strMethod == "final":
 			if self.verbose:
 				print "Using only final p-values"
-			__get_pval_from_bags( Z_final )
+			__get_conditional_pval_from_bags( Z_final )
 			assert( S.any() )
 			self.meta_summary = [S]
 			return self.meta_summary
@@ -472,8 +474,21 @@ class HAllA():
 		"""
 		helper function for reporting the output to the user,
 		"""
-		return self.meta_summary   
 
+		aOut = [] 
+
+		aP = array(self.meta_summary[0])
+		iRow1 = self.meta_array[0].shape[0]
+		iRow2 = self.meta_array[1].shape[0]
+
+		for i,j in itertools.combinations(xrange(iRow1),xrange(iRow2)):
+			### i <= j 
+			fQ = aP[i][j] 
+			if fQ != numpy.nan:
+				aOut.append( [[i,j],fQ] )
+
+		self.meta_report.append(aOut)
+		
 	def _run( self ):
 		"""
 		helper function: runs vanilla run of HAllA _as is_. 
