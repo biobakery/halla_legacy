@@ -1186,16 +1186,14 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		"""
 
 		aIndicies = pNode.get_data( ) 
-
 		aIndiciesMapped = map( array, aIndicies ) ## So we can vectorize over numpy arrays 
-
 		dP = pMethod( pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]] )
 
-		aOut.append( [aIndicies, dP] )
+		#aOut.append( [aIndicies, dP] )
 
 		return dP 
 
-	def _pursuer( apChildren, aP, bP, fQ ):
+	def _pursuer( apChildren, pParent, aP_adjusted, fQ, fQParent ):
 		"""
 		Decides if you want to continue pursuing down recursively
 
@@ -1220,11 +1218,16 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 				If q_hat <= q, reject null. Go as deep as possible. 
 
+
+			There are three cases for the pursuer 
+
+			True, False -> stop, record value 
+			True, True -> keep on going, unless no more children. Then record value 
+
+
 		"""
 		
 		aBool = [] 
-
-		bPPrior = bP
 
 		try:
 			iLen = len( aP )
@@ -1233,17 +1236,29 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			iLen = 1 
 
 		# See if children pass test 
-			for i, p in enumerate( aP_adjusted ): 
-				if p <= fQ:
-					aBool.append( True )
-					aFinal.append( [apChildren[i].get_data(), aP_adjusted[i]] )
+		for i, p in enumerate( aP_adjusted ): 
+			if p <= fQ:
+				### met significance criteria 
+				if not bool(apChildren[i].get_children()):
+					### if this is the terminal node, then do not traverse down any further
+					### furthermore, append the final p-value to the list of final association pairs 
+					aBool.append( False ) 
+					aFinal.append( [apChildren[i].get_data(), aP_adjusted[i]] ) ### only 
 				else:
-					pass 
+					### if not the terminal node, continue on 
+					aBool.append( True )
+
+			else:
+				### did not meet significance criteria
+				aBool.append( False )
 					
-		
+		if not any(aBool):
+			### if have to stop, then add to list of final association pairs 
+			aFinal.append( [pParent.get_data(), fQParent] )
+
 		return aBool 
 
-	def _fw_operator( pNode, bP = False ):
+	def _fw_operator( pNode, fQParent = None ):
 		"""
 		
 		Parameters
@@ -1261,27 +1276,23 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			* Gets fed in a node, perform function to children 
 		"""
 
-		pChildren = pNode.get_children( )
+		if not fQParent:
+			aiI,aiJ = map( array, pNode.get_data() )
+			fQParent = pMethod( pArray1[aiI], pArray2[aiJ] )
+
+		apChildren = pNode.get_children( )
 		
-		if pChildren:
-
-			aP = [ _actor( c ) for c in pChildren ]
-			
+		if apChildren: 
+			aP = [ _actor( c ) for c in apChildren ]
 			aP_adjusted = halla.stats.p_adjust( aP )
-
-			aPursuer = _pursuer( pChildren, aP_adjusted, bP=bP, fQ = q )
+			aPursuer = _pursuer( apChildren, aP_adjusted = aP_adjusted, fQ = q, fQParent = fQParent )
 
 			for j, bP in enumerate( aPursuer ):
-
-				_fw_operator( pChildren[j], bP ) 
-
-	### bP_old = True; if not bP_new or no more children, then STOP. Append to aFinal. This is the only way to be appended here. 
-	### Note how in the current implementation the first node is automatically passed; this is probably desired behavior anyways; can add more functionality later. 
+				_fw_operator( pChildren[j], fQParent = fQParent ) 
 
 	_fw_operator( pTree ) 
 
-	return aFinal, aOut
-
+	return aFinal 
 
 #==========================================================================#
 # TEST DATA  
