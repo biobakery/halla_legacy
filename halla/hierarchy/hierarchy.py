@@ -1093,7 +1093,7 @@ def layerwise_all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, a
 
 
 def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi", p_adjust = "BH", q = 0.1, 
-	pursuer_method = "nonparameteric", step_parameter = 1.0, start_parameter = 0.0, verbose = True ):
+	pursuer_method = "nonparameteric", step_parameter = 1.0, start_parameter = 0.0, bVerbose = False ):
 	"""
 	Perform all-against-all on a hypothesis tree.
 
@@ -1236,6 +1236,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		# See if children pass test 
 		for i, p in enumerate( aP_adjusted ): 
 			if p <= fQ:
+				if bVerbose:
+					print p, fQ 
 				### met significance criteria 
 				### if not the terminal node, continue on 
 				aBool.append( True )
@@ -1255,14 +1257,15 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 		if not any(aBool):
 			### if have to stop, then add to list of final association pairs 
-			aFinal.append( [pParent.get_data(), fQParent] )
+			if fQParent <= fQ:
+				aFinal.append( [pParent.get_data(), fQParent] )
 
-		for i,bB in enumerate(aBool):
-			if bB and not bool(apChildren[i].get_children()):
+		for j,bB in enumerate(aBool):
+			if (bB == True) and (apChildren[j].get_children() == []):
 				### if this is the terminal node, then do not traverse down any further
 				### furthermore, append the final p-value to the list of final association pairs 
-				aBool[i] = False 
-				aFinal.append( [apChildren[i].get_data(), aP_adjusted[i]] ) 
+				aBool[j] = False 
+				aFinal.append( [apChildren[j].get_data(), aP_adjusted[j]] ) 
 
 		return aBool 
 

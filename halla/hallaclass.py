@@ -129,14 +129,11 @@ class HAllA():
 		# Presets
 		#==================================================================#
 
-
-			# permutation_test_by_representative  
-			# permutation_test_by_kpca_norm_mi
-			# permutation_test_by_kpca_pearson
-			# permutation_test_by_cca_pearson 
-			# permutation_test_by_cca_norm_mi
-
-
+		# permutation_test_by_representative  
+		# permutation_test_by_kpca_norm_mi
+		# permutation_test_by_kpca_pearson
+		# permutation_test_by_cca_pearson 
+		# permutation_test_by_cca_norm_mi
 
 		self.hash_preset = 	{"default"		: self.__preset_default, 
 								"time"		: self.__preset_time, 
@@ -153,8 +150,6 @@ class HAllA():
 		#==================================================================#
 		# Global Defaults 
 		#==================================================================#
-
-		
 
 		#==================================================================#
 		# Mutable Meta Objects  
@@ -414,8 +409,42 @@ class HAllA():
 		if not strMethod:
 			strMethod = self.summary_method
 
+		X = self.meta_array[0]
+		Y = self.meta_array[1]
+		iX, iY = X.shape[0], Y.shape[0]
+		
+		S = -1 * numpy.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
+
+		Z = self.meta_alla 
+		Z_final, Z_all = map(array, Z) ## Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree 
+		assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
+
+		print "Z_final", Z_final
+
 		def __add_pval_product_wise( _x, _y, _fP ):
 			S[_x][_y] = _fP ; S[_y][_x] = _fP 
+
+		def __get_conditional_pval_from_bags( _Z, _strMethod = None ):
+			"""
+			
+			_strMethod: str 
+				{"default",}
+
+			The default option does the following: go through the bags, treating the p-value for each bag pair as applying to all the variables inside the bag. 
+			If new instance arises (e.g. [[3],[5]] following [[3,5,6],[3,5,6]] ), override the p-value to the one with more precision. 
+			"""
+
+			for aLine in _Z:
+				if self.verbose:
+					print aLine 
+				
+				aaBag, fAssoc = aLine
+				listBag1, listBag2 = aaBag 
+				aBag1, aBag2 = array(listBag1), array(listBag2)
+				
+				for i,j in itertools.product( range(iX), range(iY) ):
+					S[i][j] = fAssoc 
+					S[i][j] = fAssoc 
 
 		def __get_pval_from_bags( _Z, _strMethod = None ):
 			"""
@@ -436,27 +465,14 @@ class HAllA():
 				aBag1, aBag2 = array(aBag1), array(aBag2)
 				self.bc( aBag1, aBag2, pFunc = lambda x,y: __add_pval_product_wise( _x = x, _y = y, _fP = fAssoc ) )
 
-		X = self.meta_array[0]
-		Y = self.meta_array[1]
-		iX, iY = X.shape[0], Y.shape[0]
-		
-		S = -1 * numpy.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
-
-		Z = self.meta_alla 
-		Z_final, Z_all = Z ## Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree 
-		Z_final, Z_all = array(Z_final),array(Z_all)
-		assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
-
-		#if Z_final.any():
 		if strMethod == "final":
 			if self.verbose:
 				print "Using only final p-values"
-			__get_conditional_pval_from_bags( Z_final )
+			__get_pval_from_bags( Z_final )
 			assert( S.any() )
 			self.meta_summary = [S]
 			return self.meta_summary
 
-		#elif Z_all.any():
 		elif strMethod == "all":
 			if self.verbose:
 				print "Using all p-values"
@@ -475,20 +491,24 @@ class HAllA():
 		helper function for reporting the output to the user,
 		"""
 
-		aOut = [] 
+		aOut = []
 
-		aP = array(self.meta_summary[0])
+		self.meta_report = [] 
+
+		aP = self.meta_summary[0]
 		iRow1 = self.meta_array[0].shape[0]
 		iRow2 = self.meta_array[1].shape[0]
 
-		for i,j in itertools.combinations(xrange(iRow1),xrange(iRow2)):
+		for i,j in itertools.product(range(iRow1),range(iRow2)):
 			### i <= j 
 			fQ = aP[i][j] 
-			if fQ != numpy.nan:
+			if fQ != -1:
 				aOut.append( [[i,j],fQ] )
 
 		self.meta_report.append(aOut)
-		
+
+		return self.meta_report 
+
 	def _run( self ):
 		"""
 		helper function: runs vanilla run of HAllA _as is_. 
