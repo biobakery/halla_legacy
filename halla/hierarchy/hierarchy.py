@@ -1265,6 +1265,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 				### if this is the terminal node, then do not traverse down any further
 				### furthermore, append the final p-value to the list of final association pairs 
 				aBool[j] = False 
+				assert( aP_adjusted[j] <= fQ )
 				aFinal.append( [apChildren[j].get_data(), aP_adjusted[j]] ) 
 
 		return aBool 
@@ -1293,13 +1294,15 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 		apChildren = pNode.get_children( )
 		
+		#apChildren, pParent, aP_adjusted, fQ, fQParent
 		if apChildren: 
 			aP = [ _actor( c ) for c in apChildren ]
 			aP_adjusted = halla.stats.p_adjust( aP )
-			aPursuer = _pursuer( apChildren, pNode, aP_adjusted = aP_adjusted, fQ = q, fQParent = fQParent )
+			aPursuer = _pursuer( apChildren = apChildren, pParent = pNode, aP_adjusted = aP_adjusted, fQ = q, fQParent = fQParent )
 
 			for j, bP in enumerate( aPursuer ):
-				_fw_operator( apChildren[j], fQParent = fQParent ) 
+				if bP == True:
+					_fw_operator( apChildren[j], fQParent = fQParent ) 
 
 	_fw_operator( pTree ) 
 

@@ -816,4 +816,34 @@ def discretize2d( pX, pY, method = None ):
 # Classification and Validation 
 #=========================================================
 
+def bag2association( aaBag, A ):
+	"""
+	Parameters 
+	---------------
+
+		aaBag: list 
+		A: array 
+
+
+	Returns 
+	----------
+
+		A_conditional_flattened: list
+		A_emp_conditional_flattened: list
+		
+	"""
+
+	A_emp_conditional_flattened = [] 
+	A_conditional_flattened = [] 
+
+	##aBag is in order 
+	for aBag in aaBag:
+		aPair, fAssoc = aBag 
+		i,j = aPair 
+		A_emp_conditional_flattened.append( 1.0 - fAssoc )
+		A_conditional_flattened.append( A[i][j] )
+
+	assert( len(A_conditional_flattened ) == len(A_emp_conditional_flattened) )
+
+	return A_conditional_flattened, A_emp_conditional_flattened
 

@@ -352,7 +352,9 @@ class HAllA():
 		return self.meta_alla 
 
 	def _all_against_all( self, strMethod ="permutation_test_by_representative" ):
-		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, q = self.q ) 
+		fQ = self.q
+		print "q value is", fQ
+		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, q = fQ ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
 
@@ -418,8 +420,6 @@ class HAllA():
 		Z = self.meta_alla 
 		Z_final, Z_all = map(array, Z) ## Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree 
 		assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
-
-		print "Z_final", Z_final
 
 		def __add_pval_product_wise( _x, _y, _fP ):
 			S[_x][_y] = _fP ; S[_y][_x] = _fP 
@@ -534,7 +534,6 @@ class HAllA():
 
 	def set_q( self, fQ ):
 		self.q = fQ
-		return self.q 
 
 	def set_summary_method( self, strMethod ):
 		self.summary_method = strMethod 
@@ -573,7 +572,10 @@ class HAllA():
 		return self.randomization_method 
 
 	def set_exploration_function( self, strFunction ):
-			self.exploration_function = strFunction
+		self.exploration_function = strFunction
+
+	def set_verbose( self, bBool = True ):
+		self.verbose = bBool 
 
 	def set_preset( self, strPreset ):
 		try:
@@ -647,7 +649,7 @@ class HAllA():
 		"""
 
 		## Constants for this preset 
-		fQ = 0.1
+
 		pDistance = norm_mi 
 		iIter = 100
 		strReduce = "pca"
@@ -657,9 +659,7 @@ class HAllA():
 		strExplorationFunction = "layerwise"
 
 		## Set 
-		self.set_q( fQ ) 
 		self.set_metric( pDistance )
-		self.set_iterations( iIter )
 		self.set_reduce_method( strReduce )
 		self.set_p_adjust_method( strAdjust )
 		self.set_randomization_method( strRandomization )
@@ -680,18 +680,14 @@ class HAllA():
 		"""
 
 		## Constants for this preset 
-		fQ = 0.1
 		pDistance = norm_mi 
-		iIter = 100
 		strReduce = "pca"
 		strStep = "uniform"
 		strAdjust = "BH"
 		strRandomization = "permutation"
 
 		## Set 
-		self.set_q( fQ ) 
 		self.set_metric( pDistance )
-		self.set_iterations( iIter )
 		self.set_reduce_method( strReduce )
 		self.set_p_adjust_method( strAdjust )
 		self.set_randomization_method( strRandomization )
@@ -713,7 +709,7 @@ class HAllA():
 
 	def __preset_accuracy( self ):
 		## Constants for this preset 
-		fQ = 0.05
+
 		pDistance = adj_mi 
 		iIter = 1000
 		strReduce = "pca"
@@ -722,7 +718,7 @@ class HAllA():
 		strRandomization = "permutation"
 
 		## Set 
-		self.set_q( fQ ) 
+
 		self.set_metric( adj_mi )
 		self.set_iterations( iIter )
 		self.set_reduce_method( strReduce )
