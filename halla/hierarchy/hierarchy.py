@@ -1135,7 +1135,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 	"""
 
-	print reduce_tree_by_layer( [pTree] )
+	if bVerbose:
+		print reduce_tree_by_layer( [pTree] )
 
 	def _start_parameter_to_iskip( start_parameter ):
 		"""
@@ -1155,6 +1156,10 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		"""
 
 		pass 
+
+	iSkip = _start_parameter_to_iskip( start_parameter )
+
+	print "layers to skip:", iSkip 
 
 	aOut = [] ## Full log 
 	aFinal = [] ## Only the final reported values 
@@ -1255,18 +1260,18 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 		if not any(aBool):
 			### if have to stop, then add to list of final association pairs 
-			assert(type(fQParent) == float and type(fQ) == float)
-			#if float(fQParent) <= float(fQ):
-			assert(float(fQParent) <= float(fQ))
+			assert(isinstance(fQParent, float) and isinstance(fQ,float))
+			#if not float(fQParent) <= float(fQ):
+			#	print "WHY IS THE PARENT P-VAL POOR AND IT WAS REJECTED?", fQParent, fQ
+			assert(float(fQParent) <= float(fQ)), "Error: parent's p-value did not meet the q threshold and was erroneously rejected."
 			aFinal.append( [pParent.get_data(), float(fQParent)] )
 
 		for j,bB in enumerate(aBool):
 			if (bB == True) and (apChildren[j].get_children() == []):
 				### if this is the terminal node, then do not traverse down any further
 				### furthermore, append the final p-value to the list of final association pairs 
-				print "TERMINAL NODE"
-
-				#assert( len(apChildren[j].get_data()[0]) == 1 ) ##manual assert; delete later BUGBUG
+				if bVerbose:
+					print "TERMINAL NODE"
 
 				assert( float(aP_adjusted[j]) <= float(fQ) )
 				aFinal.append( [apChildren[j].get_data(), aP_adjusted[j]] ) 
@@ -1274,7 +1279,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 				
 		return aBool 
 
-	def _fw_operator( pNode, fQParent = None ):
+	def _fw_operator( pNode, fQParent, iSkip =0, iLayer = 1):
 		"""
 		
 		Parameters
@@ -1292,10 +1297,6 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			* Gets fed in a node, perform function to children 
 		"""
 
-		if not fQParent:
-			aiI,aiJ = map( array, pNode.get_data() )
-			fQParent = pMethod( pArray1[aiI], pArray2[aiJ] )
-
 		apChildren = pNode.get_children( )
 		
 		#apChildren, pParent, aP_adjusted, fQ, fQParent
@@ -1305,17 +1306,26 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			aPursuer = _pursuer( apChildren = apChildren, pParent = pNode, aP_adjusted = aP_adjusted, fQ = fQ, fQParent = fQParent )
 
 			for j, bP in enumerate( aPursuer ):
-				if bP == True:
-					print "TRUE", aP_adjusted[j]
-					_fw_operator( apChildren[j], fQParent = fQParent ) 
+				if bP == True or iLayer <= iSkip:
+					if bVerbose:
+						print "TRUE", aP_adjusted[j]
+					_fw_operator( apChildren[j], fQParent = aP_adjusted[j], iLayer = iLayer+1 ) ### Need to update new definition of fQParent, which was not happening before 
+
 				else:
-					print "FALSE", aP_adjusted[j]
+					if bVerbose:
+						print "FALSE", aP_adjusted[j]
 
-	_fw_operator( pTree ) 
-
-	print aFinal 
-	print "length is", len(aFinal)
 	
+	aiI,aiJ = map( array, pTree.get_data() )
+	fQParent = pMethod( pArray1[aiI], pArray2[aiJ] )
+
+	if fQParent <= fQ or iSkip >= 1:
+		_fw_operator( pTree, fQParent = fQParent ) 
+	
+	if bVerbose:
+		print aFinal 
+		print "length is", len(aFinal)
+		
 	return aFinal, aOut 
 
 #==========================================================================#

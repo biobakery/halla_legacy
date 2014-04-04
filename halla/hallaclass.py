@@ -357,8 +357,9 @@ class HAllA():
 
 		assert( type(iIter) == int )
 		fQ = self.q
-		print "q value is", fQ
-		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, fQ = fQ, bVerbose = self.verbose ) 
+		if self.verbose:
+			print "q value is", fQ
+		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, fQ = fQ, bVerbose = self.verbose, start_parameter = self.start_parameter ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
 
@@ -580,6 +581,9 @@ class HAllA():
 
 	def set_verbose( self, bBool = True ):
 		self.verbose = bBool 
+
+	def set_start_parameter( self, fParam ):
+		self.start_parameter = fParam
 
 	def set_preset( self, strPreset ):
 		try:

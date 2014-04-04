@@ -225,10 +225,7 @@ def bh( afPVAL ):
 
 	for i, fP in enumerate(afPVAL):
 		fAdjusted = fP*1.0*pRank[i]/iLenReduced
-		#if fAdjusted > 1.0:
-		#	print "PROBLEM"
-		#	print afPVAL
-		#	print fP, iLenReduced, pRank[i]
+		
 		aOut.append(fAdjusted)
 
 	assert( all(map(lambda x: x <= 1.0, aOut)) ) ##sanity check 
@@ -281,6 +278,8 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	metric = {pca": pca} 
 	"""
 
+	numpy.random.seed(0)
+
 	strMetric = metric 
 	pHashDecomposition = {"pca": pca, "kpca": kpca }
 	pHashMetric = halla.distance.c_hash_metric 
@@ -314,7 +313,7 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 
 def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 100 ):
 
-	numpy.random.set_seed()
+	numpy.random.seed(0)
 
 	pArray1 = array(pArray1)
 	pArray2 = array(pArray2)
@@ -365,7 +364,7 @@ def permutation_test_by_copula( ):
 
 def permutation_test_by_average( pArray1, pArray2, metric = "norm_mid", iIter = 100 ):
 
-	numpy.random.set_seed()
+	numpy.random.seed(0)
 
 	pHashDecomposition = {"pca": pca}
 	
@@ -391,6 +390,8 @@ def permutation_test_by_average( pArray1, pArray2, metric = "norm_mid", iIter = 
 
 def parametric_test( pArray1, pArray2 ):
 	
+	numpy.random.seed(0)
+
 	pMe1 = lambda x,y: halla.distance.cor( x,y, method = "pearson", pval = True)
 	pMe2 = lambda x,y: halla.distance.cor( x,y, method = "spearman", pval = True)
 
@@ -399,15 +400,10 @@ def parametric_test( pArray1, pArray2 ):
 
 	return numpy.average(pVal1), numpy.average(pVal2)
 
-# permutation_test_by_representative  
-# permutation_test_by_kpca_norm_mi
-# permutation_test_by_kpca_pearson
-# permutation_test_by_cca_pearson 
-# permutation_test_by_cca_norm_mi 
 
 def parametric_test_by_cca( pArray1, pArray2, iIter = 100 ):
 	
-	numpy.random.set_seed()
+	numpy.random.seed(0)
 
 	pArray1 = array(pArray1)
 	pArray2 = array(pArray2)
@@ -438,17 +434,17 @@ def permutation_test_by_pca( pArray1, pArray2, iIter = 100 ):
 def permutation_test_by_pca_norm_mi( pArray1, pArray2, iIter = 100 ):
 	return permutation_test_by_representative( pArray1, pArray2, iIter = iIter )
 
-def permutation_test_by_cca_pearson( pArray1, pArray2 ):
-	return permutation_test_by_cca( pArray1, pArray2, metric = "pearson" )
+def permutation_test_by_cca_pearson( pArray1, pArray2, iIter = 100 ):
+	return permutation_test_by_cca( pArray1, pArray2, metric = "pearson", iIter = iIter )
 
-def permutation_test_by_cca_norm_mi( pArray1, pArray2 ):
-	return permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi" )
+def permutation_test_by_cca_norm_mi( pArray1, pArray2, iIter = 100 ):
+	return permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = iIter )
 
-def permutation_test_by_kpca_pearson( pArray1, pArray2 ):
-	return permutation_test_by_representative( pArray1, pArray2, decomposition = "kpca", metric = "pearson" )
+def permutation_test_by_kpca_pearson( pArray1, pArray2, iIter = 100 ):
+	return permutation_test_by_representative( pArray1, pArray2, decomposition = "kpca", metric = "pearson", iIter = iIter )
 
-def permutation_test_by_kpca_norm_mi( pArray1, pArray2 ):
-	return permutation_test_by_representative( pArray1, pArray2, decomposition = "kpca", metric = "norm_mi" )
+def permutation_test_by_kpca_norm_mi( pArray1, pArray2, iIter = 100 ):
+	return permutation_test_by_representative( pArray1, pArray2, decomposition = "kpca", metric = "norm_mi", iIter = iIter )
 
 
 #=========================================================
