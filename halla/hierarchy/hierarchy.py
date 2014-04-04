@@ -725,7 +725,7 @@ def get_layer( atData, iLayer = None, bTuple = False, bIndex = False ):
 	dummyOut = [] 
 
 	if not isinstance( atData, list ): 
-		atData = reduce_tree_by_layer( atData )
+		atData = reduce_tree_by_layer( [atData] )
 
 	if not iLayer:
 		iLayer = atData[0][0]
@@ -1084,16 +1084,9 @@ def layerwise_all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, a
 
 	return aOut
 
-#method
-# permutation_test_by_representative  
-# permutation_test_by_kpca_norm_mi
-# permutation_test_by_kpca_pearson
-# permutation_test_by_cca_pearson 
-# permutation_test_by_cca_norm_mi 
 
-
-def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi", p_adjust = "BH", q = 0.1, 
-	pursuer_method = "nonparameteric", step_parameter = 1.0, start_parameter = 0.0, bVerbose = False ):
+def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi", p_adjust = "BH", fQ = 0.1, 
+	iIter = 100, pursuer_method = "nonparameteric", step_parameter = 1.0, start_parameter = 0.0, bVerbose = False, ):
 	"""
 	Perform all-against-all on a hypothesis tree.
 
@@ -1133,7 +1126,16 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		Overwhelming conclusion is that these are all variants of the same Yekutieli criterion -- all remains to pick is the $q$ cutoff, and 
 		the starting point 
 
+		#method
+		# permutation_test_by_representative  
+		# permutation_test_by_kpca_norm_mi
+		# permutation_test_by_kpca_pearson
+		# permutation_test_by_cca_pearson 
+		# permutation_test_by_cca_norm_mi 		
+
 	"""
+
+	print reduce_tree_by_layer( [pTree] )
 
 	def _start_parameter_to_iskip( start_parameter ):
 		"""
@@ -1169,12 +1171,6 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 						"permutation_test_by_cca_norm_mi" :halla.stats.permutation_test_by_cca_norm_mi,
 						}
 
-	# permutation_test_by_representative  
-	# permutation_test_by_kpca_norm_mi
-	# permutation_test_by_kpca_pearson
-	# permutation_test_by_cca_pearson 
-	# permutation_test_by_cca_norm_mi
-
 	strMethod = method 
 	pMethod = pHashMethods[strMethod]
 
@@ -1187,7 +1183,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 		aIndicies = pNode.get_data( ) 
 		aIndiciesMapped = map( array, aIndicies ) ## So we can vectorize over numpy arrays 
-		dP = pMethod( pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]] )
+		dP = pMethod( pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], iIter = iIter )
 
 		aOut.append( [aIndicies, dP] )
 
@@ -1234,8 +1230,10 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			iLen = 1 
 
 		# See if children pass test 
+
 		for i, p in enumerate( aP_adjusted ): 
-			if p <= fQ:
+			assert( isinstance(p,float) and isinstance(fQ,float) )
+			if float(p) <= float(fQ):
 				if bVerbose:
 					print p, fQ 
 				### met significance criteria 
@@ -1257,17 +1255,23 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 		if not any(aBool):
 			### if have to stop, then add to list of final association pairs 
-			if fQParent <= fQ:
-				aFinal.append( [pParent.get_data(), fQParent] )
+			assert(type(fQParent) == float and type(fQ) == float)
+			#if float(fQParent) <= float(fQ):
+			assert(float(fQParent) <= float(fQ))
+			aFinal.append( [pParent.get_data(), float(fQParent)] )
 
 		for j,bB in enumerate(aBool):
 			if (bB == True) and (apChildren[j].get_children() == []):
 				### if this is the terminal node, then do not traverse down any further
 				### furthermore, append the final p-value to the list of final association pairs 
-				aBool[j] = False 
-				assert( aP_adjusted[j] <= fQ )
-				aFinal.append( [apChildren[j].get_data(), aP_adjusted[j]] ) 
+				print "TERMINAL NODE"
 
+				#assert( len(apChildren[j].get_data()[0]) == 1 ) ##manual assert; delete later BUGBUG
+
+				assert( float(aP_adjusted[j]) <= float(fQ) )
+				aFinal.append( [apChildren[j].get_data(), aP_adjusted[j]] ) 
+				aBool[j] = False 
+				
 		return aBool 
 
 	def _fw_operator( pNode, fQParent = None ):
@@ -1298,14 +1302,20 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		if apChildren: 
 			aP = [ _actor( c ) for c in apChildren ]
 			aP_adjusted = halla.stats.p_adjust( aP )
-			aPursuer = _pursuer( apChildren = apChildren, pParent = pNode, aP_adjusted = aP_adjusted, fQ = q, fQParent = fQParent )
+			aPursuer = _pursuer( apChildren = apChildren, pParent = pNode, aP_adjusted = aP_adjusted, fQ = fQ, fQParent = fQParent )
 
 			for j, bP in enumerate( aPursuer ):
 				if bP == True:
+					print "TRUE", aP_adjusted[j]
 					_fw_operator( apChildren[j], fQParent = fQParent ) 
+				else:
+					print "FALSE", aP_adjusted[j]
 
 	_fw_operator( pTree ) 
 
+	print aFinal 
+	print "length is", len(aFinal)
+	
 	return aFinal, aOut 
 
 #==========================================================================#

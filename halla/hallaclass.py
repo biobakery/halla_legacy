@@ -74,7 +74,7 @@ class HAllA():
 
 		self.alpha = 0.05 
 		self.q = 0.1
-		self.iterations = 100
+		self.iterations = 1000
 		self.p_adjust_method = "BH"
 		self.randomization_method = "permutation" #method to generate error bars 
 		
@@ -351,10 +351,14 @@ class HAllA():
 		self.meta_alla = naive_all_against_all( self.meta_array[0], self.meta_array[1] )
 		return self.meta_alla 
 
-	def _all_against_all( self, strMethod ="permutation_test_by_representative" ):
+	def _all_against_all( self, strMethod ="permutation_test_by_representative", iIter = None ):
+		if not iIter:
+			iIter = self.iterations 
+
+		assert( type(iIter) == int )
 		fQ = self.q
 		print "q value is", fQ
-		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, q = fQ ) 
+		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, fQ = fQ, bVerbose = self.verbose ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
 
@@ -422,7 +426,8 @@ class HAllA():
 		assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
 
 		def __add_pval_product_wise( _x, _y, _fP ):
-			S[_x][_y] = _fP ; S[_y][_x] = _fP 
+			S[_x][_y] = _fP 
+			#S[_y][_x] = _fP 
 
 		def __get_conditional_pval_from_bags( _Z, _strMethod = None ):
 			"""
@@ -442,8 +447,7 @@ class HAllA():
 				listBag1, listBag2 = aaBag 
 				aBag1, aBag2 = array(listBag1), array(listBag2)
 				
-				for i,j in itertools.product( range(iX), range(iY) ):
-					S[i][j] = fAssoc 
+				for i,j in itertools.product( listBag1, listBag2 ):
 					S[i][j] = fAssoc 
 
 		def __get_pval_from_bags( _Z, _strMethod = None ):
@@ -468,7 +472,7 @@ class HAllA():
 		if strMethod == "final":
 			if self.verbose:
 				print "Using only final p-values"
-			__get_pval_from_bags( Z_final )
+			__get_conditional_pval_from_bags( Z_final )
 			assert( S.any() )
 			self.meta_summary = [S]
 			return self.meta_summary
@@ -476,7 +480,7 @@ class HAllA():
 		elif strMethod == "all":
 			if self.verbose:
 				print "Using all p-values"
-			__get_pval_from_bags( Z_all )
+			__get_conditional_pval_from_bags( Z_all )
 			assert( S.any() )
 			self.meta_summary = [S]
 			return self.meta_summary

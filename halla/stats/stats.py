@@ -224,7 +224,14 @@ def bh( afPVAL ):
 	aOut = [] 
 
 	for i, fP in enumerate(afPVAL):
-		aOut.append(fP*iLenReduced*1.0/pRank[i])
+		fAdjusted = fP*1.0*pRank[i]/iLenReduced
+		#if fAdjusted > 1.0:
+		#	print "PROBLEM"
+		#	print afPVAL
+		#	print fP, iLenReduced, pRank[i]
+		aOut.append(fAdjusted)
+
+	assert( all(map(lambda x: x <= 1.0, aOut)) ) ##sanity check 
 
 	return aOut 
 
@@ -264,6 +271,7 @@ def association_by_representative( pArray1, pArray2, metric = "norm_mi", decompo
 
 	pass 
 
+## BUGBUG: why am I getting a p-value of this 1.0099009901? 
 
 def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 100 ):
 	"""
@@ -300,9 +308,13 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 
 	fP = ((1.0-fPercentile/100.0)*iIter + 1)/(iIter+1)
 
+	assert(fP <= 1.0)
+
 	return fP
 
 def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 100 ):
+
+	numpy.random.set_seed()
 
 	pArray1 = array(pArray1)
 	pArray2 = array(pArray2)
@@ -352,6 +364,9 @@ def permutation_test_by_copula( ):
 	pass 
 
 def permutation_test_by_average( pArray1, pArray2, metric = "norm_mid", iIter = 100 ):
+
+	numpy.random.set_seed()
+
 	pHashDecomposition = {"pca": pca}
 	
 	pHashMetric = halla.distance.c_hash_metric
@@ -391,6 +406,9 @@ def parametric_test( pArray1, pArray2 ):
 # permutation_test_by_cca_norm_mi 
 
 def parametric_test_by_cca( pArray1, pArray2, iIter = 100 ):
+	
+	numpy.random.set_seed()
+
 	pArray1 = array(pArray1)
 	pArray2 = array(pArray2)
 
