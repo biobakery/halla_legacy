@@ -347,8 +347,8 @@ class HAllA():
 		## remember, `couple_tree` returns object wrapped in list 
 		return self.meta_hypothesis_tree 
 
-	def _naive_all_against_all( self ):
-		self.meta_alla = naive_all_against_all( self.meta_array[0], self.meta_array[1] )
+	def _naive_all_against_all( self, iIter = 100 ):
+		self.meta_alla = naive_all_against_all( self.meta_array[0], self.meta_array[1], iIter = iIter )
 		return self.meta_alla 
 
 	def _all_against_all( self, strMethod ="permutation_test_by_representative", iIter = None ):
@@ -357,7 +357,9 @@ class HAllA():
 
 		assert( type(iIter) == int )
 		fQ = self.q
+		
 		if self.verbose:
+			print "HAllA PROMPT: q value", fQ
 			print "q value is", fQ
 		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, fQ = fQ, bVerbose = self.verbose, start_parameter = self.start_parameter ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
@@ -424,11 +426,19 @@ class HAllA():
 
 		Z = self.meta_alla 
 		Z_final, Z_all = map(array, Z) ## Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree 
+		
+		### Sort the final Z to make sure p-value consolidation happens correctly 
+		Z_final_dummy = [-1.0 *(len(line[0][0])+len(line[0][1])) for line in Z_final]
+		args_sorted = numpy.argsort( Z_final_dummy )
+		Z_final = Z_final[args_sorted]
+
+		if self.verbose:
+			print Z_final 
+
 		assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
 
 		def __add_pval_product_wise( _x, _y, _fP ):
-			S[_x][_y] = _fP 
-			#S[_y][_x] = _fP 
+			S[_x][_y] = _fP  
 
 		def __get_conditional_pval_from_bags( _Z, _strMethod = None ):
 			"""
@@ -569,7 +579,7 @@ class HAllA():
 		return self.reduce_method
 
 	def set_iterations( self, iIterations ):
-		self.m_iIter = iIterations
+		self.iterations = iIterations
 		return self.iterations 
 
 	def set_randomization_method( self, strMethod ):
@@ -747,7 +757,8 @@ class HAllA():
 		All against all 
 		"""
 		self._featurize( )
-		return self._naive_all_against_all( )
+		#print self.iterations 
+		return [self._naive_all_against_all( iIter = self.iterations )]
 
 	#==========================================================#
 	# Public Functions / Main Pipeline  
@@ -816,11 +827,15 @@ class HAllA():
 
 		"""
 
-		try:
-			pMethod = self.hash_preset[strMethod]
-			return pMethod( )
-		except KeyError:			
-			raise Exception( "Invalid Method.")
+		if self.start_parameter == 1.0 or self.q == 1.0:
+			strMethod = "naive"
+			return self.hash_preset[strMethod]( )
+		else:
+			try:
+				pMethod = self.hash_preset[strMethod]
+				return pMethod( )
+			except KeyError:			
+				raise Exception( "Invalid Method.")
 
 	def view_singleton( self, pBags ):
 		aOut = [] 

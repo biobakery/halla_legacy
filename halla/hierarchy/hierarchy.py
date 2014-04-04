@@ -900,7 +900,7 @@ def couple_tree( apClusterNode1, apClusterNode2, strMethod = "uniform", strLinka
 
 	return _couple_tree( apClusterNode1, apClusterNode2, strMethod, strLinkage )
 
-def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_representative" ):
+def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_representative", iIter = 100  ):
 
 	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
 						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
@@ -914,10 +914,14 @@ def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_re
 	for i,j in itertools.product( range(iRow), range(iCol) ):
 
 		pDist = phashMethods[strMethod]
-		fVal = pDist( array([pArray1[i]]), array([pArray2[j]]) )
-		aOut.append(fVal)
+		fVal = pDist( array([pArray1[i]]), array([pArray2[j]]), iIter = iIter )
+		aOut.append([[i,j],fVal])
 
-	return numpy.reshape( aOut, (iRow,iCol) )
+	aOut_header = zip(*aOut)[0]
+	aOut_adjusted = halla.stats.p_adjust( zip(*aOut)[1] )
+
+	return zip(aOut_header,aOut_adjusted)
+	#return numpy.reshape( aOut, (iRow,iCol) )
 
 
 def traverse_by_layer( pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction = None ):
@@ -1084,6 +1088,9 @@ def layerwise_all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, a
 
 	return aOut
 
+#### BUGBUG: When q = 1.0, results should be _exactly the same_ as naive all_against_all, but something is going on that messes this up
+#### Need to figure out what -- it's probably in the p-value consolidation stage 
+#### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
 def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi", p_adjust = "BH", fQ = 0.1, 
 	iIter = 100, pursuer_method = "nonparameteric", step_parameter = 1.0, start_parameter = 0.0, bVerbose = False, ):
@@ -1159,7 +1166,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 	iSkip = _start_parameter_to_iskip( start_parameter )
 
-	print "layers to skip:", iSkip 
+	##print "layers to skip:", iSkip 
 
 	aOut = [] ## Full log 
 	aFinal = [] ## Only the final reported values 
@@ -1263,7 +1270,9 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			assert(isinstance(fQParent, float) and isinstance(fQ,float))
 			#if not float(fQParent) <= float(fQ):
 			#	print "WHY IS THE PARENT P-VAL POOR AND IT WAS REJECTED?", fQParent, fQ
-			assert(float(fQParent) <= float(fQ)), "Error: parent's p-value did not meet the q threshold and was erroneously rejected."
+			#assert(float(fQParent) <= float(fQ)), "Error: parent's p-value did not meet the q threshold and was erroneously rejected."
+			## Need better error handling for skipping items here 
+
 			aFinal.append( [pParent.get_data(), float(fQParent)] )
 
 		for j,bB in enumerate(aBool):

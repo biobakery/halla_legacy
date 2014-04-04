@@ -101,6 +101,10 @@ def _main(  ):
 			type = float,   default = 0.05,
 			help = "Q-value for overall significance tests" )
 
+	argp.add_argument( "-s",                dest = "fS",                    metavar = "start_parameter",
+			type = float,   default = 0.25,
+			help = "Start parameter; [0.0,1.0]" )
+
 	argp.add_argument( "-i",                dest = "iIter",    metavar = "iterations",
 			type = int,             default = 100,
 			help = "Number of iterations for nonparametric significance testing" )
@@ -113,8 +117,8 @@ def _main(  ):
 		type  = str, 		default = "default",
         help = "Exploration function" )
 
-	argp.add_argument( "-f",                dest = "fFlag",         action = "store_true",
-			help = "A flag set to true if provided" )
+	#argp.add_argument( "-f",                dest = "fFlag",         action = "store_true",
+	#		help = "A flag set to true if provided" )
 
 	argp.add_argument( "-x", 		dest = "strPreset", 	metavar = "preset",
 			type  = str, 		default = "default",
@@ -179,7 +183,8 @@ def _main(  ):
 	H.set_q( args.dQ )
 	H.set_iterations( args.iIter )
 	H.set_metric( args.strMetric )
-	
+	H.set_start_parameter( args.fS )
+
 	if args.strPreset: 
 		H.set_preset( args.strPreset )
 		aaOut = H.run( strMethod = args.strPreset )
@@ -189,24 +194,30 @@ def _main(  ):
 
 	csvw = csv.writer( args.ostm, csv.excel_tab )
 
-	csvw.writerow( ["preset: " + args.strPreset] )
+	csvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
 
-	if H._is_meta( aaOut ):
-		if H._is_meta( aaOut[0] ):
-			for i,aOut in enumerate(aaOut):
-				csvw.writerow( ["p-value matrix: " + str(i+1)] )
-				for line in aOut:
-					csvw.writerow( line )
-		else:
-			aOut = aaOut
-			for line in aOut:
-				csvw.writerow( line )	
-	else:
-		aOut = aaOut
-		for line in aOut:
-				csvw.writerow( line )
+	#if H._is_meta( aaOut ):
+	#	if H._is_meta( aaOut[0] ):
+	#		for i,aOut in enumerate(aaOut):
+	#			csvw.writerow( ["p-value matrix: " + str(i+1)] )
+	#			for line in aOut:
+	#				csvw.writerow( line )
+	#	else:
+	#		aOut = aaOut
+	#		for line in aOut:
+	#			csvw.writerow( line )	
+	#else:
+	#	aOut = aaOut
+	#	for line in aOut:
+	#			csvw.writerow( line )
 
+	csvw.writerow( [args.X.name, args.Y.name, "p-value"] )
 
+	for line in aaOut[0]:
+		iX, iY = line[0]
+		fP = line[1]
+		aLineOut = map(str,[aOutName1[iX], aOutName2[iY], fP])
+		csvw.writerow( aLineOut )
 
 
 if __name__ == '__main__':

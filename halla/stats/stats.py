@@ -278,7 +278,7 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	metric = {pca": pca} 
 	"""
 
-	numpy.random.seed(0)
+	#numpy.random.seed(0)
 
 	strMetric = metric 
 	pHashDecomposition = {"pca": pca, "kpca": kpca }
@@ -313,7 +313,7 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 
 def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 100 ):
 
-	numpy.random.seed(0)
+	#numpy.random.seed(0)
 
 	pArray1 = array(pArray1)
 	pArray2 = array(pArray2)
@@ -364,7 +364,7 @@ def permutation_test_by_copula( ):
 
 def permutation_test_by_average( pArray1, pArray2, metric = "norm_mid", iIter = 100 ):
 
-	numpy.random.seed(0)
+	#numpy.random.seed(0)
 
 	pHashDecomposition = {"pca": pca}
 	
@@ -390,7 +390,7 @@ def permutation_test_by_average( pArray1, pArray2, metric = "norm_mid", iIter = 
 
 def parametric_test( pArray1, pArray2 ):
 	
-	numpy.random.seed(0)
+	#numpy.random.seed(0)
 
 	pMe1 = lambda x,y: halla.distance.cor( x,y, method = "pearson", pval = True)
 	pMe2 = lambda x,y: halla.distance.cor( x,y, method = "spearman", pval = True)
@@ -403,7 +403,7 @@ def parametric_test( pArray1, pArray2 ):
 
 def parametric_test_by_cca( pArray1, pArray2, iIter = 100 ):
 	
-	numpy.random.seed(0)
+	#numpy.random.seed(0)
 
 	pArray1 = array(pArray1)
 	pArray2 = array(pArray2)
@@ -829,6 +829,85 @@ def discretize2d( pX, pY, method = None ):
 #=========================================================
 # Classification and Validation 
 #=========================================================
+
+def m( pArray, pFunc, axis = 0 ):
+	""" 
+	Maps pFunc over the array pArray 
+	"""
+
+	if bool(axis): 
+		pArray = pArray.T
+		# Set the axis as per numpy convention 
+	if isinstance( pFunc , numpy.ndarray ):
+		return pArray[pFunc]
+	else: #generic function type
+		return array( [pFunc(item) for item in pArray] ) 
+
+#@staticmethod 
+def mp( pArray, pFunc, axis = 0 ):
+	"""
+	Map _by pairs_ ; i.e. apply pFunc over all possible pairs in pArray 
+	"""
+
+	if bool(axis): 
+		pArray = pArray.T
+
+	pIndices = itertools.combinations( range(pArray.shape[0]), 2 )
+
+	return array([pFunc(pArray[i],pArray[j]) for i,j in pIndices])
+
+def md( pArray1, pArray2, pFunc, axis = 0 ):
+	"""
+	Map _by dot product_
+	"""
+
+	if bool(axis): 
+		pArray1, pArray2 = pArray1.T, pArray2.T
+
+	iRow1 = len(pArray1)
+	iRow2 = len(pArray2)
+
+	assert( iRow1 == iRow2 )
+	aOut = [] 
+	for i,item in enumerate(pArray1):
+		aOut.append( pFunc(item, pArray2[i]) )
+	return aOut 
+
+#@staticmethod 
+def mc( pArray1, pArray2, pFunc, axis = 0, bExpand = False ):
+	"""
+	Map _by cross product_ for ; i.e. apply pFunc over all possible pairs in pArray1 X pArray2 
+	
+	If not bExpand, gives a flattened array; else give full expanded array 
+	"""
+
+	if bool(axis): 
+		pArray1, pArray2 = pArray1.T, pArray2.T
+
+	#iRow1, iCol1 = pArray1.shape
+	#iRow2, iCol2 = pArray2.shape 
+
+	iRow1 = len(pArray1)
+	iRow2 = len(pArray2)
+
+	pIndices = itertools.product( range(iRow1), range(iRow2) )
+
+	aOut = array([pFunc(pArray1[i],pArray2[j]) for i,j in pIndices])
+	return ( aOut if not bExpand else numpy.reshape( aOut, (iRow1, iRow2) ) )
+
+def threshold( self, pArray, fValue ):
+	return m( pArray, lambda x: int(x <= fValue) )
+
+def accuracy( true_labels, emp_labels ):
+	assert( len(true_labels) == len(emp_labels) )
+	iLen = len(true_labels)
+	return sum( md( true_labels, emp_labels, lambda x,y: int(x==y) ) )*(1/float(iLen))
+
+def accuracy_with_threshold( true_labels, prob_vec, fThreshold = 0.05 ):
+	if not fThreshold:
+		fThreshold = self.q 
+	return accuracy( true_labels, threshold( prob_vec, fThreshold ) )
+
 
 def bag2association( aaBag, A ):
 	"""
