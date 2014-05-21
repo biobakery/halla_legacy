@@ -145,6 +145,10 @@ class HAllA():
 								"kpca_pearson": self.__preset_kpca_pearson,
 								"cca_pearson": self.__preset_cca_pearson,
 								"cca_norm_mi": self.__preset_cca_norm_mi, 
+								"full"		: self.__preset_full,
+								"full_cca"	: self.__preset_full_cca,
+								"full_kpca_norm_mi": self.__preset_full_kpca_norm_mi,
+								"full_kpca_pearson": self.__preset_full_kpca_pearson,
 							}
 
 		#==================================================================#
@@ -717,6 +721,56 @@ class HAllA():
 		self._all_against_all( ) 
 		self._summary_statistics( ) 
 		return self._report( )
+
+	def __preset_full( self ):
+		"""
+		Give full-pvalue matrix;
+		useful for evaluating the full AUC
+		"""
+
+		## Constants for this preset 
+		pDistance = norm_mi 
+		strReduce = "pca"
+		strStep = "uniform"
+		strAdjust = "BH"
+		strRandomization = "permutation"
+
+		## Set 
+		self.set_metric( pDistance )
+		self.set_reduce_method( strReduce )
+		self.set_p_adjust_method( strAdjust )
+		self.set_randomization_method( strRandomization )
+
+		## Run 		
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( ) 
+		return self._summary_statistics( "all" ) 
+
+
+	def __preset_full_cca( self ):
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "permutation_test_by_cca_pearson" ) 
+		return self._summary_statistics( "all" ) 
+
+	def __preset_full_kpca_norm_mi( self ):
+
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "permutation_test_by_kpca_norm_mi" ) 
+		return self._summary_statistics( "all" ) 
+
+	def __preset_full_kpca_pearson( self ):
+
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "permutation_test_by_kpca_pearson" ) 
+		return self._summary_statistics( "all" ) 
 
 	def __preset_default( self ):
 		return self.__preset_norm_mi( )

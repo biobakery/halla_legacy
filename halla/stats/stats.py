@@ -90,6 +90,12 @@ def cca( pArray1, pArray2, iComponents = 1 ):
 	#return array(X_cout), array(Y_cout)
 	return X_cout, Y_cout 
 
+def cca_p( pArray1, pArray2 ):
+
+	cc1,cc2 = cca(pArray1, pArray2)
+
+	return scipy.stats.pearsonr( cc1,cc2 )[1]
+
 def cca_score( pArray1, pArray2, strMethod = "pearson", bPval = 1, bParam = False ):
 	#from sklearn.cross_decomposition import CCA
 	import scipy.stats 
@@ -895,7 +901,7 @@ def mc( pArray1, pArray2, pFunc, axis = 0, bExpand = False ):
 	aOut = array([pFunc(pArray1[i],pArray2[j]) for i,j in pIndices])
 	return ( aOut if not bExpand else numpy.reshape( aOut, (iRow1, iRow2) ) )
 
-def threshold( self, pArray, fValue ):
+def threshold( pArray, fValue ):
 	return m( pArray, lambda x: int(x <= fValue) )
 
 def accuracy( true_labels, emp_labels ):
