@@ -3,38 +3,37 @@
 Hiearchy module, used to build trees and other data structures.
 Handles clustering and other organization schemes. 
 '''
- 
 ## structural packages 
 
-import csv
+#import csv
 import itertools
-import math
-import random
-import re
-import sys
+#import math
+#import random
+#import re
+#import sys
 
-import matplotlib
+#import matplotlib
 from numpy import array
 import numpy
-from numpy.random import normal
-import scipy
+#from numpy.random import normal
+#import scipy
 import scipy.cluster
-from scipy.cluster.hierarchy import linkage, dendrogram, to_tree, leaves_list
-from scipy.misc import *
-from scipy.spatial.distance import pdist, cdist, squareform
-import scipy.stats
-from sklearn.decomposition import \
-    PCA #remember that the matrix is X = (n_samples,n_features)
-import sklearn.decomposition
+from scipy.cluster.hierarchy import linkage, to_tree #, leaves_list, dendrogram
+#from scipy.misc import *
+from scipy.spatial.distance import pdist #, cdist, squareform
+#import scipy.stats
+#from sklearn.decomposition import PCA #remember that the matrix is X = (n_samples,n_features)
+#import sklearn.decomposition
 
-import halla
-from halla.distance import mi, l2, absl2, norm_mi
-from halla.stats import discretize, pca, bh, permutation_test_by_representative, \
-    p_adjust, permutation_test_by_kpca_norm_mi, permutation_test_by_kpca_pearson, \
-    permutation_test_by_cca_pearson, permutation_test_by_cca_norm_mi
+#import halla
+#from halla.distance import mi, l2, absl2, norm_mi
+from halla.stats import discretize
+#, pca, bh, permutation_test_by_representative, \
+#    p_adjust, permutation_test_by_kpca_norm_mi, permutation_test_by_kpca_pearson, \
+#    permutation_test_by_cca_pearson, permutation_test_by_cca_norm_mi
 import halla.stats
 import numpy as np
-import pylab as pl
+# import pylab as pl
 import copy
 
 
@@ -62,7 +61,7 @@ class Tree():
 	def __init__(self, data = None):
 		self.m_pData = data 
 		self.m_arrayChildren = []
-    
+
 	def pop(self):
 		# pop one of the children, else return none, since this amounts to killing the singleton 
 		if self.m_arrayChildren:
@@ -628,7 +627,7 @@ def fix_clusternode( pClusterNode, iExtend = 0 ):
 	Note: should NOT alter original ClusterNode object; make a deep copy of it instead 
 	"""
 
-	import copy 
+#	import copy 
 
 	def _fix_clusternode( pChild ):
 		#pChildUpdate = copy.deepcopy( pChild )
@@ -820,7 +819,7 @@ def couple_tree( apClusterNode1, apClusterNode2, strMethod = "uniform", strLinka
 	----------------
 	"""
 
-	import copy 
+#	import copy 
 
 	#-------------------------------------#
 	# Decider Functions                   #

@@ -48,7 +48,7 @@ class Distance:
 	def __init__( self, c_array1, c_array2 ): 
 		self.m_data1 = c_array1
 		self.m_data2 = c_array2 
- 
+
 	def get_inverted_distance( self, strFunc = None ):
 		pFunc = Distance.c_hashInvertFunctions[strFunc or "flip"] 
 		return pFunc( self.get_distance() ) 
