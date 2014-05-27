@@ -45,33 +45,30 @@ __status__ = "Development"
 #************************************************************************************
 
 ## structural packages 
-import itertools 
-import logging 
-import argparse 
-from numpy import array 
-import csv 
-import sys 
-import os 
+import argparse
+import csv
+import itertools
+import logging
+import os
+import sys
 
-## internal dependencies 
+from numpy import array
+
+from halla import HAllA, distance, stats
 import halla
-from halla import HAllA
-from halla import stats
-from halla import distance
-import halla.parser  
-from halla.parser import Input, Output 
-
-from halla.test import *
-from halla.stats import *
 from halla.distance import *
 from halla.hierarchy import *
+from halla.parser import Input, Output
+import halla.parser
 from halla.plot import *
+from halla.stats import *
+from halla.test import *
 
 
+## internal dependencies 
 #=============================================#
 # Wrapper  
 #=============================================#
-
 def _main(  ):
 	""" 
 	

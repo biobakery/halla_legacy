@@ -6,56 +6,51 @@ Handles clustering and other organization schemes.
  
 ## structural packages 
 
-import sys 
-import re 
-import math 
+import csv
 import itertools
+import math
+import random
+import re
+import sys
+
+import matplotlib
+from numpy import array
+import numpy
+from numpy.random import normal
+import scipy
+import scipy.cluster
+from scipy.cluster.hierarchy import linkage, dendrogram, to_tree, leaves_list
+from scipy.misc import *
+from scipy.spatial.distance import pdist, cdist, squareform
+import scipy.stats
+from sklearn.decomposition import \
+    PCA #remember that the matrix is X = (n_samples,n_features)
+import sklearn.decomposition
+
+import halla
+from halla.distance import mi, l2, absl2, norm_mi
+from halla.stats import discretize, pca, bh, permutation_test_by_representative, \
+    p_adjust, permutation_test_by_kpca_norm_mi, permutation_test_by_kpca_pearson, \
+    permutation_test_by_cca_pearson, permutation_test_by_cca_norm_mi
+import halla.stats
+import numpy as np
+import pylab as pl
+import copy
+
 
 ## halla-specific modules 
-
-import halla 
-import halla.stats 
-
-from halla.distance import mi, l2, absl2, norm_mi
-from halla.stats import discretize,pca, bh, permutation_test_by_representative, p_adjust
-from halla.stats import permutation_test_by_kpca_norm_mi, permutation_test_by_kpca_pearson, permutation_test_by_cca_pearson, permutation_test_by_cca_norm_mi
-
 # permutation_test_by_representative  
 # permutation_test_by_kpca_norm_mi
 # permutation_test_by_kpca_pearson
 # permutation_test_by_cca_pearson 
 # permutation_test_by_cca_norm_mi
-
-
 ## statistics packages 
-
-import numpy 
-import numpy as np
-from numpy import array 
-import scipy 
-import scipy.stats 
-import scipy.cluster 
-import matplotlib 
-import sklearn.decomposition
-from sklearn.decomposition import PCA #remember that the matrix is X = (n_samples,n_features)
-import csv 
-from scipy.spatial.distance import pdist, cdist, squareform
-from scipy.cluster.hierarchy import linkage, dendrogram, to_tree, leaves_list 
-import pylab as pl 
-import random  
-from numpy.random import normal 
-from scipy.misc import * 
-
-
 #==========================================================================#
 # DATA STRUCTURES 
 #==========================================================================#
-
 # Use decorators 
 # @ClusterNode 
-
 #class ClusterNode #scipy.cluster.hierarchy.ClusterNode
-
 class Tree():
 	''' 
 	A hierarchically nested structure containing nodes as
@@ -126,8 +121,6 @@ class Gardener():
 	Always return a copied version of the tree being modified. 
 
 	"""
-
-	import copy 
 
 	def __init__( self, apTree = None ):
 

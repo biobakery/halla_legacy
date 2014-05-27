@@ -2,21 +2,22 @@
 Wrappers for testing procedures, random data generation, etc 
 """
 
-import numpy
-import scipy 
-from numpy import array 
-from scipy.stats import percentileofscore
-from numpy.random import normal, multinomial 
-from itertools import compress 
+from itertools import compress
 
-import matplotlib 
+import matplotlib
+from numpy import array
+import numpy
+from numpy.random import normal, multinomial
+import scipy
+from scipy.stats import percentileofscore
+
+import halla.distance
 import halla.stats
-import halla.distance 
+
 
 #================================================================================
 # Base cases 
 #================================================================================
-
 def randmat( tShape = (10,10), pDist = numpy.random.normal ):
 	"""
 	Returns a tShape-dimensional matrix given by base distribution pDist 
@@ -76,8 +77,8 @@ def nov_27_2013():
 		[0.015625,0.125,0.421875,1.0]])
 	dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
 	dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
-
-	spearman = lambda x,y: scipy.stats.spearmanr(x,y)[0]
+	from scipy.stats import spearmanr
+	spearman = lambda x,y: spearmanr(x,y)[0]
 
 	#Pearson
 	lxpearson	= halla.hierarchy.linkage(x, metric="correlation")
@@ -96,7 +97,7 @@ def nov_27_2013():
 
 
 	#### Plotting 
-
+	from scipy.cluster.hierarchy import dendrogram
 	for k, item in enumerate(aL):
 		i,j = item
 		i,j = numpy.abs(i), numpy.abs(j)

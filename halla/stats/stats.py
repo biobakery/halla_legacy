@@ -5,37 +5,33 @@ unified statistics module
 
 # native python 
 
-import math 
-import itertools 
-from itertools import compress 
-import sys 
+from itertools import compress
+import itertools
+import math
+import sys
+
+from numpy import array
+import numpy
+from numpy.random import shuffle, binomial, normal, multinomial
+import scipy
+from scipy.stats import percentileofscore
+import sklearn
+from sklearn.metrics import roc_curve, auc
+
+import halla
+from halla.distance import mi, l2, norm_mi, adj_mi
+import pylab as pl
+from scipy.stats import pearsonr, rankdata
 
 # External dependencies 
-
-import pylab as pl
-import scipy 
-import numpy 
-from numpy import array 
-from scipy.stats import percentileofscore
-from numpy.random import shuffle, binomial, normal, multinomial 
-
 # ML plug-in 
-import sklearn 
-from sklearn.metrics import roc_curve, auc 
-
 # Internal dependencies 
-import halla 
-from halla.distance import mi, l2, norm_mi, adj_mi 
-
 # doesn't play nice with other python extensions like numpy
 # remember to cast to native python objects before passing!
 # good for prototyping, not good for optimizing.  
-
-
 #=========================================================
 # Feature Selection 
 #=========================================================
-
 def pca( pArray, iComponents = 1 ):
 	 """
 	 Input: N x D matrix 
@@ -94,7 +90,7 @@ def cca_p( pArray1, pArray2 ):
 
 	cc1,cc2 = cca(pArray1, pArray2)
 
-	return scipy.stats.pearsonr( cc1,cc2 )[1]
+	return pearsonr( cc1,cc2 )[1]
 
 def cca_score( pArray1, pArray2, strMethod = "pearson", bPval = 1, bParam = False ):
 	#from sklearn.cross_decomposition import CCA
@@ -224,7 +220,7 @@ def bh( afPVAL ):
 	afPVAL_reduced = list(set(afPVAL)) ##duplicate elements removed 
 	iLenReduced = len(afPVAL_reduced)
 
-	pRank = scipy.stats.rankdata( afPVAL, method = "dense" ) ##the "dense" method ranks ties as if the list did not contain any redundancies 
+	pRank = rankdata( afPVAL, method = "dense" ) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	## source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
 
 	aOut = [] 
@@ -397,7 +393,7 @@ def permutation_test_by_average( pArray1, pArray2, metric = "norm_mid", iIter = 
 def parametric_test( pArray1, pArray2 ):
 	
 	#numpy.random.seed(0)
-
+	from halla.distance import *
 	pMe1 = lambda x,y: halla.distance.cor( x,y, method = "pearson", pval = True)
 	pMe2 = lambda x,y: halla.distance.cor( x,y, method = "spearman", pval = True)
 
@@ -429,7 +425,7 @@ def parametric_test_by_cca( pArray1, pArray2, iIter = 100 ):
 	fAssociation = cca_score( pArray1, pArray2 ) 
 	pMetric = cca_score
 
-	fP = scipy.stats.pearsonr( X_c, Y_c )[1]
+	fP = pearsonr( X_c, Y_c )[1]
 
 	return fP
 
@@ -909,7 +905,7 @@ def accuracy( true_labels, emp_labels ):
 	iLen = len(true_labels)
 	return sum( md( true_labels, emp_labels, lambda x,y: int(x==y) ) )*(1/float(iLen))
 
-def accuracy_with_threshold( true_labels, prob_vec, fThreshold = 0.05 ):
+def accuracy_with_threshold(self, true_labels, prob_vec, fThreshold = 0.05 ):
 	if not fThreshold:
 		fThreshold = self.q 
 	return accuracy( true_labels, threshold( prob_vec, fThreshold ) )

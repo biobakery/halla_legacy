@@ -1,8 +1,3 @@
-import numpy 
-from test import *  
-from numpy.random import normal 
-import sys
-import csv 
 """
 #a1, a2 = numpy.array( [1,2,3,4,5] ), numpy.array( [6,7,8,9,10] )
 
@@ -36,6 +31,15 @@ print normalized_mi( a1, a2 )
 
 print "inverted distance:" , CNormalizedMutualInformation( a1, a2 ).get_inverted_distance( "1mflip" )
 """ 
+
+import csv
+import sys
+
+import numpy
+from numpy.random import normal
+
+from test import *
+
 
 pVec = numpy.array( uniformly_spaced_gaussian( 32 ) )
 pOut = numpy.vstack( [[pVec * normal()] for _ in range(100)] ).T 
