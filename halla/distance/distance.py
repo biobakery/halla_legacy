@@ -16,7 +16,7 @@ from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, \
 
 #from halla.distance.distance import *
 
-import halla.stats
+#import halla.stats
 from scipy.spatial.distance import cdist
 
 

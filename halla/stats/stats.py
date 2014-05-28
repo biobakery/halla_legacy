@@ -17,12 +17,13 @@ import scipy
 from scipy.stats import percentileofscore
 import sklearn
 from sklearn.metrics import roc_curve, auc
-
 import halla
-from halla.distance import mi, l2, norm_mi, adj_mi
+from halla import distance
+from halla.distance import l2
+#from halla.distance import mi, l2, norm_mi, adj_mi
 import pylab as pl
 from scipy.stats import pearsonr, rankdata
-
+#import halla.distance  
 # External dependencies 
 # ML plug-in 
 # Internal dependencies 
@@ -143,7 +144,7 @@ def kernel_cca( ):
 def kernel_cca_score( ):
 	pass 
 
-def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
+def get_medoid( pArray, iAxis = 0, pMetric = halla.distance.l2 ):
 	"""
 	Input: numpy array 
 	Output: float
@@ -393,9 +394,8 @@ def permutation_test_by_average( pArray1, pArray2, metric = "norm_mid", iIter = 
 def parametric_test( pArray1, pArray2 ):
 	
 	#numpy.random.seed(0)
-	from halla.distance import *
-	pMe1 = lambda x,y: halla.distance.cor( x,y, method = "pearson", pval = True)
-	pMe2 = lambda x,y: halla.distance.cor( x,y, method = "spearman", pval = True)
+	pMe1 = lambda x,y: cor( x,y, method = "pearson", pval = True)
+	pMe2 = lambda x,y: cor( x,y, method = "spearman", pval = True)
 
 	pVal1 = [pMe1(i,j)[1] for i,j in itertools.product( pArray1, pArray2 )]
  	pVal2 = [pMe2(i,j)[1] for i,j in itertools.product( pArray1, pArray2 )]
