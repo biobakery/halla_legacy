@@ -9,7 +9,7 @@ including all graphics and 'data object to plot' transformations.
 import scipy
 import pylab
 import scipy.cluster.hierarchy as sch
-
+#import pydot
 
 
 
@@ -77,4 +77,13 @@ class Plot:
         
         axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
         
+        '''
+    '''@staticmethod
+    def graphPlot():
+        graph = pydot.Dot('graphname', graph_type='digraph') 
+        subg = pydot.Subgraph('', rank='same') 
+        subg.add_node(pydot.Node('a')) 
+        graph.add_subgraph(subg) 
+        subg.add_node(pydot.Node('b')) 
+        subg.add_node(pydot.Node('c'))
         '''

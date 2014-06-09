@@ -134,7 +134,7 @@ class HAllA():
 		# permutation_test_by_kpca_pearson
 		# permutation_test_by_cca_pearson 
 		# permutation_test_by_cca_norm_mi
-		print 'hash_preset: default'
+		print ('hash_preset: default')
 		self.hash_preset = 	{"default"		: self.__preset_default, 
 								"time"		: self.__preset_time, 
 								"accuracy"	: self.__preset_accuracy, 
@@ -333,7 +333,7 @@ class HAllA():
 		return self.meta_feature
 
 	def _featurize( self, strMethod = "_discretize" ):
-		print 'featurize'
+		print ('featurize')
 		pMethod = None 
 		try:
 			pMethod = getattr( self, strMethod )
@@ -344,12 +344,12 @@ class HAllA():
 			return pMethod( )
 
 	def _hclust( self ):
-		print 'hclust'
+		print ('hclust')
 		self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x,bTree=True) )
 		return self.meta_data_tree 
 
 	def _couple( self ):
-		print'couple'
+		print('couple')
 		self.meta_hypothesis_tree = self.m( self.bp( self.m(self.meta_data_tree, lambda x: [x]), couple_tree ), lambda y: y[0] ) 
 		## remember, `couple_tree` returns object wrapped in list 
 		return self.meta_hypothesis_tree 
@@ -359,7 +359,7 @@ class HAllA():
 		return self.meta_alla 
 
 	def _all_against_all( self, strMethod ="permutation_test_by_representative", iIter = None ):
-		print 'all_against_all'
+		print ('all_against_all')
 		if not iIter:
 			iIter = self.iterations 
 
@@ -367,8 +367,8 @@ class HAllA():
 		fQ = self.q
 		
 		if self.verbose:
-			print "HAllA PROMPT: q value", fQ
-			print "q value is", fQ
+			print ("HAllA PROMPT: q value", fQ)
+			print ("q value is", fQ)
 		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, fQ = fQ, bVerbose = self.verbose, start_parameter = self.start_parameter ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
@@ -403,7 +403,7 @@ class HAllA():
 
 				for aLine in _Z:
 					if self.verbose:
-						print aLine 
+						print (aLine) 
 					#break
 					aaBag, fAssoc = aLine
 					aBag1, aBag2 = aaBag 
@@ -422,7 +422,7 @@ class HAllA():
 		"""
 		provides summary statistics on the output given by _all_against_all 
 		"""
-		print 'summary_statistics'
+		print ('summary_statistics')
 		if not strMethod:
 			strMethod = self.summary_method
 
@@ -441,7 +441,7 @@ class HAllA():
 		Z_final = Z_final[args_sorted]
 
 		if self.verbose:
-			print Z_final 
+			print (Z_final) 
 
 		assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
 
@@ -460,7 +460,7 @@ class HAllA():
 
 			for aLine in _Z:
 				if self.verbose:
-					print aLine 
+					print (aLine) 
 				
 				aaBag, fAssoc = aLine
 				listBag1, listBag2 = aaBag 
@@ -481,7 +481,7 @@ class HAllA():
 
 			for aLine in _Z:
 				if self.verbose:
-					print aLine 
+					print (aLine) 
 				
 				aaBag, fAssoc = aLine
 				aBag1, aBag2 = aaBag 
@@ -490,7 +490,7 @@ class HAllA():
 
 		if strMethod == "final":
 			if self.verbose:
-				print "Using only final p-values"
+				print ("Using only final p-values")
 			__get_conditional_pval_from_bags( Z_final )
 			assert( S.any() )
 			self.meta_summary = [S]
@@ -498,7 +498,7 @@ class HAllA():
 
 		elif strMethod == "all":
 			if self.verbose:
-				print "Using all p-values"
+				print ("Using all p-values")
 			__get_conditional_pval_from_bags( Z_all )
 			assert( S.any() )
 			self.meta_summary = [S]
@@ -591,7 +591,7 @@ class HAllA():
 		return self.iterations 
 
 	def set_randomization_method( self, strMethod ):
-		print'set_randomization_method'
+		print('set_randomization_method')
 		self.randomization_method = strMethod 
 		return self.randomization_method 
 
@@ -705,7 +705,7 @@ class HAllA():
 		"""
 		Mutual Information Preset 
 		"""
-		print '''preset_norm_mi:
+		print ('''preset_norm_mi:
 				## Constants for this preset 
 				pDistance = norm_mi 
 				strReduce = "pca"
@@ -726,7 +726,7 @@ class HAllA():
 				self._all_against_all( ) 
 				self._summary_statistics( ) 
 				return self._report( )
-			  '''
+			  ''')
 		## Constants for this preset 
 		pDistance = norm_mi 
 		strReduce = "pca"
@@ -799,7 +799,7 @@ class HAllA():
 		return self._summary_statistics( "all" ) 
 
 	def __preset_default( self ):
-		print 'preset_default: preset_norm_mi'
+		print ('preset_default: preset_norm_mi')
 		return self.__preset_norm_mi( )
 		#return self.__preset_layerwise( )
 
