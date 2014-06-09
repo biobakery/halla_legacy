@@ -134,7 +134,7 @@ class HAllA():
 		# permutation_test_by_kpca_pearson
 		# permutation_test_by_cca_pearson 
 		# permutation_test_by_cca_norm_mi
-
+		print 'hash_preset: default'
 		self.hash_preset = 	{"default"		: self.__preset_default, 
 								"time"		: self.__preset_time, 
 								"accuracy"	: self.__preset_accuracy, 
@@ -333,6 +333,7 @@ class HAllA():
 		return self.meta_feature
 
 	def _featurize( self, strMethod = "_discretize" ):
+		print 'featurize'
 		pMethod = None 
 		try:
 			pMethod = getattr( self, strMethod )
@@ -343,10 +344,12 @@ class HAllA():
 			return pMethod( )
 
 	def _hclust( self ):
+		print 'hclust'
 		self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x,bTree=True) )
 		return self.meta_data_tree 
 
 	def _couple( self ):
+		print'couple'
 		self.meta_hypothesis_tree = self.m( self.bp( self.m(self.meta_data_tree, lambda x: [x]), couple_tree ), lambda y: y[0] ) 
 		## remember, `couple_tree` returns object wrapped in list 
 		return self.meta_hypothesis_tree 
@@ -356,6 +359,7 @@ class HAllA():
 		return self.meta_alla 
 
 	def _all_against_all( self, strMethod ="permutation_test_by_representative", iIter = None ):
+		print 'all_against_all'
 		if not iIter:
 			iIter = self.iterations 
 
@@ -418,7 +422,7 @@ class HAllA():
 		"""
 		provides summary statistics on the output given by _all_against_all 
 		"""
-
+		print 'summary_statistics'
 		if not strMethod:
 			strMethod = self.summary_method
 
@@ -587,6 +591,7 @@ class HAllA():
 		return self.iterations 
 
 	def set_randomization_method( self, strMethod ):
+		print'set_randomization_method'
 		self.randomization_method = strMethod 
 		return self.randomization_method 
 
@@ -700,7 +705,28 @@ class HAllA():
 		"""
 		Mutual Information Preset 
 		"""
-
+		print '''preset_norm_mi:
+				## Constants for this preset 
+				pDistance = norm_mi 
+				strReduce = "pca"
+				strStep = "uniform"
+				strAdjust = "BH"
+				strRandomization = "permutation"
+		
+				## Set 
+				self.set_metric( pDistance )
+				self.set_reduce_method( strReduce )
+				self.set_p_adjust_method( strAdjust )
+				self.set_randomization_method( strRandomization )
+		
+				## Run 		
+				self._featurize( )
+				self._hclust( )
+				self._couple( )
+				self._all_against_all( ) 
+				self._summary_statistics( ) 
+				return self._report( )
+			  '''
 		## Constants for this preset 
 		pDistance = norm_mi 
 		strReduce = "pca"
@@ -773,6 +799,7 @@ class HAllA():
 		return self._summary_statistics( "all" ) 
 
 	def __preset_default( self ):
+		print 'preset_default: preset_norm_mi'
 		return self.__preset_norm_mi( )
 		#return self.__preset_layerwise( )
 
