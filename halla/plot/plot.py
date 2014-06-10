@@ -8,8 +8,9 @@ including all graphics and 'data object to plot' transformations.
 
 import scipy
 import pylab
+#import dot_parser
 import scipy.cluster.hierarchy as sch
-#import pydot
+import pydot
 
 
 
@@ -25,9 +26,9 @@ class Plot:
             x = scipy.rand(40)
             D = scipy.zeros([40,40])
             for i in range(40):
-                for j in range(40):
+                for j in range(i,40):
                     D[i,j] = abs(x[i] - x[j])
-        
+                    D[j,i]=D[i,j]
         # Compute and plot first dendrogram.
         fig = pylab.figure(figsize=(8,8))
         ax1 = fig.add_axes([0.09,0.1,0.2,0.6])
@@ -78,12 +79,36 @@ class Plot:
         axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
         
         '''
-    '''@staticmethod
+    @staticmethod
     def graphPlot():
-        graph = pydot.Dot('graphname', graph_type='digraph') 
+        '''graph = pydot.Dot('graphname', graph_type='digraph') 
         subg = pydot.Subgraph('', rank='same') 
         subg.add_node(pydot.Node('a')) 
         graph.add_subgraph(subg) 
         subg.add_node(pydot.Node('b')) 
         subg.add_node(pydot.Node('c'))
+        
+        graph.write_png('example2_graph.png')
         '''
+        # first you create a new graph, you do that with pydot.Dot()
+        graph = pydot.Dot(graph_type='graph')
+        
+        for i in range(3):
+            
+            edge = pydot.Edge("root", "parent%d" % i)
+            # and we obviosuly need to add the edge to our graph
+            graph.add_edge(edge)
+        
+        # now let us add some vassals
+        child_num = 0
+        for i in range(3):
+            for j in range(2):
+                edge = pydot.Edge("parent%d" % i, "child%d" % child_num)
+                graph.add_edge(edge)
+                child_num += 1
+        
+        # ok, we are set, let's save our graph into a file
+        graph.write_png('example1_graph.png')
+        
+        # and we are done!
+        
