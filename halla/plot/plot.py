@@ -35,7 +35,7 @@ class Plot:
         # Compute and plot first dendrogram.
         fig = pylab.figure(figsize=(8,8))
         ax1 = fig.add_axes([0.09,0.1,0.2,0.6])
-        Y = sch.linkage(D, method='centroid')
+        Y = sch.linkage(D, method='single')
         Z1 = sch.dendrogram(Y, orientation='right')
         ax1.set_xticks([])
         ax1.set_yticks([])
@@ -127,8 +127,10 @@ class Plot:
             if i%blockSize==0:
                 counter = 0
             for j in range(i,i+blockSize-counter):
+                if j>NumberOfFeatures:
+                    break
                 #print i,j
-                cov[i,j] = .5 #np.random.randint(0.0,2.0, size=1)
+                cov[i,j] = .8 #np.random.randint(0.0,2.0, size=1)
                 #cov[j,i] = cov[i,j]
             counter = counter + 1 
         #print cov
