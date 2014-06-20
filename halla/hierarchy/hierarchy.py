@@ -1180,7 +1180,12 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 						"permutation_test_by_kpca_norm_mi" :halla.stats.permutation_test_by_kpca_norm_mi, 
 						"permutation_test_by_kpca_pearson" :halla.stats.permutation_test_by_kpca_pearson,
 						"permutation_test_by_cca_pearson" :halla.stats.permutation_test_by_cca_pearson,
+						"parametric_test_by_pls_pearson": halla.stats.parametric_test_by_pls_pearson,
 						"permutation_test_by_cca_norm_mi" :halla.stats.permutation_test_by_cca_norm_mi,
+						"permutation_test_by_multiple_representative" : halla.stats.permutation_test_by_multiple_representative,
+						"parametric_test_by_representative": halla.stats.parametric_test_by_representative, 
+						"permutation_test_by_medoid": halla.stats.permutation_test_by_medoid,
+						"permutation_test_by_pls_norm_mi": halla.stats.permutation_test_by_pls_norm_mi
 						}
 
 	strMethod = method 

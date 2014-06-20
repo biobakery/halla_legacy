@@ -145,10 +145,19 @@ class HAllA():
 								"kpca_pearson": self.__preset_kpca_pearson,
 								"cca_pearson": self.__preset_cca_pearson,
 								"cca_norm_mi": self.__preset_cca_norm_mi, 
+								"pls_norm_mi": self.__preset_pls_norm_mi,
+								"pls_pearson": self.__preset_pls_pearson,
+								"plsc_pearson": None,
+								"plsc_norm_mi": None,
+								"medoid_pearson": None,
+								"medoid_norm_mi": self.__preset_medoid_norm_mi,
 								"full"		: self.__preset_full,
 								"full_cca"	: self.__preset_full_cca,
 								"full_kpca_norm_mi": self.__preset_full_kpca_norm_mi,
 								"full_kpca_pearson": self.__preset_full_kpca_pearson,
+								"multiple_representative": self.__preset_multiple_representative,
+								"parametric_multiple_representative": self.__preset_parametric_multiple_representative,
+								"parametric_test_by_representative": self.__preset_parametric_rep, 
 							}
 
 		#==================================================================#
@@ -439,7 +448,7 @@ class HAllA():
 		if self.verbose:
 			print Z_final 
 
-		assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
+		#assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
 
 		def __add_pval_product_wise( _x, _y, _fP ):
 			S[_x][_y] = _fP  
@@ -620,6 +629,24 @@ class HAllA():
 	# permutation_test_by_cca_pearson 
 	# permutation_test_by_cca_norm_mi 
 
+	def __preset_medoid_norm_mi( self ):
+
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "permutation_test_by_medoid" ) 
+		self._summary_statistics( ) 
+		return self._report( ) 
+
+	def __preset_parametric_rep( self ):
+
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "parametric_test_by_representative" ) 
+		self._summary_statistics( ) 
+		return self._report( )  
+
 	def __preset_kpca_norm_mi( self ):
 		self._featurize( )
 		self._hclust( )
@@ -643,6 +670,24 @@ class HAllA():
 		self._all_against_all( strMethod = "permutation_test_by_cca_pearson" ) 
 		self._summary_statistics( ) 
 		return self._report( ) 
+
+	def __preset_pls_pearson( self ):
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "parametric_test_by_pls_pearson" ) 
+		self._summary_statistics( ) 
+		return self._report( ) 
+
+
+	def __preset_pls_norm_mi( self ):
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "permutation_test_by_pls_norm_mi" ) 
+		self._summary_statistics( ) 
+		return self._report( ) 
+
 
 	def __preset_cca_norm_mi( self ):
 		## Constants for this preset 
@@ -696,6 +741,39 @@ class HAllA():
 		#self._summary_statistics( )
 		#return self._report( )
 
+	def __preset_parametric_multiple_representative( self ):
+
+		## Run 		
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "parametric_test_by_multiple_representative") 
+		self._summary_statistics( "all" ) 
+		return self._report( )
+
+	def __preset_multiple_representative( self ):
+
+		## Constants for this preset 
+		pDistance = norm_mi 
+		strReduce = "pca"
+		strStep = "uniform"
+		strAdjust = "BH"
+		strRandomization = "permutation"
+
+		## Set 
+		self.set_metric( pDistance )
+		self.set_reduce_method( strReduce )
+		self.set_p_adjust_method( strAdjust )
+		self.set_randomization_method( strRandomization )
+
+		## Run 		
+		self._featurize( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "permutation_test_by_multiple_representative") 
+		#self._summary_statistics( "all" ) 
+		#return self._report( )
+
 	def __preset_norm_mi( self ):
 		"""
 		Mutual Information Preset 
@@ -719,7 +797,7 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( ) 
-		self._summary_statistics( ) 
+		self._summary_statistics( "all" ) 
 		return self._report( )
 
 	def __preset_full( self ):
