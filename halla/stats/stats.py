@@ -27,14 +27,27 @@ from sklearn.metrics import roc_curve, auc
 import halla 
 from halla.distance import mi, l2, norm_mi, adj_mi 
 
-# doesn't play nice with other python extensions like numpy
-# remember to cast to native python objects before passing!
-# good for prototyping, not good for optimizing.  
-
 
 #=========================================================
 # Feature Selection 
 #=========================================================
+
+def alpha_threshold( pArray, alpha = 0.05 ):
+	"""
+	*Within Covariance* estimation 
+	Threshold association values in X and Y based on alpha cutoff. 
+	This determines the line where the features are indistinguishable. 
+	Uses normalized mutual information by default. 
+	"""
+	fPercentile = 100.0*(1.0-float(alpha))
+
+	X = pArray
+	XP = array([numpy.random.permutation( x ) for x in X])
+	D = halla.discretize( XP )
+	A = numpy.array([norm_mi(D[i],D[j]) for i,j in itertools.combinations( range(len(XP)), 2 )])
+	fScore = scipy.stats.scoreatpercentile(A, fPercentile)
+
+	return fScore 
 
 def pca( pArray, iComponents = 1 ):
 	 """
@@ -232,7 +245,7 @@ def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
 
 	d = pMetric 
 
-	pArray = ( pArray.T if bool(iAxis) else pArray  ) 
+	pArray = ( pArray.T if iAxis == 1 else pArray  ) 
 
 	mean_vec = numpy.mean(pArray, 0) 
 	
@@ -378,8 +391,8 @@ def permutation_test_by_medoid( pArray1, pArray2, metric = "norm_mi", iIter = 10
 
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	
-	pRep1 = get_medoid( discretize( pArray1 ), pMetric = pMe )
-	pRep2 = get_medoid( discretize( pArray1 ), pMetric = pMe )
+	pRep1 = get_medoid( discretize( pArray1 ), 0, pMe )
+	pRep2 = get_medoid( discretize( pArray1 ), 0, pMe )
 
 	#pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] 
 

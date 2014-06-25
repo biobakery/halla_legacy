@@ -72,8 +72,8 @@ class HAllA():
 		# Randomization and multiple correction  methods 
 		#------------------------------------------------#
 
-		self.alpha = 0.05 
-		self.q = 0.1
+		self.alpha = 0.05 ### Within covariance cut-off value 
+		self.q = 0.1 ### Between covariance cut-off value
 		self.iterations = 1000
 		self.p_adjust_method = "BH"
 		self.randomization_method = "permutation" #method to generate error bars 
@@ -170,6 +170,7 @@ class HAllA():
  
 		self.meta_array = array( ta ) if ta else None 
 		self.meta_feature = None
+		self.meta_threshold = None 
 		self.meta_data_tree = None 
 		self.meta_hypothesis_tree = None 
 		self.meta_alla = None # results of all-against-all
@@ -334,6 +335,16 @@ class HAllA():
 	#==========================================================#
 	# Helper Functions 
 	#==========================================================# 
+
+	def _threshold( self ):
+		"""
+		Threshold association values in X and Y based on alpha cutoff. 
+		This determines the line where the features are indistinguishable. 
+		"""
+
+		self.meta_threshold = map( lambda x : halla.stats.alpha_threshold( x ), self.meta_array )
+
+		return self.meta_threshold 
 
 	def _discretize( self ):
 		self.meta_feature = self.m( self.meta_array, discretize )

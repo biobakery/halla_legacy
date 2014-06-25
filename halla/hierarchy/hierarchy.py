@@ -20,13 +20,6 @@ from halla.distance import mi, l2, absl2, norm_mi
 from halla.stats import discretize,pca, bh, permutation_test_by_representative, p_adjust
 from halla.stats import permutation_test_by_kpca_norm_mi, permutation_test_by_kpca_pearson, permutation_test_by_cca_pearson, permutation_test_by_cca_norm_mi
 
-# permutation_test_by_representative  
-# permutation_test_by_kpca_norm_mi
-# permutation_test_by_kpca_pearson
-# permutation_test_by_cca_pearson 
-# permutation_test_by_cca_norm_mi
-
-
 ## statistics packages 
 
 import numpy 
@@ -1123,23 +1116,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 	Notes 
 	----------
 
-		Descension schemes: 
 		
-		* Weak negative: if q_hat <= 1.0 - q, proceed until q_hat > 1.0 - q. Report findings. 
-		* Strong negative: if q_hat <= 1.0 - q, proceed until q_hat > 1.0 -q. If Leaf, report findings, else None.
-		* Weak positive: if q_hat <= q, then continue down the tree until q_hat > q. Report findings.
-		* Strong positive: if q_hat <= q, then continue down the tree until q_hat > q. If Leaf, report findings, else None.
-
-		Overwhelming conclusion is that these are all variants of the same Yekutieli criterion -- all remains to pick is the $q$ cutoff, and 
-		the starting point 
-
-		#method
-		# permutation_test_by_representative  
-		# permutation_test_by_kpca_norm_mi
-		# permutation_test_by_kpca_pearson
-		# permutation_test_by_cca_pearson 
-		# permutation_test_by_cca_norm_mi 		
-
 	"""
 
 	if bVerbose:
