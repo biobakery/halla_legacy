@@ -800,7 +800,7 @@ def spawn_tree( pData, iCopy = 0, iDecider = -1 ):
 	"""
 	return None 
 
-def couple_tree( apClusterNode1, apClusterNode2, strMethod = "uniform", strLinkage = "min" ):
+def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold = None, strMethod = "uniform", strLinkage = "min", fAlpha = 0.05 ):
 	"""
 	Couples two data trees to produce a hypothesis tree 
 
@@ -821,6 +821,71 @@ def couple_tree( apClusterNode1, apClusterNode2, strMethod = "uniform", strLinka
 	"""
 
 	import copy 
+
+	X,Y = pArray1, pArray2 
+
+	if not afThreshold:	
+		afThreshold = [halla.stats.alpha_threshold(a, fAlpha) for a in [pArray1,pArray2]]
+
+	x_threshold, y_threshold = afThreshold[0], afThreshold[1]
+
+	aTau = [] ### Did the child meet the intra-dataset confidence cut-off? If not, its children will continue to be itself. 
+		#### tau_hat <= tau 
+		#### e.g.[(True,False),(True,True),]
+
+	#-------------------------------------#
+	# Threshold Helpers                   #
+	#-------------------------------------# 
+
+	def _min_tau(X):
+		X = numpy.array(X) 
+		D = halla.discretize( X )
+		A = numpy.array([norm_mi(D[i],D[j]) for i,j in itertools.combinations( range(len(X)), 2 )])
+
+		#assert(numpy.any(A))
+
+		if X.shape[0] < 2:
+			return numpy.min([norm_mi(D[0],D[0])])
+
+		else:
+			return numpy.min( A )
+
+	def _max_tau(X):
+		X = numpy.array(X) 
+		D = halla.discretize( X )
+		A = numpy.array([norm_mi(D[i],D[j]) for i,j in itertools.combinations( range(len(X)), 2 )])
+
+		#assert(numpy.any(A))
+
+		if X.shape[0] < 2:
+			return numpy.max([norm_mi(D[0],D[0])])
+
+		else:
+			return numpy.max( A )
+
+	def _mean_tau( X ):
+		X = numpy.array(X) 
+		D = halla.discretize( X )
+		A = numpy.array([norm_mi(D[i],D[j]) for i,j in itertools.combinations( range(len(X)), 2 )])
+
+		if X.shape[0] < 2:
+			return numpy.mean([norm_mi(D[0],D[0])])
+
+		else:
+			return numpy.mean( A )
+
+		#print "X:"
+		#print X
+
+		#print "D:"
+		#print D
+
+		#print "Mean Tau:"
+		#print A 
+		
+		#assert(numpy.any(A))
+
+
 
 	#-------------------------------------#
 	# Decider Functions                   #
@@ -849,6 +914,20 @@ def couple_tree( apClusterNode1, apClusterNode2, strMethod = "uniform", strLinka
 
 	pMethod = hashMethod[strLinkage] ##returns 'aNode x aNode -> bool' object 
 
+
+	#==========================================#	
+	# See if children pass intradataset test 
+	# This should be done at the tree coupling level. 
+	#==========================================#
+				
+	#for i, p in enumerate( aP_children ): 
+		 
+	#	ai,aj = map(array, aP_children.get_data())
+
+	#	bX = (_mean_tau(X[ai]) <= fAlpha)
+	#	bY = (_mean_tau(Y[aj]) <= fAlpha)
+
+	#	aTau.append([bX,bY])
 
 	#-------------------------------------#
 	# Parsing Steps                       #
@@ -879,12 +958,25 @@ def couple_tree( apClusterNode1, apClusterNode2, strMethod = "uniform", strLinka
 
 			pStump = Tree([data1,data2])
 
-			apChildren1, apChildren2 = _filter_true([a.left, a.right]), _filter_true([b.left,b.right])
-			
+			bTauX = ( _min_tau(X[array(data1)]) >= x_threshold ) ### parametrize by mean, min, or max
+			bTauY = ( _min_tau(Y[array(data2)]) >= y_threshold ) ### parametrize by mean, min, or max
+
+			if bTauX:
+				apChildren1 = _filter_true([a])
+			else:
+				apChildren1 = _filter_true([a.left,a.right])
+
+			if bTauY:
+				apChildren2 = _filter_true([b])
+			else:
+				apChildren2 = _filter_true([b.left,b.right])
 
 			##Children should _already be_ adjusted for depth 
 			if not(any(apChildren1)) or not(any(apChildren2)):
 				aOut.append( pStump )
+
+			elif (bTauX == True) and (bTauY == True):
+				aOut.append( pStump ) ### Do not continue on, since alpha threshold has been met.
 
 			else: 
 				aOut.append( pStump.add_children( _couple_tree( apChildren1, apChildren2, strMethod = strMethod, strLinkage = strLinkage ) ) )
@@ -893,7 +985,7 @@ def couple_tree( apClusterNode1, apClusterNode2, strMethod = "uniform", strLinka
 
 	return _couple_tree( apClusterNode1, apClusterNode2, strMethod, strLinkage )
 
-def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_representative", iIter = 100  ):
+def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_representative", iIter = 100 ):
 
 	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
 						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
@@ -1086,7 +1178,7 @@ def layerwise_all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, a
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
 def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi", p_adjust = "BH", fQ = 0.1, 
-	iIter = 100, pursuer_method = "nonparameteric", step_parameter = 1.0, start_parameter = 0.0, bVerbose = False, ):
+	iIter = 100, pursuer_method = "nonparameteric", step_parameter = 1.0, start_parameter = 0.0, bVerbose = False, afThreshold = None, fAlpha = 0.05):
 	"""
 	Perform all-against-all on a hypothesis tree.
 
@@ -1118,6 +1210,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 		
 	"""
+
+	X,Y = pArray1, pArray2 
 
 	if bVerbose:
 		print reduce_tree_by_layer( [pTree] )
@@ -1179,7 +1273,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		aIndiciesMapped = map( array, aIndicies ) ## So we can vectorize over numpy arrays 
 		dP = pMethod( pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], iIter = iIter )
 
-		aOut.append( [aIndicies, dP] )
+		#aOut.append( [aIndicies, dP] ) #### dP needs to appended AFTER multiple hypothesis correction
 
 		return dP 
 
@@ -1206,7 +1300,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 			Greedy:
 
-				If q_hat <= q, reject null. Go as deep as possible. 
+				If q_hat <= q and tau_hat > tau, reject null. Go as deep as possible. 
 
 
 			There are three cases for the pursuer 
@@ -1214,20 +1308,23 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			True, False -> stop, record value 
 			True, True -> keep on going, unless no more children. Then record value 
 		"""
-		
-		aBool = [] 
 
+		aBool = [] ### Did the child meet the inter-dataset confidence cut-off? 
+			#### q_hat <= q 
+		
 		try:
 			iLen = len( aP_adjusted )
 		except Exception:
 			aP_adjusted = [aP_adjusted]
 			iLen = 1 
-
-		# See if children pass test 
+		
+		#==========================================#	
+		# See if children pass interdataset test 
+		#==========================================#
 
 		for i, p in enumerate( aP_adjusted ): 
 			assert( isinstance(p,float) and isinstance(fQ,float) )
-			if float(p) <= float(fQ):
+			if (float(p) <= float(fQ)): ##### MAIN CONDITION FOR PROGRESSING DOWNWARDS ##### 
 				if bVerbose:
 					print p, fQ 
 				### met significance criteria 
@@ -1237,7 +1334,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			else:
 				### did not meet significance criteria
 				aBool.append( False )
-					
+
 		### (*) Note the following situation:
 		### A child has 3 siblings. That child passes the significance threshold, so its children can be added to the final list. 
 		### A sibling doesn't quite cut the threshold, so the parent has to added instead. 
@@ -1247,19 +1344,14 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		### This makes sure that (*) is taken care of. 
 		### Notice that the parental addition happens prior to the continuation of the child 
 
-		if not any(aBool):
+		if not any(aBool): #### None passed the p-value criteria 
 			### if have to stop, then add to list of final association pairs 
 			assert(isinstance(fQParent, float) and isinstance(fQ,float))
-			#if not float(fQParent) <= float(fQ):
-			#	print "WHY IS THE PARENT P-VAL POOR AND IT WAS REJECTED?", fQParent, fQ
-			#assert(float(fQParent) <= float(fQ)), "Error: parent's p-value did not meet the q threshold and was erroneously rejected."
-			## Need better error handling for skipping items here 
 
 			aFinal.append( [pParent.get_data(), float(fQParent)] )
 
 		for j,bB in enumerate(aBool):
-			if (bB == True) and (apChildren[j].get_children() == []):
-				### if this is the terminal node, then do not traverse down any further
+			if (bB == True) and (apChildren[j].get_children() == []): ### if this is the terminal node, then do not traverse down any further
 				### furthermore, append the final p-value to the list of final association pairs 
 				if bVerbose:
 					print "TERMINAL NODE"
@@ -1294,23 +1386,37 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		if apChildren: 
 			aP = [ _actor( c ) for c in apChildren ]
 			aP_adjusted = halla.stats.p_adjust( aP )
+			
+			for k, child in enumerate(apChildren): 
+				aOut.append( [child.get_data(), aP_adjusted[k]] )
+			
 			aPursuer = _pursuer( apChildren = apChildren, pParent = pNode, aP_adjusted = aP_adjusted, fQ = fQ, fQParent = fQParent )
 
 			for j, bP in enumerate( aPursuer ):
+
 				if bP == True or iLayer <= iSkip:
 					if bVerbose:
 						print "TRUE", aP_adjusted[j]
+					
+					#aFinal.append([apChildren[j].get_data(), aP_adjusted[j]]) ### Things that passed the Q cutoff. 
+
 					_fw_operator( apChildren[j], fQParent = aP_adjusted[j], iLayer = iLayer+1 ) ### Need to update new definition of fQParent, which was not happening before 
 
 				else:
 					if bVerbose:
 						print "FALSE", aP_adjusted[j]
 
+
+	#======================================#
+	# Execute 
+	#======================================#
 	
 	aiI,aiJ = map( array, pTree.get_data() )
 	fQParent = pMethod( pArray1[aiI], pArray2[aiJ] )
+	aOut.append( [pTree.get_data(), float(fQParent)] )
 
 	if fQParent <= fQ or iSkip >= 1:
+		aFinal.append( [pTree.get_data(), float(fQParent)] )
 		_fw_operator( pTree, fQParent = fQParent ) 
 	
 	if bVerbose:

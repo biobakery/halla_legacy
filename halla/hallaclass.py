@@ -342,7 +342,7 @@ class HAllA():
 		This determines the line where the features are indistinguishable. 
 		"""
 
-		self.meta_threshold = map( lambda x : halla.stats.alpha_threshold( x ), self.meta_array )
+		self.meta_threshold = map( lambda x : halla.stats.alpha_threshold( x, self.alpha ), self.meta_array )
 
 		return self.meta_threshold 
 
@@ -367,7 +367,23 @@ class HAllA():
 		return self.meta_data_tree 
 
 	def _couple( self ):
-		self.meta_hypothesis_tree = self.m( self.bp( self.m(self.meta_data_tree, lambda x: [x]), couple_tree ), lambda y: y[0] ) 
+		#self.meta_hypothesis_tree = self.m( 
+		 #self.bp( 
+		  #self.m(self.meta_data_tree, lambda x: [x]), 
+		   #couple_tree ), 
+			#lambda y: y[0] ) 
+		
+		aOut = [] 
+
+		for i,j in itertools.combinations( range(len(self.meta_data_tree)), 2 ):
+			aOut.append( 
+				couple_tree(apClusterNode1 =[self.meta_data_tree[i]], 
+				apClusterNode2 = [self.meta_data_tree[j]], 
+				pArray1 = self.meta_array[i], pArray2 = self.meta_array[j], afThreshold = self.meta_threshold )[0]
+				)
+
+		self.meta_hypothesis_tree = aOut 
+
 		## remember, `couple_tree` returns object wrapped in list 
 		return self.meta_hypothesis_tree 
 
@@ -574,6 +590,9 @@ class HAllA():
 	def set_q( self, fQ ):
 		self.q = fQ
 
+	def set_alpha( self, fA ):
+		self.alpha = fA
+
 	def set_summary_method( self, strMethod ):
 		self.summary_method = strMethod 
 		return self.summary_method 
@@ -642,7 +661,9 @@ class HAllA():
 
 	def __preset_medoid_norm_mi( self ):
 
+
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_medoid" ) 
@@ -652,6 +673,7 @@ class HAllA():
 	def __preset_parametric_rep( self ):
 
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "parametric_test_by_representative" ) 
@@ -660,6 +682,7 @@ class HAllA():
 
 	def __preset_kpca_norm_mi( self ):
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_kpca_norm_mi" ) 
@@ -668,6 +691,7 @@ class HAllA():
 
 	def __preset_kpca_pearson( self ):
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_kpca_pearson" ) 
@@ -676,6 +700,7 @@ class HAllA():
 
 	def __preset_cca_pearson( self ):
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_cca_pearson" ) 
@@ -684,6 +709,7 @@ class HAllA():
 
 	def __preset_pls_pearson( self ):
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "parametric_test_by_pls_pearson" ) 
@@ -693,6 +719,7 @@ class HAllA():
 
 	def __preset_pls_norm_mi( self ):
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_pls_norm_mi" ) 
@@ -711,6 +738,7 @@ class HAllA():
 
 		## Run 		
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_cca_norm_mi" ) 
@@ -745,7 +773,9 @@ class HAllA():
 
 		## Run 		
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
+
 		#self._couple( )
 		#self._all_against_all( )
 		return self._layerwise_all_against_all( )
@@ -756,6 +786,7 @@ class HAllA():
 
 		## Run 		
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "parametric_test_by_multiple_representative") 
@@ -779,6 +810,7 @@ class HAllA():
 
 		## Run 		
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_multiple_representative") 
@@ -805,6 +837,7 @@ class HAllA():
 
 		## Run 		
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( ) 
@@ -832,6 +865,7 @@ class HAllA():
 
 		## Run 		
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( ) 
@@ -840,6 +874,7 @@ class HAllA():
 
 	def __preset_full_cca( self ):
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_cca_pearson" ) 
@@ -848,6 +883,7 @@ class HAllA():
 	def __preset_full_kpca_norm_mi( self ):
 
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_kpca_norm_mi" ) 
@@ -856,6 +892,7 @@ class HAllA():
 	def __preset_full_kpca_pearson( self ):
 
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_kpca_pearson" ) 
@@ -888,6 +925,7 @@ class HAllA():
 
 		## Run 
 		self._featurize( )
+		self._threshold( )
 		self._hclust( )
 		self._couple( )
 		return self._all_against_all( )

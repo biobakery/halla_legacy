@@ -425,6 +425,8 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 
 	#numpy.random.seed(0)
 
+	X,Y = pArray1, pArray2 
+
 	strMetric = metric 
 	pHashDecomposition = {"pca": pca, "kpca": kpca }
 	pHashMetric = halla.distance.c_hash_metric 
@@ -436,14 +438,27 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	pMe = pHashMetric[strMetric] 
 
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function
-	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+	
+	aDist = [] 
 
+	#### Caclulate Point estimate 
+	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 	fAssociation = pMe( pRep1, pRep2 ) 
 
-	aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
-	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
-	## BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iIter iterations of PCA
+	#### Perform Permutaiton 
+	for _ in xrange(iIter):
 
+		XP = array([numpy.random.permutation(x) for x in X])
+		YP = array([numpy.random.permutation(y) for y in Y])
+
+		pRep1_, pRep2_ = [ discretize( pDe( pA ) )[0] for pA in [XP,YP] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+
+		fAssociation_ = pMe( pRep1_, pRep2_ ) 
+
+		aDist.append(fAssociation_)
+
+		#aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
+	
 	fPercentile = percentileofscore( aDist, fAssociation, kind="strict" ) ##source: Good 2000 
 	### \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
 	### k number of iterations, \hat{X} is randomized version of X 
@@ -537,8 +552,16 @@ def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 100 )
 
 	#numpy.random.seed(0)
 
+	strMetric = metric 
+	pHashDecomposition = {"pca": pca, "kpca": kpca }
+	pHashMetric = halla.distance.c_hash_metric 
+	
+	## implicit assumption is that the arrays do not need to be discretized prior to input to the function	
+
 	pArray1 = array(pArray1)
 	pArray2 = array(pArray2)
+
+	X,Y = pArray1, pArray2 
 
 	if pArray1.ndim == 1:
 		pArray1 = array([pArray1])
@@ -551,21 +574,42 @@ def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 100 )
 		return array([numpy.random.permutation(x) for x in X])
 
 	#pDe = pHashDecomposition[decomposition]
-	#pMe = pHashMetric[strMetric] 
+	pMe = pHashMetric[strMetric] 
 
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	#pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 
-	X_c, Y_c = cca( pArray1, pArray2 )
+	#### Calculate Point Estimate 
+	pRep1, pRep2 = cca( pArray1, pArray2 )
 	
-	if metric == "norm_mi":
-		fAssociation = cca_score_norm_mi( pArray1, pArray2 ) 
-		pMetric = cca_score_norm_mi 
-	elif metric == "pearson":
-		fAssociation = cca_score( pArray1, pArray2 ) 
-		pMetric = cca_score
+	aDist = [] 
+	fAssociation = cca_score_norm_mi( pRep1, pRep2 )
+
+	#### Perform Permutaiton 
+	for _ in xrange(iIter):
+
+		XP = array([numpy.random.permutation(x) for x in X])
+		YP = array([numpy.random.permutation(y) for y in Y])
+
+		#pRep1_, pRep2_ = [ discretize( pDe( pA ) )[0] for pA in [XP,YP] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+
+		pRep1_, pRep2_ = cca( XP, YP )
+
+		pRep1_, pRep2_ = discretize(pRep1_), discretize(pRep2_)
+
+		fAssociation_ = pMe( pRep1_, pRep2_ ) 
+
+		aDist.append(fAssociation_)
+
+	#if metric == "norm_mi":
+	#	fAssociation = cca_score_norm_mi( pArray1, pArray2 ) 
+	#	pMetric = cca_score_norm_mi 
+	#elif metric == "pearson":
+	#	fAssociation = cca_score( pArray1, pArray2 ) 
+	#	pMetric = cca_score
 	
-	aDist = [pMetric( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
+	#aDist = [pMetric( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
+	
 	#aDist = numpy.array([ halla.distance.norm_mi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
 	#aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
@@ -585,8 +629,16 @@ def permutation_test_by_pls( pArray1, pArray2, metric = "norm_mi", iIter = 100 )
 
 	#numpy.random.seed(0)
 
+	strMetric = metric 
+	pHashDecomposition = {"pca": pca, "kpca": kpca }
+	pHashMetric = halla.distance.c_hash_metric 
+	
+	## implicit assumption is that the arrays do not need to be discretized prior to input to the function	
+
 	pArray1 = array(pArray1)
 	pArray2 = array(pArray2)
+
+	X,Y = pArray1, pArray2 
 
 	if pArray1.ndim == 1:
 		pArray1 = array([pArray1])
@@ -599,21 +651,42 @@ def permutation_test_by_pls( pArray1, pArray2, metric = "norm_mi", iIter = 100 )
 		return array([numpy.random.permutation(x) for x in X])
 
 	#pDe = pHashDecomposition[decomposition]
-	#pMe = pHashMetric[strMetric] 
+	pMe = pHashMetric[strMetric] 
 
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	#pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 
-	X_c, Y_c = pls( pArray1, pArray2 )
+	#### Calculate Point Estimate 
+	pRep1, pRep2 = pls( pArray1, pArray2 )
 	
-	if metric == "norm_mi":
-		fAssociation = pls_score_norm_mi( pArray1, pArray2 ) 
-		pMetric = pls_score_norm_mi 
-	elif metric == "pearson":
-		fAssociation = pls_score( pArray1, pArray2 ) 
-		pMetric = pls_score
+	aDist = [] 
+	fAssociation = pls_score_norm_mi( pRep1, pRep2 )
+
+	#### Perform Permutaiton 
+	for _ in xrange(iIter):
+
+		XP = array([numpy.random.permutation(x) for x in X])
+		YP = array([numpy.random.permutation(y) for y in Y])
+
+		#pRep1_, pRep2_ = [ discretize( pDe( pA ) )[0] for pA in [XP,YP] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+
+		pRep1_, pRep2_ = pls( XP, YP )
+
+		pRep1_, pRep2_ = discretize(pRep1_), discretize(pRep2_)
+
+		fAssociation_ = pMe( pRep1_, pRep2_ ) 
+
+		aDist.append(fAssociation_)
+
+	#if metric == "norm_mi":
+	#	fAssociation = cca_score_norm_mi( pArray1, pArray2 ) 
+	#	pMetric = cca_score_norm_mi 
+	#elif metric == "pearson":
+	#	fAssociation = cca_score( pArray1, pArray2 ) 
+	#	pMetric = cca_score
 	
-	aDist = [pMetric( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
+	#aDist = [pMetric( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
+	
 	#aDist = numpy.array([ halla.distance.norm_mi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
 	#aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
