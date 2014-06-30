@@ -47,12 +47,13 @@ Operating System
 Dependencies 
 --------------------------------------------
 
-* Required
+* Required 
 	* Python (>= 2.7)
 	* Numpy (>= 1.7.1)
 	* Scipy (>= 0.12) 
 	* Scikit-learn (>=0.13)  
 	* sampledoc-master
+All the required packages are included in Anaconda which is available at https://store.continuum.io/cshop/anaconda/
 
 * Recommended Tools for documentation 
 	* Docutils

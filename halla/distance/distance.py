@@ -2,26 +2,28 @@
 '''
 Abstract distance module providing different notions of distance
 '''
-
-import itertools 
-import abc 
-import math
-
 from abc import ABCMeta
-import numpy 
-from numpy import array 
-import scipy  
-import halla.stats
-import scipy.stats 
-import scipy.cluster 
+import abc
+import itertools
+import math
+from numpy import array
+import numpy
+import scipy
+import scipy.cluster
+import scipy.stats
+from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, \
+    adjusted_mutual_info_score
+
+#from halla.distance.distance import *
+
+#import halla.stats
+from scipy.spatial.distance import cdist
+
 
 #mi-based distances from scikit-learn; (log e)-based (i.e. returns nats instead of bits)
-from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, adjusted_mutual_info_score 
-
 #==========================================================================#
 # CONSTANTS 
 #==========================================================================#
-
 c_hash_association_method_discretize = {"pearson": False,
 										"spearman": False,
 										"kw": False,
@@ -46,7 +48,7 @@ class Distance:
 	def __init__( self, c_array1, c_array2 ): 
 		self.m_data1 = c_array1
 		self.m_data2 = c_array2 
- 
+
 	def get_inverted_distance( self, strFunc = None ):
 		pFunc = Distance.c_hashInvertFunctions[strFunc or "flip"] 
 		return pFunc( self.get_distance() ) 
@@ -65,7 +67,7 @@ class EuclideanDistance( Distance ):
 	def __init__( self, c_array1, c_array2 ):
 		self.m_data1 = c_array1
 		self.m_data2 = c_array2
-		self.c_distance_type = CDistance.EMetricType.METRIC 
+		self.c_distance_type =  Distance.EMetricType.METRIC # CDistance.EMetricType.METRIC 
 
 	def get_distance( self ):
 		return numpy.linalg.norm( self.m_data2-self.m_data1 ) 

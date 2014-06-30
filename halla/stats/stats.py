@@ -5,10 +5,10 @@ unified statistics module
 
 # native python 
 
-import math 
-import itertools 
-from itertools import compress 
-import sys 
+from itertools import compress
+import itertools
+import math
+import sys
 
 # External dependencies 
 
@@ -231,7 +231,7 @@ def kernel_cca( ):
 def kernel_cca_score( ):
 	pass 
 
-def get_medoid( pArray, iAxis = 0, pMetric = l2 ):
+def get_medoid( pArray, iAxis = 0, pMetric = halla.distance.l2 ):
 	"""
 	Input: numpy array 
 	Output: float

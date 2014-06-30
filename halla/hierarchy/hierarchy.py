@@ -3,7 +3,6 @@
 Hiearchy module, used to build trees and other data structures.
 Handles clustering and other organization schemes. 
 '''
- 
 ## structural packages 
 
 import sys 
@@ -48,7 +47,6 @@ from scipy.misc import *
 # @ClusterNode 
 
 #class ClusterNode #scipy.cluster.hierarchy.ClusterNode
-
 class Tree():
 	''' 
 	A hierarchically nested structure containing nodes as
@@ -60,7 +58,7 @@ class Tree():
 	def __init__(self, data = None):
 		self.m_pData = data 
 		self.m_arrayChildren = []
-    
+
 	def pop(self):
 		# pop one of the children, else return none, since this amounts to killing the singleton 
 		if self.m_arrayChildren:
@@ -820,7 +818,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	----------------
 	"""
 
-	import copy 
+#	import copy 
 
 	X,Y = pArray1, pArray2 
 

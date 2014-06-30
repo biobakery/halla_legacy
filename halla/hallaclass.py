@@ -3,28 +3,28 @@ HAllA class
 """
 
 ## structural packages 
-import itertools 
-import logging 
-import argparse 
-from numpy import array 
-import csv 
-import sys 
-import os 
+import argparse
+import csv
+import itertools
+import logging
+import os
+import sys
 
-## internal dependencies 
+from numpy import array
+
+from halla import distance, stats
 import halla
-from halla import stats
-from halla import distance
-import halla.parser  
-from halla.parser import Input, Output 
-
-from halla.test import *
-from halla.stats import *
 from halla.distance import *
 import halla.distance
 from halla.hierarchy import *
+from halla.parser import Input, Output
+import halla.parser
 from halla.plot import *
+from halla.stats import *
+from halla.test import *
 
+
+## internal dependencies 
 class HAllA():
 	
 	def __init__( self, *ta ): 
@@ -399,8 +399,8 @@ class HAllA():
 		fQ = self.q
 		
 		if self.verbose:
-			print "HAllA PROMPT: q value", fQ
-			print "q value is", fQ
+			print ("HAllA PROMPT: q value", fQ)
+			print ("q value is", fQ)
 		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, fQ = fQ, bVerbose = self.verbose, start_parameter = self.start_parameter ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
@@ -435,7 +435,7 @@ class HAllA():
 
 				for aLine in _Z:
 					if self.verbose:
-						print aLine 
+						print (aLine) 
 					#break
 					aaBag, fAssoc = aLine
 					aBag1, aBag2 = aaBag 
@@ -473,7 +473,7 @@ class HAllA():
 		Z_final = Z_final[args_sorted]
 
 		if self.verbose:
-			print Z_final 
+			print (Z_final) 
 
 		#assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
 
@@ -492,7 +492,7 @@ class HAllA():
 
 			for aLine in _Z:
 				if self.verbose:
-					print aLine 
+					print (aLine) 
 				
 				aaBag, fAssoc = aLine
 				listBag1, listBag2 = aaBag 
@@ -513,7 +513,7 @@ class HAllA():
 
 			for aLine in _Z:
 				if self.verbose:
-					print aLine 
+					print (aLine) 
 				
 				aaBag, fAssoc = aLine
 				aBag1, aBag2 = aaBag 
@@ -522,7 +522,7 @@ class HAllA():
 
 		if strMethod == "final":
 			if self.verbose:
-				print "Using only final p-values"
+				print ("Using only final p-values")
 			__get_conditional_pval_from_bags( Z_final )
 			assert( S.any() )
 			self.meta_summary = [S]
@@ -530,7 +530,7 @@ class HAllA():
 
 		elif strMethod == "all":
 			if self.verbose:
-				print "Using all p-values"
+				print ("Using all p-values")
 			__get_conditional_pval_from_bags( Z_all )
 			assert( S.any() )
 			self.meta_summary = [S]
@@ -626,6 +626,7 @@ class HAllA():
 		return self.iterations 
 
 	def set_randomization_method( self, strMethod ):
+
 		self.randomization_method = strMethod 
 		return self.randomization_method 
 
@@ -821,7 +822,28 @@ class HAllA():
 		"""
 		Mutual Information Preset 
 		"""
-
+		print ('''preset_norm_mi:
+				## Constants for this preset 
+				pDistance = norm_mi 
+				strReduce = "pca"
+				strStep = "uniform"
+				strAdjust = "BH"
+				strRandomization = "permutation"
+		
+				## Set 
+				self.set_metric( pDistance )
+				self.set_reduce_method( strReduce )
+				self.set_p_adjust_method( strAdjust )
+				self.set_randomization_method( strRandomization )
+		
+				## Run 		
+				self._featurize( )
+				self._hclust( )
+				self._couple( )
+				self._all_against_all( ) 
+				self._summary_statistics( ) 
+				return self._report( )
+			  ''')
 		## Constants for this preset 
 		pDistance = norm_mi 
 		strReduce = "pca"

@@ -4,9 +4,11 @@ Parses input/output formats,
 manages transformations
 '''
 
-import csv 
-import numpy as np 
+import csv
+
 from numpy import array
+
+import numpy as np
 
 
 class Input:

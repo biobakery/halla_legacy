@@ -24,8 +24,10 @@
 """
 
 import logging
-import pylab
 import sys
+
+import pylab
+
 
 c_logrHAllA	= logging.getLogger( "halla" )
 
