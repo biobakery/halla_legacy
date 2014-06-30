@@ -114,41 +114,5 @@ class Plot:
         graph.write_png('example1_graph.png')
         
         # and we are done!
-    @staticmethod
-    def simulateData(NumberOfFeatures, numberOfSamples, numberOfBlocks):
-        import numpy as np
-        #import matplotlib.pyplot as plt
-        linalg = np.linalg
-        mean = [1 for _ in range(NumberOfFeatures)]
-        cov = np.array([[0.0]*NumberOfFeatures for x in xrange(NumberOfFeatures)])
-        blockSize =  NumberOfFeatures/numberOfBlocks
-        counter = 0
-        for i in range(NumberOfFeatures):
-            if i%blockSize==0:
-                counter = 0
-            for j in range(i,i+blockSize-counter):
-                if j>NumberOfFeatures:
-                    break
-                #print i,j
-                cov[i,j] = .8 #np.random.randint(0.0,2.0, size=1)
-                #cov[j,i] = cov[i,j]
-            counter = counter + 1 
-        #print cov
-        #print linalg.det(cov)
-        cov = np.dot(cov, cov.T)
-        #print cov
-        #print linalg.det(cov)
-         
-        data = np.random.multivariate_normal(mean, cov, numberOfSamples)
-        #L = linalg.cholesky(cov)
-       # print data.T
-        # print(L.shape)
-        # (2, 2)
-        #uncorrelated = np.random.standard_normal((NumberOfFeatures,numberOfSamples))
-        #data2 = np.dot(L,uncorrelated) + np.array(mean).reshape(NumberOfFeatures,1)
-        # print(data2.shape)
-        # (2, 1000)
-        #plt.scatter(data[:,0], data[:,1], c='yellow')
-        #plt.show()
-        return data.T
+    
         
