@@ -16,7 +16,7 @@ import halla
 import halla.stats 
 
 from halla.distance import mi, l2, absl2, norm_mi
-from halla.stats import discretize,pca, bh, permutation_test_by_representative, p_adjust
+from halla.stats import discretize,pca, bh, permutation_test_by_representative,permutation_test_by_representative_mic, p_adjust
 from halla.stats import permutation_test_by_kpca_norm_mi, permutation_test_by_kpca_pearson, permutation_test_by_cca_pearson, permutation_test_by_cca_norm_mi
 
 ## statistics packages 
@@ -118,10 +118,10 @@ class Gardener():
 
 	"""
 
-	import copy 
+	 
 
 	def __init__( self, apTree = None ):
-
+		import copy
 		self.delta = 1.0 ##step parameter 
 		self.sigma = 0.5 ##start parameter 
 
@@ -986,6 +986,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_representative", iIter = 100 ):
 
 	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
+					"permutation_test_by_representative_mic" : halla.stats.permutation_test_by_representative_mic,
 						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
 						"parametric_test" : halla.stats.parametric_test}
 
@@ -1254,10 +1255,11 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 						"permutation_test_by_multiple_representative" : halla.stats.permutation_test_by_multiple_representative,
 						"parametric_test_by_representative": halla.stats.parametric_test_by_representative, 
 						"permutation_test_by_medoid": halla.stats.permutation_test_by_medoid,
-						"permutation_test_by_pls_norm_mi": halla.stats.permutation_test_by_pls_norm_mi
+						"permutation_test_by_pls_norm_mi": halla.stats.permutation_test_by_pls_norm_mi,
+						"permutation_test_by_representative_mic" : halla.stats.permutation_test_by_representative_mic
 						}
 
-	strMethod = method 
+	strMethod = method
 	pMethod = pHashMethods[strMethod]
 
 	def _actor( pNode ):

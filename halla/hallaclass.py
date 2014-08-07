@@ -21,7 +21,6 @@ from halla.parser import Input, Output
 import halla.parser
 from halla.plot import *
 from halla.stats import *
-from halla.test import *
 
 
 ## internal dependencies 
@@ -77,7 +76,7 @@ class HAllA():
 		self.iterations = 1000
 		self.p_adjust_method = "BH"
 		self.randomization_method = "permutation" #method to generate error bars 
-		
+		self.outcome = []
 		#------------------------------------------------------------------#
 		# Discretization  
 		#------------------------------------------------------------------#
@@ -135,12 +134,14 @@ class HAllA():
 		# permutation_test_by_cca_pearson 
 		# permutation_test_by_cca_norm_mi
 
-		self.hash_preset = 	{"default"		: self.__preset_default, 
+		self.hash_preset = 	{"default"		: self.__preset_default, "HAllA"		: self.__preset_default, 
 								"time"		: self.__preset_time, 
 								"accuracy"	: self.__preset_accuracy, 
 								"parallel"	: self.__preset_parallel, 
 								"layerwise" : self.__preset_layerwise, 
-								"naive" 	: self.__preset_naive,
+								"naive" 	: self.__preset_naive, "AllA" 	: self.__preset_naive,
+								"MIC"	: self.__preset_mic, 
+								"HAllA-MIC"	: self.__preset_mic_pca,
 								"kpca_norm_mi": self.__preset_kpca_norm_mi,
 								"kpca_pearson": self.__preset_kpca_pearson,
 								"cca_pearson": self.__preset_cca_pearson,
@@ -390,7 +391,6 @@ class HAllA():
 	def _naive_all_against_all( self, iIter = 100 ):
 		self.meta_alla = naive_all_against_all( self.meta_array[0], self.meta_array[1], iIter = iIter )
 		return self.meta_alla 
-
 	def _all_against_all( self, strMethod ="permutation_test_by_representative", iIter = None ):
 		if not iIter:
 			iIter = self.iterations 
@@ -404,6 +404,10 @@ class HAllA():
 		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, fQ = fQ, bVerbose = self.verbose, start_parameter = self.start_parameter ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
+	
+	def _naive_all_against_all_mic( self, iIter = 100 ):
+		self.meta_alla = naive_all_against_all( self.meta_array[0], self.meta_array[1], strMethod = "permutation_test_by_representative_mic", iIter = iIter )
+		return self.meta_alla
 
 	def _layerwise_all_against_all( self ):
 
@@ -457,25 +461,35 @@ class HAllA():
 
 		if not strMethod:
 			strMethod = self.summary_method
-
+		#print('meta array:')
+		#print(self.meta_array[0])
+		#print(self.meta_array[1])	
 		X = self.meta_array[0]
 		Y = self.meta_array[1]
 		iX, iY = X.shape[0], Y.shape[0]
 		
 		S = -1 * numpy.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
-
-		Z = self.meta_alla 
-		Z_final, Z_all = map(array, Z) ## Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree 
 		
+		Z = self.meta_alla 
+		Z_final, Z_all = map(array, Z) ## Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree
+				
 		### Sort the final Z to make sure p-value consolidation happens correctly 
 		Z_final_dummy = [-1.0 *(len(line[0][0])+len(line[0][1])) for line in Z_final]
 		args_sorted = numpy.argsort( Z_final_dummy )
 		Z_final = Z_final[args_sorted]
-
 		if self.verbose:
 			print (Z_final) 
-
 		#assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
+		
+		self.outcome = numpy.zeros((len(self.meta_feature[0]),len(self.meta_feature[1])))
+		#print(self.outcome)
+		for l in range(len(Z_final)):
+			#print(Z_final[l][0][0],Z_final[l][0][0], Z_final[l][1])
+			if Z_final[l][1] < self.q:
+				for i, j in product(Z_final[l][0][0], Z_final[l][0][1]):
+					#for j in Z_final[l][0][1]:
+					self.outcome[i][j] = 1
+		#print(self.outcome)
 
 		def __add_pval_product_wise( _x, _y, _fP ):
 			S[_x][_y] = _fP  
@@ -680,7 +694,16 @@ class HAllA():
 		self._all_against_all( strMethod = "parametric_test_by_representative" ) 
 		self._summary_statistics( ) 
 		return self._report( )  
-
+	
+	def __preset_mic_pca( self ):
+		self._featurize( )
+		self._threshold( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "permutation_test_by_representative_mic" ) 
+		self._summary_statistics( ) 
+		return self._report( )  
+	
 	def __preset_kpca_norm_mi( self ):
 		self._featurize( )
 		self._threshold( )
@@ -822,28 +845,6 @@ class HAllA():
 		"""
 		Mutual Information Preset 
 		"""
-		print ('''preset_norm_mi:
-				## Constants for this preset 
-				pDistance = norm_mi 
-				strReduce = "pca"
-				strStep = "uniform"
-				strAdjust = "BH"
-				strRandomization = "permutation"
-		
-				## Set 
-				self.set_metric( pDistance )
-				self.set_reduce_method( strReduce )
-				self.set_p_adjust_method( strAdjust )
-				self.set_randomization_method( strRandomization )
-		
-				## Run 		
-				self._featurize( )
-				self._hclust( )
-				self._couple( )
-				self._all_against_all( ) 
-				self._summary_statistics( ) 
-				return self._report( )
-			  ''')
 		## Constants for this preset 
 		pDistance = norm_mi 
 		strReduce = "pca"
@@ -962,6 +963,14 @@ class HAllA():
 		self._featurize( )
 		#print self.iterations 
 		return [self._naive_all_against_all( iIter = self.iterations )]
+	
+	def __preset_mic( self ):
+		"""
+		All against all using Maximum Information Coefficient 
+		"""
+		self._featurize( )
+		#print self.iterations 
+		return [self._naive_all_against_all_mic( iIter = self.iterations )]
 
 	#==========================================================#
 	# Public Functions / Main Pipeline  
@@ -1036,7 +1045,7 @@ class HAllA():
 		else:
 			try:
 				pMethod = self.hash_preset[strMethod]
-				return pMethod( )
+				return pMethod()
 			except KeyError:			
 				raise Exception( "Invalid Method.")
 

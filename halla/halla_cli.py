@@ -170,7 +170,7 @@ def _main(  ):
 
 
 	##
-	aOut1, aOut2 = Input( strFile1.name, strFile2.name ).get()
+	aOut1, aOut2 = ( strFile1.name, strFile2.name ).get()
 
 	aOutData1, aOutName1, aOutType1, aOutHead1 = aOut1 
 	aOutData2, aOutName2, aOutType2, aOutHead2 = aOut2 
@@ -188,7 +188,8 @@ def _main(  ):
 
 	else:
 		aaOut = H.run( )
-
+	#print(aaOut)
+	print(str(H.meta_alla))
 	csvw = csv.writer( args.ostm, csv.excel_tab )
 
 	csvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
@@ -207,8 +208,12 @@ def _main(  ):
 	#	aOut = aaOut
 	#	for line in aOut:
 	#			csvw.writerow( line )
-
-	csvw.writerow( [args.X.name, args.Y.name, "p-value"] )
+	
+	# if we have just one input file
+	if args.Y ==None:
+		csvw.writerow( [istm[0].name, istm[0].name, "p-value"] )
+	else:
+		csvw.writerow( [args.X.name, args.Y.name, "p-value"] )
 
 	for line in aaOut[0]:
 		iX, iY = line[0]

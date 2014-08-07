@@ -13,11 +13,12 @@ import sys
 # External dependencies 
 
 import pylab as pl
-import scipy 
+import scipy
 import numpy 
 from numpy import array 
 from scipy.stats import percentileofscore
 from numpy.random import shuffle, binomial, normal, multinomial 
+from itertools import product
 
 # ML plug-in 
 import sklearn 
@@ -27,6 +28,28 @@ from sklearn.metrics import roc_curve, auc
 import halla 
 from halla.distance import mi, l2, norm_mi, adj_mi 
 
+def fpr_tpr(condition = None, outcome= None ):
+	condition_negative = numpy.where(condition < .45, 1, 0).sum(); #FP + TN
+	conditon_positive = numpy.where(condition >= .45, 1, 0).sum(); #TP + FN
+	tp = 0
+	fp = 0
+	print(condition_negative, conditon_positive)
+	for i in range(len(condition)):
+		for j in range(len(condition)):
+			if condition[i][j] <= .45 and outcome[i][j]==1:
+				fp = fp +1
+			if condition[i][j] >= .45 and outcome[i][j]==1:
+				tp = tp + 1
+	print(fp , tp)
+	if condition_negative == 0:
+		return 0.0, 0.0
+	fpr = float(fp)/condition_negative
+	if conditon_positive == 0:
+		return 0.0, 0.0
+	tpr = float(tp)/conditon_positive
+	
+	return fpr , tpr
+	
 
 #=========================================================
 # Feature Selection 
@@ -414,7 +437,9 @@ def permutation_test_by_medoid( pArray1, pArray2, metric = "norm_mi", iIter = 10
 
 	return fP
 
-
+def permutation_test_by_representative_mic(pArray1, pArray2, metric = "mic", decomposition = "pca", iIter = 100):
+	return permutation_test_by_representative( pArray1, pArray2, metric = "mic", decomposition = "pca", iIter = 100 )
+	
 def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 100 ):
 	"""
 	Input: 
@@ -436,7 +461,6 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 
 	pDe = pHashDecomposition[decomposition]
 	pMe = pHashMetric[strMetric] 
-
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	
 	aDist = [] 

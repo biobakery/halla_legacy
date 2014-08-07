@@ -12,8 +12,8 @@ import scipy
 import scipy.cluster
 import scipy.stats
 from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, \
-    adjusted_mutual_info_score
-
+    adjusted_mutual_info_score, make_scorer
+from minepy import MINE
 #from halla.distance.distance import *
 
 #import halla.stats
@@ -32,6 +32,7 @@ c_hash_association_method_discretize = {"pearson": False,
 										"fisher": False,
 										"norm_mi": True,
 										"mi": True,
+                                        "mic": True
 										}
 
 class Distance:
@@ -264,7 +265,7 @@ def adj_mi( pData1, pData2 ):
 ### For most association measures you can take 1-measure as a "distance" measure, but this should never be proscribed to a variable 
 ### The only place I can see use for this is in hierarchical clustering; otherwise, not relevant 
 
-def _pearson( X, Y ):
+def pearson( X, Y ):
 	X = array(X)
 	Y = array(Y) 
 
@@ -275,11 +276,17 @@ def _pearson( X, Y ):
 
 	return scipy.stats.pearsonr(X,Y)[0]
 
+def mic (pArray1, pArray2):
+    mine = MINE(alpha=0.6, c=15)
+    mine.compute_score(pArray1, pArray2)
+    
+    return mine.mic()
 
 c_hash_metric = {"norm_mi": norm_mi,
 				"mi": mi,
 				"l2": l2,
-				"pearson": _pearson
+				"pearson": pearson,
+                "mic": mic
 				}
 ### Visible and shareable to the outside world 
 
