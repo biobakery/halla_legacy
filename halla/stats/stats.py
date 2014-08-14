@@ -330,8 +330,7 @@ def bh( afPVAL ):
 
 	afPVAL_reduced = list(set(afPVAL)) ##duplicate elements removed 
 	iLenReduced = len(afPVAL_reduced)
-
-	pRank = scipy.stats.rankdata( afPVAL, method = "dense" ) ##the "dense" method ranks ties as if the list did not contain any redundancies 
+	pRank = scipy.stats.rankdata( afPVAL) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	## source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
 
 	aOut = [] 
@@ -340,8 +339,8 @@ def bh( afPVAL ):
 		fAdjusted = fP*1.0*pRank[i]/iLenReduced
 		
 		aOut.append(fAdjusted)
-
-	assert( all(map(lambda x: x <= 1.0, aOut)) ) ##sanity check 
+	#print aOut
+	#assert( all(map(lambda x: x <= 1.0, aOut)) ) ##sanity check 
 
 	return aOut 
 
