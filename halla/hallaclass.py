@@ -76,7 +76,7 @@ class HAllA():
 		self.iterations = 1000
 		self.p_adjust_method = "BH"
 		self.randomization_method = "permutation" #method to generate error bars 
-		self.outcome = []
+		#self.outcome = []
 		#------------------------------------------------------------------#
 		# Discretization  
 		#------------------------------------------------------------------#
@@ -480,7 +480,7 @@ class HAllA():
 		if self.verbose:
 			print (Z_final) 
 		#assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
-		
+		'''
 		self.outcome = numpy.zeros((len(self.meta_feature[0]),len(self.meta_feature[1])))
 		#print(self.outcome)
 		for l in range(len(Z_final)):
@@ -490,7 +490,7 @@ class HAllA():
 					#for j in Z_final[l][0][1]:
 					self.outcome[i][j] = 1
 		#print(self.outcome)
-
+		'''
 		def __add_pval_product_wise( _x, _y, _fP ):
 			S[_x][_y] = _fP  
 

@@ -62,7 +62,7 @@ from halla.parser import Input, Output
 import halla.parser
 from halla.plot import *
 from halla.stats import *
-from halla.test import *
+#from halla.test import *
 
 
 ## internal dependencies 
@@ -91,6 +91,9 @@ def _main(  ):
 
 
 	argp.add_argument( "-o",                dest = "ostm",                  metavar = "output.txt",
+			type = argparse.FileType( "w" ),        default = "bo",
+			help = "Optional output file for association significance tests" )
+	argp.add_argument( "-bo",                dest = "bostm",                  metavar = "output.txt",
 			type = argparse.FileType( "w" ),        default = sys.stdout,
 			help = "Optional output file for association significance tests" )
 
@@ -170,7 +173,7 @@ def _main(  ):
 
 
 	##
-	aOut1, aOut2 = ( strFile1.name, strFile2.name ).get()
+	aOut1, aOut2 = Input (strFile1.name, strFile2.name ).get()
 
 	aOutData1, aOutName1, aOutType1, aOutHead1 = aOut1 
 	aOutData2, aOutName2, aOutType2, aOutHead2 = aOut2 
@@ -191,7 +194,7 @@ def _main(  ):
 	#print(aaOut)
 	print(str(H.meta_alla))
 	csvw = csv.writer( args.ostm, csv.excel_tab )
-
+	bcsvw = csv.writer( args.bostm, csv.excel_tab )
 	csvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
 
 	#if H._is_meta( aaOut ):
@@ -214,13 +217,20 @@ def _main(  ):
 		csvw.writerow( [istm[0].name, istm[0].name, "p-value"] )
 	else:
 		csvw.writerow( [args.X.name, args.Y.name, "p-value"] )
-
+	#print 'aaOut:', aaOut
+	#print 'aaOut[0]', aaOut[0]
 	for line in aaOut[0]:
 		iX, iY = line[0]
 		fP = line[1]
 		aLineOut = map(str,[aOutName1[iX], aOutName2[iY], fP])
 		csvw.writerow( aLineOut )
-
+	#print 'H:', H.meta_alla
+	#print 'H[0]', H.meta_alla[0]
+	for line in H.meta_alla[0]:
+		iX, iY = line[0]
+		fP = line[1]
+		aLineOut = map(str,[str(','.join(aOutName1[i] for i in iX)),str(','.join(aOutName2[i] for i in iY)), fP])
+		bcsvw.writerow( aLineOut )
 
 if __name__ == '__main__':
 
