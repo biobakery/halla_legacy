@@ -4,7 +4,9 @@ unified statistics module
 """
 
 # native python 
-
+import sys
+sys.path.append('/Users/rah/Documents/Hutlab/halla/')
+sys.path.append('/Users/rah/Documents/Hutlab/strudel')
 from itertools import compress
 import itertools
 import math

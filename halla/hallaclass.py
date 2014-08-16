@@ -1,7 +1,9 @@
 """
 HAllA class  
 """
-
+import sys
+sys.path.append('/Users/rah/Documents/Hutlab/halla')
+sys.path.append('/Users/rah/Documents/Hutlab/strudel')
 ## structural packages 
 import argparse
 import csv
@@ -11,9 +13,8 @@ import os
 import sys
 
 from numpy import array
-
-from halla import distance, stats
 import halla
+#from halla import distance, stats
 from halla.distance import *
 import halla.distance
 from halla.hierarchy import *
