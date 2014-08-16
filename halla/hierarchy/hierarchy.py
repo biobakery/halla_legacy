@@ -37,7 +37,7 @@ import pylab as pl
 import random  
 from numpy.random import normal 
 from scipy.misc import * 
-
+sys.setrecursionlimit(10000)
 
 #==========================================================================#
 # DATA STRUCTURES 
