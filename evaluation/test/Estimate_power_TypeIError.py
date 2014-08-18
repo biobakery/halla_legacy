@@ -75,6 +75,7 @@ def _main( ):
 				new_method = method+'_'+str(alpha)+'_'+str(q)+'_'+str(start_parameter)
 				print new_method ,'is running ...with q, cut-off, ',q
 				#y_score = 1- h.meta_summary[0].flatten()
+				print 'h.meta_summary[0]', h.meta_summary[0]
 				score  = h.meta_summary[0].flatten()
 				y_true =  A.flatten()#[x for sublist in condition for x in sublist]
 				#fpr[new_method], tpr[new_method], _ = roc_curve(y_true, y_score, pos_label= 1)
