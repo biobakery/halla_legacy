@@ -37,7 +37,7 @@ def _main( ):
 	s = strudel.Strudel()
 	number_features = 40
 	number_samples = 100
-	number_blocks = 10
+	number_blocks = 4
 	print 'Synthetic Data Generation ...'
 	''''X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
 	Y,_ = s.spike( X, strMethod = "line" )

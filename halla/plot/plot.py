@@ -73,7 +73,7 @@ def plot_roc(roc_info=None, figure_name = 'roc_plot_HAllA'):
     #plt.savefig('./test/'+roc_name+'foo.pdf')
     plt.savefig(figure_name+'.pdf')
     plt.show()
-    return plt
+    #return plt
     
 def dendrogramHeatPlot(D):
     #Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python

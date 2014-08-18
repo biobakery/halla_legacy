@@ -43,7 +43,7 @@ def _main( ):
 	'''X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
 	Y,_ = s.spike( X, strMethod = "line" )
 	'''
-	X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = 2.0, Beta = 3.0)# link = "line" )
+	X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6, Beta = 3.0)# link = "line" )
 
 
 	#discretize the data prior to calculating the mutual information.
