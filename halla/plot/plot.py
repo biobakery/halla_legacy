@@ -6,15 +6,38 @@ including all graphics and 'data object to plot' transformations.
 #from pylab import plot, hist, scatter
 
 
-import scipy
-import pylab
+
 #import dot_parser
-import scipy.cluster.hierarchy as sch
 import pydot
-from numpy.matlib import rand
-from array import array
-
-
+#from pylab import *
+def _main( ):
+    plot_box()
+def plot_box(data, alpha= .1 , figure_name='HAllA_Power_TypeI_Error' ):
+    
+    import pylab as pl
+    # multiple box plots on one figure
+    
+    pl.figure("Power vs. Type I Error")
+    ax = pl.axes()
+    pl.hold(True)
+    ax.set_xticklabels(['Power', 'Type I Error'])
+    pl.xlabel("HAllA")
+    #Spl.ylabel("Power")
+    pl.xlim([-0.05, 1.05])
+    pl.ylim([-0.05, 1.05])
+    pl.boxplot(data, notch=0, sym='+', vert=1, whis=1.5)
+    #pl.hlines(1-alpha,0.0,2.5, color ='blue')
+    pl.plot([.0, 2.5], [alpha, alpha], 'k-', lw=1, color ='red')
+    #hB, = pl.plot([1,1],'b-')
+    hR, = pl.plot([1,1],'r-')
+    pl.legend((hR,),('Alpha',))
+    #pl.legend((hB, hR),('???', '???'))
+    #hB.set_visible(False)
+    hR.set_visible(False)
+    #savefig('box7')
+    pl.savefig('/Users/rah/Documents/'+figure_name+'.pdf')
+    pl.show()
+    return;
 
 def plot_roc(roc_info=None, figure_name = 'roc_plot_HAllA'):
     """
@@ -76,6 +99,13 @@ def plot_roc(roc_info=None, figure_name = 'roc_plot_HAllA'):
     #return plt
     
 def dendrogramHeatPlot(D):
+    import scipy
+    import pylab
+    #import dot_parser
+    import scipy.cluster.hierarchy as sch
+    import pydot
+    from numpy.matlib import rand
+    from array import array
     #Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
     if len(D) == 0: 
         # Generate random features and distance matrix.
@@ -167,5 +197,5 @@ def graphPlot():
     graph.write_png('example1_graph.png')
     
     # and we are done!
-
-    
+if __name__ == '__main__':
+    _main( )
