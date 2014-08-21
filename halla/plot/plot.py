@@ -12,25 +12,27 @@ import pydot
 #from pylab import *
 def _main( ):
     plot_box()
-def plot_box(data, alpha= .1 , figure_name='HAllA_Power_TypeI_Error' ):
+def plot_box(data, alpha= .1 , figure_name='HAllA_Power_TypeI_Error', ylabel = None, labels = None ):
     
     import pylab as pl
     # multiple box plots on one figure
     
-    pl.figure("Power vs. Type I Error")
+    pl.figure("HAllA vs. Other methods")
     ax = pl.axes()
     pl.hold(True)
-    ax.set_xticklabels(['Power', 'Type I Error'])
-    pl.xlabel("HAllA")
-    #Spl.ylabel("Power")
+    if len(labels) > 0:
+        ax.set_xticklabels(labels)
+    pl.xlabel('Methods')
+    pl.ylabel(ylabel)
     pl.xlim([-0.05, 1.05])
     pl.ylim([-0.05, 1.05])
     pl.boxplot(data, notch=0, sym='+', vert=1, whis=1.5)
     #pl.hlines(1-alpha,0.0,2.5, color ='blue')
-    pl.plot([.0, 2.5], [alpha, alpha], 'k-', lw=1, color ='red')
+    if ylabel == 'type_I_error':
+        pl.plot([.0, len(data)+.5], [alpha, alpha], 'k-', lw=1, color ='red')
     #hB, = pl.plot([1,1],'b-')
     hR, = pl.plot([1,1],'r-')
-    pl.legend((hR,),('Alpha',))
+    pl.legend((hR,),('q cut-off',))
     #pl.legend((hB, hR),('???', '???'))
     #hB.set_visible(False)
     hR.set_visible(False)
