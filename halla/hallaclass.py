@@ -179,6 +179,7 @@ class HAllA():
 		self.meta_out = None # final output array; some methods (e.g. all_against_all) have multiple outputs piped to both self.meta_alla and self.meta_out 
 		self.meta_summary = None # summary statistics 
 		self.meta_report = None # summary report 
+		self.aOut = None # summary output for naive approaches_
 
 		## END INIT 
 
@@ -453,7 +454,12 @@ class HAllA():
 		for Z in aOut:
 			aMetaOut.append(_layer(Z))
 
-		return aMetaOut 
+		return aMetaOut
+	def _naive_summary_statistics(self  ):
+		_, p_values = zip(*self.aOut[0])
+		self.meta_summary = []
+		self.meta_summary.append( numpy.reshape([p_values], (int(math.sqrt(len(p_values))), int(math.sqrt(len(p_values))))))
+
 
 	def _summary_statistics( self, strMethod = None ): 
 		"""
@@ -964,19 +970,19 @@ class HAllA():
 		self._featurize( )
 		#print self.iterations 
 		Out  = self._naive_all_against_all( iIter = self.iterations )
-		aOut = [Out]
-		_, p_values = zip(*Out)
-		self.meta_summary = []
-		self.meta_summary.append( numpy.reshape([p_values], (int(math.sqrt(len(p_values))), int(math.sqrt(len(p_values))))))
-		print 'Hi',self.meta_summary[0]
-		return aOut
+		self.aOut = [Out]
+		self._naive_summary_statistics()
+		return self.aOut
 	def __preset_mic( self ):
 		"""
 		All against all using Maximum Information Coefficient 
 		"""
 		self._featurize( )
 		#print self.iterations 
-		return [self._naive_all_against_all_mic( iIter = self.iterations )]
+		Out = self._naive_all_against_all_mic( iIter = self.iterations )
+		self.aOut = [Out]
+		self._naive_summary_statistics()
+		return self.aOut
 
 	#==========================================================#
 	# Public Functions / Main Pipeline  
