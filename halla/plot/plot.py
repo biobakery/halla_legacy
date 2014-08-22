@@ -24,8 +24,8 @@ def plot_box(data, alpha= .1 , figure_name='HAllA_Power_TypeI_Error', ylabel = N
         ax.set_xticklabels(labels)
     pl.xlabel('Methods')
     pl.ylabel(ylabel)
-    pl.xlim([-0.05, 1.05])
-    pl.ylim([-0.05, 1.05])
+    pl.xlim([-0.05, 1.15])
+    pl.ylim([-0.05, 1.15])
     pl.boxplot(data, notch=0, sym='+', vert=1, whis=1.5)
     #pl.hlines(1-alpha,0.0,2.5, color ='blue')
     if ylabel == 'type_I_error':

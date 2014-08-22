@@ -27,7 +27,7 @@ from sklearn.metrics.metrics import roc_curve
 def _main( ):
 	
 	#Different methods to run
-	methods = {'pls_norm_mi', 'pls_pearson', 'HAllA', 'HAllA-MIC', 'cca_pearson', 'cca_norm_mi', 'kpca_pearson', 'kpca_norm_mi'}
+	methods = {'HAllA', 'AllA'}
 	tp_fp_counter = dict()
 	roc_info = [[]]
 	power = dict()
@@ -35,11 +35,11 @@ def _main( ):
 	type_I_error_data = []
 	labels = []
 	typeI_error = dict()
-	number_of_simulation = 1000
+	number_of_simulation = 3
 	s = strudel.Strudel()
-	number_features = 256
-	number_samples = 1000
-	number_blocks = 16
+	number_features = 16
+	number_samples = 200
+	number_blocks = 4
 	
 	for q in {.05}:#, .05, .025, .01}:
 		for method in methods:
@@ -65,10 +65,11 @@ def _main( ):
 			h.set_q(q)	
 			for method in methods:
 				aOut = h.run(method)
+				#print aOut
 				new_method = method+'_'+str(q)
 				print new_method ,'is running ...with q, cut-off, ',q
 				#y_score = 1- h.meta_summary[0].flatten()
-				print 'h.meta_summary[0]', h.meta_summary[0]
+				print 'h.meta_summary[0]', h.meta_alla
 				#break;
 				print 'A', A
 				for i,j in itertools.product(range(number_features),range(number_features)):

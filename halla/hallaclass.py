@@ -11,7 +11,7 @@ import itertools
 import logging
 import os
 import sys
-
+import numpy
 from numpy import array
 import halla
 #from halla import distance, stats
@@ -22,7 +22,7 @@ from halla.parser import Input, Output
 import halla.parser
 from halla.plot import *
 from halla.stats import *
-
+import math
 
 ## internal dependencies 
 class HAllA():
@@ -34,7 +34,6 @@ class HAllA():
 		Write so that you can feed in a tuple of numpy.ndarrays; in practice the core unit of comparison is always
 		the pair of arrays
 		"""
-
 		## BEGIN INIT
 
 		#==================================================================#
@@ -48,6 +47,7 @@ class HAllA():
 		self.distance = adj_mi 
 		self.reduce_method = "pca" 
 		
+
 		#----------------------------------#
 		# Step and jump methods 
 		#----------------------------------#
@@ -963,8 +963,13 @@ class HAllA():
 		"""
 		self._featurize( )
 		#print self.iterations 
-		return [self._naive_all_against_all( iIter = self.iterations )]
-	
+		Out  = self._naive_all_against_all( iIter = self.iterations )
+		aOut = [Out]
+		_, p_values = zip(*Out)
+		self.meta_summary = []
+		self.meta_summary.append( numpy.reshape([p_values], (int(math.sqrt(len(p_values))), int(math.sqrt(len(p_values))))))
+		print 'Hi',self.meta_summary[0]
+		return aOut
 	def __preset_mic( self ):
 		"""
 		All against all using Maximum Information Coefficient 
