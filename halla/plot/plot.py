@@ -37,7 +37,7 @@ def plot_box(data, alpha= .1 , figure_name='HAllA_Power_TypeI_Error', ylabel = N
     #hB.set_visible(False)
     hR.set_visible(False)
     #savefig('box7')
-    pl.savefig('Home/Documents/'+figure_name+'.pdf')
+    pl.savefig(figure_name+'.pdf')
     pl.show()
     return;
 
