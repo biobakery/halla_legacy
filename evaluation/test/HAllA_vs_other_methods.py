@@ -4,7 +4,9 @@
 Wrappers for testing HAllA's procedures such as, 
 random data generation, Multi-ROC curves plotting etc 
 """
-
+import sys
+sys.path.append('//Users/rah/Documents/Hutlab/halla')
+sys.path.append('/Users/rah/Documents/Hutlab/strudel')
 from itertools import compress
 import matplotlib
 from numpy import array
@@ -32,21 +34,13 @@ def _main( ):
 	
 	#Generate simulated datasets
 	s = strudel.Strudel()
-	number_features = 32
-	number_samples = 100
-	number_blocks = 6
+	number_features = 20
+	number_samples = 300
+	number_blocks = 4
 	print 'Synthetic Data Generation ...'
 	#X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
-	X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .9, Beta = 3.0)# link = "line" )
-	#Y,_ = s.spike( X, strMethod = "line" )
-	#Y = numpy.random.randint(0.7,4.0, size=(64,200)) 
-	#pylab.pcolor(X, cmap= pylab.cm.RdYlGn)
-	
-	#print A
-	#pylab.pcolor(Y, cmap= pylab.cm.RdYlGn)
-	#X,Y , A= s.cholesky_block(32, 1000, 4, fVal=.9, Beta=.1)
-	#print A
-	
+	X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6, Beta = 3.0)# link = "line" )
+
 	'''
 	The following will give you the Euclidean distance between the variables in X.
 
@@ -79,11 +73,7 @@ def _main( ):
 	#hY = scipy.cluster.hierarchy.linkage(dY, method='single')
 	#HY =scipy.cluster.hierarchy.dendrogram(hY, no_labels= True)
 	
-	l = len(Dx)
-	condition = numpy.zeros((l,l))
-	for i,j in itertools.product(range(l),range(l)):
-		if abs(s.association(dX[i],dY[j]))>.5:
-			condition[i][j] = 1 
+
 	#print 'condition', condition
 	#halla.plot.Plot.dendrogramHeatPlot(Dx)
 	#halla.plot.Plot.dendrogramHeatPlot(Dy)
@@ -115,58 +105,18 @@ def _main( ):
 		fpr[method], tpr[method], _ = roc_curve(y_true, y_score, pos_label= 1)
 		s.roc(1.0 - A.flatten(), h.meta_summary[0].flatten())
 		#del h
-		'''if method in fpr:
-			fpr[method].append(fpr_temp_method)
-		else:
-			fpr[method] = [0.0]
-			fpr[method].append(fpr_temp_method)
-		if method in tpr:
-			tpr[method].append(tpr_temp_method)
-		else:
-			tpr[method] = [0.0]
-			tpr[method].append(tpr_temp_method)
-		'''
-		'''t = h.run("naive")
-		fpr_temp_AllA, tpr_temp_AllA = stats.fpr_tpr( condition, h.outcome)
-		fpr_AllA.append(fpr_temp_AllA)
-		tpr_AllA.append(tpr_temp_AllA)'''
-	
+		
 	#print(fpr_HAllA, tpr_HAllA)
 	#print(fpr_AllA, tpr_AllA)
 	for method in methods:
-		'''arr = None	
-		#if array(fpr[method]).isSorted()
-		fpr[method].append(1.0)
-		tpr[method].append(1.0)
-		arr = numpy.array([fpr[method], tpr[method]])
-		#print arr
-		arr.T
-		#print arr
-		arr.sort()
-		arr.T
-		#print(arr)
-		#arr = arr[numpy.argsort(arr[0,:])]
-		#arr = arr[arr[0,:].argsort()]
-		#print(arr)
-		method_info = [method, arr[0], arr[1]]'''
 		method_info = [method, fpr[method], tpr[method]]
 		#print(method_info)	
 		if len(roc_info[0]) == 0:
 			roc_info = [method_info]
 		else:	
-			#print(len(roc_info))
 			roc_info.append(method_info)
-		#arr = arr[numpy.argsort(arr[0,:])]
-		#AllA = ['AllA', arr[0], arr[1]]
-		
-		#AllA = ['AllA', numpy.argsort(numpy.array([fpr_AllA, tpr_AllA])[0,:])]
-		
-		#roc_info.append(AllA)
-	#print(roc_info)
+
 	halla.plot.plot_roc(roc_info, figure_name)
-	#h.run("naive")       
-
-
 
 if __name__ == '__main__':
 

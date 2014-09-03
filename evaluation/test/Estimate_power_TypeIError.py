@@ -20,14 +20,14 @@ sys.path.append('//Users/rah/Documents/Hutlab/halla')
 sys.path.append('/Users/rah/Documents/Hutlab/strudel')
 #sys.path.insert(1, '../../strudel')
 import strudel, halla, pylab
-from halla import stats
+from halla import stats, data
 import itertools
 from sklearn.metrics.metrics import roc_curve
 
 def _main( ):
 	
 	#Different methods to run
-	methods = {'HAllA', 'AllA', 'HAllA-MIC', 'MIC'}
+	methods = {'HAllA'}#, 'AllA', 'HAllA-MIC', 'MIC'}
 	tp_fp_counter = dict()
 	roc_info = [[]]
 	power = dict()
@@ -35,13 +35,13 @@ def _main( ):
 	type_I_error_data = []
 	labels = []
 	typeI_error = dict()
-	number_of_simulation = 2
+	number_of_simulation = 1
 	s = strudel.Strudel()
-	number_features = 8
-	number_samples = 10
-	number_blocks = 3
+	number_features = 16
+	number_samples = 2000
+	number_blocks = 8
 	
-	for q in {.05}:#, .05, .025, .01}:
+	for q in {.1}:#, .05, .025, .01}:
 		for method in methods:
 			new_method = method+'_'+str(q)
 			power[new_method] = []
@@ -51,7 +51,7 @@ def _main( ):
 	
 	print 'Synthetic Data Generation ...'
 	for iter_number in range(number_of_simulation):
-		X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = 0.6 , Beta = 3.0 )# link = "line" )
+		X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6 , Beta = 3.0)# link = "line" )
 		#A = numpy.zeros((number_features,number_features))
 		#X = numpy.random.rand(number_features,number_features)	
 		#Y = numpy.random.rand(number_features,number_features)
@@ -60,6 +60,11 @@ def _main( ):
 		#alpha = .3
 		#h.set_start_parameter (start_parameter)
 		#h.set_alpha (alpha)
+		
+		#halla.data.wirteData(X,"X")
+		#halla.data.wirteData(Y, "Y")
+		
+		
 		for q in { .05}:#, .05, .025, .01}:
 			# Setup alpha and q-cutoff and start parameter
 			h.set_q(q)	

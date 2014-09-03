@@ -51,7 +51,8 @@ import itertools
 import logging
 import os
 import sys
-
+sys.path.append('//Users/rah/Documents/Hutlab/halla')
+sys.path.append('/Users/rah/Documents/Hutlab/strudel')
 from numpy import array
 
 from halla import HAllA, distance, stats

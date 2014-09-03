@@ -72,7 +72,7 @@ class HAllA():
 		# Randomization and multiple correction  methods 
 		#------------------------------------------------#
 
-		self.alpha = 0.05 ### Within covariance cut-off value 
+		self.alpha = 0.2 ### Within covariance cut-off value 
 		self.q = 0.1 ### Between covariance cut-off value
 		self.iterations = 1000
 		self.p_adjust_method = "BH"

@@ -49,7 +49,7 @@ def simulateData(NumberOfFeatures=8, numberOfSamples=10000, numberOfBlocks=2, cl
     #f.close()
     data = data.T
                 
-    f = open('syntheticData.txt', 'w')
+    f = open('syntheticData.csv', 'w')
     f.write(' ')
     for i in range(len(data[1])):
         f.write(str(i)+' ')
@@ -66,6 +66,23 @@ def simulateData(NumberOfFeatures=8, numberOfSamples=10000, numberOfBlocks=2, cl
     return data   
    # with open('syntheticData.txt', 'r') as fin:
         #print fin.read()
+def wirteData(data =None, name =None):
+    f = open(name+'_syntheticData.txt', 'w')
+    # row numbers as header
+    ''''f.write(' ')
+    for i in range(len(data[1])):
+        f.write(str(i)+' ')
+        f.write(' ')
+    f.write('\n')
+    '''
+    for i in range(len(data)):
+        f.write(str(i))
+        f.write('\t')
+        for j in range(len(data[i])):
+            f.write(str(data[i,j]))
+            f.write('\t')
+        f.write('\n')
+    f.close() 
 
 if __name__ == '__main__':
 
