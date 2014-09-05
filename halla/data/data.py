@@ -67,7 +67,7 @@ def simulateData(NumberOfFeatures=8, numberOfSamples=10000, numberOfBlocks=2, cl
    # with open('syntheticData.txt', 'r') as fin:
         #print fin.read()
 def wirteData(data =None, name =None):
-    f = open(name+'_syntheticData.txt', 'w')
+    f = open(name+'_syntheticData.csv', 'w')
     # row numbers as header
     ''''f.write(' ')
     for i in range(len(data[1])):

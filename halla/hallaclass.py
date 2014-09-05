@@ -65,15 +65,15 @@ class HAllA():
 		# sigma 
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-		self.start_parameter = 0.0 ## a value between 0.0 and 1.0; 0.0 performs the simplest comparison at the top of the tree; 
+		self.start_parameter = 0.5 ## a value between 0.0 and 1.0; 0.0 performs the simplest comparison at the top of the tree; 
 		## 1.0 starts in the bottom 
 
 		#------------------------------------------------#
 		# Randomization and multiple correction  methods 
 		#------------------------------------------------#
 
-		self.alpha = 0.2 ### Within covariance cut-off value 
-		self.q = 0.1 ### Between covariance cut-off value
+		self.alpha = 0.1 ### Within covariance cut-off value 
+		self.q = 0.2 ### Between covariance cut-off value
 		self.iterations = 1000
 		self.p_adjust_method = "BH"
 		self.randomization_method = "permutation" #method to generate error bars 

@@ -92,11 +92,11 @@ def _main(  ):
 
 
 	argp.add_argument( "-o",                dest = "ostm",                  metavar = "output.txt",
-			type = argparse.FileType( "w" ),        default = "bo",
+			type = argparse.FileType( "w" ),        default = "all_association_results",
 			help = "Optional output file for association significance tests" )
-	argp.add_argument( "-bo",                dest = "bostm",                  metavar = "output.txt",
+	argp.add_argument( "-bo",                dest = "bostm",                  metavar = "blocked_output.txt",
 			type = argparse.FileType( "w" ),        default = sys.stdout,
-			help = "Optional output file for association significance tests" )
+			help = "Optional output file for blocked association significance tests" )
 
 	argp.add_argument( "-q",                dest = "dQ",                    metavar = "q_value",
 			type = float,   default = 0.05,
@@ -192,12 +192,12 @@ def _main(  ):
 
 	else:
 		aaOut = H.run( )
-	#print(aaOut)
+	print('Hi',aaOut)
 	print(str(H.meta_alla))
 	csvw = csv.writer( args.ostm, csv.excel_tab )
 	bcsvw = csv.writer( args.bostm, csv.excel_tab )
 	csvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
-
+	bcsvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
 	#if H._is_meta( aaOut ):
 	#	if H._is_meta( aaOut[0] ):
 	#		for i,aOut in enumerate(aaOut):
