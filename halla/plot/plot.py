@@ -9,9 +9,12 @@ including all graphics and 'data object to plot' transformations.
 
 #import dot_parser
 import pydot
+
 #from pylab import *
 def _main( ):
-    plot_box()
+    D = plotGridData(D = [])
+     
+    #plot_box()
 def plot_box(data, alpha= .1 , figure_name='HAllA_Power_TypeI_Error', ylabel = None, labels = None ):
     
     import pylab as pl
@@ -23,6 +26,8 @@ def plot_box(data, alpha= .1 , figure_name='HAllA_Power_TypeI_Error', ylabel = N
     if len(labels) > 0:
         ax.set_xticklabels(labels)
     pl.xlabel('Methods')
+    pl.xticks(range(len(labels)), labels, rotation=30, ha='right')
+    pl.tight_layout()
     pl.ylabel(ylabel)
     pl.xlim([-0.05, 1.15])
     pl.ylim([-0.05, 1.15])
@@ -30,16 +35,16 @@ def plot_box(data, alpha= .1 , figure_name='HAllA_Power_TypeI_Error', ylabel = N
     pl.setp(bp['boxes'], color='black')
     pl.setp(bp['whiskers'], color='blue')
     pl.setp(bp['fliers'], marker='+')
-    pl.plot(data, 'b*')
+    #pl.plot(data)
     #pl.hlines(1-alpha,0.0,2.5, color ='blue')
     if ylabel == 'type_I_error':
         pl.plot([.0, len(data)+.5], [alpha, alpha], 'k-', lw=1, color ='red')
     #hB, = pl.plot([1,1],'b-')
-    hR, = pl.plot([1,1],'r-')
-    pl.legend((hR,),('q cut-off',))
+        hR, = pl.plot([1,1],'r-')
+        pl.legend((hR,),('q cut-off',))
     #pl.legend((hB, hR),('???', '???'))
     #hB.set_visible(False)
-    hR.set_visible(False)
+        hR.set_visible(False)
     #savefig('box7')
     pl.savefig(figure_name+'.pdf')
     pl.show()
@@ -103,7 +108,24 @@ def plot_roc(roc_info=None, figure_name = 'roc_plot_HAllA'):
     plt.savefig(figure_name+'.pdf')
     plt.show()
     #return plt
-    
+def plotGridData(D):
+    import scipy
+    import pylab
+    #import dot_parser
+    import scipy.cluster.hierarchy as sch
+    import pydot
+    from numpy.matlib import rand
+    from array import array
+    #Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
+    if len(D) == 0: 
+        # Generate random features and distance matrix.
+        print "The distance matrix is empty. The function generates a random matrix."
+        x = scipy.rand(32)
+        D = scipy.rand(32,32)
+    pylab.pcolor(D, cmap = pylab.cm.ocean)
+    pylab.savefig('Data.pdf')
+    pylab.show()
+    return D
 def dendrogramHeatPlot(D):
     import scipy
     import pylab
@@ -116,10 +138,10 @@ def dendrogramHeatPlot(D):
     if len(D) == 0: 
         # Generate random features and distance matrix.
         print "The distance matrix is empty. The function generates a random matrix."
-        x = scipy.rand(40)
-        D = scipy.zeros([40,40])
-        for i in range(40):
-            for j in range(i,40):
+        x = scipy.rand(16)
+        D = scipy.zeros([16,16])
+        for i in range(16):
+            for j in range(i,16):
                 D[i,j] = abs(x[i] - x[j])
                 D[j,i]=D[i,j]
     # Compute and plot first dendrogram.
@@ -143,7 +165,7 @@ def dendrogramHeatPlot(D):
     idx2 = Z2['leaves']
     D = D[idx1,:]
     D = D[:,idx2]
-    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.RdYlGn)
+    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.ocean)
     axmatrix.set_xticks([])
     axmatrix.set_yticks([])
     
@@ -151,7 +173,7 @@ def dendrogramHeatPlot(D):
     axcolor = fig.add_axes([0.91,0.1,0.02,0.6])
     pylab.colorbar(im, cax=axcolor)
     fig.show()
-    fig.savefig('dendrogram.png')
+    fig.savefig('dendrogram.pdf')
     '''
     axmatrix.set_xticks(range(40))
     axmatrix.set_xticklabels(idx1, minor=False)
@@ -205,3 +227,4 @@ def graphPlot():
     # and we are done!
 if __name__ == '__main__':
     _main( )
+    

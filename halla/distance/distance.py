@@ -279,7 +279,7 @@ def pearson( X, Y ):
 def mic (pArray1, pArray2):
     mine = MINE(alpha=0.6, c=15)
     mine.compute_score(pArray1, pArray2)
-    
+    #print "MIC:" , mine.mic()
     return mine.mic()
 
 c_hash_metric = {"norm_mi": norm_mi,

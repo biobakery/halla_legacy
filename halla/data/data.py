@@ -66,18 +66,20 @@ def simulateData(NumberOfFeatures=8, numberOfSamples=10000, numberOfBlocks=2, cl
     return data   
    # with open('syntheticData.txt', 'r') as fin:
         #print fin.read()
-def wirteData(data =None, name =None):
+def wirteData(data =None, name =None, rowheader= True, colheader = False, ):
     f = open(name+'_syntheticData.csv', 'w')
     # row numbers as header
-    ''''f.write(' ')
-    for i in range(len(data[1])):
-        f.write(str(i)+' ')
+    if colheader == True:
         f.write(' ')
-    f.write('\n')
-    '''
+        for i in range(len(data[1])):
+            f.write(str(i)+' ')
+            f.write(' ')
+        f.write('\n')
+        
     for i in range(len(data)):
-        f.write(str(i))
-        f.write('\t')
+        if rowheader == True:
+            f.write(str(i))
+            f.write('\t')
         for j in range(len(data[i])):
             f.write(str(data[i,j]))
             f.write('\t')

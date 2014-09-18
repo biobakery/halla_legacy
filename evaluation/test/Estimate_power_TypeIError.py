@@ -26,7 +26,8 @@ from sklearn.metrics.metrics import roc_curve
 
 def _main( ):
 	#Different methods to run
-	methods = {'HAllA'}
+	methods = { "HAllA"	,"AllA", "MIC","HAllA-MIC",  "HAllA-KPCA-NMI", "HAllA-KPCA-Pearson", "HAllA-CCA-Pearson",
+			"HAllA-CCA-NMI", "HAllA-PLS-NMI", "HAllA-PLS-Pearson"}
 	tp_fp_counter = dict()
 	roc_info = [[]]
 	power = dict()
@@ -36,9 +37,9 @@ def _main( ):
 	typeI_error = dict()
 	number_of_simulation = 2
 	s = strudel.Strudel()
-	number_features = 32
-	number_samples = 1000
-	number_blocks = 4
+	number_features = 8
+	number_samples = 100
+	number_blocks = 3 
 	q_cutoff = {.1}
 	for q in q_cutoff:#, .05, .025, .01}:
 		for method in methods:
@@ -50,10 +51,9 @@ def _main( ):
 
 	print 'Synthetic Data Generation ...'
 	for iter_number in range(number_of_simulation):
-		X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6 , Beta = 3.0 )# link = "line" )
-		halla.data.wirteData(X,"X")
-		halla.data.wirteData(Y,"Y")
-		break
+		X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .9 , Beta = 3.0 )# link = "line" )
+		#halla.data.wirteData(X,"X")
+		#halla.data.wirteData(Y,"Y")
 		#A = numpy.zeros((number_features,number_features))
 		#X = numpy.random.rand(number_features,number_features) 
 		#Y = numpy.random.rand(number_features,number_features)
@@ -71,7 +71,7 @@ def _main( ):
 						new_method = method+'_'+str(q)
 						print new_method ,'is running ...with q, cut-off, ',q
 						#y_score = 1- h.meta_summary[0].flatten()
-						#print 'h.meta_summary[0]', h.meta_allaS
+						#print 'h.meta_summary[0]', h.meta_summary[0]
 						#break;
 						#print 'A', A
 						for i,j in itertools.product(range(number_features),range(number_features)):

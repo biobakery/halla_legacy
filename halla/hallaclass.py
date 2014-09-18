@@ -59,7 +59,7 @@ class HAllA():
 		# delta 
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-		self.step_parameter = 0.0 ## a value between 0.0 and 1.0; a fractional value of the layers to be tested 
+		self.step_parameter = 1.0 ## a value between 0.0 and 1.0; a fractional value of the layers to be tested 
 
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 		# sigma 
@@ -143,16 +143,16 @@ class HAllA():
 								"naive" 	: self.__preset_naive, "AllA" 	: self.__preset_naive,
 								"MIC"	: self.__preset_mic, 
 								"HAllA-MIC"	: self.__preset_mic_pca,
-								"kpca_norm_mi": self.__preset_kpca_norm_mi,
-								"kpca_pearson": self.__preset_kpca_pearson,
-								"cca_pearson": self.__preset_cca_pearson,
-								"cca_norm_mi": self.__preset_cca_norm_mi, 
-								"pls_norm_mi": self.__preset_pls_norm_mi,
-								"pls_pearson": self.__preset_pls_pearson,
+								"kpca_norm_mi": self.__preset_kpca_norm_mi, "HAllA-KPCA-NMI": self.__preset_kpca_norm_mi,
+								"kpca_pearson": self.__preset_kpca_pearson, "HAllA-KPCA-Pearson": self.__preset_kpca_pearson,
+								"cca_pearson": self.__preset_cca_pearson, "HAllA-CCA-Pearson": self.__preset_cca_pearson,
+								"cca_norm_mi": self.__preset_cca_norm_mi, "HAllA-CCA-NMI": self.__preset_cca_norm_mi,
+								"pls_norm_mi": self.__preset_pls_norm_mi, "HAllA-PLS-NMI": self.__preset_pls_norm_mi,
+								"pls_pearson": self.__preset_pls_pearson, "HAllA-PLS-Pearson": self.__preset_pls_pearson,
 								"plsc_pearson": None,
 								"plsc_norm_mi": None,
 								"medoid_pearson": None,
-								"medoid_norm_mi": self.__preset_medoid_norm_mi,
+								"medoid_norm_mi": self.__preset_medoid_norm_mi, "HAllA-Meoid-NMI": self.__preset_medoid_norm_mi,
 								"full"		: self.__preset_full,
 								"full_cca"	: self.__preset_full_cca,
 								"full_kpca_norm_mi": self.__preset_full_kpca_norm_mi,
