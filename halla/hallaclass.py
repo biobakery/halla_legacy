@@ -135,14 +135,15 @@ class HAllA():
 		# permutation_test_by_cca_pearson 
 		# permutation_test_by_cca_norm_mi
 
-		self.hash_preset = 	{"default"		: self.__preset_default, "HAllA"		: self.__preset_default, 
+		self.hash_preset = 	{"default"		: self.__preset_default, "HAllA": self.__preset_default, "HAllA-PCA-NMI": self.__preset_default,
 								"time"		: self.__preset_time, 
 								"accuracy"	: self.__preset_accuracy, 
 								"parallel"	: self.__preset_parallel, 
 								"layerwise" : self.__preset_layerwise, 
-								"naive" 	: self.__preset_naive, "AllA" 	: self.__preset_naive,
-								"MIC"	: self.__preset_mic, 
-								"HAllA-MIC"	: self.__preset_mic_pca,
+								"naive" 	: self.__preset_naive, "AllA" 	: self.__preset_naive,"AllA-NMI" 	: self.__preset_naive,
+								"MIC"	: self.__preset_mic, "AllA-MIC"	: self.__preset_mic,
+								"HAllA-MIC"	: self.__preset_pca_mic,
+								"HAllA-ICA-NMI" : self.__preset_ica_norm_mi,
 								"kpca_norm_mi": self.__preset_kpca_norm_mi, "HAllA-KPCA-NMI": self.__preset_kpca_norm_mi,
 								"kpca_pearson": self.__preset_kpca_pearson, "HAllA-KPCA-Pearson": self.__preset_kpca_pearson,
 								"cca_pearson": self.__preset_cca_pearson, "HAllA-CCA-Pearson": self.__preset_cca_pearson,
@@ -702,7 +703,7 @@ class HAllA():
 		self._summary_statistics( ) 
 		return self._report( )  
 	
-	def __preset_mic_pca( self ):
+	def __preset_pca_mic( self ):
 		self._featurize( )
 		self._threshold( )
 		self._hclust( )
@@ -710,6 +711,16 @@ class HAllA():
 		self._all_against_all( strMethod = "permutation_test_by_representative_mic" ) 
 		self._summary_statistics( ) 
 		return self._report( )  
+	
+	# step 2 to add a new method for HAllA
+	def __preset_ica_norm_mi( self ):
+		self._featurize( )
+		self._threshold( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "permutation_test_by_ica_norm_mi" ) 
+		self._summary_statistics( ) 
+		return self._report( ) 
 	
 	def __preset_kpca_norm_mi( self ):
 		self._featurize( )

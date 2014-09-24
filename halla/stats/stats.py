@@ -74,7 +74,7 @@ def alpha_threshold( pArray, alpha = 0.05 ):
 
 	return fScore 
 
-def pca( pArray, iComponents = 1 ):
+def pca( pArray, iComponents =1 ):
 	 """
 	 Input: N x D matrix 
 	 Output: D x N matrix 
@@ -103,6 +103,25 @@ def kpca( pArray, iComponents = 1):
 	kpca = KernelPCA(kernel="rbf", fit_inverse_transform=True, gamma=10)
 	
 	return kpca.fit_transform( pArray.T ).T 
+def ica( pArray, iComponents = 1 ):
+	 """
+	 Input: N x D matrix 
+	 Output: D x N matrix 
+
+	 """
+	 from sklearn.decomposition import FastICA
+	 
+	 try:
+	 	iRow, iCol = pArray.shape 
+	 	pICA = FastICA( n_components = iComponents )
+		## doing this matrix inversion twice doesn't seem to be a good idea 
+		return pICA.fit_transform( pArray.T ).T 
+
+	 except ValueError:
+	 	iRow = pArray.shape
+	 	iCol = None 
+
+	 	return pArray
 
 def cca( pArray1, pArray2, iComponents = 1 ):
 	"""
@@ -280,7 +299,7 @@ def get_medoid( pArray, iAxis = 0, pMetric = halla.distance.l2 ):
 
 
 def get_representative( pArray, pMethod = None ):
-	hash_method = {None: get_medoid, "pca": pca, }
+	hash_method = {None: get_medoid, "pca": pca, "ica": ica }
 	return hash_method[pMethod]( pArray )
 
 
@@ -392,6 +411,14 @@ def parametric_test_by_representative( pArray1, pArray2 ):
 	fAssoc,fP = scipy.stats.pearsonr( U1[0],U2[0] )
 
 	return fP 
+def parametric_test_by_representative_ica( pArray1, pArray2 ):
+
+	U1 = ica( pArray1, 1 )
+	U2 = ica( pArray2, 1 )
+	
+	fAssoc,fP = scipy.stats.pearsonr( U1[0],U2[0] )
+
+	return fP
 
 def permutation_test_by_medoid( pArray1, pArray2, metric = "norm_mi", iIter = 100 ):
 	"""
@@ -404,7 +431,7 @@ def permutation_test_by_medoid( pArray1, pArray2, metric = "norm_mi", iIter = 10
 	#numpy.random.seed(0)
 
 	strMetric = metric 
-	pHashDecomposition = {"pca": pca, "kpca": kpca }
+	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
 	pHashMetric = halla.distance.c_hash_metric 
 	
 	def _permutation( pVec ):
@@ -440,6 +467,11 @@ def permutation_test_by_medoid( pArray1, pArray2, metric = "norm_mi", iIter = 10
 
 def permutation_test_by_representative_mic(pArray1, pArray2, metric = "mic", decomposition = "pca", iIter = 100):
 	return permutation_test_by_representative( pArray1, pArray2, metric = "mic", decomposition = "pca", iIter = 100 )
+
+# Step 4: extendin HAllA 
+# here we add permutation_test_by_ica_norm_mi
+def permutation_test_by_ica_norm_mi(pArray1, pArray2, metric = "norm_mi", decomposition = "ica", iIter = 100):
+	return permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 100 )
 	
 def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 100 ):
 	"""
@@ -454,7 +486,8 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	X,Y = pArray1, pArray2 
 
 	strMetric = metric 
-	pHashDecomposition = {"pca": pca, "kpca": kpca }
+	#step 5 in a case of new decomposition method
+	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
 	pHashMetric = halla.distance.c_hash_metric 
 	
 	def _permutation( pVec ):
@@ -578,7 +611,7 @@ def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 100 )
 	#numpy.random.seed(0)
 
 	strMetric = metric 
-	pHashDecomposition = {"pca": pca, "kpca": kpca }
+	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
 	pHashMetric = halla.distance.c_hash_metric 
 	
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function	
@@ -655,7 +688,7 @@ def permutation_test_by_pls( pArray1, pArray2, metric = "norm_mi", iIter = 100 )
 	#numpy.random.seed(0)
 
 	strMetric = metric 
-	pHashDecomposition = {"pca": pca, "kpca": kpca }
+	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
 	pHashMetric = halla.distance.c_hash_metric 
 	
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function	
@@ -734,7 +767,7 @@ def permutation_test_by_average( pArray1, pArray2, metric = "norm_mid", iIter = 
 
 	#numpy.random.seed(0)
 
-	pHashDecomposition = {"pca": pca}
+	pHashDecomposition = {"pca": pca, "ica":ica}
 	
 	pHashMetric = halla.distance.c_hash_metric
 
@@ -821,6 +854,10 @@ def parametric_test_by_pls_pearson( pArray1, pArray2, iIter = 100 ):
 
 def permutation_test_by_pca( pArray1, pArray2, iIter = 100 ):
 	return permutation_test_by_representative( pArray1, pArray2, iIter = iIter )
+
+#step 5: HAllA extension
+def permutation_test_by_ica( pArray1, pArray2, iIter = 100 ):
+	return permutation_test_by_representative( pArray1, pArray2, decomposition = "ica", metric = "norm_mi", iIter = iIter )
 
 def permutation_test_by_pca_norm_mi( pArray1, pArray2, iIter = 100 ):
 	return permutation_test_by_representative( pArray1, pArray2, iIter = iIter )

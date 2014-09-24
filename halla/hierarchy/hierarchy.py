@@ -1243,7 +1243,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 	iGlobalDepth = depth_tree( pTree )
 	iSkip = _start_parameter_to_iskip( start_parameter )
-
+    # step 3: to add a new method to HAllA (extension step)
+    # for examplewe add "permutation_test_by_ica_norm_mi": halla.stats.permutation_test_by_ica_norm_mi
 	pHashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative, 
 						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
 						"parametric_test" : halla.stats.parametric_test,
@@ -1256,7 +1257,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 						"parametric_test_by_representative": halla.stats.parametric_test_by_representative, 
 						"permutation_test_by_medoid": halla.stats.permutation_test_by_medoid,
 						"permutation_test_by_pls_norm_mi": halla.stats.permutation_test_by_pls_norm_mi,
-						"permutation_test_by_representative_mic" : halla.stats.permutation_test_by_representative_mic
+						"permutation_test_by_representative_mic" : halla.stats.permutation_test_by_representative_mic,
+						 "permutation_test_by_ica_norm_mi": halla.stats.permutation_test_by_ica_norm_mi
 						}
 
 	strMethod = method

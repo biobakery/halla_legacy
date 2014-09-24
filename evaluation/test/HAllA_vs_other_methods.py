@@ -26,7 +26,7 @@ from sklearn.metrics.metrics import roc_curve
 def _main( ):
 	
 	#Different methods to run
-	methods = {"HAllA", "AllA", "HAllA-MIC", "MIC"}
+	methods = { "HAllA-PCA-NMI", "HAllA-ICA-NMI", "AllA-NMI", "AllA-MIC","HAllA-MIC",  "HAllA-KPCA-NMI", "HAllA-KPCA-Pearson", "HAllA-CCA-Pearson", "HAllA-CCA-NMI", "HAllA-PLS-NMI", "HAllA-PLS-Pearson"}
 	
 	roc_info = [[]]
 	fpr = dict()
@@ -34,55 +34,18 @@ def _main( ):
 	
 	#Generate simulated datasets
 	s = strudel.Strudel()
-	number_features = 20
+	number_features = 32
 	number_samples = 300
-	number_blocks = 4
+	number_blocks = 8
 	print 'Synthetic Data Generation ...'
 	#X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
-	X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6, Beta = 3.0)# link = "line" )
+	X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = 0.6, Beta = 3.0)# link = "line" )
 
-	'''
-	The following will give you the Euclidean distance between the variables in X.
-
-	Again, I'm taking the transpose because the function scipy.spatial.distance.pdist assumes that
- 	the matrix is of the form n x d where n is the number of samples and d is the number of variables.
- 	We are using the matrix in the opposite direction.
- 	The function scipy.spatial.distance.pdist will give you an (d2)×1 array.
- 	You sometimes would like to use the full d×d form. For this occassion, scipy has the scipy.spatial.distance.squareform function.
- 	
- 	'''
-	#discretize the data prior to calculating the mutual information.
-	print 'Discretize Data ...'
-	dX = halla.discretize( X ) 
-	#pylab.pcolor(dX, cmap= pylab.cm.RdYlGn)
-	dY = halla.discretize( Y )
-	#pylab.pcolor(dY, cmap= pylab.cm.RdYlGn)
-	
-	#The normalized mutual information function is captured in the distance module of halla
-	NMI = lambda x,y: halla.distance.norm_mi(x,y)
-	Pearson = lambda x,y: halla.distance.pearson(x, y)
-	
-	# Distance Matrix Generation
-	Dx = scipy.spatial.distance.squareform( scipy.spatial.distance.pdist( dX, lambda u,v: 1.0 - NMI(u,v) ) )
-	# Or equivalently, you can write:
-	#Dx = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dX, f ) )
-	Dy = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dY, NMI ) )
-
-	#hX = scipy.cluster.hierarchy.linkage(dX, method='single')
-	#HX =scipy.cluster.hierarchy.dendrogram(hX, no_labels= True)
-	#hY = scipy.cluster.hierarchy.linkage(dY, method='single')
-	#HY =scipy.cluster.hierarchy.dendrogram(hY, no_labels= True)
-	
-
-	#print 'condition', condition
-	#halla.plot.Plot.dendrogramHeatPlot(Dx)
-	#halla.plot.Plot.dendrogramHeatPlot(Dy)
-	
 	h = halla.HAllA( X,Y)
 	
 	# Setup alpha and q-cutoff and start parameter
-	start_parameter = 0.5
-	alpha = 0.1
+	start_parameter = 0.0
+	alpha = 0.2
 	q = 0.1
 	h.set_start_parameter (start_parameter)
 	h.set_alpha (alpha)
@@ -103,7 +66,7 @@ def _main( ):
 		y_true = A.flatten() # [x for sublist in condition for x in sublist]
 		#print 'ytrue',y_true
 		fpr[method], tpr[method], _ = roc_curve(y_true, y_score, pos_label= 1)
-		s.roc(1.0 - A.flatten(), h.meta_summary[0].flatten())
+		#s.roc(1.0 - A.flatten(), h.meta_summary[0].flatten())
 		#del h
 		
 	#print(fpr_HAllA, tpr_HAllA)

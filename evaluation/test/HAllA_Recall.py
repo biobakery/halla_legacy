@@ -31,25 +31,35 @@ import itertools
 from sklearn.metrics.metrics import roc_curve
 
 def _main( ):
-    
-    #Different methods to run
-    methods = {"HAllA"}
-    
+    methods = { "HAllA-PCA-NMI", "HAllA-ICA-NMI", "AllA-NMI", "AllA-MIC","HAllA-MIC",  "HAllA-KPCA-NMI", "HAllA-KPCA-Pearson", "HAllA-CCA-Pearson", "HAllA-CCA-NMI", "HAllA-PLS-NMI", "HAllA-PLS-Pearson"}
+    tp_fp_counter = dict()
     roc_info = [[]]
     power = dict()
+    power_data= []
+    type_I_error_data = []
+    labels = []
     typeI_error = dict()
-    for method in methods:
-        power[method] = []
-        typeI_error[method] = []
-        
-    number_of_simulation = 4
+    number_of_simulation = 5
+    s = strudel.Strudel()
+    number_features = 30
+    number_samples = 100
+    number_blocks = 5 
+    q_cutoff = {.1}
+    for q in q_cutoff:#, .05, .025, .01}:
+        for method in methods:
+                new_method = method+'_'+str(q)
+                power[new_method] = []
+                typeI_error[new_method] = []
+                tp_fp_counter[new_method] = numpy.zeros((number_features,number_features))
+    
+    s = strudel.Strudel()
     for i in range(number_of_simulation):
         
         #Generate simulated datasets
-        s = strudel.Strudel()
+        
         number_features = 8 + i 
-        number_samples = 500 + i*5
-        number_blocks = 2 + int(i/4)
+        number_samples = 100 + i*5
+        number_blocks = 3 + int(i/4)
         print 'Synthetic Data Generation ...'
         '''X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
         Y,_ = s.spike( X, strMethod = "line" )
@@ -62,14 +72,14 @@ def _main( ):
         #alpha = .3
         #h.set_start_parameter (start_parameter)
         #h.set_alpha (alpha)
-        for q in {.05}:#, .25, .1, .05, .025, .01}:
+        for q in q_cutoff:#, .25, .1, .05, .025, .01}:
             # Setup alpha and q-cutoff and start parameter
             #h.set_q(q)
             
             for method in methods:
-                aOut = h.run(method)
-                new_method = method#+'_'+str(alpha)+'_'+str(q)+'_'+str(start_parameter)
                 print new_method ,'is running ...with q, cut-off, ',q
+                aOut = h.run(method)
+                new_method = method+'_'+str(q)#+'_'+str(alpha)+'_'+str(q)+'_'+str(start_parameter)
                 #y_score = 1- h.meta_summary[0].flatten()
                 #print 'h.meta_summary[0]', h.meta_summary
                 #print 'A', A
@@ -81,37 +91,39 @@ def _main( ):
                 #fpr[new_method], tpr[new_method], _ = roc_curve(y_true, y_score, pos_label= 1)
                 all_positive_association = sum(1 for i in y_true if i==1.0)
                 all_negative_association = len(y_true) - all_positive_association
-                print all_positive_association
-                print all_negative_association
+                print 'All positives', all_positive_association
+                print 'All negetives', all_negative_association
                 number_association_tp  = 0.0
                 number_association_fp = 0.0
                 for i in range(len(y_true)):
                     #print score[i], '  ', y_true[i]
-                    if score[i] < q and y_true[i] == 1 :
-                        number_association_tp = number_association_tp + 1
+                    if score[i] < q and y_true[i] == 1.0 :
+                        number_association_tp = number_association_tp + 1.0
                     if score[i] < q and y_true[i] == 0:
-                        number_association_fp = number_association_fp + 1
+                        number_association_fp = number_association_fp + 1.0
                 print 'number_association_tp', number_association_tp
                 print 'number_association_fp:', number_association_fp
-                power[method].append((number_association_tp/all_positive_association))
-                typeI_error[method].append((number_association_fp/all_negative_association))
-                print 'power:', power[method]
-                print 'TypeI Error:', typeI_error[method] 
-    #power[method] /= number_of_simulation
-    #typeI_error[method] /= number_of_simulation    
-    #print 'power:', power[method]
-    #print 'TypeI Error:', typeI_error[method] 
-    halla.plot.plot_box([power[method], typeI_error[method]], figure_name = method+'_'+str(q), alpha = q)    
-        
+                power[new_method].append((number_association_tp/all_positive_association))
+                typeI_error[new_method].append((number_association_fp/all_negative_association))
+                print 'power:', power[new_method]
+                print 'TypeI Error:', typeI_error[new_method] 
+    
+    for q in q_cutoff: #, .05, .025, .01}:
+        for method in methods:
+            labels.append(str(method))
+            new_method = method+'_'+str(q)
+            power_data.append(power[new_method])
+            type_I_error_data.append(typeI_error[new_method])
+            #print 'power:', power[new_method]
+            #print 'TypeI Error:', typeI_error[new_method] 
+        halla.plot.plot_box(power_data, figure_name = 'Power_'+str(q), alpha = q, ylabel = 'Statistical Power', labels = labels)
+        halla.plot.plot_box(type_I_error_data, figure_name = 'Type_I_error_'+str(q), alpha = q, ylabel = 'Type I Error', labels = labels)
+        labels = []
+        power_data = []
+        type_I_error_data = []
+        #data.append(power[new_method])
+        #data.append(typeI_error[new_method]) 
     return;
-    '''figure_name = 'HAllA_start_parameter_'+str(number_features)+'_'+str(number_samples)+'_'+str(number_blocks)+'_'+str(alpha)+'_'+str(q)            
-    for new_method in new_methods:
-        method_info = [new_method, fpr[new_method], tpr[new_method]]
-        if len(roc_info[0]) == 0:
-            roc_info = [method_info]
-        else:    
-            roc_info.append(method_info)
-    halla.plot.plot_roc(roc_info, figure_name)
-    '''
 if __name__ == '__main__':
-    _main( ), 
+    _main( )
+    

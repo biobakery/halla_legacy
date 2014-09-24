@@ -8,16 +8,18 @@ including all graphics and 'data object to plot' transformations.
 
 
 #import dot_parser
-import pydot
-
+import pydot, sys
+sys.path.append('//Users/rah/Documents/Hutlab/halla')
+sys.path.append('/Users/rah/Documents/Hutlab/strudel')
+import halla
 #from pylab import *
 def _main( ):
     D = plotGridData(D = [])
-     
-    #plot_box()
-def plot_box(data, alpha= .1 , figure_name='HAllA_Power_TypeI_Error', ylabel = None, labels = None ):
+     #plot_box()
+def plot_box(data, alpha= .1 , figure_name='HAllA_Evaluation', ylabel = None, labels = None ):
     
     import pylab as pl
+    import numpy as np
     # multiple box plots on one figure
     
     pl.figure("HAllA vs. Other methods")
@@ -32,12 +34,13 @@ def plot_box(data, alpha= .1 , figure_name='HAllA_Power_TypeI_Error', ylabel = N
     pl.xlim([-0.05, 1.15])
     pl.ylim([-0.05, 1.15])
     bp = pl.boxplot(data, notch=0, sym='+', vert=1, whis=1.5)
+    pl.scatter(np.repeat(np.arange(len(data))+1, len(data[0])), [item for sublist in data for item in sublist], marker='+', alpha=1)
     pl.setp(bp['boxes'], color='black')
     pl.setp(bp['whiskers'], color='blue')
     pl.setp(bp['fliers'], marker='+')
     #pl.plot(data)
     #pl.hlines(1-alpha,0.0,2.5, color ='blue')
-    if ylabel == 'type_I_error':
+    if ylabel == 'Type I Error':
         pl.plot([.0, len(data)+.5], [alpha, alpha], 'k-', lw=1, color ='red')
     #hB, = pl.plot([1,1],'b-')
         hR, = pl.plot([1,1],'r-')
@@ -120,12 +123,18 @@ def plotGridData(D):
     if len(D) == 0: 
         # Generate random features and distance matrix.
         print "The distance matrix is empty. The function generates a random matrix."
-        x = scipy.rand(32)
-        D = scipy.rand(32,32)
-    pylab.pcolor(D, cmap = pylab.cm.ocean)
-    pylab.savefig('Data.pdf')
-    pylab.show()
-    return D
+        D = scipy.rand(8,10)
+        pylab.pcolor(D, cmap = pylab.cm.ocean)
+        pylab.savefig('Data4-8.pdf')
+        pylab.show()
+        D = halla.discretize(D)
+        pylab.pcolor(D, cmap = pylab.cm.ocean)
+        pylab.savefig('discretizeData4-8.pdf')
+        pylab.show()
+        dendrogramHeatPlot(D)
+        
+        
+        
 def dendrogramHeatPlot(D):
     import scipy
     import pylab
