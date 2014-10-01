@@ -121,7 +121,7 @@ class Input:
 		"""
 		Make sure that the data are well-formed
 		"""
-
+		assert(len(self.outData1[0]) == len(self.outData2[0]))
 		assert( len( self.outData1 ) == len( self.outType1 ) )
 		assert( len( self.outData2 ) == len( self.outType2 ) )
 

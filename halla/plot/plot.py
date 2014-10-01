@@ -52,6 +52,53 @@ def plot_box(data, alpha= .1 , figure_name='HAllA_Evaluation', ylabel = None, la
     pl.savefig(figure_name+'.pdf')
     pl.show()
     return;
+def scatter_plot(x = None, y = None, alpha = .1, figure_name='Figure2', xlabel = "Statistical Power", ylabel = "Type I Error", labels  = None):
+    import pylab as pl
+    pl.figure("Power vs. Type I Error")
+    ax = pl.axes()
+    pl.hold(True)
+    #if len(labels) > 0:
+    #    ax.set_xticklabels(labels)
+    pl.xlabel(xlabel)
+    #pl.xticks(range(len(labels)), labels, rotation=30, ha='right')
+    pl.ylabel(ylabel)
+    pl.xlim([-0.05, 1.15])
+    pl.ylim([-0.05, 1.3])
+    pl.tight_layout()
+    pl.scatter(x, y , marker='o', alpha=.5)
+    loc = True
+    for i, txt in enumerate(labels):
+        if loc :
+            pos = "right"
+            loc = False
+        else:
+            pos = "left"
+            loc = True
+        pl.annotate(txt, xy=(x[i], y[i]), xytext=(15, 30), 
+            textcoords='offset points', ha=pos, va= "bottom",
+            bbox=dict(boxstyle='round,pad=0.2', fc='yellow', alpha=0.2),
+            arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0.8', color='green'))
+    #pl.plot(data)
+    #pl.hlines(1-alpha,0.0,2.5, color ='blue')
+    #if ylabel == 'Type I Error':
+    #pl.plot([alpha, alpha], [-.05, 1.15], 'k-', lw=1, color ='red')
+    
+    pl.plot([-.05, 1.15], [alpha, alpha], 'k-', lw=1, color ='red')
+    #hB, = pl.plot([1,1],'b-')
+    hR, = pl.plot([1,1],'r-')
+    pl.legend((hR,),('q cut-off',))
+    #pl.legend((hB, hR),('???', '???'))
+    #hB.set_visible(False)
+    hR.set_visible(False)
+    #savefig('box7')
+    pl.savefig('Figure2.pdf')
+    pl.show()
+    return;
+    #fig, ax = pl.subplots()
+    #ax.scatter(x, y)
+
+    #for i, txt in enumerate(n):
+     #   ax.annotate(txt, (z[i],y[i]))
 
 def plot_roc(roc_info=None, figure_name = 'roc_plot_HAllA'):
     """

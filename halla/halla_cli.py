@@ -97,13 +97,16 @@ def _main(  ):
 	argp.add_argument( "-bo",                dest = "bostm",                  metavar = "blocked_output.txt",
 			type = argparse.FileType( "w" ),        default = sys.stdout,
 			help = "Optional output file for blocked association significance tests" )
+	argp.add_argument( "-alpha",                dest = "fA",                    metavar = "alpha",
+			type = float,   default = 0.05,
+			help = "Within covariance cut-off value" )
 
 	argp.add_argument( "-q",                dest = "dQ",                    metavar = "q_value",
-			type = float,   default = 0.2,#it was 0.05!!! Ali
+			type = float,   default = 0.05,#it was 0.05!!! Ali
 			help = "Q-value for overall significance tests" )
 
 	argp.add_argument( "-s",                dest = "fS",                    metavar = "start_parameter",
-			type = float,   default = 0.5,#it was 0.25!!! Ali
+			type = float,   default = 0.0,#it was 0.25!!! Ali
 			help = "Start parameter; [0.0,1.0]" )
 
 	argp.add_argument( "-i",                dest = "iIter",    metavar = "iterations",
@@ -153,6 +156,7 @@ def _main(  ):
 		strFile1, strFile2 = istm[:2]
 	else:
 		strFile1, strFile2 = istm[0], istm[0]
+		
 	
 	#aOut1, aOut2 = Input( strFile1.name, strFile2.name ).get()
 
@@ -176,12 +180,13 @@ def _main(  ):
 	##
 	aOut1, aOut2 = Input (strFile1.name, strFile2.name ).get()
 
-	aOutData1, aOutName1, aOutType1, aOutHead1 = aOut1 
-	aOutData2, aOutName2, aOutType2, aOutHead2 = aOut2 
+	(aOutData1, aOutName1, aOutType1, aOutHead1) = aOut1 
+	(aOutData2, aOutName2, aOutType2, aOutHead2) = aOut2 
 
-	H = HAllA( aOutData1, aOutData2 )
+	H = HAllA( array(aOutData1), array(aOutData2) )
 
 	H.set_q( args.dQ )
+	H.set_alpha(args.fA)
 	H.set_iterations( args.iIter )
 	H.set_metric( args.strMetric )
 	H.set_start_parameter( args.fS )

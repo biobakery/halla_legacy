@@ -64,7 +64,7 @@ def _main( ):
 				# Setup alpha and q-cutoff and start parameter
 				h.set_q(q)
 				for method in methods:
-					print new_method ,'is running ...with q, cut-off, ',q
+					print method ,'is running ...with q, cut-off, ',q
 					aOut = h.run(method)
 					#print aOut
 					new_method = method+'_'+str(q)

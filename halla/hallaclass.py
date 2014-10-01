@@ -11,7 +11,7 @@ import itertools
 import logging
 import os
 import sys
-import numpy
+import numpy as np
 from numpy import array
 import halla
 #from halla import distance, stats
@@ -23,7 +23,6 @@ import halla.parser
 from halla.plot import *
 from halla.stats import *
 import math
-
 ## internal dependencies 
 class HAllA():
 	
@@ -31,7 +30,7 @@ class HAllA():
 		"""
 		Think about lazy implementation to save time during run-time;
 		Don't have to keep everything in memory 
-		Write so that you can feed in a tuple of numpy.ndarrays; in practice the core unit of comparison is always
+		Write so that you can feed in a tuple of np.ndarrays; in practice the core unit of comparison is always
 		the pair of arrays
 		"""
 		## BEGIN INIT
@@ -170,8 +169,9 @@ class HAllA():
 		#==================================================================#
 		# Mutable Meta Objects  
 		#==================================================================#
- 
-		self.meta_array = array( ta ) if ta else None 
+		self.meta_array =  array(ta)  if ta else None 
+		#print self.meta_array[0]
+		#print self.meta_array[1]
 		self.meta_feature = None
 		self.meta_threshold = None 
 		self.meta_data_tree = None 
@@ -193,7 +193,7 @@ class HAllA():
 		Wrapper for type checking 
 		"""
 
-		if (isinstance(pType,list) or isinstance(pType,tuple) or isinstance(pType,numpy.ndarray)):
+		if (isinstance(pType,list) or isinstance(pType,tuple) or isinstance(pType,np.ndarray)):
 			aType = pType 
 		else:
 			aType = [pType]
@@ -239,7 +239,7 @@ class HAllA():
 		return self._check( pObject, int )    
 
 	def _is_array( self, pObject ):
-		return self._check( pObject, numpy.ndarray )
+		return self._check( pObject, np.ndarray )
 
 	def _is_1d( self, pObject ):
 		"""
@@ -270,7 +270,7 @@ class HAllA():
 		Disqualify string as a true "iterable" in this sense 
 		"""
 
-		return self._check( pObject, [list, tuple, numpy.ndarray] )
+		return self._check( pObject, [list, tuple, np.ndarray] )
 
 	#==========================================================#
 	# Static Methods 
@@ -288,6 +288,7 @@ class HAllA():
 		if isinstance( pFunc ,np.ndarray ):
 			return pArray[pFunc]
 		else: #generic function type
+			#print pArray.shape
 			return array( [pFunc(item) for item in pArray] ) 
 
 	@staticmethod 
@@ -367,7 +368,9 @@ class HAllA():
 			return pMethod( )
 
 	def _hclust( self ):
+		#print self.meta_feature
 		self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x,bTree=True) )
+		#print self.meta_data_tree
 		return self.meta_data_tree 
 
 	def _couple( self ):
@@ -425,7 +428,7 @@ class HAllA():
 
 		def _layer( Z ):
 
-			S = -1 * numpy.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
+			S = -1 * np.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
 
 			def __add_pval_product_wise( _x, _y, _fP ):
 				S[_x][_y] = _fP ; S[_y][_x] = _fP 
@@ -459,7 +462,7 @@ class HAllA():
 	def _naive_summary_statistics(self  ):
 		_, p_values = zip(*self.aOut[0])
 		self.meta_summary = []
-		self.meta_summary.append( numpy.reshape([p_values], (int(math.sqrt(len(p_values))), int(math.sqrt(len(p_values))))))
+		self.meta_summary.append( np.reshape([p_values], (int(math.sqrt(len(p_values))), int(math.sqrt(len(p_values))))))
 
 
 	def _summary_statistics( self, strMethod = None ): 
@@ -476,20 +479,20 @@ class HAllA():
 		Y = self.meta_array[1]
 		iX, iY = X.shape[0], Y.shape[0]
 		
-		S = -1 * numpy.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
+		S = -1 * np.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
 		
 		Z = self.meta_alla 
 		Z_final, Z_all = map(array, Z) ## Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree
 				
 		### Sort the final Z to make sure p-value consolidation happens correctly 
 		Z_final_dummy = [-1.0 *(len(line[0][0])+len(line[0][1])) for line in Z_final]
-		args_sorted = numpy.argsort( Z_final_dummy )
+		args_sorted = np.argsort( Z_final_dummy )
 		Z_final = Z_final[args_sorted]
 		if self.verbose:
 			print (Z_final) 
 		#assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
 		'''
-		self.outcome = numpy.zeros((len(self.meta_feature[0]),len(self.meta_feature[1])))
+		self.outcome = np.zeros((len(self.meta_feature[0]),len(self.meta_feature[1])))
 		#print(self.outcome)
 		for l in range(len(Z_final)):
 			#print(Z_final[l][0][0],Z_final[l][0][0], Z_final[l][1])

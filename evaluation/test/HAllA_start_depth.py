@@ -21,7 +21,7 @@ sys.path.append('//Users/rah/Documents/Hutlab/halla/')
 sys.path.append('/Users/rah/Documents/Hutlab/strudel')
 #sys.path.insert(1, '../../strudel')
 import strudel, halla, pylab
-from halla import stats
+from halla import stats, data
 import itertools
 from sklearn.metrics.metrics import roc_curve
 
@@ -36,14 +36,14 @@ def _main( ):
 	
 	#Generate simulated datasets
 	s = strudel.Strudel()
-	number_features = 16
-	number_samples = 100
+	number_features = 4
+	number_samples = 10
 	number_blocks = 4
 	print 'Synthetic Data Generation ...'
-	'''X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
-	Y,_ = s.spike( X, strMethod = "line" )
-	'''
-	X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6, Beta = 3.0)# link = "line" )
+	X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
+	#Y,_ = s.spike( X, strMethod = "line" )
+	Y = data.simulateData(number_features*4 ,number_samples,number_blocks , .95, .05)
+	#X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6, Beta = 3.0)# link = "line" )
 
 
 	#discretize the data prior to calculating the mutual information.
@@ -64,8 +64,11 @@ def _main( ):
 	for i,j in itertools.product(range(l),range(l)):
 		if abs(s.association(dX[i],dY[j]))>.5:
 			condition[i][j] = 1 
-	
+	print "Start"
 	h = halla.HAllA( X,Y)
+	print h.run("HAllA")
+	print "Done"
+	return
 	new_methods = set()
 	for alpha in {.05}:
 		for q in {.1}:
