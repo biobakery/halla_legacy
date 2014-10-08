@@ -152,7 +152,7 @@ def cca_p( pArray1, pArray2 ):
 
 	cc1,cc2 = cca(pArray1, pArray2)
 
-	return scipy.stats.pearsonr( cc1,cc2 )[1]
+	return scipy.stats.pearsonr( cc1,cc2 )[1] 
 
 def cca_score( pArray1, pArray2, strMethod = "pearson", bPval = 1, bParam = False ):
 	#from sklearn.cross_decomposition import CCA

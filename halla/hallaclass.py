@@ -141,7 +141,7 @@ class HAllA():
 								"layerwise" : self.__preset_layerwise, 
 								"naive" 	: self.__preset_naive, "AllA" 	: self.__preset_naive,"AllA-NMI" 	: self.__preset_naive,
 								"MIC"	: self.__preset_mic, "AllA-MIC"	: self.__preset_mic,
-								"HAllA-MIC"	: self.__preset_pca_mic,
+								"HAllA-PCA-MIC"	: self.__preset_pca_mic,
 								"HAllA-ICA-NMI" : self.__preset_ica_norm_mi,
 								"kpca_norm_mi": self.__preset_kpca_norm_mi, "HAllA-KPCA-NMI": self.__preset_kpca_norm_mi,
 								"kpca_pearson": self.__preset_kpca_pearson, "HAllA-KPCA-Pearson": self.__preset_kpca_pearson,

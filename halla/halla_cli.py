@@ -98,15 +98,15 @@ def _main(  ):
 			type = argparse.FileType( "w" ),        default = sys.stdout,
 			help = "Optional output file for blocked association significance tests" )
 	argp.add_argument( "-alpha",                dest = "fA",                    metavar = "alpha",
-			type = float,   default = 0.05,
+			type = float,   default = 0.1,
 			help = "Within covariance cut-off value" )
 
 	argp.add_argument( "-q",                dest = "dQ",                    metavar = "q_value",
-			type = float,   default = 0.05,#it was 0.05!!! Ali
+			type = float,   default = 0.2,#it was 0.05!!! Ali
 			help = "Q-value for overall significance tests" )
 
 	argp.add_argument( "-s",                dest = "fS",                    metavar = "start_parameter",
-			type = float,   default = 0.0,#it was 0.25!!! Ali
+			type = float,   default = 0.5,#it was 0.25!!! Ali
 			help = "Start parameter; [0.0,1.0]" )
 
 	argp.add_argument( "-i",                dest = "iIter",    metavar = "iterations",
@@ -201,8 +201,8 @@ def _main(  ):
 	#print(str(H.meta_alla))
 	csvw = csv.writer( args.ostm, csv.excel_tab )
 	bcsvw = csv.writer( args.bostm, csv.excel_tab )
-	csvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
-	bcsvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
+	csvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "alpha value: " + str(args.fA), "start parameter " + str(args.fS), "metric " + args.strMetric] )
+	bcsvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "alpha value: " + str(args.fA), "start parameter " + str(args.fS), "metric " + args.strMetric] )
 	#if H._is_meta( aaOut ):
 	#	if H._is_meta( aaOut[0] ):
 	#		for i,aOut in enumerate(aaOut):

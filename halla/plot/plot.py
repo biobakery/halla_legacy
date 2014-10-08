@@ -11,7 +11,7 @@ including all graphics and 'data object to plot' transformations.
 import pydot, sys
 sys.path.append('//Users/rah/Documents/Hutlab/halla')
 sys.path.append('/Users/rah/Documents/Hutlab/strudel')
-import halla
+import halla, strudel
 #from pylab import *
 def _main( ):
     D = plotGridData(D = [])
@@ -170,19 +170,28 @@ def plotGridData(D):
     if len(D) == 0: 
         # Generate random features and distance matrix.
         print "The distance matrix is empty. The function generates a random matrix."
-        D = scipy.rand(8,10)
-        pylab.pcolor(D, cmap = pylab.cm.ocean)
-        pylab.savefig('Data4-8.pdf')
+        s = strudel.Strudel()
+        X,Y,A = s.double_cholesky_block( 32, 200 , 8, fVal = .6 , Beta = 3.0 )
+        pylab.pcolor(X, cmap = pylab.cm.ocean)
+        pylab.savefig('X.pdf')
         pylab.show()
-        D = halla.discretize(D)
-        pylab.pcolor(D, cmap = pylab.cm.ocean)
-        pylab.savefig('discretizeData4-8.pdf')
+        pylab.pcolor(Y, cmap = pylab.cm.ocean)
+        pylab.savefig('Y.pdf')
         pylab.show()
-        dendrogramHeatPlot(D)
+        dX = halla.discretize(X)
+        pylab.pcolor(dX, cmap = pylab.cm.ocean)
+        pylab.savefig('dX.pdf')
+        dY = halla.discretize(Y)
+        pylab.pcolor(dY, cmap = pylab.cm.ocean)
+        pylab.savefig('dY.pdf')
+        pylab.show()
+        
+        dendrogramHeatPlot(dX, 'dXDendrogram')
+        dendrogramHeatPlot(dY, 'dYDendrogram')
         
         
         
-def dendrogramHeatPlot(D):
+def dendrogramHeatPlot(D, filename = 'Dendrogram'):
     import scipy
     import pylab
     #import dot_parser
@@ -229,7 +238,7 @@ def dendrogramHeatPlot(D):
     axcolor = fig.add_axes([0.91,0.1,0.02,0.6])
     pylab.colorbar(im, cax=axcolor)
     fig.show()
-    fig.savefig('dendrogram.pdf')
+    fig.savefig(filename+'.pdf')
     '''
     axmatrix.set_xticks(range(40))
     axmatrix.set_xticklabels(idx1, minor=False)
