@@ -171,23 +171,25 @@ def plotGridData(D):
         # Generate random features and distance matrix.
         print "The distance matrix is empty. The function generates a random matrix."
         s = strudel.Strudel()
-        X,Y,A = s.double_cholesky_block( 32, 200 , 8, fVal = .6 , Beta = 3.0 )
-        pylab.pcolor(X, cmap = pylab.cm.ocean)
+        X,Y,A = s.double_cholesky_block( 16, 16 , 2, fVal = 2.0 , Beta = 3.0 )
+        pylab.pcolor(X, cmap = pylab.cm.gist_gray)
         pylab.savefig('X.pdf')
-        pylab.show()
-        pylab.pcolor(Y, cmap = pylab.cm.ocean)
+        #pylab.show()
+        pylab.pcolor(Y, cmap = pylab.cm.gist_gray)
         pylab.savefig('Y.pdf')
-        pylab.show()
+        #pylab.show()
         dX = halla.discretize(X)
-        pylab.pcolor(dX, cmap = pylab.cm.ocean)
+        pylab.pcolor(dX, cmap = pylab.cm.gist_gray)
         pylab.savefig('dX.pdf')
         dY = halla.discretize(Y)
-        pylab.pcolor(dY, cmap = pylab.cm.ocean)
+        pylab.pcolor(dY, cmap = pylab.cm.gist_gray)
         pylab.savefig('dY.pdf')
-        pylab.show()
-        
-        dendrogramHeatPlot(dX, 'dXDendrogram')
-        dendrogramHeatPlot(dY, 'dYDendrogram')
+        #pylab.show()
+        f = lambda x,y: halla.norm_mi(x,y)
+        Dx = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dX, f ) )
+        Dy = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dY, f ) )
+        dendrogramHeatPlot([], 'dXDendrogram')
+        dendrogramHeatPlot([], 'dYDendrogram')
         
         
         
@@ -230,14 +232,14 @@ def dendrogramHeatPlot(D, filename = 'Dendrogram'):
     idx2 = Z2['leaves']
     D = D[idx1,:]
     D = D[:,idx2]
-    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.ocean)
+    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.gist_gray)
     axmatrix.set_xticks([])
     axmatrix.set_yticks([])
     
     # Plot colorbar.
     axcolor = fig.add_axes([0.91,0.1,0.02,0.6])
     pylab.colorbar(im, cax=axcolor)
-    fig.show()
+    #fig.show()
     fig.savefig(filename+'.pdf')
     '''
     axmatrix.set_xticks(range(40))

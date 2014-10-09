@@ -930,18 +930,30 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	#-------------------------------------#
 	# Parsing Steps                       #
 	#-------------------------------------#
-
 	aiGlobalDepth1 = [get_depth( ap ) for ap in apClusterNode1]
 	aiGlobalDepth2 = [get_depth( ap ) for ap in apClusterNode2]
-
+	
 	iMaxDepth = max(max(aiGlobalDepth1),max(aiGlobalDepth2))
 	iMinDepth = min(min(aiGlobalDepth1),min(aiGlobalDepth2))
+
+
+	
 
 	## Unalias data structure so this does not alter the original data type
 	## Fix for depth 
 	apClusterNode1 = [fix_clusternode(apClusterNode1[i], iExtend = iMaxDepth - aiGlobalDepth1[i]) for i in range(len(apClusterNode1))]
 	apClusterNode2 = [fix_clusternode(apClusterNode2[i], iExtend = iMaxDepth - aiGlobalDepth2[i]) for i in range(len(apClusterNode2))]
 
+	'''
+	aiGlobalDepth1 = [get_depth( ap ) for ap in apClusterNode1]
+	aiGlobalDepth2 = [get_depth( ap ) for ap in apClusterNode2]
+	if aiGlobalDepth1 > 2*aiGlobalDepth2:
+		apClusterNode1 = truncate_tree( apClusterNode1, level = 0, skip = max(aiGlobalDepth1)/max(aiGlobalDepth2) ) 
+	if aiGlobalDepth1*2 < aiGlobalDepth2:
+		apClusterNode2 = truncate_tree( apClusterNode2, level = 0, skip = max(aiGlobalDepth2)/max(aiGlobalDepth1) )
+	# End Truncate
+	'''
+	
 	def _couple_tree( apClusterNode1, apClusterNode2, strMethod = strMethod, strLinkage = strLinkage ):
 		"""
 		recursive function 
@@ -962,12 +974,20 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 			if bTauX:
 				apChildren1 = _filter_true([a])
 			else:
-				apChildren1 = _filter_true([a.left,a.right])
+				if aiGlobalDepth1 > 2*aiGlobalDepth2:
+					# Starte Truncate larger tree to have heirarchical trees in the samle scale in terms of depth 
+					apChildren1 = truncate_tree( apClusterNode1, level = 0, skip = max(aiGlobalDepth1)/max(aiGlobalDepth2) )
+				else:
+					apChildren1 = _filter_true([a.left,a.right])
 
 			if bTauY:
 				apChildren2 = _filter_true([b])
 			else:
-				apChildren2 = _filter_true([b.left,b.right])
+				# Starte Truncate larger tree to have heirarchical trees in the samle scale in terms of depth 
+				if aiGlobalDepth1*2 < aiGlobalDepth2:
+					apChildren2 = truncate_tree( apClusterNode2, level = 0, skip = max(aiGlobalDepth2)/max(aiGlobalDepth1) )
+				else:
+					apChildren2 = _filter_true([b.left,b.right])
 
 			##Children should _already be_ adjusted for depth 
 			if not(any(apChildren1)) or not(any(apChildren2)):
@@ -1502,6 +1522,7 @@ def randtree( n = 10, sparsity = 0.5, obj = True, disc = True ):
 #					aBool[i].append( 0 )
 #
 #			return aBool 
+
 
 
 
