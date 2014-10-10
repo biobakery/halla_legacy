@@ -44,7 +44,7 @@ def _main( ):
     mean_Power = []
     mean_tpye_I_error = []
     
-    number_of_simulation = 5
+    number_of_simulation =1
     s = strudel.Strudel()
     #number_samples = 10
 #number_blocks = 2 
@@ -60,7 +60,7 @@ def _main( ):
     for i in range(number_of_simulation):
         
         #Generate simulated datasets
-        number_features = 8 + i
+        number_features =32 + i
         number_samples = 20 + i*5
         number_blocks = 4 + int(i/3)
         print 'Synthetic Data Generation ...'
@@ -68,7 +68,7 @@ def _main( ):
         Y,_ = s.spike( X, strMethod = "line" )
         '''
         X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6 , Beta = 3.0 )#, link = "line" )
-            
+        #X1,Y,A1 = s.double_cholesky_block( number_features/4, number_samples , number_blocks, fVal = .6 , Beta = 3.0 )
         h = halla.HAllA( X,Y)
         new_methods = set()
         #start_parameter = .05
