@@ -32,7 +32,8 @@ c_hash_association_method_discretize = {"pearson": False,
 										"fisher": False,
 										"norm_mi": True,
 										"mi": True,
-                                        "mic": True
+                                        "mic": True,
+                                        "adj_mi": True
 										}
 
 class Distance:
@@ -285,6 +286,7 @@ def mic (pArray1, pArray2):
 c_hash_metric = {"norm_mi": norm_mi,
 				"mi": mi,
 				"l2": l2,
+                "adj_mi":adj_mi,
 				"pearson": pearson,
                 "mic": mic
 				}

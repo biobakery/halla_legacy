@@ -115,8 +115,8 @@ class HAllA():
 
 		self.__doc__			= __doc__ 
 		self.__version__ 		= "0.1.0"
-		self.__author__			= ["YS Joseph Moon", "Curtis Huttenhower"]
-		self.__contact__		= "moon.yosup@gmail.com"
+		self.__author__			= ["Gholamali.Rahnavard","YS Joseph Moon", "Curtis Huttenhower"]
+		self.__contact__		= "gholamali.rahnavard@gmail.com"
 
 		self.hash_reduce_method = {"pca"	: pca, }
 
@@ -142,6 +142,7 @@ class HAllA():
 								"naive" 	: self.__preset_naive, "AllA" 	: self.__preset_naive,"AllA-NMI" 	: self.__preset_naive,
 								"MIC"	: self.__preset_mic, "AllA-MIC"	: self.__preset_mic,
 								"HAllA-PCA-MIC"	: self.__preset_pca_mic,
+								"HAllA-PCA-AMI" : self.__preset_pca_adj_mi,
 								"HAllA-ICA-NMI" : self.__preset_ica_norm_mi,
 								"kpca_norm_mi": self.__preset_kpca_norm_mi, "HAllA-KPCA-NMI": self.__preset_kpca_norm_mi,
 								"kpca_pearson": self.__preset_kpca_pearson, "HAllA-KPCA-Pearson": self.__preset_kpca_pearson,
@@ -885,6 +886,32 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( ) 
+		self._summary_statistics( "all" ) 
+		return self._report( )
+	
+	def __preset_pca_adj_mi( self ):
+		"""
+		Adjusted Mutual Information Preset 
+		"""
+		## Constants for this preset 
+		pDistance = adj_mi 
+		strReduce = "pca"
+		strStep = "uniform"
+		strAdjust = "BH"
+		strRandomization = "permutation"
+
+		## Set 
+		self.set_metric( pDistance )
+		self.set_reduce_method( strReduce )
+		self.set_p_adjust_method( strAdjust )
+		self.set_randomization_method( strRandomization )
+
+		## Run 		
+		self._featurize( )
+		self._threshold( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all(strMethod ="permutation_test_by_representative_adj_mi" ) 
 		self._summary_statistics( "all" ) 
 		return self._report( )
 

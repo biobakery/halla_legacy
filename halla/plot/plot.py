@@ -40,7 +40,7 @@ def plot_box(data, alpha= .1 , figure_name='HAllA_Evaluation', ylabel = None, la
     pl.setp(bp['fliers'], marker='+')
     #pl.plot(data)
     #pl.hlines(1-alpha,0.0,2.5, color ='blue')
-    if ylabel == 'Type I Error':
+    if ylabel == 'FDR':
         pl.plot([.0, len(data)+.5], [alpha, alpha], 'k-', lw=1, color ='red')
     #hB, = pl.plot([1,1],'b-')
         hR, = pl.plot([1,1],'r-')
@@ -68,15 +68,16 @@ def scatter_plot(x = None, y = None, alpha = .1, figure_name='Figure2', xlabel =
     pl.scatter(x, y , marker='o', alpha=.5)
     loc = True
     for i, txt in enumerate(labels):
-        if loc :
+        '''if loc :
             pos = "right"
             loc = False
         else:
             pos = "left"
             loc = True
-        pl.annotate(txt, xy=(x[i], y[i]), xytext=(15, 30), 
-            textcoords='offset points', ha=pos, va= "bottom",
-            bbox=dict(boxstyle='round,pad=0.2', fc='yellow', alpha=0.2),
+        '''
+        pl.annotate(txt, xy=(x[i], y[i]), xytext=(10, 10), 
+            textcoords='offset points', ha="right", va= "bottom",
+            bbox=dict(boxstyle='round,pad=0.2', fc='yellow', alpha=0.5),
             arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0.8', color='green'))
     #pl.plot(data)
     #pl.hlines(1-alpha,0.0,2.5, color ='blue')

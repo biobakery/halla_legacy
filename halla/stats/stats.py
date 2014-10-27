@@ -471,7 +471,10 @@ def permutation_test_by_representative_mic(pArray1, pArray2, metric = "mic", dec
 # Step 4: extendin HAllA 
 # here we add permutation_test_by_ica_norm_mi
 def permutation_test_by_ica_norm_mi(pArray1, pArray2, metric = "norm_mi", decomposition = "ica", iIter = 100):
-	return permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 100 )
+	return permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "ica", iIter = 100 )
+
+def permutation_test_by_representative_adj_mi(pArray1, pArray2, metric = "adj_mi", decomposition = "pca", iIter = 100):
+	return permutation_test_by_representative( pArray1, pArray2, metric = "adj_mi", decomposition = "pca", iIter = 100 )
 	
 def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 100 ):
 	"""

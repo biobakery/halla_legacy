@@ -18,7 +18,6 @@ import halla.stats
 from halla.distance import mi, l2, absl2, norm_mi
 from halla.stats import discretize,pca, bh, permutation_test_by_representative,permutation_test_by_representative_mic, p_adjust
 from halla.stats import permutation_test_by_kpca_norm_mi, permutation_test_by_kpca_pearson, permutation_test_by_cca_pearson, permutation_test_by_cca_norm_mi
-
 ## statistics packages 
 
 import numpy 
@@ -37,6 +36,7 @@ import pylab as pl
 import random  
 from numpy.random import normal 
 from scipy.misc import * 
+import copy
 sys.setrecursionlimit(10000)
 
 #==========================================================================#
@@ -817,6 +817,8 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	Examples
 	----------------
 	"""
+	#Increase recursive size to avoid limit reduce_tree recursion 
+	sys.setrecursionlimit(10000)
 
 #	import copy 
 
@@ -954,8 +956,9 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 		apClusterNode2 = truncate_tree( apClusterNode2, level = 0, skip = max(aiGlobalDepth2)/max(aiGlobalDepth1) )
 	# End Truncate
 	'''
-	
-	def _couple_tree( apClusterNode1, apClusterNode2, strMethod = strMethod, strLinkage = strLinkage ):
+	print "Heirarchical TREE 1 ", reduce_tree_by_layer(apClusterNode1)
+	print "Heirarchical TREE 2 ", reduce_tree_by_layer(apClusterNode2)
+	def _couple_tree_recursive( apClusterNode1, apClusterNode2, strMethod = strMethod, strLinkage = strLinkage ):
 		"""
 		recursive function 
 		"""
@@ -981,7 +984,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 			else:
 				if skip > 1:
 					# Starte Truncate larger tree to have heirarchical trees in the samle scale in terms of depth 
-					apChildren1 = truncate_tree( apClusterNode1, level = 0, skip = skip )
+					apChildren1 = truncate_tree( a, level = 0, skip = skip )
 				else:
 					apChildren1 = _filter_true([a.left,a.right])
 
@@ -990,7 +993,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 			else:
 				# Starte Truncate larger tree to have heirarchical trees in the samle scale in terms of depth 
 				if skip > 1:
-					apChildren2 = truncate_tree( apClusterNode2, level = 0, skip = skip )
+					apChildren2 = truncate_tree( b, level = 0, skip = skip )
 				else:
 					apChildren2 = _filter_true([b.left,b.right])
 
@@ -1002,11 +1005,91 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 				aOut.append( pStump ) ### Do not continue on, since alpha threshold has been met.
 
 			else: 		
-				aOut.append( pStump.add_children( _couple_tree( apChildren1, apChildren2, strMethod = strMethod, strLinkage = strLinkage ) ) )
+				aOut.append( pStump.add_children( _couple_tree_recursive( apChildren1, apChildren2, strMethod = strMethod, strLinkage = strLinkage ) ) )
 
 		return aOut 
-
-	return _couple_tree( apClusterNode1, apClusterNode2, strMethod, strLinkage )
+	
+	def _couple_tree_itrative( apClusterNode1, apClusterNode2, strMethod = strMethod, strLinkage = strLinkage ):
+		#Nonrecursive _couple_tree
+		'''
+		nonrecursive function 
+		'''
+		#print "TREE1 ", reduce_tree_by_layer(apClusterNode1)
+		#print "TREE2 ", reduce_tree_by_layer(apClusterNode2)
+		aOut = []
+		for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
+			data1 = reduce_tree( a )
+			data2 = reduce_tree( b )
+	
+		pStump = Tree([data1,data2])
+		aOut.append(pStump)
+		L = [(pStump, (a,b))]
+		#print "satrt", L
+		while L:
+			#print L
+			(pStump, (a,b)) = L.pop(0)
+			#print "after pop", L 
+			#for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
+			
+			data1 = reduce_tree( a )
+			data2 = reduce_tree( b )
+	
+			#pStump = Tree([data1,data2])
+					
+		
+			bTauX = ( _min_tau(X[array(data1)]) >= x_threshold ) ### parametrize by mean, min, or max
+			bTauY = ( _min_tau(Y[array(data2)]) >= y_threshold ) ### parametrize by mean, min, or max
+	
+			if bTauX:
+				apChildren1 = _filter_true([a])
+			else:
+				if skip > 1:
+					# Starte Truncate larger tree to have heirarchical trees in the samle scale in terms of depth 
+					apChildren1 = truncate_tree( a, level = 0, skip = skip )
+				else:
+					apChildren1 = _filter_true([a.left,a.right])
+	
+			if bTauY:
+				apChildren2 = _filter_true([b])
+			else:
+				# Starte Truncate larger tree to have heirarchical trees in the samle scale in terms of depth 
+				if skip > 1:
+					apChildren2 = truncate_tree( b, level = 0, skip = skip )
+				else:
+					apChildren2 = _filter_true([b.left,b.right])
+	
+			##Children should _already be_ adjusted for depth 
+			if not(any(apChildren1)) or not(any(apChildren2)):
+				aOut.append( pStump )
+	
+			elif (bTauX == True) and (bTauY == True):
+				aOut.append( pStump ) ### Do not continue on, since alpha threshold has been met.
+	
+			else:
+				LChild = [(a,b) for a,b in itertools.product( apChildren1, apChildren2 )] 
+				
+				#print "After appending", L 
+				childList = []
+				while LChild:
+					(a1,b1) = LChild.pop(0)
+					
+					#for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
+			
+					data1 = reduce_tree( a1 )
+					data2 = reduce_tree( b1 )
+					tempTree = Tree([data1,data2])
+					childList.append(tempTree)
+					#print childList
+					L.append((tempTree, (a1,b1)))
+					#print L					
+				pStump.add_children( childList )
+				#L.extend(childList)
+		#print reduce_tree_by_layer(aOut)
+		return aOut
+		
+	result = _couple_tree_itrative( apClusterNode1, apClusterNode2, strMethod, strLinkage )
+	print "Coupled Hypothesis Tree",  reduce_tree_by_layer(result)
+	return result
 
 def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_representative", iIter = 100 ):
 
@@ -1283,6 +1366,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 						"permutation_test_by_medoid": halla.stats.permutation_test_by_medoid,
 						"permutation_test_by_pls_norm_mi": halla.stats.permutation_test_by_pls_norm_mi,
 						"permutation_test_by_representative_mic" : halla.stats.permutation_test_by_representative_mic,
+						"permutation_test_by_representative_adj_mi" : halla.stats.permutation_test_by_representative_adj_mi,
 						 "permutation_test_by_ica_norm_mi": halla.stats.permutation_test_by_ica_norm_mi
 						}
 

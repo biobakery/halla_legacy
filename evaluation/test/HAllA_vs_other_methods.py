@@ -26,27 +26,34 @@ from sklearn.metrics.metrics import roc_curve
 def _main( ):
 	
 	#Different methods to run
-	methods = { "HAllA-PCA-NMI", "HAllA-ICA-NMI", "AllA-NMI", "AllA-MIC","HAllA-MIC",  "HAllA-KPCA-NMI", "HAllA-KPCA-Pearson", "HAllA-CCA-Pearson", "HAllA-CCA-NMI", "HAllA-PLS-NMI", "HAllA-PLS-Pearson"}
-	
+	#methods = { "HAllA-PCA-NMI","AllA-NMI", "AllA-MIC", "HAllA-ICA-NMI", "HAllA-PCA-MIC",  "HAllA-KPCA-NMI", "HAllA-KPCA-Pearson", "HAllA-CCA-Pearson", "HAllA-CCA-NMI", "HAllA-PLS-NMI", "HAllA-PLS-Pearson"}
+	methods = { "HAllA-PCA-NMI", "HAllA-PCA-MIC","HAllA-PCA-AMI"}
 	roc_info = [[]]
 	fpr = dict()
 	tpr = dict()
 	
 	#Generate simulated datasets
 	s = strudel.Strudel()
-	number_features = 32
-	number_samples = 300
+	number_features = 64
+	number_samples = 500
 	number_blocks = 8
 	print 'Synthetic Data Generation ...'
 	#X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
-	X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = 0.6, Beta = 3.0)# link = "line" )
-
+	#X,Y,A = s.double_cholesky_nlblock( number_features, number_samples , number_blocks, fVal = .6, Beta = 3.0)# link = "line" )
+	X,Y,A = s.cholesky_nlblock( number_features, number_samples , number_blocks, fVal = .6, Beta = 3.0, link = "parabola" )
+	#X,Y,A = s.double_cholesky_nlblock( number_features, number_samples , number_blocks, fVal = 2.0, Beta = 3.0, link = "parabola" )
+	#X, Y, A = s.double_cholesky_block(number_features, number_samples , number_blocks, fVal =2.0, Beta = 3.0,)#, link = "parabola")
+	#Y = s.spike( X, strMethod = "line")
+	print A
+	halla.data.writeData(X,"X")
+	halla.data.writeData(Y,"Y")
 	h = halla.HAllA( X,Y)
+
 	
 	# Setup alpha and q-cutoff and start parameter
-	start_parameter = 0.0
-	alpha = 0.2
-	q = 0.1
+	start_parameter = 0.5
+	alpha = 0.1
+	q = 0.2
 	h.set_start_parameter (start_parameter)
 	h.set_alpha (alpha)
 	h.set_q(q)

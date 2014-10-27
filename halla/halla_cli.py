@@ -110,7 +110,7 @@ def _main(  ):
 			help = "Start parameter; [0.0,1.0]" )
 
 	argp.add_argument( "-i",                dest = "iIter",    metavar = "iterations",
-			type = int,             default = 100,
+			type = int,             default = 1000,
 			help = "Number of iterations for nonparametric significance testing" )
 
 	argp.add_argument( "-v",                dest = "iDebug",                metavar = "verbosity",
