@@ -57,7 +57,7 @@ def fpr_tpr(condition = None, outcome= None ):
 # Feature Selection 
 #=========================================================
 
-def alpha_threshold( pArray, alpha = 0.05 ):
+def alpha_threshold( pArray, alpha = 0.05, func = "norm_mi" ):
 	"""
 	*Within Covariance* estimation 
 	Threshold association values in X and Y based on alpha cutoff. 
@@ -69,9 +69,10 @@ def alpha_threshold( pArray, alpha = 0.05 ):
 	X = pArray
 	XP = array([numpy.random.permutation( x ) for x in X])
 	D = halla.discretize( XP )
-	A = numpy.array([norm_mi(D[i],D[j]) for i,j in itertools.combinations( range(len(XP)), 2 )])
+	A = numpy.array([func(D[i],D[j]) for i,j in itertools.combinations( range(len(XP)), 2 )])
 	fScore = scipy.stats.scoreatpercentile(A, fPercentile)
-
+	print "alpha_threshold: ", fScore
+	print "Distance Function:", str(func)
 	return fScore 
 
 def pca( pArray, iComponents =1 ):

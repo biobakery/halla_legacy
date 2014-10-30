@@ -348,7 +348,7 @@ class HAllA():
 		This determines the line where the features are indistinguishable. 
 		"""
 
-		self.meta_threshold = map( lambda x : halla.stats.alpha_threshold( x, self.alpha ), self.meta_array )
+		self.meta_threshold = map( lambda x : halla.stats.alpha_threshold( x, self.alpha, func = self.distance ), self.meta_array )
 
 		return self.meta_threshold 
 
@@ -387,7 +387,7 @@ class HAllA():
 			aOut.append( 
 				couple_tree(apClusterNode1 =[self.meta_data_tree[i]], 
 				apClusterNode2 = [self.meta_data_tree[j]], 
-				pArray1 = self.meta_array[i], pArray2 = self.meta_array[j], afThreshold = self.meta_threshold )[0]
+				pArray1 = self.meta_array[i], pArray2 = self.meta_array[j], afThreshold = self.meta_threshold, fAlpha = self.alpha, func = self.distance )[0]
 				)
 
 		self.meta_hypothesis_tree = aOut 
@@ -688,7 +688,9 @@ class HAllA():
 
 	def __preset_medoid_norm_mi( self ):
 
-
+		pDistance = norm_mi
+		self.set_metric( pDistance )
+		
 		self._featurize( )
 		self._threshold( )
 		self._hclust( )
@@ -708,6 +710,8 @@ class HAllA():
 		return self._report( )  
 	
 	def __preset_pca_mic( self ):
+		pDistance = mic
+		self.set_metric( pDistance )
 		self._featurize( )
 		self._threshold( )
 		self._hclust( )
@@ -718,6 +722,8 @@ class HAllA():
 	
 	# step 2 to add a new method for HAllA
 	def __preset_ica_norm_mi( self ):
+		pDistance = norm_mi
+		self.set_metric( pDistance )
 		self._featurize( )
 		self._threshold( )
 		self._hclust( )
@@ -727,6 +733,9 @@ class HAllA():
 		return self._report( ) 
 	
 	def __preset_kpca_norm_mi( self ):
+		pDistance = norm_mi
+		self.set_metric( pDistance )
+		
 		self._featurize( )
 		self._threshold( )
 		self._hclust( )
@@ -736,6 +745,8 @@ class HAllA():
 		return self._report( )  
 
 	def __preset_kpca_pearson( self ):
+		pDistance = pearson
+		self.set_metric( pDistance )
 		self._featurize( )
 		self._threshold( )
 		self._hclust( )
@@ -745,6 +756,8 @@ class HAllA():
 		return self._report( ) 
 
 	def __preset_cca_pearson( self ):
+		pDistance = pearson
+		self.set_metric( pDistance )
 		self._featurize( )
 		self._threshold( )
 		self._hclust( )
@@ -754,6 +767,8 @@ class HAllA():
 		return self._report( ) 
 
 	def __preset_pls_pearson( self ):
+		pDistance = pearson
+		self.set_metric( pDistance )
 		self._featurize( )
 		self._threshold( )
 		self._hclust( )
@@ -764,6 +779,8 @@ class HAllA():
 
 
 	def __preset_pls_norm_mi( self ):
+		pDistance = norm_mi
+		self.set_metric( pDistance )
 		self._featurize( )
 		self._threshold( )
 		self._hclust( )
@@ -775,7 +792,8 @@ class HAllA():
 
 	def __preset_cca_norm_mi( self ):
 		## Constants for this preset 
-		
+		pDistance = norm_mi
+		self.set_metric( pDistance )
 		#pDistance = norm_mi 
 		#iIter = 100
 		#strReduce = "pca"

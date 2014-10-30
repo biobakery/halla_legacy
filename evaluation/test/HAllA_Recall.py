@@ -33,10 +33,11 @@ from sklearn.metrics.metrics import roc_curve
 def _main( ):
     methods = { "HAllA-PCA-NMI","HAllA-PCA-AMI","HAllA-ICA-NMI", "HAllA-PCA-MIC",  "HAllA-KPCA-NMI", "HAllA-KPCA-Pearson", "HAllA-CCA-Pearson", "HAllA-CCA-NMI", "HAllA-PLS-NMI", "HAllA-PLS-Pearson","AllA-NMI", "AllA-MIC"}
     #methods = {  "HAllA-KPCA-Pearson", "HAllA-CCA-Pearson", "HAllA-PLS-NMI", "HAllA-PLS-Pearson"}
-    methods = {"HAllA-PCA-NMI", "HAllA-PCA-MIC","HAllA-PCA-AMI"}
-    methods = { "HAllA-PCA-NMI"}
-    #methods = {"HAllA-PCA-MIC"}
+    methods = {"HAllA-PCA-NMI", "HAllA-PCA-MIC"}
+    #methods = { "HAllA-PCA-NMI"}
+    ##methods = {"HAllA-PCA-MIC"}
     #methods = {"AllA-NMI"}
+#methods = {"HAllA-KPCA-Pearson"}
     tp_fp_counter = dict()
     roc_info = [[]]
     recall = dict()
@@ -47,11 +48,11 @@ def _main( ):
     mean_recall = []
     mean_fdr = []
     
-    number_of_simulation = 1
+    number_of_simulation = 3
     s = strudel.Strudel()
     #number_samples = 10
 #number_blocks = 2 
-    q_cutoff = {.1}
+    q_cutoff = {.2}
     for q in q_cutoff:#, .05, .025, .01}:
         for method in methods:
                 new_method = method+'_'+str(q)
@@ -64,14 +65,15 @@ def _main( ):
         
         #Generate simulated datasets
         number_features = 12 + i
-        number_samples = 2000 + i*5
-        number_blocks = 4 + int(i/3)
+        number_samples = 300 + i*5
+        number_blocks = 3 + int(i/3)
         print 'Synthetic Data Generation ...'
         '''X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
         Y,_ = s.spike( X, strMethod = "line" )
         '''
-        X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6 , Beta = 3.0 )#, link = "line" )
+        #X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6 , Beta = 3.0 )#, link = "line" )
         #X,Y,A = s.cholesky_nlblock( number_features, number_samples , number_blocks, fVal = 2.6, Beta = 3.0, link = "half_circle" )
+        X,Y,A = s.cholesky_nlblock( number_features, number_samples , number_blocks, fVal = 2.6, Beta = 3.0, link = "log" )
         #X1,Y,A1 = s.double_cholesky_block( number_features/4, number_samples , number_blocks, fVal = .6 , Beta = 3.0 )
         h = halla.HAllA( X,Y)
         #new_methods = set()
@@ -82,13 +84,13 @@ def _main( ):
         for q in q_cutoff:#, .25, .1, .05, .025, .01}:
             # Setup alpha and q-cutoff and start parameter
             h.set_q(q)
-            #h.set_alpha(.1)
+            #h.set_alpha(.05)
 #           h.set_start_parameter(0.5)
             for method in methods:
                 print method ,'is running ...with q, cut-off, ',q
                 aOut = h.run(method)
                 import hierarchy
-                print "aOut", h.meta_alla
+                #print "aOut", h.meta_alla
                 new_method = method+'_'+str(q)#+'_'+str(alpha)+'_'+str(q)+'_'+str(start_parameter)
                 #y_score = 1- h.meta_summary[0].flatten()
                 print 'h.meta_summary[0]', h.meta_summary
@@ -99,10 +101,10 @@ def _main( ):
                 #print 'h.meta_summary[0]', zip (score, y_true)
                 #print 'A', y_true
                 #fpr[new_method], tpr[new_method], _ = roc_curve(y_true, y_score, pos_label= 1)
-                all_positive_association = sum(1 for i in y_true if i==1.0)
-                all_negative_association = len(y_true) - all_positive_association
-                outcome_positive = sum(1 for i in score if i <= q)
-                #print 'All positives', all_positive_association
+                condition_positive = sum(1 for i in y_true if i==1.0)
+                all_negative_association = len(y_true) - condition_positive
+                test_outcome_positive = sum(1 for i in score if i <= q)
+                #print 'All positives', condition_positive
                 #print 'All negetives', all_negative_association
                 number_association_tp  = 0.0
                 number_association_fp = 0.0
@@ -114,10 +116,10 @@ def _main( ):
                         number_association_fp = number_association_fp + 1.0
                 #print 'number_association_tp', number_association_tp
                 #print 'number_association_fp:', number_association_fp
-                if all_positive_association > 0.0:
-                    recall[new_method].append((number_association_tp/all_positive_association))
-                if outcome_positive > 0.0:
-                    fdr[new_method].append((number_association_fp/outcome_positive))
+                if condition_positive > 0.0:
+                    recall[new_method].append((number_association_tp/condition_positive))
+                if test_outcome_positive > 0.0:
+                    fdr[new_method].append((number_association_fp/test_outcome_positive))
                 else:
                     fdr[new_method].append(1.0) 
                 print str(new_method)

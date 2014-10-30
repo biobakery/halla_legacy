@@ -798,7 +798,7 @@ def spawn_tree( pData, iCopy = 0, iDecider = -1 ):
 	"""
 	return None 
 
-def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold = None, strMethod = "uniform", strLinkage = "min", fAlpha = 0.05 ):
+def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold = None, strMethod = "uniform", strLinkage = "min", fAlpha = 0.05, func ="norm_mi"):
 	"""
 	Couples two data trees to produce a hypothesis tree 
 
@@ -818,17 +818,17 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	----------------
 	"""
 	#Increase recursive size to avoid limit reduce_tree recursion 
-	sys.setrecursionlimit(10000)
+	#sys.setrecursionlimit(10000)
 
 #	import copy 
 
 	X,Y = pArray1, pArray2 
 
 	if not afThreshold:	
-		afThreshold = [halla.stats.alpha_threshold(a, fAlpha) for a in [pArray1,pArray2]]
-
+		afThreshold = [halla.stats.alpha_threshold(a, fAlpha, func ) for a in [pArray1,pArray2]]
+	
 	x_threshold, y_threshold = afThreshold[0], afThreshold[1]
-
+	print "x_threshold, y_threshold:", x_threshold, y_threshold
 	aTau = [] ### Did the child meet the intra-dataset confidence cut-off? If not, its children will continue to be itself. 
 		#### tau_hat <= tau 
 		#### e.g.[(True,False),(True,True),]
@@ -840,12 +840,12 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	def _min_tau(X):
 		X = numpy.array(X) 
 		D = halla.discretize( X )
-		A = numpy.array([norm_mi(D[i],D[j]) for i,j in itertools.combinations( range(len(X)), 2 )])
+		A = numpy.array([func(D[i],D[j]) for i,j in itertools.combinations( range(len(X)), 2 )])
 
 		#assert(numpy.any(A))
 
 		if X.shape[0] < 2:
-			return numpy.min([norm_mi(D[0],D[0])])
+			return numpy.min([func(D[0],D[0])])
 
 		else:
 			return numpy.min( A )
@@ -853,12 +853,12 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	def _max_tau(X):
 		X = numpy.array(X) 
 		D = halla.discretize( X )
-		A = numpy.array([norm_mi(D[i],D[j]) for i,j in itertools.combinations( range(len(X)), 2 )])
+		A = numpy.array([func(D[i],D[j]) for i,j in itertools.combinations( range(len(X)), 2 )])
 
 		#assert(numpy.any(A))
 
 		if X.shape[0] < 2:
-			return numpy.max([norm_mi(D[0],D[0])])
+			return numpy.max([func(D[0],D[0])])
 
 		else:
 			return numpy.max( A )
@@ -866,10 +866,10 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	def _mean_tau( X ):
 		X = numpy.array(X) 
 		D = halla.discretize( X )
-		A = numpy.array([norm_mi(D[i],D[j]) for i,j in itertools.combinations( range(len(X)), 2 )])
+		A = numpy.array([func(D[i],D[j]) for i,j in itertools.combinations( range(len(X)), 2 )])
 
 		if X.shape[0] < 2:
-			return numpy.mean([norm_mi(D[0],D[0])])
+			return numpy.mean([func(D[0],D[0])])
 
 		else:
 			return numpy.mean( A )
@@ -956,8 +956,8 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 		apClusterNode2 = truncate_tree( apClusterNode2, level = 0, skip = max(aiGlobalDepth2)/max(aiGlobalDepth1) )
 	# End Truncate
 	'''
-	print "Heirarchical TREE 1 ", reduce_tree_by_layer(apClusterNode1)
-	print "Heirarchical TREE 2 ", reduce_tree_by_layer(apClusterNode2)
+	#print "Heirarchical TREE 1 ", reduce_tree_by_layer(apClusterNode1)
+	#print "Heirarchical TREE 2 ", reduce_tree_by_layer(apClusterNode2)
 	def _couple_tree_recursive( apClusterNode1, apClusterNode2, strMethod = strMethod, strLinkage = strLinkage ):
 		"""
 		recursive function 
@@ -1088,7 +1088,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 		return aOut
 		
 	result = _couple_tree_itrative( apClusterNode1, apClusterNode2, strMethod, strLinkage )
-	print "Coupled Hypothesis Tree",  reduce_tree_by_layer(result)
+	#print "Coupled Hypothesis Tree",  reduce_tree_by_layer(result)
 	return result
 
 def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_representative", iIter = 100 ):
