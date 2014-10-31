@@ -26,14 +26,16 @@ sys.path.append('//Users/rah/Documents/Hutlab/halla')
 sys.path.append('/Users/rah/Documents/Hutlab/strudel')
 #sys.path.insert(1, '../../strudel')
 import strudel, halla, pylab
-from halla import stats
+from halla import stats, data
 import itertools
 from sklearn.metrics.metrics import roc_curve
 
 def _main( ):
-    methods = { "HAllA-PCA-NMI","HAllA-PCA-AMI","HAllA-ICA-NMI", "HAllA-PCA-MIC",  "HAllA-KPCA-NMI", "HAllA-KPCA-Pearson", "HAllA-CCA-Pearson", "HAllA-CCA-NMI", "HAllA-PLS-NMI", "HAllA-PLS-Pearson","AllA-NMI", "AllA-MIC"}
+    #methods = { "HAllA-PCA-NMI","HAllA-PCA-AMI","HAllA-ICA-NMI", "HAllA-PCA-MIC", "HAllA-ICA-MIC", "HAllA-KPCA-NMI", "HAllA-KPCA-Pearson", "HAllA-CCA-Pearson", "HAllA-CCA-NMI", "HAllA-PLS-NMI", "HAllA-PLS-Pearson","AllA-NMI", "AllA-MIC"}
+    # log
+    methods = { "HAllA-PCA-NMI","HAllA-PCA-AMI","HAllA-ICA-NMI", "HAllA-PCA-MIC", "HAllA-ICA-MIC"}
     #methods = {  "HAllA-KPCA-Pearson", "HAllA-CCA-Pearson", "HAllA-PLS-NMI", "HAllA-PLS-Pearson"}
-    methods = {"HAllA-PCA-NMI", "HAllA-PCA-MIC"}
+    #methods = {"HAllA-PCA-NMI", "HAllA-PCA-MIC"}
     #methods = { "HAllA-PCA-NMI"}
     ##methods = {"HAllA-PCA-MIC"}
     #methods = {"AllA-NMI"}
@@ -48,7 +50,7 @@ def _main( ):
     mean_recall = []
     mean_fdr = []
     
-    number_of_simulation = 3
+    number_of_simulation = 5
     s = strudel.Strudel()
     #number_samples = 10
 #number_blocks = 2 
@@ -71,10 +73,13 @@ def _main( ):
         '''X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
         Y,_ = s.spike( X, strMethod = "line" )
         '''
-        #X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6 , Beta = 3.0 )#, link = "line" )
+        X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6 , Beta = 3.0 )#, link = "line" )
         #X,Y,A = s.cholesky_nlblock( number_features, number_samples , number_blocks, fVal = 2.6, Beta = 3.0, link = "half_circle" )
-        X,Y,A = s.cholesky_nlblock( number_features, number_samples , number_blocks, fVal = 2.6, Beta = 3.0, link = "log" )
+        #X,Y,A = s.cholesky_nlblock( number_features, number_samples , number_blocks, fVal = 2.6, Beta = 3.0, link = "log" )
         #X1,Y,A1 = s.double_cholesky_block( number_features/4, number_samples , number_blocks, fVal = .6 , Beta = 3.0 )
+        
+        halla.data.writeData(X,"X")
+        halla.data.writeData(Y,"Y")
         h = halla.HAllA( X,Y)
         #new_methods = set()
         #start_parameter = .05
@@ -93,7 +98,7 @@ def _main( ):
                 #print "aOut", h.meta_alla
                 new_method = method+'_'+str(q)#+'_'+str(alpha)+'_'+str(q)+'_'+str(start_parameter)
                 #y_score = 1- h.meta_summary[0].flatten()
-                print 'h.meta_summary[0]', h.meta_summary
+                #print 'h.meta_summary[0]', h.meta_summary
                 #print 'A', A
                 #print 'h.meta_alla[0]', h.meta_alla[0]
                 score  = h.meta_summary[0].flatten()

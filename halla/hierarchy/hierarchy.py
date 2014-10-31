@@ -828,7 +828,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 		afThreshold = [halla.stats.alpha_threshold(a, fAlpha, func ) for a in [pArray1,pArray2]]
 	
 	x_threshold, y_threshold = afThreshold[0], afThreshold[1]
-	print "x_threshold, y_threshold:", x_threshold, y_threshold
+	#print "x_threshold, y_threshold:", x_threshold, y_threshold
 	aTau = [] ### Did the child meet the intra-dataset confidence cut-off? If not, its children will continue to be itself. 
 		#### tau_hat <= tau 
 		#### e.g.[(True,False),(True,True),]
@@ -1367,7 +1367,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 						"permutation_test_by_pls_norm_mi": halla.stats.permutation_test_by_pls_norm_mi,
 						"permutation_test_by_representative_mic" : halla.stats.permutation_test_by_representative_mic,
 						"permutation_test_by_representative_adj_mi" : halla.stats.permutation_test_by_representative_adj_mi,
-						 "permutation_test_by_ica_norm_mi": halla.stats.permutation_test_by_ica_norm_mi
+						 "permutation_test_by_ica_norm_mi": halla.stats.permutation_test_by_ica_norm_mi,
+						 "permutation_test_by_ica_mic": halla.stats.permutation_test_by_ica_mic
 						}
 
 	strMethod = method

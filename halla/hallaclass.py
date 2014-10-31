@@ -144,6 +144,7 @@ class HAllA():
 								"HAllA-PCA-MIC"	: self.__preset_pca_mic,
 								"HAllA-PCA-AMI" : self.__preset_pca_adj_mi,
 								"HAllA-ICA-NMI" : self.__preset_ica_norm_mi,
+								"HAllA-ICA-MIC" : self.__preset_ica_mic,
 								"kpca_norm_mi": self.__preset_kpca_norm_mi, "HAllA-KPCA-NMI": self.__preset_kpca_norm_mi,
 								"kpca_pearson": self.__preset_kpca_pearson, "HAllA-KPCA-Pearson": self.__preset_kpca_pearson,
 								"cca_pearson": self.__preset_cca_pearson, "HAllA-CCA-Pearson": self.__preset_cca_pearson,
@@ -732,6 +733,16 @@ class HAllA():
 		self._summary_statistics( ) 
 		return self._report( ) 
 	
+	def __preset_ica_mic( self ):
+		pDistance = mic
+		self.set_metric( pDistance )
+		self._featurize( )
+		self._threshold( )
+		self._hclust( )
+		self._couple( )
+		self._all_against_all( strMethod = "permutation_test_by_ica_mic" ) 
+		self._summary_statistics( ) 
+		return self._report( ) 
 	def __preset_kpca_norm_mi( self ):
 		pDistance = norm_mi
 		self.set_metric( pDistance )
