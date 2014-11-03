@@ -1060,10 +1060,12 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	
 			##Children should _already be_ adjusted for depth 
 			if not(any(apChildren1)) or not(any(apChildren2)):
-				aOut.append( pStump )
+				#aOut.append( pStump )
+				continue
 	
 			elif (bTauX == True) and (bTauY == True):
-				aOut.append( pStump ) ### Do not continue on, since alpha threshold has been met.
+				#aOut.append( pStump ) ### Do not continue on, since alpha threshold has been met.
+				continue
 	
 			else:
 				LChild = [(a,b) for a,b in itertools.product( apChildren1, apChildren2 )] 

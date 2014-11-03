@@ -38,7 +38,7 @@ def _main( ):
     #methods = {"HAllA-PCA-NMI", "HAllA-PCA-MIC"}
     methods = { "HAllA-CCA-Pearson"}
     methods = {"HAllA-PCA-NMI"}
-    ##methods = {"HAllA-PCA-MIC"}
+    methods = {"HAllA-PCA-MIC"}
     #methods = {"AllA-NMI"}
     #methods = {"HAllA-KPCA-Pearson"}
     tp_fp_counter = dict()
@@ -70,9 +70,9 @@ def _main( ):
     for i in range(number_of_simulation):
         
         #Generate simulated datasets
-        number_features = 12 + i
+        number_features = 8 + i
         number_samples = 300 + i*5
-        number_blocks = 3 + int(i/3)
+        number_blocks = 2 + int(i/3)
         print 'Synthetic Data Generation ...'
         '''X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
         Y,_ = s.spike( X, strMethod = "line" )
