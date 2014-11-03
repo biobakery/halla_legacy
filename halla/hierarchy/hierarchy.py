@@ -956,8 +956,8 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 		apClusterNode2 = truncate_tree( apClusterNode2, level = 0, skip = max(aiGlobalDepth2)/max(aiGlobalDepth1) )
 	# End Truncate
 	'''
-	#print "Heirarchical TREE 1 ", reduce_tree_by_layer(apClusterNode1)
-	#print "Heirarchical TREE 2 ", reduce_tree_by_layer(apClusterNode2)
+	print "Heirarchical TREE 1 ", reduce_tree_by_layer(apClusterNode1)
+	print "Heirarchical TREE 2 ", reduce_tree_by_layer(apClusterNode2)
 	def _couple_tree_recursive( apClusterNode1, apClusterNode2, strMethod = strMethod, strLinkage = strLinkage ):
 		"""
 		recursive function 
@@ -1088,7 +1088,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 		return aOut
 		
 	result = _couple_tree_itrative( apClusterNode1, apClusterNode2, strMethod, strLinkage )
-	#print "Coupled Hypothesis Tree",  reduce_tree_by_layer(result)
+	print "Coupled Hypothesis Tree",  reduce_tree_by_layer(result)
 	return result
 
 def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_representative", iIter = 100 ):
@@ -1285,7 +1285,7 @@ def layerwise_all_against_all( pClusterNode1, pClusterNode2, pArray1, pArray2, a
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
 def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_representative", metric = "norm_mi", p_adjust = "BH", fQ = 0.1, 
-	iIter = 100, pursuer_method = "nonparameteric", step_parameter = 1.0, start_parameter = 0.0, bVerbose = False, afThreshold = None, fAlpha = 0.05):
+	iIter = 1000, pursuer_method = "nonparameteric", step_parameter = 1.0, start_parameter = 0.0, bVerbose = False, afThreshold = None, fAlpha = 0.05):
 	"""
 	Perform all-against-all on a hypothesis tree.
 

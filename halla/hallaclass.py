@@ -61,10 +61,10 @@ class HAllA():
 		self.step_parameter = 1.0 ## a value between 0.0 and 1.0; a fractional value of the layers to be tested 
 
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-		# sigma 
+		# sigma  
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-		self.start_parameter = 0.5 ## a value between 0.0 and 1.0; 0.0 performs the simplest comparison at the top of the tree; 
+		self.start_parameter = 0.0   ## a value between 0.0 and 1.0; 0.0 performs the simplest comparison at the top of the tree; 
 		## 1.0 starts in the bottom 
 
 		#------------------------------------------------#
@@ -409,7 +409,7 @@ class HAllA():
 		if self.verbose:
 			print ("HAllA PROMPT: q value", fQ)
 			print ("q value is", fQ)
-		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, fQ = fQ, bVerbose = self.verbose, start_parameter = self.start_parameter ) 
+		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, fQ = self.q, fAlpha = self.alpha, bVerbose = self.verbose, start_parameter = self.start_parameter ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
 	
