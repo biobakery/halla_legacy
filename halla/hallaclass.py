@@ -1127,6 +1127,7 @@ class HAllA():
 		else:
 			try:
 				pMethod = self.hash_preset[strMethod]
+				print "Preset:", pMethod
 				return pMethod()
 			except KeyError:			
 				raise Exception( "Invalid Method.")

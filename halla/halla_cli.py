@@ -24,7 +24,7 @@ Description: Halla command python wrapper.
 #SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #####################################################################################
 
-__author__ = "Yo Sup Moon, George Weingart"
+__author__ = "G. Ali Rahnavard, Yo Sup Moon, George Weingart"
 __copyright__ = "Copyright 2014"
 __credits__ = ["Yo Sup Moon","George Weingart"]
 __license__ = "MIT"
@@ -125,7 +125,7 @@ def _main(  ):
 	#		help = "A flag set to true if provided" )
 
 	argp.add_argument( "-x", 		dest = "strPreset", 	metavar = "preset",
-			type  = str, 		default = "default",
+			type  = str, 		default = "",
 			help = "Instead of specifying parameters separately, use a preset" )
 
 	argp.add_argument( "-m", 		dest = "strMetric", 	metavar = "metric",
@@ -192,9 +192,9 @@ def _main(  ):
 	H.set_start_parameter( args.fS )
 
 	if args.strPreset: 
-		H.set_preset( args.strPreset )
-		aaOut = H.run( strMethod = args.strPreset )
-
+		print "User Preset"
+		aaOut = H.set_preset( args.strPreset )
+		#aaOut = H.run( strMethod = args.strPreset )
 	else:
 		aaOut = H.run( )
 	#print('Hi',aaOut)

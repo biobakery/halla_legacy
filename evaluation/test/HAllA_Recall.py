@@ -70,14 +70,14 @@ def _main( ):
     for i in range(number_of_simulation):
         
         #Generate simulated datasets
-        number_features = 8 + i
+        number_features = 12 + i
         number_samples = 300 + i*5
-        number_blocks = 2 + int(i/3)
+        number_blocks = 3 + int(i/3)
         print 'Synthetic Data Generation ...'
         '''X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
         Y,_ = s.spike( X, strMethod = "line" )
         '''
-        X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6 , Beta = 3.0 )#, link = "line" )
+        X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = 2.6 , Beta = 3.0 )#, link = "line" )
         #X,Y,A = s.cholesky_nlblock( number_features, number_samples , number_blocks, fVal = 2.6, Beta = 3.0, link = "half_circle" )
         #X,Y,A = s.cholesky_nlblock( number_features, number_samples , number_blocks, fVal = 2.6, Beta = 3.0, link = "log" )
         #X,Y,A = s.cholesky_nlblock( number_features, number_samples , number_blocks, fVal = 2.6, Beta = 3.0, link = "sine" )
@@ -96,6 +96,7 @@ def _main( ):
             # Setup alpha and q-cutoff and start parameter
             h.set_q(q)
             h.set_alpha(.2)
+            #h.iterations = 100
 #           h.set_start_parameter(0.5)
             for method in methods:
                 print method ,'is running ...with q, cut-off, ',q
