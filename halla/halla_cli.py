@@ -193,8 +193,8 @@ def _main(  ):
 
 	if args.strPreset: 
 		print "User Preset"
-		aaOut = H.set_preset( args.strPreset )
-		#aaOut = H.run( strMethod = args.strPreset )
+		#aaOut = H.set_preset( args.strPreset )
+		aaOut = H.run( strMethod = args.strPreset )
 	else:
 		aaOut = H.run( )
 	#print('Hi',aaOut)
