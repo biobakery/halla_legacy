@@ -956,8 +956,8 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 		apClusterNode2 = truncate_tree( apClusterNode2, level = 0, skip = max(aiGlobalDepth2)/max(aiGlobalDepth1) )
 	# End Truncate
 	'''
-	#print "Heirarchical TREE 1 ", reduce_tree_by_layer(apClusterNode1)
-	#print "Heirarchical TREE 2 ", reduce_tree_by_layer(apClusterNode2)
+	print "Heirarchical TREE 1 ", reduce_tree_by_layer(apClusterNode1)
+	print "Heirarchical TREE 2 ", reduce_tree_by_layer(apClusterNode2)
 	def _couple_tree_recursive( apClusterNode1, apClusterNode2, strMethod = strMethod, strLinkage = strLinkage ):
 		"""
 		recursive function 
@@ -1090,7 +1090,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 		return aOut
 		
 	result = _couple_tree_itrative( apClusterNode1, apClusterNode2, strMethod, strLinkage )
-	#print "Coupled Hypothesis Tree",  reduce_tree_by_layer(result)
+	print "Coupled Hypothesis Tree",  reduce_tree_by_layer(result)
 	return result
 
 def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_representative", iIter = 100 ):
