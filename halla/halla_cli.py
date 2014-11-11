@@ -94,7 +94,10 @@ def _main(  ):
 	argp.add_argument( "-o",                dest = "ostm",                  metavar = "output.txt",
 			type = argparse.FileType( "w" ),        default = "all_association_results",
 			help = "Optional output file for association significance tests" )
-	argp.add_argument( "-bo",                dest = "bostm",                  metavar = "blocked_output.txt",
+	argp.add_argument( "-c",                dest = "costm",                  metavar = "clusters_output.txt",
+			type = argparse.FileType( "w" ),        default = "all_compared_clusters",
+			help = "Optional output file for all compared clusters" )
+	argp.add_argument( "-b",                dest = "bostm",                  metavar = "blocked_output.txt",
 			type = argparse.FileType( "w" ),        default = sys.stdout,
 			help = "Optional output file for blocked association significance tests" )
 	argp.add_argument( "-alpha",                dest = "fA",                    metavar = "alpha",
@@ -225,19 +228,29 @@ def _main(  ):
 		csvw.writerow( [args.X.name, args.Y.name, "p-value"] )
 	#print 'aaOut:', aaOut
 	#print 'aaOut[0]', aaOut[0]
-	for line in aaOut[0]:
+	for line in aaOut:
 		iX, iY = line[0]
 		fP = line[1]
 		aLineOut = map(str,[aOutName1[iX], aOutName2[iY], fP])
 		csvw.writerow( aLineOut )
 	#print 'H:', H.meta_alla
 	#print 'H[0]', H.meta_alla[0]
+
 	for line in H.meta_alla[0]:
 		iX, iY = line[0]
 		fP = line[1]
 		aLineOut = map(str,[str('  '.join(aOutName1[i] for i in iX)),str(' '.join(aOutName2[i] for i in iY)), fP])
 		bcsvw.writerow( aLineOut )
-
+	
+	csvwc = csv.writer(args.costm , csv.excel_tab )
+	csvwc.writerow( ['Level', "Dataset 1","Dataset 2" ] )
+	for line in reduce_tree_by_layer([H.meta_hypothesis_tree]):
+		(level, clusters ) = line
+		iX, iY = clusters[0], clusters[1]
+		fP = line[1]
+		aLineOut = map(str,[str(level),str('  '.join(aOutName1[i] for i in iX)),str(' '.join(aOutName2[i] for i in iY))])
+		csvwc.writerow( aLineOut )
+ 	
 if __name__ == '__main__':
 
 	_main(  )

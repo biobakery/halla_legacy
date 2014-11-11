@@ -172,18 +172,18 @@ def plotGridData(D):
         # Generate random features and distance matrix.
         print "The distance matrix is empty. The function generates a random matrix."
         s = strudel.Strudel()
-        X,Y,A = s.double_cholesky_block( 16, 16 , 2, fVal = 2.0 , Beta = 3.0 )
-        pylab.pcolor(X, cmap = pylab.cm.gist_gray)
+        X,Y,A = s.double_cholesky_block( 3, 10 , 2, fVal = 2.0 , Beta = 3.0 )
+        pylab.pcolor(X, cmap = pylab.cm.afmhot)
         pylab.savefig('X.pdf')
         #pylab.show()
-        pylab.pcolor(Y, cmap = pylab.cm.gist_gray)
+        pylab.pcolor(Y, cmap = pylab.cm.afmhot)
         pylab.savefig('Y.pdf')
         #pylab.show()
         dX = halla.discretize(X)
-        pylab.pcolor(dX, cmap = pylab.cm.gist_gray)
+        pylab.pcolor(dX, cmap = pylab.cm.afmhot)
         pylab.savefig('dX.pdf')
         dY = halla.discretize(Y)
-        pylab.pcolor(dY, cmap = pylab.cm.gist_gray)
+        pylab.pcolor(dY, cmap = pylab.cm.afmhot)
         pylab.savefig('dY.pdf')
         #pylab.show()
         f = lambda x,y: halla.norm_mi(x,y)
@@ -233,7 +233,7 @@ def dendrogramHeatPlot(D, filename = 'Dendrogram'):
     idx2 = Z2['leaves']
     D = D[idx1,:]
     D = D[:,idx2]
-    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.gist_gray)
+    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.afmhot)
     axmatrix.set_xticks([])
     axmatrix.set_yticks([])
     

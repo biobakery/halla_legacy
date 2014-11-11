@@ -382,17 +382,10 @@ class HAllA():
 		   #couple_tree ), 
 			#lambda y: y[0] ) 
 		
-		aOut = [] 
-
-		for i,j in itertools.combinations( range(len(self.meta_data_tree)), 2 ):
-			aOut.append( 
-				couple_tree(apClusterNode1 =[self.meta_data_tree[i]], 
-				apClusterNode2 = [self.meta_data_tree[j]], 
-				pArray1 = self.meta_array[i], pArray2 = self.meta_array[j], afThreshold = self.meta_threshold, fAlpha = self.alpha, func = self.distance )[0]
-				)
-
-		self.meta_hypothesis_tree = aOut 
-
+		self.meta_hypothesis_tree = couple_tree(apClusterNode1 =[self.meta_data_tree[0]], 
+				apClusterNode2 = [self.meta_data_tree[1]], 
+				pArray1 = self.meta_array[0], pArray2 = self.meta_array[1], afThreshold = self.meta_threshold, fAlpha = self.alpha, func = self.distance )[0]
+		
 		## remember, `couple_tree` returns object wrapped in list 
 		return self.meta_hypothesis_tree 
 
@@ -409,7 +402,7 @@ class HAllA():
 		if self.verbose:
 			print ("HAllA PROMPT: q value", fQ)
 			print ("q value is", fQ)
-		self.meta_alla = all_against_all( self.meta_hypothesis_tree[0], self.meta_array[0], self.meta_array[1], method = strMethod, fQ = self.q, fAlpha = self.alpha, bVerbose = self.verbose, start_parameter = self.start_parameter ) 
+		self.meta_alla = all_against_all( self.meta_hypothesis_tree, self.meta_array[0], self.meta_array[1], method = strMethod, fQ = self.q, fAlpha = self.alpha, bVerbose = self.verbose, start_parameter = self.start_parameter ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
 	
@@ -435,7 +428,7 @@ class HAllA():
 			def __add_pval_product_wise( _x, _y, _fP ):
 				S[_x][_y] = _fP ; S[_y][_x] = _fP 
 
-			def __get_pval_from_bags( _Z, _strMethod = None ):
+			def __get_pval_from_bags( _Z, _strMethod = 'final' ):
 				"""
 				
 				_strMethod: str 
@@ -528,7 +521,7 @@ class HAllA():
 				for i,j in itertools.product( listBag1, listBag2 ):
 					S[i][j] = fAssoc 
 
-		def __get_pval_from_bags( _Z, _strMethod = None ):
+		def __get_pval_from_bags( _Z, _strMethod = 'final' ):
 			"""
 			
 			_strMethod: str 
@@ -552,7 +545,7 @@ class HAllA():
 				print ("Using only final p-values")
 			__get_conditional_pval_from_bags( Z_final )
 			assert( S.any() )
-			self.meta_summary = [S]
+			self.meta_summary = S
 			return self.meta_summary
 
 		elif strMethod == "all":
@@ -560,7 +553,7 @@ class HAllA():
 				print ("Using all p-values")
 			__get_conditional_pval_from_bags( Z_all )
 			assert( S.any() )
-			self.meta_summary = [S]
+			self.meta_summary = S
 			return self.meta_summary
 
 	def _plot( self ):
@@ -575,9 +568,9 @@ class HAllA():
 
 		aOut = []
 
-		self.meta_report = [] 
+		#self.meta_report = [] 
 
-		aP = self.meta_summary[0]
+		aP = self.meta_summary
 		iRow1 = self.meta_array[0].shape[0]
 		iRow2 = self.meta_array[1].shape[0]
 
@@ -587,7 +580,7 @@ class HAllA():
 			if fQ != -1:
 				aOut.append( [[i,j],fQ] )
 
-		self.meta_report.append(aOut)
+		self.meta_report = aOut
 
 		return self.meta_report 
 
@@ -718,7 +711,7 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_representative_mic" ) 
-		self._summary_statistics( ) 
+		self._summary_statistics('final' ) 
 		return self._report( )  
 	
 	# step 2 to add a new method for HAllA
@@ -730,7 +723,7 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_ica_norm_mi" ) 
-		self._summary_statistics( ) 
+		self._summary_statistics('final' ) 
 		return self._report( ) 
 	
 	def __preset_ica_mic( self ):
@@ -752,7 +745,7 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_kpca_norm_mi" ) 
-		self._summary_statistics( ) 
+		self._summary_statistics('final' ) 
 		return self._report( )  
 
 	def __preset_kpca_pearson( self ):
@@ -763,7 +756,7 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_kpca_pearson" ) 
-		self._summary_statistics( ) 
+		self._summary_statistics('final' ) 
 		return self._report( ) 
 
 	def __preset_cca_pearson( self ):
@@ -774,7 +767,7 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_cca_pearson" ) 
-		self._summary_statistics( ) 
+		self._summary_statistics('final' ) 
 		return self._report( ) 
 
 	def __preset_pls_pearson( self ):
@@ -785,7 +778,7 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "parametric_test_by_pls_pearson" ) 
-		self._summary_statistics( ) 
+		self._summary_statistics('final' ) 
 		return self._report( ) 
 
 
@@ -797,7 +790,7 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_pls_norm_mi" ) 
-		self._summary_statistics( ) 
+		self._summary_statistics('final' ) 
 		return self._report( ) 
 
 
@@ -817,7 +810,7 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_cca_norm_mi" ) 
-		self._summary_statistics( ) 
+		self._summary_statistics('final' ) 
 		return self._report( ) 
 
 
@@ -915,7 +908,7 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( ) 
-		self._summary_statistics( "all" ) 
+		self._summary_statistics( 'final' ) 
 		return self._report( )
 	
 	def __preset_pca_adj_mi( self ):
@@ -941,7 +934,7 @@ class HAllA():
 		self._hclust( )
 		self._couple( )
 		self._all_against_all(strMethod ="permutation_test_by_representative_adj_mi" ) 
-		self._summary_statistics( "all" ) 
+		self._summary_statistics( 'final' ) 
 		return self._report( )
 
 	def __preset_full( self ):
@@ -1127,7 +1120,7 @@ class HAllA():
 		else:
 			try:
 				pMethod = self.hash_preset[strMethod]
-				print "Preset:", pMethod
+				#print "Preset:", pMethod
 				return pMethod()
 			except KeyError:			
 				raise Exception( "Invalid Method.")

@@ -1088,9 +1088,74 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 				#L.extend(childList)
 		#print reduce_tree_by_layer(aOut)
 		return aOut
+	
+	def _couple_tree_all_clusters( apClusterNode1, apClusterNode2, strMethod = strMethod, strLinkage = strLinkage ):
+		#Nonrecursive _couple_tree
+		'''
+		nonrecursive function 
+		'''
+		#print "TREE1 ", reduce_tree_by_layer(apClusterNode1)
+		#print "TREE2 ", reduce_tree_by_layer(apClusterNode2)
+		aOut = []
+		for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
+			data1 = reduce_tree( a )
+			data2 = reduce_tree(b )
+	
+		pStump = Tree([data1,data2])
+		aOut.append(pStump)
+		L1 = [(pStump, (a,b))]
+		#b = apClusterNode2
+		#print "satrt", L1
+		#root = True
+		while L1:
+			#print L
+			(pStump, (a1,b1)) = L1.pop(0)		
+			data1 = reduce_tree( a1 )
+			#data = reduce_tree( b1 )
+			
+			
+			L2 = [(pStump, (a1,b1))]
+			while L2:
+				(pStump, (_,b2)) = L2.pop(0)
+				cdata2 = reduce_tree( b2 )
+				bTauY = ( _min_tau(Y[array(cdata2)]) >= y_threshold ) ### parametrize by mean, min, or max
+				if bTauY:
+					continue
+				else:
+					apChildren2 = _filter_true([b2.left,b2.right])
+				if any(apChildren2):
+					childList = []
+					for b3 in apChildren2:
+						#for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
+				
+						#data1 = reduce_tree( a1 )
+						cdata2 = reduce_tree( b3 )
+						tempTree = Tree([data1,cdata2])
+						childList.append(tempTree)
+						L2.append((tempTree, (a1,b3)))				
+					pStump.add_children( childList )
+					#print "After L2:", reduce_tree( pStump )
+			#print "End of while L2"		
+			bTauX = ( _min_tau(X[array(data1)]) >= x_threshold ) ### parametrize by mean, min, or max
+			if bTauX:
+				continue
+			else:
+				apChildren1 = _filter_true([a1.left,a1.right])
+			if any(apChildren1):
+				childlist1 = [] 
+				for child in apChildren1:
+					cdata1 = reduce_tree(child)
+					tempTree = Tree([cdata1,data2])
+					L1.append((tempTree, (child,b)))
+					childlist1.append(tempTree)
+				pStump.add_children( childlist1 )
+				#print "After L1: ",reduce_tree( pStump )
+		#print "End of while L1"
+		#print reduce_tree_by_layer(aOut)
+		return aOut
 		
-	result = _couple_tree_itrative( apClusterNode1, apClusterNode2, strMethod, strLinkage )
-	print "Coupled Hypothesis Tree",  reduce_tree_by_layer(result)
+	result = _couple_tree_all_clusters( apClusterNode1, apClusterNode2, strMethod, strLinkage )
+	print "Coupled Hypothesis Tree", reduce_tree_by_layer(result)
 	return result
 
 def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_representative", iIter = 100 ):
