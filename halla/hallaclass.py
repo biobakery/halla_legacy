@@ -23,6 +23,7 @@ import halla.parser
 from halla.plot import *
 from halla.stats import *
 import math
+import time
 ## internal dependencies 
 class HAllA():
 	
@@ -348,9 +349,9 @@ class HAllA():
 		Threshold association values in X and Y based on alpha cutoff. 
 		This determines the line where the features are indistinguishable. 
 		"""
-
+		#print 'Threshold'
 		self.meta_threshold = map( lambda x : halla.stats.alpha_threshold( x, self.alpha, func = self.distance ), self.meta_array )
-
+		#print 'End Threshold'
 		return self.meta_threshold 
 
 	def _discretize( self ):
@@ -902,13 +903,26 @@ class HAllA():
 		self.set_p_adjust_method( strAdjust )
 		self.set_randomization_method( strRandomization )
 
-		## Run 		
+		## Run 
+		start_time = time.time()
 		self._featurize( )
+		print("--- %s seconds: _featurize ---" % (time.time() - start_time))
+		start_time = time.time()
 		self._threshold( )
+		print("--- %s seconds: _threshold ---" % (time.time() - start_time))
+		start_time = time.time()
 		self._hclust( )
+		print("--- %s seconds: _hclust ---" % (time.time() - start_time))
+		start_time = time.time()
 		self._couple( )
-		self._all_against_all( ) 
+		print("--- %s seconds: _couple ---" % (time.time() - start_time))
+		start_time = time.time()
+		self._all_against_all( )
+		print("--- %s seconds: _all_against_all ---" % (time.time() - start_time))
+		start_time = time.time() 
 		self._summary_statistics( 'final' ) 
+		print("--- %s seconds: _summary_statistics ---" % (time.time() - start_time))
+		start_time = time.time()
 		return self._report( )
 	
 	def __preset_pca_adj_mi( self ):
