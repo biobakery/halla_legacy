@@ -52,9 +52,9 @@ def plot_box(data, alpha= .1 , figure_name='HAllA_Evaluation', ylabel = None, la
     pl.savefig(figure_name+'.pdf')
     pl.show()
     return;
-def scatter_plot(x = None, y = None, alpha = .1, figure_name='Figure2', xlabel = "Statistical Power", ylabel = "Type I Error", labels  = None):
+def scatter_plot(x = None, y = None, alpha = .1, figure_name='Figure2', xlabel = "Recall", ylabel = "FDR", labels  = None):
     import pylab as pl
-    pl.figure("Power vs. Type I Error")
+    pl.figure("Recall vs. FDR")
     ax = pl.axes()
     pl.hold(True)
     #if len(labels) > 0:

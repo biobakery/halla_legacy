@@ -52,7 +52,7 @@ def _main( ):
     mean_recall = []
     mean_fdr = []
     
-    number_of_simulation = 1
+    number_of_simulation = 5
     s = strudel.Strudel()
     #number_samples = 10
     #number_blocks = 2 
@@ -60,7 +60,7 @@ def _main( ):
     #gentisate = [-2.803896939,0.848525004,2.337156759,1.109115819,1.149897344,0.13528992,0.158061311,0.714277918,1.328749628,1.119709746,-0.288184305,0.487029427,0.634337124,-0.098073725,0.097477949,0.071809458,0.454466981,-0.327865239,0.729327623,1.045276511,0.312906643,0.120882089,0.369824602,0.285065158,0.561143341,0.111381205,-0.293628799,-0.178924627,-0.112243296,1.237924395,2.227920252,1.222810016,2.537628451,1.220163919,0.093127075,0.501187279,1.030010539,1.437226516,-0.718826102,-0.171019997,-4.380434511,-0.247839406,-0.606073698,1.072803476,-1.496260884,-0.337527087,1.02548119,0.941821597,-0.902707592,2.012035388,-0.207272705,-0.575161602,2.713930255,0.216390163,0.543604771,-0.228780703,-0.257659499,-0.013931937,0.497006386,0.180530168,-0.964544835,-2.23245979,0.797249201,1.309643979,-0.062199528,0.542413658,0.103351616,-0.000857285,-0.397219976,0.707122363,-0.203863764,0.356717166,-0.642701928,0.124088691,0.546656896,-2.126731775,-0.861813436,-0.211929283,-1.235060927,0.111532633,0.180513843,-1.167946232,0.155406771,-0.450751692,-0.475081011,-0.801261868,0.384715843,0.047546605,-1.404889596,0.329788325,-0.377645309,-0.996422113,-2.261983185,-2.77811642,0.854787825,-0.573595364,-0.545498864,-0.834801286,-0.442397744,-0.175937405,-1.001478347,0.286864456,-1.5003544,-2.757857251]
     #print"NMI", distance.NormalizedMutualInformation( score1, gentisate ).get_distance()
     #return 
-    q_cutoff = {.1}
+    q_cutoff = {.01}
     for q in q_cutoff:#, .05, .025, .01}:
         for method in methods:
                 new_method = method+'_'+str(q)
@@ -72,19 +72,26 @@ def _main( ):
     for i in range(number_of_simulation):
         
         #Generate simulated datasets
-        number_features = 8 + i
-        number_samples = 500 + i*5
-        number_blocks = 1 + int(i/3)
+        number_features = 9 + i
+        number_samples = 300 + i*5
+        number_blocks = 3 + int(i/3)
         print 'Synthetic Data Generation ...'
         '''X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
-        Y,_ = s.spike( X, strMethod = "line" )
-        '''
+        Y,_ = s.spike( X, strMethod = "line" )'''
+        
         X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = .6 , Beta = 3.0 )#, link = "line" )
-        X = np.concatenate((X, X), axis=0)
+        #print"NMI", distance.NormalizedMutualInformation( halla.stats.discretize(X[1]), halla.stats.discretize(X[2]) ).get_distance()
+#       X = array([[1,1,1,3],[1,1,1,3],[1,1,1,3],[1,1,1,3]])
+        #Y = array([[1,1,3,3],[1,1,1,3],[1,2,1,4],[1,1,1,3]])
+        #X1 = X
+        #X = np.concatenate((X, np.random.randint(0.0, 100000.0,(number_features, number_samples)) ),axis=0)
+        #X = np.concatenate((X, X1), axis=0)
+        #Y = np.concatenate((Y, np.random.randint(0.0, 100000.0,(number_features, number_samples)) ),axis=0)
+        
         #X = np.concatenate((X, X), axis=0)
-        Xlog,Ylog,A = s.cholesky_nlblock( number_features, number_samples , number_blocks, fVal = .0002 , Beta = 0.0002, link = "sine" )
-        X = np.concatenate((X, Xlog), axis=0)
-        Y = np.concatenate((Y, Ylog), axis=0)
+        #Xlog,Ylog,A = s.cholesky_nlblock( number_features, number_samples , number_blocks, fVal = .0002 , Beta = 0.0002, link = "sine" )
+        #X = np.concatenate((X, Xlog), axis=0)
+        # Y = np.concatenate((Y, Ylog), axis=0)
         '''Xlog,Ylog,A = s.cholesky_nlblock( number_features, number_samples , number_blocks, fVal = .0002 , Beta = 0.0002, link = "sine" )
         X = np.concatenate((X, Xlog), axis=0)
         Y = np.concatenate((Y, Ylog), axis=0)
@@ -135,7 +142,7 @@ def _main( ):
         #h.set_alpha (alpha)
         for q in q_cutoff:#, .25, .1, .05, .025, .01}:
             # Setup alpha and q-cutoff and start parameter
-            alpha = .01
+            alpha = .1
             h.set_q(q)
             h.set_alpha(alpha)
             #h.iterations = 100

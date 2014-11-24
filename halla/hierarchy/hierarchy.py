@@ -32,7 +32,7 @@ import sklearn.decomposition
 from sklearn.decomposition import PCA #remember that the matrix is X = (n_samples,n_features)
 import csv 
 from scipy.spatial.distance import pdist, cdist, squareform
-from scipy.cluster.hierarchy import linkage, dendrogram, to_tree, leaves_list 
+from scipy.cluster.hierarchy import linkage, dendrogram, to_tree, leaves_list, fcluster 
 import pylab as pl 
 import random  
 from numpy.random import normal 
@@ -416,16 +416,27 @@ def hclust( pArray, strMetric = "norm_mi", cluster_method = "single", bTree = Fa
 		This hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV's, not just single ones 
 		Use the "grouping property" as discussed by Kraskov paper. 
 	"""
-
+	import pylab
 	pMetric = halla.distance.c_hash_metric[strMetric] 
 	## Remember, pMetric is a notion of _strength_, not _distance_ 
-
+	#print str(pMetric)
 	def pDistance( x,y ):
-		return 1.0 - pMetric(x,y)
+		return  1.0 - pMetric(x,y)
 
 	D = pdist( pArray, metric = pDistance )
-	#print D    
-	Z = linkage( D ) 
+	#print "Distance",D    
+	Z = linkage( D, metric = pDistance  )
+	scipy.cluster.hierarchy.dendrogram(Z)
+	pylab.show() 
+	#print "Linkage Matrix:", Z
+	print fcluster(Z, .75 )
+	print fcluster(Z, .9 )
+	print fcluster(Z, .3 )
+	
+	#cutted_Z = np.where(Z[:,2]<.7)
+	#print  cutted_Z 
+	#scipy.all( (Z[:,3] >= .4, Z[:,3] <= .6), axis=0 ).nonzero()
+	#print pos.distance()
 	return to_tree( Z ) if bTree else Z 
 
 
@@ -467,6 +478,7 @@ def truncate_tree( apClusterNode, level = 0, skip = 0 ):
 			return filter( lambda x: bool(x), apClusterNode )
 	
 		else:
+			#print "truncated tree is malformed--empty!"
 			raise Exception("truncated tree is malformed--empty!")
 
 def reduce_tree( pClusterNode, pFunction = lambda x: x.id, aOut = [] ):
@@ -869,8 +881,30 @@ def _next( ):
 	"""
 	gives the next node on the chain of linkages 
 	"""
-	pass	
-def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold = None, strMethod = "uniform", strLinkage = "min", fAlpha = 0.05, func ="norm_mi", exploration = "couple_tree_all_clusters"):
+	pass
+
+def _is_start(ClusterNode, distance):
+	#node_indeces = reduce_tree(ClusterNode)
+	#print "Node: ",node_indeces
+	#if halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .65 or len(node_indeces) ==1:# and _min_tau(X[array(node_indeces)], func) <= x_threshold:
+	if ClusterNode.dist < distance :#and ClusterNode.get_count() >2 :
+		return True
+	else: 
+		return False
+
+def _is_stop(ClusterNode, X, func, distance):
+	    #return  ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
+		#bTauY = ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
+		node_indeces = reduce_tree(ClusterNode)
+		#bTauX = (halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6)# x_threshold)
+		print "In stop checking number of children:",ClusterNode.get_count()
+		if ClusterNode.is_leaf() or len(node_indeces) < 2 or ClusterNode.dist< distance:#or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6:
+			print "Good Stop",ClusterNode.dist 
+			return True
+		else:
+			return False#bTauX
+		
+def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold = None, strMethod = "uniform", strLinkage = "min", fAlpha = 0.05, func ="norm_mi", exploration = "couple_tree_iterative"):
 	hashMethod = {"couple_tree_all_clusters": couple_tree_all_clusters, 
 			"couple_tree_iterative": couple_tree_iterative 
 			}
@@ -880,6 +914,37 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	#print("--- %s seconds to generate coupled_tree by %s ---" % (time.time() - start_time, exploration ))
 	print "Coupled Hypothesis Tree ", reduce_tree_by_layer(coupled_tree)
 	return coupled_tree
+def _cutree (apChildren, distance):
+	print "Distance: ", distance
+	roots_subtree_cut = []
+	while apChildren :
+		#print apChildren1				
+		#data =[reduce_tree( node ) for node in apChildren1]
+		#print [_mean_tau(X[array(node_indeces)], func)  for node_indeces in data]
+		temp_apChildren = []
+		for node in apChildren:
+			node_indeces = reduce_tree(node)
+			#print "Node: ",node_indeces
+			#if halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .65 or len(node_indeces) ==1:# and _min_tau(X[array(node_indeces)], func) <= x_threshold:
+			if _is_start(node, distance):
+				roots_subtree_cut.append(node)
+				print "In start: ",reduce_tree(node)
+				#print "Pass with distance:", node.dist
+			elif not _is_stop(node, X= None, func = None, distance = distance ):
+			#if not any((halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .6 and not _min_tau(X[array(node_indeces)], func) < x_threshold) for node_indeces in data):
+			#if any(_mean_tau(X[array(node_indeces)], func) < .1 for node_indeces in data):
+				#print "byPass apChildren1"
+				#apChildren1Temp = []
+				truncated_result = truncate_tree( [node], level = 0, skip = 1 )
+				if truncated_result:
+					temp_apChildren += truncated_result
+				#apChildren1 = apChildren1Temp
+				#print "New childs",apChildren1
+		#print "ENd loop"
+		apChildren = temp_apChildren
+	return roots_subtree_cut
+		#print apChildren1
+	#print "End While"
 	
 def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold = None, strMethod = "uniform", strLinkage = "min", fAlpha = 0.05, func ="norm_mi"):
 	"""
@@ -900,11 +965,7 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 	Examples
 	----------------
 	"""
-	#Increase recursive size to avoid limit reduce_tree recursion 
-	#sys.setrecursionlimit(10000)
-
-#	import copy 
-
+	
 	X,Y = pArray1, pArray2 
 
 	if not afThreshold:	
@@ -954,7 +1015,7 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 	apClusterNode1 = [fix_clusternode(apClusterNode1[i], iExtend = iMaxDepth - aiGlobalDepth1[i]) for i in range(len(apClusterNode1))]
 	apClusterNode2 = [fix_clusternode(apClusterNode2[i], iExtend = iMaxDepth - aiGlobalDepth2[i]) for i in range(len(apClusterNode2))]
 	
-	skip = max(aiGlobalDepth1)/max(aiGlobalDepth2)
+	skip = 0# = max(aiGlobalDepth1)/max(aiGlobalDepth2)
 
 	#print "General2: ", max(aiGlobalDepth1),max(aiGlobalDepth2)
 	'''
@@ -968,92 +1029,129 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 	'''
 	print "Hierarchical TREE 1 ", reduce_tree_by_layer(apClusterNode1)
 	print "Hierarchical TREE 2 ", reduce_tree_by_layer(apClusterNode2)
-	def _couple_tree_itrative( apClusterNode1, apClusterNode2, strMethod = strMethod, strLinkage = strLinkage ):
-		#Nonrecursive _couple_tree
-		'''
-		nonrecursive function 
-		'''
-		#print "TREE1 ", reduce_tree_by_layer(apClusterNode1)
-		#print "TREE2 ", reduce_tree_by_layer(apClusterNode2)
-		aOut = []
-		for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
-			data1 = reduce_tree( a )
-			data2 = reduce_tree( b )
 	
-		pStump = Tree([data1,data2])
-		aOut.append(pStump)
-		L = [(pStump, (a,b))]
-		#print "satrt", L
-		while L:
-			#print L
-			(pStump, (a,b)) = L.pop(0)
-			#print "after pop", L 
-			#for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
-			
-			data1 = reduce_tree( a )
-			data2 = reduce_tree( b )
+	#print "TREE1 ", reduce_tree_by_layer(apClusterNode1)
+	#print "TREE2 ", reduce_tree_by_layer(apClusterNode2)
+	aOut = []
+	'''for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
+		data1 = reduce_tree( a )
+		data2 = reduce_tree( b )
+
+	pStump = Tree([data1,data2])
+	aOut.append(pStump)
+	L = [(pStump, (a,b))]
+	'''
+	distance =.75
+	apChildren1 = _cutree (apClusterNode1, distance = distance)
 	
-			#pStump = Tree([data1,data2])
-					
+
+	#print "Qualified Nodes:"
+	#for node in apChildren1:
+	#	print reduce_tree(node)
+	apChildren2 = _cutree (apClusterNode2, distance = distance)
+	#print "Cluster 1"	
+	#print "Qualified Nodes:"
+	#for node in apChildren2:
+	#	print reduce_tree(node)
+	#print "Cluster 2"	
+	
+	print "Start Nodes 1: ", [reduce_tree( node) for node in apChildren1]
+	print "Start Nodes 2: ", [reduce_tree( node) for node in apChildren2]
+	'''
+	Establish the root of the coupling tree based on based matched clusters in
+	the first layer of relevent depth
+	'''	
+	min_nmi = 0.0
+	for node1 in apChildren1:
+		for node2 in apChildren2:
+			data1 = reduce_tree( node1 )
+			data2 = reduce_tree( node2 )
+			temp_nmi = func (pca(X[array(data1)])[0] , pca(Y[array(data2)])[0])
+			if min_nmi < temp_nmi:
+				min_nmi = temp_nmi
+				pStump = Tree([data1,data2])
+	aOut.append(pStump)
+	'''
+	End establishing the root of the coupling tree
+	'''
+	L = []
+	childList= []	
+	for a,b in itertools.product( apChildren1, apChildren2 ):
+		data1 = reduce_tree( a )
+		data2 = reduce_tree( b )
+		tempTree = Tree([data1,data2])
+		childList.append(tempTree)
+		L.append((tempTree, (a,b)))
+	pStump.add_children( childList )
+	
+	distance = distance *.8
+	while L:
+		#print "Start list", L
 		
-			bTauX = ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
-			bTauY = ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
-	
-			if bTauX:
-				apChildren1 = _filter_true([a])
-			else:
-				if skip > 1:
-					# Starte Truncate larger tree to have Hierarchical trees in the samle scale in terms of depth 
-					apChildren1 = truncate_tree( a, level = 0, skip = skip )
-				else:
-					apChildren1 = _filter_true([a.left,a.right])
-	
-			if bTauY:
-				apChildren2 = _filter_true([b])
-			else:
-				# Starte Truncate larger tree to have Hierarchical trees in the samle scale in terms of depth 
-				if skip > 1:
-					apChildren2 = truncate_tree( b, level = 0, skip = skip )
-				else:
-					apChildren2 = _filter_true([b.left,b.right])
-	
-			##Children should _already be_ adjusted for depth 
-			if not(any(apChildren1)) or not(any(apChildren2)):
-				#aOut.append( pStump )
-				continue
-	
-			elif (bTauX == True) and (bTauY == True):
-				#aOut.append( pStump ) ### Do not continue on, since alpha threshold has been met.
-				continue
-	
-			else:
-				LChild = [(a,b) for a,b in itertools.product( apChildren1, apChildren2 )] 
-				
-				#print "After appending", L 
-				childList = []
-				while LChild:
-					(a1,b1) = LChild.pop(0)
-					
-					#for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
+		(pStump, (a,b)) = L.pop(0)
+		#print "after pop", L 
+		#for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
+		
+		data1 = reduce_tree( a )
+		data2 = reduce_tree( b )
+		
+		#pStump = Tree([data1,data2])
+		#if len(data1) <= 2 or len(data2) <= 2:
+		#	continue		
+		bTauX = _is_stop(a, X, func, distance = distance)# ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
+		bTauY = _is_stop(b, Y, func, distance = distance)#( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
+		#bTauX = (halla.stats.pca_explained_variance_ratio_(X[array(data1)])[0] > .8 or _mean_tau(X[array(data1)], func) >= .6)# x_threshold)
+		#bTauY = (halla.stats.pca_explained_variance_ratio_(Y[array(data2)])[0] > .8 or _mean_tau(Y[array(data2)], func) >= .6)# y_threshold)
+		apChildren1 = []
+		apChildren2 = []
+		if not bTauX:
+			apChildren1 = _cutree(apChildren1, distance = distance)#_filter_true([a.left,a.right])
+			print "Children 1: "#, apChildren1
+			for node in apChildren1:
+				print reduce_tree(node)
+		else:
+			apChildren1 = []
+
+		if not bTauY:
+			apChildren2 = _cutree(apChildren2, distance = distance)
+			print "Children 2: "#,apChildren2
+			for node in apChildren2:
+				print reduce_tree(node)
+		else:
+			apChildren2 = []
+
+		##Children should _already be_ adjusted for depth 
+		if not(any(apChildren1)) or not(any(apChildren2)):
+			#aOut.append( pStump )
+			continue
+
+		elif (bTauX == True) or (bTauY == True):
+			#aOut.append( pStump ) ### Do not continue on, since alpha threshold has been met.
+			continue
+
+		else:
+			LChild = [(a,b) for a,b in itertools.product( apChildren1, apChildren2 )] 
 			
-					data1 = reduce_tree( a1 )
-					data2 = reduce_tree( b1 )
-					tempTree = Tree([data1,data2])
-					childList.append(tempTree)
-					#print childList
-					L.append((tempTree, (a1,b1)))
-					#print L					
-				pStump.add_children( childList )
-				#L.extend(childList)
-		#print reduce_tree_by_layer(aOut)
-		return aOut
-	
-	#start_time = time.time()
-	result = _couple_tree_itrative( apClusterNode1, apClusterNode2, strMethod, strLinkage )
-	#print("--- %s seconds ---" % (time.time() - start_time))
-	#print "Coupled Hypothesis Tree I", reduce_tree_by_layer(result)
-	
-	return result
+			#print "After appending", L 
+			childList = []
+			while LChild:
+				(a1,b1) = LChild.pop(0)
+				
+				#for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
+		
+				data1 = reduce_tree( a1 )
+				data2 = reduce_tree( b1 )
+				tempTree = Tree([data1,data2])
+				childList.append(tempTree)
+				#print childList
+				#if len(data1) > 1 and len(data2) > 1:
+				L.append((tempTree, (a1,b1)))
+				#print L					
+			pStump.add_children( childList )
+		distance = distance *.8
+			#L.extend(childList)
+	#print reduce_tree_by_layer(aOut)
+	return aOut
 
 def couple_tree_all_clusters( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold = None, strMethod = "uniform", strLinkage = "min", fAlpha = 0.05, func ="norm_mi"):
 	"""
@@ -1331,6 +1429,178 @@ def couple_tree_recursive( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 
 		return aOut 
 	result = _couple_tree_recursive( apClusterNode1, apClusterNode2, strMethod, strLinkage )
+	return result
+def couple_tree_iterative_by_actual_depth( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold = None, strMethod = "uniform", strLinkage = "min", fAlpha = 0.05, func ="norm_mi"):
+	"""
+	Couples two data trees to produce a hypothesis tree 
+
+	Parameters
+	------------
+	pClusterNode1, pClusterNode2 : ClusterNode objects
+	method : str 
+		{"uniform", "2-uniform", "log-uniform"}
+	linkage : str 
+		{"max", "min"}
+
+	Returns
+	-----------
+	tH : halla.Tree object 
+
+	Examples
+	----------------
+	"""
+	#Increase recursive size to avoid limit reduce_tree recursion 
+	#sys.setrecursionlimit(10000)
+
+#	import copy 
+
+	X,Y = pArray1, pArray2 
+
+	if not afThreshold:	
+		afThreshold = [halla.stats.alpha_threshold(a, fAlpha, func ) for a in [pArray1,pArray2]]
+	
+	x_threshold, y_threshold = afThreshold[0], afThreshold[1]
+	#print "x_threshold, y_threshold:", x_threshold, y_threshold
+	aTau = [] ### Did the child meet the intra-dataset confidence cut-off? If not, its children will continue to be itself. 
+		#### tau_hat <= tau 
+		#### e.g.[(True,False),(True,True),]
+
+	## hash containing string mappings for deciders 
+
+	hashMethod = {"min": _decider_min, 
+				"max": _decider_max, 
+				}
+
+	pMethod = hashMethod[strLinkage] ##returns 'aNode x aNode -> bool' object 
+
+
+	#==========================================#	
+	# See if children pass intradataset test 
+	# This should be done at the tree coupling level. 
+	#==========================================#
+				
+	#for i, p in enumerate( aP_children ): 
+		 
+	#	ai,aj = map(array, aP_children.get_data())
+
+	#	bX = (_mean_tau(X[ai]) <= fAlpha)
+	#	bY = (_mean_tau(Y[aj]) <= fAlpha)
+
+	#	aTau.append([bX,bY])
+
+	#-------------------------------------#
+	# Parsing Steps                       #
+	#-------------------------------------#
+	
+	## Unalias data structure so this does not alter the original data type
+	## Fix for depth 
+	aiGlobalDepth1 = [get_depth( ap ) for ap in apClusterNode1]
+	aiGlobalDepth2 = [get_depth( ap ) for ap in apClusterNode2]
+	
+	iMaxDepth = max(max(aiGlobalDepth1),max(aiGlobalDepth2))
+	iMinDepth = min(min(aiGlobalDepth1),min(aiGlobalDepth2))
+	
+	apClusterNode1 = [fix_clusternode(apClusterNode1[i], iExtend = iMaxDepth - aiGlobalDepth1[i]) for i in range(len(apClusterNode1))]
+	apClusterNode2 = [fix_clusternode(apClusterNode2[i], iExtend = iMaxDepth - aiGlobalDepth2[i]) for i in range(len(apClusterNode2))]
+	
+	skip = max(aiGlobalDepth1)/max(aiGlobalDepth2)
+
+	#print "General2: ", max(aiGlobalDepth1),max(aiGlobalDepth2)
+	'''
+	aiGlobalDepth1 = [get_depth( ap ) for ap in apClusterNode1]
+	aiGlobalDepth2 = [get_depth( ap ) for ap in apClusterNode2]
+	if aiGlobalDepth1 > 2*aiGlobalDepth2:
+		apClusterNode1 = truncate_tree( apClusterNode1, level = 0, skip = max(aiGlobalDepth1)/max(aiGlobalDepth2) ) 
+	if aiGlobalDepth1*2 < aiGlobalDepth2:
+		apClusterNode2 = truncate_tree( apClusterNode2, level = 0, skip = max(aiGlobalDepth2)/max(aiGlobalDepth1) )
+	# End Truncate
+	'''
+	print "Hierarchical TREE 1 ", reduce_tree_by_layer(apClusterNode1)
+	print "Hierarchical TREE 2 ", reduce_tree_by_layer(apClusterNode2)
+	def _couple_tree_itrative( apClusterNode1, apClusterNode2, strMethod = strMethod, strLinkage = strLinkage ):
+		#Nonrecursive _couple_tree
+		'''
+		nonrecursive function 
+		'''
+		#print "TREE1 ", reduce_tree_by_layer(apClusterNode1)
+		#print "TREE2 ", reduce_tree_by_layer(apClusterNode2)
+		aOut = []
+		for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
+			data1 = reduce_tree( a )
+			data2 = reduce_tree( b )
+	
+		pStump = Tree([data1,data2])
+		aOut.append(pStump)
+		L = [(pStump, (a,b))]
+		#print "satrt", L
+		while L:
+			#print L
+			(pStump, (a,b)) = L.pop(0)
+			#print "after pop", L 
+			#for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
+			
+			data1 = reduce_tree( a )
+			data2 = reduce_tree( b )
+			
+			#pStump = Tree([data1,data2])
+					
+			bTauX = ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
+			bTauY = ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
+	
+			if bTauX:
+				apChildren1 = _filter_true([a])
+			else:
+				if skip > 1:
+					# Starte Truncate larger tree to have Hierarchical trees in the samle scale in terms of depth 
+					apChildren1 = truncate_tree( a, level = 0, skip = skip )
+				else:
+					apChildren1 = _filter_true([a.left,a.right])
+	
+			if bTauY:
+				apChildren2 = _filter_true([b])
+			else:
+				# Starte Truncate larger tree to have Hierarchical trees in the samle scale in terms of depth 
+				if skip > 1:
+					apChildren2 = truncate_tree( b, level = 0, skip = skip )
+				else:
+					apChildren2 = _filter_true([b.left,b.right])
+	
+			##Children should _already be_ adjusted for depth 
+			if not(any(apChildren1)) or not(any(apChildren2)):
+				#aOut.append( pStump )
+				continue
+	
+			elif (bTauX == True) and (bTauY == True):
+				#aOut.append( pStump ) ### Do not continue on, since alpha threshold has been met.
+				continue
+	
+			else:
+				LChild = [(a,b) for a,b in itertools.product( apChildren1, apChildren2 )] 
+				
+				#print "After appending", L 
+				childList = []
+				while LChild:
+					(a1,b1) = LChild.pop(0)
+					
+					#for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
+			
+					data1 = reduce_tree( a1 )
+					data2 = reduce_tree( b1 )
+					tempTree = Tree([data1,data2])
+					childList.append(tempTree)
+					#print childList
+					L.append((tempTree, (a1,b1)))
+					#print L					
+				pStump.add_children( childList )
+				#L.extend(childList)
+		#print reduce_tree_by_layer(aOut)
+		return aOut
+	
+	#start_time = time.time()
+	result = _couple_tree_itrative( apClusterNode1, apClusterNode2, strMethod, strLinkage )
+	#print("--- %s seconds ---" % (time.time() - start_time))
+	#print "Coupled Hypothesis Tree I", reduce_tree_by_layer(result)
+	
 	return result
 		
 def naive_all_against_all( pArray1, pArray2, strMethod = "permutation_test_by_representative", iIter = 100 ):
@@ -1615,7 +1885,31 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 	strMethod = method
 	pMethod = pHashMethods[strMethod]
-
+	def _simple_descending_test():
+		L = pTree.get_children()
+		while L:
+			currentNode = L.pop(0)
+			print currentNode.get_data()
+			aiI,aiJ = map( array, currentNode.get_data() )
+			fQParent = pMethod( pArray1[aiI], pArray2[aiJ] )
+			aOut.append( [currentNode.get_data(), float(fQParent)] )
+			if fQParent <= fQ:
+				print "Pas"
+				aFinal.append( [currentNode.get_data(), float(fQParent)] )
+			elif fQParent >fQ and fQParent <= 1.0 - fQ:
+				L += currentNode.get_children()
+		'''if fQParent <= fQ or iSkip >= 1:
+			aFinal.append( [pTree.get_data(), float(fQParent)] )
+			_fw_operator( pTree, fQParent = fQParent )
+		elif fQParent >fQ or fQParent <= 1.0- fQ and iSkip >=1:
+			_fw_operator( pTree, fQParent = fQParent )
+		'''
+		if bVerbose:
+			print aFinal 
+			print "length is", len(aFinal)
+			
+		return aFinal, aOut
+	
 	def _actor( pNode ):
 		"""
 		Performs a certain action at the node
@@ -1631,6 +1925,90 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 		return dP 
 
+	def _pursuer_joseph( apChildren, pParent, aP_adjusted, fQ, fQParent ):
+		"""
+		Decides if you want to continue pursuing down recursively
+
+		Parameters
+		===============
+
+			apChildren: list 
+			aP: list 
+			bP: bool 
+			fQ: float 
+
+		Returns
+		===============
+
+			aBool: list 
+				list of bool values to see which nodes to continue on 
+
+		Notes
+		===============
+
+			Greedy:
+
+				If q_hat <= q and tau_hat > tau, reject null. Go as deep as possible. 
+
+
+			There are three cases for the pursuer 
+
+			True, False -> stop, record value 
+			True, True -> keep on going, unless no more children. Then record value 
+		"""
+
+		aBool = [] ### Did the child meet the inter-dataset confidence cut-off? 
+			#### q_hat <= q 
+		
+		try:
+			iLen = len( aP_adjusted )
+		except Exception:
+			aP_adjusted = [aP_adjusted]
+			iLen = 1 
+		
+		#==========================================#	
+		# See if children pass interdataset test 
+		#==========================================#
+
+		for i, p in enumerate( aP_adjusted ): 
+			assert( isinstance(p,float) and isinstance(fQ,float) )
+			if (float(p) <= float(fQ) ): ##### MAIN CONDITION FOR PROGRESSING DOWNWARDS ##### 
+				if bVerbose:
+					print p, fQ 
+				### met significance criteria 
+				### if not the terminal node, continue on 
+				aBool.append( True )
+
+			else:
+				### did not meet significance criteria
+				aBool.append( False )
+
+		### (*) Note the following situation:
+		### A child has 3 siblings. That child passes the significance threshold, so its children can be added to the final list. 
+		### A sibling doesn't quite cut the threshold, so the parent has to added instead. 
+		### But, the child has overlapping data with the sibling that was just added. 
+		### To combat this situation. Make sure that the lower nodes (even leaves) are always added AFTER the parent node 
+
+		### This makes sure that (*) is taken care of. 
+		### Notice that the parental addition happens prior to the continuation of the child 
+
+		if not any(aBool): #### None passed the p-value criteria 
+			### if have to stop, then add to list of final association pairs 
+			assert(isinstance(fQParent, float) and isinstance(fQ,float))
+
+			aFinal.append( [pParent.get_data(), float(fQParent)] )
+
+		for j,bB in enumerate(aBool):
+			if (bB == True) and (apChildren[j].get_children() == []): ### if this is the terminal node, then do not traverse down any further
+				### furthermore, append the final p-value to the list of final association pairs 
+				if bVerbose:
+					print "TERMINAL NODE"
+
+				assert( float(aP_adjusted[j]) <= float(fQ) )
+				aFinal.append( [apChildren[j].get_data(), aP_adjusted[j]] ) 
+				aBool[j] = False 
+				
+		return aBool
 	def _pursuer( apChildren, pParent, aP_adjusted, fQ, fQParent ):
 		"""
 		Decides if you want to continue pursuing down recursively
@@ -1715,7 +2093,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 				aBool[j] = False 
 				
 		return aBool 
-
+	
 	def _fw_operator( pNode, fQParent, iSkip =0, iLayer = 1):
 		"""
 		
@@ -1734,6 +2112,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			* Gets fed in a node, perform function to children 
 		"""
 
+		
 		apChildren = pNode.get_children( )
 		
 		#apChildren, pParent, aP_adjusted, fQ, fQParent
@@ -1752,7 +2131,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 					if bVerbose:
 						print "TRUE", aP_adjusted[j]
 					
-					#aFinal.append([apChildren[j].get_data(), aP_adjusted[j]]) ### Things that passed the Q cutoff. 
+					aFinal.append([apChildren[j].get_data(), aP_adjusted[j]]) ### Things that passed the Q cutoff. 
 
 					_fw_operator( apChildren[j], fQParent = aP_adjusted[j], iLayer = iLayer+1 ) ### Need to update new definition of fQParent, which was not happening before 
 
@@ -1764,14 +2143,15 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 	#======================================#
 	# Execute 
 	#======================================#
-	
+	#_simple_descending_test()
 	aiI,aiJ = map( array, pTree.get_data() )
 	fQParent = pMethod( pArray1[aiI], pArray2[aiJ] )
 	aOut.append( [pTree.get_data(), float(fQParent)] )
 
-	if fQParent <= fQ or iSkip >= 1:
-		aFinal.append( [pTree.get_data(), float(fQParent)] )
-		_fw_operator( pTree, fQParent = fQParent ) 
+	#if fQParent <= fQ or iSkip >= 1:
+		#aFinal.append( [pTree.get_data(), float(fQParent)] )
+	start_flag = True
+	_fw_operator( pTree, fQParent = fQParent ) 
 	
 	if bVerbose:
 		print aFinal 

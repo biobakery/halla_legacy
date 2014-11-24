@@ -74,20 +74,39 @@ def alpha_threshold( pArray, alpha = 0.05, func = norm_mi ):
 	#print "alpha_threshold: ", fScore
 	#print "Distance Function:", str(func)
 	return fScore 
+def pca_explained_variance_ratio_(pArray, iComponents =1):
+	
+	"""
+	 Input: N x D matrix 
+	 Output: D x N matrix 
 
-def pca( pArray, iComponents =1 ):
+	 """
+	from sklearn.decomposition import PCA
+
+ 	iRow, iCol = pArray.shape 
+ 	pPCA = PCA( n_components = iComponents )
+	## doing this matrix inversion twice doesn't seem to be a good idea 
+	pPCA.fit(pArray.T)
+	#PCA(copy=True, n_components=1, whiten=False)
+	#print "PCA variance", pPCA.explained_variance_ratio_ 
+	return pPCA.explained_variance_ratio_ 
+
+	
+def pca( pArray, iComponents = 1 ):
 	 """
 	 Input: N x D matrix 
 	 Output: D x N matrix 
 
 	 """
 	 from sklearn.decomposition import PCA
-
+	 #print "pArray:", pArray
 	 try:
 	 	iRow, iCol = pArray.shape 
 	 	pPCA = PCA( n_components = iComponents )
 		## doing this matrix inversion twice doesn't seem to be a good idea 
-		return pPCA.fit_transform( pArray.T ).T 
+		#print"PCA:",   pPCA.fit_transform( pArray.T ).T 
+		#print "End PCA"
+		return pPCA.fit_transform( pArray.T ).T
 
 	 except ValueError:
 	 	iRow = pArray.shape
@@ -350,15 +369,16 @@ def bh( afPVAL ):
  
 	"""
 
-	afPVAL_reduced = list(set(afPVAL)) ##duplicate elements removed 
-	iLenReduced = len(afPVAL_reduced)
-	pRank = scipy.stats.rankdata( afPVAL) ##the "dense" method ranks ties as if the list did not contain any redundancies 
+	#afPVAL_reduced = list(set(afPVAL)) ##duplicate elements removed 
+	#iLenReduced = len(afPVAL_reduced)
+	#pRank = scipy.stats.rankdata( afPVAL) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	## source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
+	pRank = scipy.stats.rankdata( afPVAL,method='ordinal')
 
 	aOut = [] 
-
+	iLen = len(afPVAL)
 	for i, fP in enumerate(afPVAL):
-		fAdjusted = fP*1.0*pRank[i]/iLenReduced
+		fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
 		
 		aOut.append(fAdjusted)
 	#print aOut

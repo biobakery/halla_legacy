@@ -372,7 +372,7 @@ class HAllA():
 
 	def _hclust( self ):
 		#print self.meta_feature
-		self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x,bTree=True) )
+		self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x , bTree=True) )
 		#print self.meta_data_tree
 		return self.meta_data_tree 
 
