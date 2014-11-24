@@ -426,12 +426,12 @@ def hclust( pArray, strMetric = "norm_mi", cluster_method = "single", bTree = Fa
 	D = pdist( pArray, metric = pDistance )
 	#print "Distance",D    
 	Z = linkage( D, metric = pDistance  )
-	scipy.cluster.hierarchy.dendrogram(Z)
-	pylab.show() 
+	#scipy.cluster.hierarchy.dendrogram(Z)
+	#pylab.show() 
 	#print "Linkage Matrix:", Z
-	print fcluster(Z, .75 )
-	print fcluster(Z, .9 )
-	print fcluster(Z, .3 )
+	#print fcluster(Z, .75 )
+	#print fcluster(Z, .9 )
+	#print fcluster(Z, .3 )
 	
 	#cutted_Z = np.where(Z[:,2]<.7)
 	#print  cutted_Z 
@@ -887,7 +887,7 @@ def _is_start(ClusterNode, distance):
 	#node_indeces = reduce_tree(ClusterNode)
 	#print "Node: ",node_indeces
 	#if halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .65 or len(node_indeces) ==1:# and _min_tau(X[array(node_indeces)], func) <= x_threshold:
-	if ClusterNode.dist < distance :#and ClusterNode.get_count() >2 :
+	if ClusterNode.dist <= distance :#and ClusterNode.get_count() >2 :
 		return True
 	else: 
 		return False
@@ -897,9 +897,9 @@ def _is_stop(ClusterNode, X, func, distance):
 		#bTauY = ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
 		node_indeces = reduce_tree(ClusterNode)
 		#bTauX = (halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6)# x_threshold)
-		print "In stop checking number of children:",ClusterNode.get_count()
-		if ClusterNode.is_leaf() or len(node_indeces) < 2 or ClusterNode.dist< distance:#or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6:
-			print "Good Stop",ClusterNode.dist 
+		#print "In stop checking number of children:",ClusterNode.get_count()
+		if len(node_indeces) <= 3:#ClusterNode.is_leaf(): #or len(node_indeces) < 2 or ClusterNode.dist< distance:#or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6:
+			#print "Good Stop",ClusterNode.dist 
 			return True
 		else:
 			return False#bTauX
@@ -915,7 +915,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	print "Coupled Hypothesis Tree ", reduce_tree_by_layer(coupled_tree)
 	return coupled_tree
 def _cutree (apChildren, distance):
-	print "Distance: ", distance
+	#print "Distance: ", distance
 	roots_subtree_cut = []
 	while apChildren :
 		#print apChildren1				
@@ -928,9 +928,10 @@ def _cutree (apChildren, distance):
 			#if halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .65 or len(node_indeces) ==1:# and _min_tau(X[array(node_indeces)], func) <= x_threshold:
 			if _is_start(node, distance):
 				roots_subtree_cut.append(node)
-				print "In start: ",reduce_tree(node)
+				#print "In start: ",reduce_tree(node)
 				#print "Pass with distance:", node.dist
-			elif not _is_stop(node, X= None, func = None, distance = distance ):
+			#elif not _is_stop(node, X= None, func = None, distance = distance ):
+			else:
 			#if not any((halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .6 and not _min_tau(X[array(node_indeces)], func) < x_threshold) for node_indeces in data):
 			#if any(_mean_tau(X[array(node_indeces)], func) < .1 for node_indeces in data):
 				#print "byPass apChildren1"
@@ -1041,9 +1042,10 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 	aOut.append(pStump)
 	L = [(pStump, (a,b))]
 	'''
-	distance =.75
+	distance = .75
+	#print "apClusterNode1", apClusterNode1
 	apChildren1 = _cutree (apClusterNode1, distance = distance)
-	
+	#print "apClusterNode1", apClusterNode1
 
 	#print "Qualified Nodes:"
 	#for node in apChildren1:
@@ -1084,7 +1086,8 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 		L.append((tempTree, (a,b)))
 	pStump.add_children( childList )
 	
-	distance = distance *.8
+	distance = distance * .9
+	next_L = []
 	while L:
 		#print "Start list", L
 		
@@ -1105,18 +1108,18 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 		apChildren1 = []
 		apChildren2 = []
 		if not bTauX:
-			apChildren1 = _cutree(apChildren1, distance = distance)#_filter_true([a.left,a.right])
-			print "Children 1: "#, apChildren1
-			for node in apChildren1:
-				print reduce_tree(node)
+			apChildren1 = _cutree([a], distance = distance)#_filter_true([a.left,a.right])
+			#print "Children 1: "#, apChildren1
+			#for node in apChildren1:
+				#print reduce_tree(node)
 		else:
 			apChildren1 = []
 
 		if not bTauY:
-			apChildren2 = _cutree(apChildren2, distance = distance)
-			print "Children 2: "#,apChildren2
-			for node in apChildren2:
-				print reduce_tree(node)
+			apChildren2 = _cutree([b], distance = distance)
+			#print "Children 2: "#,apChildren2
+			#for node in apChildren2:
+				#print reduce_tree(node)
 		else:
 			apChildren2 = []
 
@@ -1145,10 +1148,12 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 				childList.append(tempTree)
 				#print childList
 				#if len(data1) > 1 and len(data2) > 1:
-				L.append((tempTree, (a1,b1)))
+				next_L.append((tempTree, (a1,b1)))
 				#print L					
 			pStump.add_children( childList )
-		distance = distance *.8
+		if not L:
+			L = next_L
+			distance = distance * .9
 			#L.extend(childList)
 	#print reduce_tree_by_layer(aOut)
 	return aOut
@@ -1891,18 +1896,18 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			currentNode = L.pop(0)
 			print currentNode.get_data()
 			aiI,aiJ = map( array, currentNode.get_data() )
-			fQParent = pMethod( pArray1[aiI], pArray2[aiJ] )
-			aOut.append( [currentNode.get_data(), float(fQParent)] )
-			if fQParent <= fQ:
+			p_value = pMethod( pArray1[aiI], pArray2[aiJ] )
+			aOut.append( [currentNode.get_data(), float(p_value)] )
+			if p_value <= fQ:
 				print "Pas"
-				aFinal.append( [currentNode.get_data(), float(fQParent)] )
-			elif fQParent >fQ and fQParent <= 1.0 - fQ:
+				aFinal.append( [currentNode.get_data(), float(p_value)] )
+			elif p_value >fQ and p_value <= 1.0 - fQ:
 				L += currentNode.get_children()
-		'''if fQParent <= fQ or iSkip >= 1:
-			aFinal.append( [pTree.get_data(), float(fQParent)] )
-			_fw_operator( pTree, fQParent = fQParent )
-		elif fQParent >fQ or fQParent <= 1.0- fQ and iSkip >=1:
-			_fw_operator( pTree, fQParent = fQParent )
+		'''if p_value <= fQ or iSkip >= 1:
+			aFinal.append( [pTree.get_data(), float(p_value)] )
+			_fw_operator( pTree, p_value = p_value )
+		elif p_value >fQ or p_value <= 1.0- fQ and iSkip >=1:
+			_fw_operator( pTree, p_value = p_value )
 		'''
 		if bVerbose:
 			print aFinal 
