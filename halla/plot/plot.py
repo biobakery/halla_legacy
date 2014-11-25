@@ -9,7 +9,7 @@ including all graphics and 'data object to plot' transformations.
 
 #import dot_parser
 import pydot, sys
-sys.path.append('//Users/rah/Documents/Hutlab/halla')
+sys.path.append('/Users/rah/Documents/Hutlab/halla')
 sys.path.append('/Users/rah/Documents/Hutlab/strudel')
 import halla, strudel
 #from pylab import *

@@ -883,11 +883,11 @@ def _next( ):
 	"""
 	pass
 
-def _is_start(ClusterNode, distance):
-	#node_indeces = reduce_tree(ClusterNode)
+def _is_start(ClusterNode,  X, func, distance):
+	node_indeces = reduce_tree(ClusterNode)
 	#print "Node: ",node_indeces
 	#if halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .65 or len(node_indeces) ==1:# and _min_tau(X[array(node_indeces)], func) <= x_threshold:
-	if ClusterNode.dist <= distance :#and ClusterNode.get_count() >2 :
+	if ClusterNode.dist <= distance and halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .60 :#and ClusterNode.get_count() >2 :
 		return True
 	else: 
 		return False
@@ -898,7 +898,7 @@ def _is_stop(ClusterNode, X, func, distance):
 		node_indeces = reduce_tree(ClusterNode)
 		#bTauX = (halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6)# x_threshold)
 		#print "In stop checking number of children:",ClusterNode.get_count()
-		if len(node_indeces) <= 3:#ClusterNode.is_leaf(): #or len(node_indeces) < 2 or ClusterNode.dist< distance:#or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6:
+		if len(node_indeces) <= 3 or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8:#ClusterNode.is_leaf(): #or len(node_indeces) < 2 or ClusterNode.dist< distance:#or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6:
 			#print "Good Stop",ClusterNode.dist 
 			return True
 		else:
@@ -914,7 +914,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	#print("--- %s seconds to generate coupled_tree by %s ---" % (time.time() - start_time, exploration ))
 	print "Coupled Hypothesis Tree ", reduce_tree_by_layer(coupled_tree)
 	return coupled_tree
-def _cutree (apChildren, distance):
+def _cutree (apChildren, X, func, distance):
 	#print "Distance: ", distance
 	roots_subtree_cut = []
 	while apChildren :
@@ -926,7 +926,7 @@ def _cutree (apChildren, distance):
 			node_indeces = reduce_tree(node)
 			#print "Node: ",node_indeces
 			#if halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .65 or len(node_indeces) ==1:# and _min_tau(X[array(node_indeces)], func) <= x_threshold:
-			if _is_start(node, distance):
+			if _is_start(node ,X, func, distance):
 				roots_subtree_cut.append(node)
 				#print "In start: ",reduce_tree(node)
 				#print "Pass with distance:", node.dist
@@ -1044,13 +1044,13 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 	'''
 	distance = .75
 	#print "apClusterNode1", apClusterNode1
-	apChildren1 = _cutree (apClusterNode1, distance = distance)
+	apChildren1 = _cutree (apClusterNode1, X, func, distance = distance)
 	#print "apClusterNode1", apClusterNode1
 
 	#print "Qualified Nodes:"
 	#for node in apChildren1:
 	#	print reduce_tree(node)
-	apChildren2 = _cutree (apClusterNode2, distance = distance)
+	apChildren2 = _cutree (apClusterNode2,  Y, func, distance = distance)
 	#print "Cluster 1"	
 	#print "Qualified Nodes:"
 	#for node in apChildren2:
@@ -1108,7 +1108,7 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 		apChildren1 = []
 		apChildren2 = []
 		if not bTauX:
-			apChildren1 = _cutree([a], distance = distance)#_filter_true([a.left,a.right])
+			apChildren1 = _cutree([a],  X, func, distance = distance)#_filter_true([a.left,a.right])
 			#print "Children 1: "#, apChildren1
 			#for node in apChildren1:
 				#print reduce_tree(node)
@@ -1116,7 +1116,7 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 			apChildren1 = []
 
 		if not bTauY:
-			apChildren2 = _cutree([b], distance = distance)
+			apChildren2 = _cutree([b],  Y, func, distance = distance)
 			#print "Children 2: "#,apChildren2
 			#for node in apChildren2:
 				#print reduce_tree(node)
@@ -2148,7 +2148,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 	#======================================#
 	# Execute 
 	#======================================#
-	#_simple_descending_test()
+	_simple_descending_test()
 	aiI,aiJ = map( array, pTree.get_data() )
 	fQParent = pMethod( pArray1[aiI], pArray2[aiJ] )
 	aOut.append( [pTree.get_data(), float(fQParent)] )
