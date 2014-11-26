@@ -38,7 +38,7 @@ import random
 from numpy.random import normal 
 from scipy.misc import * 
 import copy
-#sys.setrecursionlimit(10000)
+sys.setrecursionlimit(20000)
 
 #==========================================================================#
 # DATA STRUCTURES 
@@ -426,8 +426,8 @@ def hclust( pArray, strMetric = "norm_mi", cluster_method = "single", bTree = Fa
 	D = pdist( pArray, metric = pDistance )
 	#print "Distance",D    
 	Z = linkage( D, metric = pDistance  )
-	scipy.cluster.hierarchy.dendrogram(Z)
-	pylab.show() 
+	#scipy.cluster.hierarchy.dendrogram(Z)
+	#pylab.show() 
 	#print "Linkage Matrix:", Z
 	#print fcluster(Z, .75 )
 	#print fcluster(Z, .9 )
@@ -478,6 +478,7 @@ def truncate_tree( apClusterNode, level = 0, skip = 0 ):
 			return filter( lambda x: bool(x), apClusterNode )
 	
 		else:
+			return
 			#print "truncated tree is malformed--empty!"
 			raise Exception("truncated tree is malformed--empty!")
 
@@ -897,7 +898,7 @@ def _is_stop(ClusterNode, X, func, distance, cluster_threshold ):
 		#bTauY = ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
 		node_indeces = reduce_tree(ClusterNode)
 		#bTauX = (halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6)# x_threshold)
-		if halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .75:#ClusterNode.is_leaf(): #or len(node_indeces) < 2 or ClusterNode.dist< distance:#or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6:
+		if halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8:#ClusterNode.is_leaf(): #or len(node_indeces) < 2 or ClusterNode.dist< distance:#or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6:
 			#print "Good Stop",ClusterNode.dist 
 			print "PC1 in stop:", halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0], node_indeces
 			return True
@@ -1172,7 +1173,6 @@ def couple_tree_all_clusters( apClusterNode1, apClusterNode2, pArray1, pArray2, 
 	----------------
 	"""
 	#Increase recursive size to avoid limit reduce_tree recursion 
-	#sys.setrecursionlimit(10000)
 
 #	import copy 
 
