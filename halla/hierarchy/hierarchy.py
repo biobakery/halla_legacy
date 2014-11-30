@@ -1949,6 +1949,38 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			
 		return aFinal, aOut
 	
+	def _bh_descending_test():
+		apChildren = pTree.get_children()
+		level = 0
+		while apChildren:
+			next_level_apChildren =[]
+			level += 1
+			print "Level in hypotheses testing tree: ",level
+			aP = [ _actor( c ) for c in apChildren ]
+			aP_adjusted = halla.stats.p_adjust( aP, fQ )
+			pRank = scipy.stats.rankdata( aP, method='ordinal')
+			max_r_t = 0
+			print "aP", aP
+			print "aP_adjusted: ", aP_adjusted  
+			for i in range(len(aP)):
+				if aP[i] <= aP_adjusted[i] and max_r_t < pRank[i]:
+					max_r_t =  pRank[i]
+					print "max_r_t", max_r_t
+			for i in range(len(aP)):
+				if pRank[i] <= max_r_t:
+					print "************Pass with p-value:", aP[i]
+					aOut.append( [apChildren[i].get_data(), float(aP[i])] )
+					aFinal.append( [apChildren[i].get_data(), float(aP[i])] )
+				else :
+					aOut.append( [apChildren[i].get_data(), float(aP[i])] )
+					if not apChildren[i].is_leaf():
+						next_level_apChildren.extend(apChildren[i].get_children())
+					
+			#print "No association in:", apChildren
+			apChildren = next_level_apChildren
+												
+		return aFinal, aOut
+	
 	def _actor( pNode ):
 		"""
 		Performs a certain action at the node
@@ -2182,8 +2214,9 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 	#======================================#
 	# Execute 
 	#======================================#
-	_simple_descending_test()
-	aiI,aiJ = map( array, pTree.get_data() )
+	#aFinal, aOut = _simple_descending_test()
+	aFinal, aOut = _bh_descending_test()
+	'''aiI,aiJ = map( array, pTree.get_data() )
 	fQParent = pMethod( pArray1[aiI], pArray2[aiJ] )
 	aOut.append( [pTree.get_data(), float(fQParent)] )
 
@@ -2195,7 +2228,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 	if bVerbose:
 		print aFinal 
 		print "length is", len(aFinal)
-		
+	'''	
 	return aFinal, aOut 
 
 #==========================================================================#

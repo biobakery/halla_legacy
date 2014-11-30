@@ -327,7 +327,7 @@ def get_representative( pArray, pMethod = None ):
 # Multiple comparison adjustment 
 #=========================================================
 
-def bh( afPVAL ):
+def bh( afPVAL, q ):
 	"""
 	Implement the benjamini-hochberg hierarchical hypothesis testing criterion 
 	In practice, used for implementing Yekutieli criterion *per layer*.  
@@ -378,7 +378,8 @@ def bh( afPVAL ):
 	aOut = [] 
 	iLen = len(afPVAL)
 	for i, fP in enumerate(afPVAL):
-		fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
+		#fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
+		fAdjusted = q*1.0*pRank[i]/iLen#iLenReduced
 		
 		aOut.append(fAdjusted)
 	#print aOut
@@ -386,7 +387,7 @@ def bh( afPVAL ):
 
 	return aOut 
 
-def p_adjust( pval, method = "BH" ):
+def p_adjust( pval, q, method = "BH" ):
 	"""
 	
 	Parameters
@@ -409,7 +410,7 @@ def p_adjust( pval, method = "BH" ):
 	except (TypeError,IndexError):
 		pval = [pval]
 
-	return bh( pval ) 
+	return bh( pval, q ) 
 
 #=========================================================
 # Statistical test 
