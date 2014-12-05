@@ -507,9 +507,8 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 
 	metric = {pca": pca} 
 	"""
-
 	#numpy.random.seed(0)
-
+	#return g_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 1000 )
 	X,Y = pArray1, pArray2 
 
 	strMetric = metric 
@@ -551,11 +550,61 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	### consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
 
 	fP = ((1.0-fPercentile/100.0)*iIter + 1)/(iIter+1)
-
+	
 	assert(fP <= 1.0)
-
+	#print fP
 	return fP
 
+def g_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 1000 ):
+	"""
+	Input: 
+	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 1000
+
+	metric = {pca": pca} 
+	"""
+	X,Y = pArray1, pArray2 
+	
+	strMetric = metric 
+	#step 5 in a case of new decomposition method
+	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
+	pHashMetric = halla.distance.c_hash_metric 
+	
+	pDe = pHashDecomposition[decomposition]
+	pMe = pHashMetric[strMetric] 
+	## implicit assumption is that the arrays do not need to be discretized prior to input to the function
+	
+	#### Caclulate Point estimate 
+	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+	print "pRep1:", pRep1
+	print "pRep2:", pRep2
+	filtered_pRep1 = []
+	filtered_pRep2 = []
+	for i in range(len(pRep1)):
+		if pRep1[i] or pRep2[i]:
+			filtered_pRep1.append(pRep1[i])
+			filtered_pRep2.append(pRep2[i])
+	# compute degrees of freedom for table
+	xdf = len(  pRep1 ) - 1
+	ydf = len(  pRep2 ) - 1
+	df = xdf * ydf
+	print "degrees of freedom... =", df
+	n = len (pRep1)
+	import os, sys, re, glob, argparse
+	from random import choice, random, shuffle
+	from collections import Counter
+	from scipy.stats import chi2
+	from math import log, exp, sqrt
+	mi = halla.distance.NormalizedMutualInformation( pRep1, pRep2 ).get_distance()
+	print "nmi", mi
+	mi_natural_log = mi / log( exp( 1.0 ), 2.0 )
+	print "nmi_natural_log"
+	fP = 1.0 - chi2.cdf( 2.0 * n * mi_natural_log, df )
+	print "G-test P-value: ", fP
+				
+	#g, fP, dof, expctd = scipy.stats.chi2_contingency([filtered_pRep1, filtered_pRep2], lambda_="log-likelihood")
+	
+	#print "G-test, Pvalue:", fP 
+	return fP
 def parametric_test_by_max_pca( pArray1, pArray2, k = 2, metric = "spearman", iIter = 1000 ):
 
 	aOut = [] 

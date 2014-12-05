@@ -244,7 +244,7 @@ def _main(  ):
 	
 	csvwc = csv.writer(args.costm , csv.excel_tab )
 	csvwc.writerow( ['Level', "Dataset 1","Dataset 2" ] )
-	for line in reduce_tree_by_layer([H.meta_hypothesis_tree]):
+	for line in halla.hierarchy.reduce_tree_by_layer([H.meta_hypothesis_tree]):
 		(level, clusters ) = line
 		iX, iY = clusters[0], clusters[1]
 		fP = line[1]

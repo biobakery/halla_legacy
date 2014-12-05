@@ -908,7 +908,7 @@ class HAllA():
 		self._featurize( )
 		print("--- %s seconds: _featurize ---" % (time.time() - start_time))
 		start_time = time.time()
-		self._threshold( )
+		#self._threshold( )
 		print("--- %s seconds: _threshold ---" % (time.time() - start_time))
 		start_time = time.time()
 		self._hclust( )
