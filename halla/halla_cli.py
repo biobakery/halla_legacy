@@ -204,8 +204,8 @@ def _main(  ):
 	#print(str(H.meta_alla))
 	csvw = csv.writer( args.ostm, csv.excel_tab )
 	bcsvw = csv.writer( args.bostm, csv.excel_tab )
-	csvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "alpha value: " + str(args.fA), "start parameter " + str(args.fS), "metric " + args.strMetric] )
-	bcsvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "alpha value: " + str(args.fA), "start parameter " + str(args.fS), "metric " + args.strMetric] )
+	csvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
+	bcsvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
 	#if H._is_meta( aaOut ):
 	#	if H._is_meta( aaOut[0] ):
 	#		for i,aOut in enumerate(aaOut):
@@ -248,7 +248,7 @@ def _main(  ):
 		(level, clusters ) = line
 		iX, iY = clusters[0], clusters[1]
 		fP = line[1]
-		aLineOut = map(str,[str(level),str('  '.join(aOutName1[i] for i in iX)),str(' '.join(aOutName2[i] for i in iY))])
+		aLineOut = map(str,[str(level),str('  '.join(aOutName1[i] for i in iX)),str(';'.join(aOutName2[i] for i in iY))])
 		csvwc.writerow( aLineOut )
  	
 if __name__ == '__main__':
