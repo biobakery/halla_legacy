@@ -74,9 +74,9 @@ def _main( ):
     for i in range(number_of_simulation):
         
         #Generate simulated datasets
-        number_features = 32 + i
+        number_features = 4 + i
         number_samples = 200 + i*5
-        number_blocks = 8 + int(i/3)
+        number_blocks = 2 + int(i/3)
         print 'Synthetic Data Generation ...'
         '''X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
         Y,_ = s.spike( X, strMethod = "line" )'''
@@ -159,8 +159,8 @@ def _main( ):
                 #print 'A', A
                 print 'Discovered Associations:', h.meta_alla[0]
                 print 'All Comparisons:', h.meta_alla[1]
-                score  = h.meta_summary.flatten()
-                #print 'score: ',score
+                score  = h.meta_summary[:,:, 0].flatten()
+                print 'score: ', score
                 y_true =  A.flatten()#[x for sublist in condition for x in sublist]
                 #print 'h.meta_summary[0]', zip (score, y_true)
                 #print 'A', y_true

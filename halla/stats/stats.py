@@ -373,7 +373,7 @@ def bh( afPVAL, q ):
 	#iLenReduced = len(afPVAL_reduced)
 	#pRank = scipy.stats.rankdata( afPVAL) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	## source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
-	pRank = scipy.stats.rankdata( afPVAL,method='ordinal')
+	pRank = scipy.stats.rankdata( afPVAL, method='ordinal')
 
 	aOut = [] 
 	iLen = len(afPVAL)

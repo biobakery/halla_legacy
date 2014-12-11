@@ -231,7 +231,8 @@ def _main(  ):
 	for line in aaOut:
 		iX, iY = line[0]
 		fP = line[1]
-		aLineOut = map(str,[aOutName1[iX], aOutName2[iY], fP])
+		fP_adjust = line[2]
+		aLineOut = map(str,[aOutName1[iX], aOutName2[iY], fP, fP_adjust])
 		csvw.writerow( aLineOut )
 	#print 'H:', H.meta_alla
 	#print 'H[0]', H.meta_alla[0]
@@ -239,7 +240,8 @@ def _main(  ):
 	for line in H.meta_alla[0]:
 		iX, iY = line[0]
 		fP = line[1]
-		aLineOut = map(str,[str('  '.join(aOutName1[i] for i in iX)),str(' '.join(aOutName2[i] for i in iY)), fP])
+		fP_adjust = line[2]
+		aLineOut = map(str,[str(';'.join(aOutName1[i] for i in iX)),str(';'.join(aOutName2[i] for i in iY)), fP, fP_adjust])
 		bcsvw.writerow( aLineOut )
 	
 	csvwc = csv.writer(args.costm , csv.excel_tab )
@@ -248,7 +250,8 @@ def _main(  ):
 		(level, clusters ) = line
 		iX, iY = clusters[0], clusters[1]
 		fP = line[1]
-		aLineOut = map(str,[str(level),str('  '.join(aOutName1[i] for i in iX)),str(';'.join(aOutName2[i] for i in iY))])
+		#fP_adjust = line[2]
+		aLineOut = map(str,[str(level),str(';'.join(aOutName1[i] for i in iX)),str(';'.join(aOutName2[i] for i in iY))])
 		csvwc.writerow( aLineOut )
  	
 if __name__ == '__main__':

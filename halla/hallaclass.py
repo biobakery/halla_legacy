@@ -475,7 +475,7 @@ class HAllA():
 		Y = self.meta_array[1]
 		iX, iY = X.shape[0], Y.shape[0]
 		
-		S = -1 * np.ones( (iX, iY) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
+		S = -1 * np.ones( (iX, iY ,2) ) ## matrix of all associations; symmetric if using a symmetric measure of association  
 		
 		Z = self.meta_alla 
 		Z_final, Z_all = map(array, Z) ## Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree
@@ -498,8 +498,9 @@ class HAllA():
 					self.outcome[i][j] = 1
 		#print(self.outcome)
 		'''
-		def __add_pval_product_wise( _x, _y, _fP ):
-			S[_x][_y] = _fP  
+		def __add_pval_product_wise( _x, _y, _fP, _fP_adjust ):
+			S[_x][_y][0] = _fP
+			S[_x][_y][1] = _fP_adjust  
 
 		def __get_conditional_pval_from_bags( _Z, _strMethod = None ):
 			"""
@@ -515,12 +516,13 @@ class HAllA():
 				if self.verbose:
 					print (aLine) 
 				
-				aaBag, fAssoc = aLine
+				aaBag, fAssoc, fP_adjust = aLine
 				listBag1, listBag2 = aaBag 
 				aBag1, aBag2 = array(listBag1), array(listBag2)
 				
 				for i,j in itertools.product( listBag1, listBag2 ):
-					S[i][j] = fAssoc 
+					S[i][j][0] = fAssoc 
+					S[i][j][1] = fP_adjust
 
 		def __get_pval_from_bags( _Z, _strMethod = 'final' ):
 			"""
@@ -536,10 +538,10 @@ class HAllA():
 				if self.verbose:
 					print (aLine) 
 				
-				aaBag, fAssoc = aLine
+				aaBag, fAssoc, P_adjust = aLine
 				aBag1, aBag2 = aaBag 
 				aBag1, aBag2 = array(aBag1), array(aBag2)
-				self.bc( aBag1, aBag2, pFunc = lambda x,y: __add_pval_product_wise( _x = x, _y = y, _fP = fAssoc ) )
+				self.bc( aBag1, aBag2, pFunc = lambda x,y: __add_pval_product_wise( _x = x, _y = y, _fP = fAssoc, _fP_adjust = P_adjust ) )
 
 		if strMethod == "final":
 			if self.verbose:
@@ -577,9 +579,10 @@ class HAllA():
 
 		for i,j in itertools.product(range(iRow1),range(iRow2)):
 			### i <= j 
-			fQ = aP[i][j] 
+			fQ = aP[i][j][0] 
+			fQ_adust = aP[i][j][1] 
 			if fQ != -1:
-				aOut.append( [[i,j],fQ] )
+				aOut.append( [[i,j],fQ,fQ_adust ] )
 
 		self.meta_report = aOut
 

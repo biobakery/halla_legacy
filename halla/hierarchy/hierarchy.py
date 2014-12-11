@@ -903,9 +903,9 @@ def _is_start(ClusterNode,  X, func, distance, cluster_threshold ):
 def _is_stop(ClusterNode, X, func, distance, cluster_threshold ):
 	    #return  ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
 		#bTauY = ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
-		#node_indeces = reduce_tree(ClusterNode)
+		node_indeces = reduce_tree(ClusterNode)
 		#bTauX = (halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6)# x_threshold)
-		if ClusterNode.is_leaf(): #halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .75:#or len(node_indeces) < 2 or ClusterNode.dist< distance:#or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6:
+		if ClusterNode.is_leaf() or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .85:#or len(node_indeces) < 2 or ClusterNode.dist< distance:#or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6:
 			#print "Good Stop",ClusterNode.dist 
 			#print "PC1 in stop:", halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0], node_indeces
 			return True
@@ -1021,7 +1021,7 @@ def _cutree_combination (clusterNodelist, X, func, distance, cluster_threshold )
 	
 		clusterNode = temp_apChildren
 	#print len(sub_clusters), n
-	next_dist = distance * .9
+	next_dist = distance * .5
 	aDist = []
 	for i in range(len(sub_clusters)):
 		if sub_clusters[i].dist > 0.0:
@@ -1151,9 +1151,9 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 		if distance2 > 0.0:
 			new_distance = numpy.min([distance1, distance2])
 		else:
-			new_distance = .9 * distance1
+			new_distance = .5 * distance1
 	elif distance2 > 0.0:
-		new_distance = .9 * distance1
+		new_distance = .5 * distance1
 	else: 
 		new_distance = 0.0
 	print "new_distance",new_distance
@@ -2031,11 +2031,11 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			currentNode = L.pop(0)
 			print currentNode.get_data()
 			aiI,aiJ = map( array, currentNode.get_data() )
-			p_value = pMethod( pArray1[aiI], pArray2[aiJ] )
-			aOut.append( [currentNode.get_data(), float(p_value)] )
+			p_value = pMethod( pArray1[aiI], pArray2[aiJ])
+			aOut.append( [currentNode.get_data(), float(p_value), float(p_value)] )
 			if p_value <= fQ:
 				print "************Pass with p-value:", p_value
-				aFinal.append( [currentNode.get_data(), float(p_value)] )
+				aFinal.append( [currentNode.get_data(), float(p_value), float(p_value)] )
 			elif p_value >fQ and p_value <= 1.0 - fQ:
 				L += currentNode.get_children()
 				#global number_performed_test
@@ -2077,10 +2077,10 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			for i in range(len(aP)):
 				if pRank[i] <= max_r_t:
 					print "************Pass with p-value:", aP[i]
-					aOut.append( [apChildren[i].get_data(), float(aP[i])] )
-					aFinal.append( [apChildren[i].get_data(), float(aP[i])] )
+					aOut.append( [apChildren[i].get_data(), float(aP[i]), aP_adjusted[i]] )
+					aFinal.append( [apChildren[i].get_data(), float(aP[i]), aP_adjusted[i]] )
 				else :
-					aOut.append( [apChildren[i].get_data(), float(aP[i])] )
+					aOut.append( [apChildren[i].get_data(), float(aP[i]), aP_adjusted[i]] )
 					if not apChildren[i].is_leaf():
 						next_level_apChildren.extend(apChildren[i].get_children())
 			#global number_performed_test
@@ -2323,8 +2323,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 	#======================================#
 	# Execute 
 	#======================================#
-	#aFinal, aOut = _simple_descending_test()
-	aFinal, aOut = _bh_descending_test()
+	aFinal, aOut = _simple_descending_test()
+	#aFinal, aOut = _bh_descending_test()
 	'''aiI,aiJ = map( array, pTree.get_data() )
 	fQParent = pMethod( pArray1[aiI], pArray2[aiJ] )
 	aOut.append( [pTree.get_data(), float(fQParent)] )
