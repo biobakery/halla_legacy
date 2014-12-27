@@ -537,13 +537,14 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 
 		pRep1_, pRep2_ = [ discretize( pDe( pA ) )[0] for pA in [XP,YP] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 
-		fAssociation_ = pMe( pRep1_, pRep2_ ) 
+		# Association between representatives  
+		fAssociation_ = pMe( pRep1_, pRep2_ ) #NMI
 
 		aDist.append(fAssociation_)
 
 		#aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	
-	fPercentile = percentileofscore( aDist, fAssociation, kind="strict" ) ##source: Good 2000 
+	fPercentile = percentileofscore( aDist, fAssociation, kind="strict" ) ##source: Good 2000   CEll? 617-851-6849
 	### \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
 	### k number of iterations, \hat{X} is randomized version of X 
 	### PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 

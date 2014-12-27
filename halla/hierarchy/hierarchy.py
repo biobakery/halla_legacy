@@ -2023,6 +2023,7 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 	strMethod = method
 	pMethod = pHashMethods[strMethod]
+	
 	def _simple_descending_test():
 		L = pTree.get_children()
 		global number_performed_test
@@ -2055,16 +2056,17 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			
 		return aFinal, aOut
 	
-	def _bh_descending_test():
-		apChildren = pTree.get_children()
-		level = 0
+	def _ybh_descending_test():
+		apChildren = [pTree]
+		level = 1
 		global number_performed_test
 		number_performed_test += len(apChildren)
+		next_level_apChildren =[]
 		while apChildren:
-			next_level_apChildren =[]
-			level += 1
+			Current_Family_Children = apChildren.pop(0).get_children()
+			
 			print "Level in hypotheses testing tree: ",level
-			aP = [ _actor( c ) for c in apChildren ]
+			aP = [ _actor( c ) for c in Current_Family_Children ]
 			aP_adjusted = halla.stats.p_adjust( aP, fQ )
 			pRank = scipy.stats.rankdata( aP, method='ordinal')
 			max_r_t = 0
@@ -2076,17 +2078,25 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 					print "max_r_t", max_r_t
 			for i in range(len(aP)):
 				if pRank[i] <= max_r_t:
-					print "************Pass with p-value:", aP[i]
-					aOut.append( [apChildren[i].get_data(), float(aP[i]), aP_adjusted[i]] )
-					aFinal.append( [apChildren[i].get_data(), float(aP[i]), aP_adjusted[i]] )
+					print "************Pass with p-value:", aP[i], Current_Family_Children[i].get_data()[0], Current_Family_Children[i].get_data()[1]
+					aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]] )
+					aFinal.append( [Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]] )
 				else :
-					aOut.append( [apChildren[i].get_data(), float(aP[i]), aP_adjusted[i]] )
-					if not apChildren[i].is_leaf():
-						next_level_apChildren.extend(apChildren[i].get_children())
-			#global number_performed_test
-			number_performed_test += len(next_level_apChildren)		
+					aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]] )
+					if (not Current_Family_Children[i].is_leaf()) and aP[i]/(len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1])) <= fQ:
+						next_level_apChildren.append(Current_Family_Children[i])
+						print "Gray area with p-value:", aP[i]
+					elif Current_Family_Children[i].is_leaf():
+						print "End of branch, leaf!"
+					else:
+						print "Bypass, no hope to find an association in the branch with p-value: ",aP[i]," and ",len(Current_Family_Children[i].get_children()), " children."
+			#global number_performed_test		
 			#print "No association in:", apChildren
-			apChildren = next_level_apChildren
+			if not apChildren:
+				number_performed_test += len(next_level_apChildren)
+				apChildren = next_level_apChildren
+				level += 1
+				next_level_apChildren =[]
 												
 		return aFinal, aOut
 	
@@ -2323,8 +2333,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 	#======================================#
 	# Execute 
 	#======================================#
-	aFinal, aOut = _simple_descending_test()
-	#aFinal, aOut = _bh_descending_test()
+	#aFinal, aOut = _simple_descending_test()
+	aFinal, aOut = _ybh_descending_test()
 	'''aiI,aiJ = map( array, pTree.get_data() )
 	fQParent = pMethod( pArray1[aiI], pArray2[aiJ] )
 	aOut.append( [pTree.get_data(), float(fQParent)] )
