@@ -905,7 +905,7 @@ def _is_stop(ClusterNode, X, func, distance, cluster_threshold ):
 		#bTauY = ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
 		node_indeces = reduce_tree(ClusterNode)
 		#bTauX = (halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6)# x_threshold)
-		if ClusterNode.is_leaf() or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .85:#or len(node_indeces) < 2 or ClusterNode.dist< distance:#or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6:
+		if ClusterNode.is_leaf():# or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .85:#or len(node_indeces) < 2 or ClusterNode.dist< distance:#or halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6:
 			#print "Good Stop",ClusterNode.dist 
 			#print "PC1 in stop:", halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0], node_indeces
 			return True
@@ -995,7 +995,6 @@ def _cutree_to_log2 (apNode, X, func, distance, cluster_threshold ):
 	return set(temp_apChildren)
 def _cutree_combination (clusterNodelist, X, func, distance, cluster_threshold ):
 	print "Distance: ", distance
-	sub_clusters = []
 	clusterNode = clusterNodelist
 	#node = clusterNode[0]
 	n = clusterNode[0].get_count()
@@ -1003,30 +1002,33 @@ def _cutree_combination (clusterNodelist, X, func, distance, cluster_threshold )
 	while clusterNode :
 		temp_apChildren = []
 		sub_clusterNode = truncate_tree( clusterNode, level = 0, skip = 1 )
+		for node in clusterNode:
+			if node.is_leaf():
+				sub_clusterNode += [node]
 		if sub_clusterNode:
 			for node in sub_clusterNode:
 				if _is_start(node ,X, func, distance, cluster_threshold):
 					sub_clusters.append(node)
-					#print "In start: ",reduce_tree(node)
-					#print "Pass with distance:", node.dist
-				#elif not _is_stop(node, X= None, func = None, distance = distance ):
 				else:
 				#if not any((halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .6 and not _min_tau(X[array(node_indeces)], func) < x_threshold) for node_indeces in data):
 				#if any(_mean_tau(X[array(node_indeces)], func) < .1 for node_indeces in data):
 					#print "byPass apChildren1"
 					#apChildren1Temp = []
-					truncated_result = truncate_tree( [node], level = 0, skip = 1 )
+					if not node.is_leaf():
+						truncated_result = truncate_tree( [node], level = 0, skip = 1 )
+					else:
+						truncated_result = [node]	
 					if truncated_result:
 						temp_apChildren += truncated_result
 	
 		clusterNode = temp_apChildren
 	#print len(sub_clusters), n
-	next_dist = distance * .5
+	next_dist = distance - 0.1 
 	aDist = []
 	for i in range(len(sub_clusters)):
 		if sub_clusters[i].dist > 0.0:
 			aDist += [sub_clusters[i].dist]
-	while len(sub_clusters) < round(math.sqrt(n)) and len(sub_clusters) > 1:
+	while len(sub_clusters) < round(math.sqrt(n)) :# and len(sub_clusters) > 1:
 		aDist = []
 		max_dist_node = sub_clusters[0]
 		for i in range(len(sub_clusters)):
@@ -1036,8 +1038,8 @@ def _cutree_combination (clusterNodelist, X, func, distance, cluster_threshold )
 				max_dist_node = sub_clusters[i]
 		print "Max Distance in this level", _percentage(max_dist_node.dist)
 		if not max_dist_node.is_leaf():
-			sub_clusters.remove(max_dist_node)
 			sub_clusters += truncate_tree( [max_dist_node], level = 0, skip = 1 )
+			sub_clusters.remove(max_dist_node)
 		else:
 			break
 	if 	aDist:
@@ -1151,9 +1153,9 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 		if distance2 > 0.0:
 			new_distance = numpy.min([distance1, distance2])
 		else:
-			new_distance = .5 * distance1
+			new_distance = distance1 - 0.1
 	elif distance2 > 0.0:
-		new_distance = .5 * distance1
+		new_distance = distance2 - 0.1
 	else: 
 		new_distance = 0.0
 	print "new_distance",new_distance
@@ -1163,14 +1165,14 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 	Establish the root of the coupling tree based on based matched clusters in
 	the first layer of relevent depth
 	'''	
-	min_nmi = 0.0
+	max_nmi = 0.0
 	for node1 in apChildren1:
 		for node2 in apChildren2:
 			data1 = reduce_tree( node1 )
 			data2 = reduce_tree( node2 )
 			temp_nmi = func (pca(X[array(data1)])[0] , pca(Y[array(data2)])[0])
-			if min_nmi < temp_nmi:
-				min_nmi = temp_nmi
+			if max_nmi < temp_nmi:
+				max_nmi = temp_nmi
 				pStump = Tree([data1,data2])
 	aOut.append(pStump)
 	'''
@@ -1189,24 +1191,15 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 	distance = new_distance
 	next_L = []
 	while L:
-		#print "Start list", L
 		
 		(pStump, (a,b)) = L.pop(0)
-		#print "after pop", L 
-		#for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
 		
 		data1 = reduce_tree( a )
 		data2 = reduce_tree( b )
-		#print data1, data2
-		#pStump = Tree([data1,data2])
-		#if len(data1) <= 2 or len(data2) <= 2:
-		#	continue		
+				
 		bTauX = _is_stop(a, X, func, distance = distance, cluster_threshold = x_threshold)# ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
 		bTauY = _is_stop(b, Y, func, distance = distance, cluster_threshold = y_threshold)#( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
-		#bTauX = (halla.stats.pca_explained_variance_ratio_(X[array(data1)])[0] > .8 or _mean_tau(X[array(data1)], func) >= .6)# x_threshold)
-		#bTauY = (halla.stats.pca_explained_variance_ratio_(Y[array(data2)])[0] > .8 or _mean_tau(Y[array(data2)], func) >= .6)# y_threshold)
 		if (bTauX == True) and (bTauY == True):
-			#aOut.append( pStump ) ### Do not continue on, since alpha threshold has been met.
 			continue
 
 		apChildren1 = [a]
@@ -1219,16 +1212,8 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 		if not bTauY:
 			apChildren2, distance2 = _cutree_combination([b],  Y, func, distance = distance, cluster_threshold =y_threshold)
 
-			#print "Children 2: "#,apChildren2
-			#for node in apChildren2:
-				#print reduce_tree(node)
-		##Children should _already be_ adjusted for depth 
-		#if not(any(apChildren1)) or not(any(apChildren2)):
-			#aOut.append( pStump )
-			#continue
 		new_distance = numpy.min([distance1, distance2])
 		LChild = [(a,b) for a,b in itertools.product( apChildren1, apChildren2 )] 
-		
 		#print "After appending", L 
 		childList = []
 		while LChild:
@@ -1241,8 +1226,8 @@ def couple_tree_iterative( apClusterNode1, apClusterNode2, pArray1, pArray2, afT
 			tempTree = Tree([data1,data2])
 			childList.append(tempTree)
 			#print childList
-			if len(data1) > 1 or len(data2) > 1:
-				next_L.append((tempTree, (a1,b1)))
+			#if len(data1) > 1 or len(data2) > 1:
+			next_L.append((tempTree, (a1,b1)))
 			#print L					
 		pStump.add_children( childList )
 		if not L:
@@ -2060,12 +2045,11 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		apChildren = [pTree]
 		level = 1
 		global number_performed_test
-		number_performed_test += len(apChildren)
-		next_level_apChildren =[]
+		
+		next_level_apChildren = []
 		while apChildren:
 			Current_Family_Children = apChildren.pop(0).get_children()
-			
-			print "Level in hypotheses testing tree: ",level
+			number_performed_test += len(Current_Family_Children)
 			aP = [ _actor( c ) for c in Current_Family_Children ]
 			aP_adjusted = halla.stats.p_adjust( aP, fQ )
 			pRank = scipy.stats.rankdata( aP, method='ordinal')
@@ -2083,9 +2067,9 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 					aFinal.append( [Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]] )
 				else :
 					aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]] )
-					if (not Current_Family_Children[i].is_leaf()) and aP[i]/(len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1])) <= fQ:
-						next_level_apChildren.append(Current_Family_Children[i])
+					if (not Current_Family_Children[i].is_leaf()) :#and aP[i]*level/(len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1])) <= fQ:
 						print "Gray area with p-value:", aP[i]
+						next_level_apChildren.append(Current_Family_Children[i])
 					elif Current_Family_Children[i].is_leaf():
 						print "End of branch, leaf!"
 					else:
@@ -2093,7 +2077,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 			#global number_performed_test		
 			#print "No association in:", apChildren
 			if not apChildren:
-				number_performed_test += len(next_level_apChildren)
+				print "Hypotheses testing for level ",level," is finished."
+				#number_performed_test += len(next_level_apChildren)
 				apChildren = next_level_apChildren
 				level += 1
 				next_level_apChildren =[]

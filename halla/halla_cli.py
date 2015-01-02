@@ -24,7 +24,7 @@ Description: Halla command python wrapper.
 #SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #####################################################################################
 
-__author__ = "G. Ali Rahnavard, Yo Sup Moon, George Weingart"
+__author__ = "Gholamali Rahnavard, Yo Sup Moon, George Weingart"
 __copyright__ = "Copyright 2014"
 __credits__ = ["Yo Sup Moon","George Weingart"]
 __license__ = "MIT"
@@ -204,8 +204,9 @@ def _main(  ):
 	#print(str(H.meta_alla))
 	csvw = csv.writer( args.ostm, csv.excel_tab )
 	bcsvw = csv.writer( args.bostm, csv.excel_tab )
-	csvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
-	bcsvw.writerow( ["## HAllA preset: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
+	csvw.writerow( ["Method: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
+	bcsvw.writerow( ["Method: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
+	
 	#if H._is_meta( aaOut ):
 	#	if H._is_meta( aaOut[0] ):
 	#		for i,aOut in enumerate(aaOut):
@@ -221,11 +222,16 @@ def _main(  ):
 	#	for line in aOut:
 	#			csvw.writerow( line )
 	
-	# if we have just one input file
+	# Columns title
+	# if we have just one input file 
 	if args.Y ==None:
-		csvw.writerow( [istm[0].name, istm[0].name, "p-value"] )
+		csvw.writerow( [istm[0].name, istm[0].name, "nominal p-value", "adjusted p-value"] )
+		bcsvw.writerow( [istm[0].name, istm[0].name, "nominal p-value", "adjusted p-value"] )
 	else:
-		csvw.writerow( [args.X.name, args.Y.name, "p-value"] )
+		csvw.writerow( [args.X.name, args.Y.name, "p-value", "adjusted p-value"] )
+		bcsvw.writerow( [args.X.name, args.Y.name, "p-value", "adjusted p-value"] )
+	
+	
 	#print 'aaOut:', aaOut
 	#print 'aaOut[0]', aaOut[0]
 	for line in aaOut:
@@ -236,9 +242,12 @@ def _main(  ):
 		csvw.writerow( aLineOut )
 	#print 'H:', H.meta_alla
 	#print 'H[0]', H.meta_alla[0]
-
+	associated_feature_X_indecies =  []
+	associated_feature_Y_indecies = []
 	for line in H.meta_alla[0]:
 		iX, iY = line[0]
+		associated_feature_X_indecies += iX
+		associated_feature_Y_indecies += iY
 		fP = line[1]
 		fP_adjust = line[2]
 		aLineOut = map(str,[str(';'.join(aOutName1[i] for i in iX)),str(';'.join(aOutName2[i] for i in iY)), fP, fP_adjust])

@@ -379,7 +379,7 @@ def bh( afPVAL, q ):
 	iLen = len(afPVAL)
 	for i, fP in enumerate(afPVAL):
 		#fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
-		fAdjusted = q*1.0*pRank[i]/iLen#iLenReduced
+		fAdjusted = q*1.0*pRank[i]/iLen #iLenReduced
 		
 		aOut.append(fAdjusted)
 	#print aOut
@@ -544,7 +544,7 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 
 		#aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	
-	fPercentile = percentileofscore( aDist, fAssociation, kind="strict" ) ##source: Good 2000   CEll? 617-851-6849
+	fPercentile = percentileofscore( aDist, fAssociation, kind="strict" ) ##source: Good 2000  
 	### \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
 	### k number of iterations, \hat{X} is randomized version of X 
 	### PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 

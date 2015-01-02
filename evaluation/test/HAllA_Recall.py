@@ -75,7 +75,7 @@ def _main( ):
         
         #Generate simulated datasets
         number_features = 9 + i
-        number_samples = 200 + i*5
+        number_samples = 150 + i*5
         number_blocks = 3 + int(i/3)
         print 'Synthetic Data Generation ...'
         '''X = data.simulateData(number_features,number_samples,number_blocks , .95, .05)
