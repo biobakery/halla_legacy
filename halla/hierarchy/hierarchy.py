@@ -1010,14 +1010,8 @@ def _cutree_combination (clusterNodelist, X, func, distance, cluster_threshold )
 				if _is_start(node ,X, func, distance, cluster_threshold):
 					sub_clusters.append(node)
 				else:
-				#if not any((halla.stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .6 and not _min_tau(X[array(node_indeces)], func) < x_threshold) for node_indeces in data):
-				#if any(_mean_tau(X[array(node_indeces)], func) < .1 for node_indeces in data):
-					#print "byPass apChildren1"
-					#apChildren1Temp = []
 					if not node.is_leaf():
-						truncated_result = truncate_tree( [node], level = 0, skip = 1 )
-					else:
-						truncated_result = [node]	
+						truncated_result = truncate_tree( [node], level = 0, skip = 1 )	
 					if truncated_result:
 						temp_apChildren += truncated_result
 	
@@ -2318,8 +2312,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 	#======================================#
 	# Execute 
 	#======================================#
-	aFinal, aOut = _simple_descending_test()
-	#aFinal, aOut = _ybh_descending_test()
+	#aFinal, aOut = _simple_descending_test()
+	aFinal, aOut = _ybh_descending_test()
 	'''aiI,aiJ = map( array, pTree.get_data() )
 	fQParent = pMethod( pArray1[aiI], pArray2[aiJ] )
 	aOut.append( [pTree.get_data(), float(fQParent)] )
