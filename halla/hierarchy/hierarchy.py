@@ -1004,7 +1004,7 @@ def _cutree_combination (clusterNodelist, X, func, distance, cluster_threshold )
 		sub_clusterNode = truncate_tree( clusterNode, level = 0, skip = 1 )
 		for node in clusterNode:
 			if node.is_leaf():
-				sub_clusterNode += [node]
+				sub_clusterNode.append(node)
 		if sub_clusterNode:
 			for node in sub_clusterNode:
 				if _is_start(node ,X, func, distance, cluster_threshold):
@@ -2318,8 +2318,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 	#======================================#
 	# Execute 
 	#======================================#
-	#aFinal, aOut = _simple_descending_test()
-	aFinal, aOut = _ybh_descending_test()
+	aFinal, aOut = _simple_descending_test()
+	#aFinal, aOut = _ybh_descending_test()
 	'''aiI,aiJ = map( array, pTree.get_data() )
 	fQParent = pMethod( pArray1[aiI], pArray2[aiJ] )
 	aOut.append( [pTree.get_data(), float(fQParent)] )

@@ -52,7 +52,7 @@ def _main( ):
     mean_recall = []
     mean_fdr = []
     
-    number_of_simulation = 1
+    number_of_simulation = 5
     s = strudel.Strudel()
     #number_samples = 10
     #number_blocks = 2 

@@ -13,7 +13,7 @@ Version 0.0.1
 -------------------------------------------------------
 
 Authors
- Yo Sup Moon, Curtis Huttenhower
+ Gholamali Rahnavard, Yo Sup Moon, Curtis Huttenhower
 
 Google Group
  halla-users: https://groups.google.com/forum/#!forum/halla-users
@@ -117,6 +117,7 @@ HAlLA by default takes a tab-delimited text file as an input, where each row des
 	| Data2 | 1.5     | 100.2   | -30.7  |
 	+-------+---------+---------+--------+
 
+Note: as the inputs datasets have the same samples, the input files must not have sample headers
 
 Output 
 -----------------------------------------------
@@ -138,7 +139,7 @@ Advanced
 
 The following is a list of all available arguments that can be passed into halla:: 
 
-	usage: halla.py [-h] [-o output.txt] [-p p_value] [-P p_mi] [-b bootstraps] [-v verbosity] [input.txt]
+	usage: halla_cli.py -X inputfile1.tx -Y inputfile2.txt -q p-value -b output_for_associations.txt -c out_for_clusters.txt [-h] [-o output.txt] [-v verbosity] 
 
 	Hierarchical All-against-All significance association testing.
 
@@ -153,13 +154,14 @@ The following is a list of all available arguments that can be passed into halla
 	  -P p_mi        P-value for permutation equivalence of MI clusters
 	  -b bootstraps  Number of bootstraps for significance testing
 	  -v verbosity   Debug logging level; increase for greater verbosity
+          -x  method that want to use, the default is HAllA-PCA-NMI
 
 Mini-tutorial
 ---------------------------------------------------
 
-Suppose you have a tab-delimited file containing the dataset you wish to run halla on. We will call this file `in.txt`. We will call the output file `out.txt`. In the root directory of halla, one can type::
+Suppose you have two tab-delimited file containing the datasets you wish to run halla on. We will call this files `input1.txt` and `input2.txt`. We will call the output file `associations.txt`. In the root directory of halla, one can type::
 	
-	$ python halla.py in.txt > out.txt 
+	$ python halla_cli.py -X input1.txt -Y input2.txt -q .2 -x "HAllA-PCA-NMI" -b output.txt
 
 To obtain the output in `out.txt`. 
 	
