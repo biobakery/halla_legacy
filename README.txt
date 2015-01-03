@@ -118,6 +118,7 @@ HAlLA by default takes a tab-delimited text file as an input, where each row des
 	+-------+---------+---------+--------+
 
 Note: as the inputs datasets have the same samples, the input files must not have sample headers
+
 Output 
 -----------------------------------------------
 
@@ -153,7 +154,7 @@ The following is a list of all available arguments that can be passed into halla
 	  -P p_mi        P-value for permutation equivalence of MI clusters
 	  -b bootstraps  Number of bootstraps for significance testing
 	  -v verbosity   Debug logging level; increase for greater verbosity
-         -x  method that want to use, the default is HAllA-PCA-NMI
+          -x  method that want to use, the default is HAllA-PCA-NMI
 
 Mini-tutorial
 ---------------------------------------------------
