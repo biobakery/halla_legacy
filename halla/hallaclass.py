@@ -5,21 +5,13 @@ import sys
 sys.path.append('/Users/rah/Documents/Hutlab/halla')
 sys.path.append('/Users/rah/Documents/Hutlab/strudel')
 ## structural packages 
-import argparse
-import csv
 import itertools
-import logging
-import os
-import sys
 import numpy as np
 from numpy import array
 import halla
 #from halla import distance, stats
 from halla.distance import *
-import halla.distance
 from halla.hierarchy import *
-from halla.parser import Input, Output
-import halla.parser
 from halla.plot import *
 from halla.stats import *
 import math
@@ -65,14 +57,10 @@ class HAllA():
 		# sigma  
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-		self.start_parameter = 0.0   ## a value between 0.0 and 1.0; 0.0 performs the simplest comparison at the top of the tree; 
-		## 1.0 starts in the bottom 
-
 		#------------------------------------------------#
 		# Randomization and multiple correction  methods 
 		#------------------------------------------------#
 
-		self.alpha = 0.1 ### Within covariance cut-off value 
 		self.q = 0.2 ### Between covariance cut-off value
 		self.iterations = 1000
 		self.p_adjust_method = "BH"
@@ -344,16 +332,6 @@ class HAllA():
 	# Helper Functions 
 	#==========================================================# 
 
-	def _threshold( self ):
-		"""
-		Threshold association values in X and Y based on alpha cutoff. 
-		This determines the line where the features are indistinguishable. 
-		"""
-		#print 'Threshold'
-		self.meta_threshold = map( lambda x : halla.stats.alpha_threshold( x, self.alpha, func = self.distance ), self.meta_array )
-		#print 'End Threshold'
-		return self.meta_threshold 
-
 	def _discretize( self ):
 		self.meta_feature = self.m( self.meta_array, discretize )
 		# Should do a better job at detecting whether dataset is categorical or continuous
@@ -385,7 +363,7 @@ class HAllA():
 		
 		self.meta_hypothesis_tree = couple_tree(apClusterNode1 =[self.meta_data_tree[0]], 
 				apClusterNode2 = [self.meta_data_tree[1]], 
-				pArray1 = self.meta_array[0], pArray2 = self.meta_array[1], afThreshold = self.meta_threshold, fAlpha = self.alpha, func = self.distance )[0]
+				pArray1 = self.meta_array[0], pArray2 = self.meta_array[1], afThreshold = self.meta_threshold, func = self.distance )[0]
 		
 		## remember, `couple_tree` returns object wrapped in list 
 		return self.meta_hypothesis_tree 
@@ -403,7 +381,7 @@ class HAllA():
 		if self.verbose:
 			print ("HAllA PROMPT: q value", fQ)
 			print ("q value is", fQ)
-		self.meta_alla = all_against_all( self.meta_hypothesis_tree, self.meta_array[0], self.meta_array[1], method = strMethod, fQ = self.q, fAlpha = self.alpha, bVerbose = self.verbose, start_parameter = self.start_parameter ) 
+		self.meta_alla = all_against_all( self.meta_hypothesis_tree, self.meta_array[0], self.meta_array[1], method = strMethod, fQ = self.q, bVerbose = self.verbose ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
 	
@@ -614,9 +592,6 @@ class HAllA():
 	def set_q( self, fQ ):
 		self.q = fQ
 
-	def set_alpha( self, fA ):
-		self.alpha = fA
-
 	def set_summary_method( self, strMethod ):
 		self.summary_method = strMethod 
 		return self.summary_method 
@@ -659,9 +634,6 @@ class HAllA():
 
 	def set_verbose( self, bBool = True ):
 		self.verbose = bBool 
-
-	def set_start_parameter( self, fParam ):
-		self.start_parameter = fParam
 
 	def set_preset( self, strPreset ):
 		try:
@@ -912,13 +884,14 @@ class HAllA():
 		print("--- %s seconds: _featurize ---" % (time.time() - start_time))
 		start_time = time.time()
 		#self._threshold( )
-		print("--- %s seconds: _threshold ---" % (time.time() - start_time))
+		#print("--- %s seconds: _threshold ---" % (time.time() - start_time))
 		start_time = time.time()
 		self._hclust( )
 		print("--- %s seconds: _hclust ---" % (time.time() - start_time))
 		start_time = time.time()
 		self._couple( )
 		print("--- %s seconds: _couple ---" % (time.time() - start_time))
+		print("Association hypotheses testing is started.....this may takes longer ....")
 		start_time = time.time()
 		self._all_against_all( )
 		print("--- %s seconds: _all_against_all ---" % (time.time() - start_time))
@@ -1131,7 +1104,7 @@ class HAllA():
 
 		"""
 
-		if self.start_parameter == 1.0 or self.q == 1.0:
+		if self.q == 1.0:
 			strMethod = "naive"
 			return self.hash_preset[strMethod]( )
 		else:

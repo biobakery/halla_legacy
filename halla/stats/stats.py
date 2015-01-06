@@ -385,7 +385,7 @@ def bh( afPVAL, q ):
 	#print aOut
 	#assert( all(map(lambda x: x <= 1.0, aOut)) ) ##sanity check 
 
-	return aOut 
+	return aOut, pRank 
 
 def p_adjust( pval, q, method = "BH" ):
 	"""
@@ -712,7 +712,7 @@ def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 1000 
 	pMe = pHashMetric[strMetric] 
 
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function
-	#pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+	#pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(py.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 
 	#### Calculate Point Estimate 
 	pRep1, pRep2 = cca( pArray1, pArray2 )
@@ -726,7 +726,7 @@ def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 1000 
 		XP = array([numpy.random.permutation(x) for x in X])
 		YP = array([numpy.random.permutation(y) for y in Y])
 
-		#pRep1_, pRep2_ = [ discretize( pDe( pA ) )[0] for pA in [XP,YP] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+		#pRep1_, pRep2_ = [ discretize( pDe( pA ) )[0] for pA in [XP,YP] ] if bool(py.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 
 		pRep1_, pRep2_ = cca( XP, YP )
 
@@ -745,7 +745,7 @@ def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 1000 
 	
 	#aDist = [pMetric( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
 	
-	#aDist = numpy.array([ halla.distance.norm_mi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
+	#aDist = numpy.array([ py.distance.norm_mi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
 	#aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
 	## BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iIter iterations of PCA
@@ -789,7 +789,7 @@ def permutation_test_by_pls( pArray1, pArray2, metric = "norm_mi", iIter = 1000 
 	pMe = pHashMetric[strMetric] 
 
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function
-	#pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+	#pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(py.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 
 	#### Calculate Point Estimate 
 	pRep1, pRep2 = pls( pArray1, pArray2 )
@@ -803,7 +803,7 @@ def permutation_test_by_pls( pArray1, pArray2, metric = "norm_mi", iIter = 1000 
 		XP = array([numpy.random.permutation(x) for x in X])
 		YP = array([numpy.random.permutation(y) for y in Y])
 
-		#pRep1_, pRep2_ = [ discretize( pDe( pA ) )[0] for pA in [XP,YP] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+		#pRep1_, pRep2_ = [ discretize( pDe( pA ) )[0] for pA in [XP,YP] ] if bool(py.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 
 		pRep1_, pRep2_ = pls( XP, YP )
 
@@ -822,7 +822,7 @@ def permutation_test_by_pls( pArray1, pArray2, metric = "norm_mi", iIter = 1000 
 	
 	#aDist = [pMetric( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
 	
-	#aDist = numpy.array([ halla.distance.norm_mi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
+	#aDist = numpy.array([ py.distance.norm_mi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
 	#aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
 	## BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iIter iterations of PCA

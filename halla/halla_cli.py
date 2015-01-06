@@ -1,5 +1,5 @@
 """
-Author: G. Ali Rahnavard, Yo Sup Moon,  George Weingart
+Author: Gholamali Rahnavard, Yo Sup Moon,  George Weingart
 Description: Halla command python wrapper.
 """
 
@@ -28,7 +28,7 @@ __author__ = "Gholamali Rahnavard, Yo Sup Moon, George Weingart"
 __copyright__ = "Copyright 2014"
 __credits__ = ["Yo Sup Moon","George Weingart"]
 __license__ = "MIT"
-__maintainer__ = "George Weingart"
+__hallatainer__ = "George Weingart"
 __email__ = "george.weingart@gmail.com"
 __status__ = "Development"
 
@@ -64,6 +64,13 @@ import halla.parser
 from halla.plot import *
 from halla.stats import *
 #from halla.test import *
+from numpy import *
+import scipy as sp
+from pandas import *
+from rpy2.robjects.packages import importr
+import rpy2.robjects as ro
+import pandas.rpy.common as com
+import rpy2.robjects.numpy2ri
 
 
 ## internal dependencies 
@@ -85,32 +92,32 @@ def _main(  ):
  
  #**************************************************************************************
  #*  Change by George Weingart 2014/03/21                                              *
- #*  Moved the parsing into the _main subroutine                                       *
+ #*  Moved the parsing into the _halla subroutine                                       *
  #**************************************************************************************
  	argp = argparse.ArgumentParser( prog = "halla.py",
 			description = "Hierarchical All-against-All significance association testing." )
+			
+	argp.add_argument( "-X",              metavar = "Xinput.txt",   
+			type  =   argparse.FileType( "r" ),        default = sys.stdin,      
+			help = "First file: Tab-delimited text input file, one row per feature, one column per measurement" )		
+			
+	argp.add_argument( "-Y",              metavar = "Yinput.txt",   
+			type  =   argparse.FileType( "r" ),        default = None,    
+			help = "Second file: Tab-delimited text input file, one row per feature, one column per measurement - If not selected, we will use the first file (-X)" )
 
-
-	argp.add_argument( "-o",                dest = "ostm",                  metavar = "output.txt",
-			type = argparse.FileType( "w" ),        default = "all_association_results",
+	argp.add_argument( "-b",                dest = "ostm",                  metavar = "one_by_one.txt",
+			type = argparse.FileType( "w" ),        default = "all_association_results_one_by_one",
 			help = "Optional output file for association significance tests" )
 	argp.add_argument( "-c",                dest = "costm",                  metavar = "clusters_output.txt",
 			type = argparse.FileType( "w" ),        default = "all_compared_clusters",
 			help = "Optional output file for all compared clusters" )
-	argp.add_argument( "-b",                dest = "bostm",                  metavar = "blocked_output.txt",
-			type = argparse.FileType( "w" ),        default = sys.stdout,
+	argp.add_argument( "-o",                dest = "bostm",                  metavar = "output.txt", #default = "sys.stdout
+			type = argparse.FileType( "w" ),        default = "output.txt",
 			help = "Optional output file for blocked association significance tests" )
-	argp.add_argument( "-alpha",                dest = "fA",                    metavar = "alpha",
-			type = float,   default = 0.25,
-			help = "Within covariance cut-off value" )
 
 	argp.add_argument( "-q",                dest = "dQ",                    metavar = "q_value",
 			type = float,   default = 0.1,#it was 0.05!!! Ali
 			help = "Q-value for overall significance tests" )
-
-	argp.add_argument( "-s",                dest = "fS",                    metavar = "start_parameter",
-			type = float,   default = 0.0,#it was 0.25!!! Ali
-			help = "Start parameter; [0.0,1.0]" )
 
 	argp.add_argument( "-i",                dest = "iIter",    metavar = "iterations",
 			type = int,             default = 1000,
@@ -124,24 +131,14 @@ def _main(  ):
 		type  = str, 		default = "default",
         help = "Exploration function" )
 
-	#argp.add_argument( "-f",                dest = "fFlag",         action = "store_true",
-	#		help = "A flag set to true if provided" )
-
 	argp.add_argument( "-x", 		dest = "strPreset", 	metavar = "preset",
-			type  = str, 		default = "",
+			type  = str, 		default = "HAllA-PCA-NMI",
 			help = "Instead of specifying parameters separately, use a preset" )
 
 	argp.add_argument( "-m", 		dest = "strMetric", 	metavar = "metric",
 			type  = str, 		default = "norm_mi",
 			help = "Metric to be used for hierarchical clustering" )
-			
-	argp.add_argument( "-X",              metavar = "Xinput.txt",   
-			type  =   argparse.FileType( "r" ),        default = sys.stdin,      
-			help = "First file: Tab-delimited text input file, one row per feature, one column per measurement" )		
-			
-	argp.add_argument( "-Y",              metavar = "Yinput.txt",   
-			type  =   argparse.FileType( "r" ),        default = None,    
-			help = "Second file: Tab-delimited text input file, one row per feature, one column per measurement - If not selected, we will use the first file (-X)" )		
+		
 			
 	args = argp.parse_args( )
 	istm = list()						#We are using now X and Y 
@@ -189,80 +186,148 @@ def _main(  ):
 	H = HAllA( array(aOutData1), array(aOutData2) )
 
 	H.set_q( args.dQ )
-	H.set_alpha(args.fA)
 	H.set_iterations( args.iIter )
 	H.set_metric( args.strMetric )
-	H.set_start_parameter( args.fS )
 
 	if args.strPreset: 
-		print "User Preset"
-		#aaOut = H.set_preset( args.strPreset )
 		aaOut = H.run( strMethod = args.strPreset )
 	else:
 		aaOut = H.run( )
-	#print('Hi',aaOut)
-	#print(str(H.meta_alla))
-	csvw = csv.writer( args.ostm, csv.excel_tab )
-	bcsvw = csv.writer( args.bostm, csv.excel_tab )
-	csvw.writerow( ["Method: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
-	bcsvw.writerow( ["Method: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
 	
-	#if H._is_meta( aaOut ):
-	#	if H._is_meta( aaOut[0] ):
-	#		for i,aOut in enumerate(aaOut):
-	#			csvw.writerow( ["p-value matrix: " + str(i+1)] )
-	#			for line in aOut:
-	#				csvw.writerow( line )
-	#	else:
-	#		aOut = aaOut
-	#		for line in aOut:
-	#			csvw.writerow( line )	
-	#else:
-	#	aOut = aaOut
-	#	for line in aOut:
-	#			csvw.writerow( line )
-	
-	# Columns title
-	# if we have just one input file 
-	if args.Y ==None:
-		csvw.writerow( [istm[0].name, istm[0].name, "nominal p-value", "adjusted p-value"] )
-		bcsvw.writerow( [istm[0].name, istm[0].name, "nominal p-value", "adjusted p-value"] )
-	else:
-		csvw.writerow( [args.X.name, args.Y.name, "p-value", "adjusted p-value"] )
-		bcsvw.writerow( [args.X.name, args.Y.name, "p-value", "adjusted p-value"] )
-	
-	
-	#print 'aaOut:', aaOut
-	#print 'aaOut[0]', aaOut[0]
-	for line in aaOut:
-		iX, iY = line[0]
-		fP = line[1]
-		fP_adjust = line[2]
-		aLineOut = map(str,[aOutName1[iX], aOutName2[iY], fP, fP_adjust])
-		csvw.writerow( aLineOut )
-	#print 'H:', H.meta_alla
-	#print 'H[0]', H.meta_alla[0]
-	associated_feature_X_indecies =  []
-	associated_feature_Y_indecies = []
-	for line in H.meta_alla[0]:
-		iX, iY = line[0]
-		associated_feature_X_indecies += iX
-		associated_feature_Y_indecies += iY
-		fP = line[1]
-		fP_adjust = line[2]
-		aLineOut = map(str,[str(';'.join(aOutName1[i] for i in iX)),str(';'.join(aOutName2[i] for i in iY)), fP, fP_adjust])
-		bcsvw.writerow( aLineOut )
-	
-	csvwc = csv.writer(args.costm , csv.excel_tab )
-	csvwc.writerow( ['Level', "Dataset 1","Dataset 2" ] )
-	for line in halla.hierarchy.reduce_tree_by_layer([H.meta_hypothesis_tree]):
-		(level, clusters ) = line
-		iX, iY = clusters[0], clusters[1]
-		fP = line[1]
-		#fP_adjust = line[2]
-		aLineOut = map(str,[str(level),str(';'.join(aOutName1[i] for i in iX)),str(';'.join(aOutName2[i] for i in iY))])
-		csvwc.writerow( aLineOut )
- 	
+	def _report():
+		csvw = csv.writer( args.ostm, csv.excel_tab )
+		bcsvw = csv.writer( args.bostm, csv.excel_tab )
+		csvw.writerow( ["Method: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
+		bcsvw.writerow( ["Method: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
+		
+		#if H._is_meta( aaOut ):
+		#	if H._is_meta( aaOut[0] ):
+		#		for i,aOut in enumerate(aaOut):
+		#			csvw.writerow( ["p-value matrix: " + str(i+1)] )
+		#			for line in aOut:
+		#				csvw.writerow( line )
+		#	else:
+		#		aOut = aaOut
+		#		for line in aOut:
+		#			csvw.writerow( line )	
+		#else:
+		#	aOut = aaOut
+		#	for line in aOut:
+		#			csvw.writerow( line )
+		
+		# Columns title
+		# if we have just one input file 
+		filename = "./output_plots/"
+		dir = os.path.dirname(filename)
+		try:
+			os.stat(dir)
+		except:
+			os.mkdir(dir)
+		if args.Y ==None:
+			csvw.writerow( [istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"] )
+			bcsvw.writerow( [istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"] )
+		else:
+			csvw.writerow( [args.X.name, args.Y.name, "nominal-pvalue", "adjusted-pvalue"] )
+			bcsvw.writerow( [args.X.name, args.Y.name, "nominal-pvalue", "adjusted-pvalue"] )
+		
+		
+		#print 'aaOut:', aaOut
+		#print 'aaOut[0]', aaOut[0]
+		for line in aaOut:
+			iX, iY = line[0]
+			fP = line[1]
+			fP_adjust = line[2]
+			aLineOut = map(str,[aOutName1[iX], aOutName2[iY], fP, fP_adjust])
+			csvw.writerow( aLineOut )
+		#print 'H:', H.meta_alla
+		#print 'H[0]', H.meta_alla[0]
+		associated_feature_X_indecies =  []
+		associated_feature_Y_indecies = []
+		association_number = 0 
+		for line in H.meta_alla[0]:
+			association_number += 1
+			iX, iY = line[0]
+			associated_feature_X_indecies += iX
+			associated_feature_Y_indecies += iY
+			fP = line[1]
+			fP_adjust = line[2]
+			aLineOut = map(str,[str(';'.join(aOutName1[i] for i in iX)),str(';'.join(aOutName2[i] for i in iY)), fP, fP_adjust])
+			bcsvw.writerow( aLineOut )
+			import numpy as np
+			import pandas as pd
+			import matplotlib.pyplot as plt 
+			cluster1 = [aOutData1[i] for i in iX]
+			X_labels = np.array([aOutName1[i] for i in iX])
+			#cluster = np.array([aOutData1[i] for i in iX]
+			df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
+			axes = pd.tools.plotting.scatter_matrix(df, alpha=0.2)
+			filename = "./output_plots/"+"asscoiation"+str(association_number)+'/'
+			dir = os.path.dirname(filename)
+			try:
+				os.stat(dir)
+			except:
+				os.mkdir(dir)
+			#plt.tight_layout()
+			plt.savefig(filename+'Dataset_1_cluster_'+str(association_number)+'_scatter_matrix.pdf')
+			plt.figure()
+			cluster2 = [aOutData2[i] for i in iY]
+			Y_labels = np.array([aOutName2[i] for i in iY])
+			df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
+			axes = pd.tools.plotting.scatter_matrix(df, alpha=0.2)
+			#plt.tight_layout()
+			plt.savefig(filename+'Dataset_2_cluster_'+str(association_number)+'_scatter_matrix.pdf')
+			plt.figure()
+			df1 = np.array(cluster1, dtype= float)
+			df2 = np.array(cluster2, dtype= float)
+			plt.scatter(halla.stats.pca(df1),halla.stats.pca(df2), alpha=0.5)
+			plt.savefig(filename+'/association_'+str(association_number)+'.pdf')
+			plt.figure()
+			plt.close("all")
+		
+		from scipy.stats.stats import pearsonr
+		X_labels = np.array([aOutName1[i] for i in associated_feature_X_indecies])
+		Y_labels = np.array([aOutName2[i] for i in associated_feature_Y_indecies])
+		cluster1 = [aOutData1[i] for i in associated_feature_X_indecies]	
+		cluster2 = [aOutData2[i] for i in associated_feature_Y_indecies]
+		df1 = np.array(cluster1, dtype= float)
+		df2 = np.array(cluster2, dtype= float)
+		p = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
+		for i in range(len(associated_feature_X_indecies)):
+			for j in range(len(associated_feature_Y_indecies)):
+				p[i][j] = pearsonr(df1[i],df2[j])[0]
+		nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
+		for i in range(len(associated_feature_X_indecies)):
+			for j in range(len(associated_feature_Y_indecies)):
+				nmi[i][j] = distance.NormalizedMutualInformation( halla.discretize(df1[i]),halla.discretize(df2[j]) ).get_distance()
+		#print p
+		rpy2.robjects.numpy2ri.activate()
+		ro.r('library("gplots")')
+		ro.globalenv['nmi'] = nmi
+		ro.globalenv['labRow'] = X_labels 
+		ro.globalenv['labCol'] = Y_labels
+		ro.r('pdf(file = "./output_plots/NMI_heatmap.pdf")')
+		ro.r('heatmap.2(nmi, labRow = labRow, labCol = labCol)')
+		ro.r('dev.off()')
+		ro.globalenv['p'] = p
+		ro.r('pdf(file = "./output_plots/Pearson_heatmap.pdf")')
+		ro.r('heatmap.2(p, , labRow = labRow, labCol = labCol)')
+		ro.r('dev.off()')
+		#set_default_mode(NO_CONVERSION)
+		#rpy2.library("ALL")
+		#hm = halla.plot.hclust2.Heatmap( p)#, cl.sdendrogram, cl.fdendrogram, snames, fnames, fnames_meta, args = args )
+		#hm.draw()
+		#halla.plot.heatmap(D = p, filename ='./output_plots/pearson_heatmap')
+		#halla.plot.heatmap(D = nmi, filename ='./output_plots/nmi_heatmap')
+		csvwc = csv.writer(args.costm , csv.excel_tab )
+		csvwc.writerow( ['Level', "Dataset 1","Dataset 2" ] )
+		for line in halla.hierarchy.reduce_tree_by_layer([H.meta_hypothesis_tree]):
+			(level, clusters ) = line
+			iX, iY = clusters[0], clusters[1]
+			fP = line[1]
+			#fP_adjust = line[2]
+			aLineOut = map(str,[str(level),str(';'.join(aOutName1[i] for i in iX)),str(';'.join(aOutName2[i] for i in iY))])
+			csvwc.writerow( aLineOut )
+	_report()	
 if __name__ == '__main__':
-
 	_main(  )
+

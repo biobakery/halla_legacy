@@ -49,7 +49,7 @@ def simulateData(NumberOfFeatures=8, numberOfSamples=10000, numberOfBlocks=2, cl
     #f.close()
     data = data.T
                 
-    f = open('syntheticData.csv', 'w')
+    f = open('syntheticData.txt', 'w')
     f.write(' ')
     for i in range(len(data[1])):
         f.write(str(i)+' ')
@@ -67,13 +67,14 @@ def simulateData(NumberOfFeatures=8, numberOfSamples=10000, numberOfBlocks=2, cl
    # with open('syntheticData.txt', 'r') as fin:
         #print fin.read()
 def writeData(data =None, name =None, rowheader= True, colheader = False, ):
-    f = open(name+'_syntheticData.csv', 'w')
+    f = open(name+'_syntheticData.txt', 'w')
     # row numbers as header
     if colheader == True:
-        f.write(' ')
-        for i in range(len(data[1])):
-            f.write(str(i)+' ')
-            f.write(' ')
+        f.write('\t')
+        for i in range(len(data[0])):
+            f.write(str(i))
+            if i< len(data[1])-1:
+                f.write('\t')
         f.write('\n')
         
     for i in range(len(data)):
@@ -82,7 +83,8 @@ def writeData(data =None, name =None, rowheader= True, colheader = False, ):
             f.write('\t')
         for j in range(len(data[i])):
             f.write(str(data[i,j]))
-            f.write('\t')
+            if j< len(data[i])-1:
+                f.write('\t')
         f.write('\n')
     f.close() 
 

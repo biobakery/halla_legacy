@@ -179,14 +179,14 @@ def plotGridData(D):
         pylab.pcolor(Y, cmap = pylab.cm.afmhot)
         pylab.savefig('Y.pdf')
         #pylab.show()
-        dX = halla.discretize(X)
+        dX = halla1.py.discretize(X)
         pylab.pcolor(dX, cmap = pylab.cm.afmhot)
         pylab.savefig('dX.pdf')
-        dY = halla.discretize(Y)
+        dY = halla1.py.discretize(Y)
         pylab.pcolor(dY, cmap = pylab.cm.afmhot)
         pylab.savefig('dY.pdf')
         #pylab.show()
-        f = lambda x,y: halla.norm_mi(x,y)
+        f = lambda x,y: halla1.py.norm_mi(x,y)
         Dx = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dX, f ) )
         Dy = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dY, f ) )
         dendrogramHeatPlot([], 'dXDendrogram')
@@ -194,7 +194,7 @@ def plotGridData(D):
         
         
         
-def dendrogramHeatPlot(D, filename = 'Dendrogram'):
+def heatmap(D, filename = 'Dendrogram'):
     import scipy
     import pylab
     #import dot_parser
@@ -213,7 +213,7 @@ def dendrogramHeatPlot(D, filename = 'Dendrogram'):
                 D[i,j] = abs(x[i] - x[j])
                 D[j,i]=D[i,j]
     # Compute and plot first dendrogram.
-    fig = pylab.figure(figsize=(8,8))
+    fig = pylab.figure(figsize=(10,10))
     ax1 = fig.add_axes([0.09,0.1,0.2,0.6])
     Y = sch.linkage(D, method='single')
     Z1 = sch.dendrogram(Y, orientation='right')
@@ -295,4 +295,4 @@ def graphPlot():
     # and we are done!
 if __name__ == '__main__':
     _main( )
-    
+  
