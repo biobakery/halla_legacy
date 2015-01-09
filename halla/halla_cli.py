@@ -54,7 +54,6 @@ import sys
 sys.path.append('//Users/rah/Documents/Hutlab/halla')
 sys.path.append('/Users/rah/Documents/Hutlab/strudel')
 from numpy import array
-
 from halla import HAllA, distance, stats
 import halla
 from halla.distance import *
@@ -71,6 +70,7 @@ from rpy2.robjects.packages import importr
 import rpy2.robjects as ro
 import pandas.rpy.common as com
 import rpy2.robjects.numpy2ri
+import shutil
 
 
 ## internal dependencies 
@@ -94,7 +94,14 @@ def _main(  ):
  #*  Change by George Weingart 2014/03/21                                              *
  #*  Moved the parsing into the _halla subroutine                                       *
  #**************************************************************************************
- 	argp = argparse.ArgumentParser( prog = "halla.py",
+ 	filename = "./output/"
+	dir = os.path.dirname(filename)
+	try:
+		shutil.rmtree(dir)
+		os.mkdir(dir)
+	except:
+		os.mkdir(dir)
+ 	argp = argparse.ArgumentParser( prog = "halla_cli.py",
 			description = "Hierarchical All-against-All significance association testing." )
 			
 	argp.add_argument( "-X",              metavar = "Xinput.txt",   
@@ -104,19 +111,20 @@ def _main(  ):
 	argp.add_argument( "-Y",              metavar = "Yinput.txt",   
 			type  =   argparse.FileType( "r" ),        default = None,    
 			help = "Second file: Tab-delimited text input file, one row per feature, one column per measurement - If not selected, we will use the first file (-X)" )
-
-	argp.add_argument( "-b",                dest = "ostm",                  metavar = "one_by_one.txt",
-			type = argparse.FileType( "w" ),        default = "all_association_results_one_by_one",
-			help = "Optional output file for association significance tests" )
-	argp.add_argument( "-c",                dest = "costm",                  metavar = "clusters_output.txt",
-			type = argparse.FileType( "w" ),        default = "all_compared_clusters",
-			help = "Optional output file for all compared clusters" )
+	
 	argp.add_argument( "-o",                dest = "bostm",                  metavar = "output.txt", #default = "sys.stdout
-			type = argparse.FileType( "w" ),        default = "output.txt",
+			type = argparse.FileType( "w" ),        default = "./output/associations.txt",
 			help = "Optional output file for blocked association significance tests" )
 
+	argp.add_argument( "-a",                dest = "ostm",                  metavar = "one_by_one.txt",
+			type = argparse.FileType( "w" ),        default = "./output/all_association_results_one_by_one.txt",
+			help = "Optional output file to report features one bye one for association significance tests" )
+	argp.add_argument( "-c",                dest = "costm",                  metavar = "clusters_output.txt",
+			type = argparse.FileType( "w" ),        default = "./output/all_compared_clusters_hypotheses_tree.txt",
+			help = "Optional output file for hypothesis tree which includes all compared clusters" )
+	
 	argp.add_argument( "-q",                dest = "dQ",                    metavar = "q_value",
-			type = float,   default = 0.1,#it was 0.05!!! Ali
+			type = float,   default = 0.1,
 			help = "Q-value for overall significance tests" )
 
 	argp.add_argument( "-i",                dest = "iIter",    metavar = "iterations",
@@ -137,7 +145,7 @@ def _main(  ):
 
 	argp.add_argument( "-m", 		dest = "strMetric", 	metavar = "metric",
 			type  = str, 		default = "norm_mi",
-			help = "Metric to be used for hierarchical clustering" )
+			help = "Metric to be used for similarity measurement clustering" )
 		
 			
 	args = argp.parse_args( )
@@ -178,6 +186,7 @@ def _main(  ):
 
 
 	##
+	
 	aOut1, aOut2 = Input (strFile1.name, strFile2.name ).get()
 
 	(aOutData1, aOutName1, aOutType1, aOutHead1) = aOut1 
@@ -188,7 +197,8 @@ def _main(  ):
 	H.set_q( args.dQ )
 	H.set_iterations( args.iIter )
 	H.set_metric( args.strMetric )
-
+	#print "First Row", halla.stats.discretize(aOutData1)
+	#return
 	if args.strPreset: 
 		aaOut = H.run( strMethod = args.strPreset )
 	else:
@@ -197,8 +207,8 @@ def _main(  ):
 	def _report():
 		csvw = csv.writer( args.ostm, csv.excel_tab )
 		bcsvw = csv.writer( args.bostm, csv.excel_tab )
-		csvw.writerow( ["Method: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
-		bcsvw.writerow( ["Method: " + args.strPreset, "q value: " + str(args.dQ), "start parameter " + str(args.fS), "metric " + args.strMetric] )
+		csvw.writerow( ["Method: " + args.strPreset, "q value: " + str(args.dQ), "metric " + args.strMetric] )
+		bcsvw.writerow( ["Method: " + args.strPreset, "q value: " + str(args.dQ), "metric " + args.strMetric] )
 		
 		#if H._is_meta( aaOut ):
 		#	if H._is_meta( aaOut[0] ):
@@ -217,18 +227,13 @@ def _main(  ):
 		
 		# Columns title
 		# if we have just one input file 
-		filename = "./output_plots/"
-		dir = os.path.dirname(filename)
-		try:
-			os.stat(dir)
-		except:
-			os.mkdir(dir)
+		
 		if args.Y ==None:
 			csvw.writerow( [istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"] )
 			bcsvw.writerow( [istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"] )
 		else:
 			csvw.writerow( [args.X.name, args.Y.name, "nominal-pvalue", "adjusted-pvalue"] )
-			bcsvw.writerow( [args.X.name, args.Y.name, "nominal-pvalue", "adjusted-pvalue"] )
+			bcsvw.writerow( ["Association Number", args.X.name, args.Y.name, "nominal-pvalue", "adjusted-pvalue"] )
 		
 		
 		#print 'aaOut:', aaOut
@@ -244,6 +249,7 @@ def _main(  ):
 		associated_feature_X_indecies =  []
 		associated_feature_Y_indecies = []
 		association_number = 0 
+		
 		for line in H.meta_alla[0]:
 			association_number += 1
 			iX, iY = line[0]
@@ -251,7 +257,7 @@ def _main(  ):
 			associated_feature_Y_indecies += iY
 			fP = line[1]
 			fP_adjust = line[2]
-			aLineOut = map(str,[str(';'.join(aOutName1[i] for i in iX)),str(';'.join(aOutName2[i] for i in iY)), fP, fP_adjust])
+			aLineOut = map(str,[association_number, str(';'.join(aOutName1[i] for i in iX)),str(';'.join(aOutName2[i] for i in iY)), fP, fP_adjust])
 			bcsvw.writerow( aLineOut )
 			import numpy as np
 			import pandas as pd
@@ -261,7 +267,7 @@ def _main(  ):
 			#cluster = np.array([aOutData1[i] for i in iX]
 			df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
 			axes = pd.tools.plotting.scatter_matrix(df, alpha=0.2)
-			filename = "./output_plots/"+"asscoiation"+str(association_number)+'/'
+			filename = "./output/"+"association"+str(association_number)+'/'
 			dir = os.path.dirname(filename)
 			try:
 				os.stat(dir)
@@ -299,25 +305,24 @@ def _main(  ):
 		for i in range(len(associated_feature_X_indecies)):
 			for j in range(len(associated_feature_Y_indecies)):
 				nmi[i][j] = distance.NormalizedMutualInformation( halla.discretize(df1[i]),halla.discretize(df2[j]) ).get_distance()
-		#print p
 		rpy2.robjects.numpy2ri.activate()
 		ro.r('library("gplots")')
 		ro.globalenv['nmi'] = nmi
 		ro.globalenv['labRow'] = X_labels 
 		ro.globalenv['labCol'] = Y_labels
-		ro.r('pdf(file = "./output_plots/NMI_heatmap.pdf")')
+		ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
 		ro.r('heatmap.2(nmi, labRow = labRow, labCol = labCol)')
 		ro.r('dev.off()')
 		ro.globalenv['p'] = p
-		ro.r('pdf(file = "./output_plots/Pearson_heatmap.pdf")')
+		ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
 		ro.r('heatmap.2(p, , labRow = labRow, labCol = labCol)')
 		ro.r('dev.off()')
 		#set_default_mode(NO_CONVERSION)
 		#rpy2.library("ALL")
 		#hm = halla.plot.hclust2.Heatmap( p)#, cl.sdendrogram, cl.fdendrogram, snames, fnames, fnames_meta, args = args )
 		#hm.draw()
-		#halla.plot.heatmap(D = p, filename ='./output_plots/pearson_heatmap')
-		#halla.plot.heatmap(D = nmi, filename ='./output_plots/nmi_heatmap')
+		#halla.plot.heatmap(D = p, filename ='./output/pearson_heatmap')
+		#halla.plot.heatmap(D = nmi, filename ='./output/nmi_heatmap')
 		csvwc = csv.writer(args.costm , csv.excel_tab )
 		csvwc.writerow( ['Level', "Dataset 1","Dataset 2" ] )
 		for line in halla.hierarchy.reduce_tree_by_layer([H.meta_hypothesis_tree]):

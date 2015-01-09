@@ -20,7 +20,9 @@ from numpy import array
 import scipy.cluster 
 from scipy.spatial.distance import pdist
 from scipy.cluster.hierarchy import linkage, to_tree
-
+import matplotlib.pyplot as plt
+import sys
+sys.setrecursionlimit(20000)
 #==========================================================================#
 # DATA STRUCTURES 
 #==========================================================================#
@@ -29,6 +31,8 @@ from scipy.cluster.hierarchy import linkage, to_tree
 global max_dist
 max_dist = 1.0 
 
+global fig_num 
+fig_num = 1
 #class ClusterNode #scipy.cluster.hierarchy.ClusterNode
 class Tree():
 	''' 
@@ -398,7 +402,6 @@ def hclust( pArray, strMetric = "norm_mi", cluster_method = "single", bTree = Fa
 		This hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV's, not just single ones 
 		Use the "grouping property" as discussed by Kraskov paper. 
 	"""
-	import pylab
 	pMetric = halla.distance.c_hash_metric[strMetric] 
 	## Remember, pMetric is a notion of _strength_, not _distance_ 
 	#print str(pMetric)
@@ -406,10 +409,14 @@ def hclust( pArray, strMetric = "norm_mi", cluster_method = "single", bTree = Fa
 		return  1.0 - pMetric(x,y)
 
 	D = pdist( pArray, metric = pDistance )
-	#print "Distance",D    
+	#print "Distance",D
+	plt.figure()    
 	Z = linkage( D, metric = pDistance  )
-	#scipy.cluster.hierarchy.dendrogram(Z)
-	#pylab.show() 
+	scipy.cluster.hierarchy.dendrogram(Z)
+	plt.gcf()
+	global fig_num
+	plt.savefig("output/Dendrogram_" +str(fig_num)+".pdf")
+	fig_num += 1
 	#print "Linkage Matrix:", Z
 	#print fcluster(Z, .75 )
 	#print fcluster(Z, .9 )
@@ -867,7 +874,10 @@ def _next( ):
 	pass
 def _percentage(dist):
 	global max_dist
-	return float(dist)/float(max_dist)
+	if max_dist > 0:
+		return float(dist)/float(max_dist)
+	else:
+		return 0.0
 
 def _is_start(ClusterNode,  X, func, distance ):
 	#node_indeces = reduce_tree(ClusterNode)
@@ -878,7 +888,7 @@ def _is_start(ClusterNode,  X, func, distance ):
 	else: 
 		return False
 
-def _is_stop(ClusterNode, X, func, distance):
+def _is_stop(ClusterNode, X, func = 'norm_mi', distance = 0.0 ):
 		node_indeces = reduce_tree(ClusterNode)
 		if ClusterNode.is_leaf():# or py.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .85:#or len(node_indeces) < 2 or ClusterNode.dist< distance:#or py.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6:
 			return True
@@ -912,7 +922,7 @@ def _cutree_to_log2 (apNode, X, func, distance, cluster_threshold ):
 		temp_apChildren += sub_apChildren
 	#print "Number of sub-clusters: ", len(set(temp_apChildren))
 	return set(temp_apChildren)
-def _cutree (clusterNodelist, X, func, distance):
+def _cutree_overall (clusterNodelist, X, func, distance):
 	clusterNode = clusterNodelist
 	n = clusterNode[0].get_count()
 	sub_clusters = []
@@ -933,7 +943,12 @@ def _cutree (clusterNodelist, X, func, distance):
 						temp_apChildren += truncated_result
 	
 		clusterNode = temp_apChildren
-	next_dist = distance - 0.1 
+	if distance > .1:
+		next_dist = distance - 0.1 
+	elif distance > .01:
+		next_dist = distance - 0.01
+	else:
+		next_dist = 0.0
 	aDist = []
 	for i in range(len(sub_clusters)):
 		if sub_clusters[i].dist > 0.0:
@@ -956,6 +971,33 @@ def _cutree (clusterNodelist, X, func, distance):
 		next_dist = _percentage(numpy.min(aDist))
 	#print len(sub_clusters), n			
 	return sub_clusters , next_dist
+def _cutree (clusterNodelist):
+	clusterNode = clusterNodelist
+	n = clusterNode[0].get_count()
+	sub_clusters = []
+	while clusterNode :
+		temp_apChildren = []
+		sub_clusterNode = truncate_tree( clusterNode, level = 0, skip = 1 )
+		for node in clusterNode:
+			if node.is_leaf():
+				sub_clusterNode += [node]
+		sub_clusters = sub_clusterNode
+		clusterNode = temp_apChildren
+	while len(sub_clusters) <= round(math.log(n,2)):
+		aDist = []
+		max_dist_node = sub_clusters[0]
+		for i in range(len(sub_clusters)):
+			if sub_clusters[i].dist > 0.0:
+				aDist += [sub_clusters[i].dist]
+			if max_dist_node.dist < sub_clusters[i].dist:
+				max_dist_node = sub_clusters[i]
+		#print "Max Distance in this level", _percentage(max_dist_node.dist)
+		if not max_dist_node.is_leaf():
+			sub_clusters += truncate_tree( [max_dist_node], level = 0, skip = 1 )
+			sub_clusters.remove(max_dist_node)
+		else:
+			break
+	return sub_clusters
 
 	
 def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold = None, strMethod = "uniform", strLinkage = "min", func ="norm_mi", exploration = "couple_tree_iterative"):
@@ -979,8 +1021,8 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	"""
 	
 	X,Y = pArray1, pArray2
-	global max_dist 
-	max_dist = max (node.dist for node in apClusterNode1+apClusterNode2)
+	#global max_dist 
+	#max_dist = max (node.dist for node in apClusterNode1+apClusterNode2)
 	#print "Max distance:", max_dist
 	#if not afThreshold:	
 	#	afThreshold = [halla.stats.alpha_threshold(a, fAlpha, func ) for a in [pArray1,pArray2]]
@@ -1028,19 +1070,11 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	aOut.append(pStump)
 	L = [(pStump, (a,b))]
 	'''
-	distance = 1.0
+	#distance = 1.0
 	#print "apClusterNode1", apClusterNode1
-	apChildren1, distance1 = _cutree (apClusterNode1, X, func, distance = distance)
-	apChildren2, distance2 = _cutree (apClusterNode2,  Y, func, distance = distance)
-	if distance1 > 0.0:
-		if distance2 > 0.0:
-			new_distance = numpy.min([distance1, distance2])
-		else:
-			new_distance = distance1 - 0.1
-	elif distance2 > 0.0:
-		new_distance = distance2 - 0.1
-	else: 
-		new_distance = 0.0
+	apChildren1 = _cutree (apClusterNode1)
+	apChildren2 = _cutree (apClusterNode2)
+	
 	#print "new_distance",new_distance
 	#print "Start Nodes 1: ", [reduce_tree( node) for node in apChildren1]
 	#print "Start Nodes 2: ", [reduce_tree( node) for node in apChildren2]
@@ -1053,7 +1087,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 		for node2 in apChildren2:
 			data1 = reduce_tree( node1 )
 			data2 = reduce_tree( node2 )
-			temp_nmi = func (pca(X[array(data1)])[0] , pca(Y[array(data2)])[0])
+			temp_nmi = func (pca(halla.stats.discretize(X[array(data1)]))[0] , pca(halla.stats.discretize(Y[array(data2)])[0]))
 			if max_nmi < temp_nmi:
 				max_nmi = temp_nmi
 				pStump = Tree([data1,data2])
@@ -1071,7 +1105,6 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 		L.append((tempTree, (a,b)))
 	pStump.add_children( childList )
 	
-	distance = new_distance
 	next_L = []
 	while L:
 		
@@ -1080,22 +1113,22 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 		data1 = reduce_tree( a )
 		data2 = reduce_tree( b )
 				
-		bTauX = _is_stop(a, X, func, distance = distance)# ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
-		bTauY = _is_stop(b, Y, func, distance = distance)#( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
+		bTauX = _is_stop(a, X)# ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
+		bTauY = _is_stop(b, Y)#( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
 		if (bTauX == True) and (bTauY == True):
 			continue
 
 		apChildren1 = [a]
 		apChildren2 = [b]
 		if not bTauX:
-			apChildren1, distance1 = _cutree([a],  X, func, distance = distance)#_filter_true([a.left,a.right])
+			apChildren1 = _cutree([a])#_filter_true([a.left,a.right])
 			#print "Children 1: "#, apChildren1
 			#for node in apChildren1:
 				#print reduce_tree(node)
 		if not bTauY:
-			apChildren2, distance2 = _cutree([b],  Y, func, distance = distance)
+			apChildren2 = _cutree([b])
 
-		new_distance = numpy.min([distance1, distance2])
+		#new_distance = numpy.mean([distance1, distance2])
 		LChild = [(a,b) for a,b in itertools.product( apChildren1, apChildren2 )] 
 		#print "After appending", L 
 		childList = []
@@ -1116,7 +1149,6 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 		if not L:
 			#print "Next level of Coupling"
 			L = next_L
-			distance = new_distance
 			#L.extend(childList)
 	#print "Coupled Tree", reduce_tree_by_layer(aOut)
 	#return
@@ -1949,14 +1981,14 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 					aFinal.append( [Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]] )
 				else :
 					aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]] )
-					if not Current_Family_Children[i].is_leaf() and aP[i]* level/(len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1])) <= fQ:
+					if not Current_Family_Children[i].is_leaf():# and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
 						#print "Gray area with p-value:", aP[i]
 						next_level_apChildren.append(Current_Family_Children[i])
 					elif Current_Family_Children[i].is_leaf():
-						#print "End of branch, leaf!"
+						print "End of branch, leaf!"
 						continue
 					else:
-						print "Bypass, no hope to find an association in the branch with p-value: ",aP[i]," and ",len(Current_Family_Children[i].get_children()), " sub-hepotheses."
+						print "Bypass, no hope to find an association in the branch with p-value: ",aP[i]," and ",len(Current_Family_Children[i].get_children()), " sub-hypotheses.", Current_Family_Children[i].get_data()[0], "   ",Current_Family_Children[i].get_data()[1]
 			#global number_performed_test		
 			#print "No association in:", apChildren
 			if not apChildren:

@@ -683,7 +683,7 @@ class HAllA():
 		pDistance = mic
 		self.set_metric( pDistance )
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_representative_mic" ) 
@@ -695,7 +695,7 @@ class HAllA():
 		pDistance = norm_mi
 		self.set_metric( pDistance )
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_ica_norm_mi" ) 
@@ -706,7 +706,7 @@ class HAllA():
 		pDistance = mic
 		self.set_metric( pDistance )
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_ica_mic" ) 
@@ -717,7 +717,7 @@ class HAllA():
 		self.set_metric( pDistance )
 		
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_kpca_norm_mi" ) 
@@ -728,7 +728,7 @@ class HAllA():
 		pDistance = pearson
 		self.set_metric( pDistance )
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_kpca_pearson" ) 
@@ -739,7 +739,7 @@ class HAllA():
 		pDistance = pearson
 		self.set_metric( pDistance )
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_cca_pearson" ) 
@@ -750,7 +750,7 @@ class HAllA():
 		pDistance = pearson
 		self.set_metric( pDistance )
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "parametric_test_by_pls_pearson" ) 
@@ -762,7 +762,7 @@ class HAllA():
 		pDistance = norm_mi
 		self.set_metric( pDistance )
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_pls_norm_mi" ) 
@@ -782,7 +782,7 @@ class HAllA():
 
 		## Run 		
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_cca_norm_mi" ) 
@@ -817,7 +817,7 @@ class HAllA():
 
 		## Run 		
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 
 		#self._couple( )
@@ -830,7 +830,7 @@ class HAllA():
 
 		## Run 		
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "parametric_test_by_multiple_representative") 
@@ -854,7 +854,7 @@ class HAllA():
 
 		## Run 		
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_multiple_representative") 
@@ -883,7 +883,7 @@ class HAllA():
 		self._featurize( )
 		print("--- %s seconds: _featurize ---" % (time.time() - start_time))
 		start_time = time.time()
-		#self._threshold( )
+		##self._threshold( )
 		#print("--- %s seconds: _threshold ---" % (time.time() - start_time))
 		start_time = time.time()
 		self._hclust( )
@@ -891,7 +891,8 @@ class HAllA():
 		start_time = time.time()
 		self._couple( )
 		print("--- %s seconds: _couple ---" % (time.time() - start_time))
-		print("Association hypotheses testing is started.....this may takes longer ....")
+		print("Association hypotheses testing is started ...")
+		print("This task may take longer ...")
 		start_time = time.time()
 		self._all_against_all( )
 		print("--- %s seconds: _all_against_all ---" % (time.time() - start_time))
@@ -920,7 +921,7 @@ class HAllA():
 
 		## Run 		
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all(strMethod ="permutation_test_by_representative_adj_mi" ) 
@@ -948,7 +949,7 @@ class HAllA():
 
 		## Run 		
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( ) 
@@ -957,7 +958,7 @@ class HAllA():
 
 	def __preset_full_cca( self ):
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_cca_pearson" ) 
@@ -966,7 +967,7 @@ class HAllA():
 	def __preset_full_kpca_norm_mi( self ):
 
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_kpca_norm_mi" ) 
@@ -975,7 +976,7 @@ class HAllA():
 	def __preset_full_kpca_pearson( self ):
 
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		self._all_against_all( strMethod = "permutation_test_by_kpca_pearson" ) 
@@ -1008,7 +1009,7 @@ class HAllA():
 
 		## Run 
 		self._featurize( )
-		self._threshold( )
+		#self._threshold( )
 		self._hclust( )
 		self._couple( )
 		return self._all_against_all( )

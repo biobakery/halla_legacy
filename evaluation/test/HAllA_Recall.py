@@ -80,8 +80,8 @@ def _main( ):
     for i in range(number_of_simulation):
         #Generate simulated datasets
         number_features = 4 + i
-        number_samples = 250 + i*5
-        number_blocks = 4 + int(i/3)
+        number_samples = 10 + i*5
+        number_blocks = 2 + int(i/2)
         print 'Synthetic Data Generation ...'
         
         X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = 2.6 , Beta = 3.0 )#, link = "line" )
@@ -92,11 +92,9 @@ def _main( ):
         
         for q in q_cutoff:#, .25, .1, .05, .025, .01}:
             # Setup alpha and q-cutoff and start parameter
-            alpha = .1
             h.set_q(q)
-            h.set_alpha(alpha)
             for method in methods:
-                print method ,'is running ...with q, cut-off: ',q, 'and alpha, clustering threshold: ', alpha
+                print method ,'is running ...with q, cut-off: ',q
                 aOut = h.run(method)
                 #print "aOut", h.meta_alla
                 new_method = method+'_'+str(q)#+'_'+str(alpha)+'_'+str(q)+'_'+str(start_parameter)

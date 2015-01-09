@@ -537,14 +537,14 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 
 		pRep1_, pRep2_ = [ discretize( pDe( pA ) )[0] for pA in [XP,YP] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 
-		# Association between representatives  
+		# Similarity score between representatives  
 		fAssociation_ = pMe( pRep1_, pRep2_ ) #NMI
 
 		aDist.append(fAssociation_)
 
 		#aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	
-	fPercentile = percentileofscore( aDist, fAssociation, kind="strict" ) ##source: Good 2000  
+	fPercentile = percentileofscore( aDist, fAssociation, kind="mean" ) ##source: Good 2000  
 	### \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
 	### k number of iterations, \hat{X} is randomized version of X 
 	### PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
@@ -1296,12 +1296,12 @@ def discretize( pArray, iN = None, method = None, aiSkip = [] ):
 		
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
-			iN = int(len( astrValues )**0.5 + 0.5)
+			iN = round(math.sqrt(len(astrValues )))#**0.5 + 0.5)
 		elif iN == 0:
 			iN = len( astrValues )
 		else:
 			iN = min( iN, len( set(astrValues) ) )
-			
+		#print iN	
 		# This is still a bit buggy since ( [0, 0, 0, 1, 2, 2, 2, 2], 3 ) will exhibit suboptimal behavior
 		aiIndices = sorted( range( len( astrValues ) ), cmp = lambda i, j: cmp( astrValues[i], astrValues[j] ) )
 		astrRet = [None] * len( astrValues )
@@ -1315,20 +1315,22 @@ def discretize( pArray, iN = None, method = None, aiSkip = [] ):
 		return astrRet
 
 	try:
-		iRow1, iCol = pArray.shape 
+		#iRow1, iCol = pArray.shape 
 
 		aOut = [] 
-		
+		#iN= len(pArray)
+		#print iN
 		for i, line in enumerate( pArray ):
 			if i in aiSkip:
 				aOut.append( line )
 			else:
-				aOut.append( _discretize_continuous( line ) )
+				aOut.append( _discretize_continuous( line) )
 
 		return array( aOut )
 
 	except Exception:
-		return _discretize_continuous( pArray )
+		iN= len(pArray)
+		return _discretize_continuous( pArray)
 
 def discretize2d( pX, pY, method = None ):
 	pass 
