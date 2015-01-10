@@ -68,7 +68,7 @@ def _main( ):
     
     number_of_simulation = 1
     s = strudel.Strudel()
-    q_cutoff = {.1}
+    q_cutoff = {.2}
     for q in q_cutoff:#, .05, .025, .01}:
         for method in methods:
                 new_method = method+'_'+str(q)
@@ -80,7 +80,7 @@ def _main( ):
     for i in range(number_of_simulation):
         #Generate simulated datasets
         number_features = 4 + i
-        number_samples = 10 + i*5
+        number_samples = 50 + i*5
         number_blocks = 2 + int(i/2)
         print 'Synthetic Data Generation ...'
         
@@ -140,10 +140,10 @@ def _main( ):
             mean_fdr.append(np.mean(fdr[new_method]))
             #print 'recall:', recall[new_method]
             #print 'TypeI Error:', fdr[new_method] 
-        halla.plot.plot_box(recall_data, figure_name = 'Figure2a', alpha = q, ylabel = 'Recall', labels = labels)
-        halla.plot.plot_box(fdr_data,figure_name = 'Figure2b', alpha = q, ylabel = 'FDR', labels = labels)
+        #halla.plot.plot_box(recall_data, figure_name = 'Figure2a', alpha = q, ylabel = 'Recall', labels = labels)
+        #halla.plot.plot_box(fdr_data,figure_name = 'Figure2b', alpha = q, ylabel = 'FDR', labels = labels)
         halla.plot.scatter_plot( mean_recall, mean_fdr, alpha = q, labels = labels)
-        f = open('Results', 'w')
+        f = open('power_fdr.txt', 'w')
         s = "Recall:" + str(recall_data) +" mean: "+ str(mean_recall) +"\n"
         f.write(s)
         s = "FDR:" + str(fdr_data) +" mean: "+ str(mean_fdr) +"\n"
@@ -154,7 +154,7 @@ def _main( ):
         fdr_data = []
         #data.append(recall[new_method])
         #data.append(fdr[new_method]) 
-    return;
+    return
 if __name__ == '__main__':
     _main( )
     

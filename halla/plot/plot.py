@@ -51,7 +51,7 @@ def plot_box(data, alpha= .1 , figure_name='HAllA_Evaluation', ylabel = None, la
     #savefig('box7')
     pl.savefig(figure_name+'.pdf')
     pl.show()
-    return;
+    return
 def scatter_plot(x = None, y = None, alpha = .1, figure_name='Figure2', xlabel = "Recall", ylabel = "FDR", labels  = None):
     import pylab as pl
     pl.figure("Recall vs. FDR")
@@ -94,7 +94,7 @@ def scatter_plot(x = None, y = None, alpha = .1, figure_name='Figure2', xlabel =
     #savefig('box7')
     pl.savefig('Figure2.pdf')
     pl.show()
-    return;
+    return
     #fig, ax = pl.subplots()
     #ax.scatter(x, y)
 

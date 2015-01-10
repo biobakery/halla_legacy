@@ -42,9 +42,11 @@ class Tree():
 	A general object, tree need not be 2-tree 
 	'''	
 
-	def __init__(self, data = None):
+	def __init__(self, data = None, left_distance = None, right_distance = None ):
 		self.m_pData = data 
 		self.m_arrayChildren = []
+		self.left_distance = left_distance
+		self.right_distance = right_distance
 
 	def pop(self):
 		# pop one of the children, else return none, since this amounts to killing the singleton 
@@ -96,6 +98,10 @@ class Tree():
 	
 	def get_data(self):
 		return self.m_pData 
+	def get_right_distance(self):
+		return self.right_distance
+	def get_left_distance(self):
+		return self.left_distance
 
 class Gardener():
 	"""
@@ -983,12 +989,9 @@ def _cutree (clusterNodelist):
 				sub_clusterNode += [node]
 		sub_clusters = sub_clusterNode
 		clusterNode = temp_apChildren
-	while len(sub_clusters) <= round(math.log(n,2)):
-		aDist = []
+	while len(sub_clusters) < round(math.sqrt(n)):
 		max_dist_node = sub_clusters[0]
 		for i in range(len(sub_clusters)):
-			if sub_clusters[i].dist > 0.0:
-				aDist += [sub_clusters[i].dist]
 			if max_dist_node.dist < sub_clusters[i].dist:
 				max_dist_node = sub_clusters[i]
 		#print "Max Distance in this level", _percentage(max_dist_node.dist)
@@ -1076,8 +1079,8 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	apChildren2 = _cutree (apClusterNode2)
 	
 	#print "new_distance",new_distance
-	#print "Start Nodes 1: ", [reduce_tree( node) for node in apChildren1]
-	#print "Start Nodes 2: ", [reduce_tree( node) for node in apChildren2]
+	print "Start Nodes 1: ", [reduce_tree( node) for node in apChildren1]
+	print "Start Nodes 2: ", [reduce_tree( node) for node in apChildren2]
 	'''
 	Establish the root of the coupling tree based on based matched clusters in
 	the first layer of relevent depth
@@ -1090,7 +1093,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 			temp_nmi = func (pca(halla.stats.discretize(X[array(data1)]))[0] , pca(halla.stats.discretize(Y[array(data2)])[0]))
 			if max_nmi < temp_nmi:
 				max_nmi = temp_nmi
-				pStump = Tree([data1,data2])
+				pStump = Tree(data =[data1,data2], left_distance = node1.dist, right_distance = node2.dist)
 	aOut.append(pStump)
 	'''
 	End establishing the root of the coupling tree
@@ -1100,7 +1103,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	for a,b in itertools.product( apChildren1, apChildren2 ):
 		data1 = reduce_tree( a )
 		data2 = reduce_tree( b )
-		tempTree = Tree([data1,data2])
+		tempTree = Tree(data =[data1,data2], left_distance = a.dist, right_distance = b.dist)
 		childList.append(tempTree)
 		L.append((tempTree, (a,b)))
 	pStump.add_children( childList )
@@ -1139,7 +1142,7 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	
 			data1 = reduce_tree( a1 )
 			data2 = reduce_tree( b1 )
-			tempTree = Tree([data1,data2])
+			tempTree = Tree(data =[data1,data2], left_distance = a1.dist, right_distance =  b1.dist)
 			childList.append(tempTree)
 			#print childList
 			#if len(data1) > 1 or len(data2) > 1:
@@ -1263,7 +1266,7 @@ def couple_tree_all_clusters( apClusterNode1, apClusterNode2, pArray1, pArray2, 
 			temp_nmi = func (pca(X[array(data1)])[0] , pca(Y[array(data2)])[0])
 			if min_nmi < temp_nmi:
 				min_nmi = temp_nmi
-				pStump = Tree([data1,data2])
+				pStump = Tree(data =[data1,data2], min_distance = node1.dist, right_distance =  node2.dist)
 	aOut.append(pStump)
 	'''
 	End establishing the root of the coupling tree
@@ -1273,7 +1276,7 @@ def couple_tree_all_clusters( apClusterNode1, apClusterNode2, pArray1, pArray2, 
 	for a,b in itertools.product( apChildren1, apChildren2 ):
 		data1 = reduce_tree( a )
 		data2 = reduce_tree( b )
-		tempTree = Tree([data1,data2])
+		tempTree = Tree(data =[data1,data2], min_distance = a.dist, right_distance =  b.dist)
 		childList.append(tempTree)
 		L.append((tempTree, (a,b)))
 	pStump.add_children( childList )
@@ -2000,6 +2003,61 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 												
 		return aFinal, aOut
 	
+	def _bh_hypothesis_testing():
+		apChildren = [pTree]
+		level = 1
+		passed_tests = []
+		global number_performed_test
+		
+		next_level_apChildren = []
+		while apChildren:
+			Current_Family_Children = apChildren.pop(0).get_children()
+			print "Number of children:", len(Current_Family_Children)
+			number_performed_test += len(Current_Family_Children)
+			aP = [ _actor( c ) for c in Current_Family_Children ]
+			#aP_adjusted, pRank = halla.stats.p_adjust( aP, fQ )
+			
+			for i in range(len(aP)):
+				if aP[i] <= fQ:
+					print "************Pass with nominal p-value:", aP[i], Current_Family_Children[i].get_data()[0], Current_Family_Children[i].get_data()[1]
+					passed_tests.append( [Current_Family_Children[i], float(aP[i])] )
+				else :
+					#aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
+					if not Current_Family_Children[i].is_leaf() and aP[i] >fQ and aP[i] <= 1.0 - fQ and max(Current_Family_Children[i].get_left_distance(), Current_Family_Children[i].get_right_distance()) < .5:
+					# and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
+						print "Gray area with p-value:", aP[i]
+						next_level_apChildren.append(Current_Family_Children[i])
+					elif Current_Family_Children[i].is_leaf():
+						print "End of branch, leaf!"
+					else:
+						print "Bypass, no hope to find an association in the branch with p-value: ",aP[i]," and ",len(Current_Family_Children[i].get_children()), " sub-hypotheses.", Current_Family_Children[i].get_data()[0], "   ",Current_Family_Children[i].get_data()[1]
+			#global number_performed_test		
+			#print "No association in:", apChildren
+			if not apChildren:
+				print "Hypotheses testing level ",level," is finished."
+				#number_performed_test += len(next_level_apChildren)
+				apChildren = next_level_apChildren
+				level += 1
+				next_level_apChildren =[]
+		max_r_t = 0
+		print "Number of passed tests:", len(passed_tests)
+		passed_tests = array(passed_tests)
+		aP_adjusted, pRank = halla.stats.p_adjust( passed_tests[:,1], fQ )
+		print "ajusted pvalue: ", aP_adjusted
+		for i in range(len(passed_tests)):
+			if passed_tests[i][1] <= aP_adjusted[i] and max_r_t <= pRank[i]:
+				max_r_t =  pRank[i]
+				#print "max_r_t", max_r_t
+		for i in range(len(passed_tests[:,1])):
+			if pRank[i] <= max_r_t:
+				print "************Pass with p-value:", passed_tests[i][1], passed_tests[i][0].get_data()[0], passed_tests[i][0].get_data()[1]
+				aOut.append( [passed_tests[i][0].get_data(), float(passed_tests[i][1]) , aP_adjusted[i]] )
+				aFinal.append( [passed_tests[i][0].get_data(), float(passed_tests[i][1]) , aP_adjusted[i]] )
+			else :
+				aOut.append([passed_tests[i][0].get_data(), float(passed_tests[i][1]) , aP_adjusted[i]] )
+												
+		return aFinal, aOut
+	
 	def _actor( pNode ):
 		"""
 		Performs a certain action at the node
@@ -2019,7 +2077,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 	#======================================#
 	# Execute 
 	#======================================#
-	#aFinal, aOut = _simple_descending()
-	aFinal, aOut = _ybh_descending()
+	# aFinal, aOut = _simple_descending()
+	# aFinal, aOut = _ybh_descending()
+	aFinal, aOut = _bh_hypothesis_testing()
 	print "____Number of performed test:", number_performed_test
 	return aFinal, aOut 
