@@ -63,14 +63,8 @@ import halla.parser
 from halla.plot import *
 from halla.stats import *
 #from halla.test import *
-from numpy import *
-import scipy as sp
-from pandas import *
-from rpy2.robjects.packages import importr
-import rpy2.robjects as ro
-import pandas.rpy.common as com
-import rpy2.robjects.numpy2ri
-import shutil
+import shutil 
+
 
 
 ## internal dependencies 
@@ -192,8 +186,8 @@ def _main(  ):
 	(aOutData1, aOutName1, aOutType1, aOutHead1) = aOut1 
 	(aOutData2, aOutName2, aOutType2, aOutHead2) = aOut2 
 
-	H = HAllA( array(aOutData1), array(aOutData2) )
-
+	H = HAllA(args, aOut1, aOut2)
+	
 	H.set_q( args.dQ )
 	H.set_iterations( args.iIter )
 	H.set_metric( args.strMetric )
@@ -204,7 +198,7 @@ def _main(  ):
 	else:
 		aaOut = H.run( )
 	
-	def _report():
+	def _report(args, aOutData2, aOutName2, aOutType2, aOutHead2):
 		csvw = csv.writer( args.ostm, csv.excel_tab )
 		bcsvw = csv.writer( args.bostm, csv.excel_tab )
 		csvw.writerow( ["Method: " + args.strPreset, "q value: " + str(args.dQ), "metric " + args.strMetric] )
@@ -252,6 +246,14 @@ def _main(  ):
 		
 		for line in H.meta_alla[0]:
 			association_number += 1
+			filename = "./output/"+"association"+str(association_number)+'/'
+			dir = os.path.dirname(filename)
+			try:
+				shutil.rmtree(dir)
+				os.mkdir(dir)
+			except:
+				os.mkdir(dir)
+				
 			iX, iY = line[0]
 			associated_feature_X_indecies += iX
 			associated_feature_Y_indecies += iY
@@ -262,34 +264,42 @@ def _main(  ):
 			import numpy as np
 			import pandas as pd
 			import matplotlib.pyplot as plt 
+			plt.figure()
 			cluster1 = [aOutData1[i] for i in iX]
 			X_labels = np.array([aOutName1[i] for i in iX])
 			#cluster = np.array([aOutData1[i] for i in iX]
 			df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
-			axes = pd.tools.plotting.scatter_matrix(df, alpha=0.2)
-			filename = "./output/"+"association"+str(association_number)+'/'
-			dir = os.path.dirname(filename)
-			try:
-				os.stat(dir)
-			except:
-				os.mkdir(dir)
+			axes = pd.tools.plotting.scatter_matrix(df)
+			
 			#plt.tight_layout()
+			
 			plt.savefig(filename+'Dataset_1_cluster_'+str(association_number)+'_scatter_matrix.pdf')
-			plt.figure()
 			cluster2 = [aOutData2[i] for i in iY]
 			Y_labels = np.array([aOutName2[i] for i in iY])
+			plt.figure()
 			df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-			axes = pd.tools.plotting.scatter_matrix(df, alpha=0.2)
+			axes = pd.tools.plotting.scatter_matrix(df)
 			#plt.tight_layout()
 			plt.savefig(filename+'Dataset_2_cluster_'+str(association_number)+'_scatter_matrix.pdf')
-			plt.figure()
 			df1 = np.array(cluster1, dtype= float)
 			df2 = np.array(cluster2, dtype= float)
+			plt.figure()
 			plt.scatter(halla.stats.pca(df1),halla.stats.pca(df2), alpha=0.5)
 			plt.savefig(filename+'/association_'+str(association_number)+'.pdf')
-			plt.figure()
+			#plt.figure()
 			plt.close("all")
 		
+		
+		csvwc = csv.writer(args.costm , csv.excel_tab )
+		csvwc.writerow( ['Level', "Dataset 1","Dataset 2" ] )
+		for line in halla.hierarchy.reduce_tree_by_layer([H.meta_hypothesis_tree]):
+			(level, clusters ) = line
+			iX, iY = clusters[0], clusters[1]
+			fP = line[1]
+			#fP_adjust = line[2]
+			aLineOut = map(str,[str(level),str(';'.join(aOutName1[i] for i in iX)),str(';'.join(aOutName2[i] for i in iY))])
+			csvwc.writerow( aLineOut )
+		print "R visualization!"
 		from scipy.stats.stats import pearsonr
 		X_labels = np.array([aOutName1[i] for i in associated_feature_X_indecies])
 		Y_labels = np.array([aOutName2[i] for i in associated_feature_Y_indecies])
@@ -304,18 +314,18 @@ def _main(  ):
 		nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
 		for i in range(len(associated_feature_X_indecies)):
 			for j in range(len(associated_feature_Y_indecies)):
-				nmi[i][j] = distance.NormalizedMutualInformation( halla.discretize(df1[i]),halla.discretize(df2[j]) ).get_distance()
+				nmi[i][j] = 1.0 - distance.NormalizedMutualInformation( halla.discretize(df1[i]),halla.discretize(df2[j]) ).get_distance()
 		rpy2.robjects.numpy2ri.activate()
 		ro.r('library("gplots")')
 		ro.globalenv['nmi'] = nmi
 		ro.globalenv['labRow'] = X_labels 
 		ro.globalenv['labCol'] = Y_labels
 		ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
-		ro.r('heatmap.2(nmi, labRow = labRow, labCol = labCol)')
+		ro.r('heatmap.2(nmi, labRow = labRow, labCol = labCol, col=redgreen(75), scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)')
 		ro.r('dev.off()')
 		ro.globalenv['p'] = p
 		ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
-		ro.r('heatmap.2(p, , labRow = labRow, labCol = labCol)')
+		ro.r('heatmap.2(p, , labRow = labRow, labCol = labCol, , col=redgreen(75), scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)')
 		ro.r('dev.off()')
 		#set_default_mode(NO_CONVERSION)
 		#rpy2.library("ALL")
@@ -323,16 +333,7 @@ def _main(  ):
 		#hm.draw()
 		#halla.plot.heatmap(D = p, filename ='./output/pearson_heatmap')
 		#halla.plot.heatmap(D = nmi, filename ='./output/nmi_heatmap')
-		csvwc = csv.writer(args.costm , csv.excel_tab )
-		csvwc.writerow( ['Level', "Dataset 1","Dataset 2" ] )
-		for line in halla.hierarchy.reduce_tree_by_layer([H.meta_hypothesis_tree]):
-			(level, clusters ) = line
-			iX, iY = clusters[0], clusters[1]
-			fP = line[1]
-			#fP_adjust = line[2]
-			aLineOut = map(str,[str(level),str(';'.join(aOutName1[i] for i in iX)),str(';'.join(aOutName2[i] for i in iY))])
-			csvwc.writerow( aLineOut )
-	_report()	
+	#_report(args, aOutData2, aOutName2, aOutType2, aOutHead2)	
 if __name__ == '__main__':
 	_main(  )
 

@@ -554,7 +554,7 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	
 	assert(fP <= 1.0)
 	#print fP
-	return fP
+	return fP, fAssociation
 
 def g_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 1000 ):
 	"""

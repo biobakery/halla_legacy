@@ -68,7 +68,7 @@ def _main( ):
     
     number_of_simulation = 1
     s = strudel.Strudel()
-    q_cutoff = {.2}
+    q_cutoff = {.1}
     for q in q_cutoff:#, .05, .025, .01}:
         for method in methods:
                 new_method = method+'_'+str(q)
@@ -79,15 +79,16 @@ def _main( ):
     s = strudel.Strudel()
     for i in range(number_of_simulation):
         #Generate simulated datasets
-        number_features = 4 + i
-        number_samples = 50 + i*5
-        number_blocks = 2 + int(i/2)
+        number_features = 8 + i
+        number_samples = 40 + i*5
+        number_blocks = 3 + int(i/2)
         print 'Synthetic Data Generation ...'
         
         X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = 2.6 , Beta = 3.0 )#, link = "line" )
 #       
         halla.data.writeData(X,"X" )
         halla.data.writeData(Y,"Y")
+        return
         h = halla.HAllA( X,Y)
         
         for q in q_cutoff:#, .25, .1, .05, .025, .01}:

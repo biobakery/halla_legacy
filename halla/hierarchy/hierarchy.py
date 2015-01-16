@@ -42,7 +42,7 @@ class Tree():
 	A general object, tree need not be 2-tree 
 	'''	
 
-	def __init__(self, data = None, left_distance = None, right_distance = None ):
+	def __init__(self, data = None, left_distance = None, right_distance = None, nmi = None ):
 		self.m_pData = data 
 		self.m_arrayChildren = []
 		self.left_distance = left_distance
@@ -97,11 +97,19 @@ class Tree():
 		return self 
 	
 	def get_data(self):
-		return self.m_pData 
+		return self.m_pData
+
 	def get_right_distance(self):
 		return self.right_distance
+	
 	def get_left_distance(self):
 		return self.left_distance
+	
+	def get_nmi(self):
+		return self.nmi
+	
+	def set_nmi(self, nmi = None):
+		self.nmi = nmi
 
 class Gardener():
 	"""
@@ -225,7 +233,7 @@ def is_tree( pObj ):
 		return False 
 
 
-def hclust( pArray, strMetric = "norm_mi", cluster_method = "single", bTree = False ):
+def hclust( pArray, labels = None, strMetric = "norm_mi", cluster_method = "single", bTree = False ):
 	"""
 	Performs hierarchical clustering on an numpy array 
 
@@ -416,13 +424,14 @@ def hclust( pArray, strMetric = "norm_mi", cluster_method = "single", bTree = Fa
 
 	D = pdist( pArray, metric = pDistance )
 	#print "Distance",D
-	plt.figure()    
+	#plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
 	Z = linkage( D, metric = pDistance  )
-	scipy.cluster.hierarchy.dendrogram(Z)
+	scipy.cluster.hierarchy.dendrogram(Z, labels = labels, leaf_rotation=90)
 	plt.gcf()
 	global fig_num
-	plt.savefig("output/Dendrogram_" +str(fig_num)+".pdf")
+	plt.savefig("output/Dendrogram_" +str(fig_num)+".pdf", dpi = 500)
 	fig_num += 1
+	plt.close("all")
 	#print "Linkage Matrix:", Z
 	#print fcluster(Z, .75 )
 	#print fcluster(Z, .9 )
@@ -989,7 +998,7 @@ def _cutree (clusterNodelist):
 				sub_clusterNode += [node]
 		sub_clusters = sub_clusterNode
 		clusterNode = temp_apChildren
-	while len(sub_clusters) < round(math.sqrt(n)):
+	while len(sub_clusters) < round(math.log(n,2)):
 		max_dist_node = sub_clusters[0]
 		for i in range(len(sub_clusters)):
 			if max_dist_node.dist < sub_clusters[i].dist:
@@ -1003,7 +1012,7 @@ def _cutree (clusterNodelist):
 	return sub_clusters
 
 	
-def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold = None, strMethod = "uniform", strLinkage = "min", func ="norm_mi", exploration = "couple_tree_iterative"):
+def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod = "uniform", strLinkage = "min", func ="norm_mi", exploration = "couple_tree_iterative"):
 	"""
 	Couples two data trees to produce a hypothesis tree 
 
@@ -1079,8 +1088,8 @@ def couple_tree( apClusterNode1, apClusterNode2, pArray1, pArray2, afThreshold =
 	apChildren2 = _cutree (apClusterNode2)
 	
 	#print "new_distance",new_distance
-	print "Start Nodes 1: ", [reduce_tree( node) for node in apChildren1]
-	print "Start Nodes 2: ", [reduce_tree( node) for node in apChildren2]
+	#print "Start Nodes 1: ", [reduce_tree( node) for node in apChildren1]
+	#print "Start Nodes 2: ", [reduce_tree( node) for node in apChildren2]
 	'''
 	Establish the root of the coupling tree based on based matched clusters in
 	the first layer of relevent depth
@@ -1258,7 +1267,7 @@ def couple_tree_all_clusters( apClusterNode1, apClusterNode2, pArray1, pArray2, 
 	Establish the root of the coupling tree based on based matched clusters in
 	the first layer of relevent depth
 	'''	
-	min_nmi = 0.0
+	'''min_nmi = 0.0
 	for node1 in apChildren1:
 		for node2 in apChildren2:
 			data1 = reduce_tree( node1 )
@@ -1267,6 +1276,10 @@ def couple_tree_all_clusters( apClusterNode1, apClusterNode2, pArray1, pArray2, 
 			if min_nmi < temp_nmi:
 				min_nmi = temp_nmi
 				pStump = Tree(data =[data1,data2], min_distance = node1.dist, right_distance =  node2.dist)
+	'''
+	data1 = reduce_tree( apClusterNode1[0] )
+	data2 = reduce_tree( apClusterNode2[0] )
+	pStump = Tree(data =[data1,data2], min_distance = apClusterNode1[0].dist, right_distance =  apClusterNode2[0].dist)
 	aOut.append(pStump)
 	'''
 	End establishing the root of the coupling tree
@@ -2007,30 +2020,37 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 		apChildren = [pTree]
 		level = 1
 		passed_tests = []
+		performed_tests = []
 		global number_performed_test
 		
 		next_level_apChildren = []
 		while apChildren:
 			Current_Family_Children = apChildren.pop(0).get_children()
-			print "Number of children:", len(Current_Family_Children)
+			#print "Number of children:", len(Current_Family_Children)
 			number_performed_test += len(Current_Family_Children)
 			aP = [ _actor( c ) for c in Current_Family_Children ]
 			#aP_adjusted, pRank = halla.stats.p_adjust( aP, fQ )
 			
 			for i in range(len(aP)):
-				if aP[i] <= fQ:
+				#print "NMI", Current_Family_Children[i].get_nmi()
+				performed_tests.append( [Current_Family_Children[i], float(aP[i])] )
+				if Current_Family_Children[0].get_nmi() > .05: #aP[i] <= fQ:
 					print "************Pass with nominal p-value:", aP[i], Current_Family_Children[i].get_data()[0], Current_Family_Children[i].get_data()[1]
 					passed_tests.append( [Current_Family_Children[i], float(aP[i])] )
-				else :
-					#aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
-					if not Current_Family_Children[i].is_leaf() and aP[i] >fQ and aP[i] <= 1.0 - fQ and max(Current_Family_Children[i].get_left_distance(), Current_Family_Children[i].get_right_distance()) < .5:
-					# and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-						print "Gray area with p-value:", aP[i]
-						next_level_apChildren.append(Current_Family_Children[i])
-					elif Current_Family_Children[i].is_leaf():
+				elif aP[i] > 1.0 - fQ and (Current_Family_Children[i].get_left_distance() <= .3\
+										 or Current_Family_Children[i].get_right_distance() <=  .3):
+					print "Bypass, no hope to find an association in the branch with p-value: ",\
+				aP[i]," and ",len(Current_Family_Children[i].get_children()),\
+				 " sub-hypotheses.", Current_Family_Children[i].get_data()[0],\
+				  "   ",Current_Family_Children[i].get_data()[1]
+					
+				elif Current_Family_Children[i].is_leaf():
 						print "End of branch, leaf!"
-					else:
-						print "Bypass, no hope to find an association in the branch with p-value: ",aP[i]," and ",len(Current_Family_Children[i].get_children()), " sub-hypotheses.", Current_Family_Children[i].get_data()[0], "   ",Current_Family_Children[i].get_data()[1]
+					#aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
+				else:
+					print "Gray area with p-value:", aP[i]
+					next_level_apChildren.append(Current_Family_Children[i])
+					
 			#global number_performed_test		
 			#print "No association in:", apChildren
 			if not apChildren:
@@ -2040,21 +2060,22 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 				level += 1
 				next_level_apChildren =[]
 		max_r_t = 0
-		print "Number of passed tests:", len(passed_tests)
-		passed_tests = array(passed_tests)
-		aP_adjusted, pRank = halla.stats.p_adjust( passed_tests[:,1], fQ )
-		print "ajusted pvalue: ", aP_adjusted
-		for i in range(len(passed_tests)):
-			if passed_tests[i][1] <= aP_adjusted[i] and max_r_t <= pRank[i]:
+		print "Number of performed tests:", len(performed_tests)
+		print "Number of passed from nominal tests:", len(performed_tests)
+		performed_tests = array(performed_tests)
+		aP_adjusted, pRank = halla.stats.p_adjust( performed_tests[:,1], fQ )
+		#print "ajusted pvalue: ", aP_adjusted
+		for i in range(len(performed_tests)):
+			if performed_tests[i][1] <= aP_adjusted[i] and max_r_t <= pRank[i]:
 				max_r_t =  pRank[i]
 				#print "max_r_t", max_r_t
-		for i in range(len(passed_tests[:,1])):
+		for i in range(len(performed_tests[:,1])):
 			if pRank[i] <= max_r_t:
-				print "************Pass with p-value:", passed_tests[i][1], passed_tests[i][0].get_data()[0], passed_tests[i][0].get_data()[1]
-				aOut.append( [passed_tests[i][0].get_data(), float(passed_tests[i][1]) , aP_adjusted[i]] )
-				aFinal.append( [passed_tests[i][0].get_data(), float(passed_tests[i][1]) , aP_adjusted[i]] )
+				print "************Pass with p-value:", performed_tests[i][1], performed_tests[i][0].get_data()[0], performed_tests[i][0].get_data()[1]
+				aOut.append( [performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]] )
+				aFinal.append( [performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]] )
 			else :
-				aOut.append([passed_tests[i][0].get_data(), float(passed_tests[i][1]) , aP_adjusted[i]] )
+				aOut.append([performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]] )
 												
 		return aFinal, aOut
 	
@@ -2067,8 +2088,8 @@ def all_against_all( pTree, pArray1, pArray2, method = "permutation_test_by_repr
 
 		aIndicies = pNode.get_data( ) 
 		aIndiciesMapped = map( array, aIndicies ) ## So we can vectorize over numpy arrays 
-		dP = pMethod( pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], iIter = iIter )
-
+		dP, nmi= pMethod( pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], iIter = iIter )
+		pNode.set_nmi(nmi)
 		#aOut.append( [aIndicies, dP] ) #### dP needs to appended AFTER multiple hypothesis correction
 
 		return dP 

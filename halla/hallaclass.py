@@ -2,6 +2,7 @@
 HAllA class  
 """
 import sys
+import csv
 sys.path.append('/Users/rah/Documents/Hutlab/halla')
 sys.path.append('/Users/rah/Documents/Hutlab/strudel')
 ## structural packages 
@@ -16,10 +17,20 @@ from halla.plot import *
 from halla.stats import *
 import math
 import time
-## internal dependencies 
+## internal dependencies
+
+from numpy import *
+import scipy as sp
+from pandas import *
+from rpy2.robjects.packages import importr
+import rpy2.robjects as ro
+import pandas.rpy.common as com
+import rpy2.robjects.numpy2ri
+import shutil 
+import os
 class HAllA():
 	
-	def __init__( self, *ta ): 
+	def __init__( self, args, aOutX, aOutY): 
 		"""
 		Think about lazy implementation to save time during run-time;
 		Don't have to keep everything in memory 
@@ -160,12 +171,19 @@ class HAllA():
 		#==================================================================#
 		# Mutable Meta Objects  
 		#==================================================================#
-		self.meta_array =  array(ta)  if ta else None 
+		self.args = args
+		(self.aOutData1, self.aOutName1, self.aOutType1, self.aOutHead1) = aOutX 
+		(self.aOutData2, self.aOutName2, self.aOutType2, self.aOutHead2) = aOutY
+		self.meta_array = array([None,None])
+		self.meta_array[0]= array(self.aOutData1)#.append(X)
+		self.meta_array[1] = array(self.aOutData2)#.append(Y)
+		self.xlabels = self.aOutName1
+		self.ylabels = self.aOutName2
 		#print self.meta_array[0]
 		#print self.meta_array[1]
 		self.meta_feature = None
 		self.meta_threshold = None 
-		self.meta_data_tree = None 
+		self.meta_data_tree = [] 
 		self.meta_hypothesis_tree = None 
 		self.meta_alla = None # results of all-against-all
 		self.meta_out = None # final output array; some methods (e.g. all_against_all) have multiple outputs piped to both self.meta_alla and self.meta_out 
@@ -350,7 +368,9 @@ class HAllA():
 
 	def _hclust( self ):
 		#print self.meta_feature
-		self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x , bTree=True) )
+		self.meta_data_tree.append(hclust(self.meta_feature[0] , labels = self.xlabels, bTree=True))
+		self.meta_data_tree.append(hclust(self.meta_feature[1] , labels = self.ylabels, bTree=True))
+		#self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x , bTree=True) )
 		#print self.meta_data_tree
 		return self.meta_data_tree 
 
@@ -363,7 +383,7 @@ class HAllA():
 		
 		self.meta_hypothesis_tree = couple_tree(apClusterNode1 =[self.meta_data_tree[0]], 
 				apClusterNode2 = [self.meta_data_tree[1]], 
-				pArray1 = self.meta_array[0], pArray2 = self.meta_array[1], afThreshold = self.meta_threshold, func = self.distance )[0]
+				pArray1 = self.meta_array[0], pArray2 = self.meta_array[1], func = self.distance )[0]
 		
 		## remember, `couple_tree` returns object wrapped in list 
 		return self.meta_hypothesis_tree 
@@ -547,7 +567,7 @@ class HAllA():
 		helper function for reporting the output to the user,
 		"""
 
-		aOut = []
+		aaOut = []
 
 		#self.meta_report = [] 
 
@@ -560,10 +580,137 @@ class HAllA():
 			fQ = aP[i][j][0] 
 			fQ_adust = aP[i][j][1] 
 			if fQ != -1:
-				aOut.append( [[i,j],fQ,fQ_adust ] )
+				aaOut.append( [[i,j],fQ,fQ_adust ] )
 
-		self.meta_report = aOut
+		self.meta_report = aaOut
+		#print "meta summary:", self.meta_report
+		istm = list()						#We are using now X and Y 
+ 	
+		#***************************************************************
+		#We are using now X and Y - If Y was not set - we use X        *
+		#***************************************************************
+		if self.args.Y == None:
+			istm = [self.args.X,  self.args.X]						#Use X  
+		else:
+			istm = [self.args.X,  self.args.Y]						#Use X and Y
+	
+		
+		if len(istm) > 1:
+			strFile1, strFile2 = istm[:2]
+		else:
+			strFile1, strFile2 = istm[0], istm[0]
+		csvw = csv.writer( self.args.ostm, csv.excel_tab )
+		bcsvw = csv.writer( self.args.bostm, csv.excel_tab )
+		csvw.writerow( ["Method: " + self.args.strPreset, "q value: " + str(self.args.dQ), "metric " + self.args.strMetric] )
+		bcsvw.writerow( ["Method: " + self.args.strPreset, "q value: " + str(self.args.dQ), "metric " + self.args.strMetric] )
+		
+		if self.args.Y ==None:
+			csvw.writerow( [istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"] )
+			bcsvw.writerow( [istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"] )
+		else:
+			csvw.writerow( [self.args.X.name, self.args.Y.name, "nominal-pvalue", "adjusted-pvalue"] )
+			bcsvw.writerow( ["Association Number", self.args.X.name, self.args.Y.name, "nominal-pvalue", "adjusted-pvalue"] )
 
+		for line in aaOut:
+			iX, iY = line[0]
+			fP = line[1]
+			fP_adjust = line[2]
+			aLineOut = map(str,[self.aOutName1[iX], self.aOutName2[iY], fP, fP_adjust])
+			csvw.writerow( aLineOut )
+		#print 'H:', self.meta_alla
+		#print 'H[0]', self.meta_alla[0]
+		associated_feature_X_indecies =  []
+		associated_feature_Y_indecies = []
+		association_number = 0 
+		
+		for line in self.meta_alla[0]:
+			association_number += 1
+			filename = "./output/"+"association"+str(association_number)+'/'
+			dir = os.path.dirname(filename)
+			try:
+				shutil.rmtree(dir)
+				os.mkdir(dir)
+			except:
+				os.mkdir(dir)
+				
+			iX, iY = line[0]
+			associated_feature_X_indecies += iX
+			associated_feature_Y_indecies += iY
+			fP = line[1]
+			fP_adjust = line[2]
+			aLineOut = map(str,[association_number, str(';'.join(self.aOutName1[i] for i in iX)),str(';'.join(self.aOutName2[i] for i in iY)), fP, fP_adjust])
+			bcsvw.writerow( aLineOut )
+			import pandas as pd
+			import matplotlib.pyplot as plt 
+			plt.figure()
+			cluster1 = [self.aOutData1[i] for i in iX]
+			X_labels = np.array([self.aOutName1[i] for i in iX])
+			#cluster = np.array([aOutData1[i] for i in iX]
+			df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
+			axes = pd.tools.plotting.scatter_matrix(df)
+			
+			#plt.tight_layout()
+			
+			plt.savefig(filename+'Dataset_1_cluster_'+str(association_number)+'_scatter_matrix.pdf')
+			cluster2 = [self.aOutData2[i] for i in iY]
+			Y_labels = np.array([self.aOutName2[i] for i in iY])
+			plt.figure()
+			df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
+			axes = pd.tools.plotting.scatter_matrix(df)
+			#plt.tight_layout()
+			plt.savefig(filename+'Dataset_2_cluster_'+str(association_number)+'_scatter_matrix.pdf')
+			df1 = np.array(cluster1, dtype= float)
+			df2 = np.array(cluster2, dtype= float)
+			plt.figure()
+			plt.scatter(halla.stats.pca(df1),halla.stats.pca(df2), alpha=0.5)
+			plt.savefig(filename+'/association_'+str(association_number)+'.pdf')
+			#plt.figure()
+			plt.close("all")
+		
+		
+		csvwc = csv.writer(self.args.costm , csv.excel_tab )
+		csvwc.writerow( ['Level', "Dataset 1","Dataset 2" ] )
+		for line in halla.hierarchy.reduce_tree_by_layer([self.meta_hypothesis_tree]):
+			(level, clusters ) = line
+			iX, iY = clusters[0], clusters[1]
+			fP = line[1]
+			#fP_adjust = line[2]
+			aLineOut = map(str,[str(level),str(';'.join(self.aOutName1[i] for i in iX)),str(';'.join(self.aOutName2[i] for i in iY))])
+			csvwc.writerow( aLineOut )
+		print "R visualization!"
+		from scipy.stats.stats import pearsonr
+		X_labels = np.array([self.aOutName1[i] for i in associated_feature_X_indecies])
+		Y_labels = np.array([self.aOutName2[i] for i in associated_feature_Y_indecies])
+		cluster1 = [self.aOutData1[i] for i in associated_feature_X_indecies]	
+		cluster2 = [self.aOutData2[i] for i in associated_feature_Y_indecies]
+		df1 = np.array(cluster1, dtype= float)
+		df2 = np.array(cluster2, dtype= float)
+		p = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
+		for i in range(len(associated_feature_X_indecies)):
+			for j in range(len(associated_feature_Y_indecies)):
+				p[i][j] = pearsonr(df1[i],df2[j])[0]
+		nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
+		for i in range(len(associated_feature_X_indecies)):
+			for j in range(len(associated_feature_Y_indecies)):
+				nmi[i][j] = distance.NormalizedMutualInformation( halla.discretize(df1[i]),halla.discretize(df2[j]) ).get_distance()
+		rpy2.robjects.numpy2ri.activate()
+		ro.r('library("gplots")')
+		ro.globalenv['nmi'] = nmi
+		ro.globalenv['labRow'] = X_labels 
+		ro.globalenv['labCol'] = Y_labels
+		ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
+		ro.r('heatmap.2(nmi, labRow = labRow, labCol = labCol, col=redgreen(75), scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)')
+		ro.r('dev.off()')
+		ro.globalenv['p'] = p
+		ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
+		ro.r('heatmap.2(p, , labRow = labRow, labCol = labCol, , col=redgreen(75), scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)')
+		ro.r('dev.off()')
+		#set_default_mode(NO_CONVERSION)
+		#rpy2.library("ALL")
+		#hm = halla.plot.hclust2.Heatmap( p)#, cl.sdendrogram, cl.fdendrogram, snames, fnames, fnames_meta, args = args )
+		#hm.draw()
+		#halla.plot.heatmap(D = p, filename ='./output/pearson_heatmap')
+		#halla.plot.heatmap(D = nmi, filename ='./output/nmi_heatmap')
 		return self.meta_report 
 
 	def _run( self ):
@@ -895,7 +1042,7 @@ class HAllA():
 		print("This task may take longer ...")
 		start_time = time.time()
 		self._all_against_all( )
-		print("--- %s seconds: _all_against_all ---" % (time.time() - start_time))
+		print("--- %s seconds: _hypothesis testing ---" % (time.time() - start_time))
 		start_time = time.time() 
 		self._summary_statistics( 'final' ) 
 		print("--- %s seconds: _summary_statistics ---" % (time.time() - start_time))
