@@ -5,30 +5,27 @@ unified statistics module
 
 # native python 
 import sys
-sys.path.append('/Users/rah/Documents/Hutlab/halla/')
-sys.path.append('/Users/rah/Documents/Hutlab/strudel')
+
+
 from itertools import compress
 import itertools
 import math
-import sys
 
 # External dependencies 
 
-import pylab as pl
 import scipy
 import numpy 
 from numpy import array 
-from scipy.stats import percentileofscore
+#from scipy.stats import percentileofscore
 from numpy.random import shuffle, binomial, normal, multinomial 
 from itertools import product
-
 # ML plug-in 
 import sklearn 
 from sklearn.metrics import roc_curve, auc 
 
 # Internal dependencies 
-import halla 
-from halla.distance import mi, l2, norm_mi, adj_mi 
+import distance
+from distance import mi, l2, norm_mi, adj_mi 
 
 def fpr_tpr(condition = None, outcome= None ):
 	condition_negative = numpy.where(condition < .45, 1, 0).sum(); #FP + TN
@@ -68,7 +65,7 @@ def alpha_threshold( pArray, alpha = 0.05, func = norm_mi ):
 
 	X = pArray
 	XP = array([numpy.random.permutation( x ) for x in X])
-	D = halla.discretize( XP )
+	D = discretize( XP )
 	A = numpy.array([func(D[i],D[j]) for i,j in itertools.combinations( range(len(XP)), 2 )])
 	fScore = scipy.stats.scoreatpercentile(A, fPercentile)
 	#print "alpha_threshold: ", fScore
@@ -88,7 +85,7 @@ def pca_explained_variance_ratio_(pArray, iComponents =1):
 	## doing this matrix inversion twice doesn't seem to be a good idea 
 	pPCA.fit(pArray.T)
 	#PCA(copy=True, n_components=1, whiten=False)
-	#print "PCA variance", pPCA.explained_variance_ratio_ 
+	print "PCA variance", pPCA.explained_variance_ratio_ 
 	return pPCA.explained_variance_ratio_ 
 
 	
@@ -213,10 +210,10 @@ def cca_score_norm_mi( pArray1, pArray2 ):
 	if Y_c.ndim > 1:
 		Y_c = list(Y_c[0])
 	
-	X_cd = halla.stats.discretize( X_c )
-	Y_cd = halla.stats.discretize( Y_c )
+	X_cd =  stats.discretize( X_c )
+	Y_cd =  stats.discretize( Y_c )
 
-	return halla.distance.norm_mi( X_cd, Y_cd )
+	return  distance.norm_mi( X_cd, Y_cd )
 	#return scipy.stats.pearsonr( X_c, Y_c )[0]
 
 def pls( pArray1, pArray2, iComponents = 1 ):
@@ -280,10 +277,10 @@ def pls_score_norm_mi( pArray1, pArray2 ):
 	if Y_c.ndim > 1:
 		Y_c = list(Y_c[0])
 	
-	X_cd = halla.stats.discretize( X_c )
-	Y_cd = halla.stats.discretize( Y_c )
+	X_cd =  stats.discretize( X_c )
+	Y_cd =  stats.discretize( Y_c )
 
-	return halla.distance.norm_mi( X_cd, Y_cd )
+	return  distance.norm_mi( X_cd, Y_cd )
 
 
 def plsc():
@@ -295,7 +292,7 @@ def kernel_cca( ):
 def kernel_cca_score( ):
 	pass 
 
-def get_medoid( pArray, iAxis = 0, pMetric = halla.distance.l2 ):
+def get_medoid( pArray, iAxis = 0, pMetric = distance.l2 ):
 	"""
 	Input: numpy array 
 	Output: float
@@ -373,7 +370,7 @@ def bh( afPVAL, q ):
 	#iLenReduced = len(afPVAL_reduced)
 	#pRank = scipy.stats.rankdata( afPVAL) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	## source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
-	pRank = scipy.stats.rankdata( afPVAL, method='ordinal')
+	pRank = scipy.stats.rankdata(afPVAL, method='ordinal' )
 
 	aOut = [] 
 	iLen = len(afPVAL)
@@ -454,7 +451,7 @@ def permutation_test_by_medoid( pArray1, pArray2, metric = "norm_mi", iIter = 10
 
 	strMetric = metric 
 	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
-	pHashMetric = halla.distance.c_hash_metric 
+	pHashMetric =  distance.c_hash_metric 
 	
 	def _permutation( pVec ):
 		return numpy.random.permutation( pVec )
@@ -514,7 +511,7 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	strMetric = metric 
 	#step 5 in a case of new decomposition method
 	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
-	pHashMetric = halla.distance.c_hash_metric 
+	pHashMetric = distance.c_hash_metric 
 	
 	def _permutation( pVec ):
 		return numpy.random.permutation( pVec )
@@ -525,17 +522,19 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	
 	aDist = [] 
 
-	#### Caclulate Point estimate 
-	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+	#### Calculate Point estimate 
+	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+	left_pc = pca_explained_variance_ratio_(discretize(pDe(pArray1)))
+	right_pc = pca_explained_variance_ratio_(discretize(pDe(pArray2)))
 	fAssociation = pMe( pRep1, pRep2 ) 
 
-	#### Perform Permutaiton 
+	#### Perform Permutation 
 	for _ in xrange(iIter):
 
 		XP = array([numpy.random.permutation(x) for x in X])
 		YP = array([numpy.random.permutation(y) for y in Y])
 
-		pRep1_, pRep2_ = [ discretize( pDe( pA ) )[0] for pA in [XP,YP] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+		pRep1_, pRep2_ = [ discretize( pDe( pA ) )[0] for pA in [XP,YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 
 		# Similarity score between representatives  
 		fAssociation_ = pMe( pRep1_, pRep2_ ) #NMI
@@ -544,7 +543,7 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 
 		#aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	
-	fPercentile = percentileofscore( aDist, fAssociation, kind="mean" ) ##source: Good 2000  
+	fPercentile = scipy.stats.percentileofscore( aDist, fAssociation, kind="mean" ) ##source: Good 2000  
 	### \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
 	### k number of iterations, \hat{X} is randomized version of X 
 	### PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
@@ -554,7 +553,7 @@ def permutation_test_by_representative( pArray1, pArray2, metric = "norm_mi", de
 	
 	assert(fP <= 1.0)
 	#print fP
-	return fP, fAssociation
+	return fP, fAssociation, left_pc, right_pc
 
 def g_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 1000 ):
 	"""
@@ -568,14 +567,14 @@ def g_test_by_representative( pArray1, pArray2, metric = "norm_mi", decompositio
 	strMetric = metric 
 	#step 5 in a case of new decomposition method
 	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
-	pHashMetric = halla.distance.c_hash_metric 
+	pHashMetric =  distance.c_hash_metric 
 	
 	pDe = pHashDecomposition[decomposition]
 	pMe = pHashMetric[strMetric] 
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	
 	#### Caclulate Point estimate 
-	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
+	pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool( distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 	print "pRep1:", pRep1
 	print "pRep2:", pRep2
 	filtered_pRep1 = []
@@ -595,7 +594,7 @@ def g_test_by_representative( pArray1, pArray2, metric = "norm_mi", decompositio
 	from collections import Counter
 	from scipy.stats import chi2
 	from math import log, exp, sqrt
-	mi = halla.distance.NormalizedMutualInformation( pRep1, pRep2 ).get_distance()
+	mi =  distance.NormalizedMutualInformation( pRep1, pRep2 ).get_distance()
 	print "nmi", mi
 	mi_natural_log = mi / log( exp( 1.0 ), 2.0 )
 	print "nmi_natural_log"
@@ -638,7 +637,7 @@ def permutation_test_by_max_pca( pArray1, pArray2, k = 2, metric = "norm_mi", iI
 
 	strMetric = metric 
 	
-	pHashMetric = halla.distance.c_hash_metric 
+	pHashMetric = distance.c_hash_metric 
 	
 	def _permutation( pVec ):
 		return numpy.random.permutation( pVec )
@@ -689,7 +688,7 @@ def permutation_test_by_cca( pArray1, pArray2, metric = "norm_mi", iIter = 1000 
 
 	strMetric = metric 
 	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
-	pHashMetric = halla.distance.c_hash_metric 
+	pHashMetric =  distance.c_hash_metric 
 	
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function	
 
@@ -766,7 +765,7 @@ def permutation_test_by_pls( pArray1, pArray2, metric = "norm_mi", iIter = 1000 
 
 	strMetric = metric 
 	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
-	pHashMetric = halla.distance.c_hash_metric 
+	pHashMetric =  distance.c_hash_metric 
 	
 	## implicit assumption is that the arrays do not need to be discretized prior to input to the function	
 
@@ -846,7 +845,7 @@ def permutation_test_by_average( pArray1, pArray2, metric = "norm_mid", iIter = 
 
 	pHashDecomposition = {"pca": pca, "ica":ica}
 	
-	pHashMetric = halla.distance.c_hash_metric
+	pHashMetric =  distance.c_hash_metric
 
 	def _permutation( pVec ):
 		return numpy.random.permutation( pVec )
@@ -861,7 +860,7 @@ def permutation_test_by_average( pArray1, pArray2, metric = "norm_mid", iIter = 
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
 	pArrayPerm = numpy.array( [ pFun( array( [_permutation( x ) for x in pArray1] ), pArray2 ) for i in xrange( iIter ) ] )
 
-	dPPerm = percentileofscore( pArrayPerm, dVal ) / 100.0 	
+	dPPerm = scipy.stats.percentileofscore( pArrayPerm, dVal ) / 100.0 	
 
 	return dPPerm
 
@@ -870,8 +869,8 @@ def parametric_test( pArray1, pArray2 ):
 	
 	#numpy.random.seed(0)
 
-	pMe1 = lambda x,y: halla.distance.cor( x,y, method = "pearson", pval = True)
-	pMe2 = lambda x,y: halla.distance.cor( x,y, method = "spearman", pval = True)
+	pMe1 = lambda x,y:  distance.cor( x,y, method = "pearson", pval = True)
+	pMe2 = lambda x,y:  distance.cor( x,y, method = "spearman", pval = True)
 
 	pVal1 = [pMe1(i,j)[1] for i,j in itertools.product( pArray1, pArray2 )]
  	pVal2 = [pMe2(i,j)[1] for i,j in itertools.product( pArray1, pArray2 )]
@@ -1413,10 +1412,7 @@ def accuracy( true_labels, emp_labels ):
 	iLen = len(true_labels)
 	return sum( md( true_labels, emp_labels, lambda x,y: int(x==y) ) )*(1/float(iLen))
 
-def accuracy_with_threshold( true_labels, prob_vec, fThreshold = 0.05 ):
-	if not fThreshold:
-		fThreshold = self.q 
-	return accuracy( true_labels, threshold( prob_vec, fThreshold ) )
+
 
 
 def bag2association( aaBag, A ):

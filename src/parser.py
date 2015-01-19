@@ -5,11 +5,8 @@ manages transformations
 '''
 
 import csv
-
 from numpy import array
-
 import numpy as np
-
 
 class Input:
 	"""

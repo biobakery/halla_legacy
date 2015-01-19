@@ -3,29 +3,24 @@ HAllA class
 """
 import sys
 import csv
-sys.path.append('/Users/rah/Documents/Hutlab/halla')
+sys.path.append('/Users/rah/Documents/Hutlab/halla/src')
 sys.path.append('/Users/rah/Documents/Hutlab/strudel')
 ## structural packages 
 import itertools
 import numpy as np
-from numpy import array
-import halla
-#from halla import distance, stats
-from halla.distance import *
-from halla.hierarchy import *
-from halla.plot import *
-from halla.stats import *
-import math
+import distance
+import hierarchy
+import stats
 import time
 ## internal dependencies
 
 from numpy import *
 import scipy as sp
-from pandas import *
-from rpy2.robjects.packages import importr
+#from pandas import *
+'''from rpy2.robjects.packages import importr
 import rpy2.robjects as ro
 import pandas.rpy.common as com
-import rpy2.robjects.numpy2ri
+import rpy2.robjects.numpy2ri'''
 import shutil 
 import os
 class HAllA():
@@ -47,7 +42,7 @@ class HAllA():
 		# Single and cross-decomposition 
 		#----------------------------------#
 
-		self.distance = adj_mi 
+		self.distance = distance.adj_mi 
 		self.reduce_method = "pca" 
 		
 
@@ -118,9 +113,9 @@ class HAllA():
 		self.__author__			= ["Gholamali.Rahnavard","YS Joseph Moon", "Curtis Huttenhower"]
 		self.__contact__		= "gholamali.rahnavard@gmail.com"
 
-		self.hash_reduce_method = {"pca"	: pca, }
+		self.hash_reduce_method = {"pca"	: stats.pca }
 
-		self.hash_metric 		= halla.distance.c_hash_metric 
+		self.hash_metric 		= distance.c_hash_metric 
 
 		self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q","distance","iterations", "reduce_method", "p_adjust_method","randomization_method"]
 
@@ -351,7 +346,7 @@ class HAllA():
 	#==========================================================# 
 
 	def _discretize( self ):
-		self.meta_feature = self.m( self.meta_array, discretize )
+		self.meta_feature = self.m( self.meta_array, stats.discretize )
 		# Should do a better job at detecting whether dataset is categorical or continuous
 		# Take information from the parser module 
 		return self.meta_feature
@@ -368,8 +363,8 @@ class HAllA():
 
 	def _hclust( self ):
 		#print self.meta_feature
-		self.meta_data_tree.append(hclust(self.meta_feature[0] , labels = self.xlabels, bTree=True))
-		self.meta_data_tree.append(hclust(self.meta_feature[1] , labels = self.ylabels, bTree=True))
+		self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[0] , labels = self.xlabels, bTree=True))
+		self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[1] , labels = self.ylabels, bTree=True))
 		#self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x , bTree=True) )
 		#print self.meta_data_tree
 		return self.meta_data_tree 
@@ -381,7 +376,7 @@ class HAllA():
 		   #couple_tree ), 
 			#lambda y: y[0] ) 
 		
-		self.meta_hypothesis_tree = couple_tree(apClusterNode1 =[self.meta_data_tree[0]], 
+		self.meta_hypothesis_tree = hierarchy.couple_tree(apClusterNode1 =[self.meta_data_tree[0]], 
 				apClusterNode2 = [self.meta_data_tree[1]], 
 				pArray1 = self.meta_array[0], pArray2 = self.meta_array[1], func = self.distance )[0]
 		
@@ -389,7 +384,7 @@ class HAllA():
 		return self.meta_hypothesis_tree 
 
 	def _naive_all_against_all( self, iIter = 100 ):
-		self.meta_alla = naive_all_against_all( self.meta_array[0], self.meta_array[1], iIter = iIter )
+		self.meta_alla = hierarchy.naive_all_against_all( self.meta_array[0], self.meta_array[1], iIter = iIter )
 		return self.meta_alla 
 	def _all_against_all( self, strMethod ="permutation_test_by_representative", iIter = None ):
 		if not iIter:
@@ -401,12 +396,12 @@ class HAllA():
 		if self.verbose:
 			print ("HAllA PROMPT: q value", fQ)
 			print ("q value is", fQ)
-		self.meta_alla = all_against_all( self.meta_hypothesis_tree, self.meta_array[0], self.meta_array[1], method = strMethod, fQ = self.q, bVerbose = self.verbose ) 
+		self.meta_alla = hierarchy.all_against_all( self.meta_hypothesis_tree, self.meta_array[0], self.meta_array[1], method = strMethod, fQ = self.q, bVerbose = self.verbose ) 
 		## Choose to keep to 2 arrays for now -- change later to generalize 
 		return self.meta_alla 
 	
 	def _naive_all_against_all_mic( self, iIter = 100 ):
-		self.meta_alla = naive_all_against_all( self.meta_array[0], self.meta_array[1], strMethod = "permutation_test_by_representative_mic", iIter = iIter )
+		self.meta_alla = hierarchy.naive_all_against_all( self.meta_array[0], self.meta_array[1], strMethod = "permutation_test_by_representative_mic", iIter = iIter )
 		return self.meta_alla
 
 	def _layerwise_all_against_all( self ):
@@ -416,7 +411,7 @@ class HAllA():
 		tX, tY = self.meta_data_tree[0], self.meta_data_tree[1]
 		iX, iY = X.shape[0], Y.shape[0]
 
-		aOut = filter(bool,list(halla.hierarchy.layerwise_all_against_all( tX, tY, X, Y )))
+		aOut = filter(bool,list(hierarchy.layerwise_all_against_all( tX, tY, X, Y )))
 
 		aMetaOut = [] 
 
@@ -640,14 +635,14 @@ class HAllA():
 			fP_adjust = line[2]
 			aLineOut = map(str,[association_number, str(';'.join(self.aOutName1[i] for i in iX)),str(';'.join(self.aOutName2[i] for i in iY)), fP, fP_adjust])
 			bcsvw.writerow( aLineOut )
-			import pandas as pd
+			#import pandas as pd
 			import matplotlib.pyplot as plt 
 			plt.figure()
 			cluster1 = [self.aOutData1[i] for i in iX]
 			X_labels = np.array([self.aOutName1[i] for i in iX])
 			#cluster = np.array([aOutData1[i] for i in iX]
-			df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
-			axes = pd.tools.plotting.scatter_matrix(df)
+			#df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
+			#axes = pd.tools.plotting.scatter_matrix(df)
 			
 			#plt.tight_layout()
 			
@@ -655,14 +650,14 @@ class HAllA():
 			cluster2 = [self.aOutData2[i] for i in iY]
 			Y_labels = np.array([self.aOutName2[i] for i in iY])
 			plt.figure()
-			df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-			axes = pd.tools.plotting.scatter_matrix(df)
+			#df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
+			#axes = pd.tools.plotting.scatter_matrix(df)
 			#plt.tight_layout()
 			plt.savefig(filename+'Dataset_2_cluster_'+str(association_number)+'_scatter_matrix.pdf')
 			df1 = np.array(cluster1, dtype= float)
 			df2 = np.array(cluster2, dtype= float)
 			plt.figure()
-			plt.scatter(halla.stats.pca(df1),halla.stats.pca(df2), alpha=0.5)
+			plt.scatter(stats.pca(df1), stats.pca(df2), alpha=0.5)
 			plt.savefig(filename+'/association_'+str(association_number)+'.pdf')
 			#plt.figure()
 			plt.close("all")
@@ -670,7 +665,7 @@ class HAllA():
 		
 		csvwc = csv.writer(self.args.costm , csv.excel_tab )
 		csvwc.writerow( ['Level', "Dataset 1","Dataset 2" ] )
-		for line in halla.hierarchy.reduce_tree_by_layer([self.meta_hypothesis_tree]):
+		for line in hierarchy.reduce_tree_by_layer([self.meta_hypothesis_tree]):
 			(level, clusters ) = line
 			iX, iY = clusters[0], clusters[1]
 			fP = line[1]
@@ -692,8 +687,8 @@ class HAllA():
 		nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
 		for i in range(len(associated_feature_X_indecies)):
 			for j in range(len(associated_feature_Y_indecies)):
-				nmi[i][j] = distance.NormalizedMutualInformation( halla.discretize(df1[i]),halla.discretize(df2[j]) ).get_distance()
-		rpy2.robjects.numpy2ri.activate()
+				nmi[i][j] = distance.NormalizedMutualInformation( stats.discretize(df1[i]), stats.discretize(df2[j]) ).get_distance()
+		'''rpy2.robjects.numpy2ri.activate()
 		ro.r('library("gplots")')
 		ro.globalenv['nmi'] = nmi
 		ro.globalenv['labRow'] = X_labels 
@@ -704,7 +699,7 @@ class HAllA():
 		ro.globalenv['p'] = p
 		ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
 		ro.r('heatmap.2(p, , labRow = labRow, labCol = labCol, , col=redgreen(75), scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)')
-		ro.r('dev.off()')
+		ro.r('dev.off()')'''
 		#set_default_mode(NO_CONVERSION)
 		#rpy2.library("ALL")
 		#hm = halla.plot.hclust2.Heatmap( p)#, cl.sdendrogram, cl.fdendrogram, snames, fnames, fnames_meta, args = args )
@@ -805,7 +800,7 @@ class HAllA():
 
 	def __preset_medoid_norm_mi( self ):
 
-		pDistance = norm_mi
+		pDistance = distance.norm_mi
 		self.set_metric( pDistance )
 		
 		self._featurize( )
@@ -827,7 +822,7 @@ class HAllA():
 		return self._report( )  
 	
 	def __preset_pca_mic( self ):
-		pDistance = mic
+		pDistance = distance.mic
 		self.set_metric( pDistance )
 		self._featurize( )
 		#self._threshold( )
@@ -839,7 +834,7 @@ class HAllA():
 	
 	# step 2 to add a new method for HAllA
 	def __preset_ica_norm_mi( self ):
-		pDistance = norm_mi
+		pDistance = distance.norm_mi
 		self.set_metric( pDistance )
 		self._featurize( )
 		#self._threshold( )
@@ -850,7 +845,7 @@ class HAllA():
 		return self._report( ) 
 	
 	def __preset_ica_mic( self ):
-		pDistance = mic
+		pDistance = distance.mic
 		self.set_metric( pDistance )
 		self._featurize( )
 		#self._threshold( )
@@ -860,7 +855,7 @@ class HAllA():
 		self._summary_statistics( ) 
 		return self._report( ) 
 	def __preset_kpca_norm_mi( self ):
-		pDistance = norm_mi
+		pDistance = distance.norm_mi
 		self.set_metric( pDistance )
 		
 		self._featurize( )
@@ -872,7 +867,7 @@ class HAllA():
 		return self._report( )  
 
 	def __preset_kpca_pearson( self ):
-		pDistance = pearson
+		pDistance = distance.pearson
 		self.set_metric( pDistance )
 		self._featurize( )
 		#self._threshold( )
@@ -883,7 +878,7 @@ class HAllA():
 		return self._report( ) 
 
 	def __preset_cca_pearson( self ):
-		pDistance = pearson
+		pDistance = distance.pearson
 		self.set_metric( pDistance )
 		self._featurize( )
 		#self._threshold( )
@@ -894,7 +889,7 @@ class HAllA():
 		return self._report( ) 
 
 	def __preset_pls_pearson( self ):
-		pDistance = pearson
+		pDistance = distance.pearson
 		self.set_metric( pDistance )
 		self._featurize( )
 		#self._threshold( )
@@ -906,7 +901,7 @@ class HAllA():
 
 
 	def __preset_pls_norm_mi( self ):
-		pDistance = norm_mi
+		pDistance = distance.norm_mi
 		self.set_metric( pDistance )
 		self._featurize( )
 		#self._threshold( )
@@ -919,7 +914,7 @@ class HAllA():
 
 	def __preset_cca_norm_mi( self ):
 		## Constants for this preset 
-		pDistance = norm_mi
+		pDistance = distance.norm_mi
 		self.set_metric( pDistance )
 		#pDistance = norm_mi 
 		#iIter = 100
@@ -947,7 +942,7 @@ class HAllA():
 
 		## Constants for this preset 
 
-		pDistance = norm_mi 
+		pDistance = distance.norm_mi 
 		iIter = 100
 		strReduce = "pca"
 		strStep = "uniform"
@@ -987,7 +982,7 @@ class HAllA():
 	def __preset_multiple_representative( self ):
 
 		## Constants for this preset 
-		pDistance = norm_mi 
+		pDistance = distance.norm_mi 
 		strReduce = "pca"
 		strStep = "uniform"
 		strAdjust = "BH"
@@ -1013,7 +1008,7 @@ class HAllA():
 		Mutual Information Preset 
 		"""
 		## Constants for this preset 
-		pDistance = norm_mi 
+		pDistance = distance.norm_mi 
 		strReduce = "pca"
 		strStep = "uniform"
 		strAdjust = "BH"
@@ -1054,7 +1049,7 @@ class HAllA():
 		Adjusted Mutual Information Preset 
 		"""
 		## Constants for this preset 
-		pDistance = adj_mi 
+		pDistance = distance.adj_mi 
 		strReduce = "pca"
 		strStep = "uniform"
 		strAdjust = "BH"
@@ -1082,7 +1077,7 @@ class HAllA():
 		"""
 
 		## Constants for this preset 
-		pDistance = norm_mi 
+		pDistance = distance.norm_mi 
 		strReduce = "pca"
 		strStep = "uniform"
 		strAdjust = "BH"
@@ -1139,7 +1134,7 @@ class HAllA():
 	def __preset_accuracy( self ):
 		## Constants for this preset 
 
-		pDistance = adj_mi 
+		pDistance = distance.adj_mi 
 		iIter = 1000
 		strReduce = "pca"
 		strStep = "uniform"
@@ -1148,7 +1143,7 @@ class HAllA():
 
 		## Set 
 
-		self.set_metric( adj_mi )
+		self.set_metric( distance.adj_mi )
 		self.set_iterations( iIter )
 		self.set_reduce_method( strReduce )
 		self.set_p_adjust_method( strAdjust )

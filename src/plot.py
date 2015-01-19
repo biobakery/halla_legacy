@@ -8,11 +8,14 @@ including all graphics and 'data object to plot' transformations.
 
 
 #import dot_parser
-import pydot, sys
-sys.path.append('/Users/rah/Documents/Hutlab/halla')
+import sys
+#import pydot
+sys.path.append('/Users/rah/Documents/Hutlab/halla/src')
 sys.path.append('/Users/rah/Documents/Hutlab/strudel')
-import halla, strudel
-#from pylab import *
+import strudel
+import pylab
+import stats
+import distance
 def _main( ):
     D = plotGridData(D = [])
      #plot_box()
@@ -161,10 +164,8 @@ def plot_roc(roc_info=None, figure_name = 'roc_plot_HAllA'):
     #return plt
 def plotGridData(D):
     import scipy
-    import pylab
     #import dot_parser
     import scipy.cluster.hierarchy as sch
-    import pydot
     from numpy.matlib import rand
     from array import array
     #Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
@@ -173,24 +174,24 @@ def plotGridData(D):
         print "The distance matrix is empty. The function generates a random matrix."
         s = strudel.Strudel()
         X,Y,A = s.double_cholesky_block( 3, 10 , 2, fVal = 2.0 , Beta = 3.0 )
-        pylab.pcolor(X, cmap = pylab.cm.afmhot)
+        #pylab.pcolor(X, cmap = pylab.cm.afmhot)
         pylab.savefig('X.pdf')
         #pylab.show()
-        pylab.pcolor(Y, cmap = pylab.cm.afmhot)
+        #pylab.pcolor(Y, cmap = pylab.cm.afmhot)
         pylab.savefig('Y.pdf')
         #pylab.show()
-        dX = halla1.py.discretize(X)
-        pylab.pcolor(dX, cmap = pylab.cm.afmhot)
+        dX = stats.discretize(X)
+        #pylab.pcolor(dX, cmap = pylab.cm.afmhot)
         pylab.savefig('dX.pdf')
-        dY = halla1.py.discretize(Y)
-        pylab.pcolor(dY, cmap = pylab.cm.afmhot)
+        dY = stats.discretize(Y)
+        #pylab.pcolor(dY, cmap = pylab.cm.afmhot)
         pylab.savefig('dY.pdf')
         #pylab.show()
-        f = lambda x,y: halla1.py.norm_mi(x,y)
-        Dx = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dX, f ) )
-        Dy = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dY, f ) )
-        dendrogramHeatPlot([], 'dXDendrogram')
-        dendrogramHeatPlot([], 'dYDendrogram')
+        f = lambda x,y: distance.norm_mi(x,y)
+        #Dx = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dX, f ) )
+        #Dy = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dY, f ) )
+        #endrogramHeatPlot([], 'dXDendrogram')
+        #dendrogramHeatPlot([], 'dYDendrogram')
         
         
         
@@ -199,7 +200,6 @@ def heatmap(D, filename = 'Dendrogram'):
     import pylab
     #import dot_parser
     import scipy.cluster.hierarchy as sch
-    import pydot
     from numpy.matlib import rand
     from array import array
     #Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
@@ -233,13 +233,13 @@ def heatmap(D, filename = 'Dendrogram'):
     idx2 = Z2['leaves']
     D = D[idx1,:]
     D = D[:,idx2]
-    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.afmhot)
+    #im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.afmhot)
     axmatrix.set_xticks([])
     axmatrix.set_yticks([])
     
     # Plot colorbar.
     axcolor = fig.add_axes([0.91,0.1,0.02,0.6])
-    pylab.colorbar(im, cax=axcolor)
+    #pylab.colorbar(im, cax=axcolor)
     #fig.show()
     fig.savefig(filename+'.pdf')
     '''
@@ -262,37 +262,6 @@ def heatmap(D, filename = 'Dendrogram'):
     axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
     
     '''
-def graphPlot():
-    '''graph = pydot.Dot('graphname', graph_type='digraph') 
-    subg = pydot.Subgraph('', rank='same') 
-    subg.add_node(pydot.Node('a')) 
-    graph.add_subgraph(subg) 
-    subg.add_node(pydot.Node('b')) 
-    subg.add_node(pydot.Node('c'))
-    
-    graph.write_png('example2_graph.png')
-    '''
-    # first you create a new graph, you do that with pydot.Dot()
-    graph = pydot.Dot(graph_type='graph')
-    
-    for i in range(3):
-        
-        edge = pydot.Edge("root", "parent%d" % i)
-        # and we obviosuly need to add the edge to our graph
-        graph.add_edge(edge)
-    
-    # now let us add some vassals
-    child_num = 0
-    for i in range(3):
-        for j in range(2):
-            edge = pydot.Edge("parent%d" % i, "child%d" % child_num)
-            graph.add_edge(edge)
-            child_num += 1
-    
-    # ok, we are set, let's save our graph into a file
-    graph.write_png('example1_graph.png')
-    
-    # and we are done!
 if __name__ == '__main__':
     _main( )
   
