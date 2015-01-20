@@ -25,7 +25,7 @@ URL
  http://huttenhower.sph.harvard.edu/halla
 
 Citation
- Yo Sup Moon, George Weingart, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation)
+Gholamali Rahnavard, Yo Sup Moon, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation)
 
 .. toctree::
    :maxdepth: 2
