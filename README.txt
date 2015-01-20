@@ -25,7 +25,7 @@ URL
  http://huttenhower.sph.harvard.edu/halla
 
 Citation
-Gholamali Rahnavard, Yo Sup Moon, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation)
+ Gholamali Rahnavard, Yo Sup Moon, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation)
 
 .. toctree::
    :maxdepth: 2
@@ -165,8 +165,6 @@ Suppose you have two tab-delimited file containing the datasets you wish to run 
 	
 	$ python halla.py -X input1.txt -Y input2.txt -q .2 
 
-To obtain the output in `out.txt`. 
-	
 
 Frequently Asked Questions 
 ==============================================
@@ -197,11 +195,3 @@ Functions
 
 .. automodule:: halla.hierarchy
 	:members:
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
