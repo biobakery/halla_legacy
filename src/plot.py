@@ -3,23 +3,26 @@ Central namespace for plotting capacities in HAllA,
 including all graphics and 'data object to plot' transformations.
 """
 
-#from pylab import plot, hist, scatter
+# from pylab import plot, hist, scatter
 
 
 
-#import dot_parser
+# import dot_parser
+import pylab
 import sys
-#import pydot
+
+import distance
+import stats
+import strudel
+
+
+# import pydot
 sys.path.append('/Users/rah/Documents/Hutlab/halla/src')
 sys.path.append('/Users/rah/Documents/Hutlab/strudel')
-import strudel
-import pylab
-import stats
-import distance
-def _main( ):
-    D = plotGridData(D = [])
-     #plot_box()
-def plot_box(data, alpha= .1 , figure_name='HAllA_Evaluation', ylabel = None, labels = None ):
+def _main():
+    D = plotGridData(D=[])
+     # plot_box()
+def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', ylabel=None, labels=None):
     
     import pylab as pl
     import numpy as np
@@ -37,33 +40,33 @@ def plot_box(data, alpha= .1 , figure_name='HAllA_Evaluation', ylabel = None, la
     pl.xlim([-0.05, 1.15])
     pl.ylim([-0.05, 1.15])
     bp = pl.boxplot(data, notch=0, sym='+', vert=1, whis=1.5)
-    pl.scatter(np.repeat(np.arange(len(data))+1, len(data[0])), [item for sublist in data for item in sublist], marker='+', alpha=1)
+    pl.scatter(np.repeat(np.arange(len(data)) + 1, len(data[0])), [item for sublist in data for item in sublist], marker='+', alpha=1)
     pl.setp(bp['boxes'], color='black')
     pl.setp(bp['whiskers'], color='blue')
     pl.setp(bp['fliers'], marker='+')
-    #pl.plot(data)
-    #pl.hlines(1-alpha,0.0,2.5, color ='blue')
+    # pl.plot(data)
+    # pl.hlines(1-alpha,0.0,2.5, color ='blue')
     if ylabel == 'FDR':
-        pl.plot([.0, len(data)+.5], [alpha, alpha], 'k-', lw=1, color ='red')
-    #hB, = pl.plot([1,1],'b-')
-        hR, = pl.plot([1,1],'r-')
-        pl.legend((hR,),('q cut-off',))
-    #pl.legend((hB, hR),('???', '???'))
-    #hB.set_visible(False)
+        pl.plot([.0, len(data) + .5], [alpha, alpha], 'k-', lw=1, color='red')
+    # hB, = pl.plot([1,1],'b-')
+        hR, = pl.plot([1, 1], 'r-')
+        pl.legend((hR,), ('q cut-off',))
+    # pl.legend((hB, hR),('???', '???'))
+    # hB.set_visible(False)
         hR.set_visible(False)
-    #savefig('box7')
-    pl.savefig(figure_name+'.pdf')
+    # savefig('box7')
+    pl.savefig(figure_name + '.pdf')
     pl.show()
     return
-def scatter_plot(x = None, y = None, alpha = .1, figure_name='Figure2', xlabel = "Recall", ylabel = "FDR", labels  = None):
+def scatter_plot(x=None, y=None, alpha=.1, figure_name='Figure2', xlabel="Recall", ylabel="FDR", labels=None):
     import pylab as pl
     pl.figure("Recall vs. FDR")
     ax = pl.axes()
     pl.hold(True)
-    #if len(labels) > 0:
+    # if len(labels) > 0:
     #    ax.set_xticklabels(labels)
     pl.xlabel(xlabel)
-    #pl.xticks(range(len(labels)), labels, rotation=30, ha='right')
+    # pl.xticks(range(len(labels)), labels, rotation=30, ha='right')
     pl.ylabel(ylabel)
     pl.xlim([-0.05, 1.15])
     pl.ylim([-0.05, 1.3])
@@ -78,33 +81,33 @@ def scatter_plot(x = None, y = None, alpha = .1, figure_name='Figure2', xlabel =
             pos = "left"
             loc = True
         '''
-        pl.annotate(txt, xy=(x[i], y[i]), xytext=(10, 10), 
-            textcoords='offset points', ha="right", va= "bottom",
+        pl.annotate(txt, xy=(x[i], y[i]), xytext=(10, 10),
+            textcoords='offset points', ha="right", va="bottom",
             bbox=dict(boxstyle='round,pad=0.2', fc='yellow', alpha=0.5),
             arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0.8', color='green'))
-    #pl.plot(data)
-    #pl.hlines(1-alpha,0.0,2.5, color ='blue')
-    #if ylabel == 'Type I Error':
-    #pl.plot([alpha, alpha], [-.05, 1.15], 'k-', lw=1, color ='red')
+    # pl.plot(data)
+    # pl.hlines(1-alpha,0.0,2.5, color ='blue')
+    # if ylabel == 'Type I Error':
+    # pl.plot([alpha, alpha], [-.05, 1.15], 'k-', lw=1, color ='red')
     
-    pl.plot([-.05, 1.15], [alpha, alpha], 'k-', lw=1, color ='red')
-    #hB, = pl.plot([1,1],'b-')
-    hR, = pl.plot([1,1],'r-')
-    pl.legend((hR,),('q cut-off',))
-    #pl.legend((hB, hR),('???', '???'))
-    #hB.set_visible(False)
+    pl.plot([-.05, 1.15], [alpha, alpha], 'k-', lw=1, color='red')
+    # hB, = pl.plot([1,1],'b-')
+    hR, = pl.plot([1, 1], 'r-')
+    pl.legend((hR,), ('q cut-off',))
+    # pl.legend((hB, hR),('???', '???'))
+    # hB.set_visible(False)
     hR.set_visible(False)
-    #savefig('box7')
+    # savefig('box7')
     pl.savefig('Figure2.pdf')
     pl.show()
     return
-    #fig, ax = pl.subplots()
-    #ax.scatter(x, y)
+    # fig, ax = pl.subplots()
+    # ax.scatter(x, y)
 
-    #for i, txt in enumerate(n):
+    # for i, txt in enumerate(n):
      #   ax.annotate(txt, (z[i],y[i]))
 
-def plot_roc(roc_info=None, figure_name = 'roc_plot_HAllA'):
+def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
     """
     =======================================
     Receiver Operating Characteristic (ROC)
@@ -139,12 +142,12 @@ def plot_roc(roc_info=None, figure_name = 'roc_plot_HAllA'):
     roc_name = ''
     roc_auc = dict()
     for i in range(len(roc_info)):
-        #print ('Hi', (roc_info[i][1]))
+        # print ('Hi', (roc_info[i][1]))
         fpr[roc_info[i][0]] = roc_info[i][1]
-        #print ((roc_info[i][1])[0])
+        # print ((roc_info[i][1])[0])
         tpr[roc_info[i][0]] = roc_info[i][2]
         roc_auc[roc_info[i][0]] = auc(fpr[roc_info[i][0]], tpr[roc_info[i][0]])
-        roc_name += '_'+roc_info[i][0] 
+        roc_name += '_' + roc_info[i][0] 
         
     # Plot ROC curve
     plt.figure()
@@ -158,90 +161,90 @@ def plot_roc(roc_info=None, figure_name = 'roc_plot_HAllA'):
     plt.ylabel('True Positive Rate')
     plt.title('Receiver operating characteristic')
     plt.legend(loc="lower right")
-    #plt.savefig('./test/'+roc_name+'foo.pdf')
-    plt.savefig(figure_name+'.pdf')
+    # plt.savefig('./test/'+roc_name+'foo.pdf')
+    plt.savefig(figure_name + '.pdf')
     plt.show()
-    #return plt
+    # return plt
 def plotGridData(D):
     import scipy
-    #import dot_parser
+    # import dot_parser
     import scipy.cluster.hierarchy as sch
     from numpy.matlib import rand
     from array import array
-    #Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
+    # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
     if len(D) == 0: 
         # Generate random features and distance matrix.
         print "The distance matrix is empty. The function generates a random matrix."
         s = strudel.Strudel()
-        X,Y,A = s.double_cholesky_block( 3, 10 , 2, fVal = 2.0 , Beta = 3.0 )
-        #pylab.pcolor(X, cmap = pylab.cm.afmhot)
+        X, Y, A = s.double_cholesky_block(3, 10 , 2, fVal=2.0 , Beta=3.0)
+        # pylab.pcolor(X, cmap = pylab.cm.afmhot)
         pylab.savefig('X.pdf')
-        #pylab.show()
-        #pylab.pcolor(Y, cmap = pylab.cm.afmhot)
+        # pylab.show()
+        # pylab.pcolor(Y, cmap = pylab.cm.afmhot)
         pylab.savefig('Y.pdf')
-        #pylab.show()
+        # pylab.show()
         dX = stats.discretize(X)
-        #pylab.pcolor(dX, cmap = pylab.cm.afmhot)
+        # pylab.pcolor(dX, cmap = pylab.cm.afmhot)
         pylab.savefig('dX.pdf')
         dY = stats.discretize(Y)
-        #pylab.pcolor(dY, cmap = pylab.cm.afmhot)
+        # pylab.pcolor(dY, cmap = pylab.cm.afmhot)
         pylab.savefig('dY.pdf')
-        #pylab.show()
-        f = lambda x,y: distance.norm_mi(x,y)
-        #Dx = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dX, f ) )
-        #Dy = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dY, f ) )
-        #endrogramHeatPlot([], 'dXDendrogram')
-        #dendrogramHeatPlot([], 'dYDendrogram')
+        # pylab.show()
+        f = lambda x, y: distance.norm_mi(x, y)
+        # Dx = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dX, f ) )
+        # Dy = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dY, f ) )
+        # endrogramHeatPlot([], 'dXDendrogram')
+        # dendrogramHeatPlot([], 'dYDendrogram')
         
         
         
-def heatmap(D, filename = 'Dendrogram'):
+def heatmap(D, filename='Dendrogram'):
     import scipy
     import pylab
-    #import dot_parser
+    # import dot_parser
     import scipy.cluster.hierarchy as sch
     from numpy.matlib import rand
     from array import array
-    #Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
+    # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
     if len(D) == 0: 
         # Generate random features and distance matrix.
         print "The distance matrix is empty. The function generates a random matrix."
         x = scipy.rand(16)
-        D = scipy.zeros([16,16])
+        D = scipy.zeros([16, 16])
         for i in range(16):
-            for j in range(i,16):
-                D[i,j] = abs(x[i] - x[j])
-                D[j,i]=D[i,j]
+            for j in range(i, 16):
+                D[i, j] = abs(x[i] - x[j])
+                D[j, i] = D[i, j]
     # Compute and plot first dendrogram.
-    fig = pylab.figure(figsize=(10,10))
-    ax1 = fig.add_axes([0.09,0.1,0.2,0.6])
+    fig = pylab.figure(figsize=(10, 10))
+    ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6])
     Y = sch.linkage(D, method='single')
     Z1 = sch.dendrogram(Y, orientation='right')
     ax1.set_xticks([])
     ax1.set_yticks([])
     
     # Compute and plot second dendrogram.
-    ax2 = fig.add_axes([0.3,0.71,0.6,0.2])
+    ax2 = fig.add_axes([0.3, 0.71, 0.6, 0.2])
     Y = sch.linkage(D, method='single')
     Z2 = sch.dendrogram(Y)
     ax2.set_xticks([])
     ax2.set_yticks([])
     
     # Plot distance matrix.
-    axmatrix = fig.add_axes([0.3,0.1,0.6,0.6])
+    axmatrix = fig.add_axes([0.3, 0.1, 0.6, 0.6])
     idx1 = Z1['leaves']
     idx2 = Z2['leaves']
-    D = D[idx1,:]
-    D = D[:,idx2]
-    #im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.afmhot)
+    D = D[idx1, :]
+    D = D[:, idx2]
+    # im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.afmhot)
     axmatrix.set_xticks([])
     axmatrix.set_yticks([])
     
     # Plot colorbar.
-    axcolor = fig.add_axes([0.91,0.1,0.02,0.6])
-    #pylab.colorbar(im, cax=axcolor)
-    #fig.show()
-    fig.savefig(filename+'.pdf')
+    axcolor = fig.add_axes([0.91, 0.1, 0.02, 0.6])
+    # pylab.colorbar(im, cax=axcolor)
+    # fig.show()
+    fig.savefig(filename + '.pdf')
     '''
     axmatrix.set_xticks(range(40))
     axmatrix.set_xticklabels(idx1, minor=False)
@@ -263,5 +266,5 @@ def heatmap(D, filename = 'Dendrogram'):
     
     '''
 if __name__ == '__main__':
-    _main( )
+    _main()
   

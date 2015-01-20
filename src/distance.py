@@ -10,17 +10,17 @@ from numpy import array
 import numpy
 import scipy
 import scipy.cluster
+from scipy.spatial.distance import cdist
 import scipy.stats
+
 from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, \
     adjusted_mutual_info_score, make_scorer
-#from minepy import MINE
-#from halla.distance.distance import *
-
-#import halla.stats
-from scipy.spatial.distance import cdist
 
 
-#mi-based distances from scikit-learn; (log e)-based (i.e. returns nats instead of bits)
+# from minepy import MINE
+# from halla.distance.distance import *
+# import halla.stats
+# mi-based distances from scikit-learn; (log e)-based (i.e. returns nats instead of bits)
 #==========================================================================#
 # CONSTANTS 
 #==========================================================================#
@@ -42,42 +42,42 @@ class Distance:
 	'''
 	__metaclass__ = ABCMeta
 		
-	c_hashInvertFunctions = {"logistic": lambda x:1.0/(1+numpy.exp(-1.0*x)), "flip": lambda x: -1.0*x, "1mflip": lambda x: 1-1.0*x }
+	c_hashInvertFunctions = {"logistic": lambda x:1.0 / (1 + numpy.exp(-1.0 * x)), "flip": lambda x:-1.0 * x, "1mflip": lambda x: 1 - 1.0 * x }
 
 	class EMetricType:
 		NONMETRIC = 0
 		METRIC = 1
-	def __init__( self, c_array1, c_array2 ): 
+	def __init__(self, c_array1, c_array2): 
 		self.m_data1 = c_array1
 		self.m_data2 = c_array2 
 
-	def get_inverted_distance( self, strFunc = None ):
+	def get_inverted_distance(self, strFunc=None):
 		pFunc = Distance.c_hashInvertFunctions[strFunc or "flip"] 
-		return pFunc( self.get_distance() ) 
+		return pFunc(self.get_distance()) 
 						
 	@abc.abstractmethod
-	def get_distance( self ): pass 
+	def get_distance(self): pass 
 
 	@abc.abstractmethod 
-	def get_distance_type( self ): pass
+	def get_distance_type(self): pass
 	
 	
-class EuclideanDistance( Distance ):
+class EuclideanDistance(Distance):
 
 	__metaclass__ = ABCMeta 
 
-	def __init__( self, c_array1, c_array2 ):
+	def __init__(self, c_array1, c_array2):
 		self.m_data1 = c_array1
 		self.m_data2 = c_array2
-		self.c_distance_type =  Distance.EMetricType.METRIC # CDistance.EMetricType.METRIC 
+		self.c_distance_type = Distance.EMetricType.METRIC  # CDistance.EMetricType.METRIC 
 
-	def get_distance( self ):
-		return numpy.linalg.norm( self.m_data2-self.m_data1 ) 
+	def get_distance(self):
+		return numpy.linalg.norm(self.m_data2 - self.m_data1) 
 
-	def get_distance_type( self ):
+	def get_distance_type(self):
 		return self.c_distance_type 	
 	
-class MutualInformation( Distance ):
+class MutualInformation(Distance):
 	"""
 	Scikit-learn uses the convention log = ln
 	Adjust multiplicative factor of log(e,2) 
@@ -85,60 +85,60 @@ class MutualInformation( Distance ):
 
 	__metaclass__ = ABCMeta 
 
-	def __init__( self, c_array1, c_array2, bSym = False ):
+	def __init__(self, c_array1, c_array2, bSym=False):
 		self.m_data1 = c_array1 
 		self.m_data2 = c_array2 
 		self.bSym = bSym
 		self.c_distance_type = Distance.EMetricType.NONMETRIC 
 	
-	def get_distance( self ):
-		#assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
-		return math.log(math.e,2) *  mutual_info_score( self.m_data1, self.m_data2 ) 	
-	def get_distance_type( self ):
+	def get_distance(self):
+		# assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
+		return math.log(math.e, 2) * mutual_info_score(self.m_data1, self.m_data2) 	
+	def get_distance_type(self):
 		return self.c_distance_type 	
 
-class NormalizedMutualInformation( Distance ):
+class NormalizedMutualInformation(Distance):
 	"""
 	normalized by sqrt(H1*H2) so the range is [0,1]
 	"""	
 	__metaclass__ = ABCMeta 
 
-	def __init__( self, c_array1, c_array2 ):
+	def __init__(self, c_array1, c_array2):
 		self.m_data1 = c_array1 
 		self.m_data2 = c_array2 
 		self.c_distance_type = Distance.EMetricType.NONMETRIC 
 	
-	def get_distance( self ):
-		#assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
-		return normalized_mutual_info_score( self.m_data1, self.m_data2 )
+	def get_distance(self):
+		# assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
+		return normalized_mutual_info_score(self.m_data1, self.m_data2)
 
-	def get_distance_type( self ):
+	def get_distance_type(self):
 		return self.c_distance_type 	
 	
-class AdjustedMutualInformation( Distance ):
+class AdjustedMutualInformation(Distance):
 	"""
 	adjusted for chance
 	""" 
 	
 	__metaclass__ = ABCMeta 
 
-	def __init__( self, c_array1, c_array2 ):
+	def __init__(self, c_array1, c_array2):
 		self.m_data1 = c_array1 
 		self.m_data2 = c_array2 
 		self.c_distance_type = Distance.EMetricType.NONMETRIC 
 	
-	def get_distance( self ):
-		#assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
-		return adjusted_mutual_info_score( self.m_data1, self.m_data2 )
+	def get_distance(self):
+		# assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
+		return adjusted_mutual_info_score(self.m_data1, self.m_data2)
 
-	def get_distance_type( self ):
+	def get_distance_type(self):
 		return self.c_distance_type 	
 
 #==========================================================================#
 # DISTANCE FUNCTIONS  
 #==========================================================================#
 
-def l2( pData1, pData2 ):
+def l2(pData1, pData2):
 	"""
 	Returns the l2 distance
 
@@ -148,10 +148,10 @@ def l2( pData1, pData2 ):
 	"""
 	return numpy.linalg.norm(pData1 - pData2)
 
-def absl2( pData1, pData2 ):
-	return numpy.abs( l2( pData1, pData2 ) )
+def absl2(pData1, pData2):
+	return numpy.abs(l2(pData1, pData2))
 
-def mi( pData1, pData2 ):
+def mi(pData1, pData2):
 	"""
 	Static implementation of mutual information, returns bits 
 
@@ -190,9 +190,9 @@ def mi( pData1, pData2 ):
 	(3, 3) 0.311278124459
 	"""
 
-	return MutualInformation( pData1, pData2 ).get_distance()
+	return MutualInformation(pData1, pData2).get_distance()
 
-def norm_mi( pData1, pData2 ):
+def norm_mi(pData1, pData2):
 	"""
 	Static implementation of normalized mutual information 
 
@@ -224,9 +224,9 @@ def norm_mi( pData1, pData2 ):
 
 	"""
 
-	return NormalizedMutualInformation( pData1, pData2 ).get_distance() 
+	return NormalizedMutualInformation(pData1, pData2).get_distance() 
 
-def adj_mi( pData1, pData2 ):
+def adj_mi(pData1, pData2):
 	""" 
 	Static implementation of adjusted distance 
 
@@ -258,15 +258,15 @@ def adj_mi( pData1, pData2 ):
 
 	"""
 
-	return AdjustedMutualInformation( pData1, pData2 ).get_distance()
+	return AdjustedMutualInformation(pData1, pData2).get_distance()
 
-### Changeset March 11, 2014
-### NB: As a general rule, always use notion of "strength" of association; i.e. 0 for non-associated and 1 for strongly associated 
-### This will alleviate confusion and enforce an invariance principle 
-### For most association measures you can take 1-measure as a "distance" measure, but this should never be proscribed to a variable 
-### The only place I can see use for this is in hierarchical clustering; otherwise, not relevant 
+# ## Changeset March 11, 2014
+# ## NB: As a general rule, always use notion of "strength" of association; i.e. 0 for non-associated and 1 for strongly associated 
+# ## This will alleviate confusion and enforce an invariance principle 
+# ## For most association measures you can take 1-measure as a "distance" measure, but this should never be proscribed to a variable 
+# ## The only place I can see use for this is in hierarchical clustering; otherwise, not relevant 
 
-def pearson( X, Y ):
+def pearson(X, Y):
 	X = array(X)
 	Y = array(Y) 
 
@@ -275,12 +275,12 @@ def pearson( X, Y ):
 	if Y.ndim > 1:
 		Y = Y[0]
 
-	return scipy.stats.pearsonr(X,Y)[0]
+	return scipy.stats.pearsonr(X, Y)[0]
 
 def mic (pArray1, pArray2):
     mine = MINE(alpha=0.6, c=15)
     mine.compute_score(pArray1, pArray2)
-    #print "MIC:" , mine.mic()
+    # print "MIC:" , mine.mic()
     return mine.mic()
 
 c_hash_metric = {"norm_mi": norm_mi,
@@ -290,19 +290,19 @@ c_hash_metric = {"norm_mi": norm_mi,
 				"pearson": pearson,
                 "mic": mic
 				}
-### Visible and shareable to the outside world 
+# ## Visible and shareable to the outside world 
 
 #==========================================================================#
 # STRUCTURAL FUNCTIONS   
 #==========================================================================#
 
-def squareform( pArray ):
+def squareform(pArray):
 	"""
 	Switches back and forth between square and flat distance matrices 
 	"""
-	return scipy.cluster.hierarchy.distance.squareform( pArray )
+	return scipy.cluster.hierarchy.distance.squareform(pArray)
 
-def pdist( pArray, metric="euclidean" ):
+def pdist(pArray, metric="euclidean"):
 	"""
 	Performs pairwise distance computation 
 
@@ -337,5 +337,5 @@ def pdist( pArray, metric="euclidean" ):
 	[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 	""" 
 	pMetric = metric 
-	return scipy.cluster.hierarchy.distance.pdist( pArray, pMetric )
+	return scipy.cluster.hierarchy.distance.pdist(pArray, pMetric)
 

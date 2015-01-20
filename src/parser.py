@@ -6,7 +6,9 @@ manages transformations
 
 import csv
 from numpy import array
+
 import numpy as np
+
 
 class Input:
 	"""
@@ -21,19 +23,19 @@ class Input:
 	* `LEX` <- lexical 
 	
 	"""
-	def __init__( self, strFileName1, strFileName2 = None, var_names = True, headers = False ):
+	def __init__(self, strFileName1, strFileName2=None, var_names=True, headers=False):
 		
-		#Data types 
+		# Data types 
 		self.continuous = "CON"
 		self.categorical = "CAT"
 		self.binary = "BIN"
 		self.lexical = "LEX"
 
-		#Boolean indicators 
+		# Boolean indicators 
 		self.varNames = var_names 
 		self.headers = headers
 
-		#Initialize data structures 
+		# Initialize data structures 
 		self.strFileName1 = strFileName1
 		self.strFileName2 = strFileName1 if not strFileName2 else strFileName2 
 
@@ -49,61 +51,61 @@ class Input:
 		self.outHead1 = None
 		self.outHead2 = None 
 
-		self.csvr1 = csv.reader( open( self.strFileName1 ), csv.excel_tab )
-		self.csvr2 = csv.reader( open( self.strFileName2 ), csv.excel_tab )
+		self.csvr1 = csv.reader(open(self.strFileName1), csv.excel_tab)
+		self.csvr2 = csv.reader(open(self.strFileName2), csv.excel_tab)
 		
-		self._load( ) 
-		self._parse( )
-		self._check( )
+		self._load() 
+		self._parse()
+		self._check()
 
-	def get( self ):
+	def get(self):
 		return [(self.outData1, self.outName1, self.outType1, self.outHead1), (self.outData2, self.outName2, self.outType2, self.outHead2)] 
 
-	def _load( self ):
-		self.outData1 = np.array( [x for x in self.csvr1] ) 
-		self.outData2 = np.array( [x for x in self.csvr2] )
+	def _load(self):
+		self.outData1 = np.array([x for x in self.csvr1]) 
+		self.outData2 = np.array([x for x in self.csvr2])
 
-	def _parse( self ):
-		def __parse( pArray, bVar, bHeaders ):
+	def _parse(self):
+		def __parse(pArray, bVar, bHeaders):
  
 			aOut = [] 
 			aNames = []
 			aTypes = []
 			aHeaders = []
 			
-			## Parse headers and variable names 
+			# # Parse headers and variable names 
 			if bHeaders:
 				aHeaders = list(pArray[0])
 				pArray = pArray[1:]
 
 			if bVar: 
-				aNames = list(pArray[:,0])
-				pArray = pArray[:,1:]
+				aNames = list(pArray[:, 0])
+				pArray = pArray[:, 1:]
 
-			## Parse data types, missing values, and whitespace 
-			for i, line in enumerate( pArray ):
+			# # Parse data types, missing values, and whitespace 
+			for i, line in enumerate(pArray):
 				###########line = map( lambda x: ( x.strip() if bool(x.strip()) else None ), line )
 				#*****************************************************************************************************
-				#*   Modification by George Weingart  2014/03/20                                                     *
-				#*   If the line is not full,  replace the Nones with nans                                           *
+				# *   Modification by George Weingart  2014/03/20                                                     *
+				# *   If the line is not full,  replace the Nones with nans                                           *
 				#*****************************************************************************************************
-				line = map( lambda x: ( x.strip() if bool(x.strip()) else np.nan ), line )    ###### Convert missings to nans
+				line = map(lambda x: (x.strip() if bool(x.strip()) else np.nan), line)  ###### Convert missings to nans
 				if all(line):
 					aOut.append(line)
 					if not aNames:
-						aNames.append( i )
+						aNames.append(i)
 
 					try: 
-						line = map(int, line) #is it explicitly categorical?  
+						line = map(int, line)  # is it explicitly categorical?  
 						aTypes.append("CAT")
 					except ValueError:
 						try:
-							line = map(float, line) #is it continuous? 
+							line = map(float, line)  # is it continuous? 
 							aTypes.append("CON")
 						except ValueError:
-							line = line #we are forced to conclude that it is implicitly categorical, with some lexical ordering 
+							line = line  # we are forced to conclude that it is implicitly categorical, with some lexical ordering 
 							aTypes.append("LEX")
-				else: # delete corresponding name from namespace 
+				else:  # delete corresponding name from namespace 
 					try:
 						aNames.remove(aNames[i])
 					except Exception:
@@ -111,25 +113,25 @@ class Input:
 
 			return aOut, aNames, aTypes, aHeaders 
 
-		self.outData1, self.outName1, self.outType1, self.outHead1 = __parse( self.outData1, self.varNames, self.headers )
-		self.outData2, self.outName2, self.outType2, self.outHead2 = __parse( self.outData2, self.varNames, self.headers )
+		self.outData1, self.outName1, self.outType1, self.outHead1 = __parse(self.outData1, self.varNames, self.headers)
+		self.outData2, self.outName2, self.outType2, self.outHead2 = __parse(self.outData2, self.varNames, self.headers)
 
-	def _check( self ):
+	def _check(self):
 		"""
 		Make sure that the data are well-formed
 		"""
 		assert(len(self.outData1[0]) == len(self.outData2[0]))
-		assert( len( self.outData1 ) == len( self.outType1 ) )
-		assert( len( self.outData2 ) == len( self.outType2 ) )
+		assert(len(self.outData1) == len(self.outType1))
+		assert(len(self.outData2) == len(self.outType2))
 
 		if self.outName1:
-			assert( len( self.outData1 ) == len( self.outName1 ) )
+			assert(len(self.outData1) == len(self.outName1))
 		if self.outName2:
-			assert( len( self.outData2 ) == len( self.outName2 ) )
+			assert(len(self.outData2) == len(self.outName2))
 		if self.outHead1:
-			assert( len( self.outData1 ) == len( self.outHead1 ) )
+			assert(len(self.outData1) == len(self.outHead1))
 		if self.outHead2:
-			assert( len( self.outData2 ) == len( self.outHead2 ) )
+			assert(len(self.outData2) == len(self.outHead2))
 
 	
 class Output:
@@ -139,16 +141,16 @@ class Output:
 	In batch mode: takes data generated by HAllA object and transforms it to useable objects 
 
 	"""
-	def __init__( self ):
+	def __init__(self):
 		pass 
 
-	def roc( self ):
+	def roc(self):
 		pass
 
-	def get_auc( self ):
+	def get_auc(self):
 		pass 
 
-	def plot( self ):
+	def plot(self):
 		pass 
 
 
