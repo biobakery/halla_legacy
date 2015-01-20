@@ -53,7 +53,7 @@ Dependencies
 	* Scipy (>= 0.12) 
 	* Scikit-learn (>=0.13) 
 	* Pandas (>=0.15.2) 
- 
+ 	* rpy2
 	* sampledoc-master
 All the required packages are included in Anaconda which is available at https://store.continuum.io/cshop/anaconda/
 

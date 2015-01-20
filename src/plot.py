@@ -13,12 +13,13 @@ import sys
 
 import distance
 import stats
-import strudel
+
 
 
 # import pydot
 sys.path.append('/Users/rah/Documents/Hutlab/halla/src')
 sys.path.append('/Users/rah/Documents/Hutlab/strudel')
+#import strudel
 def _main():
     D = plotGridData(D=[])
      # plot_box()

@@ -4,10 +4,12 @@ HAllA class
 # # structural packages 
 # # internal dependencies
 # from pandas import *
-'''from rpy2.robjects.packages import importr
-import rpy2.robjects as ro
-import pandas.rpy.common as com
-import rpy2.robjects.numpy2ri'''
+
+try: 
+	import pandas as pd
+except: 
+	print "--- install pandas library for scatter matrix plotting"
+import matplotlib.pyplot as plt 
 
 import csv
 import itertools
@@ -28,63 +30,33 @@ class HAllA():
 	
 	def __init__(self, args, aOutX, aOutY): 
 		
-		#==================================================================#
-		# Parameters  
-		#==================================================================#
-
-		#----------------------------------#
-		# Single and cross-decomposition 
-		#----------------------------------#
-
-		self.distance = distance.adj_mi 
-		self.reduce_method = "pca" 
-		
-
-		#----------------------------------#
-		# Step and jump methods 
-		#----------------------------------#
-		
-		self.exploration_function = "default"
-			# #{"layerwise", "greedy", "default"}
-
-		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-		# delta 
-		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
+		if args:
+			self.distance = args.strMetric 
+			self.reduce_method = args.strReduce 
+			self.exploration_function = "default"
+			self.q = args.dQ  
+			self.iterations = args.iIter
+			self.p_adjust_method = args.strAdjust
+			self.randomization_method = args.strRandomization  # method to generate error bars 
+			self.strStep = "uniform"
+			self.verbose = args.iDebug 
+		else:
+			self.distance = "norm_mi"
+			self.reduce_method = "pca" 
+			self.exploration_function = "default"
+			self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
+			self.q = .1  
+			self.iterations = 1000
+			self.p_adjust_method = "BH"
+			self.randomization_method = "permutation"  # method to generate error bars 
+			self.strStep = "uniform"
+			self.verbose = False 
+			
+		self.summary_method = "final"
 		self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
 
-		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-		# sigma  
-		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-		#------------------------------------------------#
-		# Randomization and multiple correction  methods 
-		#------------------------------------------------#
-
-		self.q = 0.2  # ## Between covariance cut-off value
-		self.iterations = 1000
-		self.p_adjust_method = "BH"
-		self.randomization_method = "permutation"  # method to generate error bars 
-		# self.outcome = []
-		#------------------------------------------------------------------#
-		# Discretization  
-		#------------------------------------------------------------------#
-
-		self.meta_disc_skip = None  # which indices to skip when discretizing? 
-
-		#------------------------------------------------------------------#
-		# Feature Normalization   
-		#------------------------------------------------------------------#
-
-		# # Beta warping, copulas? 
-
-		#------------------------------------------------------------------#
-		# Output Parameters    
-		#------------------------------------------------------------------#
-
-		self.summary_method = "final"
 			# # {"all","final"}
-		self.verbose = False 
+		
 
 		#==================================================================#
 		# Static Objects  
@@ -358,23 +330,18 @@ class HAllA():
 		return self.meta_data_tree 
 
 	def _couple(self):
-		# self.meta_hypothesis_tree = self.m( 
-		 # self.bp( 
-		  # self.m(self.meta_data_tree, lambda x: [x]), 
-		   # couple_tree ), 
-			# lambda y: y[0] ) 
-		
+				
 		self.meta_hypothesis_tree = hierarchy.couple_tree(apClusterNode1=[self.meta_data_tree[0]],
 				apClusterNode2=[self.meta_data_tree[1]],
 				pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], func=self.distance)[0]
 		
 		# # remember, `couple_tree` returns object wrapped in list 
-		return self.meta_hypothesis_tree 
+		#return self.meta_hypothesis_tree 
 
 	def _naive_all_against_all(self, iIter=100):
 		self.meta_alla = hierarchy.naive_all_against_all(self.meta_array[0], self.meta_array[1], iIter=iIter)
 		return self.meta_alla 
-	def _all_against_all(self, strMethod="permutation_test_by_representative", iIter=None):
+	def _hypotheses_testing(self, strMethod="permutation_test_by_representative", iIter=None):
 		if not iIter:
 			iIter = self.iterations 
 
@@ -386,7 +353,7 @@ class HAllA():
 			print ("q value is", fQ)
 		self.meta_alla = hierarchy.all_against_all(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=strMethod, fQ=self.q, bVerbose=self.verbose) 
 		# # Choose to keep to 2 arrays for now -- change later to generalize 
-		return self.meta_alla 
+		#return self.meta_alla 
 	
 	def _naive_all_against_all_mic(self, iIter=100):
 		self.meta_alla = hierarchy.naive_all_against_all(self.meta_array[0], self.meta_array[1], strMethod="permutation_test_by_representative_mic", iIter=iIter)
@@ -444,7 +411,7 @@ class HAllA():
 
 	def _summary_statistics(self, strMethod=None): 
 		"""
-		provides summary statistics on the output given by _all_against_all 
+		provides summary statistics on the output given by _hypotheses_testing 
 		"""
 
 		if not strMethod:
@@ -549,7 +516,7 @@ class HAllA():
 		"""
 		helper function for reporting the output to the user,
 		"""
-
+		output_dir = "./output/"
 		aaOut = []
 
 		# self.meta_report = [] 
@@ -584,8 +551,8 @@ class HAllA():
 			strFile1, strFile2 = istm[0], istm[0]
 		csvw = csv.writer(self.args.ostm, csv.excel_tab)
 		bcsvw = csv.writer(self.args.bostm, csv.excel_tab)
-		csvw.writerow(["Method: " + self.args.strPreset, "q value: " + str(self.args.dQ), "metric " + self.args.strMetric])
-		bcsvw.writerow(["Method: " + self.args.strPreset, "q value: " + str(self.args.dQ), "metric " + self.args.strMetric])
+		csvw.writerow(["Method: " + str(self.reduce_method)+str(self.distance), "q value: " + str(self.q), "metric " + str(self.distance)])
+		bcsvw.writerow(["Method: " + str(self.reduce_method)+str(self.distance), "q value: " + str(self.q), "metric " + str(self.distance)])
 		
 		if self.args.Y == None:
 			csvw.writerow([istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"])
@@ -604,11 +571,10 @@ class HAllA():
 		# print 'H[0]', self.meta_alla[0]
 		associated_feature_X_indecies = []
 		associated_feature_Y_indecies = []
-		association_number = 0 
-		
+		association_number = 0
 		for line in self.meta_alla[0]:
 			association_number += 1
-			filename = "./output/" + "association" + str(association_number) + '/'
+			filename = output_dir + "association" + str(association_number) + '/'
 			dir = os.path.dirname(filename)
 			try:
 				shutil.rmtree(dir)
@@ -623,14 +589,13 @@ class HAllA():
 			fP_adjust = line[2]
 			aLineOut = map(str, [association_number, str(';'.join(self.aOutName1[i] for i in iX)), str(';'.join(self.aOutName2[i] for i in iY)), fP, fP_adjust])
 			bcsvw.writerow(aLineOut)
-			# import pandas as pd
-			import matplotlib.pyplot as plt 
 			plt.figure()
 			cluster1 = [self.aDataSet1[i] for i in iX]
 			X_labels = np.array([self.aOutName1[i] for i in iX])
+			
 			# cluster = np.array([aOutData1[i] for i in iX]
-			# df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
-			# axes = pd.tools.plotting.scatter_matrix(df)
+			df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
+			axes = pd.tools.plotting.scatter_matrix(df)
 			
 			# plt.tight_layout()
 			
@@ -638,8 +603,8 @@ class HAllA():
 			cluster2 = [self.aDataSet2[i] for i in iY]
 			Y_labels = np.array([self.aOutName2[i] for i in iY])
 			plt.figure()
-			# df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-			# axes = pd.tools.plotting.scatter_matrix(df)
+			df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
+			axes = pd.tools.plotting.scatter_matrix(df)
 			# plt.tight_layout()
 			plt.savefig(filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
 			df1 = np.array(cluster1, dtype=float)
@@ -649,7 +614,7 @@ class HAllA():
 			plt.savefig(filename + '/association_' + str(association_number) + '.pdf')
 			# plt.figure()
 			plt.close("all")
-		
+			
 		
 		csvwc = csv.writer(self.args.costm , csv.excel_tab)
 		csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
@@ -676,7 +641,11 @@ class HAllA():
 		for i in range(len(associated_feature_X_indecies)):
 			for j in range(len(associated_feature_Y_indecies)):
 				nmi[i][j] = distance.NormalizedMutualInformation(stats.discretize(df1[i]), stats.discretize(df2[j])).get_distance()
-		'''rpy2.robjects.numpy2ri.activate()
+		from rpy2.robjects.packages import importr
+		import rpy2.robjects as ro
+		#import pandas.rpy.common as com
+		import rpy2.robjects.numpy2ri
+		rpy2.robjects.numpy2ri.activate()
 		ro.r('library("gplots")')
 		ro.globalenv['nmi'] = nmi
 		ro.globalenv['labRow'] = X_labels 
@@ -687,7 +656,7 @@ class HAllA():
 		ro.globalenv['p'] = p
 		ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
 		ro.r('heatmap.2(p, , labRow = labRow, labCol = labCol, , col=redgreen(75), scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)')
-		ro.r('dev.off()')'''
+		ro.r('dev.off()')
 		# set_default_mode(NO_CONVERSION)
 		# rpy2.library("ALL")
 		# hm = halla.plot.hclust2.Heatmap( p)#, cl.sdendrogram, cl.fdendrogram, snames, fnames, fnames_meta, args = args )
@@ -795,7 +764,7 @@ class HAllA():
 		self._threshold()
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_medoid") 
+		self._hypotheses_testing(strMethod="permutation_test_by_medoid") 
 		self._summary_statistics() 
 		return self._report() 
 
@@ -805,7 +774,7 @@ class HAllA():
 		self._threshold()
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="parametric_test_by_representative") 
+		self._hypotheses_testing(strMethod="parametric_test_by_representative") 
 		self._summary_statistics() 
 		return self._report()  
 	
@@ -816,7 +785,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_representative_mic") 
+		self._hypotheses_testing(strMethod="permutation_test_by_representative_mic") 
 		self._summary_statistics('final') 
 		return self._report()  
 	
@@ -828,7 +797,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_ica_norm_mi") 
+		self._hypotheses_testing(strMethod="permutation_test_by_ica_norm_mi") 
 		self._summary_statistics('final') 
 		return self._report() 
 	
@@ -839,7 +808,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_ica_mic") 
+		self._hypotheses_testing(strMethod="permutation_test_by_ica_mic") 
 		self._summary_statistics() 
 		return self._report() 
 	def __preset_kpca_norm_mi(self):
@@ -850,7 +819,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_kpca_norm_mi") 
+		self._hypotheses_testing(strMethod="permutation_test_by_kpca_norm_mi") 
 		self._summary_statistics('final') 
 		return self._report()  
 
@@ -861,7 +830,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_kpca_pearson") 
+		self._hypotheses_testing(strMethod="permutation_test_by_kpca_pearson") 
 		self._summary_statistics('final') 
 		return self._report() 
 
@@ -872,7 +841,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_cca_pearson") 
+		self._hypotheses_testing(strMethod="permutation_test_by_cca_pearson") 
 		self._summary_statistics('final') 
 		return self._report() 
 
@@ -883,7 +852,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="parametric_test_by_pls_pearson") 
+		self._hypotheses_testing(strMethod="parametric_test_by_pls_pearson") 
 		self._summary_statistics('final') 
 		return self._report() 
 
@@ -895,7 +864,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_pls_norm_mi") 
+		self._hypotheses_testing(strMethod="permutation_test_by_pls_norm_mi") 
 		self._summary_statistics('final') 
 		return self._report() 
 
@@ -915,7 +884,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_cca_norm_mi") 
+		self._hypotheses_testing(strMethod="permutation_test_by_cca_norm_mi") 
 		self._summary_statistics('final') 
 		return self._report() 
 
@@ -951,7 +920,7 @@ class HAllA():
 		self._hclust()
 
 		# self._couple( )
-		# self._all_against_all( )
+		# self._hypotheses_testing( )
 		return self._layerwise_all_against_all()
 		# self._summary_statistics( )
 		# return self._report( )
@@ -963,7 +932,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="parametric_test_by_multiple_representative") 
+		self._hypotheses_testing(strMethod="parametric_test_by_multiple_representative") 
 		self._summary_statistics("all") 
 		return self._report()
 
@@ -987,18 +956,17 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_multiple_representative") 
+		self._hypotheses_testing(strMethod="permutation_test_by_multiple_representative") 
 		# self._summary_statistics( "all" ) 
 		# return self._report( )
-
-	def __preset_norm_mi(self):
+	def __set_paramaters(self):
 		"""
 		Mutual Information Preset 
 		"""
 		# # Constants for this preset 
 		pDistance = distance.norm_mi 
 		strReduce = "pca"
-		strStep = "uniform"
+		
 		strAdjust = "BH"
 		strRandomization = "permutation"
 
@@ -1008,30 +976,6 @@ class HAllA():
 		self.set_p_adjust_method(strAdjust)
 		self.set_randomization_method(strRandomization)
 
-		# # Run 
-		start_time = time.time()
-		self._featurize()
-		print("--- %s seconds: _featurize ---" % (time.time() - start_time))
-		start_time = time.time()
-		# #self._threshold( )
-		# print("--- %s seconds: _threshold ---" % (time.time() - start_time))
-		start_time = time.time()
-		self._hclust()
-		print("--- %s seconds: _hclust ---" % (time.time() - start_time))
-		start_time = time.time()
-		self._couple()
-		print("--- %s seconds: _couple ---" % (time.time() - start_time))
-		print("Association hypotheses testing is started ...")
-		print("This task may take longer ...")
-		start_time = time.time()
-		self._all_against_all()
-		print("--- %s seconds: _hypothesis testing ---" % (time.time() - start_time))
-		start_time = time.time() 
-		self._summary_statistics('final') 
-		print("--- %s seconds: _summary_statistics ---" % (time.time() - start_time))
-		start_time = time.time()
-		return self._report()
-	
 	def __preset_pca_adj_mi(self):
 		"""
 		Adjusted Mutual Information Preset 
@@ -1054,7 +998,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_representative_adj_mi") 
+		self._hypotheses_testing(strMethod="permutation_test_by_representative_adj_mi") 
 		self._summary_statistics('final') 
 		return self._report()
 
@@ -1082,7 +1026,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all() 
+		self._hypotheses_testing() 
 		return self._summary_statistics("all") 
 
 
@@ -1091,7 +1035,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_cca_pearson") 
+		self._hypotheses_testing(strMethod="permutation_test_by_cca_pearson") 
 		return self._summary_statistics("all") 
 
 	def __preset_full_kpca_norm_mi(self):
@@ -1100,7 +1044,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_kpca_norm_mi") 
+		self._hypotheses_testing(strMethod="permutation_test_by_kpca_norm_mi") 
 		return self._summary_statistics("all") 
 
 	def __preset_full_kpca_pearson(self):
@@ -1109,11 +1053,11 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		self._all_against_all(strMethod="permutation_test_by_kpca_pearson") 
+		self._hypotheses_testing(strMethod="permutation_test_by_kpca_pearson") 
 		return self._summary_statistics("all") 
 
 	def __preset_default(self):
-		return self.__preset_norm_mi()
+		return self.__main()
 		# return self.__preset_layerwise( )
 
 	def __preset_time(self):
@@ -1142,7 +1086,7 @@ class HAllA():
 		# self._threshold( )
 		self._hclust()
 		self._couple()
-		return self._all_against_all()
+		return self._hypotheses_testing()
  
 	def __preset_parallel(self):
 		pass 
@@ -1200,28 +1144,16 @@ class HAllA():
 		for item in self.keys_attribute:
 			sys.stderr.write("\t".join([item, str(getattr(self, item))]) + "\n") 
 
-	def run(self, strMethod="default"):
+	def run(self):
+		
 		"""
 		Main run module 
-
-		Parameters
-		------------
-
-			method : str 
-				Specifies what method to use; e.g. which preset to follow 
-				{"default", "custom", "time", "accuracy", "parallel"}
-
-				* Custom: 
-				* Default:  
 
 		Returns 
 		-----------
 
 			Z : HAllA output object 
 		
-		Notes 
-		---------
-
 		* Main steps
 
 			+ Parse input and clean data 
@@ -1238,13 +1170,36 @@ class HAllA():
 		if self.q == 1.0:
 			strMethod = "naive"
 			return self.hash_preset[strMethod]()
-		else:
-			try:
-				pMethod = self.hash_preset[strMethod]
-				# print "Preset:", pMethod
-				return pMethod()
-			except KeyError:			
-				raise Exception("Invalid Method.")
+		# set parameters
+		self.__set_paramaters()
+		
+		# featurize 
+		start_time = time.time()
+		self._featurize()
+		print("--- %s seconds: _featurize ---" % (time.time() - start_time))
+		
+		# hierarchical clustering 
+		start_time = time.time()
+		self._hclust()
+		print("--- %s seconds: _hclust ---" % (time.time() - start_time))
+		
+		# coupling clusters hierarchically 
+		start_time = time.time()
+		self._couple()
+		print("--- %s seconds: _couple ---" % (time.time() - start_time))
+		
+		# hypotheses testing
+		print("--- association hypotheses testing is started, this task may take longer ...")
+		start_time = time.time()
+		self._hypotheses_testing()
+		print("--- %s seconds: _hypothesis testing ---" % (time.time() - start_time))
+		
+		# Generate a report
+		start_time = time.time() 
+		self._summary_statistics('final') 
+		print("--- %s seconds: _summary_statistics ---" % (time.time() - start_time))
+		
+		return self._report()
 
 	def view_singleton(self, pBags):
 		aOut = [] 

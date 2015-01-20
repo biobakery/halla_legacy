@@ -1554,7 +1554,7 @@ def all_against_all(pTree, pArray1, pArray2, method="permutation_test_by_represe
 			for i in range(len(aP)):
 				# print "NMI", Current_Family_Children[i].get_nmi()
 				performed_tests.append([Current_Family_Children[i], float(aP[i])])
-				if Current_Family_Children[0].get_nmi() > .1 and aP[i] <= fQ:
+				if  aP[i] <= fQ:
 					print "************Pass with nominal p-value:", aP[i], Current_Family_Children[i].get_data()[0], Current_Family_Children[i].get_data()[1]
 					passed_tests.append([Current_Family_Children[i], float(aP[i])])
 				elif aP[i] > 1.0 - fQ and (Current_Family_Children[i].get_left_distance() <= .3\

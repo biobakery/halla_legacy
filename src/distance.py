@@ -2,6 +2,7 @@
 '''
 Abstract distance module providing different notions of distance
 '''
+import sys
 from abc import ABCMeta
 import abc
 import itertools
@@ -18,8 +19,7 @@ from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, \
 
 
 # from minepy import MINE
-# from halla.distance.distance import *
-# import halla.stats
+
 # mi-based distances from scikit-learn; (log e)-based (i.e. returns nats instead of bits)
 #==========================================================================#
 # CONSTANTS 
@@ -278,6 +278,12 @@ def pearson(X, Y):
 	return scipy.stats.pearsonr(X, Y)[0]
 
 def mic (pArray1, pArray2):
+    try:
+        #import minepy
+        from minepy import MINE
+    except (ImportError):
+        sys.exit("CRITICAL ERROR:2 Unable to find the HAllA src directory." + 
+            " Please check your install.") 
     mine = MINE(alpha=0.6, c=15)
     mine.compute_score(pArray1, pArray2)
     # print "MIC:" , mine.mic()
