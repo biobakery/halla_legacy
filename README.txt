@@ -51,7 +51,9 @@ Dependencies
 	* Python (>= 2.7)
 	* Numpy (>= 1.7.1)
 	* Scipy (>= 0.12) 
-	* Scikit-learn (>=0.13)  
+	* Scikit-learn (>=0.13) 
+	* Pandas (>=0.15.2) 
+ 
 	* sampledoc-master
 All the required packages are included in Anaconda which is available at https://store.continuum.io/cshop/anaconda/
 
@@ -139,7 +141,7 @@ Advanced
 
 The following is a list of all available arguments that can be passed into halla:: 
 
-	usage: halla_cli.py -X inputfile1.tx -Y inputfile2.txt -q p-value -b output_for_associations.txt -c out_for_clusters.txt [-h] [-o output.txt] [-v verbosity] 
+	usage: halla.py -X inputfile1.tx -Y inputfile2.txt -q .1 
 
 	Hierarchical All-against-All significance association testing.
 
@@ -161,7 +163,7 @@ Mini-tutorial
 
 Suppose you have two tab-delimited file containing the datasets you wish to run halla on. We will call this files `input1.txt` and `input2.txt`. We will call the output file `associations.txt`. In the root directory of halla, one can type::
 	
-	$ python halla_cli.py -X input1.txt -Y input2.txt -q .2 -x "HAllA-PCA-NMI" -b output.txt
+	$ python halla.py -X input1.txt -Y input2.txt -q .2 
 
 To obtain the output in `out.txt`. 
 	
