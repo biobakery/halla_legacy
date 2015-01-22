@@ -1533,7 +1533,6 @@ def all_against_all(pTree, pArray1, pArray2, method="permutation_test_by_represe
 				next_level_apChildren = []
 												
 		return aFinal, aOut
-	
 	def _bh_hypothesis_testing():
 		apChildren = [pTree]
 		level = 1
@@ -1557,8 +1556,7 @@ def all_against_all(pTree, pArray1, pArray2, method="permutation_test_by_represe
 				if  aP[i] <= fQ:
 					print "************Pass with nominal p-value:", aP[i], Current_Family_Children[i].get_data()[0], Current_Family_Children[i].get_data()[1]
 					passed_tests.append([Current_Family_Children[i], float(aP[i])])
-				elif aP[i] > 1.0 - fQ and (Current_Family_Children[i].get_left_distance() <= .3\
-										 or Current_Family_Children[i].get_right_distance() <= .3):
+				elif aP[i] > 1.0 - fQ :
 					print "Bypass, no hope to find an association in the branch with p-value: ", \
 				aP[i], " and ", len(Current_Family_Children[i].get_children()), \
 				 " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
@@ -1580,8 +1578,93 @@ def all_against_all(pTree, pArray1, pArray2, method="permutation_test_by_represe
 				level += 1
 				next_level_apChildren = []
 		max_r_t = 0
-		print "Number of performed tests:", len(performed_tests)
-		print "Number of passed from nominal tests:", len(passed_tests)
+		print "--- number of performed tests:", len(performed_tests)
+		print "--- number of passed from nominal tests:", len(passed_tests)
+		performed_tests = array(performed_tests)
+		print "Nominal p-values", performed_tests[:, 1]
+		aP_adjusted, pRank = stats.p_adjust(performed_tests[:, 1], fQ)
+		print "ajusted pvalue: ", aP_adjusted
+		for i in range(len(performed_tests)):
+			if performed_tests[i][1] <= aP_adjusted[i] and max_r_t <= pRank[i]:
+				max_r_t = pRank[i]
+				print "max_r_t", max_r_t
+		for i in range(len(performed_tests[:, 1])):
+			if pRank[i] <= max_r_t:
+				print "************Pass with p-value:", performed_tests[i][1], performed_tests[i][0].get_data()[0], performed_tests[i][0].get_data()[1]
+				aOut.append([performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]])
+				aFinal.append([performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]])
+			else :
+				aOut.append([performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]])
+		print "Number of found  associations:", len(aFinal)										
+		return aFinal, aOut
+	def _rah_hypothesis_testing():
+		def __descend(clusterNode):
+			if clusterNode.get_left_distance() <.9 and\
+			   clusterNode.get.get_left_distance()< .9 and\
+			   clusterNode.get_left_pc() > pc_threshold and\
+			   clusterNode.get_right_pc() > pc_threshold:
+				return True
+			else: return False
+		
+		apChildren = [pTree]
+		level = 1
+		passed_tests = []
+		performed_tests = []
+		global number_performed_test
+		pc_threshold = .75
+		next_level_apChildren = []
+		while apChildren:
+			Current_Family_Children = apChildren.pop(0).get_children()
+			
+			# print "Number of children:", len(Current_Family_Children)
+			number_performed_test += len(Current_Family_Children)
+			
+			# claculate nominal p-value
+			for i in range(len(Current_Family_Children)):
+				Current_Family_Children[i].set_nominal_pvalue(_actor(Current_Family_Children[i]))
+			aP = [ Current_Family_Children[i].get_nominal_pvalue() for i in range(len(Current_Family_Children)) ]
+			
+			for i in range(len(aP)):
+				# print "NMI", Current_Family_Children[i].get_nmi()
+				performed_tests.append([Current_Family_Children[i], float(aP[i])])	
+				if  Current_Family_Children[i].get_left_distance() <.9 and Current_Family_Children[i].get_left_distance()< .9 and Current_Family_Children[i].get_left_pc() > pc_threshold and Current_Family_Children[i].get_right_pc() > pc_threshold:
+					if aP[i] <= fQ and Current_Family_Children[i].get_nmi() > .1:
+						print "************Pass with nominal p-value:", aP[i], Current_Family_Children[i].get_data()[0], Current_Family_Children[i].get_data()[1]
+						passed_tests.append([Current_Family_Children[i], float(aP[i])])
+					elif Current_Family_Children[i].is_leaf():
+						print "End of branch, leaf!"
+					else:
+						print "Stop descending: no hope for association sub-branches. ", aP[i]
+						
+				else:
+					print "Gray area with p-value:", aP[i]
+					next_level_apChildren.append(Current_Family_Children[i])
+				'''	
+				elif aP[i] > 1.0 - fQ and (Current_Family_Children[i].get_left_distance() <= .3\
+										 or Current_Family_Children[i].get_right_distance() <= .3):
+					print "Bypass, no hope to find an association in the branch with p-value: ", \
+				aP[i], " and ", len(Current_Family_Children[i].get_children()), \
+				 " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
+				  "   ", Current_Family_Children[i].get_data()[1]
+					
+				elif Current_Family_Children[i].is_leaf() or Current_Family_Children[i].get_left_pc > .8 or Current_Family_Children[i].get_right_pc > .8 :
+						print "End of branch, leaf!"
+					# aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
+				else:
+					print "Gray area with p-value:", aP[i]
+					next_level_apChildren.append(Current_Family_Children[i])
+				'''	
+			# global number_performed_test		
+			# print "No association in:", apChildren
+			if not apChildren:
+				print "Hypotheses testing level ", level, " is finished."
+				# number_performed_test += len(next_level_apChildren)
+				apChildren = next_level_apChildren
+				level += 1
+				next_level_apChildren = []
+		max_r_t = 0
+		print "--- number of performed tests:", len(performed_tests)
+		print "--- number of passed from nominal tests:", len(passed_tests)
 		performed_tests = array(performed_tests)
 		print "Nominal p-values", performed_tests[:, 1]
 		aP_adjusted, pRank = stats.p_adjust(performed_tests[:, 1], fQ)
