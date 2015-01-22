@@ -606,22 +606,27 @@ class HAllA():
 		for i in range(len(associated_feature_X_indecies)):
 			for j in range(len(associated_feature_Y_indecies)):
 				nmi[i][j] = distance.NormalizedMutualInformation(stats.discretize(df1[i]), stats.discretize(df2[j])).get_distance()
+				
 		from rpy2.robjects.packages import importr
 		import rpy2.robjects as ro
 		#import pandas.rpy.common as com
 		import rpy2.robjects.numpy2ri
 		rpy2.robjects.numpy2ri.activate()
-		ro.r('library("gplots")')
+		ro.r('library("pheatmap")')
 		ro.globalenv['nmi'] = nmi
 		ro.globalenv['labRow'] = X_labels 
 		ro.globalenv['labCol'] = Y_labels
 		if len(associated_feature_X_indecies)>1 and len(associated_feature_Y_indecies)>1 :
-			ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
-			ro.r('heatmap.2(nmi, labRow = labRow, labCol = labCol, col=redgreen(75))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+			#ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
+			ro.r('colnames(nmi) = labCol')
+			ro.r('rownames(nmi) = labRow')
+			ro.r('pheatmap(nmi, filename ="./output/NMI_heatmap.pdf", cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T)')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
 			ro.r('dev.off()')
 			ro.globalenv['p'] = p
-			ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
-			ro.r('heatmap.2(p, , labRow = labRow, labCol = labCol, , col=redgreen(75))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+			#ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
+			ro.r('colnames(p) = labCol')
+			ro.r('rownames(p) = labRow')
+			ro.r('pheatmap(p, , labRow = labRow, labCol = labCol, filename = "./output/Pearson_heatmap.pdf", cellwidth = 10, cellheight = 10, fontsize = 10)')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
 			ro.r('dev.off()')
 		# set_default_mode(NO_CONVERSION)
 		# rpy2.library("ALL")
