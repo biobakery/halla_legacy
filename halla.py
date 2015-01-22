@@ -156,7 +156,7 @@ def _main():
     number_blocks = 3 
     print '--- synthetic data generation ...'
         
-    X, Y, A = s.double_cholesky_block(number_features, number_samples , number_blocks, fVal=.6 , Beta=3.0)  # , link = "line" )
+    X, Y, A = s.double_cholesky_block(number_features, number_samples , number_blocks, fVal=2.6 , Beta=3.0)  # , link = "line" )
     
     
     input_dir = make_directory()

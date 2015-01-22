@@ -617,11 +617,11 @@ class HAllA():
 		ro.globalenv['labCol'] = Y_labels
 		if len(associated_feature_X_indecies)>1 and len(associated_feature_Y_indecies)>1 :
 			ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
-			ro.r('heatmap.2(nmi, labRow = labRow, labCol = labCol, col=redgreen(75), scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)')
+			ro.r('heatmap.2(nmi, labRow = labRow, labCol = labCol, col=redgreen(75))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
 			ro.r('dev.off()')
 			ro.globalenv['p'] = p
 			ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
-			ro.r('heatmap.2(p, , labRow = labRow, labCol = labCol, , col=redgreen(75), scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)')
+			ro.r('heatmap.2(p, , labRow = labRow, labCol = labCol, , col=redgreen(75))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
 			ro.r('dev.off()')
 		# set_default_mode(NO_CONVERSION)
 		# rpy2.library("ALL")
