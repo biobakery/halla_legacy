@@ -19,11 +19,31 @@ try:
     halla_base_directory = os.path.abspath(os.path.join(config_file_location, os.pardir))
     sys.path.append(halla_base_directory + '/src')
     sys.path.append('/Users/rah/Documents/Hutlab/strudel')
-    #make_IO_directory(halla_base_directory+'/halla/output')
 except :
     sys.exit("CRITICAL ERROR: Unable to find the HAllA src directory." + 
         " Please check your install.") 
+
+
+# set output path
+def make_directory(dir = halla_base_directory+'/halla/input'):
     
+    '''
+    make a directory
+    '''
+    try:
+        shutil.rmtree(dir)
+        os.mkdir(dir)
+        return dir
+    except:
+        os.mkdir(dir)
+        return dir
+    
+try:
+    dir=make_directory(halla_base_directory+'/halla/output')
+except:
+    sys.exit("CRITICAL ERROR: Unable to make an output directory." + 
+        " Please check your permission.") 
+            
 # Try to load one of the halla src modules to check the installation
 try:
     from src import config
@@ -129,19 +149,6 @@ def parse_arguments (args):
             help="The approach for randomization, [default is permutation, options are permutation and G-test]")    
           
     return argp.parse_args()
-
-def make_IO_directory(dir = halla_base_directory+'/halla/input'):
-    
-    '''
-    generate an output directory
-    '''
-    try:
-        shutil.rmtree(dir)
-        os.mkdir(dir)
-        return dir
-    except:
-        os.mkdir(dir)
-        return dir
     
 
 def _main():
@@ -154,17 +161,17 @@ def _main():
     s = strudel.Strudel()
     
     number_features = 8 
-    number_samples = 150 
+    number_samples = 100 
     number_blocks = 3 
-    print 'Synthetic Data Generation ...'
+    print '--- synthetic data generation ...'
         
     X, Y, A = s.double_cholesky_block(number_features, number_samples , number_blocks, fVal=.6 , Beta=3.0)  # , link = "line" )
     
     
-    #input_dir = make_IO_directory()
-    output_dir = make_IO_directory(halla_base_directory+'/halla/output')
-    #data.writeData(X, input_dir+"/X")
-    #data.writeData(Y,  input_dir+"/Y")     
+    input_dir = make_directory()
+    #output_dir = make_directory(halla_base_directory+'/halla/output')
+    data.writeData(X, input_dir+"/X")
+    data.writeData(Y,  input_dir+"/Y")     
 
 
     istm = list()  # X and Y are used to store datasets

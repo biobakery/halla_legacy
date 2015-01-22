@@ -567,6 +567,10 @@ class HAllA():
 			fP_adjust = line[2]
 			aLineOut = map(str, [self.aOutName1[iX], self.aOutName2[iY], fP, fP_adjust])
 			csvw.writerow(aLineOut)
+			
+		#self.args.ostm.close()
+		#self.args.bostm.close()
+		
 		# print 'H:', self.meta_alla
 		# print 'H[0]', self.meta_alla[0]
 		associated_feature_X_indecies = []
