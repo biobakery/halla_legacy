@@ -149,20 +149,7 @@ def _main():
     args=parse_arguments(sys.argv)
     
     # synthetic data 
-    s = strudel.Strudel()
     
-    number_features = 9 
-    number_samples = 200 
-    number_blocks = 3 
-    print '--- synthetic data generation ...'
-        
-    X, Y, A = s.double_cholesky_block(number_features, number_samples , number_blocks, fVal=2.6 , Beta=3.0)  # , link = "line" )
-    
-    
-    input_dir = make_directory()
-    #output_dir = make_directory(halla_base_directory+'/halla/output')
-    strudel.writeData(X, input_dir+"/X")
-    strudel.writeData(Y,  input_dir+"/Y")     
 
 
     istm = list()  # X and Y are used to store datasets
