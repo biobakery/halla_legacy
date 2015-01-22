@@ -87,31 +87,31 @@ def parse_arguments (args):
             
     argp.add_argument("-X", metavar="Xinput.txt",
             type=argparse.FileType("r"), default=sys.stdin,
-            help="First file: Tab-delimited text input file, one row per feature, one column per measurement")        
+            help="First file: Tab-delimited text input file, one row per feature, one column per measurement.")        
             
     argp.add_argument("-Y", metavar="Yinput.txt",
             type=argparse.FileType("r"), default=None,
-            help="Second file: Tab-delimited text input file, one row per feature, one column per measurement - If not selected, we will use the first file (-X)")
+            help="Second file: Tab-delimited text input file, one row per feature, one column per measurement - If not selected, we will use the first file (-X).")
     
     argp.add_argument("-o", dest="bostm", metavar="output.txt",  # default = "sys.stdout
             type=argparse.FileType("w"), default="./output/associations.txt",
-            help="Optional output file for blocked association significance tests")
+            help="output file for significance tests (associations).")
 
     argp.add_argument("-a", dest="ostm", metavar="one_by_one.txt",
             type=argparse.FileType("w"), default="./output/all_association_results_one_by_one.txt",
-            help="Optional output file to report features one bye one for association significance tests")
+            help="Optional output file to report features one bye one for association significance tests.")
    
     argp.add_argument("-c", dest="costm", metavar="clusters_output.txt",
             type=argparse.FileType("w"), default="./output/all_compared_clusters_hypotheses_tree.txt",
-            help="Optional output file for hypothesis tree which includes all compared clusters")
+            help="Optional output file for hypothesis tree which includes all compared clusters.")
     
     argp.add_argument("-q", dest="dQ", metavar="q_value",
             type=float, default=0.1,
-            help="Q-value for overall significance tests")
+            help="Q-value for overall significance tests (cut-off for false discovery rate).")
 
     argp.add_argument("-i", dest="iIter", metavar="iterations",
             type=int, default=1000,
-            help="Number of iterations for nonparametric significance testing")
+            help="Number of iterations for nonparametric significance testing (permutation test)")
 
     argp.add_argument("-v", dest="iDebug", metavar="verbosity",
             type=int, default= 0,#10 - (logging.WARNING / 10)
@@ -119,11 +119,11 @@ def parse_arguments (args):
 
     argp.add_argument("-e", "--exploration",     dest="strExploration",     metavar="exploration",
         type=str,         default = "BHY",
-        help="Exploration function for maximize power and control false discovery rate, BHY, BH, RAH")
+        help="Exploration function for maximize power and control false discovery rate, BHY, BH, RAH.")
 
     argp.add_argument("-m",         dest="strMetric",     metavar="metric",
             type=str,         default="norm_mi",
-            help="Metric to be used for similarity measurement clustering")
+            help="Metric to be used for similarity measurement, NMI, MIC, Pearson.")
     
     argp.add_argument("-d",         dest="strReduce",     metavar="decomposition",
             type=str,         default="pca",
@@ -131,7 +131,7 @@ def parse_arguments (args):
     
     argp.add_argument("-j",         dest="strAdjust",     metavar="adjusting",
             type=str,         default="BH",
-            help="The approach for controlling FDR [default = BH, options are BH, BHY")
+            help="The approach for controlling FDR [default = BH]")
     
     argp.add_argument("-r",         dest="strRandomization",     metavar="randomization",
             type=str,         default="permutation",

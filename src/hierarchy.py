@@ -13,14 +13,13 @@ from scipy.cluster.hierarchy import linkage, to_tree
 from scipy.spatial.distance import pdist
 import sys
 
+import distance
 from distance import mi, l2, absl2, norm_mi
-import distance 
 import matplotlib.pyplot as plt
 import numpy as np
+import stats 
 from stats import discretize, pca, bh, permutation_test_by_representative, permutation_test_by_representative_mic, p_adjust
 from stats import permutation_test_by_kpca_norm_mi, permutation_test_by_kpca_pearson, permutation_test_by_cca_pearson, permutation_test_by_cca_norm_mi
-import stats 
-
 
 # # statistics packages 
 sys.setrecursionlimit(20000)
@@ -112,17 +111,17 @@ class Tree():
 	def set_nmi(self, nmi=None):
 		self.nmi = nmi
 		
-	def set_left_pc(self, pc):
-		self.left_pc = pc
+	def set_left_first_pc(self, pc):
+		self.left_first_pc = pc
 	
-	def set_right_pc(self, pc):
-		self.right_pc = pc
+	def set_right_first_pc(self, pc):
+		self.right_first_pc = pc
 		
-	def get_left_pc(self):
-		return self.left_pc
+	def get_left_first_pc(self):
+		return self.left_first_pc
 	
-	def get_right_pc(self):
-		return self.left_pc
+	def get_right_first_pc(self):
+		return self.right_first_pc
 	
 	def set_nominal_pvalue(self, pvalue):
 		self.nominal_pvalue = pvalue
@@ -931,7 +930,10 @@ def _is_start(ClusterNode, X, func, distance):
 
 def _is_stop(ClusterNode, X, func='norm_mi', distance=0.0):
 		node_indeces = reduce_tree(ClusterNode)
-		if ClusterNode.is_leaf():  # or py.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .85:#or len(node_indeces) < 2 or ClusterNode.dist< distance:#or py.pca_explained_variance_ratio_(X[array(node_indeces)])[0] > .8 or _mean_tau(X[array(node_indeces)], func) >= .6:
+		#print "Node: ",node_indeces
+		first_PC = stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0]
+		if ClusterNode.is_leaf() or ClusterNode.dist <.5 or first_PC > .5:
+			#print "dist:", ClusterNode.dist, " first_PC:", first_PC,"\n"
 			return True
 		else:
 			return False
@@ -1097,9 +1099,7 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 
 	# print "Hierarchical TREE 1 ", reduce_tree_by_layer(apClusterNode1)
 	# print "Hierarchical TREE 2 ", reduce_tree_by_layer(apClusterNode2)
-	
-	# print "TREE1 ", reduce_tree_by_layer(apClusterNode1)
-	# print "TREE2 ", reduce_tree_by_layer(apClusterNode2)
+
 	aOut = []
 
 	# Create the root of the coupling tree
@@ -1397,8 +1397,6 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 
 		
 	"""
-	global number_performed_test 
-	number_performed_test = 0
 	X, Y = pArray1, pArray2 
 
 	if bVerbose:
@@ -1457,7 +1455,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 	
 	def _simple_hypothesis_testing():
 		L = pTree.get_children()
-		global number_performed_test
+		number_performed_test = 0
 		number_performed_test += len(L)
 		while L:
 			currentNode = L.pop(0)
@@ -1470,7 +1468,6 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 				aFinal.append([currentNode.get_data(), float(p_value), float(p_value)])
 			elif p_value > fQ and p_value <= 1.0 - fQ:
 				L += currentNode.get_children()
-				# global number_performed_test
 				number_performed_test += len(currentNode.get_children())
 				print "Conitinue, gray area with p-value:", p_value
 			else:
@@ -1524,8 +1521,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 						continue
 					else:
 						print "Bypass, no hope to find an association in the branch with p-value: ", aP[i], " and ", len(Current_Family_Children[i].get_children()), " sub-hypotheses.", Current_Family_Children[i].get_data()[0], "   ", Current_Family_Children[i].get_data()[1]
-			# global number_performed_test		
-			# print "No association in:", apChildren
+
 			if not apChildren:
 				print "Hypotheses testing level ", level, " is finished."
 				# number_performed_test += len(next_level_apChildren)
@@ -1533,20 +1529,17 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 				level += 1
 				next_level_apChildren = []
 		print "--- number of performed tests:", number_performed_tests
-		print "--- number of passed from nominal tests:", number_passed_tests										
+		print "--- number of passed tests:", number_passed_tests										
 		return aFinal, aOut
 	def _bh_hypothesis_testing():
 		apChildren = [pTree]
 		level = 1
 		passed_tests = []
 		performed_tests = []
-		global number_performed_test
-		
 		next_level_apChildren = []
 		while apChildren:
 			Current_Family_Children = apChildren.pop(0).get_children()
-			# print "Number of children:", len(Current_Family_Children)
-			number_performed_test += len(Current_Family_Children)
+		
 			# claculate nominal p-value
 			for i in range(len(Current_Family_Children)):
 				Current_Family_Children[i].set_nominal_pvalue(_actor(Current_Family_Children[i]))
@@ -1564,7 +1557,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 				 " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
 				  "   ", Current_Family_Children[i].get_data()[1]
 					
-				elif Current_Family_Children[i].is_leaf() or Current_Family_Children[i].get_left_pc > .8 or Current_Family_Children[i].get_right_pc > .8 :
+				elif Current_Family_Children[i].is_leaf() or Current_Family_Children[i].get_left_first_pc > .8 or Current_Family_Children[i].get_right_first_pc > .8 :
 						print "End of branch, leaf!"
 					# aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
 				else:
@@ -1603,8 +1596,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 		def __descend(clusterNode):
 			if clusterNode.get_left_distance() <.9 and\
 			   clusterNode.get.get_left_distance()< .9 and\
-			   clusterNode.get_left_pc() > pc_threshold and\
-			   clusterNode.get_right_pc() > pc_threshold:
+			   clusterNode.get_left_first_pc() > pc_threshold and\
+			   clusterNode.get_right_first_pc() > pc_threshold:
 				return True
 			else: return False
 		
@@ -1629,7 +1622,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 			for i in range(len(aP)):
 				# print "NMI", Current_Family_Children[i].get_nmi()
 				performed_tests.append([Current_Family_Children[i], float(aP[i])])	
-				if  Current_Family_Children[i].get_left_distance() <.9 and Current_Family_Children[i].get_left_distance()< .9 and Current_Family_Children[i].get_left_pc() > pc_threshold and Current_Family_Children[i].get_right_pc() > pc_threshold:
+				if  Current_Family_Children[i].get_left_distance() <.9 and Current_Family_Children[i].get_left_distance()< .9 and Current_Family_Children[i].get_left_first_pc() > pc_threshold and Current_Family_Children[i].get_right_first_pc() > pc_threshold:
 					if aP[i] <= fQ and Current_Family_Children[i].get_nmi() > .1:
 						print "************Pass with nominal p-value:", aP[i], Current_Family_Children[i].get_data()[0], Current_Family_Children[i].get_data()[1]
 						passed_tests.append([Current_Family_Children[i], float(aP[i])])
@@ -1649,7 +1642,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 				 " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
 				  "   ", Current_Family_Children[i].get_data()[1]
 					
-				elif Current_Family_Children[i].is_leaf() or Current_Family_Children[i].get_left_pc > .8 or Current_Family_Children[i].get_right_pc > .8 :
+				elif Current_Family_Children[i].is_leaf() or Current_Family_Children[i].get_left_first_pc > .8 or Current_Family_Children[i].get_right_first_pc > .8 :
 						print "End of branch, leaf!"
 					# aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
 				else:
@@ -1694,10 +1687,10 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 
 		aIndicies = pNode.get_data() 
 		aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays 
-		dP, nmi, left_pc, right_pc = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], iIter=iIter)
+		dP, nmi, left_first_pc, right_first_pc = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], iIter=iIter)
 		pNode.set_nmi(nmi)
-		pNode.set_left_pc(left_pc)
-		pNode.set_right_pc(right_pc)
+		pNode.set_left_first_pc(left_first_pc)
+		pNode.set_right_first_pc(right_first_pc)
 		# aOut.append( [aIndicies, dP] ) #### dP needs to appended AFTER multiple hypothesis correction
 
 		return dP 
@@ -1709,11 +1702,9 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 	#======================================#
 	# Execute 
 	#======================================#
-	# aFinal, aOut = _simple_descending()
-	# aFinal, aOut = _ybh_descending()
 	strExploration = exploration
 	pExploration = exploration_function[strExploration]
 	aFinal, aOut = pExploration()
 
-	print "____Number of performed test:", number_performed_test
+	#print "____Number of performed test:", number_performed_test
 	return aFinal, aOut 

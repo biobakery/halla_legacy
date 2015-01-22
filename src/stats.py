@@ -83,7 +83,7 @@ def pca_explained_variance_ratio_(pArray, iComponents=1):
 	# # doing this matrix inversion twice doesn't seem to be a good idea 
 	pPCA.fit(pArray.T)
 	# PCA(copy=True, n_components=1, whiten=False)
-	print "PCA variance", pPCA.explained_variance_ratio_ 
+	#print "PCA variance", pPCA.explained_variance_ratio_ 
 	return pPCA.explained_variance_ratio_ 
 
 	
