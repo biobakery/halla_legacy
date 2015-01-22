@@ -1484,12 +1484,12 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 	def _bhy_hypothesis_testing():
 		apChildren = [pTree]
 		level = 1
-		global number_performed_test
-		
+		number_performed_tests = 0 
+		number_passed_tests = 0
 		next_level_apChildren = []
 		while apChildren:
 			Current_Family_Children = apChildren.pop(0).get_children()
-			number_performed_test += len(Current_Family_Children)
+			number_performed_tests += len(Current_Family_Children)
 			
 			# claculate nominal p-value
 			for i in range(len(Current_Family_Children)):
@@ -1510,7 +1510,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 					# print "max_r_t", max_r_t
 			for i in range(len(aP)):
 				if pRank[i] <= max_r_t:
-					print "************Pass with p-value:", aP[i], Current_Family_Children[i].get_data()[0], Current_Family_Children[i].get_data()[1]
+					number_passed_tests += 1
+					print "--- Pass with p-value:", aP[i], Current_Family_Children[i].get_data()[0], Current_Family_Children[i].get_data()[1]
 					aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
 					aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
 				else :
@@ -1531,7 +1532,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 				apChildren = next_level_apChildren
 				level += 1
 				next_level_apChildren = []
-												
+		print "--- number of performed tests:", number_performed_tests
+		print "--- number of passed from nominal tests:", number_passed_tests										
 		return aFinal, aOut
 	def _bh_hypothesis_testing():
 		apChildren = [pTree]

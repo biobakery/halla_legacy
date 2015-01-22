@@ -1,28 +1,23 @@
 """
 HAllA class  
 """
-# # structural packages 
-# # internal dependencies
-# from pandas import *
 
 try: 
 	import pandas as pd
 except: 
 	print "--- install pandas library for scatter matrix plotting"
 import matplotlib.pyplot as plt 
-
 import csv
 import itertools
-from numpy import *
+from numpy import array
 import os
-import shutil 
 import sys
+import shutil 
 import time
-
+import math
 import distance
 import hierarchy
 import numpy as np
-import scipy as sp
 import stats
 
 
@@ -41,6 +36,7 @@ class HAllA():
 			self.strStep = "uniform"
 			self.verbose = args.iDebug 
 		else:
+			print "command argument are not passed!"
 			self.distance = "norm_mi"
 			self.reduce_method = "pca" 
 			self.exploration_function = "default"
@@ -85,40 +81,7 @@ class HAllA():
 
 		self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q", "distance", "iterations", "reduce_method", "p_adjust_method", "randomization_method"]
 
-		#==================================================================#
-		# Presets
-		#==================================================================#
-
-		self.hash_preset = 	{"default"		: self.__preset_default, "HAllA": self.__preset_default, "HAllA-PCA-NMI": self.__preset_default,
-								"time"		: self.__preset_time,
-								"accuracy"	: self.__preset_accuracy,
-								"parallel"	: self.__preset_parallel,
-								"layerwise" : self.__preset_layerwise,
-								"naive" 	: self.__preset_naive, "AllA" 	: self.__preset_naive, "AllA-NMI" 	: self.__preset_naive,
-								"MIC"	: self.__preset_mic, "AllA-MIC"	: self.__preset_mic,
-								"HAllA-PCA-MIC"	: self.__preset_pca_mic,
-								"HAllA-PCA-AMI" : self.__preset_pca_adj_mi,
-								"HAllA-ICA-NMI" : self.__preset_ica_norm_mi,
-								"HAllA-ICA-MIC" : self.__preset_ica_mic,
-								"kpca_norm_mi": self.__preset_kpca_norm_mi, "HAllA-KPCA-NMI": self.__preset_kpca_norm_mi,
-								"kpca_pearson": self.__preset_kpca_pearson, "HAllA-KPCA-Pearson": self.__preset_kpca_pearson,
-								"cca_pearson": self.__preset_cca_pearson, "HAllA-CCA-Pearson": self.__preset_cca_pearson,
-								"cca_norm_mi": self.__preset_cca_norm_mi, "HAllA-CCA-NMI": self.__preset_cca_norm_mi,
-								"pls_norm_mi": self.__preset_pls_norm_mi, "HAllA-PLS-NMI": self.__preset_pls_norm_mi,
-								"pls_pearson": self.__preset_pls_pearson, "HAllA-PLS-Pearson": self.__preset_pls_pearson,
-								"plsc_pearson": None,
-								"plsc_norm_mi": None,
-								"medoid_pearson": None,
-								"medoid_norm_mi": self.__preset_medoid_norm_mi, "HAllA-Meoid-NMI": self.__preset_medoid_norm_mi,
-								"full"		: self.__preset_full,
-								"full_cca"	: self.__preset_full_cca,
-								"full_kpca_norm_mi": self.__preset_full_kpca_norm_mi,
-								"full_kpca_pearson": self.__preset_full_kpca_pearson,
-								"multiple_representative": self.__preset_multiple_representative,
-								"parametric_multiple_representative": self.__preset_parametric_multiple_representative,
-								"parametric_test_by_representative": self.__preset_parametric_rep,
-							}
-
+		
 		#==================================================================#
 		# Global Defaults 
 		#==================================================================#
@@ -307,8 +270,6 @@ class HAllA():
 
 	def _discretize(self):
 		self.meta_feature = self.m(self.meta_array, stats.discretize)
-		# Should do a better job at detecting whether dataset is categorical or continuous
-		# Take information from the parser module 
 		return self.meta_feature
 
 	def _featurize(self, strMethod="_discretize"):
@@ -551,8 +512,8 @@ class HAllA():
 			strFile1, strFile2 = istm[0], istm[0]
 		csvw = csv.writer(self.args.ostm, csv.excel_tab)
 		bcsvw = csv.writer(self.args.bostm, csv.excel_tab)
-		csvw.writerow(["Method: " + str(self.reduce_method)+str(self.distance), "q value: " + str(self.q), "metric " + str(self.distance)])
-		bcsvw.writerow(["Method: " + str(self.reduce_method)+str(self.distance), "q value: " + str(self.q), "metric " + str(self.distance)])
+		csvw.writerow(["Method: " + self.reduce_method  +"-"+ self.distance , "q value: " + str(self.q), "metric " +self.distance])
+		bcsvw.writerow(["Method: " + self.reduce_method +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
 		
 		if self.args.Y == None:
 			csvw.writerow([istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"])
@@ -753,374 +714,6 @@ class HAllA():
 	These are hard-coded presets deemed useful for the user 
 	"""
 
-	######NEW PRESETS 
-	# permutation_test_by_representative  -> norm_mi 
-	# permutation_test_by_kpca_norm_mi -> 
-	# permutation_test_by_kpca_pearson
-	# permutation_test_by_cca_pearson 
-	# permutation_test_by_cca_norm_mi 
-
-	def __preset_medoid_norm_mi(self):
-
-		pDistance = distance.norm_mi
-		self.set_metric(pDistance)
-		
-		self._featurize()
-		self._threshold()
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_medoid") 
-		self._summary_statistics() 
-		return self._report() 
-
-	def __preset_parametric_rep(self):
-
-		self._featurize()
-		self._threshold()
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="parametric_test_by_representative") 
-		self._summary_statistics() 
-		return self._report()  
-	
-	def __preset_pca_mic(self):
-		pDistance = distance.mic
-		self.set_metric(pDistance)
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_representative_mic") 
-		self._summary_statistics('final') 
-		return self._report()  
-	
-	# step 2 to add a new method for HAllA
-	def __preset_ica_norm_mi(self):
-		pDistance = distance.norm_mi
-		self.set_metric(pDistance)
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_ica_norm_mi") 
-		self._summary_statistics('final') 
-		return self._report() 
-	
-	def __preset_ica_mic(self):
-		pDistance = distance.mic
-		self.set_metric(pDistance)
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_ica_mic") 
-		self._summary_statistics() 
-		return self._report() 
-	def __preset_kpca_norm_mi(self):
-		pDistance = distance.norm_mi
-		self.set_metric(pDistance)
-		
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_kpca_norm_mi") 
-		self._summary_statistics('final') 
-		return self._report()  
-
-	def __preset_kpca_pearson(self):
-		pDistance = distance.pearson
-		self.set_metric(pDistance)
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_kpca_pearson") 
-		self._summary_statistics('final') 
-		return self._report() 
-
-	def __preset_cca_pearson(self):
-		pDistance = distance.pearson
-		self.set_metric(pDistance)
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_cca_pearson") 
-		self._summary_statistics('final') 
-		return self._report() 
-
-	def __preset_pls_pearson(self):
-		pDistance = distance.pearson
-		self.set_metric(pDistance)
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="parametric_test_by_pls_pearson") 
-		self._summary_statistics('final') 
-		return self._report() 
-
-
-	def __preset_pls_norm_mi(self):
-		pDistance = distance.norm_mi
-		self.set_metric(pDistance)
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_pls_norm_mi") 
-		self._summary_statistics('final') 
-		return self._report() 
-
-
-	def __preset_cca_norm_mi(self):
-		# # Constants for this preset 
-		pDistance = distance.norm_mi
-		self.set_metric(pDistance)
-		# pDistance = norm_mi 
-		# iIter = 100
-		# strReduce = "pca"
-		# strAdjust = "BH"
-		# strRandomization = "permutation"
-
-		# # Run 		
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_cca_norm_mi") 
-		self._summary_statistics('final') 
-		return self._report() 
-
-
-	######END 
-
-
-	def __preset_layerwise(self):
-		"""
-		Layerwise MI preset 
-		"""
-
-		# # Constants for this preset 
-
-		pDistance = distance.norm_mi 
-		iIter = 100
-		strReduce = "pca"
-		strStep = "uniform"
-		strAdjust = "BH"
-		strRandomization = "permutation"
-		strExplorationFunction = "layerwise"
-
-		# # Set 
-		self.set_metric(pDistance)
-		self.set_reduce_method(strReduce)
-		self.set_p_adjust_method(strAdjust)
-		self.set_randomization_method(strRandomization)
-		self.set_exploration_function(strExplorationFunction)
-
-		# # Run 		
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-
-		# self._couple( )
-		# self._hypotheses_testing( )
-		return self._layerwise_all_against_all()
-		# self._summary_statistics( )
-		# return self._report( )
-
-	def __preset_parametric_multiple_representative(self):
-
-		# # Run 		
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="parametric_test_by_multiple_representative") 
-		self._summary_statistics("all") 
-		return self._report()
-
-	def __preset_multiple_representative(self):
-
-		# # Constants for this preset 
-		pDistance = distance.norm_mi 
-		strReduce = "pca"
-		strStep = "uniform"
-		strAdjust = "BH"
-		strRandomization = "permutation"
-
-		# # Set 
-		self.set_metric(pDistance)
-		self.set_reduce_method(strReduce)
-		self.set_p_adjust_method(strAdjust)
-		self.set_randomization_method(strRandomization)
-
-		# # Run 		
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_multiple_representative") 
-		# self._summary_statistics( "all" ) 
-		# return self._report( )
-	def __set_paramaters(self):
-		"""
-		Mutual Information Preset 
-		"""
-		# # Constants for this preset 
-		pDistance = distance.norm_mi 
-		strReduce = "pca"
-		
-		strAdjust = "BH"
-		strRandomization = "permutation"
-
-		# # Set 
-		self.set_metric(pDistance)
-		self.set_reduce_method(strReduce)
-		self.set_p_adjust_method(strAdjust)
-		self.set_randomization_method(strRandomization)
-
-	def __preset_pca_adj_mi(self):
-		"""
-		Adjusted Mutual Information Preset 
-		"""
-		# # Constants for this preset 
-		pDistance = distance.adj_mi 
-		strReduce = "pca"
-		strStep = "uniform"
-		strAdjust = "BH"
-		strRandomization = "permutation"
-
-		# # Set 
-		self.set_metric(pDistance)
-		self.set_reduce_method(strReduce)
-		self.set_p_adjust_method(strAdjust)
-		self.set_randomization_method(strRandomization)
-
-		# # Run 		
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_representative_adj_mi") 
-		self._summary_statistics('final') 
-		return self._report()
-
-	def __preset_full(self):
-		"""
-		Give full-pvalue matrix;
-		useful for evaluating the full AUC
-		"""
-
-		# # Constants for this preset 
-		pDistance = distance.norm_mi 
-		strReduce = "pca"
-		strStep = "uniform"
-		strAdjust = "BH"
-		strRandomization = "permutation"
-
-		# # Set 
-		self.set_metric(pDistance)
-		self.set_reduce_method(strReduce)
-		self.set_p_adjust_method(strAdjust)
-		self.set_randomization_method(strRandomization)
-
-		# # Run 		
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing() 
-		return self._summary_statistics("all") 
-
-
-	def __preset_full_cca(self):
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_cca_pearson") 
-		return self._summary_statistics("all") 
-
-	def __preset_full_kpca_norm_mi(self):
-
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_kpca_norm_mi") 
-		return self._summary_statistics("all") 
-
-	def __preset_full_kpca_pearson(self):
-
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		self._hypotheses_testing(strMethod="permutation_test_by_kpca_pearson") 
-		return self._summary_statistics("all") 
-
-	def __preset_default(self):
-		return self.__main()
-		# return self.__preset_layerwise( )
-
-	def __preset_time(self):
-		pass 
-
-	def __preset_accuracy(self):
-		# # Constants for this preset 
-
-		pDistance = distance.adj_mi 
-		iIter = 1000
-		strReduce = "pca"
-		strStep = "uniform"
-		strAdjust = "BH"
-		strRandomization = "permutation"
-
-		# # Set 
-
-		self.set_metric(distance.adj_mi)
-		self.set_iterations(iIter)
-		self.set_reduce_method(strReduce)
-		self.set_p_adjust_method(strAdjust)
-		self.set_randomization_method(strRandomization)
-
-		# # Run 
-		self._featurize()
-		# self._threshold( )
-		self._hclust()
-		self._couple()
-		return self._hypotheses_testing()
- 
-	def __preset_parallel(self):
-		pass 
-
-	def __preset_naive(self):
-		"""
-		All against all 
-		"""
-		self._featurize()
-		# print self.iterations 
-		Out = self._naive_all_against_all(iIter=self.iterations)
-		self.aOut = [Out]
-		self._naive_summary_statistics()
-		return self.aOut
-	def __preset_mic(self):
-		"""
-		All against all using Maximum Information Coefficient 
-		"""
-		self._featurize()
-		# print self.iterations 
-		Out = self._naive_all_against_all_mic(iIter=self.iterations)
-		self.aOut = [Out]
-		self._naive_summary_statistics()
-		return self.aOut
-
-	#==========================================================#
-	# Public Functions / Main Pipeline  
-	#==========================================================# 	
-
 	def load_data(self):
 		pass 
 
@@ -1174,9 +767,8 @@ class HAllA():
 
 		if self.q == 1.0:
 			strMethod = "naive"
-			return self.hash_preset[strMethod]()
-		# set parameters
-		self.__set_paramaters()
+			#return self.all_agains_all()
+			# set up all-against-all
 		
 		# featurize 
 		start_time = time.time()

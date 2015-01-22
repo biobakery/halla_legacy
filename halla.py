@@ -68,15 +68,6 @@ except (AttributeError, IndexError):
         str(config.required_python_version_major) + "." + 
         str(config.required_python_version_minor) + "+)") 
 
-# structural packages 
-# import stats
-# import parser
-# import distance
-# import data
-# import hierarchy
-# impor hallaclass
-# import plot 
-
 def get_halla_base_directory():
     """ 
     Return the location of the halla base directory
@@ -158,20 +149,20 @@ def _main():
     args=parse_arguments(sys.argv)
     
     # synthetic data 
-    #s = strudel.Strudel()
+    s = strudel.Strudel()
     
-    #number_features = 8 
-    #number_samples = 100 
-    #number_blocks = 3 
-    #print '--- synthetic data generation ...'
+    number_features = 9 
+    number_samples = 200 
+    number_blocks = 3 
+    print '--- synthetic data generation ...'
         
-    #X, Y, A = s.double_cholesky_block(number_features, number_samples , number_blocks, fVal=.6 , Beta=3.0)  # , link = "line" )
+    X, Y, A = s.double_cholesky_block(number_features, number_samples , number_blocks, fVal=.6 , Beta=3.0)  # , link = "line" )
     
     
-    #input_dir = make_directory()
+    input_dir = make_directory()
     #output_dir = make_directory(halla_base_directory+'/halla/output')
-    #data.writeData(X, input_dir+"/X")
-    #data.writeData(Y,  input_dir+"/Y")     
+    strudel.writeData(X, input_dir+"/X")
+    strudel.writeData(Y,  input_dir+"/Y")     
 
 
     istm = list()  # X and Y are used to store datasets
