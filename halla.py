@@ -135,7 +135,12 @@ def parse_arguments (args):
     
     argp.add_argument("-r",         dest="strRandomization",     metavar="randomization",
             type=str,         default="permutation",
-            help="The approach for randomization, [default is permutation, options are permutation and G-test]")    
+            help="The approach for randomization, [default is permutation, options are permutation and G-test]") 
+    
+    argp.add_argument("-t",         dest="dThreshold_similiarity",     metavar="similarity threshold",
+            type=str,         default=.5,
+            help="A threshold for similarity to count a cluster as one unit and no consider sub-clusters as sub-unit.")    
+   
           
     return argp.parse_args()
     

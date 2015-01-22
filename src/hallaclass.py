@@ -34,7 +34,8 @@ class HAllA():
 			self.p_adjust_method = args.strAdjust
 			self.randomization_method = args.strRandomization  # method to generate error bars 
 			self.strStep = "uniform"
-			self.verbose = args.iDebug 
+			self.verbose = args.iDebug
+			self.threshold = args.dThreshold_similiarity 
 		else:
 			print "command argument are not passed!"
 			self.distance = "norm_mi"
@@ -294,7 +295,7 @@ class HAllA():
 				
 		self.meta_hypothesis_tree = hierarchy.couple_tree(apClusterNode1=[self.meta_data_tree[0]],
 				apClusterNode2=[self.meta_data_tree[1]],
-				pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], func=self.distance)[0]
+				pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], func=self.distance, threshold = self.threshold)[0]
 		
 		# # remember, `couple_tree` returns object wrapped in list 
 		#return self.meta_hypothesis_tree 

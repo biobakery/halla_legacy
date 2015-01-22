@@ -928,9 +928,9 @@ def _is_start(ClusterNode, X, func, distance):
 	else: 
 		return False
 
-def _is_stop(ClusterNode, X, func='norm_mi', distance=0.0):
+def _is_stop(ClusterNode, dataSet, threshold = None):
 		node_indeces = reduce_tree(ClusterNode)
-		first_PC = stats.pca_explained_variance_ratio_(X[array(node_indeces)])[0]
+		first_PC = stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
 		if ClusterNode.is_leaf() or ClusterNode.dist <.5 or first_PC > .5:
 			#print "Node: ",node_indeces
 			#print "dist:", ClusterNode.dist, " first_PC:", first_PC,"\n"
@@ -1040,7 +1040,7 @@ def _cutree (clusterNodelist):
 	return sub_clusters
 
 	
-def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uniform", strLinkage="min", func="norm_mi", exploration="couple_tree_iterative"):
+def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uniform", strLinkage="min", func="norm_mi", threshold = None):
 	
 	"""
 	Couples two data trees to produce a hypothesis tree 
@@ -1131,8 +1131,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 		data1 = reduce_tree(a)
 		data2 = reduce_tree(b)
 				
-		bTauX = _is_stop(a, X)  # ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
-		bTauY = _is_stop(b, Y)  # ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
+		bTauX = _is_stop(a, X, threshold)  # ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
+		bTauY = _is_stop(b, Y, threshold)  # ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
 		if (bTauX == True) and (bTauY == True):
 			continue
 
