@@ -9,7 +9,7 @@ import sys
 
 from src import hallaclass, hierarchy, stats, distance, parser, plot
 from src.parser import Input, Output
-import strudel
+#import strudel
 
 
 # set path
