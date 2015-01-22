@@ -33,7 +33,7 @@ class HAllA():
 		if args:
 			self.distance = args.strMetric 
 			self.reduce_method = args.strReduce 
-			self.exploration_function = "default"
+			self.exploration_function = args.strExploration
 			self.q = args.dQ  
 			self.iterations = args.iIter
 			self.p_adjust_method = args.strAdjust
@@ -47,7 +47,7 @@ class HAllA():
 			self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
 			self.q = .1  
 			self.iterations = 1000
-			self.p_adjust_method = "BH"
+			self.p_adjust_method = "RAH"
 			self.randomization_method = "permutation"  # method to generate error bars 
 			self.strStep = "uniform"
 			self.verbose = False 
@@ -141,7 +141,7 @@ class HAllA():
 		self.meta_data_tree = [] 
 		self.meta_hypothesis_tree = None 
 		self.meta_alla = None  # results of all-against-all
-		self.meta_out = None  # final output array; some methods (e.g. all_against_all) have multiple outputs piped to both self.meta_alla and self.meta_out 
+		self.meta_out = None  # final output array; some methods (e.g. hypotheses_testing) have multiple outputs piped to both self.meta_alla and self.meta_out 
 		self.meta_summary = None  # summary statistics 
 		self.meta_report = None  # summary report 
 		self.aOut = None  # summary output for naive approaches_
@@ -351,7 +351,7 @@ class HAllA():
 		if self.verbose:
 			print ("HAllA PROMPT: q value", fQ)
 			print ("q value is", fQ)
-		self.meta_alla = hierarchy.all_against_all(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=strMethod, fQ=self.q, bVerbose=self.verbose) 
+		self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=strMethod, exploration=self.exploration_function,  fQ=self.q, bVerbose=self.verbose) 
 		# # Choose to keep to 2 arrays for now -- change later to generalize 
 		#return self.meta_alla 
 	
@@ -654,13 +654,14 @@ class HAllA():
 		ro.globalenv['nmi'] = nmi
 		ro.globalenv['labRow'] = X_labels 
 		ro.globalenv['labCol'] = Y_labels
-		ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
-		ro.r('heatmap.2(nmi, labRow = labRow, labCol = labCol, col=redgreen(75), scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)')
-		ro.r('dev.off()')
-		ro.globalenv['p'] = p
-		ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
-		ro.r('heatmap.2(p, , labRow = labRow, labCol = labCol, , col=redgreen(75), scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)')
-		ro.r('dev.off()')
+		if len(associated_feature_X_indecies)>1 and len(associated_feature_Y_indecies)>1 :
+			ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
+			ro.r('heatmap.2(nmi, labRow = labRow, labCol = labCol, col=redgreen(75), scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)')
+			ro.r('dev.off()')
+			ro.globalenv['p'] = p
+			ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
+			ro.r('heatmap.2(p, , labRow = labRow, labCol = labCol, , col=redgreen(75), scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)')
+			ro.r('dev.off()')
 		# set_default_mode(NO_CONVERSION)
 		# rpy2.library("ALL")
 		# hm = halla.plot.hclust2.Heatmap( p)#, cl.sdendrogram, cl.fdendrogram, snames, fnames, fnames_meta, args = args )

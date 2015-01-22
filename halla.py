@@ -129,8 +129,8 @@ def parse_arguments (args):
             help="Debug logging level; increase for greater verbosity")
 
     argp.add_argument("-e", "--exploration",     dest="strExploration",     metavar="exploration",
-        type=str,         default="default",
-        help="Exploration function")
+        type=str,         default = "BHY",
+        help="Exploration function for maximize power and control false discovery rate, BHY, BH, RAH")
 
     argp.add_argument("-m",         dest="strMetric",     metavar="metric",
             type=str,         default="norm_mi",

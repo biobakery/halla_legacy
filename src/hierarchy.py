@@ -1360,11 +1360,11 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 
 	return aOut
 
-#### BUGBUG: When q = 1.0, results should be _exactly the same_ as naive all_against_all, but something is going on that messes this up
+#### BUGBUG: When q = 1.0, results should be _exactly the same_ as naive hypotheses_testing, but something is going on that messes this up
 #### Need to figure out what -- it's probably in the p-value consolidation stage 
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
-def all_against_all(pTree, pArray1, pArray2, method="permutation_test_by_representative", metric="norm_mi", p_adjust="BH", fQ=0.1,
+def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_representative", metric="norm_mi", exploration= "BHY", p_adjust="BH", fQ=0.1,
 	iIter=1000, pursuer_method="nonparameteric", step_parameter=1.0, start_parameter=0.0, bVerbose=False, afThreshold=None, fAlpha=0.05):
 	"""
 	Perform all-against-all on a hypothesis tree.
@@ -1432,8 +1432,8 @@ def all_against_all(pTree, pArray1, pArray2, method="permutation_test_by_represe
 
 	iGlobalDepth = depth_tree(pTree)
 	# iSkip = _start_parameter_to_iskip( start_parameter )
-    # step 3: to add a new method to HAllA (extension step)
-    # for examplewe add "permutation_test_by_ica_norm_mi": py.stats.permutation_test_by_ica_norm_mi
+	
+		
 	pHashMethods = {"permutation_test_by_representative" : stats.permutation_test_by_representative,
 						"permutation_test_by_average" : stats.permutation_test_by_average,
 						"parametric_test" : stats.parametric_test,
@@ -1455,7 +1455,7 @@ def all_against_all(pTree, pArray1, pArray2, method="permutation_test_by_represe
 	strMethod = method
 	pMethod = pHashMethods[strMethod]
 	
-	def _simple_descending():
+	def _simple_hypothesis_testing():
 		L = pTree.get_children()
 		global number_performed_test
 		number_performed_test += len(L)
@@ -1481,7 +1481,7 @@ def all_against_all(pTree, pArray1, pArray2, method="permutation_test_by_represe
 			
 		return aFinal, aOut
 	
-	def _ybh_descending():
+	def _bhy_hypothesis_testing():
 		apChildren = [pTree]
 		level = 1
 		global number_performed_test
@@ -1499,7 +1499,7 @@ def all_against_all(pTree, pArray1, pArray2, method="permutation_test_by_represe
 			# claculate adjusted p-value
 			aP_adjusted, pRank = stats.p_adjust(aP, fQ)
 			for i in range(len(Current_Family_Children)):
-				Current_Family_Children[i].set_adjusted_pvalue(aP_adjusted[pRank[i]])
+				Current_Family_Children[i].set_adjusted_pvalue(aP_adjusted[i])
 				
 			max_r_t = 0
 			# print "aP", aP
@@ -1666,9 +1666,9 @@ def all_against_all(pTree, pArray1, pArray2, method="permutation_test_by_represe
 		print "--- number of performed tests:", len(performed_tests)
 		print "--- number of passed from nominal tests:", len(passed_tests)
 		performed_tests = array(performed_tests)
-		print "Nominal p-values", performed_tests[:, 1]
+		#print "Nominal p-values", performed_tests[:, 1]
 		aP_adjusted, pRank = stats.p_adjust(performed_tests[:, 1], fQ)
-		print "ajusted pvalue: ", aP_adjusted
+		#print "ajusted pvalue: ", aP_adjusted
 		for i in range(len(performed_tests)):
 			if performed_tests[i][1] <= aP_adjusted[i] and max_r_t <= pRank[i]:
 				max_r_t = pRank[i]
@@ -1700,12 +1700,18 @@ def all_against_all(pTree, pArray1, pArray2, method="permutation_test_by_represe
 
 		return dP 
 
-	
+	exploration_function = {"BHY": _bhy_hypothesis_testing,
+							"BH":  _bh_hypothesis_testing,
+							"RAH": _rah_hypothesis_testing,
+							"simple":_simple_hypothesis_testing}
 	#======================================#
 	# Execute 
 	#======================================#
 	# aFinal, aOut = _simple_descending()
 	# aFinal, aOut = _ybh_descending()
-	aFinal, aOut = _bh_hypothesis_testing()
+	strExploration = exploration
+	pExploration = exploration_function[strExploration]
+	aFinal, aOut = pExploration()
+
 	print "____Number of performed test:", number_performed_test
 	return aFinal, aOut 
