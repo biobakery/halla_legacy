@@ -9,8 +9,6 @@ import sys
 
 from src import hallaclass, hierarchy, stats, distance, parser, plot
 from src.parser import Input, Output
-#import strudel
-
 
 # set path
 try:
@@ -148,10 +146,6 @@ def _main():
     # Parse arguments from command line
     args=parse_arguments(sys.argv)
     
-    # synthetic data 
-    
-
-
     istm = list()  # X and Y are used to store datasets
  	
 	# If Y was not set - we use X

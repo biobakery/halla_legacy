@@ -52,7 +52,8 @@ Dependencies
 	* Numpy (>= 1.7.1)
 	* Scipy (>= 0.12) 
 	* Scikit-learn (>=0.13) 
-	* Pandas (>=0.15.2) 
+	* Pandas (>=0.15.2)
+	* R 
  	* rpy2
 	* sampledoc-master
 All the required packages are included in Anaconda which is available at https://store.continuum.io/cshop/anaconda/
@@ -141,7 +142,7 @@ Advanced
 
 The following is a list of all available arguments that can be passed into halla:: 
 
-	usage: halla.py -X inputfile1.tx -Y inputfile2.txt -q .1 
+	usage: halla.py -X inputfile1.txt -Y inputfile2.txt -q .1 
 
 	Hierarchical All-against-All significance association testing.
 
@@ -156,7 +157,6 @@ The following is a list of all available arguments that can be passed into halla
 	  -P p_mi        P-value for permutation equivalence of MI clusters
 	  -b bootstraps  Number of bootstraps for significance testing
 	  -v verbosity   Debug logging level; increase for greater verbosity
-          -x  method that want to use, the default is HAllA-PCA-NMI
 
 Mini-tutorial
 ---------------------------------------------------
@@ -164,7 +164,8 @@ Mini-tutorial
 Suppose you have two tab-delimited file containing the datasets you wish to run halla on. We will call this files `input1.txt` and `input2.txt`. We will call the output file `associations.txt`. In the root directory of halla, one can type::
 	
 	$ python halla.py -X input1.txt -Y input2.txt -q .2 
-
+for demo inputs try:
+	$ python halla.py -X ./input/X_syntheticData.txt -Y ./input/Y_syntheticData.txt 
 
 Frequently Asked Questions 
 ==============================================
