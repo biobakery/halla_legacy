@@ -381,7 +381,6 @@ def bh(afPVAL, q):
 	for i, fP in enumerate(afPVAL):
 		# fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
 		fAdjusted = q * 1.0 * pRank[i] / iLen  # iLenReduced
-		
 		aOut.append(fAdjusted)
 	# print aOut
 	# assert( all(map(lambda x: x <= 1.0, aOut)) ) ##sanity check 
@@ -857,7 +856,7 @@ def permutation_test_by_average(pArray1, pArray2, metric="norm_mid", iIter=1000)
 
 def permutation_test(pArray1, pArray2, metric, decomposition, iIter):
 	if decomposition in ["pca", "ica", "kpca"]:
-		return permutation_test_by_representative(pArray1, pArray2, metric=metric, decomposition="pca", iIter=iIter)
+		return permutation_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter)
 	
 	if decomposition in ["average"]:
 		return permutation_test_by_average(pArray1, pArray2, metric=metric, iIter=iIter)
