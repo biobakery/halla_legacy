@@ -18,8 +18,7 @@ from distance import mi, l2, absl2, norm_mi
 import matplotlib.pyplot as plt
 import numpy as np
 import stats 
-from stats import discretize, pca, bh, permutation_test_by_representative, permutation_test_by_representative_mic, p_adjust
-from stats import permutation_test_by_kpca_norm_mi, permutation_test_by_kpca_pearson, permutation_test_by_cca_pearson, permutation_test_by_cca_norm_mi
+from stats import discretize, pca, bh, permutation_test_by_representative, p_adjust
 
 # # statistics packages 
 sys.setrecursionlimit(20000)
@@ -1174,7 +1173,6 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 def naive_all_against_all(pArray1, pArray2, strMethod="permutation_test_by_representative", iIter=100):
 
 	phashMethods = {"permutation_test_by_representative" : stats.permutation_test_by_representative,
-					"permutation_test_by_representative_mic" : stats.permutation_test_by_representative_mic,
 						"permutation_test_by_average" : stats.permutation_test_by_average,
 						"parametric_test" : stats.parametric_test}
 
@@ -1364,8 +1362,8 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 #### Need to figure out what -- it's probably in the p-value consolidation stage 
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
-def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_representative", metric="norm_mi", exploration= "BHY", p_adjust="BH", fQ=0.1,
-	iIter=1000, pursuer_method="nonparameteric", step_parameter=1.0, start_parameter=0.0, bVerbose=False, afThreshold=None, fAlpha=0.05):
+def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="norm_mi", exploration= "BHY", p_adjust="BH", fQ=0.1,
+	iIter=1000, pursuer_method="nonparameteric", decomposition = "pca", bVerbose=False, afThreshold=None, fAlpha=0.05):
 	"""
 	Perform all-against-all on a hypothesis tree.
 
@@ -1421,8 +1419,6 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 
 		pass 
 
-	iSkip = _start_parameter_to_iskip(start_parameter)
-
 	# print "layers to skip:", iSkip 
 
 	aOut = []  # # Full log 
@@ -1432,22 +1428,15 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 	# iSkip = _start_parameter_to_iskip( start_parameter )
 	
 		
-	pHashMethods = {"permutation_test_by_representative" : stats.permutation_test_by_representative,
-						"permutation_test_by_average" : stats.permutation_test_by_average,
-						"parametric_test" : stats.parametric_test,
-						"permutation_test_by_kpca_norm_mi" :stats.permutation_test_by_kpca_norm_mi,
-						"permutation_test_by_kpca_pearson" :stats.permutation_test_by_kpca_pearson,
-						"permutation_test_by_cca_pearson" :stats.permutation_test_by_cca_pearson,
-						"parametric_test_by_pls_pearson": stats.parametric_test_by_pls_pearson,
-						"permutation_test_by_cca_norm_mi" :stats.permutation_test_by_cca_norm_mi,
+	pHashMethods = {"permutation" : stats.permutation_test,
 						"permutation_test_by_multiple_representative" : stats.permutation_test_by_multiple_representative,
-						"parametric_test_by_representative": stats.parametric_test_by_representative,
 						"permutation_test_by_medoid": stats.permutation_test_by_medoid,
 						"permutation_test_by_pls_norm_mi": stats.permutation_test_by_pls_norm_mi,
-						"permutation_test_by_representative_mic" : stats.permutation_test_by_representative_mic,
-						"permutation_test_by_representative_adj_mi" : stats.permutation_test_by_representative_adj_mi,
-						 "permutation_test_by_ica_norm_mi": stats.permutation_test_by_ica_norm_mi,
-						 "permutation_test_by_ica_mic": stats.permutation_test_by_ica_mic
+						
+						# parametric tests
+						"parametric_test_by_pls_pearson": stats.parametric_test_by_pls_pearson,
+						"parametric_test_by_representative": stats.parametric_test_by_representative,
+						"parametric_test" : stats.parametric_test
 						}
 
 	strMethod = method
@@ -1461,7 +1450,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 			currentNode = L.pop(0)
 			print currentNode.get_data()
 			aiI, aiJ = map(array, currentNode.get_data())
-			p_value = pMethod(pArray1[aiI], pArray2[aiJ])
+			p_value = pMethod(pArray1[aiI], pArray2[aiJ], metric = metric, decomposition = decomposition, iIter = iIter)
 			aOut.append([currentNode.get_data(), float(p_value), float(p_value)])
 			if p_value <= fQ:
 				print "************Pass with p-value:", p_value
@@ -1592,7 +1581,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 				aOut.append([performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]])
 		print "Number of found  associations:", len(aFinal)										
 		return aFinal, aOut
-	def _rah_hypothesis_testing():
+	def _rh_hypothesis_testing():
 		def __descend(clusterNode):
 			if clusterNode.get_left_distance() <.9 and\
 			   clusterNode.get.get_left_distance()< .9 and\
@@ -1687,7 +1676,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 
 		aIndicies = pNode.get_data() 
 		aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays 
-		dP, nmi, left_first_pc, right_first_pc = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], iIter=iIter)
+		dP, nmi, left_first_pc, right_first_pc = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
 		pNode.set_nmi(nmi)
 		pNode.set_left_first_pc(left_first_pc)
 		pNode.set_right_first_pc(right_first_pc)
@@ -1697,7 +1686,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation_test_by_repr
 
 	exploration_function = {"BHY": _bhy_hypothesis_testing,
 							"BH":  _bh_hypothesis_testing,
-							"RAH": _rah_hypothesis_testing,
+							"RH": _rh_hypothesis_testing,
 							"simple":_simple_hypothesis_testing}
 	#======================================#
 	# Execute 

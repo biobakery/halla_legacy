@@ -303,17 +303,14 @@ class HAllA():
 	def _naive_all_against_all(self, iIter=100):
 		self.meta_alla = hierarchy.naive_all_against_all(self.meta_array[0], self.meta_array[1], iIter=iIter)
 		return self.meta_alla 
-	def _hypotheses_testing(self, strMethod="permutation_test_by_representative", iIter=None):
-		if not iIter:
-			iIter = self.iterations 
-
-		assert(type(iIter) == int)
+	def _hypotheses_testing(self):
+			
 		fQ = self.q
 		
 		if self.verbose:
 			print ("HAllA PROMPT: q value", fQ)
 			print ("q value is", fQ)
-		self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=strMethod, exploration=self.exploration_function,  fQ=self.q, bVerbose=self.verbose) 
+		self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, exploration=self.exploration_function,  fQ=self.q, iIter = self.iterations, bVerbose=self.verbose) 
 		# # Choose to keep to 2 arrays for now -- change later to generalize 
 		#return self.meta_alla 
 	

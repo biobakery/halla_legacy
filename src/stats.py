@@ -487,19 +487,6 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="norm_mi", iIter=1000):
 	assert(fP <= 1.0)
 
 	return fP
-
-def permutation_test_by_representative_mic(pArray1, pArray2, metric="mic", decomposition="pca", iIter=100):
-	return permutation_test_by_representative(pArray1, pArray2, metric="mic", decomposition="pca", iIter=1000)
-
-# Step 4: extendin HAllA 
-# here we add permutation_test_by_ica_norm_mi
-def permutation_test_by_ica_norm_mi(pArray1, pArray2, metric="norm_mi", decomposition="ica", iIter=100):
-	return permutation_test_by_representative(pArray1, pArray2, metric="norm_mi", decomposition="ica", iIter=1000)
-def permutation_test_by_ica_mic(pArray1, pArray2, metric="mic", decomposition="ica", iIter=1000):
-	return permutation_test_by_representative(pArray1, pArray2, metric="mic", decomposition="ica", iIter=1000)
-
-def permutation_test_by_representative_adj_mi(pArray1, pArray2, metric="adj_mi", decomposition="pca", iIter=1000):
-	return permutation_test_by_representative(pArray1, pArray2, metric="adj_mi", decomposition="pca", iIter=1000)
 	
 def permutation_test_by_representative(pArray1, pArray2, metric="norm_mi", decomposition="pca", iIter=1000):
 	"""
@@ -868,6 +855,16 @@ def permutation_test_by_average(pArray1, pArray2, metric="norm_mid", iIter=1000)
 
 	return dPPerm
 
+def permutation_test(pArray1, pArray2, metric, decomposition, iIter):
+	if decomposition in ["pca", "ica", "kpca"]:
+		return permutation_test_by_representative(pArray1, pArray2, metric=metric, decomposition="pca", iIter=iIter)
+	
+	if decomposition in ["average"]:
+		return permutation_test_by_average(pArray1, pArray2, metric=metric, iIter=iIter)
+	
+	if decomposition in ["cca"]:
+		return permutation_test_by_cca(pArray1, pArray2, metric=metric, iIter=iIter)
+
 
 def parametric_test(pArray1, pArray2):
 	
@@ -931,31 +928,8 @@ def parametric_test_by_pls_pearson(pArray1, pArray2, iIter=1000):
 
 	return fP
 
-
-def permutation_test_by_pca(pArray1, pArray2, iIter=1000):
-	return permutation_test_by_representative(pArray1, pArray2, iIter=iIter)
-
-# step 5: HAllA extension
-def permutation_test_by_ica(pArray1, pArray2, iIter=1000):
-	return permutation_test_by_representative(pArray1, pArray2, decomposition="ica", metric="norm_mi", iIter=iIter)
-
-def permutation_test_by_pca_norm_mi(pArray1, pArray2, iIter=1000):
-	return permutation_test_by_representative(pArray1, pArray2, iIter=iIter)
-
-def permutation_test_by_cca_pearson(pArray1, pArray2, iIter=1000):
-	return permutation_test_by_cca(pArray1, pArray2, metric="pearson", iIter=iIter)
-
-def permutation_test_by_cca_norm_mi(pArray1, pArray2, iIter=1000):
-	return permutation_test_by_cca(pArray1, pArray2, metric="norm_mi", iIter=iIter)
-
 def permutation_test_by_pls_norm_mi(pArray1, pArray2, iIter=1000):
 	return permutation_test_by_pls(pArray1, pArray2, metric="norm_mi", iIter=iIter)
-
-def permutation_test_by_kpca_pearson(pArray1, pArray2, iIter=1000):
-	return permutation_test_by_representative(pArray1, pArray2, decomposition="kpca", metric="pearson", iIter=iIter)
-
-def permutation_test_by_kpca_norm_mi(pArray1, pArray2, iIter=1000):
-	return permutation_test_by_representative(pArray1, pArray2, decomposition="kpca", metric="norm_mi", iIter=iIter)
 
 
 #=========================================================

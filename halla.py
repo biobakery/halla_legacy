@@ -119,7 +119,7 @@ def parse_arguments (args):
 
     argp.add_argument("-e", "--exploration",     dest="strExploration",     metavar="exploration",
         type=str,         default = "BHY",
-        help="Exploration function for maximize power and control false discovery rate, BHY, BH, RAH.")
+        help="Exploration function for maximize power and control false discovery rate, BHY, BH, RH.")
 
     argp.add_argument("-m",         dest="strMetric",     metavar="metric",
             type=str,         default="norm_mi",
@@ -135,7 +135,7 @@ def parse_arguments (args):
     
     argp.add_argument("-r",         dest="strRandomization",     metavar="randomization",
             type=str,         default="permutation",
-            help="The approach for randomization, [default is permutation, options are permutation and G-test]") 
+            help="The approach for randomization test, [default is permutation, options are permutation and G-test]") 
     
     argp.add_argument("-t",         dest="dThreshold_similiarity",     metavar="similarity threshold",
             type=str,         default=.5,
