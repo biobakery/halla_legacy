@@ -46,6 +46,7 @@ class Tree():
 		self.m_arrayChildren = []
 		self.left_distance = left_distance
 		self.right_distance = right_distance
+		self.adjuste_pvalue = 0.0
 
 	def pop(self):
 		# pop one of the children, else return none, since this amounts to killing the singleton 
@@ -133,7 +134,28 @@ class Tree():
 	
 	def get_adjusted_pvalue(self):
 		return self.adjusted_pvalue
-		
+	
+	def is_association(self, pc_threshold, sim_threshold, pvalue_threshold):
+		if self.get_nominal_pvalue() < pvalue_threshold and\
+		   self.get_left_first_pc() > .1 and \
+		   self.get_right_first_pc()> .1 and\
+		   1.0 - self.get_left_distance() > sim_threshold and\
+		   1.0 - self.get_right_distance() > sim_threshold:
+			return True
+		else:
+			return False
+	def report(self):
+		print "--- association"		
+		print "---- pvalue                        :", self.get_nominal_pvalue()
+		#if self.get_adjusted_pvalue() <> 0.0:
+		#	print "--- adjusted pvalue     :", self.get_adjusted_pvalue()
+		print "---- NMI                           :", self.get_nmi()
+		print "---- first cluster's features      :", self.get_data()[0]
+		print "---- first cluster similarity      :", 1.0 - self.get_left_distance()
+		print "---- first pc of the first cluster :", self.get_left_first_pc()
+		print "---- second cluster's features     :", self.get_data()[1]
+		print "---- second cluster similarity     :", 1.0 - self.get_right_distance()
+		print "---- first pc of the second cluster:", self.get_right_first_pc(), "\n\n"
 
 class Gardener():
 	"""
@@ -1457,8 +1479,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 				Current_Family_Children[i].set_nominal_pvalue(_actor(Current_Family_Children[i]))
 			
 				aOut.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_nominal_pvalue(), Current_Family_Children[i].get_nominal_pvalue()])
-				if Current_Family_Children[i].get_nominal_pvalue() <= fQ:
-					print "--- Pass with p-value:", Current_Family_Children[i].get_nominal_pvalue(), Current_Family_Children[i].get_data()[0], Current_Family_Children[i].get_data()[1]
+				if Current_Family_Children[i].is_association(pc_threshold = .1, sim_threshold = .1, pvalue_threshold = .05):
+					Current_Family_Children[i].report()
 					number_passed_tests += 1
 					aFinal.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_nominal_pvalue(), Current_Family_Children[i].get_nominal_pvalue()])
 				elif Current_Family_Children[i].get_nominal_pvalue() > fQ and Current_Family_Children[i].get_nominal_pvalue() <= 1.0 - fQ:
@@ -1507,7 +1529,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 			for i in range(len(aP)):
 				if pRank[i] <= max_r_t:
 					number_passed_tests += 1
-					print "--- Pass with p-value:", aP[i], Current_Family_Children[i].get_data()[0], Current_Family_Children[i].get_data()[1]
+					Current_Family_Children[i].report()
 					aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
 					aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
 				else :
@@ -1552,8 +1574,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 			for i in range(len(aP)):
 				# print "NMI", Current_Family_Children[i].get_nmi()
 				performed_tests.append([Current_Family_Children[i], float(aP[i])])
-				if  aP[i] <= fQ:
-					print "************Pass with nominal p-value:", aP[i], Current_Family_Children[i].get_data()[0], Current_Family_Children[i].get_data()[1]
+				if  Current_Family_Children[i].is_association(pc_threshold = .1, sim_threshold = .1, pvalue_threshold = .05):
+					Current_Family_Children[i].report()
 					passed_tests.append([Current_Family_Children[i], float(aP[i])])
 				elif aP[i] > 1.0 - fQ :
 					print "Bypass, no hope to find an association in the branch with p-value: ", \
@@ -1593,7 +1615,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 				aFinal.append([performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]])
 			else :
 				aOut.append([performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]])
-		print "--- fumber of passed  tests in BH:", len(aFinal)	
+		print "--- number of passed  tests in BH:", len(aFinal)	
 		print "--- number of performed tests:", len(performed_tests)									
 		return aFinal, aOut
 	def _rh_hypothesis_testing():
@@ -1619,9 +1641,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 			for i in range(len(aP)):
 				# print "NMI", Current_Family_Children[i].get_nmi()
 				performed_tests.append([Current_Family_Children[i], float(aP[i])])	
-				#if   Current_Family_Children[i].get_left_distance()<= .5 and Current_Family_Children[i].get_left_first_pc() > pc_threshold and Current_Family_Children[i].get_right_first_pc() > pc_threshold:
-				if aP[i] <= fQ :
-					print "--- Pass with nominal p-value:", aP[i], Current_Family_Children[i].get_data()[0], Current_Family_Children[i].get_data()[1]
+				if Current_Family_Children[i].is_association(pc_threshold = .1, sim_threshold = .1, pvalue_threshold = .05):
+					Current_Family_Children[i].report()
 					end_level_tests.append([Current_Family_Children[i], float(aP[i])])
 					round1_passed_tests.append([Current_Family_Children[i], float(aP[i])])
 				elif Current_Family_Children[i].is_leaf():
@@ -1642,6 +1663,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 		max_r_t = 0
 		print "--- number of performed tests:", len(performed_tests)
 		print "--- number of passed from nominal tests:", len(round1_passed_tests)
+		print "--- number of tests in the end level:", len(end_level_tests)
 		end_level_tests = array(end_level_tests)
 		#print "Nominal p-values", performed_tests[:, 1]
 		aP_adjusted, pRank = stats.p_adjust(end_level_tests[:, 1], fQ)
@@ -1649,7 +1671,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 		for i in range(len(end_level_tests)):
 			if end_level_tests[i][1] <= aP_adjusted[i] and max_r_t <= pRank[i]:
 				max_r_t = pRank[i]
-				print "max_r_t", max_r_t
+				#print "max_r_t", max_r_t
 		for i in range(len(end_level_tests[:, 1])):
 			if pRank[i] <= max_r_t:
 				print "--- Pass with p-value:", end_level_tests[i][1], " adjusted_pvalue: ", aP_adjusted[i], end_level_tests[i][0].get_data()[0], end_level_tests[i][0].get_data()[1]

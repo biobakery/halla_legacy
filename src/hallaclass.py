@@ -495,9 +495,7 @@ class HAllA():
 		# print "meta summary:", self.meta_report
 		istm = list()  # We are using now X and Y 
  	
-		#***************************************************************
-		# We are using now X and Y - If Y was not set - we use X        *
-		#***************************************************************
+		# We are using now X and Y - If Y was not set - we use X
 		if self.args.Y == None:
 			istm = [self.args.X, self.args.X]  # Use X  
 		else:
@@ -508,130 +506,144 @@ class HAllA():
 			strFile1, strFile2 = istm[:2]
 		else:
 			strFile1, strFile2 = istm[0], istm[0]
-		csvw = csv.writer(self.args.ostm, csv.excel_tab)
-		bcsvw = csv.writer(self.args.bostm, csv.excel_tab)
-		csvw.writerow(["Method: " + self.reduce_method  +"-"+ self.distance , "q value: " + str(self.q), "metric " +self.distance])
-		bcsvw.writerow(["Method: " + self.reduce_method +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
-		
-		if self.args.Y == None:
-			csvw.writerow([istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"])
-			bcsvw.writerow([istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"])
-		else:
-			csvw.writerow([self.args.X.name, self.args.Y.name, "nominal-pvalue", "adjusted-pvalue"])
-			bcsvw.writerow(["Association Number", self.args.X.name, self.args.Y.name, "nominal-pvalue", "adjusted-pvalue"])
-
-		for line in aaOut:
-			iX, iY = line[0]
-			fP = line[1]
-			fP_adjust = line[2]
-			aLineOut = map(str, [self.aOutName1[iX], self.aOutName2[iY], fP, fP_adjust])
-			csvw.writerow(aLineOut)
-			
-		#self.args.ostm.close()
-		#self.args.bostm.close()
-		
-		# print 'H:', self.meta_alla
-		# print 'H[0]', self.meta_alla[0]
+		global associated_feature_X_indecies
 		associated_feature_X_indecies = []
+		global associated_feature_Y_indecies
 		associated_feature_Y_indecies = []
-		association_number = 0
-		for line in self.meta_alla[0]:
-			association_number += 1
-			filename = output_dir + "association" + str(association_number) + '/'
-			dir = os.path.dirname(filename)
-			try:
-				shutil.rmtree(dir)
-				os.mkdir(dir)
-			except:
-				os.mkdir(dir)
+		
+		def _report_all_tests():
+			csvw = csv.writer(self.args.ostm, csv.excel_tab)
+			csvw.writerow(["Method: " + self.reduce_method  +"-"+ self.distance , "q value: " + str(self.q), "metric " +self.distance])
+			
+			if self.args.Y == None:
+				csvw.writerow([istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"])
+			else:
+				csvw.writerow([self.args.X.name, self.args.Y.name, "nominal-pvalue", "adjusted-pvalue"])
+	
+			for line in aaOut:
+				iX, iY = line[0]
+				fP = line[1]
+				fP_adjust = line[2]
+				aLineOut = map(str, [self.aOutName1[iX], self.aOutName2[iY], fP, fP_adjust])
+				csvw.writerow(aLineOut)
+
+			
+		def _report_and_plot_associations ():	
+			association_number = 0
+			bcsvw = csv.writer(self.args.bostm, csv.excel_tab)
+			bcsvw.writerow(["Method: " + self.reduce_method +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
+			
+			if self.args.Y == None:
+				bcsvw.writerow([istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"])
+			else:
+				bcsvw.writerow(["Association Number", self.args.X.name, self.args.Y.name, "nominal-pvalue", "adjusted-pvalue"])
+	
+
+			for line in self.meta_alla[0]:
+				association_number += 1
+				filename = output_dir + "association" + str(association_number) + '/'
+				dir = os.path.dirname(filename)
+				try:
+					shutil.rmtree(dir)
+					os.mkdir(dir)
+				except:
+					os.mkdir(dir)
+					
+				iX, iY = line[0]
+				global associated_feature_X_indecies
+				associated_feature_X_indecies += iX
+				global associated_feature_Y_indecies
+				associated_feature_Y_indecies += iY
+				fP = line[1]
+				fP_adjust = line[2]
+				aLineOut = map(str, [association_number, str(';'.join(self.aOutName1[i] for i in iX)), str(';'.join(self.aOutName2[i] for i in iY)), fP, fP_adjust])
+				bcsvw.writerow(aLineOut)
+				plt.figure()
+				cluster1 = [self.aDataSet1[i] for i in iX]
+				X_labels = np.array([self.aOutName1[i] for i in iX])
 				
-			iX, iY = line[0]
-			associated_feature_X_indecies += iX
-			associated_feature_Y_indecies += iY
-			fP = line[1]
-			fP_adjust = line[2]
-			aLineOut = map(str, [association_number, str(';'.join(self.aOutName1[i] for i in iX)), str(';'.join(self.aOutName2[i] for i in iY)), fP, fP_adjust])
-			bcsvw.writerow(aLineOut)
-			plt.figure()
-			cluster1 = [self.aDataSet1[i] for i in iX]
-			X_labels = np.array([self.aOutName1[i] for i in iX])
-			
-			# cluster = np.array([aOutData1[i] for i in iX]
-			df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
-			axes = pd.tools.plotting.scatter_matrix(df)
-			
-			# plt.tight_layout()
-			
-			plt.savefig(filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-			cluster2 = [self.aDataSet2[i] for i in iY]
-			Y_labels = np.array([self.aOutName2[i] for i in iY])
-			plt.figure()
-			df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-			axes = pd.tools.plotting.scatter_matrix(df)
-			# plt.tight_layout()
-			plt.savefig(filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+				# cluster = np.array([aOutData1[i] for i in iX]
+				df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
+				axes = pd.tools.plotting.scatter_matrix(df)
+				
+				# plt.tight_layout()
+				
+				plt.savefig(filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+				cluster2 = [self.aDataSet2[i] for i in iY]
+				Y_labels = np.array([self.aOutName2[i] for i in iY])
+				plt.figure()
+				df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
+				axes = pd.tools.plotting.scatter_matrix(df)
+				# plt.tight_layout()
+				plt.savefig(filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+				df1 = np.array(cluster1, dtype=float)
+				df2 = np.array(cluster2, dtype=float)
+				plt.figure()
+				plt.scatter(stats.pca(df1), stats.pca(df2), alpha=0.5)
+				plt.savefig(filename + '/association_' + str(association_number) + '.pdf')
+				# plt.figure()
+				plt.close("all")
+				
+		def _report_compared_clusters():
+			csvwc = csv.writer(self.args.costm , csv.excel_tab)
+			csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
+			for line in hierarchy.reduce_tree_by_layer([self.meta_hypothesis_tree]):
+				(level, clusters) = line
+				iX, iY = clusters[0], clusters[1]
+				fP = line[1]
+				# fP_adjust = line[2]
+				aLineOut = map(str, [str(level), str(';'.join(self.aOutName1[i] for i in iX)), str(';'.join(self.aOutName2[i] for i in iY))])
+				csvwc.writerow(aLineOut)
+
+		def _heatmap():
+			from scipy.stats.stats import pearsonr
+			global associated_feature_X_indecies
+			X_labels = np.array([self.aOutName1[i] for i in associated_feature_X_indecies])
+			global associated_feature_Y_indecies
+			Y_labels = np.array([self.aOutName2[i] for i in associated_feature_Y_indecies])
+			cluster1 = [self.meta_feature[0][i] for i in associated_feature_X_indecies]	
+			cluster2 = [self.meta_feature[1][i] for i in associated_feature_Y_indecies]
 			df1 = np.array(cluster1, dtype=float)
 			df2 = np.array(cluster2, dtype=float)
-			plt.figure()
-			plt.scatter(stats.pca(df1), stats.pca(df2), alpha=0.5)
-			plt.savefig(filename + '/association_' + str(association_number) + '.pdf')
-			# plt.figure()
-			plt.close("all")
-			
+			p = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
+			for i in range(len(associated_feature_X_indecies)):
+				for j in range(len(associated_feature_Y_indecies)):
+					p[i][j] = pearsonr(df1[i], df2[j])[0]
+			nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
+			for i in range(len(associated_feature_X_indecies)):
+				for j in range(len(associated_feature_Y_indecies)):
+					nmi[i][j] = distance.NormalizedMutualInformation(stats.discretize(df1[i]), stats.discretize(df2[j])).get_distance()
+					
+			from rpy2.robjects.packages import importr
+			import rpy2.robjects as ro
+			#import pandas.rpy.common as com
+			import rpy2.robjects.numpy2ri
+			rpy2.robjects.numpy2ri.activate()
+			ro.r('library("pheatmap")')
+			ro.globalenv['nmi'] = nmi
+			ro.globalenv['labRow'] = X_labels 
+			ro.globalenv['labCol'] = Y_labels
+			if len(associated_feature_X_indecies)>1 and len(associated_feature_Y_indecies)>1 :
+				#ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
+				ro.r('colnames(nmi) = labCol')
+				ro.r('rownames(nmi) = labRow')
+				ro.r('pheatmap(nmi, filename ="./output/NMI_heatmap.pdf", cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T)')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+				ro.r('dev.off()')
+				ro.globalenv['p'] = p
+				#ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
+				ro.r('colnames(p) = labCol')
+				ro.r('rownames(p) = labRow')
+				ro.r('pheatmap(p, , labRow = labRow, labCol = labCol, filename = "./output/Pearson_heatmap.pdf", cellwidth = 10, cellheight = 10, fontsize = 10)')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+				ro.r('dev.off()')
+
+		# Execute report functions
+		_report_all_tests()
+		print "--- plotting associations ..."
+		_report_and_plot_associations ()
+		_report_compared_clusters()
+		print "--- plotting heatmaps ..."
+		_heatmap()
 		
-		csvwc = csv.writer(self.args.costm , csv.excel_tab)
-		csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
-		for line in hierarchy.reduce_tree_by_layer([self.meta_hypothesis_tree]):
-			(level, clusters) = line
-			iX, iY = clusters[0], clusters[1]
-			fP = line[1]
-			# fP_adjust = line[2]
-			aLineOut = map(str, [str(level), str(';'.join(self.aOutName1[i] for i in iX)), str(';'.join(self.aOutName2[i] for i in iY))])
-			csvwc.writerow(aLineOut)
-		print "R visualization!"
-		from scipy.stats.stats import pearsonr
-		X_labels = np.array([self.aOutName1[i] for i in associated_feature_X_indecies])
-		Y_labels = np.array([self.aOutName2[i] for i in associated_feature_Y_indecies])
-		cluster1 = [self.aDataSet1[i] for i in associated_feature_X_indecies]	
-		cluster2 = [self.aDataSet2[i] for i in associated_feature_Y_indecies]
-		df1 = np.array(cluster1, dtype=float)
-		df2 = np.array(cluster2, dtype=float)
-		p = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
-		for i in range(len(associated_feature_X_indecies)):
-			for j in range(len(associated_feature_Y_indecies)):
-				p[i][j] = pearsonr(df1[i], df2[j])[0]
-		nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
-		for i in range(len(associated_feature_X_indecies)):
-			for j in range(len(associated_feature_Y_indecies)):
-				nmi[i][j] = distance.NormalizedMutualInformation(stats.discretize(df1[i]), stats.discretize(df2[j])).get_distance()
-				
-		from rpy2.robjects.packages import importr
-		import rpy2.robjects as ro
-		#import pandas.rpy.common as com
-		import rpy2.robjects.numpy2ri
-		rpy2.robjects.numpy2ri.activate()
-		ro.r('library("pheatmap")')
-		ro.globalenv['nmi'] = nmi
-		ro.globalenv['labRow'] = X_labels 
-		ro.globalenv['labCol'] = Y_labels
-		if len(associated_feature_X_indecies)>1 and len(associated_feature_Y_indecies)>1 :
-			#ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
-			ro.r('colnames(nmi) = labCol')
-			ro.r('rownames(nmi) = labRow')
-			ro.r('pheatmap(nmi, filename ="./output/NMI_heatmap.pdf", cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T)')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-			ro.r('dev.off()')
-			ro.globalenv['p'] = p
-			#ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
-			ro.r('colnames(p) = labCol')
-			ro.r('rownames(p) = labRow')
-			ro.r('pheatmap(p, , labRow = labRow, labCol = labCol, filename = "./output/Pearson_heatmap.pdf", cellwidth = 10, cellheight = 10, fontsize = 10)')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-			ro.r('dev.off()')
-		# set_default_mode(NO_CONVERSION)
-		# rpy2.library("ALL")
-		# hm = halla.plot.hclust2.Heatmap( p)#, cl.sdendrogram, cl.fdendrogram, snames, fnames, fnames_meta, args = args )
-		# hm.draw()
-		# halla.plot.heatmap(D = p, filename ='./output/pearson_heatmap')
-		# halla.plot.heatmap(D = nmi, filename ='./output/nmi_heatmap')
 		return self.meta_report 
 
 	def _run(self):

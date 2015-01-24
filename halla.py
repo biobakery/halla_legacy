@@ -37,10 +37,10 @@ def make_directory(dir = halla_base_directory+'/halla/input'):
         return dir
     
 try:
-    dir=make_directory(halla_base_directory+'/halla/output')
+    dir=make_directory(dir = halla_base_directory+'/halla/output')
 except:
     sys.exit("CRITICAL ERROR: Unable to make an output directory." + 
-        " Please check your permission.") 
+        "Please check your permission.") 
             
 # Try to load one of the halla src modules to check the installation
 try:
@@ -118,7 +118,7 @@ def parse_arguments (args):
             help="Debug logging level; increase for greater verbosity")
 
     argp.add_argument("-e", "--exploration",     dest="strExploration",     metavar="exploration",
-        type=str,         default = "BH",
+        type=str,         default = "RH",
         help="Exploration function for maximize power and control false discovery rate, simple, BHY, BH, RH.")
 
     argp.add_argument("-m",         dest="strMetric",     metavar="metric",

@@ -521,14 +521,14 @@ def permutation_test_by_representative(pArray1, pArray2, metric="norm_mi", decom
 	#### Perform Permutation 
 	for _ in xrange(iIter):
 
-		XP = array([numpy.random.permutation(x) for x in X])
-		YP = array([numpy.random.permutation(y) for y in Y])
+		#XP = array([numpy.random.permutation(x) for x in X])
+		#YP = array([numpy.random.permutation(y) for y in Y])
 
-		pRep1_, pRep2_ = [ discretize(pDe(pA))[0] for pA in [XP, YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
-
+		#pRep1_, pRep2_ = [ discretize(pDe(pA))[0] for pA in [XP, YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
+		permuted_pRep2 = numpy.random.permutation(pRep2)
 		# Similarity score between representatives  
-		fAssociation_ = pMe(pRep1_, pRep2_)  # NMI
-
+		#fAssociation_ = pMe(pRep1_, pRep2_)  # NMI
+		fAssociation_ = pMe(pRep1, permuted_pRep2)  # NMI
 		aDist.append(fAssociation_)
 
 		# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
@@ -1277,7 +1277,7 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 			iN = len(astrValues)
 		else:
 			iN = min(iN, len(set(astrValues)))
-		# print iN	
+		#print iN	
 		# This is still a bit buggy since ( [0, 0, 0, 1, 2, 2, 2, 2], 3 ) will exhibit suboptimal behavior
 		aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
 		astrRet = [None] * len(astrValues)
