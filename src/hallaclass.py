@@ -28,7 +28,7 @@ class HAllA():
 		if args:
 			self.distance = args.strMetric 
 			self.reduce_method = args.strReduce 
-			self.exploration_function = args.strExploration
+			self.fdr_function = args.strFDR
 			self.q = args.dQ  
 			self.iterations = args.iIter
 			self.p_adjust_method = args.strAdjust
@@ -40,7 +40,7 @@ class HAllA():
 			print "command argument are not passed!"
 			self.distance = "norm_mi"
 			self.reduce_method = "pca" 
-			self.exploration_function = "default"
+			self.fdr_function = "default"
 			self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
 			self.q = .1  
 			self.iterations = 1000
@@ -310,7 +310,7 @@ class HAllA():
 		if self.verbose:
 			print ("HAllA PROMPT: q value", fQ)
 			print ("q value is", fQ)
-		self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, exploration=self.exploration_function,  fQ=self.q, iIter = self.iterations, bVerbose=self.verbose) 
+		self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function,  fQ=self.q, iIter = self.iterations, bVerbose=self.verbose) 
 		# # Choose to keep to 2 arrays for now -- change later to generalize 
 		#return self.meta_alla 
 	
@@ -709,8 +709,8 @@ class HAllA():
 		self.randomization_method = strMethod 
 		return self.randomization_method 
 
-	def set_exploration_function(self, strFunction):
-		self.exploration_function = strFunction
+	def set_fdr_function(self, strFunction):
+		self.fdr_function = strFunction
 
 	def set_verbose(self, bBool=True):
 		self.verbose = bBool 
@@ -784,7 +784,7 @@ class HAllA():
 			strMethod = "naive"
 			#return self.all_agains_all()
 			# set up all-against-all
-		
+		execution_time = time.time()
 		# featurize 
 		start_time = time.time()
 		self._featurize()
@@ -810,9 +810,10 @@ class HAllA():
 		start_time = time.time() 
 		self._summary_statistics('final') 
 		print("--- %s seconds: _summary_statistics ---" % (time.time() - start_time))
-		
-		return self._report()
 
+		results = self._report()
+		print("\n--- in %s seconds HAllA is successfully done ---" % (time.time() - execution_time))
+		return results
 	def view_singleton(self, pBags):
 		aOut = [] 
 		for aIndices, fP in pBags:

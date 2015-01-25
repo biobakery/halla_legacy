@@ -85,41 +85,41 @@ def parse_arguments (args):
     argp = argparse.ArgumentParser(prog="halla.py",
         description="Hierarchical All-against-All significance association testing.")
             
-    argp.add_argument("-X", metavar="Xinput.txt",
+    argp.add_argument("-X", metavar="first input dataset",
             type=argparse.FileType("r"), default=sys.stdin,
             help="First file: Tab-delimited text input file, one row per feature, one column per measurement.")        
             
-    argp.add_argument("-Y", metavar="Yinput.txt",
+    argp.add_argument("-Y", metavar="second input dataset",
             type=argparse.FileType("r"), default=None,
             help="Second file: Tab-delimited text input file, one row per feature, one column per measurement - If not selected, we will use the first file (-X).")
     
-    argp.add_argument("-o", dest="bostm", metavar="output.txt",  # default = "sys.stdout
+    argp.add_argument("-o", dest="bostm", metavar="output",  # default = "sys.stdout
             type=argparse.FileType("w"), default="./output/associations.txt",
             help="output file for significance tests (associations).")
 
-    argp.add_argument("-a", dest="ostm", metavar="one_by_one.txt",
+    argp.add_argument("-a", dest="ostm", metavar="one_by_one feature output",
             type=argparse.FileType("w"), default="./output/all_association_results_one_by_one.txt",
             help="Optional output file to report features one bye one for association significance tests.")
    
-    argp.add_argument("-c", dest="costm", metavar="clusters_output.txt",
+    argp.add_argument("-c", dest="costm", metavar="all compared clusters ",
             type=argparse.FileType("w"), default="./output/all_compared_clusters_hypotheses_tree.txt",
             help="Optional output file for hypothesis tree which includes all compared clusters.")
     
     argp.add_argument("-q", dest="dQ", metavar="q_value",
             type=float, default=0.1,
             help="Q-value for overall significance tests (cut-off for false discovery rate).")
+    
+    argp.add_argument("-t",         dest="dThreshold_similiarity",     metavar="similarity threshold",
+            type=str,         default=.5,
+            help="A threshold for similarity to count a cluster as one unit and no consider sub-clusters as sub-unit.")    
+    
+    argp.add_argument("-f",     dest="strFDR",     metavar="fdr",
+        type=str,         default = "RH",
+        help="function for maximize statistical power and control false discovery rate, simple, BHY, BH, RH.")
 
     argp.add_argument("-i", dest="iIter", metavar="iterations",
             type=int, default=1000,
             help="Number of iterations for nonparametric significance testing (permutation test)")
-
-    argp.add_argument("-v", dest="iDebug", metavar="verbosity",
-            type=int, default= 0,#10 - (logging.WARNING / 10)
-            help="Debug logging level; increase for greater verbosity")
-
-    argp.add_argument("-e", "--exploration",     dest="strExploration",     metavar="exploration",
-        type=str,         default = "RH",
-        help="Exploration function for maximize power and control false discovery rate, simple, BHY, BH, RH.")
 
     argp.add_argument("-m",         dest="strMetric",     metavar="metric",
             type=str,         default="norm_mi",
@@ -131,17 +131,16 @@ def parse_arguments (args):
     
     argp.add_argument("-j",         dest="strAdjust",     metavar="adjusting",
             type=str,         default="BH",
-            help="The approach for controlling FDR [default = BH]")
+            help="The approach for calculating adjusted p-value [default = BH]")
     
     argp.add_argument("-r",         dest="strRandomization",     metavar="randomization",
             type=str,         default="permutation",
-            help="The approach for randomization test, [default is permutation, options are permutation and G-test]") 
-    
-    argp.add_argument("-t",         dest="dThreshold_similiarity",     metavar="similarity threshold",
-            type=str,         default=.5,
-            help="A threshold for similarity to count a cluster as one unit and no consider sub-clusters as sub-unit.")    
-   
-          
+            help="The approach for randomization test, [default is permutation, options are permutation and G-test]")  
+     
+    argp.add_argument("-v", dest="iDebug", metavar="verbosity",
+            type=int, default= 0,#10 - (logging.WARNING / 10)
+            help="Debug logging level; increase for greater verbosity")
+
     return argp.parse_args()
     
 
