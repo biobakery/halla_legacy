@@ -1,3 +1,5 @@
+#!/usr/local/env python
+
 import argparse
 import csv
 import itertools
@@ -146,7 +148,17 @@ def parse_arguments (args):
 
 def _main():
     
+    #Generate simulated datasets
+    number_features = 15 
+    number_samples = 100 
+    number_blocks = 3 
+    s = strudel.Strudel()
+    print 'Synthetic Data Generation ...'
     
+    X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = 2.6 , Beta = 3.0 )#, link = "line" )
+#       
+    halla.data.writeData(X,"./input/X" )
+    halla.data.writeData(Y,"./input/Y")
     # Parse arguments from command line
     args=parse_arguments(sys.argv)
     

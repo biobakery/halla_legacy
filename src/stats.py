@@ -567,6 +567,10 @@ def g_test_by_representative(pArray1, pArray2, metric="norm_mi", decomposition="
 	pRep1, pRep2 = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 	print "pRep1:", pRep1
 	print "pRep2:", pRep2
+	left_pc = first_pc(pArray1)
+	right_pc = first_pc(pArray2)
+	fAssociation = pMe(pRep1, pRep2) 
+	
 	filtered_pRep1 = []
 	filtered_pRep2 = []
 	for i in range(len(pRep1)):
@@ -574,27 +578,44 @@ def g_test_by_representative(pArray1, pArray2, metric="norm_mi", decomposition="
 			filtered_pRep1.append(pRep1[i])
 			filtered_pRep2.append(pRep2[i])
 	# compute degrees of freedom for table
-	xdf = len(pRep1) - 1
-	ydf = len(pRep2) - 1
+	xdf = len(set(filtered_pRep1)) - 1
+	ydf = len(set(filtered_pRep2)) - 1
 	df = xdf * ydf
 	print "degrees of freedom... =", df
-	n = len (pRep1)
+	n = len (filtered_pRep1)
 	import os, sys, re, glob, argparse
 	from random import choice, random, shuffle
 	from collections import Counter
 	from scipy.stats import chi2
 	from math import log, exp, sqrt
 	mi = distance.NormalizedMutualInformation(pRep1, pRep2).get_distance()
+	# mutual information
+	def _mutinfo( x, y ):
+	    px, py, pxy = [Counter() for i in range( 3 )]
+	    assert len( x ) == len( y ), "unequal lengths"
+	    delta = 1 / float( len( x ) )
+	    for xchar, ychar in zip( x, y ):
+	        px[xchar] += delta 
+	        py[ychar] += delta
+	        pxy[( xchar, ychar )] += delta
+	    S = 0
+	    for ( xchar, ychar ), value in pxy.items():
+	        S += value * ( log( value, 2 ) - log( px[xchar], 2 ) - log( py[ychar], 2 ) )
+	    return S
+	
+	
+	# actual value
+	#mi = _mutinfo( filtered_pRep1, filtered_pRep1 )
 	print "nmi", mi
 	mi_natural_log = mi / log(exp(1.0), 2.0)
 	print "nmi_natural_log"
-	fP = 1.0 - chi2.cdf(2.0 * n * mi_natural_log, df)
+	fP = 1 - chi2.cdf(2.0 * n * mi_natural_log, df)
 	print "G-test P-value: ", fP
 				
 	# g, fP, dof, expctd = scipy.stats.chi2_contingency([filtered_pRep1, filtered_pRep2], lambda_="log-likelihood")
 	
 	# print "G-test, Pvalue:", fP 
-	return fP
+	return fP, fAssociation, left_pc, right_pc
 def parametric_test_by_max_pca(pArray1, pArray2, k=2, metric="spearman", iIter=1000):
 
 	aOut = [] 
@@ -864,7 +885,16 @@ def permutation_test(pArray1, pArray2, metric, decomposition, iIter):
 	if decomposition in ["cca"]:
 		return permutation_test_by_cca(pArray1, pArray2, metric=metric, iIter=iIter)
 
-
+def g_test(pArray1, pArray2, metric, decomposition, iIter):
+	if decomposition in ["pca", "ica", "kpca"]:
+		return g_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter)
+	'''
+	if decomposition in ["average"]:
+		return g_test_by_average(pArray1, pArray2, metric=metric, iIter=iIter)
+	
+	if decomposition in ["cca"]:
+		return g_test_by_cca(pArray1, pArray2, metric=metric, iIter=iIter)
+	'''
 def parametric_test(pArray1, pArray2):
 	
 	# numpy.random.seed(0)

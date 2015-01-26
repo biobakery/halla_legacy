@@ -136,17 +136,20 @@ class Tree():
 		return self.adjusted_pvalue
 	
 	def is_association(self, pc_threshold, sim_threshold, pvalue_threshold):
-		if self.get_nominal_pvalue() < pvalue_threshold and\
-		   self.get_left_first_pc() > .1 and \
-		   self.get_right_first_pc()> .1 and\
-		   1.0 - self.get_left_distance() > sim_threshold and\
+		if self.get_nmi() > .1 and \
+		   1.0 - self.get_left_distance() > sim_threshold and \
 		   1.0 - self.get_right_distance() > sim_threshold:
+			#self.get_nominal_pvalue() < pvalue_threshold and
+			#self.get_left_first_pc() > .1 and \
+		   #self.get_right_first_pc()> .1 :
 			return True
 		else:
 			return False
 	
 	def is_bypass(self, pvalue_threshold = .05):
-		if self.get_nominal_pvalue()> 1.0 - pvalue_threshold:
+		if self.get_nominal_pvalue()> 1.0 - pvalue_threshold and\
+		   self.get_left_first_pc() > .25 and \
+		   self.get_right_first_pc()> .25:
 			return True
 		else:
 			return False
@@ -939,8 +942,7 @@ def _next():
 	gives the next node on the chain of linkages 
 	"""
 	pass
-def _percentage(dist):
-	global max_dist
+def _percentage(dist, max_dist):
 	if max_dist > 0:
 		return float(dist) / float(max_dist)
 	else:
@@ -955,10 +957,10 @@ def _is_start(ClusterNode, X, func, distance):
 	else: 
 		return False
 
-def _is_stop(ClusterNode, dataSet, threshold = None):
+def _is_stop(ClusterNode, dataSet, max_dist_cluster, threshold = None):
 		node_indeces = reduce_tree(ClusterNode)
 		first_PC = stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
-		if ClusterNode.is_leaf() or ClusterNode.dist <.5 or first_PC > .5:
+		if ClusterNode.is_leaf() or _percentage(ClusterNode.dist, max_dist_cluster) <.5 or first_PC > .5:
 			#print "Node: ",node_indeces
 			#print "dist:", ClusterNode.dist, " first_PC:", first_PC,"\n"
 			return True
@@ -1089,8 +1091,11 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 	"""
 	
 	X, Y = pArray1, pArray2
-	# global max_dist 
-	# max_dist = max (node.dist for node in apClusterNode1+apClusterNode2)
+	global max_dist_cluster1 
+	max_dist_cluster1 = max (node.dist for node in apClusterNode1)
+	
+	global max_dist_cluster2 
+	max_dist_cluster2 = max (node.dist for node in apClusterNode2)
 	# print "Max distance:", max_dist
 	# if not afThreshold:	
 	# 	afThreshold = [halla.stats.alpha_threshold(a, fAlpha, func ) for a in [pArray1,pArray2]]
@@ -1158,8 +1163,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 		data1 = reduce_tree(a)
 		data2 = reduce_tree(b)
 				
-		bTauX = _is_stop(a, X, threshold)  # ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
-		bTauY = _is_stop(b, Y, threshold)  # ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
+		bTauX = _is_stop(a, X, max_dist_cluster1, threshold)  # ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
+		bTauY = _is_stop(b, Y, max_dist_cluster2, threshold)  # ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
 		if (bTauX == True) and (bTauY == True):
 			continue
 
@@ -1464,7 +1469,10 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 						# parametric tests
 						"parametric_test_by_pls_pearson": stats.parametric_test_by_pls_pearson,
 						"parametric_test_by_representative": stats.parametric_test_by_representative,
-						"parametric_test" : stats.parametric_test
+						"parametric_test" : stats.parametric_test,
+						
+						# G-Test
+						"g-test":stats.g_test
 						}
 
 	strMethod = method

@@ -612,7 +612,7 @@ class HAllA():
 			nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
 			for i in range(len(associated_feature_X_indecies)):
 				for j in range(len(associated_feature_Y_indecies)):
-					nmi[i][j] = distance.NormalizedMutualInformation(stats.discretize(df1[i]), stats.discretize(df2[j])).get_distance()
+					nmi[i][j] = distance.NormalizedMutualInformation(df1[i], df2[j]).get_distance()
 					
 			from rpy2.robjects.packages import importr
 			import rpy2.robjects as ro
