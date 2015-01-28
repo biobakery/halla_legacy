@@ -136,10 +136,10 @@ class Tree():
 		return self.adjusted_pvalue
 	
 	def is_association(self, pc_threshold, sim_threshold, pvalue_threshold):
-		if self.get_nmi() > .1 and \
-		   1.0 - self.get_left_distance() > sim_threshold and \
-		   1.0 - self.get_right_distance() > sim_threshold:
-			#self.get_nominal_pvalue() < pvalue_threshold and
+		if self.get_nominal_pvalue() < pvalue_threshold: 
+		#self.get_nmi() > .1 and \
+		   #1.0 - self.get_left_distance() > sim_threshold and \
+		   #1.0 - self.get_right_distance() > sim_threshold
 			#self.get_left_first_pc() > .1 and \
 		   #self.get_right_first_pc()> .1 :
 			return True

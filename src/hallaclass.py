@@ -2,10 +2,6 @@
 HAllA class  
 """
 
-try: 
-	import pandas as pd
-except: 
-	print "--- install pandas library for scatter matrix plotting"
 import matplotlib.pyplot as plt 
 import csv
 import itertools
@@ -51,7 +47,7 @@ class HAllA():
 			
 		self.summary_method = "final"
 		self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
-
+		self.output_dir = args.output_dir
 			# # {"all","final"}
 		
 
@@ -475,7 +471,7 @@ class HAllA():
 		"""
 		helper function for reporting the output to the user,
 		"""
-		output_dir = "./output/"
+		output_dir = self.output_dir
 		aaOut = []
 
 		# self.meta_report = [] 
@@ -512,7 +508,8 @@ class HAllA():
 		associated_feature_Y_indecies = []
 		
 		def _report_all_tests():
-			csvw = csv.writer(self.args.ostm, csv.excel_tab)
+			output_file_all  = open(str(self.output_dir)+'/all_association_results_one_by_one.txt', 'w')
+			csvw = csv.writer(output_file_all, csv.excel_tab)
 			csvw.writerow(["Method: " + self.reduce_method  +"-"+ self.distance , "q value: " + str(self.q), "metric " +self.distance])
 			
 			if self.args.Y == None:
@@ -530,7 +527,8 @@ class HAllA():
 			
 		def _report_and_plot_associations ():	
 			association_number = 0
-			bcsvw = csv.writer(self.args.bostm, csv.excel_tab)
+			output_file_associations  = open(str(self.output_dir)+'/associations.txt', 'w')
+			bcsvw = csv.writer(output_file_associations, csv.excel_tab)
 			bcsvw.writerow(["Method: " + self.reduce_method +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
 			
 			if self.args.Y == None:
@@ -541,14 +539,6 @@ class HAllA():
 
 			for line in self.meta_alla[0]:
 				association_number += 1
-				filename = output_dir + "association" + str(association_number) + '/'
-				dir = os.path.dirname(filename)
-				try:
-					shutil.rmtree(dir)
-					os.mkdir(dir)
-				except:
-					os.mkdir(dir)
-					
 				iX, iY = line[0]
 				global associated_feature_X_indecies
 				associated_feature_X_indecies += iX
@@ -562,30 +552,40 @@ class HAllA():
 				cluster1 = [self.aDataSet1[i] for i in iX]
 				X_labels = np.array([self.aOutName1[i] for i in iX])
 				
-				# cluster = np.array([aOutData1[i] for i in iX]
-				df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
-				axes = pd.tools.plotting.scatter_matrix(df)
-				
-				# plt.tight_layout()
-				
-				plt.savefig(filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-				cluster2 = [self.aDataSet2[i] for i in iY]
-				Y_labels = np.array([self.aOutName2[i] for i in iY])
-				plt.figure()
-				df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-				axes = pd.tools.plotting.scatter_matrix(df)
-				# plt.tight_layout()
-				plt.savefig(filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-				df1 = np.array(cluster1, dtype=float)
-				df2 = np.array(cluster2, dtype=float)
-				plt.figure()
-				plt.scatter(stats.pca(df1), stats.pca(df2), alpha=0.5)
-				plt.savefig(filename + '/association_' + str(association_number) + '.pdf')
-				# plt.figure()
-				plt.close("all")
+				if self.args.plotting_results:
+					print "--- plotting associations ..."
+					import pandas as pd
+					filename = self.output_dir + "/association" + str(association_number) + '/'
+					dir = os.path.dirname(filename)
+					try:
+						shutil.rmtree(dir)
+						os.mkdir(dir)
+					except:
+						os.mkdir(dir)
+					df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
+					axes = pd.tools.plotting.scatter_matrix(df)
+					
+					# plt.tight_layout()
+					
+					plt.savefig(filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+					cluster2 = [self.aDataSet2[i] for i in iY]
+					Y_labels = np.array([self.aOutName2[i] for i in iY])
+					plt.figure()
+					df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
+					axes = pd.tools.plotting.scatter_matrix(df)
+					# plt.tight_layout()
+					plt.savefig(filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+					df1 = np.array(cluster1, dtype=float)
+					df2 = np.array(cluster2, dtype=float)
+					plt.figure()
+					plt.scatter(stats.pca(df1), stats.pca(df2), alpha=0.5)
+					plt.savefig(filename + '/association_' + str(association_number) + '.pdf')
+					# plt.figure()
+					plt.close("all")
 				
 		def _report_compared_clusters():
-			csvwc = csv.writer(self.args.costm , csv.excel_tab)
+			output_file_compared_clusters  = open(str(self.output_dir)+'/all_compared_clusters_hypotheses_tree.txt', 'w')
+			csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab)
 			csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
 			for line in hierarchy.reduce_tree_by_layer([self.meta_hypothesis_tree]):
 				(level, clusters) = line
@@ -596,52 +596,54 @@ class HAllA():
 				csvwc.writerow(aLineOut)
 
 		def _heatmap():
-			from scipy.stats.stats import pearsonr
-			global associated_feature_X_indecies
-			X_labels = np.array([self.aOutName1[i] for i in associated_feature_X_indecies])
-			global associated_feature_Y_indecies
-			Y_labels = np.array([self.aOutName2[i] for i in associated_feature_Y_indecies])
-			cluster1 = [self.meta_feature[0][i] for i in associated_feature_X_indecies]	
-			cluster2 = [self.meta_feature[1][i] for i in associated_feature_Y_indecies]
-			df1 = np.array(cluster1, dtype=float)
-			df2 = np.array(cluster2, dtype=float)
-			p = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
-			for i in range(len(associated_feature_X_indecies)):
-				for j in range(len(associated_feature_Y_indecies)):
-					p[i][j] = pearsonr(df1[i], df2[j])[0]
-			nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
-			for i in range(len(associated_feature_X_indecies)):
-				for j in range(len(associated_feature_Y_indecies)):
-					nmi[i][j] = distance.NormalizedMutualInformation(df1[i], df2[j]).get_distance()
-					
-			from rpy2.robjects.packages import importr
-			import rpy2.robjects as ro
-			#import pandas.rpy.common as com
-			import rpy2.robjects.numpy2ri
-			rpy2.robjects.numpy2ri.activate()
-			ro.r('library("pheatmap")')
-			ro.globalenv['nmi'] = nmi
-			ro.globalenv['labRow'] = X_labels 
-			ro.globalenv['labCol'] = Y_labels
-			if len(associated_feature_X_indecies)>1 and len(associated_feature_Y_indecies)>1 :
-				#ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
-				ro.r('colnames(nmi) = labCol')
-				ro.r('rownames(nmi) = labRow')
-				ro.r('pheatmap(nmi, filename ="./output/NMI_heatmap.pdf", cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T)')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-				ro.r('dev.off()')
-				ro.globalenv['p'] = p
-				#ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
-				ro.r('colnames(p) = labCol')
-				ro.r('rownames(p) = labRow')
-				ro.r('pheatmap(p, , labRow = labRow, labCol = labCol, filename = "./output/Pearson_heatmap.pdf", cellwidth = 10, cellheight = 10, fontsize = 10)')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-				ro.r('dev.off()')
+			if self.args.plotting_results:
+				print "--- plotting heatmaps using R ..."
+				from scipy.stats.stats import pearsonr
+				global associated_feature_X_indecies
+				X_labels = np.array([self.aOutName1[i] for i in associated_feature_X_indecies])
+				global associated_feature_Y_indecies
+				Y_labels = np.array([self.aOutName2[i] for i in associated_feature_Y_indecies])
+				cluster1 = [self.meta_feature[0][i] for i in associated_feature_X_indecies]	
+				cluster2 = [self.meta_feature[1][i] for i in associated_feature_Y_indecies]
+				df1 = np.array(cluster1, dtype=float)
+				df2 = np.array(cluster2, dtype=float)
+				p = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
+				for i in range(len(associated_feature_X_indecies)):
+					for j in range(len(associated_feature_Y_indecies)):
+						p[i][j] = pearsonr(df1[i], df2[j])[0]
+				nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
+				for i in range(len(associated_feature_X_indecies)):
+					for j in range(len(associated_feature_Y_indecies)):
+						nmi[i][j] = distance.NormalizedMutualInformation(df1[i], df2[j]).get_distance()
+						
+				
+				import rpy2.robjects as ro
+				#import pandas.rpy.common as com
+				import rpy2.robjects.numpy2ri
+				rpy2.robjects.numpy2ri.activate()
+				ro.r('library("pheatmap")')
+				ro.globalenv['nmi'] = nmi
+				ro.globalenv['labRow'] = X_labels 
+				ro.globalenv['labCol'] = Y_labels
+				if len(associated_feature_X_indecies)>1 and len(associated_feature_Y_indecies)>1 :
+					#ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
+					ro.globalenv['output_file_NMI'] = str(self.output_dir)+"/NMI_heatmap.pdf"
+					ro.globalenv['output_file_Pearson'] = str(self.output_dir)+"/Pearson_heatmap.pdf"
+					ro.r('colnames(nmi) = labCol')
+					ro.r('rownames(nmi) = labRow')
+					ro.r('pheatmap(nmi, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T)')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+					ro.r('dev.off()')
+					ro.globalenv['p'] = p
+					#ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
+					ro.r('colnames(p) = labCol')
+					ro.r('rownames(p) = labRow')
+					ro.r('pheatmap(p, , labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10)')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+					ro.r('dev.off()')
 
 		# Execute report functions
 		_report_all_tests()
-		print "--- plotting associations ..."
 		_report_and_plot_associations ()
 		_report_compared_clusters()
-		print "--- plotting heatmaps ..."
 		_heatmap()
 		
 		return self.meta_report 

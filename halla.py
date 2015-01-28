@@ -1,5 +1,3 @@
-#!/usr/local/env python
-
 import argparse
 import csv
 import itertools
@@ -24,26 +22,7 @@ except :
         " Please check your install.") 
 
 
-# set output path
-def make_directory(dir = halla_base_directory+'/halla/input'):
-    
-    '''
-    make a directory
-    '''
-    try:
-        shutil.rmtree(dir)
-        os.mkdir(dir)
-        return dir
-    except:
-        os.mkdir(dir)
-        return dir
-    
-try:
-    dir=make_directory(dir = halla_base_directory+'/halla/output')
-except:
-    sys.exit("CRITICAL ERROR: Unable to make an output directory." + 
-        "Please check your permission.") 
-            
+   
 # Try to load one of the halla src modules to check the installation
 try:
     from src import config
@@ -51,23 +30,22 @@ except ImportError:
     sys.exit("CRITICAL ERROR: Unable to find the config under src directory." + 
         " Please check your install.") 
 
-
-    
 # Check the python version
+import sys
 try:
     if (sys.version_info[0] != config.required_python_version_major or
         sys.version_info[1] < config.required_python_version_minor):
-        sys.exit("CRITICAL ERROR: The python version found (version " + 
-            str(sys.version_info[0]) + "." + str(sys.version_info[1]) + ") " + 
-            "does not match the version required (version " + 
-            str(config.required_python_version_major) + "." + 
-            str(config.required_python_version_minor) + "+)")
-except (AttributeError, IndexError):
-    sys.exit("CRITICAL ERROR: The python version found (version 1) " + 
-        "does not match the version required (version " + 
-        str(config.required_python_version_major) + "." + 
-        str(config.required_python_version_minor) + "+)") 
-
+        sys.exit("CRITICAL ERROR: The python version found (version "+
+            str(sys.version_info[0])+"."+str(sys.version_info[1])+") "+
+            "does not match the version required (version "+
+            str(config.required_python_version_major)+"."+
+            str(config.required_python_version_minor)+"+)")
+except (AttributeError,IndexError):
+    sys.exit("CRITICAL ERROR: The python version found (version 1) " +
+        "does not match the version required (version "+
+        str(config.required_python_version_major)+"."+
+        str(config.required_python_version_minor)+"+)")  
+    
 def get_halla_base_directory():
     """ 
     Return the location of the halla base directory
@@ -79,6 +57,50 @@ def get_halla_base_directory():
     halla_base_directory = os.path.abspath(os.path.join(config_file_location, os.pardir))
     
     return halla_base_directory
+
+def check_requirements(args):
+    """
+    Check requirements (file format, dependencies, permissions)
+    """
+    # check the third party softwares for plotting the results
+    if args.plotting_results:
+        try: 
+            import pandas as pd
+        except ImportError: 
+            print "--- Please check your installation for pandas library"
+        try:
+            from rpy2.robjects.packages import importr
+        except ImportError: 
+            print "--- Please check your installation for rpy2 library"
+        
+        
+    
+    # Check that the output directory is writeable
+    output_dir = os.path.abspath(args.output_dir)
+    args.output_dir = output_dir
+    if not os.path.isdir(output_dir):
+        try:
+            print("Creating output directory: " + output_dir)
+            os.mkdir(output_dir)
+        except EnvironmentError:
+            sys.exit("CRITICAL ERROR: Unable to create output directory.")
+    else:
+        try:
+            print("Removing the old output directory: " + output_dir)
+            shutil.rmtree(output_dir)
+            print("Creating output directory: " + output_dir)
+            os.mkdir(output_dir)
+        except EnvironmentError:
+            sys.exit("CRITICAL ERROR: Unable to create output directory.")
+        
+    
+    if not os.access(output_dir, os.W_OK):
+        sys.exit("CRITICAL ERROR: The output directory is not " + 
+            "writeable. This software needs to write files to this directory.\n" +
+            "Please select another directory.")
+        
+    print("Output files will be written to: " + output_dir) 
+    
 
 def parse_arguments (args):
     """ 
@@ -95,23 +117,24 @@ def parse_arguments (args):
             type=argparse.FileType("r"), default=None,
             help="Second file: Tab-delimited text input file, one row per feature, one column per measurement - If not selected, we will use the first file (-X).")
     
-    argp.add_argument("-o", dest="bostm", metavar="output",  # default = "sys.stdout
-            type=argparse.FileType("w"), default="./output/associations.txt",
-            help="output file for significance tests (associations).")
-
-    argp.add_argument("-a", dest="ostm", metavar="one_by_one feature output",
-            type=argparse.FileType("w"), default="./output/all_association_results_one_by_one.txt",
-            help="Optional output file to report features one bye one for association significance tests.")
-   
-    argp.add_argument("-c", dest="costm", metavar="all compared clusters ",
-            type=argparse.FileType("w"), default="./output/all_compared_clusters_hypotheses_tree.txt",
-            help="Optional output file for hypothesis tree which includes all compared clusters.")
+    argp.add_argument(
+        "-o", "--output",
+        dest = "output_dir", 
+        help="directory to write output files\n[REQUIRED]", 
+        metavar="<output>", 
+        required=True)
     
+    argp.add_argument(
+        "--plotting_results", 
+        help="bypass the plotting results step\n", 
+        action="store_true",
+        default=False)
+
     argp.add_argument("-q", dest="dQ", metavar="q_value",
             type=float, default=0.1,
             help="Q-value for overall significance tests (cut-off for false discovery rate).")
     
-    argp.add_argument("-t",         dest="dThreshold_similiarity",     metavar="similarity threshold",
+    argp.add_argument("-s",         dest="dThreshold_similiarity",     metavar="similarity threshold",
             type=str,         default=.5,
             help="A threshold for similarity to count a cluster as one unit and no consider sub-clusters as sub-unit.")    
     
@@ -135,33 +158,45 @@ def parse_arguments (args):
             type=str,         default="BH",
             help="The approach for calculating adjusted p-value [default = BH]")
     
-    argp.add_argument("-r",         dest="strRandomization",     metavar="randomization",
+    argp.add_argument("-t",         dest="strRandomization",     metavar="test",
             type=str,         default="permutation",
-            help="The approach for randomization test, [default is permutation, options are permutation and G-test]")  
+            help="The approach for association test, [default is permutation, options are permutation and G-test]")  
      
     argp.add_argument("-v", dest="iDebug", metavar="verbosity",
             type=int, default= 0,#10 - (logging.WARNING / 10)
             help="Debug logging level; increase for greater verbosity")
 
     return argp.parse_args()
-    
+    '''
+argp.add_argument("-o", dest="bostm", metavar="output",  # default = "sys.stdout
+            type=argparse.FileType("w"), default="./output/associations.txt",
+            help="output file for significance tests (associations).")
+
+    argp.add_argument("-a", dest="ostm", metavar="one_by_one feature output",
+            type=argparse.FileType("w"), default="./output/all_association_results_one_by_one.txt",
+            help="Optional output file to report features one bye one for association significance tests.")
+   
+    argp.add_argument("-c", dest="costm", metavar="all compared clusters ",
+            type=argparse.FileType("w"), default="./output/all_compared_clusters_hypotheses_tree.txt",
+            help="Optional output file for hypothesis tree which includes all compared clusters.")
+    '''
 
 def _main():
-    
+    import strudel
     #Generate simulated datasets
-    number_features = 15 
-    number_samples = 100 
-    number_blocks = 3 
+    number_features = 4 
+    number_samples = 100
+    number_blocks = 2 
     s = strudel.Strudel()
     print 'Synthetic Data Generation ...'
     
     X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = 2.6 , Beta = 3.0 )#, link = "line" )
 #       
-    halla.data.writeData(X,"./input/X" )
-    halla.data.writeData(Y,"./input/Y")
+    strudel.writeData(X,"./input/X" )
+    strudel.writeData(Y,"./input/Y")
     # Parse arguments from command line
     args=parse_arguments(sys.argv)
-    
+    check_requirements(args)
     istm = list()  # X and Y are used to store datasets
  	
 	# If Y was not set - we use X
