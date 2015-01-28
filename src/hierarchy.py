@@ -1498,12 +1498,15 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 					number_passed_tests += 1
 					aFinal.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_nominal_pvalue(), Current_Family_Children[i].get_nominal_pvalue()])
 				elif Current_Family_Children[i].get_nominal_pvalue() > fQ and Current_Family_Children[i].get_nominal_pvalue() <= 1.0 - fQ:
-					next_level_apChildren.append(Current_Family_Children[i]) 
-					print "Conitinue, gray area with p-value:", Current_Family_Children[i].get_nominal_pvalue()
+					next_level_apChildren.append(Current_Family_Children[i])
+					if bVerbose: 
+						print "Conitinue, gray area with p-value:", Current_Family_Children[i].get_nominal_pvalue()
 				elif Current_Family_Children[i].is_bypass(pvalue_threshold = fQ):
-					print "Stop: no chance of association by descending", Current_Family_Children[i].get_nominal_pvalue()
+					if bVerbose:
+						print "Stop: no chance of association by descending", Current_Family_Children[i].get_nominal_pvalue()
 			if not apChildren:
-				print "Hypotheses testing level ", level, " is finished."
+				if bVerbose:
+					print "Hypotheses testing level ", level, " is finished."
 				# number_performed_test += len(next_level_apChildren)
 				apChildren = next_level_apChildren
 				level += 1
@@ -1550,20 +1553,24 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 					aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
 					#if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
 					if Current_Family_Children[i].is_bypass(pvalue_threshold = fQ) :
-						print "Bypass, no hope to find an association in the branch with p-value: ", \
+						if bVerbose:
+							print "Bypass, no hope to find an association in the branch with p-value: ", \
 					aP[i], " and ", len(Current_Family_Children[i].get_children()), \
 					 " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
 					  "   ", Current_Family_Children[i].get_data()[1]
 						
 					elif Current_Family_Children[i].is_leaf():
+						if bVerbose:
 							print "End of branch, leaf!"
 						# aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
 					else:
-						print "Gray area with p-value:", aP[i]
-						next_level_apChildren.append(Current_Family_Children[i])
+						if bVerbose:
+							print "Gray area with p-value:", aP[i]
+							next_level_apChildren.append(Current_Family_Children[i])
 					
 			if not apChildren:
-				print "Hypotheses testing level ", level, " is finished."
+				if bVerbose:
+					print "Hypotheses testing level ", level, " is finished."
 				# number_performed_test += len(next_level_apChildren)
 				apChildren = next_level_apChildren
 				level += 1
@@ -1592,16 +1599,19 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 					Current_Family_Children[i].report()
 					passed_tests.append([Current_Family_Children[i], float(aP[i])])
 				elif Current_Family_Children[i].is_bypass(pvalue_threshold = fQ) :
-					print "Bypass, no hope to find an association in the branch with p-value: ", \
-				aP[i], " and ", len(Current_Family_Children[i].get_children()), \
-				 " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
-				  "   ", Current_Family_Children[i].get_data()[1]
+					if bVerbose:
+						print "Bypass, no hope to find an association in the branch with p-value: ", \
+					aP[i], " and ", len(Current_Family_Children[i].get_children()), \
+					 " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
+					  "   ", Current_Family_Children[i].get_data()[1]
 					
 				elif Current_Family_Children[i].is_leaf():
+					if bVerbose:
 						print "End of branch, leaf!"
 					# aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
 				else:
-					print "Gray area with p-value:", aP[i]
+					if bVerbose:
+						print "Gray area with p-value:", aP[i]
 					next_level_apChildren.append(Current_Family_Children[i])
 			
 
@@ -1661,18 +1671,22 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 					round1_passed_tests.append([Current_Family_Children[i], float(aP[i])])
 				elif Current_Family_Children[i].is_leaf():
 					end_level_tests.append([Current_Family_Children[i], float(aP[i])])
-					print "End of branch, leaf!"
+					if bVerbose:
+						print "End of branch, leaf!"
 				elif Current_Family_Children[i].is_bypass(pvalue_threshold = fQ) :
-					print "Bypass, no hope to find an association in the branch with p-value: ", \
-				aP[i], " and ", len(Current_Family_Children[i].get_children()), \
-				 " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
-				  "   ", Current_Family_Children[i].get_data()[1]
+					if bVerbose:
+						print "Bypass, no hope to find an association in the branch with p-value: ", \
+					aP[i], " and ", len(Current_Family_Children[i].get_children()), \
+					 " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
+					  "   ", Current_Family_Children[i].get_data()[1]
 				else:
-					print "Gray area with p-value:", aP[i]
+					if bVerbose:
+						print "Gray area with p-value:", aP[i]
 					next_level_apChildren.append(Current_Family_Children[i])
 				
 			if not apChildren:
-				print "Hypotheses testing level ", level, " is finished.", "Next: ", len(next_level_apChildren)
+				if bVerbose:
+					print "Hypotheses testing level ", level, " is finished.", "Next: ", len(next_level_apChildren)
 				apChildren = next_level_apChildren
 				level += 1
 				next_level_apChildren = []
