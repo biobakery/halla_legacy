@@ -166,12 +166,7 @@ class HAllA():
 		return self._check(pObject, np.ndarray)
 
 	def _is_1d(self, pObject):
-		"""
-		>>> import strudel 
-		>>> s = strudel.Strudel( )
-		>>> s._is_1d( [] )
-		"""
-
+	
 		strErrorMessage = "Object empty; cannot determine type"
 		bEmpty = self._is_empty(pObject)
 

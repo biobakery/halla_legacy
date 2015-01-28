@@ -17,9 +17,7 @@ import stats
 
 
 # import pydot
-sys.path.append('/Users/rah/Documents/Hutlab/halla/src')
-sys.path.append('/Users/rah/Documents/Hutlab/strudel')
-#import strudel
+
 def _main():
     D = plotGridData(D=[])
      # plot_box()
@@ -166,38 +164,6 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
     plt.savefig(figure_name + '.pdf')
     plt.show()
     # return plt
-def plotGridData(D):
-    import scipy
-    # import dot_parser
-    import scipy.cluster.hierarchy as sch
-    from numpy.matlib import rand
-    from array import array
-    # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
-    if len(D) == 0: 
-        # Generate random features and distance matrix.
-        print "The distance matrix is empty. The function generates a random matrix."
-        s = strudel.Strudel()
-        X, Y, A = s.double_cholesky_block(3, 10 , 2, fVal=2.0 , Beta=3.0)
-        # pylab.pcolor(X, cmap = pylab.cm.afmhot)
-        pylab.savefig('X.pdf')
-        # pylab.show()
-        # pylab.pcolor(Y, cmap = pylab.cm.afmhot)
-        pylab.savefig('Y.pdf')
-        # pylab.show()
-        dX = stats.discretize(X)
-        # pylab.pcolor(dX, cmap = pylab.cm.afmhot)
-        pylab.savefig('dX.pdf')
-        dY = stats.discretize(Y)
-        # pylab.pcolor(dY, cmap = pylab.cm.afmhot)
-        pylab.savefig('dY.pdf')
-        # pylab.show()
-        f = lambda x, y: distance.norm_mi(x, y)
-        # Dx = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dX, f ) )
-        # Dy = scipy.spatial.distance.squareform( 1.0 - scipy.spatial.distance.pdist( dY, f ) )
-        # endrogramHeatPlot([], 'dXDendrogram')
-        # dendrogramHeatPlot([], 'dYDendrogram')
-        
-        
         
 def heatmap(D, filename='Dendrogram'):
     import scipy
