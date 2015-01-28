@@ -1,24 +1,15 @@
-import argparse
-import csv
-import itertools
-import logging
-from numpy import array
-import os
-import shutil 
-import sys
-
+#!/usr/bin/env python
 
 #  Load the halla src modules to check the installation
+import sys
 try:
     from src import config
-    from src import hallaclass, hierarchy, stats, distance, parser, plot
-    from src.parser import Input, Output
+    
 except ImportError:
     sys.exit("CRITICAL ERROR: Unable to find the config under src directory." + 
         " Please check your install.") 
 
 # Check the python version
-import sys
 try:
     if (sys.version_info[0] != config.required_python_version_major or
         sys.version_info[1] < config.required_python_version_minor):
@@ -32,7 +23,23 @@ except (AttributeError,IndexError):
         "does not match the version required (version "+
         str(config.required_python_version_major)+"."+
         str(config.required_python_version_minor)+"+)")  
-    
+
+import argparse
+import csv
+import itertools
+import logging
+import os
+import shutil 
+
+try:
+    from numpy import array
+except ImportError:
+    sys.exit("Please install numpy")
+
+from src import hallaclass, hierarchy, stats, distance, parser, plot
+from src.parser import Input, Output
+
+
 def get_halla_base_directory():
     """ 
     Return the location of the halla base directory
@@ -177,15 +184,15 @@ def _main():
  	
 	# If Y was not set - we use X
     if args.Y == None:
-		istm = [args.X, args.X]  # Use X  
+        istm = [args.X, args.X]  # Use X  
     else:
-		istm = [args.X, args.Y]  # Use X and Y
+        istm = [args.X, args.Y]  # Use X and Y
 
 	
     if len(istm) > 1:
-		strFile1, strFile2 = istm[:2]
+        strFile1, strFile2 = istm[:2]
     else:
-		strFile1, strFile2 = istm[0], istm[0]
+        strFile1, strFile2 = istm[0], istm[0]
 		
     aOut1, aOut2 = Input (strFile1.name, strFile2.name).get()
 
