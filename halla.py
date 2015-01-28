@@ -67,11 +67,11 @@ def check_requirements(args):
         try: 
             import pandas as pd
         except ImportError: 
-            print "--- Please check your installation for pandas library"
+            sys.exit("--- Please check your installation for pandas library")
         try:
             from rpy2.robjects.packages import importr
         except ImportError: 
-            print "--- Please check your installation for rpy2 library"
+            sys.exit("--- Please check your installation for rpy2 library")
         
         
     
