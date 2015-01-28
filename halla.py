@@ -7,25 +7,12 @@ import os
 import shutil 
 import sys
 
-from src import hallaclass, hierarchy, stats, distance, parser, plot
-from src.parser import Input, Output
 
-# set path
-try:
-    config_file_location = os.path.dirname(os.path.realpath(__file__))
-    # The halla base directory is parent directory of the config file location
-    halla_base_directory = os.path.abspath(os.path.join(config_file_location, os.pardir))
-    sys.path.append(halla_base_directory + '/src')
-    sys.path.append('/Users/rah/Documents/Hutlab/strudel')
-except :
-    sys.exit("CRITICAL ERROR: Unable to find the HAllA src directory." + 
-        " Please check your install.") 
-
-
-   
-# Try to load one of the halla src modules to check the installation
+#  Load the halla src modules to check the installation
 try:
     from src import config
+    from src import hallaclass, hierarchy, stats, distance, parser, plot
+    from src.parser import Input, Output
 except ImportError:
     sys.exit("CRITICAL ERROR: Unable to find the config under src directory." + 
         " Please check your install.") 
@@ -182,18 +169,7 @@ argp.add_argument("-o", dest="bostm", metavar="output",  # default = "sys.stdout
     '''
 
 def _main():
-    import strudel
-    #Generate simulated datasets
-    number_features = 4 
-    number_samples = 100
-    number_blocks = 2 
-    s = strudel.Strudel()
-    print 'Synthetic Data Generation ...'
     
-    X,Y,A = s.double_cholesky_block( number_features, number_samples , number_blocks, fVal = 2.6 , Beta = 3.0 )#, link = "line" )
-#       
-    strudel.writeData(X,"./input/X" )
-    strudel.writeData(Y,"./input/Y")
     # Parse arguments from command line
     args=parse_arguments(sys.argv)
     check_requirements(args)
