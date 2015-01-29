@@ -56,7 +56,10 @@ Dependencies
 	* R 
  	* rpy2
 	* sampledoc-master
+	* matplotlib
 All the required packages are included in Anaconda which is available at https://store.continuum.io/cshop/anaconda/
+* Optional
+	* pheatmap
 
 * Recommended Tools for documentation 
 	* Docutils
