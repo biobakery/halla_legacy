@@ -301,7 +301,7 @@ class HAllA():
 		if self.verbose:
 			print ("HAllA PROMPT: q value", fQ)
 			print ("q value is", fQ)
-		self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function,  fQ=self.q, iIter = self.iterations, bVerbose=self.verbose) 
+		self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function,  fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose) 
 		# # Choose to keep to 2 arrays for now -- change later to generalize 
 		#return self.meta_alla 
 	
@@ -637,7 +637,7 @@ class HAllA():
 
 		# Execute report functions
 		_report_all_tests()
-		_report_and_plot_associations ()
+		_report_and_plot_associations()
 		_report_compared_clusters()
 		_heatmap()
 		

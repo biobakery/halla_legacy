@@ -135,13 +135,12 @@ class Tree():
 	def get_adjusted_pvalue(self):
 		return self.adjusted_pvalue
 	
-	def is_association(self, pc_threshold, sim_threshold, pvalue_threshold):
-		if self.get_nominal_pvalue() < pvalue_threshold: 
-		#self.get_nmi() > .1 and \
-		   #1.0 - self.get_left_distance() > sim_threshold and \
-		   #1.0 - self.get_right_distance() > sim_threshold
-			#self.get_left_first_pc() > .1 and \
-		   #self.get_right_first_pc()> .1 :
+	def is_association(self, pvalue_threshold, pc_threshold, sim_threshold):
+		if self.get_nominal_pvalue() < pvalue_threshold and \
+			1.0 - self.get_left_distance() > sim_threshold and \
+		    1.0 - self.get_right_distance() > sim_threshold and \
+		    self.get_left_first_pc() > pc_threshold and \
+		    self.get_right_first_pc()> pc_threshold :
 			return True
 		else:
 			return False
@@ -154,7 +153,7 @@ class Tree():
 		else:
 			return False
 	def report(self):
-		print "\n--- association"		
+		print "\n--- association before fdr controlling"		
 		print "---- pvalue                        :", self.get_nominal_pvalue()
 		#if self.get_adjusted_pvalue() <> 0.0:
 		#	print "--- adjusted pvalue     :", self.get_adjusted_pvalue()
@@ -960,7 +959,7 @@ def _is_start(ClusterNode, X, func, distance):
 def _is_stop(ClusterNode, dataSet, max_dist_cluster, threshold = None):
 		node_indeces = reduce_tree(ClusterNode)
 		first_PC = stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
-		if ClusterNode.is_leaf() or _percentage(ClusterNode.dist, max_dist_cluster) <.5 or first_PC > .5:
+		if ClusterNode.is_leaf() or _percentage(ClusterNode.dist, max_dist_cluster) < .1 or first_PC > .9:
 			#print "Node: ",node_indeces
 			#print "dist:", ClusterNode.dist, " first_PC:", first_PC,"\n"
 			return True
@@ -1396,7 +1395,7 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
 def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="norm_mi", fdr= "BHY", p_adjust="BH", fQ=0.1,
-	iIter=1000, pursuer_method="nonparameteric", decomposition = "pca", bVerbose=False, afThreshold=None, fAlpha=0.05):
+	iIter=1000, pursuer_method="nonparameteric", decomposition = "pca", bVerbose=False, afThreshold=.2, fAlpha=0.05):
 	"""
 	Perform all-against-all on a hypothesis tree.
 
@@ -1493,7 +1492,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 				Current_Family_Children[i].set_nominal_pvalue(_actor(Current_Family_Children[i]))
 			
 				aOut.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_nominal_pvalue(), Current_Family_Children[i].get_nominal_pvalue()])
-				if Current_Family_Children[i].is_association(pc_threshold = .1, sim_threshold = .1, pvalue_threshold = .05):
+				if Current_Family_Children[i].is_association(pvalue_threshold = fQ, pc_threshold = afThreshold , sim_threshold = afThreshold):
 					Current_Family_Children[i].report()
 					number_passed_tests += 1
 					aFinal.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_nominal_pvalue(), Current_Family_Children[i].get_nominal_pvalue()])
@@ -1566,7 +1565,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 					else:
 						if bVerbose:
 							print "Gray area with p-value:", aP[i]
-							next_level_apChildren.append(Current_Family_Children[i])
+						next_level_apChildren.append(Current_Family_Children[i])
 					
 			if not apChildren:
 				if bVerbose:
@@ -1595,7 +1594,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 			for i in range(len(aP)):
 				# print "NMI", Current_Family_Children[i].get_nmi()
 				performed_tests.append([Current_Family_Children[i], float(aP[i])])
-				if  Current_Family_Children[i].is_association(pc_threshold = .1, sim_threshold = .1, pvalue_threshold = .05):
+				if  Current_Family_Children[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
 					Current_Family_Children[i].report()
 					passed_tests.append([Current_Family_Children[i], float(aP[i])])
 				elif Current_Family_Children[i].is_bypass(pvalue_threshold = fQ) :
@@ -1665,7 +1664,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 			for i in range(len(aP)):
 				# print "NMI", Current_Family_Children[i].get_nmi()
 				performed_tests.append([Current_Family_Children[i], float(aP[i])])	
-				if Current_Family_Children[i].is_association(pc_threshold = .1, sim_threshold = .1, pvalue_threshold = .05):
+				if Current_Family_Children[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
 					Current_Family_Children[i].report()
 					end_level_tests.append([Current_Family_Children[i], float(aP[i])])
 					round1_passed_tests.append([Current_Family_Children[i], float(aP[i])])
@@ -1686,7 +1685,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 				
 			if not apChildren:
 				if bVerbose:
-					print "Hypotheses testing level ", level, " is finished.", "Next: ", len(next_level_apChildren)
+					print "Hypotheses testing level ", level, " is finished.", "number of hypotheses in the next level: ", len(next_level_apChildren)
 				apChildren = next_level_apChildren
 				level += 1
 				next_level_apChildren = []
