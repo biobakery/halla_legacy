@@ -1,16 +1,7 @@
-.. HAllA: Hierarchical All-against All documentation master file, created by
-   sphinx-quickstart on Mon Nov 25 13:27:23 2013.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-
+[TOC]
 =============================================================
-HAllA: Hierarchical All-against-All association testing 
+# HAllA: Hierarchical All-against-All association testing #
 =============================================================
-
--------------------------------------------------------
-Version 0.0.1
--------------------------------------------------------
 
 Authors
  Gholamali Rahnavard, Yo Sup Moon, Curtis Huttenhower
@@ -27,14 +18,12 @@ URL
 Citation
  Gholamali Rahnavard, Yo Sup Moon, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation)
 
-.. toctree::
-   :maxdepth: 2
 
 
-Chapter 0 Getting Started
+## Getting Started ##
 ============================================ 
 
-Operating System  
+### Operating System ###
 --------------------------------------------
 
 * Supported 
@@ -47,7 +36,7 @@ Operating System
 Dependencies 
 --------------------------------------------
 
-* Required 
+### Required ###
 	* Python (>= 2.7)
 	* Numpy (>= 1.7.1)
 	* Scipy (>= 0.12) 
@@ -66,7 +55,7 @@ All the required packages are included in Anaconda which is available at https:/
 	* Docutils
 	* itex2MML
 
-Getting HAllA
+## Getting HAllA ##
 --------------------------------------------
 
 HAllA can be downloaded from its bitbucket repository: http://bitbucket.org/biobakery/halla.
@@ -78,10 +67,10 @@ bin/testdata (source: Put into bin any scripts you’ve written that use your to
 
 
 
-Chapter 1 Basics 
+## Basics ## 
 ============================================
 
-Introduction
+### Introduction ###
 --------------------------------------------
 
 HAllA (pronounced "`challah <http://en.wikipedia.org/wiki/Challah>`_") is an
@@ -107,10 +96,10 @@ variables.  It's your one-stop shop for statistical significance!
 If you use this tool, the included scripts, or any related code in your work,
 please let us know, sign up for the HAllA Users Group (halla-users@googlegroups.com), and pass along any issues or feedback.
 
-Contents
+### Contents ###
 ========
 
-Input 
+#### Input #####
 ----------------------------------------------
 
 HAllA by default takes a tab-delimited text file as an input, where each row describes feature (data/metadata) and each column represents an instance. In other words, input `X` is a `D x N` matrix where `D` is the number of dimensions in each instance of the data and `N` is the number of instances (samples). The "edges" of the matrix should contain labels of the data, if desired. The following is an example input ::
@@ -125,7 +114,7 @@ HAllA by default takes a tab-delimited text file as an input, where each row des
 
 Note: as the inputs datasets have the same samples, the input files must not have sample headers
 
-Output 
+#### Output ####
 -----------------------------------------------
 
 HAllA by default prints a tab-delimited text file as output ::
@@ -140,7 +129,7 @@ HAllA by default prints a tab-delimited text file as output ::
 is not likely to be caused by the noise in the data).  
 
 
-Advanced 
+#### Advanced ####
 ------------------------------------------------
 
 The following is a list of all available arguments that can be passed into halla:: 
@@ -161,7 +150,7 @@ The following is a list of all available arguments that can be passed into halla
 	  -b bootstraps  Number of bootstraps for significance testing
 	  -v verbosity   Debug logging level; increase for greater verbosity
 
-Mini-tutorial
+#### Mini-tutorial ####
 ---------------------------------------------------
 
 Suppose you have two tab-delimited file containing the datasets you wish to run halla on. We will call this files `input1.txt` and `input2.txt`. We will call the output file `associations.txt`. In the root directory of halla, one can type::
@@ -170,32 +159,7 @@ Suppose you have two tab-delimited file containing the datasets you wish to run 
 for demo inputs try:
 	$ python halla.py -X ./input/X_syntheticData.txt -Y ./input/Y_syntheticData.txt 
 
-Frequently Asked Questions 
+#### Frequently Asked Questions ####
 ==============================================
 
 NB: Direct all questions to the halla-users google group. 
-
-
-Functions
-==============================================
-
-.. automodule:: halla 
-	:members:
-
-.. automodule:: halla.stats
-	:members:
-
-.. automodule:: halla.distance
-	:members:
-
-.. automodule:: halla.parser
-	:members:
-
-.. automodule:: halla.logger
-	:members:
-
-.. automodule:: halla.test 
-	:members:
-
-.. automodule:: halla.hierarchy
-	:members:

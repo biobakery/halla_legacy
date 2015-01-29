@@ -1545,6 +1545,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 			for i in range(len(aP)):
 				if pRank[i] <= max_r_t:
 					number_passed_tests += 1
+					print "-- associations after BHY fdr controlling"
 					Current_Family_Children[i].report()
 					aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
 					aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
@@ -1694,9 +1695,10 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 		print "--- number of passed from nominal tests:", len(round1_passed_tests)
 		print "--- number of tests in the end of branches:", len(end_level_tests)
 		end_level_tests = array(end_level_tests)
-		#print "Nominal p-values", performed_tests[:, 1]
+		performed_tests = array(performed_tests)
+		print "Nominal p-values", end_level_tests[:, 1]
 		aP_adjusted, pRank = stats.p_adjust(end_level_tests[:, 1], fQ)
-		#print "ajusted pvalue: ", aP_adjusted
+		print "ajusted pvalue: ", aP_adjusted
 		for i in range(len(end_level_tests)):
 			if end_level_tests[i][1] <= aP_adjusted[i] and max_r_t <= pRank[i]:
 				max_r_t = pRank[i]
