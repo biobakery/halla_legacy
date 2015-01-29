@@ -552,11 +552,20 @@ class HAllA():
 					import pandas as pd
 					filename = self.output_dir + "/association" + str(association_number) + '/'
 					dir = os.path.dirname(filename)
+
+					# remove the directory if it exists
+					if os.path.isdir(dir):
+						try:
+							shutil.rmtree(dir)
+						except EnvironmentError:
+							sys.exit("Unable to remove directory: "+dir)
+					
+					# create new directory
 					try:
-						shutil.rmtree(dir)
 						os.mkdir(dir)
-					except:
-						os.mkdir(dir)
+					except EnvironmentError:
+						sys.exit("Unable to create directory: "+dir)
+
 					df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
 					axes = pd.tools.plotting.scatter_matrix(df)
 					
