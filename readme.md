@@ -1,10 +1,11 @@
-[TOC]
-=============================================================
-# HAllA: Hierarchical All-against-All association testing #
-=============================================================
+**HAllA: Hierarchical All-against-All association testing 
+**
 
-Authors
- Gholamali Rahnavard, Yo Sup Moon, Curtis Huttenhower
+[TOC]
+
+## Description ##
+
+Gholamali Rahnavard, Yo Sup Moon, Curtis Huttenhower
 
 Google Group
  halla-users: https://groups.google.com/forum/#!forum/halla-users
@@ -18,59 +19,6 @@ URL
 Citation
  Gholamali Rahnavard, Yo Sup Moon, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation)
 
-
-
-## Getting Started ##
-============================================ 
-
-### Operating System ###
---------------------------------------------
-
-* Supported 
-	* Ubuntu Linux (>= 12.04) 
-	* Mac OS X (>= 10.7)
-
-* Untested  
-	* Windows (>= XP) 
-
-Dependencies 
---------------------------------------------
-
-### Required ###
-	* Python (>= 2.7)
-	* Numpy (>= 1.7.1)
-	* Scipy (>= 0.12) 
-	* Scikit-learn (>=0.13) 
-	* Pandas (>=0.15.2)
-	* R 
- 	* rpy2
-	* sampledoc-master
-	* matplotlib
-All the required packages are included in Anaconda which is available at https://store.continuum.io/cshop/anaconda/
-
-* Optional
-	* pheatmap
-
-* Recommended Tools for documentation 
-	* Docutils
-	* itex2MML
-
-## Getting HAllA ##
---------------------------------------------
-
-HAllA can be downloaded from its bitbucket repository: http://bitbucket.org/biobakery/halla.
-
-Directory Structure -- What you get 
----------------------------------------------
-
-bin/testdata (source: Put into bin any scripts you’ve written that use your towelstuff package and which you think would be useful for your users. If you don’t have any, then remove the bin directory.)
-
-
-
-## Basics ## 
-============================================
-
-### Introduction ###
 --------------------------------------------
 
 HAllA (pronounced "`challah <http://en.wikipedia.org/wiki/Challah>`_") is an
@@ -96,13 +44,67 @@ variables.  It's your one-stop shop for statistical significance!
 If you use this tool, the included scripts, or any related code in your work,
 please let us know, sign up for the HAllA Users Group (halla-users@googlegroups.com), and pass along any issues or feedback.
 
-### Contents ###
-========
+# Requirements #
 
-#### Input #####
-----------------------------------------------
+## Operating System ##
+	* Supported 
+		* Ubuntu Linux (>= 12.04) 
+		* Mac OS X (>= 10.7)
 
-HAllA by default takes a tab-delimited text file as an input, where each row describes feature (data/metadata) and each column represents an instance. In other words, input `X` is a `D x N` matrix where `D` is the number of dimensions in each instance of the data and `N` is the number of instances (samples). The "edges" of the matrix should contain labels of the data, if desired. The following is an example input ::
+	* Untested  
+		* Windows (>= XP) 
+
+
+## Softwares ##
+```
+* Python (>= 2.7)
+* Numpy (>= 1.7.1)
+* Scipy (>= 0.12) 
+* Scikit-learn (>=0.13)
+* matplotlib
+```
+** Optional for plotting results by using --plotting_results option in command line **
+```
+* Pandas (>=0.15.2)
+* R 
+* rpy2
+* pheatmap from package in R
+```
+# Installation #
+
+## Downloading HAllA ##
+HAllA can be downloaded in two ways:
+
+* [Download](https://bitbucket.org/biobakery/halla/downloads) a compressed set of files.
+* Create a clone of the repository on your computer with the command: 
+	
+	``hg clone https://bitbucket.org/biobakery/halla ``
+
+Note: Creating a clone of the repository requires [Mercurial](http://mercurial.selenic.com/) to be installed. Once the repository has been cloned upgrading to the latest release of HAllA is simple. Just type ``hg pull -u`` from within the repository which will download the latest release.
+
+For the steps that follow, $HAllA_PATH is the location that HAllA was download (ie $HAllA_PATH=/home/user/halla/ with the file "halla.py" found in this folder).
+
+## Updating the environment ##
+To update the environment, add the path to the HAllA download directory ($HAllA_PATH) to your $PATH.
+
+1. Add this line to the .bashrc file located in your home directory ($HOME) : `` export PATH=$PATH:$HAllA_PATH ``
+1.  Run this command to update your current environment: ``$ source $HOME/.bashrc ``
+1. HAllA can now be run without providing the location of the install directory: `` $ halla.py --help ``
+
+
+The update environment step is optional if the path to the HAllA executable is always provided. 
+For example, calling HAllA as follows does not require updates to the environment: `` $ $HAllA_PATH/halla.py --help ``
+
+
+# How to Run #
+
+## Basic usage ##
+
+Type the command:
+
+`` halla.py -X $DATASET1 -Y DATASET2 --output $OUTPUT_DIR``
+
+HAllA by default takes two tab-delimited text files as an input, where in each file, each row describes feature (data/metadata) and each column represents an instance. In other words, input `X` is a `D x N` matrix where `D` is the number of dimensions in each instance of the data and `N` is the number of instances (samples). The "edges" of the matrix should contain labels of the data, if desired. The following is an example input ::
 
 	+-------+---------+---------+--------+
 	|       | Sample1 | Sample2 | Sample3|
@@ -112,54 +114,148 @@ HAllA by default takes a tab-delimited text file as an input, where each row des
 	| Data2 | 1.5     | 100.2   | -30.7  |
 	+-------+---------+---------+--------+
 
-Note: as the inputs datasets have the same samples, the input files must not have sample headers
+Note: the input files have the same samples(columns) but features(rows) could be different. 
 
-#### Output ####
+### Output ###
 -----------------------------------------------
 
 HAllA by default prints a tab-delimited text file as output ::
 
 	+------+------+-------+------+------+
-	| One  | Two  | MID   | Pperm| Pboot|
+	| One  | Two  | MIS   | Pperm| Pboot|
 	+------+------+-------+------+------+
 	| Data1| Data2| 0.64  | 0.02 | 0.008|
 	+------+------+-------+------+------+  	
 
-`MID` stands for "mutual information distance", which is an information-theoretic measure of association between two random variables. `Pperm` and `Pboot` corresponds to the p-values of the permutation and bootstrap tests used to assess the statistical significance of the mutual information distance (i.e. lower p-values signify that the association between two variables 
+`MIS` stands for "mutual information similarity", which is an information-theoretic measure of association between two random variables. `Pperm` and `Pboot` corresponds to the p-values of the permutation and bootstrap tests used to assess the statistical significance of the mutual information distance (i.e. lower p-values signify that the association between two variables 
 is not likely to be caused by the noise in the data).  
 
+$OUTPUT_DIR = the output directory
 
-#### Advanced ####
-------------------------------------------------
+**Three output files will be created:**
 
-The following is a list of all available arguments that can be passed into halla:: 
+1. $OUTPUT_DIR/associations.tsv
+1. $OUTPUT_DIR/all_association_results_one_by_one.tsv
+1. $OUTPUT_DIR/all_compared_clusters_hypotheses_tree.tsv
 
-	usage: halla.py -X inputfile1.txt -Y inputfile2.txt -q .1 
+** Optional outputs if --plotting_results is used in command line:**
 
-	Hierarchical All-against-All significance association testing.
+1. $OUTPUT_DIR/associationsN/ (for all associations from 0..N if there is any)
+	1. association_1.pdf
+	1. Dataset_1_cluster_N_scatter_matrix.pdf
+	1. Dataset_2_cluster_N_scatter_matrix.pdf
+1. $OUTPUT_DIR/Pearson_heatmap.pdf
+1. $OUTPUT_DIR/NMI_heatmap.pdf
 
-	positional arguments:
-	  input.txt      Tab-delimited text input file, one row per feature, one
-			 column per measurement
+## Demo runs ##
 
-	optional arguments:
-	  -h, --help     show this help message and exit
-	  -o output.txt  Optional output file for association significance tests
-	  -p p_value     P-value for overall significance tests
-	  -P p_mi        P-value for permutation equivalence of MI clusters
-	  -b bootstraps  Number of bootstraps for significance testing
-	  -v verbosity   Debug logging level; increase for greater verbosity
+The input folder contains four demo input files. These files are tab-delimitated files.
 
-#### Mini-tutorial ####
----------------------------------------------------
+To run the HAllA demo type the command:
 
-Suppose you have two tab-delimited file containing the datasets you wish to run halla on. We will call this files `input1.txt` and `input2.txt`. We will call the output file `associations.txt`. In the root directory of halla, one can type::
-	
-	$ python halla.py -X input1.txt -Y input2.txt -q .2 
-for demo inputs try:
-	$ python halla.py -X ./input/X_syntheticData.txt -Y ./input/Y_syntheticData.txt 
+`` halla.py -X input/X_syntheticData.txt -Y Y_syntheticData.txt -o $OUTPUT_DIR ``
 
-#### Frequently Asked Questions ####
-==============================================
+$OUTPUT_DIR is the output directory
 
-NB: Direct all questions to the halla-users google group. 
+## Output files ##
+
+HAllA produces three output files which by default are tab-delimited text.
+
+### Significant Discovered Associations ###
+```
+Method: pca-norm_mi	q value: 0.1	metric norm_mi
+Association Number	./input/X_syntheticData.txt	./input/Y_syntheticData.txt	nominal-pvalue	adjusted-pvalue
+1	0;1;2	2;0;1	0.002997002997	0.0222222222222
+2	3;4;5	3;4;5	0.024975024975	0.0333333333333
+3	6;7;8	6;7;8	0.000999000999001	0.0111111111111
+```
+### All Association Results One-by-One ###
+```
+Method: pca-norm_mi	q value: 0.1	metric norm_mi
+./input/X_syntheticData.txt	./input/Y_syntheticData.txt	nominal-pvalue	adjusted-pvalue
+0	0	0.002997002997	0.0222222222222
+0	1	0.002997002997	0.0222222222222
+0	2	0.002997002997	0.0222222222222
+1	0	0.002997002997	0.0222222222222
+1	1	0.002997002997	0.0222222222222
+1	2	0.002997002997	0.0222222222222
+2	0	0.002997002997	0.0222222222222
+2	1	0.002997002997	0.0222222222222
+2	2	0.002997002997	0.0222222222222
+3	3	0.024975024975	0.0333333333333
+3	4	0.024975024975	0.0333333333333
+3	5	0.024975024975	0.0333333333333
+4	3	0.024975024975	0.0333333333333
+4	4	0.024975024975	0.0333333333333
+4	5	0.024975024975	0.0333333333333
+5	3	0.024975024975	0.0333333333333
+5	4	0.024975024975	0.0333333333333
+5	5	0.024975024975	0.0333333333333
+6	6	0.000999000999001	0.0111111111111
+6	7	0.000999000999001	0.0111111111111
+6	8	0.000999000999001	0.0111111111111
+7	6	0.000999000999001	0.0111111111111
+7	7	0.000999000999001	0.0111111111111
+7	8	0.000999000999001	0.0111111111111
+8	6	0.000999000999001	0.0111111111111
+8	7	0.000999000999001	0.0111111111111
+8	8	0.000999000999001	0.0111111111111
+```
+### All Compared Clusters Hypotheses Tree ###
+```
+Level	Dataset 1	Dataset 2
+0	0;1;2;6;7;8;3;4;5	3;4;5;2;0;1;6;7;8
+1	0;1;2	3;4;5
+1	0;1;2	6;7;8
+1	0;1;2	2;0;1
+1	3;4;5	3;4;5
+1	3;4;5	6;7;8
+1	3;4;5	2;0;1
+1	6;7;8	3;4;5
+1	6;7;8	6;7;8
+1	6;7;8	2;0;1
+```
+# Complete option list #
+```
+usage: halla.py [-h] [-X first input dataset] [-Y second input dataset] -o
+                <output> [--plotting_results] [-q q_value]
+                [-s similarity threshold] [-f fdr] [-i iterations] [-m metric]
+                [-d decomposition] [-j adjusting] [-t test] [-v verbosity]
+
+Hierarchical All-against-All significance association testing.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -X first input dataset
+                        First file: Tab-delimited text input file, one row per
+                        feature, one column per measurement.
+  -Y second input dataset
+                        Second file: Tab-delimited text input file, one row
+                        per feature, one column per measurement - If not
+                        selected, we will use the first file (-X).
+  -o <output>, --output <output>
+                        directory to write output files [REQUIRED]
+  --plotting_results    bypass the plotting results step
+  -q q_value            Q-value for overall significance tests (cut-off for
+                        false discovery rate).
+  -s similarity threshold
+                        A threshold for similarity to count a cluster as one
+                        unit and no consider sub-clusters as sub-unit.
+  -f fdr                function for maximize statistical power and control
+                        false discovery rate, simple, BHY, BH, RH.
+  -i iterations         Number of iterations for nonparametric significance
+                        testing (permutation test)
+  -m metric             Metric to be used for similarity measurement, NMI,
+                        MIC, Pearson.
+  -d decomposition      The approach for reducing dimensions (or
+                        decomposition)[default = pca, options are pca, cca,
+                        kpca, ica]
+  -j adjusting          The approach for calculating adjusted p-value [default
+                        = BH]
+  -t test               The approach for association test, [default is
+                        permutation, options are permutation and G-test]
+  -v verbosity          Debug logging level; increase for greater verbosity
+```
+# Frequently Asked Questions #
+
+Please see all FAQ at the [ halla-users google group]( https://groups.google.com/forum/#!forum/halla-users).
