@@ -58,6 +58,7 @@ Dependencies
 	* sampledoc-master
 	* matplotlib
 All the required packages are included in Anaconda which is available at https://store.continuum.io/cshop/anaconda/
+
 * Optional
 	* pheatmap
 
@@ -68,7 +69,7 @@ All the required packages are included in Anaconda which is available at https:/
 Getting HAllA
 --------------------------------------------
 
-HAllA can be downloaded from its bitbucket repository: http://bitbucket.org/chuttenh/halla.
+HAllA can be downloaded from its bitbucket repository: http://bitbucket.org/biobakery/halla.
 
 Directory Structure -- What you get 
 ---------------------------------------------
@@ -83,9 +84,9 @@ Chapter 1 Basics
 Introduction
 --------------------------------------------
 
-`HAllA`_ (pronounced "`challah <http://en.wikipedia.org/wiki/Challah>`_") is an
+HAllA (pronounced "`challah <http://en.wikipedia.org/wiki/Challah>`_") is an
 end-to-end statistical method for Hierarchical All-against-All discovery of
-significant relationships among data features with high power.  `HAllA`_ is robust
+significant relationships among data features with high power.  HAllA is robust
 to data type, operating both on continuous and categorical values, and works well
 both on homogeneous datasets (where all measurements are of the same type, e.g.
 gene expression microarrays) and on heterogeneous data (containing measurements
@@ -93,19 +94,18 @@ with different units or types, e.g. patient clinical metadata).  Finally, it is
 also aware of multiple input, multiple output problems, in which data might
 contain of two (or more) distinct subsets sharing an index (e.g. clinical metadata,
 genotypes, microarrays, and microbiomes all drawn from the same subjects).  In
-all of these cases, `HAllA`_ will identify which pairs of features (genes,
+all of these cases, HAllA will identify which pairs of features (genes,
 microbes, loci, etc.) share statistically significant co-variation, without
 getting tripped up by high-dimensionality.
 
-In short, `HAllA`_ is like testing for correlation among all pairs of variables
+In short, HAllA is like testing for correlation among all pairs of variables
 in a high-dimensional dataset, but without tripping over multiple hypothesis
 testing, the problem of figuring out what "correlation" means for different
 units or scales, or differentiating between predictor/input or response/output
-variables.  It's your one-stop shop for statistical signficance!
+variables.  It's your one-stop shop for statistical significance!
 
 If you use this tool, the included scripts, or any related code in your work,
-please let us know, sign up for the `HAllA users group`_
-(`halla-users@googlegroups.com`_), and pass along any issues or feedback.
+please let us know, sign up for the HAllA Users Group (halla-users@googlegroups.com), and pass along any issues or feedback.
 
 Contents
 ========
@@ -113,7 +113,7 @@ Contents
 Input 
 ----------------------------------------------
 
-HAlLA by default takes a tab-delimited text file as an input, where each row describes feature (data/metadata) and each column represents an instance. In other words, input `X` is a `D x N` matrix where `D` is the number of dimensions in each instance of the data and `N` is the number of instances (samples). The "edges" of the matrix should contain labels of the data, if desired. The following is an example input ::
+HAllA by default takes a tab-delimited text file as an input, where each row describes feature (data/metadata) and each column represents an instance. In other words, input `X` is a `D x N` matrix where `D` is the number of dimensions in each instance of the data and `N` is the number of instances (samples). The "edges" of the matrix should contain labels of the data, if desired. The following is an example input ::
 
 	+-------+---------+---------+--------+
 	|       | Sample1 | Sample2 | Sample3|
