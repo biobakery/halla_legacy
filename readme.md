@@ -66,9 +66,6 @@ please let us know, sign up for the HAllA Users Group (halla-users@googlegroups.
 ** Optional for plotting results by using --plotting_results option in command line **
 ```
 * Pandas (>=0.15.2)
-* R 
-* rpy2
-* pheatmap from package in R
 ```
 # Installation #
 
