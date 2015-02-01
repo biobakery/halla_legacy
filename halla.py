@@ -62,11 +62,11 @@ def check_requirements(args):
             import pandas as pd
         except ImportError: 
             sys.exit("--- Please check your installation for pandas library")
-        try:
+        '''try:
             from rpy2.robjects.packages import importr
         except ImportError: 
             sys.exit("--- Please check your installation for rpy2 library")
-        
+        '''
         
     
     # Check that the output directory is writeable
@@ -104,12 +104,13 @@ def parse_arguments (args):
         description="Hierarchical All-against-All significance association testing.")
             
     argp.add_argument(
-        "-X", metavar="first input dataset",
+        "-X", metavar="<input_dataset_1.txt>",
         type=argparse.FileType("r"), default=sys.stdin,
-        help="First file: Tab-delimited text input file, one row per feature, one column per measurement.")        
+        help="First file: Tab-delimited text input file, one row per feature, one column per measurement.",
+        required=True)        
             
     argp.add_argument(
-        "-Y", metavar="second input dataset",
+        "-Y", metavar="input_dataset_2.txt",
         type=argparse.FileType("r"),
         default=None,
         help="Second file: Tab-delimited text input file, one row per feature, one column per measurement - If not selected, we will use the first file (-X).")
@@ -123,7 +124,7 @@ def parse_arguments (args):
     
     argp.add_argument(
         "--plotting_results", 
-        help="bypass the plotting results step\n", 
+        help="plotting results\n", 
         action="store_true",
         default=False)
 
@@ -184,12 +185,12 @@ def parse_arguments (args):
         help="The approach for association test, [default is permutation, options are permutation and G-test]")  
      
     argp.add_argument(
-        "-v", metavar="verbosity",
+        "-v", "--verbose", metavar="verbosity",
         dest="iDebug",
         type=int,
-        default= 0,#10 - (logging.WARNING / 10)
+        default= False,#10 - (logging.WARNING / 10)
         help="Debug logging level; increase for greater verbosity")
-
+    
     return argp.parse_args()
 
 def _main():

@@ -376,8 +376,10 @@ class HAllA():
 		S = -1 * np.ones((iX, iY , 2))  # # matrix of all associations; symmetric if using a symmetric measure of association  
 		
 		Z = self.meta_alla 
-		Z_final, Z_all = map(array, Z)  # # Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree
-				
+		_final, _all = map(array, Z)  # # Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree
+		Z_final = array([[_final[i].get_data(), _final[i].get_nominal_pvalue(), _final[i].get_adjusted_pvalue()] for i in range(len(_final))])
+		Z_all = array([[_all[i].get_data(), _all[i].get_nominal_pvalue(), _all[i].get_adjusted_pvalue()] for i in range(len(_all))])	
+			
 		# ## Sort the final Z to make sure p-value consolidation happens correctly 
 		Z_final_dummy = [-1.0 * (len(line[0][0]) + len(line[0][1])) for line in Z_final]
 		args_sorted = np.argsort(Z_final_dummy)
@@ -524,24 +526,41 @@ class HAllA():
 			association_number = 0
 			output_file_associations  = open(str(self.output_dir)+'/associations.txt', 'w')
 			bcsvw = csv.writer(output_file_associations, csv.excel_tab)
-			bcsvw.writerow(["Method: " + self.reduce_method +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
+			#bcsvw.writerow(["Method: " + self.reduce_method +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
 			
 			if self.args.Y == None:
 				bcsvw.writerow([istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"])
 			else:
-				bcsvw.writerow(["Association Number", self.args.X.name, self.args.Y.name, "nominal-pvalue", "adjusted-pvalue"])
+				bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "SImilarity score between Clusters (NMI)"])
 	
-
-			for line in self.meta_alla[0]:
+			sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.nominal_pvalue, reverse=True)
+			for association in sorted_associations:
 				association_number += 1
-				iX, iY = line[0]
+				iX, iY = association.get_data()
 				global associated_feature_X_indecies
 				associated_feature_X_indecies += iX
 				global associated_feature_Y_indecies
 				associated_feature_Y_indecies += iY
-				fP = line[1]
-				fP_adjust = line[2]
-				aLineOut = map(str, [association_number, str(';'.join(self.aOutName1[i] for i in iX)), str(';'.join(self.aOutName2[i] for i in iY)), fP, fP_adjust])
+				fP = association.get_nominal_pvalue()
+				fP_adjust = association.get_adjusted_pvalue()
+				clusterX_similarity = 1.0 - association.get_left_distance()
+				clusterX_first_pc = association.get_left_first_pc()
+				clusterY_similarity = 1.0 - association.get_right_distance()
+				clusterY_first_pc = association.get_right_first_pc()
+				association_similarity = association.get_nmi()
+				
+				aLineOut = map(str, [association_number,
+									 str(';'.join(self.aOutName1[i] for i in iX)),
+									 clusterX_similarity,
+									 clusterX_first_pc,
+									 " ", 
+									 str(';'.join(self.aOutName2[i] for i in iY)),
+									 clusterY_similarity,
+									 clusterY_first_pc,
+									 " ",
+									 fP,
+									 fP_adjust,
+									 association_similarity])
 				bcsvw.writerow(aLineOut)
 				plt.figure()
 				cluster1 = [self.aDataSet1[i] for i in iX]
@@ -648,7 +667,7 @@ class HAllA():
 		_report_all_tests()
 		_report_and_plot_associations()
 		_report_compared_clusters()
-		_heatmap()
+		#_heatmap()
 		
 		return self.meta_report 
 
@@ -790,35 +809,57 @@ class HAllA():
 			strMethod = "naive"
 			#return self.all_agains_all()
 			# set up all-against-all
+			
+		performance_file  = open(str(self.output_dir)+'/performance.txt', 'w')
+		csvw = csv.writer(performance_file, csv.excel_tab)
+		csvw.writerow(["Method: ", self.reduce_method])
+		csvw.writerow(["Similarity Method: ", self.distance]) 
+		csvw.writerow(["q: FDR cut-off : ", self.q]) 
+	
 		execution_time = time.time()
 		# featurize 
 		start_time = time.time()
 		self._featurize()
-		print("--- %s seconds: _featurize ---" % (time.time() - start_time))
+		ecution_time_temp = time.time() - start_time
+		csvw.writerow(["featurize time", ecution_time_temp ])
+		print("--- %s seconds: _featurize ---" % ecution_time_temp)
 		
 		# hierarchical clustering 
 		start_time = time.time()
 		self._hclust()
-		print("--- %s seconds: _hclust ---" % (time.time() - start_time))
+		ecution_time_temp = time.time() - start_time
+		csvw.writerow(["Hierarchical clustering time", ecution_time_temp ])
+		print("--- %s seconds: _hclust ---" % ecution_time_temp)
 		
 		# coupling clusters hierarchically 
 		start_time = time.time()
 		self._couple()
-		print("--- %s seconds: _couple ---" % (time.time() - start_time))
-		
+		ecution_time_temp = time.time() - start_time
+		csvw.writerow(["Coupling hypotheses tree time", ecution_time_temp ])
+		print("--- %s seconds: _couple ---" % ecution_time_temp)
 		# hypotheses testing
 		print("--- association hypotheses testing is started, this task may take longer ...")
 		start_time = time.time()
 		self._hypotheses_testing()
-		print("--- %s seconds: _hypothesis testing ---" % (time.time() - start_time))
+		ecution_time_temp = time.time() - start_time
+		csvw.writerow(["Hypotheses testing time", ecution_time_temp ])
+		print("--- %s seconds: _hypothesis testing ---" % ecution_time_temp)
 		
 		# Generate a report
 		start_time = time.time() 
 		self._summary_statistics('final') 
-		print("--- %s seconds: _summary_statistics ---" % (time.time() - start_time))
-
+		ecution_time_temp = time.time() - start_time
+		csvw.writerow(["Summary statistics time", ecution_time_temp ])
+		print("--- %s seconds: _summary_statistics ---" % ecution_time_temp)
+		
+		start_time = time.time() 
 		results = self._report()
-		print("\n--- in %s seconds HAllA is successfully done ---" % (time.time() - execution_time))
+		ecution_time_temp = time.time() - start_time
+		csvw.writerow(["Plotting results time", ecution_time_temp ])
+		print("--- %s seconds: plotting results time ---" % ecution_time_temp)
+		ecution_time_temp = time.time() - execution_time
+		csvw.writerow(["Total execution time time", ecution_time_temp ])
+		print("\n--- in %s seconds HAllA is successfully done ---" % ecution_time_temp )
 		return results
 	def view_singleton(self, pBags):
 		aOut = [] 

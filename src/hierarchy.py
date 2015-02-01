@@ -6,7 +6,7 @@ Handles clustering and other organization schemes.
 # # structural packages 
 import itertools
 import math 
-from numpy import array 
+from numpy import array , rank
 import numpy 
 import scipy.cluster 
 from scipy.cluster.hierarchy import linkage, to_tree
@@ -164,6 +164,12 @@ class Tree():
 		print "---- second cluster's features     :", self.get_data()[1]
 		print "---- second cluster similarity     :", 1.0 - self.get_right_distance()
 		print "---- first pc of the second cluster:", self.get_right_first_pc(), "\n"
+	
+	def set_family_rank(self, rank= None):
+		self.family_rank = rank
+		
+	def get_family_rank(self):
+		return self.family_rank
 
 class Gardener():
 	"""
@@ -1534,11 +1540,13 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 			aP_adjusted, pRank = stats.p_adjust(aP, fQ)
 			for i in range(len(Current_Family_Children)):
 				Current_Family_Children[i].set_adjusted_pvalue(aP_adjusted[i])
+				Current_Family_Children[i].set_family_rank(pRank[i])
+				
 				
 			max_r_t = 0
 			# print "aP", aP
 			# print "aP_adjusted: ", aP_adjusted  
-			for i in range(len(aP)):
+			for i in range(len(Current_Family_Children)):
 				if aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
 					max_r_t = pRank[i]
 					# print "max_r_t", max_r_t
@@ -1547,10 +1555,13 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 					number_passed_tests += 1
 					print "-- associations after BHY fdr controlling"
 					Current_Family_Children[i].report()
-					aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-					aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+					#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+					aOut.append(Current_Family_Children[i])
+					#aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+					aFinal.append(Current_Family_Children[i])
 				else :
-					aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+					#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+					aOut.append(Current_Family_Children[i])
 					#if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
 					if Current_Family_Children[i].is_bypass(pvalue_threshold = fQ) :
 						if bVerbose:
