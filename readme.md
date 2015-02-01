@@ -220,7 +220,7 @@ Level	Dataset 1	Dataset 2
 ```
 # Complete option list #
 ```
-usage: halla.py [-h] [-X first input dataset] [-Y second input dataset] -o
+usage: halla.py [-h] -X <input_dataset_1.txt> [-Y input_dataset_2.txt] -o
                 <output> [--plotting_results] [-q q_value]
                 [-s similarity threshold] [-f fdr] [-i iterations] [-m metric]
                 [-d decomposition] [-j adjusting] [-t test] [-v verbosity]
@@ -229,16 +229,16 @@ Hierarchical All-against-All significance association testing.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -X first input dataset
+  -X <input_dataset_1.txt>
                         First file: Tab-delimited text input file, one row per
                         feature, one column per measurement.
-  -Y second input dataset
+  -Y input_dataset_2.txt
                         Second file: Tab-delimited text input file, one row
                         per feature, one column per measurement - If not
                         selected, we will use the first file (-X).
   -o <output>, --output <output>
                         directory to write output files [REQUIRED]
-  --plotting_results    bypass the plotting results step
+  --plotting_results    plotting results
   -q q_value            Q-value for overall significance tests (cut-off for
                         false discovery rate).
   -s similarity threshold
@@ -257,7 +257,8 @@ optional arguments:
                         = BH]
   -t test               The approach for association test, [default is
                         permutation, options are permutation and G-test]
-  -v verbosity          Debug logging level; increase for greater verbosity
+  -v verbosity, --verbose verbosity
+                        Debug logging level; increase for greater verbosity
 ```
 # Frequently Asked Questions #
 
