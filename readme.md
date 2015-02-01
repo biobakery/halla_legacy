@@ -127,12 +127,12 @@ Note: the input files have the same samples(columns) but features(rows) could be
 HAllA by default prints a tab-delimited text file as output ::
 
 	+----------+----------+-------+------+------+
-	| One      | Two      | MIS   | Pperm| Pboot|
+	| One      | Two      | NMI   | Pperm| Padjust|
 	+ ---------+----------+-------+------+------+
 	| X_CLUSTER| Y_CLUSTER| 0.64  | 0.02 | 0.008|
 	+----------+----------+-------+------+------+  	
 
-`MIS` stands for "mutual information similarity", which is an information-theoretic measure of association between two random variables. `Pperm` and `Pboot` corresponds to the p-values of the permutation and bootstrap tests used to assess the statistical significance of the mutual information distance (i.e. lower p-values signify that the association between two variables 
+`NMIS` stands for "normalized mutual information", which is an information-theoretic measure of association between two random variables. `Pperm` and `Padjust` corresponds to the p-values of the permutation tests and adjusted p-value from Benjamini-Hochberg-Yekutieli approach used to assess the statistical significance of the mutual information distance (i.e. lower p-values signify that the association between two variables 
 is not likely to be caused by the noise in the data).  
 
 $OUTPUT_DIR = the output directory
@@ -204,7 +204,7 @@ Association Number	Clusters First Dataset	Cluster Similarity Score (NMI)	Explain
 8	7	0.000999001	0.011111111
 8	8	0.000999001	0.011111111
 ```
-### All Compared Clusters Hypotheses Tree ###
+### All Compared Clusters from the Hypotheses Tree ###
 ```
 Level	Dataset 1	Dataset 2
 0	0;1;2;6;7;8;3;4;5	3;4;5;2;0;1;6;7;8
