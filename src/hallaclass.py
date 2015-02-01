@@ -507,7 +507,7 @@ class HAllA():
 		def _report_all_tests():
 			output_file_all  = open(str(self.output_dir)+'/all_association_results_one_by_one.txt', 'w')
 			csvw = csv.writer(output_file_all, csv.excel_tab)
-			csvw.writerow(["Method: " + self.reduce_method  +"-"+ self.distance , "q value: " + str(self.q), "metric " +self.distance])
+			csvw.writerow(["Decomposition method: " + self.reduce_method  +"-"+ self.distance , "q value: " + str(self.q), "metric " +self.distance])
 			
 			if self.args.Y == None:
 				csvw.writerow([istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"])
@@ -533,7 +533,7 @@ class HAllA():
 			else:
 				bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "SImilarity score between Clusters (NMI)"])
 	
-			sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.nominal_pvalue, reverse=True)
+			sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.nominal_pvalue)
 			for association in sorted_associations:
 				association_number += 1
 				iX, iY = association.get_data()
@@ -812,8 +812,8 @@ class HAllA():
 			
 		performance_file  = open(str(self.output_dir)+'/performance.txt', 'w')
 		csvw = csv.writer(performance_file, csv.excel_tab)
-		csvw.writerow(["Method: ", self.reduce_method])
-		csvw.writerow(["Similarity Method: ", self.distance]) 
+		csvw.writerow(["Decomposition method: ", self.reduce_method])
+		csvw.writerow(["Similarity method: ", self.distance]) 
 		csvw.writerow(["q: FDR cut-off : ", self.q]) 
 	
 		execution_time = time.time()
