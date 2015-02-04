@@ -153,11 +153,11 @@ class Tree():
 		else:
 			return False
 	def report(self):
-		print "\n--- association before fdr controlling"		
+		print "\n--- association based on permutation test"		
 		print "---- pvalue                        :", self.get_nominal_pvalue()
 		#if self.get_adjusted_pvalue() <> 0.0:
 		#	print "--- adjusted pvalue     :", self.get_adjusted_pvalue()
-		print "---- NMI                           :", self.get_nmi()
+		print "---- similarity score              :", self.get_nmi()
 		print "---- first cluster's features      :", self.get_data()[0]
 		print "---- first cluster similarity      :", 1.0 - self.get_left_distance()
 		print "---- first pc of the first cluster :", self.get_left_first_pc()
