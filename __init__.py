@@ -1,5 +1,6 @@
 """
-__init__ for Strudel 
+__init__ for HAllA 
 """
 
 from src import * 
+from halla import *
