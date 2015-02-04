@@ -153,7 +153,7 @@ class Tree():
 		else:
 			return False
 	def report(self):
-		print "\n--- association based on permutation test"		
+		print "\n--- hypothesis test based on permutation test"		
 		print "---- pvalue                        :", self.get_nominal_pvalue()
 		#if self.get_adjusted_pvalue() <> 0.0:
 		#	print "--- adjusted pvalue     :", self.get_adjusted_pvalue()

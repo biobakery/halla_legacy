@@ -567,7 +567,7 @@ class HAllA():
 				X_labels = np.array([self.aOutName1[i] for i in iX])
 				
 				if self.args.plotting_results:
-					print "--- plotting associations ..."
+					print "--- plotting associations ",association_number," ..."
 					import pandas as pd
 					filename = self.output_dir + "/association" + str(association_number) + '/'
 					dir = os.path.dirname(filename)
