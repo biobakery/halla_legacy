@@ -54,6 +54,9 @@ class HAllA():
 		self.meta_summary = None  # summary statistics 
 		self.meta_report = None  # summary report 
 		self.aOut = None  # summary output for naive approaches_
+		self.aOutName1 = None
+		self.aOutName2 = None
+		self.threshold = .05
 
 		#==================================================================#
 		# Static Objects  
@@ -253,7 +256,7 @@ class HAllA():
 	def _hclust(self):
 		# print self.meta_feature
 		self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[0] , labels=self.aOutName1, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
-		self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[1] , labels=self.aOutName2, bTree=True))
+		self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[1] , labels=self.aOutName2, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
 		# self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x , bTree=True) )
 		# print self.meta_data_tree
 		return self.meta_data_tree 

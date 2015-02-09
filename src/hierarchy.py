@@ -1746,7 +1746,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 
 		return dP 
 
-	fdr_function = {"BHY": _bhy_hypothesis_testing,
+	fdr_function = {"default": _bhy_hypothesis_testing,
+							"BHY": _bhy_hypothesis_testing,
 							"BH":  _bh_hypothesis_testing,
 							"RH": _rh_hypothesis_testing,
 							"simple":_simple_hypothesis_testing}
