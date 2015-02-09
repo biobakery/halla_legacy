@@ -54,9 +54,11 @@ class HAllA():
 		self.meta_summary = None  # summary statistics 
 		self.meta_report = None  # summary report 
 		self.aOut = None  # summary output for naive approaches_
-		self.aOutName1 = None
-		self.aOutName2 = None
+		self.aOutName1 = [str(i) for i in range(len(X))]
+		self.aOutName2 = [str(i) for i in range(len(Y))]
 		self.threshold = .05
+		self.strFile1 = None
+		self.strFile2 = None
 
 		#==================================================================#
 		# Static Objects  
@@ -79,7 +81,8 @@ class HAllA():
 		self.__author__			 = ["Gholamali.Rahnavard", "YS Joseph Moon", "Curtis Huttenhower"]
 		self.__contact__		 = "gholamali.rahnavard@gmail.com"
 
-		self.hash_reduce_method = {"pca"	: stats.pca }
+		self.hash_reduce_method = {"pca"	: stats.pca,
+									"ica"	: stats.ica }
 
 		self.hash_metric 		 = distance.c_hash_metric 
 
@@ -473,8 +476,8 @@ class HAllA():
 		def _report_all_tests():
 			output_file_all  = open(str(self.output_dir)+'/all_association_results_one_by_one.txt', 'w')
 			csvw = csv.writer(output_file_all, csv.excel_tab)
-			csvw.writerow(["Decomposition method: " + self.reduce_method  +"-"+ self.distance , "q value: " + str(self.q), "metric " +self.distance])
-			csvw.writerow([self.strFile1.name, self.strFile1.name, "nominal-pvalue", "adjusted-pvalue"])
+			#csvw.writerow(["Decomposition method: ", self.reduce_method  +"-"+ self.distance , "q value: " + str(self.q), "metric " +self.distance])
+			csvw.writerow(["First Dataset", "Second Dataset", "nominal-pvalue", "adjusted-pvalue"])
 	
 			for line in aaOut:
 				iX, iY = line[0]
