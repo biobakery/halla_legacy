@@ -293,7 +293,7 @@ def is_tree(pObj):
 		return False 
 
 
-def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=False):
+def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=False, plotting_result = False , out_dir = "./"):
 	"""
 	Performs hierarchical clustering on an numpy array 
 
@@ -486,12 +486,13 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
 	# print "Distance",D
 	# plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
 	Z = linkage(D, metric=pDistance)
-	scipy.cluster.hierarchy.dendrogram(Z, labels=labels, leaf_rotation=90)
-	plt.gcf()
-	global fig_num
-	plt.savefig("output/Dendrogram_" + str(fig_num) + ".pdf", dpi=500)
-	fig_num += 1
-	plt.close("all")
+	if plotting_result:
+		scipy.cluster.hierarchy.dendrogram(Z, labels=labels, leaf_rotation=90)
+		plt.gcf()
+		global fig_num
+		plt.savefig(out_dir+"/Dendrogram_" + str(fig_num) + ".pdf", dpi=500)
+		fig_num += 1
+		plt.close("all")
 	# print "Linkage Matrix:", Z
 	# print fcluster(Z, .75 )
 	# print fcluster(Z, .9 )
