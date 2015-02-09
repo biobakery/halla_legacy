@@ -19,37 +19,41 @@ import stats
 
 class HAllA():
 	
-	def __init__(self, args, aOutX, aOutY): 
+	def __init__(self, X, Y): 
 		
-		if args:
-			self.distance = args.strMetric 
-			self.reduce_method = args.strReduce 
-			self.fdr_function = args.strFDR
-			self.q = args.dQ  
-			self.iterations = args.iIter
-			self.p_adjust_method = args.strAdjust
-			self.randomization_method = args.strRandomization  # method to generate error bars 
-			self.strStep = "uniform"
-			self.verbose = args.iDebug
-			self.threshold = args.dThreshold_similiarity 
-		else:
-			print "command argument are not passed!"
-			self.distance = "norm_mi"
-			self.reduce_method = "pca" 
-			self.fdr_function = "default"
-			self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
-			self.q = .1  
-			self.iterations = 1000
-			self.p_adjust_method = "RAH"
-			self.randomization_method = "permutation"  # method to generate error bars 
-			self.strStep = "uniform"
-			self.verbose = False 
+		print "set default argument!"
+		self.distance = "nmi"
+		self.reduce_method = "pca" 
+		self.fdr_function = "default"
+		self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
+		self.q = .1  
+		self.iterations = 1000
+		self.p_adjust_method = "BH"
+		self.randomization_method = "permutation"  # method to generate error bars 
+		self.strStep = "uniform"
+		self.verbose = False 
 			
 		self.summary_method = "final"
 		self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
-		self.output_dir = args.output_dir
-			# # {"all","final"}
-		
+		self.output_dir = "./out_put"
+
+		#==================================================================#
+		# Mutable Meta Objects  
+		#==================================================================#
+		self.meta_array = array([None, None])
+		self.meta_array[0] = X  # .append(X)
+		self.meta_array[1] = Y  # .append(Y)
+		#print self.meta_array[0]
+		#print self.meta_array[1]
+		self.meta_feature = None
+		self.meta_threshold = None 
+		self.meta_data_tree = [] 
+		self.meta_hypothesis_tree = None 
+		self.meta_alla = None  # results of all-against-all
+		self.meta_out = None  # final output array; some methods (e.g. hypotheses_testing) have multiple outputs piped to both self.meta_alla and self.meta_out 
+		self.meta_summary = None  # summary statistics 
+		self.meta_report = None  # summary report 
+		self.aOut = None  # summary output for naive approaches_
 
 		#==================================================================#
 		# Static Objects  
@@ -77,34 +81,6 @@ class HAllA():
 		self.hash_metric 		 = distance.c_hash_metric 
 
 		self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q", "distance", "iterations", "reduce_method", "p_adjust_method", "randomization_method"]
-
-		
-		#==================================================================#
-		# Global Defaults 
-		#==================================================================#
-
-		#==================================================================#
-		# Mutable Meta Objects  
-		#==================================================================#
-		self.args = args
-		(self.aDataSet1, self.aOutName1, self.aOutType1, self.aOutHead1) = aOutX 
-		(self.aDataSet2, self.aOutName2, self.aOutType2, self.aOutHead2) = aOutY
-		self.meta_array = array([None, None])
-		self.meta_array[0] = array(self.aDataSet1)  # .append(X)
-		self.meta_array[1] = array(self.aDataSet2)  # .append(Y)
-		self.xlabels = self.aOutName1
-		self.ylabels = self.aOutName2
-		# print self.meta_array[0]
-		# print self.meta_array[1]
-		self.meta_feature = None
-		self.meta_threshold = None 
-		self.meta_data_tree = [] 
-		self.meta_hypothesis_tree = None 
-		self.meta_alla = None  # results of all-against-all
-		self.meta_out = None  # final output array; some methods (e.g. hypotheses_testing) have multiple outputs piped to both self.meta_alla and self.meta_out 
-		self.meta_summary = None  # summary statistics 
-		self.meta_report = None  # summary report 
-		self.aOut = None  # summary output for naive approaches_
 
 		# # END INIT 
 
@@ -276,8 +252,8 @@ class HAllA():
 
 	def _hclust(self):
 		# print self.meta_feature
-		self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[0] , labels=self.xlabels, bTree=True))
-		self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[1] , labels=self.ylabels, bTree=True))
+		self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[0] , labels=self.aOutName1, bTree=True))
+		self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[1] , labels=self.aOutName2, bTree=True))
 		# self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x , bTree=True) )
 		# print self.meta_data_tree
 		return self.meta_data_tree 
@@ -367,11 +343,11 @@ class HAllA():
 		if not strMethod:
 			strMethod = self.summary_method
 		# print('meta array:')
-		# print(self.meta_array[0])
-		# print(self.meta_array[1])	
+		#print(self.meta_array[0])
+		#print(self.meta_array[1])	
 		X = self.meta_array[0]
 		Y = self.meta_array[1]
-		iX, iY = X.shape[0], Y.shape[0]
+		iX, iY = len(X[0]), len(Y[0])
 		
 		S = -1 * np.ones((iX, iY , 2))  # # matrix of all associations; symmetric if using a symmetric measure of association  
 		
@@ -474,8 +450,8 @@ class HAllA():
 		# self.meta_report = [] 
 
 		aP = self.meta_summary
-		iRow1 = self.meta_array[0].shape[0]
-		iRow2 = self.meta_array[1].shape[0]
+		iRow1 = len(self.meta_array[0][0])
+		iRow2 = len(self.meta_array[1][0])
 
 		for i, j in itertools.product(range(iRow1), range(iRow2)):
 			# ## i <= j 
@@ -486,19 +462,6 @@ class HAllA():
 
 		self.meta_report = aaOut
 		# print "meta summary:", self.meta_report
-		istm = list()  # We are using now X and Y 
- 	
-		# We are using now X and Y - If Y was not set - we use X
-		if self.args.Y == None:
-			istm = [self.args.X, self.args.X]  # Use X  
-		else:
-			istm = [self.args.X, self.args.Y]  # Use X and Y
-	
-		
-		if len(istm) > 1:
-			strFile1, strFile2 = istm[:2]
-		else:
-			strFile1, strFile2 = istm[0], istm[0]
 		global associated_feature_X_indecies
 		associated_feature_X_indecies = []
 		global associated_feature_Y_indecies
@@ -508,11 +471,7 @@ class HAllA():
 			output_file_all  = open(str(self.output_dir)+'/all_association_results_one_by_one.txt', 'w')
 			csvw = csv.writer(output_file_all, csv.excel_tab)
 			csvw.writerow(["Decomposition method: " + self.reduce_method  +"-"+ self.distance , "q value: " + str(self.q), "metric " +self.distance])
-			
-			if self.args.Y == None:
-				csvw.writerow([istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"])
-			else:
-				csvw.writerow([self.args.X.name, self.args.Y.name, "nominal-pvalue", "adjusted-pvalue"])
+			csvw.writerow([self.strFile1.name, self.strFile1.name, "nominal-pvalue", "adjusted-pvalue"])
 	
 			for line in aaOut:
 				iX, iY = line[0]
@@ -527,11 +486,7 @@ class HAllA():
 			output_file_associations  = open(str(self.output_dir)+'/associations.txt', 'w')
 			bcsvw = csv.writer(output_file_associations, csv.excel_tab)
 			#bcsvw.writerow(["Method: " + self.reduce_method +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
-			
-			if self.args.Y == None:
-				bcsvw.writerow([istm[0].name, istm[0].name, "nominal-pvalue", "adjusted-pvalue"])
-			else:
-				bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "SImilarity score between Clusters (NMI)"])
+			bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
 	
 			sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.nominal_pvalue)
 			for association in sorted_associations:
@@ -563,10 +518,10 @@ class HAllA():
 									 association_similarity])
 				bcsvw.writerow(aLineOut)
 				plt.figure()
-				cluster1 = [self.aDataSet1[i] for i in iX]
+				cluster1 = [self.meta_array[0][i] for i in iX]
 				X_labels = np.array([self.aOutName1[i] for i in iX])
 				
-				if self.args.plotting_results:
+				if self.plotting_results:
 					print "--- plotting associations ",association_number," ..."
 					import pandas as pd
 					filename = self.output_dir + "/association" + str(association_number) + '/'
@@ -591,7 +546,7 @@ class HAllA():
 					# plt.tight_layout()
 					
 					plt.savefig(filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-					cluster2 = [self.aDataSet2[i] for i in iY]
+					cluster2 = [self.meta_array[1][i] for i in iY]
 					Y_labels = np.array([self.aOutName2[i] for i in iY])
 					plt.figure()
 					df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
@@ -619,7 +574,7 @@ class HAllA():
 				csvwc.writerow(aLineOut)
 
 		def _heatmap():
-			if self.args.plotting_results:
+			if self.plotting_results:
 				print "--- plotting heatmaps using R ..."
 				from scipy.stats.stats import pearsonr
 				global associated_feature_X_indecies
@@ -809,8 +764,10 @@ class HAllA():
 			strMethod = "naive"
 			#return self.all_agains_all()
 			# set up all-against-all
-			
-		performance_file  = open(str(self.output_dir)+'/performance.txt', 'w')
+		try:	
+			performance_file  = open(str(self.output_dir)+'/performance.txt', 'w')
+		except IOError:
+			sys.exit("IO Exception: "+self.output_dir+"/performance.txt") 
 		csvw = csv.writer(performance_file, csv.excel_tab)
 		csvw.writerow(["Decomposition method: ", self.reduce_method])
 		csvw.writerow(["Similarity method: ", self.distance]) 
@@ -861,6 +818,7 @@ class HAllA():
 		csvw.writerow(["Total execution time time", ecution_time_temp ])
 		print("\n--- in %s seconds HAllA is successfully done ---" % ecution_time_temp )
 		return results
+	
 	def view_singleton(self, pBags):
 		aOut = [] 
 		for aIndices, fP in pBags:

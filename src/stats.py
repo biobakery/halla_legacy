@@ -17,7 +17,7 @@ import sys
 import sklearn 
 from sklearn.metrics import roc_curve, auc 
 
-from distance import mi, l2, norm_mi, adj_mi 
+from distance import mi, l2, nmi, adj_mi 
 import distance
 
 
@@ -52,7 +52,7 @@ def fpr_tpr(condition=None, outcome=None):
 # Feature Selection 
 #=========================================================
 
-def alpha_threshold(pArray, alpha=0.05, func=norm_mi):
+def alpha_threshold(pArray, alpha=0.05, func=nmi):
 	"""
 	*Within Covariance* estimation 
 	Threshold association values in X and Y based on alpha cutoff. 
@@ -196,7 +196,7 @@ def cca_score(pArray1, pArray2, strMethod="pearson", bPval=1, bParam=False):
 	
 	return scipy.stats.pearsonr(X_c, Y_c)[0]
 
-def cca_score_norm_mi(pArray1, pArray2):
+def cca_score_nmi(pArray1, pArray2):
 	import scipy.stats 
 
 	pArray1 = array(pArray1)
@@ -217,7 +217,7 @@ def cca_score_norm_mi(pArray1, pArray2):
 	X_cd = stats.discretize(X_c)
 	Y_cd = stats.discretize(Y_c)
 
-	return  distance.norm_mi(X_cd, Y_cd)
+	return  distance.nmi(X_cd, Y_cd)
 	# return scipy.stats.pearsonr( X_c, Y_c )[0]
 
 def pls(pArray1, pArray2, iComponents=1):
@@ -263,7 +263,7 @@ def pls_score(pArray1, pArray2, strMethod="pearson", bPval=1, bParam=False):
 	
 	return scipy.stats.pearsonr(X_c, Y_c)[0]
 
-def pls_score_norm_mi(pArray1, pArray2):
+def pls_score_nmi(pArray1, pArray2):
 	import scipy.stats 
 
 	pArray1 = array(pArray1)
@@ -284,7 +284,7 @@ def pls_score_norm_mi(pArray1, pArray2):
 	X_cd = stats.discretize(X_c)
 	Y_cd = stats.discretize(Y_c)
 
-	return  distance.norm_mi(X_cd, Y_cd)
+	return  distance.nmi(X_cd, Y_cd)
 
 
 def plsc():
@@ -416,7 +416,7 @@ def p_adjust(pval, q, method="BH"):
 # Statistical test 
 #=========================================================
 
-def association_by_representative(pArray1, pArray2, metric="norm_mi", decomposition="pca", iIter=1000):
+def association_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000):
 	"""
 	Returns the inverse of the strength of the association (smaller scores for better association)
 	"""
@@ -442,7 +442,7 @@ def parametric_test_by_representative_ica(pArray1, pArray2):
 
 	return fP
 
-def permutation_test_by_medoid(pArray1, pArray2, metric="norm_mi", iIter=1000):
+def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 	"""
 	Input: 
 	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 100
@@ -487,7 +487,7 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="norm_mi", iIter=1000):
 
 	return fP
 	
-def permutation_test_by_representative(pArray1, pArray2, metric="norm_mi", decomposition="pca", iIter=1000):
+def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000):
 	"""
 	Input: 
 	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 1000
@@ -495,7 +495,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="norm_mi", decom
 	metric = {pca": pca} 
 	"""
 	# numpy.random.seed(0)
-	# return g_test_by_representative( pArray1, pArray2, metric = "norm_mi", decomposition = "pca", iIter = 1000 )
+	# return g_test_by_representative( pArray1, pArray2, metric = "nmi", decomposition = "pca", iIter = 1000 )
 	X, Y = pArray1, pArray2 
 
 	strMetric = metric 
@@ -545,7 +545,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="norm_mi", decom
 	# print fP
 	return fP, fAssociation, left_pc, right_pc
 
-def g_test_by_representative(pArray1, pArray2, metric="norm_mi", decomposition="pca", iIter=1000):
+def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000):
 	"""
 	Input: 
 	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 1000
@@ -637,7 +637,7 @@ def parametric_test_by_max_pca(pArray1, pArray2, k=2, metric="spearman", iIter=1
 
 	return aOut 
 
-def permutation_test_by_max_pca(pArray1, pArray2, k=2, metric="norm_mi", iIter=1000):
+def permutation_test_by_max_pca(pArray1, pArray2, k=2, metric="nmi", iIter=1000):
 
 	aOut = [] 
 
@@ -685,7 +685,7 @@ def permutation_test_by_max_pca(pArray1, pArray2, k=2, metric="norm_mi", iIter=1
 
 	return aOut 	
 
-def permutation_test_by_multiple_representative(pArray1, pArray2, k=2, metric="norm_mi", iIter=1000):
+def permutation_test_by_multiple_representative(pArray1, pArray2, k=2, metric="nmi", iIter=1000):
 
 	return min(permutation_test_by_max_pca(pArray1, pArray2, k=k, metric=metric, iIter=iIter))
 
@@ -693,7 +693,7 @@ def parametric_test_by_multiple_representative(pArray1, pArray2, k=2, metric="sp
 
 	return min(parametric_test_by_max_pca(pArray1, pArray2, k=k, metric=metric))
 
-def permutation_test_by_cca(pArray1, pArray2, metric="norm_mi", iIter=1000):
+def permutation_test_by_cca(pArray1, pArray2, metric="nmi", iIter=1000):
 
 	# numpy.random.seed(0)
 
@@ -728,7 +728,7 @@ def permutation_test_by_cca(pArray1, pArray2, metric="norm_mi", iIter=1000):
 	pRep1, pRep2 = cca(pArray1, pArray2)
 	
 	aDist = [] 
-	fAssociation = cca_score_norm_mi(pRep1, pRep2)
+	fAssociation = cca_score_nmi(pRep1, pRep2)
 
 	#### Perform Permutaiton 
 	for _ in xrange(iIter):
@@ -746,16 +746,16 @@ def permutation_test_by_cca(pArray1, pArray2, metric="norm_mi", iIter=1000):
 
 		aDist.append(fAssociation_)
 
-	# if metric == "norm_mi":
-	# 	fAssociation = cca_score_norm_mi( pArray1, pArray2 ) 
-	# 	pMetric = cca_score_norm_mi 
+	# if metric == "nmi":
+	# 	fAssociation = cca_score_nmi( pArray1, pArray2 ) 
+	# 	pMetric = cca_score_nmi 
 	# elif metric == "pearson":
 	# 	fAssociation = cca_score( pArray1, pArray2 ) 
 	# 	pMetric = cca_score
 	
 	# aDist = [pMetric( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
 	
-	# aDist = numpy.array([ py.distance.norm_mi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
+	# aDist = numpy.array([ py.distance.nmi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
 	# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
 	# # BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iIter iterations of PCA
@@ -770,7 +770,7 @@ def permutation_test_by_cca(pArray1, pArray2, metric="norm_mi", iIter=1000):
 
 	return fP
 
-def permutation_test_by_pls(pArray1, pArray2, metric="norm_mi", iIter=1000):
+def permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=1000):
 
 	# numpy.random.seed(0)
 
@@ -805,7 +805,7 @@ def permutation_test_by_pls(pArray1, pArray2, metric="norm_mi", iIter=1000):
 	pRep1, pRep2 = pls(pArray1, pArray2)
 	
 	aDist = [] 
-	fAssociation = pls_score_norm_mi(pRep1, pRep2)
+	fAssociation = pls_score_nmi(pRep1, pRep2)
 
 	#### Perform Permutaiton 
 	for _ in xrange(iIter):
@@ -823,16 +823,16 @@ def permutation_test_by_pls(pArray1, pArray2, metric="norm_mi", iIter=1000):
 
 		aDist.append(fAssociation_)
 
-	# if metric == "norm_mi":
-	# 	fAssociation = cca_score_norm_mi( pArray1, pArray2 ) 
-	# 	pMetric = cca_score_norm_mi 
+	# if metric == "nmi":
+	# 	fAssociation = cca_score_nmi( pArray1, pArray2 ) 
+	# 	pMetric = cca_score_nmi 
 	# elif metric == "pearson":
 	# 	fAssociation = cca_score( pArray1, pArray2 ) 
 	# 	pMetric = cca_score
 	
 	# aDist = [pMetric( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
 	
-	# aDist = numpy.array([ py.distance.norm_mi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
+	# aDist = numpy.array([ py.distance.nmi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
 	# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
 	# # BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iIter iterations of PCA
@@ -850,7 +850,7 @@ def permutation_test_by_pls(pArray1, pArray2, metric="norm_mi", iIter=1000):
 def permutation_test_by_copula():
 	pass 
 
-def permutation_test_by_average(pArray1, pArray2, metric="norm_mid", iIter=1000):
+def permutation_test_by_average(pArray1, pArray2, metric="nmid", iIter=1000):
 
 	# numpy.random.seed(0)
 
@@ -957,8 +957,8 @@ def parametric_test_by_pls_pearson(pArray1, pArray2, iIter=1000):
 
 	return fP
 
-def permutation_test_by_pls_norm_mi(pArray1, pArray2, iIter=1000):
-	return permutation_test_by_pls(pArray1, pArray2, metric="norm_mi", iIter=iIter)
+def permutation_test_by_pls_nmi(pArray1, pArray2, iIter=1000):
+	return permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=iIter)
 
 
 #=========================================================

@@ -30,7 +30,7 @@ c_hash_association_method_discretize = {"pearson": False,
 										"anova": False,
 										"x2": False,
 										"fisher": False,
-										"norm_mi": True,
+										"nmi": True,
 										"mi": True,
                                         "mic": True,
                                         "adj_mi": True
@@ -192,7 +192,7 @@ def mi(pData1, pData2):
 
 	return MutualInformation(pData1, pData2).get_distance()
 
-def norm_mi(pData1, pData2):
+def nmi(pData1, pData2):
 	"""
 	Static implementation of normalized mutual information 
 
@@ -204,7 +204,7 @@ def norm_mi(pData1, pData2):
 	>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
 	>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
 	>>> p = itertools.product( range(len(x)), range(len(y)) )
-	>>> for item in p: i,j = item; print (i,j), norm_mi( dx[i], dy[j] )
+	>>> for item in p: i,j = item; print (i,j), nmi( dx[i], dy[j] )
 	(0, 0) 1.0
 	(0, 1) 1.0
 	(0, 2) 1.0
@@ -289,7 +289,7 @@ def mic (pArray1, pArray2):
     # print "MIC:" , mine.mic()
     return mine.mic()
 
-c_hash_metric = {"norm_mi": norm_mi,
+c_hash_metric = {"nmi": nmi,
 				"mi": mi,
 				"l2": l2,
                 "adj_mi":adj_mi,
@@ -337,9 +337,9 @@ def pdist(pArray, metric="euclidean"):
 	[0.2254033307585166, 0.0, 0.2254033307585166, 0.2254033307585166, 0.0, 0.2254033307585166]
 	>>> list( halla.distance.pdist( y, lambda u,v: halla.distance.cord(u,v, method="spearman") ) )
 	[0.10557280900008414, 0.0, 0.0, 0.10557280900008414, 0.10557280900008414, 0.0]
-	>>> list( halla.distance.pdist( dx, halla.distance.norm_mid ) )
+	>>> list( halla.distance.pdist( dx, halla.distance.nmid ) )
 	[0.65440797005578877, 0.0, 0.65440797005578877, 0.65440797005578877, 0.0, 0.65440797005578877]
-	>>> list( halla.distance.pdist( dy, halla.distance.norm_mid ) )
+	>>> list( halla.distance.pdist( dy, halla.distance.nmid ) )
 	[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 	""" 
 	pMetric = metric 

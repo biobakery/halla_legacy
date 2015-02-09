@@ -193,31 +193,44 @@ def parse_arguments (args):
     
     return argp.parse_args()
 
-def _main():
-    
-    # Parse arguments from command line
-    args=parse_arguments(sys.argv)
-    check_requirements(args)
+def set_HAllA_object (H, args):
+    H.distance = args.strMetric 
+    H.reduce_method = args.strReduce 
+    H.fdr_function = args.strFDR
+    H.q = args.dQ  
+    H.iterations = args.iIter
+    H.p_adjust_method = args.strAdjust
+    H.randomization_method = args.strRandomization  # method to generate error bars 
+    H.strStep = "uniform"
+    H.verbose = args.iDebug
+    H.threshold = args.dThreshold_similiarity
+    H.output_dir = args.output_dir
     istm = list()  # X and Y are used to store datasets
- 	
-	# If Y was not set - we use X
+     
+    # If Y was not set - we use X
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  
     else:
         istm = [args.X, args.Y]  # Use X and Y
 
-	
+    
     if len(istm) > 1:
-        strFile1, strFile2 = istm[:2]
+        H.strFile1, H.strFile2 = istm[:2]
     else:
-        strFile1, strFile2 = istm[0], istm[0]
-		
-    aOut1, aOut2 = Input (strFile1.name, strFile2.name).get()
-
-    (aOutData1, aOutName1, aOutType1, aOutHead1) = aOut1 
-    (aOutData2, aOutName2, aOutType2, aOutHead2) = aOut2 
-
-    H = hallaclass.HAllA(args, aOut1, aOut2)
+        H.strFile1, H.strFile2 = istm[0], istm[0]
+        
+    aOut1, aOut2 = Input (H.strFile1.name, H.strFile2.name).get()
+    H.plotting_results = args.plotting_results
+    (H.meta_array[0], H.aOutName1, H.aOutType1, H.aOutHead1) = aOut1 
+    (H.meta_array[1], H.aOutName2, H.aOutType2, H.aOutHead2) = aOut2 
+    
+def _main():
+    
+    # Parse arguments from command line
+    args=parse_arguments(sys.argv)
+    check_requirements(args)
+    H = hallaclass.HAllA(X = None, Y = None)
+    set_HAllA_object(H, args)         
     aaOut = H.run()	
     
 if __name__ == '__main__':

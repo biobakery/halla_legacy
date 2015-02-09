@@ -18,9 +18,6 @@ import stats
 
 # import pydot
 
-def _main():
-    D = plotGridData(D=[])
-     # plot_box()
 def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', ylabel=None, labels=None):
     
     import pylab as pl
@@ -176,10 +173,10 @@ def heatmap(D, filename='Dendrogram'):
     if len(D) == 0: 
         # Generate random features and distance matrix.
         print "The distance matrix is empty. The function generates a random matrix."
-        x = scipy.rand(16)
-        D = scipy.zeros([16, 16])
-        for i in range(16):
-            for j in range(i, 16):
+        x = scipy.rand(4)
+        D = scipy.zeros([4, 4])
+        for i in range(4):
+            for j in range(i, 4):
                 D[i, j] = abs(x[i] - x[j])
                 D[j, i] = D[i, j]
     # Compute and plot first dendrogram.
@@ -203,14 +200,14 @@ def heatmap(D, filename='Dendrogram'):
     idx2 = Z2['leaves']
     D = D[idx1, :]
     D = D[:, idx2]
-    # im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.afmhot)
+    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.afmhot)
     axmatrix.set_xticks([])
     axmatrix.set_yticks([])
     
     # Plot colorbar.
     axcolor = fig.add_axes([0.91, 0.1, 0.02, 0.6])
-    # pylab.colorbar(im, cax=axcolor)
-    # fig.show()
+    pylab.colorbar(im, cax=axcolor)
+    fig.show()
     fig.savefig(filename + '.pdf')
     '''
     axmatrix.set_xticks(range(40))
@@ -228,10 +225,5 @@ def heatmap(D, filename='Dendrogram'):
     #(0.5,0,0.5,1) adds an Axes on the right half of the figure. (0,0.5,1,0.5) adds an Axes on the top half of the figure.
     #Most people probably use add_subplot for its convenience. I like add_axes for its control.
     #To remove the border, use add_axes([left,bottom,width,height], frame_on=False)
-    
     axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
-    
     '''
-if __name__ == '__main__':
-    _main()
-  

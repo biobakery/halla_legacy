@@ -14,7 +14,7 @@ from scipy.spatial.distance import pdist
 import sys
 
 import distance
-from distance import mi, l2, absl2, norm_mi
+from distance import mi, l2, absl2, nmi
 import matplotlib.pyplot as plt
 import numpy as np
 import stats 
@@ -293,7 +293,7 @@ def is_tree(pObj):
 		return False 
 
 
-def hclust(pArray, labels=None, strMetric="norm_mi", cluster_method="single", bTree=False):
+def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=False):
 	"""
 	Performs hierarchical clustering on an numpy array 
 
@@ -426,7 +426,7 @@ def hclust(pArray, labels=None, strMetric="norm_mi", cluster_method="single", bT
 		x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
 		dx = halla.discretize( x, iN = None, method = None, aiSkip = [1,3] )
 
-		lxmi = py.hierarchy.hclust( dx, pdist_metric = py.distance.norm_mid )
+		lxmi = py.hierarchy.hclust( dx, pdist_metric = py.distance.nmid )
 
 		dendrogram(lxmi)
 
@@ -440,7 +440,7 @@ def hclust(pArray, labels=None, strMetric="norm_mi", cluster_method="single", bT
 		x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
 		dx = py.discretize( x, iN = None, method = None, aiSkip = [1,3] )
 
-		lxmi = py.hierarchy.hclust( dx, pdist_metric = py.distance.norm_mid )
+		lxmi = py.hierarchy.hclust( dx, pdist_metric = py.distance.nmid )
 
 		dendrogram(lxmi)
 
@@ -453,7 +453,7 @@ def hclust(pArray, labels=None, strMetric="norm_mi", cluster_method="single", bT
 		y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
 		dy = halla.discretize( y, iN = None, method = None, aiSkip = [1] )		
 
-		lymi = py.hierarchy.hclust( dy, pdist_metric = py.distance.norm_mid )
+		lymi = py.hierarchy.hclust( dy, pdist_metric = py.distance.nmid )
 
 		dendrogram( lymi )	
 
@@ -466,7 +466,7 @@ def hclust(pArray, labels=None, strMetric="norm_mi", cluster_method="single", bT
 		y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
 		dy = py.discretize( y, iN = None, method = None, aiSkip = [1] )		
 
-		lymi = py.hierarchy.hclust( dy, pdist_metric = py.distance.norm_mid )
+		lymi = py.hierarchy.hclust( dy, pdist_metric = py.distance.nmid )
 
 		dendrogram( lymi )	
 
@@ -1074,7 +1074,7 @@ def _cutree (clusterNodelist):
 	return sub_clusters
 
 	
-def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uniform", strLinkage="min", func="norm_mi", threshold = None):
+def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uniform", strLinkage="min", func="nmi", threshold = None):
 	
 	"""
 	Couples two data trees to produce a hypothesis tree 
@@ -1400,7 +1400,7 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 #### Need to figure out what -- it's probably in the p-value consolidation stage 
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
-def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="norm_mi", fdr= "BHY", p_adjust="BH", fQ=0.1,
+def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
 	iIter=1000, pursuer_method="nonparameteric", decomposition = "pca", bVerbose=False, afThreshold=.2, fAlpha=0.05):
 	"""
 	Perform all-against-all on a hypothesis tree.
@@ -1469,7 +1469,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="no
 	pHashMethods = {"permutation" : stats.permutation_test,
 						"permutation_test_by_multiple_representative" : stats.permutation_test_by_multiple_representative,
 						"permutation_test_by_medoid": stats.permutation_test_by_medoid,
-						"permutation_test_by_pls_norm_mi": stats.permutation_test_by_pls_norm_mi,
+						"permutation_test_by_pls_nmi": stats.permutation_test_by_pls_nmi,
 						
 						# parametric tests
 						"parametric_test_by_pls_pearson": stats.parametric_test_by_pls_pearson,
