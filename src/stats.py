@@ -17,7 +17,7 @@ import sys
 import sklearn 
 from sklearn.metrics import roc_curve, auc 
 
-from distance import mi, l2, nmi, adj_mi 
+from distance import mi, l2, nmi, ami 
 import distance
 
 
@@ -850,7 +850,7 @@ def permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=1000):
 def permutation_test_by_copula():
 	pass 
 
-def permutation_test_by_average(pArray1, pArray2, metric="nmid", iIter=1000):
+def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 
 	# numpy.random.seed(0)
 
@@ -1453,3 +1453,8 @@ def bag2association(aaBag, A):
 
 	return A_conditional_flattened, A_emp_conditional_flattened
 
+c_hash_reduce_method = {"pca"    : pca,
+                        "ica"    : ica,
+                        "cca"	 : cca,
+                        "pls"	 : pls,
+                        "average": None }

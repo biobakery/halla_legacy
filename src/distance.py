@@ -33,8 +33,9 @@ c_hash_association_method_discretize = {"pearson": False,
 										"nmi": True,
 										"mi": True,
                                         "mic": True,
-                                        "adj_mi": True
+                                        "ami": True
 										}
+
 
 class Distance:
 	''' 
@@ -226,7 +227,7 @@ def nmi(pData1, pData2):
 
 	return NormalizedMutualInformation(pData1, pData2).get_distance() 
 
-def adj_mi(pData1, pData2):
+def ami(pData1, pData2):
 	""" 
 	Static implementation of adjusted distance 
 
@@ -238,7 +239,7 @@ def adj_mi(pData1, pData2):
 	>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
 	>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
 	>>> p = itertools.product( range(len(x)), range(len(y)) )
-	>>> for item in p: i,j = item; print (i,j), adj_mi( dx[i], dy[j] )
+	>>> for item in p: i,j = item; print (i,j), ami( dx[i], dy[j] )
 	(0, 0) 1.0
 	(0, 1) 1.0
 	(0, 2) 1.0
@@ -292,10 +293,11 @@ def mic (pArray1, pArray2):
 c_hash_metric = {"nmi": nmi,
 				"mi": mi,
 				"l2": l2,
-                "adj_mi":adj_mi,
+                "ami":ami,
 				"pearson": pearson,
                 "mic": mic
 				}
+
 # ## Visible and shareable to the outside world 
 
 #==========================================================================#

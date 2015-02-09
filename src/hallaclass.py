@@ -81,8 +81,7 @@ class HAllA():
 		self.__author__			 = ["Gholamali.Rahnavard", "YS Joseph Moon", "Curtis Huttenhower"]
 		self.__contact__		 = "gholamali.rahnavard@gmail.com"
 
-		self.hash_reduce_method = {"pca"	: stats.pca,
-									"ica"	: stats.ica }
+		self.hash_reduce_method = stats.c_hash_reduce_method
 
 		self.hash_metric 		 = distance.c_hash_metric 
 
@@ -283,7 +282,7 @@ class HAllA():
 		if self.verbose:
 			print ("HAllA PROMPT: q value", fQ)
 			print ("q value is", fQ)
-		self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function,  fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose) 
+		self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.reduce_method, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose) 
 		# # Choose to keep to 2 arrays for now -- change later to generalize 
 		#return self.meta_alla 
 	
