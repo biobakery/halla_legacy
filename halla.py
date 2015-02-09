@@ -165,7 +165,7 @@ def parse_arguments (args):
     
     argp.add_argument(
         "-d", metavar="decomposition",
-        dest="strReduce",
+        dest="strDecomposition",
         type=str,
         default="pca",
         help="The approach for reducing dimensions (or decomposition)[default = pca, options are pca, cca, kpca, ica]")    
@@ -195,7 +195,7 @@ def parse_arguments (args):
 
 def set_HAllA_object (H, args):
     H.distance = args.strMetric 
-    H.reduce_method = args.strReduce 
+    H.decomposition = args.strDecomposition 
     H.fdr_function = args.strFDR
     H.q = args.dQ  
     H.iterations = args.iIter

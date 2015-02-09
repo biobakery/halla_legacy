@@ -105,11 +105,11 @@ class Tree():
 	def get_left_distance(self):
 		return self.left_distance
 	
-	def get_nmi(self):
-		return self.nmi
+	def get_similarity_score(self):
+		return self.similarity_score
 	
-	def set_nmi(self, nmi=None):
-		self.nmi = nmi
+	def set_similarity_score(self, similarity_score=None):
+		self.similarity_score = similarity_score
 		
 	def set_left_first_pc(self, pc):
 		self.left_first_pc = pc
@@ -157,12 +157,12 @@ class Tree():
 		print "---- pvalue                        :", self.get_nominal_pvalue()
 		#if self.get_adjusted_pvalue() <> 0.0:
 		#	print "--- adjusted pvalue     :", self.get_adjusted_pvalue()
-		print "---- similarity score              :", self.get_nmi()
+		print "---- similarity_score score              :", self.get_similarity_score()
 		print "---- first cluster's features      :", self.get_data()[0]
-		print "---- first cluster similarity      :", 1.0 - self.get_left_distance()
+		print "---- first cluster similarity_score      :", 1.0 - self.get_left_distance()
 		print "---- first pc of the first cluster :", self.get_left_first_pc()
 		print "---- second cluster's features     :", self.get_data()[1]
-		print "---- second cluster similarity     :", 1.0 - self.get_right_distance()
+		print "---- second cluster similarity_score     :", 1.0 - self.get_right_distance()
 		print "---- first pc of the second cluster:", self.get_right_first_pc(), "\n"
 	
 	def set_family_rank(self, rank= None):
@@ -1609,7 +1609,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 			aP = [ Current_Family_Children[i].get_nominal_pvalue() for i in range(len(Current_Family_Children)) ]
 			
 			for i in range(len(aP)):
-				# print "NMI", Current_Family_Children[i].get_nmi()
+				# print "NMI", Current_Family_Children[i].get_similarity_score()
 				performed_tests.append([Current_Family_Children[i], float(aP[i])])
 				if  Current_Family_Children[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
 					Current_Family_Children[i].report()
@@ -1679,7 +1679,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 			aP = [ Current_Family_Children[i].get_nominal_pvalue() for i in range(len(Current_Family_Children)) ]
 			
 			for i in range(len(aP)):
-				# print "NMI", Current_Family_Children[i].get_nmi()
+				# print "NMI", Current_Family_Children[i].get_similarity_score()
 				performed_tests.append([Current_Family_Children[i], float(aP[i])])	
 				if Current_Family_Children[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
 					Current_Family_Children[i].report()
@@ -1738,8 +1738,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 
 		aIndicies = pNode.get_data() 
 		aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays 
-		dP, nmi, left_first_pc, right_first_pc = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
-		pNode.set_nmi(nmi)
+		dP, similarity, left_first_pc, right_first_pc = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
+		pNode.set_similarity_score(similarity)
 		pNode.set_left_first_pc(left_first_pc)
 		pNode.set_right_first_pc(right_first_pc)
 		# aOut.append( [aIndicies, dP] ) #### dP needs to appended AFTER multiple hypothesis correction

@@ -1453,7 +1453,7 @@ def bag2association(aaBag, A):
 
 	return A_conditional_flattened, A_emp_conditional_flattened
 
-c_hash_reduce_method = {"pca"    : pca,
+c_hash_decomposition = {"pca"    : pca,
                         "ica"    : ica,
                         "cca"	 : cca,
                         "pls"	 : pls,

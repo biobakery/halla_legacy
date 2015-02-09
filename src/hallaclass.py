@@ -23,7 +23,7 @@ class HAllA():
 		
 		print "set default argument!"
 		self.distance = "nmi"
-		self.reduce_method = "pca" 
+		self.decomposition = "pca" 
 		self.fdr_function = "default"
 		self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
 		self.q = .1  
@@ -81,11 +81,11 @@ class HAllA():
 		self.__author__			 = ["Gholamali.Rahnavard", "YS Joseph Moon", "Curtis Huttenhower"]
 		self.__contact__		 = "gholamali.rahnavard@gmail.com"
 
-		self.hash_reduce_method = stats.c_hash_reduce_method
+		self.hash_decomposition = stats.c_hash_decomposition
 
 		self.hash_metric 		 = distance.c_hash_metric 
 
-		self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q", "distance", "iterations", "reduce_method", "p_adjust_method", "randomization_method"]
+		self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q", "distance", "iterations", "decomposition", "p_adjust_method", "randomization_method"]
 
 		# # END INIT 
 
@@ -257,8 +257,8 @@ class HAllA():
 
 	def _hclust(self):
 		# print self.meta_feature
-		self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[0] , labels=self.aOutName1, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
-		self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[1] , labels=self.aOutName2, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
+		self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[0] , strMetric= self.distance, labels=self.aOutName1, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
+		self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[1] , strMetric= self.distance, labels=self.aOutName2, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
 		# self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x , bTree=True) )
 		# print self.meta_data_tree
 		return self.meta_data_tree 
@@ -282,7 +282,7 @@ class HAllA():
 		if self.verbose:
 			print ("HAllA PROMPT: q value", fQ)
 			print ("q value is", fQ)
-		self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.reduce_method, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose) 
+		self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose) 
 		# # Choose to keep to 2 arrays for now -- change later to generalize 
 		#return self.meta_alla 
 	
@@ -475,7 +475,7 @@ class HAllA():
 		def _report_all_tests():
 			output_file_all  = open(str(self.output_dir)+'/all_association_results_one_by_one.txt', 'w')
 			csvw = csv.writer(output_file_all, csv.excel_tab)
-			#csvw.writerow(["Decomposition method: ", self.reduce_method  +"-"+ self.distance , "q value: " + str(self.q), "metric " +self.distance])
+			#csvw.writerow(["Decomposition method: ", self.decomposition  +"-"+ self.distance , "q value: " + str(self.q), "metric " +self.distance])
 			csvw.writerow(["First Dataset", "Second Dataset", "nominal-pvalue", "adjusted-pvalue"])
 	
 			for line in aaOut:
@@ -490,7 +490,7 @@ class HAllA():
 			association_number = 0
 			output_file_associations  = open(str(self.output_dir)+'/associations.txt', 'w')
 			bcsvw = csv.writer(output_file_associations, csv.excel_tab)
-			#bcsvw.writerow(["Method: " + self.reduce_method +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
+			#bcsvw.writerow(["Method: " + self.decomposition +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
 			bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
 	
 			sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.nominal_pvalue)
@@ -507,7 +507,7 @@ class HAllA():
 				clusterX_first_pc = association.get_left_first_pc()
 				clusterY_similarity = 1.0 - association.get_right_distance()
 				clusterY_first_pc = association.get_right_first_pc()
-				association_similarity = association.get_nmi()
+				association_similarity = association.get_similarity_score()
 				
 				aLineOut = map(str, [association_number,
 									 str(';'.join(self.aOutName1[i] for i in iX)),
@@ -678,12 +678,12 @@ class HAllA():
 			self.distance = pMetric 
 		return self.distance 
 
-	def set_reduce_method(self, strMethod):
+	def set_decomposition(self, strMethod):
 		if isinstance(strMethod, str):
-			self.reduce_method = self.hash_reduce_method[strMethod]
+			self.decomposition = self.hash_decomposition[strMethod]
 		else:
-			self.reduce_method = strMethod 
-		return self.reduce_method
+			self.decomposition = strMethod 
+		return self.decomposition
 
 	def set_iterations(self, iIterations):
 		self.iterations = iIterations
@@ -774,7 +774,7 @@ class HAllA():
 		except IOError:
 			sys.exit("IO Exception: "+self.output_dir+"/performance.txt") 
 		csvw = csv.writer(performance_file, csv.excel_tab)
-		csvw.writerow(["Decomposition method: ", self.reduce_method])
+		csvw.writerow(["Decomposition method: ", self.decomposition])
 		csvw.writerow(["Similarity method: ", self.distance]) 
 		csvw.writerow(["q: FDR cut-off : ", self.q]) 
 	
