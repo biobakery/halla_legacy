@@ -46,7 +46,10 @@ class Tree():
 		self.m_arrayChildren = []
 		self.left_distance = left_distance
 		self.right_distance = right_distance
-		self.adjuste_pvalue = 0.0
+		self.adjuste_pvalue = None
+		self.similarity_score = None
+		self.left_first_pc = None
+		self.right_first_pc = None
 
 	def pop(self):
 		# pop one of the children, else return none, since this amounts to killing the singleton 
@@ -146,9 +149,9 @@ class Tree():
 			return False
 	
 	def is_bypass(self, pvalue_threshold = .05):
-		if self.get_nominal_pvalue()> 1.0 - pvalue_threshold and\
-		   self.get_left_first_pc() > .25 and \
-		   self.get_right_first_pc()> .25:
+		if self.get_nominal_pvalue() > 1.0 - pvalue_threshold or\
+		   (self.get_left_first_pc() > .5 and \
+		   self.get_right_first_pc()> .5):
 			return True
 		else:
 			return False
@@ -1559,7 +1562,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 				if pRank[i] <= max_r_t:
 					number_passed_tests += 1
 					print "-- associations after BHY fdr controlling"
-					Current_Family_Children[i].report()
+					if bVerbose:
+						Current_Family_Children[i].report()
 					#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
 					aOut.append(Current_Family_Children[i])
 					#aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
@@ -1737,11 +1741,15 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 		"""
 
 		aIndicies = pNode.get_data() 
-		aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays 
-		dP, similarity, left_first_pc, right_first_pc = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
-		pNode.set_similarity_score(similarity)
-		pNode.set_left_first_pc(left_first_pc)
-		pNode.set_right_first_pc(right_first_pc)
+		aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays
+		if decomposition == "pca": 
+			dP, similarity, left_first_pc, right_first_pc = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
+			pNode.set_similarity_score(similarity)
+			pNode.set_left_first_pc(left_first_pc)
+			pNode.set_right_first_pc(right_first_pc)
+		else:
+			dP = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
+			
 		# aOut.append( [aIndicies, dP] ) #### dP needs to appended AFTER multiple hypothesis correction
 
 		return dP 

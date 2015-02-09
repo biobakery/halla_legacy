@@ -18,18 +18,19 @@ import stats
 
 # import pydot
 
-def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', ylabel=None, labels=None):
+def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods', ylabel=None, labels=None):
     
     import pylab as pl
     import numpy as np
     # multiple box plots on one figure
     
-    pl.figure("HAllA vs. Other methods")
+    pl.figure("HAllA False Discovery Rate Controlling")
+    pl.title("HAllA False Discovery Rate Controlling")
     ax = pl.axes()
     pl.hold(True)
     if len(labels) > 0:
         ax.set_xticklabels(labels)
-    pl.xlabel('Methods')
+    pl.xlabel(xlabel)
     pl.xticks(range(len(labels)), labels, rotation=30, ha='right')
     pl.tight_layout()
     pl.ylabel(ylabel)
@@ -52,11 +53,14 @@ def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', ylabel=None, label
         hR.set_visible(False)
     # savefig('box7')
     pl.savefig(figure_name + '.pdf')
-    pl.show()
-    return
+    pl.savefig(figure_name + '.png')
+    #pl.show()
+    pl.close()
+
 def scatter_plot(x=None, y=None, alpha=.1, figure_name='Figure2', xlabel="Recall", ylabel="FDR", labels=None):
     import pylab as pl
     pl.figure("Recall vs. FDR")
+    pl.title("Recall vs. FDR")
     ax = pl.axes()
     pl.hold(True)
     # if len(labels) > 0:
@@ -95,6 +99,7 @@ def scatter_plot(x=None, y=None, alpha=.1, figure_name='Figure2', xlabel="Recall
     hR.set_visible(False)
     # savefig('box7')
     pl.savefig('Figure2.pdf')
+    pl.savefig('Figure2.png')
     pl.show()
     return
     # fig, ax = pl.subplots()

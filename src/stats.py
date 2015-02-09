@@ -13,6 +13,7 @@ import numpy
 from numpy.random import shuffle, binomial, normal, multinomial 
 import scipy
 import sys
+from scipy.stats import scoreatpercentile, pearsonr, rankdata, percentileofscore, spearmanr
 
 import sklearn 
 from sklearn.metrics import roc_curve, auc 
@@ -65,7 +66,7 @@ def alpha_threshold(pArray, alpha=0.05, func=nmi):
 	XP = array([numpy.random.permutation(x) for x in X])
 	D = discretize(XP)
 	A = numpy.array([func(D[i], D[j]) for i, j in itertools.combinations(range(len(XP)), 2)])
-	fScore = scipy.stats.scoreatpercentile(A, fPercentile)
+	fScore = scoreatpercentile(A, fPercentile)
 	# print "alpha_threshold: ", fScore
 	# print "Distance Function:", str(func)
 	return fScore 
@@ -173,7 +174,7 @@ def cca_p(pArray1, pArray2):
 
 	cc1, cc2 = cca(pArray1, pArray2)
 
-	return scipy.stats.pearsonr(cc1, cc2)[1] 
+	return pearsonr(cc1, cc2)[1] 
 
 def cca_score(pArray1, pArray2, strMethod="pearson", bPval=1, bParam=False):
 	# from sklearn.cross_decomposition import CCA
@@ -214,8 +215,8 @@ def cca_score_nmi(pArray1, pArray2):
 	if Y_c.ndim > 1:
 		Y_c = list(Y_c[0])
 	
-	X_cd = stats.discretize(X_c)
-	Y_cd = stats.discretize(Y_c)
+	X_cd = discretize(X_c)
+	Y_cd = discretize(Y_c)
 
 	return  distance.nmi(X_cd, Y_cd)
 	# return scipy.stats.pearsonr( X_c, Y_c )[0]
@@ -281,8 +282,8 @@ def pls_score_nmi(pArray1, pArray2):
 	if Y_c.ndim > 1:
 		Y_c = list(Y_c[0])
 	
-	X_cd = stats.discretize(X_c)
-	Y_cd = stats.discretize(Y_c)
+	X_cd = discretize(X_c)
+	Y_cd = discretize(Y_c)
 
 	return  distance.nmi(X_cd, Y_cd)
 
@@ -374,7 +375,7 @@ def bh(afPVAL, q):
 	# iLenReduced = len(afPVAL_reduced)
 	# pRank = scipy.stats.rankdata( afPVAL) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	# # source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
-	pRank = scipy.stats.rankdata(afPVAL, method='ordinal')
+	pRank = rankdata(afPVAL, method='ordinal')
 
 	aOut = [] 
 	iLen = len(afPVAL)
@@ -430,7 +431,7 @@ def parametric_test_by_representative(pArray1, pArray2):
 	U1 = pca(pArray1, 1)
 	U2 = pca(pArray2, 1)
 	
-	fAssoc, fP = scipy.stats.pearsonr(U1[0], U2[0])
+	fAssoc, fP = pearsonr(U1[0], U2[0])
 
 	return fP 
 def parametric_test_by_representative_ica(pArray1, pArray2):
@@ -438,7 +439,7 @@ def parametric_test_by_representative_ica(pArray1, pArray2):
 	U1 = ica(pArray1, 1)
 	U2 = ica(pArray2, 1)
 	
-	fAssoc, fP = scipy.stats.pearsonr(U1[0], U2[0])
+	fAssoc, fP = pearsonr(U1[0], U2[0])
 
 	return fP
 
@@ -533,7 +534,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 
 		# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	
-	fPercentile = scipy.stats.percentileofscore(aDist, fAssociation, kind="mean")  # #source: Good 2000  
+	fPercentile = percentileofscore(aDist, fAssociation, kind="mean")  # #source: Good 2000  
 	# ## \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
 	# ## k number of iterations, \hat{X} is randomized version of X 
 	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
@@ -633,7 +634,7 @@ def parametric_test_by_max_pca(pArray1, pArray2, k=2, metric="spearman", iIter=1
 
 	for x, y in itertools.product(pRep1, pRep2):
 		
-		aOut.append(scipy.stats.spearmanr(x, y)[1])
+		aOut.append(spearmanr(x, y)[1])
 
 	return aOut 
 
@@ -871,7 +872,7 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
 	pArrayPerm = numpy.array([ pFun(array([_permutation(x) for x in pArray1]), pArray2) for i in xrange(iIter) ])
 
-	dPPerm = scipy.stats.percentileofscore(pArrayPerm, dVal) / 100.0 	
+	dPPerm = percentileofscore(pArrayPerm, dVal) / 100.0 	
 
 	return dPPerm
 
@@ -899,8 +900,8 @@ def parametric_test(pArray1, pArray2):
 	
 	# numpy.random.seed(0)
 
-	pMe1 = lambda x, y:  distance.cor(x, y, method="pearson", pval=True)
-	pMe2 = lambda x, y:  distance.cor(x, y, method="spearman", pval=True)
+	pMe1 = lambda x, y:  cor(x, y, method="pearson", pval=True)
+	pMe2 = lambda x, y:  cor(x, y, method="spearman", pval=True)
 
 	pVal1 = [pMe1(i, j)[1] for i, j in itertools.product(pArray1, pArray2)]
  	pVal2 = [pMe2(i, j)[1] for i, j in itertools.product(pArray1, pArray2)]
@@ -930,7 +931,7 @@ def parametric_test_by_cca(pArray1, pArray2, iIter=1000):
 	fAssociation = cca_score(pArray1, pArray2) 
 	pMetric = cca_score
 
-	fP = scipy.stats.pearsonr(X_c, Y_c)[1]
+	fP = pearsonr(X_c, Y_c)[1]
 
 	return fP
 
@@ -953,7 +954,7 @@ def parametric_test_by_pls_pearson(pArray1, pArray2, iIter=1000):
 
 	X_pls, Y_pls = pls(pArray1, pArray2)
 	
-	fP = scipy.stats.pearsonr(X_pls, Y_pls)[1]
+	fP = pearsonr(X_pls, Y_pls)[1]
 
 	return fP
 
