@@ -205,6 +205,7 @@ def set_HAllA_object (H, args):
     H.verbose = args.iDebug
     H.threshold = args.dThreshold_similiarity
     H.output_dir = args.output_dir
+    self.plotting_result = args.plotting_results
     istm = list()  # X and Y are used to store datasets
      
     # If Y was not set - we use X
