@@ -487,6 +487,7 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
 	# plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
 	Z = linkage(D, metric=pDistance)
 	if plotting_result:
+		print "--- plotting dentrogram ... "
 		scipy.cluster.hierarchy.dendrogram(Z, labels=labels, leaf_rotation=90)
 		plt.gcf()
 		global fig_num
