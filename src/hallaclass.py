@@ -60,6 +60,7 @@ class HAllA():
 		self.strFile1 = None
 		self.strFile2 = None
 		self.outcome = None
+		self.pvalues = None
 		#==================================================================#
 		# Static Objects  
 		#==================================================================#
@@ -379,7 +380,19 @@ class HAllA():
 				listBag1, listBag2 = aaBag 	
 				for i, j in itertools.product(listBag1, listBag2):
 					self.outcome[i][j] = 1.0 
-
+		def __set_pvalues(Z_all):
+			self.pvalues = np.zeros((len(self.meta_feature[0]),len(self.meta_feature[1])))
+			
+			for aLine in Z_all:
+				if self.verbose:
+					print (aLine) 
+				
+				aaBag, pvalue, _ = aLine
+				listBag1, listBag2 = aaBag 	
+				for i, j in itertools.product(listBag1, listBag2):
+					self.pvalues[i][j] = pvalue 
+			
+			
 		def __add_pval_product_wise(_x, _y, _fP, _fP_adjust):
 			S[_x][_y][0] = _fP
 			S[_x][_y][1] = _fP_adjust  
@@ -425,6 +438,7 @@ class HAllA():
 				aBag1, aBag2 = array(aBag1), array(aBag2)
 				self.bc(aBag1, aBag2, pFunc=lambda x, y: __add_pval_product_wise(_x=x, _y=y, _fP=fAssoc, _fP_adjust=P_adjust))
 		__set_outcome(Z_final)
+		__set_pvalues(Z_all)
 		if strMethod == "final":
 			if self.verbose:
 				print ("Using only final p-values")
@@ -439,7 +453,6 @@ class HAllA():
 			__get_conditional_pval_from_bags(Z_all)
 			assert(S.any())
 			self.meta_summary = S
-			__set_outcome(Z_final)
 			return self.meta_summary
 
 	def _plot(self):

@@ -1538,12 +1538,13 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 		while apChildren:
 			Current_Family_Children = apChildren.pop(0).get_children()
 			number_performed_tests += len(Current_Family_Children)
-			
+			#aP = []
 			# claculate nominal p-value
 			for i in range(len(Current_Family_Children)):
+				#print "aP", i, _actor(Current_Family_Children[i])
+				#print Current_Family_Children[i]
 				Current_Family_Children[i].set_nominal_pvalue(_actor(Current_Family_Children[i]))
 			aP = [ Current_Family_Children[i].get_nominal_pvalue() for i in range(len(Current_Family_Children)) ]
-			
 			# claculate adjusted p-value
 			aP_adjusted, pRank = stats.p_adjust(aP, fQ)
 			for i in range(len(Current_Family_Children)):
@@ -1552,8 +1553,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 				
 				
 			max_r_t = 0
-			# print "aP", aP
-			# print "aP_adjusted: ", aP_adjusted  
+			#print "aP", aP
+			#print "aP_adjusted: ", aP_adjusted  
 			for i in range(len(Current_Family_Children)):
 				if aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
 					max_r_t = pRank[i]
@@ -1584,8 +1585,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 							print "End of branch, leaf!"
 						# aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
 					else:
-						if bVerbose:
-							print "Gray area with p-value:", aP[i]
+						#if bVerbose:
+						print "Gray area with p-value:", aP[i]
 						next_level_apChildren.append(Current_Family_Children[i])
 					
 			if not apChildren:
@@ -1742,13 +1743,11 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 
 		aIndicies = pNode.get_data() 
 		aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays
-		if decomposition == "pca": 
-			dP, similarity, left_first_pc, right_first_pc = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
-			pNode.set_similarity_score(similarity)
-			pNode.set_left_first_pc(left_first_pc)
-			pNode.set_right_first_pc(right_first_pc)
-		else:
-			dP = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
+		dP, similarity, left_first_pc, right_first_pc = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
+		pNode.set_similarity_score(similarity)
+		pNode.set_left_first_pc(left_first_pc)
+		pNode.set_right_first_pc(right_first_pc)
+		
 			
 		# aOut.append( [aIndicies, dP] ) #### dP needs to appended AFTER multiple hypothesis correction
 
