@@ -54,8 +54,8 @@ class HAllA():
 		self.meta_summary = None  # summary statistics 
 		self.meta_report = None  # summary report 
 		self.aOut = None  # summary output for naive approaches_
-		self.aOutName1 = [str(i) for i in range(len(X)) if X]
-		self.aOutName2 = [str(i) for i in range(len(Y)) if Y]
+		self.aOutName1 = None 
+		self.aOutName2 = None 
 		self.threshold = .05
 		self.strFile1 = None
 		self.strFile2 = None
@@ -243,6 +243,9 @@ class HAllA():
 	#==========================================================# 
 
 	def _discretize(self):
+		if not self.aOutName1:
+			self.aOutName1 = [str(i) for i in range(len(self.meta_array[0])) ]
+			self.aOutName2 = [str(i) for i in range(len(self.meta_array[1])) ]
 		self.meta_feature = self.m(self.meta_array, stats.discretize)
 		return self.meta_feature
 
