@@ -160,7 +160,7 @@ def parse_arguments (args):
         "-m", metavar="metric",
         dest="strMetric",
         type=str,
-        default="norm_mi",
+        default="nmi",
         help="Metric to be used for similarity measurement, NMI, MIC, Pearson.")
     
     argp.add_argument(
