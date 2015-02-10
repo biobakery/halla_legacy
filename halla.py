@@ -1,28 +1,23 @@
 #!/usr/bin/env python
 
-#  Load the halla src modules to check the installation
 import sys
-try:
-    from src import config
-    
-except ImportError:
-    sys.exit("CRITICAL ERROR: Unable to find the config under src directory." + 
-        " Please check your install.") 
 
 # Check the python version
+REQUIRED_PYTHON_VERSION_MAJOR = 2
+REQUIRED_PYTHON_VERSION_MINOR = 7
 try:
-    if (sys.version_info[0] != config.required_python_version_major or
-        sys.version_info[1] < config.required_python_version_minor):
+    if (sys.version_info[0] != REQUIRED_PYTHON_VERSION_MAJOR or
+        sys.version_info[1] < REQUIRED_PYTHON_VERSION_MINOR):
         sys.exit("CRITICAL ERROR: The python version found (version "+
             str(sys.version_info[0])+"."+str(sys.version_info[1])+") "+
             "does not match the version required (version "+
-            str(config.required_python_version_major)+"."+
-            str(config.required_python_version_minor)+"+)")
+            str(REQUIRED_PYTHON_VERSION_MAJOR)+"."+
+            str(REQUIRED_PYTHON_VERSION_MINOR)+"+)")
 except (AttributeError,IndexError):
     sys.exit("CRITICAL ERROR: The python version found (version 1) " +
         "does not match the version required (version "+
-        str(config.required_python_version_major)+"."+
-        str(config.required_python_version_minor)+"+)")  
+        str(REQUIRED_PYTHON_VERSION_MAJOR)+"."+
+        str(REQUIRED_PYTHON_VERSION_MINOR)+"+)")  
 
 import argparse
 import csv
@@ -35,8 +30,16 @@ try:
     from numpy import array
 except ImportError:
     sys.exit("Please install numpy")
+    
+#  Load a halla src module to check the installation
+try:
+    from src import hierarchy
+    
+except ImportError:
+    sys.exit("CRITICAL ERROR: Unable to find the hierarchy module under the src directory." + 
+        " Please check your install.") 
 
-from src import hallaclass, hierarchy, stats, distance, parser, plot
+from src import hallaclass, stats, distance, parser, plot
 from src.parser import Input, Output
 
 
