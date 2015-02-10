@@ -280,10 +280,10 @@ def pearson(X, Y):
 
 def mic (pArray1, pArray2):
     try:
-        #import minepy
+        import minepy
         from minepy import MINE
     except (ImportError):
-        sys.exit("CRITICAL ERROR:2 Unable to find the HAllA src directory." + 
+        sys.exit("CRITICAL ERROR:2 Unable to import minepy package." + 
             " Please check your install.") 
     mine = MINE(alpha=0.6, c=15)
     mine.compute_score(pArray1, pArray2)

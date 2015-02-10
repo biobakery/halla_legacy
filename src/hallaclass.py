@@ -54,8 +54,8 @@ class HAllA():
 		self.meta_summary = None  # summary statistics 
 		self.meta_report = None  # summary report 
 		self.aOut = None  # summary output for naive approaches_
-		self.aOutName1 = [str(i) for i in range(len(X))]
-		self.aOutName2 = [str(i) for i in range(len(Y))]
+		self.aOutName1 = [str(i) for i in range(len(X)) if X]
+		self.aOutName2 = [str(i) for i in range(len(Y)) if Y]
 		self.threshold = .05
 		self.strFile1 = None
 		self.strFile2 = None
