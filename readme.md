@@ -21,7 +21,7 @@ Citation
 
 --------------------------------------------
 
-HAllA (pronounced "`challah <http://en.wikipedia.org/wiki/Challah>`_") is an
+HAllA (pronounced [challah](http://en.wikipedia.org/wiki/Challah)) is an
 end-to-end statistical method for Hierarchical All-against-All discovery of
 significant relationships among data features with high power.  HAllA is robust
 to data type, operating both on continuous and categorical values, and works well
@@ -77,22 +77,27 @@ HAllA can be downloaded in two ways:
 	
 	``hg clone https://bitbucket.org/biobakery/halla ``
 
-Note: Creating a clone of the repository requires [Mercurial](http://mercurial.selenic.com/) to be installed. Once the repository has been cloned upgrading to the latest release of HAllA is simple. Just type ``hg pull -u`` from within the repository which will download the latest release.
-
-For the steps that follow, $HAllA_PATH is the location that HAllA was download (ie $HAllA_PATH=/home/user/halla/ with the file "readme.md" found in this folder).
+Note: Creating a clone of the repository requires [Mercurial](http://mercurial.selenic.com/) to be installed. Once the repository has been cloned upgrading to the latest release of HAllA is simple. Just type ``hg pull -u`` from within the repository which will download the latest release. Then follow the install steps to update your install.
 
 ## Install HAllA  ##
 
-To install HAllA if you have admin priviledges (ie root):
-1. From the HAllA directory run : `` $ python setup.py install `` 
+How to install HAllA if you have admin priviledges (ie root):
 
-To install HAllA if you do NOT have admin privileges (ie root):
+1. From the HAllA directory run : 
+
+        $ python setup.py install 
+
+
+How to install HAllA if you do not have admin privileges (ie root):
+
 1. Select a directory where you have write permissions to install HAllA ($DIR)
 1. Create the directory where the HAllA executables will be installed : `` $ mkdir -p $DIR/bin/ ``
 1. Add the bin directory to your path : `` $ export PATH=$PATH:$DIR/bin/ ``
 1. Create the directory where the HAllA libraries will be installed : `` $ mkdir -p $DIR/lib/ ``
 1. Add the lib directory to your pythonpath : `` $ export PYTHONPATH=$PYTHONPATH:$DIR/lib/ ``
-1. From the HAllA directory run : `` $ python setup.py install --install-scripts $DIR/bin/ --install-lib $DIR/lib/ `` 
+1. From the HAllA directory run :  
+
+        $ python setup.py install --install-scripts $DIR/bin/ --install-lib $DIR/lib/ 
 
 NOTE: The changes to the paths made if you do not have admin priviledges will only be in effect while your shell is open. 
 Closing your shell or opening a new shell will not include these changes to the paths. If you are running in a bash shell 
@@ -165,7 +170,7 @@ The input folder contains four demo input files. These files are tab-delimitated
 
 To run the HAllA demo type the command:
 
-`` halla -X input/X_syntheticData.txt -Y Y_syntheticData.txt -o $OUTPUT_DIR ``
+`` halla -X examples/X_syntheticData.txt -Y examples/Y_syntheticData.txt -o $OUTPUT_DIR ``
 
 $OUTPUT_DIR is the output directory
 
