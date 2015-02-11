@@ -18,8 +18,7 @@ from scipy.stats import scoreatpercentile, pearsonr, rankdata, percentileofscore
 import sklearn 
 from sklearn.metrics import roc_curve, auc 
 
-from distance import mi, l2, nmi, ami 
-import distance
+import halla.distance
 
 
 # External dependencies 
@@ -53,7 +52,7 @@ def fpr_tpr(condition=None, outcome=None):
 # Feature Selection 
 #=========================================================
 
-def alpha_threshold(pArray, alpha=0.05, func=nmi):
+def alpha_threshold(pArray, alpha=0.05, func=halla.distance.nmi):
 	"""
 	*Within Covariance* estimation 
 	Threshold association values in X and Y based on alpha cutoff. 
@@ -218,7 +217,7 @@ def cca_score_nmi(pArray1, pArray2):
 	X_cd = discretize(X_c)
 	Y_cd = discretize(Y_c)
 
-	return  distance.nmi(X_cd, Y_cd)
+	return  halla.distance.nmi(X_cd, Y_cd)
 	# return scipy.stats.pearsonr( X_c, Y_c )[0]
 
 def pls(pArray1, pArray2, iComponents=1):
@@ -285,7 +284,7 @@ def pls_score_nmi(pArray1, pArray2):
 	X_cd = discretize(X_c)
 	Y_cd = discretize(Y_c)
 
-	return  distance.nmi(X_cd, Y_cd)
+	return  halla.distance.nmi(X_cd, Y_cd)
 
 
 def plsc():
@@ -297,7 +296,7 @@ def kernel_cca():
 def kernel_cca_score():
 	pass 
 
-def get_medoid(pArray, iAxis=0, pMetric=distance.l2):
+def get_medoid(pArray, iAxis=0, pMetric=halla.distance.l2):
 	"""
 	Input: numpy array 
 	Output: float
@@ -455,7 +454,7 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 
 	strMetric = metric 
 	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
-	pHashMetric = distance.c_hash_metric 
+	pHashMetric = halla.distance.c_hash_metric 
 	
 	def _permutation(pVec):
 		return numpy.random.permutation(pVec)
@@ -502,7 +501,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	strMetric = metric 
 	# step 5 in a case of new decomposition method
 	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
-	pHashMetric = distance.c_hash_metric 
+	pHashMetric = halla.distance.c_hash_metric 
 	
 	def _permutation(pVec):
 		return numpy.random.permutation(pVec)
@@ -514,7 +513,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	aDist = [] 
 
 	#### Calculate Point estimate 
-	pRep1, pRep2 = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
+	pRep1, pRep2 = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 	left_pc = first_pc(pArray1)
 	right_pc = first_pc(pArray2)
 	fAssociation = pMe(pRep1, pRep2) 
@@ -558,14 +557,14 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 	strMetric = metric 
 	# step 5 in a case of new decomposition method
 	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
-	pHashMetric = distance.c_hash_metric 
+	pHashMetric = halla.distance.c_hash_metric 
 	
 	pDe = pHashDecomposition[decomposition]
 	pMe = pHashMetric[strMetric] 
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	
 	#### Caclulate Point estimate 
-	pRep1, pRep2 = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
+	pRep1, pRep2 = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 	print "pRep1:", pRep1
 	print "pRep2:", pRep2
 	left_pc = first_pc(pArray1)
@@ -589,7 +588,7 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 	from collections import Counter
 	from scipy.stats import chi2
 	from math import log, exp, sqrt
-	mi = distance.NormalizedMutualInformation(pRep1, pRep2).get_distance()
+	mi = halla.distance.NormalizedMutualInformation(pRep1, pRep2).get_distance()
 	# mutual information
 	def _mutinfo( x, y ):
 	    px, py, pxy = [Counter() for i in range( 3 )]
@@ -649,7 +648,7 @@ def permutation_test_by_max_pca(pArray1, pArray2, k=2, metric="nmi", iIter=1000)
 
 	strMetric = metric 
 	
-	pHashMetric = distance.c_hash_metric 
+	pHashMetric = halla.distance.c_hash_metric 
 	
 	def _permutation(pVec):
 		return numpy.random.permutation(pVec)
@@ -700,7 +699,7 @@ def permutation_test_by_cca(pArray1, pArray2, metric="nmi", iIter=1000):
 
 	strMetric = metric 
 	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
-	pHashMetric = distance.c_hash_metric 
+	pHashMetric = halla.distance.c_hash_metric 
 	
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function	
 
@@ -777,7 +776,7 @@ def permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=1000):
 
 	strMetric = metric 
 	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
-	pHashMetric = distance.c_hash_metric 
+	pHashMetric = halla.distance.c_hash_metric 
 	
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function	
 
@@ -857,7 +856,7 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 
 	pHashDecomposition = {"pca": pca, "ica":ica}
 	
-	pHashMetric = distance.c_hash_metric
+	pHashMetric = halla.distance.c_hash_metric
 
 	def _permutation(pVec):
 		return numpy.random.permutation(pVec)

@@ -79,19 +79,14 @@ HAllA can be downloaded in two ways:
 
 Note: Creating a clone of the repository requires [Mercurial](http://mercurial.selenic.com/) to be installed. Once the repository has been cloned upgrading to the latest release of HAllA is simple. Just type ``hg pull -u`` from within the repository which will download the latest release.
 
-For the steps that follow, $HAllA_PATH is the location that HAllA was download (ie $HAllA_PATH=/home/user/halla/ with the file "halla.py" found in this folder).
+For the steps that follow, $HAllA_PATH is the location that HAllA was download (ie $HAllA_PATH=/home/user/halla/ with the file "readme.md" found in this folder).
 
 ## Updating the environment ##
-To update the environment, add the path to the HAllA download directory ($HAllA_PATH) to your $PATH.
+To update the environment, add the path to the HAllA download directory ($HAllA_PATH) to your paths.
 
-1. Add this line to the .bashrc file located in your home directory ($HOME) : `` export PATH=$PATH:$HAllA_PATH ``
+1. Add this line to the .bashrc file located in your home directory ($HOME) : `` export PYTHONPATH=$PYTHONPATH:$HAllA_PATH ``
+1. Add this line to the .bashrc file located in your home directory ($HOME) : `` export PATH=$PATH:$HAllA_PATH/halla/ ``
 1.  Run this command to update your current environment: ``$ source $HOME/.bashrc ``
-1. HAllA can now be run without providing the location of the install directory: `` $ halla.py --help ``
-
-
-The update environment step is optional if the path to the HAllA executable is always provided. 
-For example, calling HAllA as follows does not require updates to the environment: `` $ $HAllA_PATH/halla.py --help ``
-
 
 # How to Run #
 
@@ -99,7 +94,7 @@ For example, calling HAllA as follows does not require updates to the environmen
 
 Type the command:
 
-`` halla.py -X $DATASET1 -Y DATASET2 --output $OUTPUT_DIR``
+`` halla_main.py -X $DATASET1 -Y DATASET2 --output $OUTPUT_DIR``
 
 HAllA by default takes two tab-delimited text files as an input, where in each file, each row describes feature (data/metadata) and each column represents an instance. In other words, input `X` is a `D x N` matrix where `D` is the number of dimensions in each instance of the data and `N` is the number of instances (samples). The "edges" of the matrix should contain labels of the data, if desired. The following is an example input ::
 
@@ -158,7 +153,7 @@ The input folder contains four demo input files. These files are tab-delimitated
 
 To run the HAllA demo type the command:
 
-`` halla.py -X input/X_syntheticData.txt -Y Y_syntheticData.txt -o $OUTPUT_DIR ``
+`` halla_main.py -X input/X_syntheticData.txt -Y Y_syntheticData.txt -o $OUTPUT_DIR ``
 
 $OUTPUT_DIR is the output directory
 
@@ -220,7 +215,7 @@ Level	Dataset 1	Dataset 2
 ```
 # Complete option list #
 ```
-usage: halla.py [-h] -X <input_dataset_1.txt> [-Y input_dataset_2.txt] -o
+usage: halla_main.py [-h] -X <input_dataset_1.txt> [-Y input_dataset_2.txt] -o
                 <output> [--plotting_results] [-q q_value]
                 [-s similarity threshold] [-f fdr] [-i iterations] [-m metric]
                 [-d decomposition] [-j adjusting] [-t test] [-v verbosity]

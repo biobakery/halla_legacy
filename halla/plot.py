@@ -11,11 +11,6 @@ including all graphics and 'data object to plot' transformations.
 import pylab
 import sys
 
-import distance
-import stats
-
-
-
 # import pydot
 
 def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods', ylabel=None, labels=None):

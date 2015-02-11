@@ -41,15 +41,15 @@ try:
 except ImportError:
     sys.exit("Please install matplotlib")
     
-#  Load a halla src module to check the installation
+#  Load a halla module to check the installation
 try:
-    from src import hierarchy
+    import halla.hierarchy
 except ImportError:
-    sys.exit("CRITICAL ERROR: Unable to find the hierarchy module under the src directory." + 
+    sys.exit("CRITICAL ERROR: Unable to find the hierarchy module." + 
         " Please check your install.") 
 
-from src import stats, distance, parser, plot
-from src.parser import Input, Output
+import halla.stats, halla.distance
+from halla.parser import Input, Output
 
 
 class HAllA():
@@ -117,9 +117,9 @@ class HAllA():
         self.__author__             = ["Gholamali.Rahnavard", "YS Joseph Moon", "Curtis Huttenhower"]
         self.__contact__         = "gholamali.rahnavard@gmail.com"
 
-        self.hash_decomposition = stats.c_hash_decomposition
+        self.hash_decomposition = halla.stats.c_hash_decomposition
 
-        self.hash_metric          = distance.c_hash_metric 
+        self.hash_metric          = halla.distance.c_hash_metric 
 
         self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q", "distance", "iterations", "decomposition", "p_adjust_method", "randomization_method"]
 
@@ -281,7 +281,7 @@ class HAllA():
         if not self.aOutName1:
             self.aOutName1 = [str(i) for i in range(len(self.meta_array[0])) ]
             self.aOutName2 = [str(i) for i in range(len(self.meta_array[1])) ]
-        self.meta_feature = self.m(self.meta_array, stats.discretize)
+        self.meta_feature = self.m(self.meta_array, halla.stats.discretize)
         return self.meta_feature
 
     def _featurize(self, strMethod="_discretize"):
@@ -296,15 +296,15 @@ class HAllA():
 
     def _hclust(self):
         # print self.meta_feature
-        self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[0] , strMetric= self.distance, labels=self.aOutName1, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
-        self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[1] , strMetric= self.distance, labels=self.aOutName2, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
+        self.meta_data_tree.append(halla.hierarchy.hclust(self.meta_feature[0] , strMetric= self.distance, labels=self.aOutName1, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
+        self.meta_data_tree.append(halla.hierarchy.hclust(self.meta_feature[1] , strMetric= self.distance, labels=self.aOutName2, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
         # self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x , bTree=True) )
         # print self.meta_data_tree
         return self.meta_data_tree 
 
     def _couple(self):
                 
-        self.meta_hypothesis_tree = hierarchy.couple_tree(apClusterNode1=[self.meta_data_tree[0]],
+        self.meta_hypothesis_tree = halla.hierarchy.couple_tree(apClusterNode1=[self.meta_data_tree[0]],
                 apClusterNode2=[self.meta_data_tree[1]],
                 pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], func=self.distance, threshold = self.threshold)[0]
         
@@ -312,7 +312,7 @@ class HAllA():
         #return self.meta_hypothesis_tree 
 
     def _naive_all_against_all(self, iIter=100):
-        self.meta_alla = hierarchy.naive_all_against_all(self.meta_array[0], self.meta_array[1], iIter=iIter)
+        self.meta_alla = halla.hierarchy.naive_all_against_all(self.meta_array[0], self.meta_array[1], iIter=iIter)
         return self.meta_alla 
     def _hypotheses_testing(self):
             
@@ -321,12 +321,12 @@ class HAllA():
         if self.verbose:
             print ("HAllA PROMPT: q value", fQ)
             print ("q value is", fQ)
-        self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose) 
+        self.meta_alla = halla.hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose) 
         # # Choose to keep to 2 arrays for now -- change later to generalize 
         #return self.meta_alla 
     
     def _naive_all_against_all_mic(self, iIter=100):
-        self.meta_alla = hierarchy.naive_all_against_all(self.meta_array[0], self.meta_array[1], strMethod="permutation_test_by_representative_mic", iIter=iIter)
+        self.meta_alla = halla.hierarchy.naive_all_against_all(self.meta_array[0], self.meta_array[1], strMethod="permutation_test_by_representative_mic", iIter=iIter)
         return self.meta_alla
 
     def _layerwise_all_against_all(self):
@@ -336,7 +336,7 @@ class HAllA():
         tX, tY = self.meta_data_tree[0], self.meta_data_tree[1]
         iX, iY = X.shape[0], Y.shape[0]
 
-        aOut = filter(bool, list(hierarchy.layerwise_all_against_all(tX, tY, X, Y)))
+        aOut = filter(bool, list(halla.hierarchy.layerwise_all_against_all(tX, tY, X, Y)))
 
         aMetaOut = [] 
 
@@ -614,7 +614,7 @@ class HAllA():
                     df1 = np.array(cluster1, dtype=float)
                     df2 = np.array(cluster2, dtype=float)
                     plt.figure()
-                    plt.scatter(stats.pca(df1), stats.pca(df2), alpha=0.5)
+                    plt.scatter(halla.stats.pca(df1), halla.stats.pca(df2), alpha=0.5)
                     plt.savefig(filename + '/association_' + str(association_number) + '.pdf')
                     # plt.figure()
                     plt.close("all")
@@ -623,7 +623,7 @@ class HAllA():
             output_file_compared_clusters  = open(str(self.output_dir)+'/all_compared_clusters_hypotheses_tree.txt', 'w')
             csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab)
             csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
-            for line in hierarchy.reduce_tree_by_layer([self.meta_hypothesis_tree]):
+            for line in halla.hierarchy.reduce_tree_by_layer([self.meta_hypothesis_tree]):
                 (level, clusters) = line
                 iX, iY = clusters[0], clusters[1]
                 fP = line[1]
@@ -650,7 +650,7 @@ class HAllA():
                 nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
                 for i in range(len(associated_feature_X_indecies)):
                     for j in range(len(associated_feature_Y_indecies)):
-                        nmi[i][j] = distance.NormalizedMutualInformation(df1[i], df2[j]).get_distance()
+                        nmi[i][j] = halla.distance.NormalizedMutualInformation(df1[i], df2[j]).get_distance()
                         
                 
                 import rpy2.robjects as ro
@@ -944,7 +944,7 @@ def parse_arguments (args):
     """ 
     Parse the arguments from the user
     """
-    argp = argparse.ArgumentParser(prog="halla.py",
+    argp = argparse.ArgumentParser(prog="halla_main.py",
         description="Hierarchical All-against-All significance association testing.")
             
     argp.add_argument(

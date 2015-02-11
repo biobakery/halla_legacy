@@ -12,13 +12,11 @@ import scipy.cluster
 from scipy.cluster.hierarchy import linkage, to_tree
 from scipy.spatial.distance import pdist
 import sys
-
-import distance
-from distance import mi, l2, absl2, nmi
 import matplotlib.pyplot as plt
 import numpy as np
-import stats 
-from stats import discretize, pca, bh, permutation_test_by_representative, p_adjust
+
+import halla.distance
+import halla.stats
 
 # # statistics packages 
 sys.setrecursionlimit(20000)
@@ -479,7 +477,7 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
 		This hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV's, not just single ones 
 		Use the "grouping property" as discussed by Kraskov paper. 
 	"""
-	pMetric = distance.c_hash_metric[strMetric] 
+	pMetric = halla.distance.c_hash_metric[strMetric] 
 	# # Remember, pMetric is a notion of _strength_, not _distance_ 
 	# print str(pMetric)
 	def pDistance(x, y):
@@ -828,7 +826,7 @@ def cross_section_tree(pClusterNode, method="uniform", cuts="complete"):
 
 	layer_form = reduce_tree_by_layer(pClusterNode)
 	iDepth = depth_tree(layer_form, bLayerform=True)
-	pCuts = stats.uniform_cut(range(iDepth), iDepth if cuts == "complete" else cuts)
+	pCuts = halla.stats.uniform_cut(range(iDepth), iDepth if cuts == "complete" else cuts)
 	aCuts = [x[0] for x in pCuts]
 
 	for item in layer_form:
@@ -889,7 +887,7 @@ def spawn_tree(pData, iCopy=0, iDecider=-1):
 
 def _min_tau(X, func):
 	X = numpy.array(X) 
-	D = stats.discretize(X)
+	D = halla.stats.discretize(X)
 	A = numpy.array([func(D[i], D[j]) for i, j in itertools.combinations(range(len(X)), 2)])
 
 	# assert(numpy.any(A))
@@ -902,7 +900,7 @@ def _min_tau(X, func):
 
 def _max_tau(X, func):
 	X = numpy.array(X) 
-	D = stats.discretize(X)
+	D = halla.stats.discretize(X)
 	A = numpy.array([func(D[i], D[j]) for i, j in itertools.combinations(range(len(X)), 2)])
 
 	# assert(numpy.any(A))
@@ -915,7 +913,7 @@ def _max_tau(X, func):
 
 def _mean_tau(X, func):
 	X = numpy.array(X) 
-	D = stats.discretize(X)
+	D = halla.stats.discretize(X)
 	A = numpy.array([func(D[i], D[j]) for i, j in itertools.combinations(range(len(X)), 2)])
 
 	if X.shape[0] < 2:
@@ -972,7 +970,7 @@ def _is_start(ClusterNode, X, func, distance):
 
 def _is_stop(ClusterNode, dataSet, max_dist_cluster, threshold = None):
 		node_indeces = reduce_tree(ClusterNode)
-		first_PC = stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
+		first_PC = halla.stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
 		if ClusterNode.is_leaf() or _percentage(ClusterNode.dist, max_dist_cluster) < .1 or first_PC > .9:
 			#print "Node: ",node_indeces
 			#print "dist:", ClusterNode.dist, " first_PC:", first_PC,"\n"
@@ -1218,9 +1216,9 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 		
 def naive_all_against_all(pArray1, pArray2, strMethod="permutation_test_by_representative", iIter=100):
 
-	phashMethods = {"permutation_test_by_representative" : stats.permutation_test_by_representative,
-						"permutation_test_by_average" : stats.permutation_test_by_average,
-						"parametric_test" : stats.parametric_test}
+	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative,
+						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
+						"parametric_test" : halla.stats.parametric_test}
 
 	iRow = len(pArray1)
 	iCol = len(pArray2)
@@ -1234,7 +1232,7 @@ def naive_all_against_all(pArray1, pArray2, strMethod="permutation_test_by_repre
 		aOut.append([[i, j], fVal])
 
 	aOut_header = zip(*aOut)[0]
-	aOut_adjusted = stats.p_adjust(zip(*aOut)[1])
+	aOut_adjusted = halla.stats.p_adjust(zip(*aOut)[1])
 
 	return zip(aOut_header, aOut_adjusted)
 	# return numpy.reshape( aOut, (iRow,iCol) )
@@ -1381,7 +1379,7 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 	"""
 	aOut = [] 
 
-	pPTBR = lambda ai, aj, X, Y : stats.permutation_test_by_representative(X[array(ai)], Y[array(aj)]) 
+	pPTBR = lambda ai, aj, X, Y : halla.stats.permutation_test_by_representative(X[array(ai)], Y[array(aj)]) 
 
 	traverse_out = traverse_by_layer(pClusterNode1, pClusterNode2, pArray1, pArray2)  # #just gives me the coupled indices 
 
@@ -1389,10 +1387,10 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 		aLayerOut = [] 
 		aPval = [] 
 		for item in layer:
-			fPval = stats.permutation_test_by_representative(pArray1[array(item[0])], pArray2[array(item[1])])
+			fPval = halla.stats.permutation_test_by_representative(pArray1[array(item[0])], pArray2[array(item[1])])
 			aPval.append(fPval)
 		
-		adjusted_pval = stats.p_adjust(aPval)
+		adjusted_pval = halla.stats.p_adjust(aPval)
 		if not isinstance(adjusted_pval, list):
 			# # keep type consistency 
 			adjusted_pval = [adjusted_pval]
@@ -1474,18 +1472,18 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 	# iSkip = _start_parameter_to_iskip( start_parameter )
 	
 		
-	pHashMethods = {"permutation" : stats.permutation_test,
-						"permutation_test_by_multiple_representative" : stats.permutation_test_by_multiple_representative,
-						"permutation_test_by_medoid": stats.permutation_test_by_medoid,
-						"permutation_test_by_pls_nmi": stats.permutation_test_by_pls_nmi,
+	pHashMethods = {"permutation" : halla.stats.permutation_test,
+						"permutation_test_by_multiple_representative" : halla.stats.permutation_test_by_multiple_representative,
+						"permutation_test_by_medoid": halla.stats.permutation_test_by_medoid,
+						"permutation_test_by_pls_nmi": halla.stats.permutation_test_by_pls_nmi,
 						
 						# parametric tests
-						"parametric_test_by_pls_pearson": stats.parametric_test_by_pls_pearson,
-						"parametric_test_by_representative": stats.parametric_test_by_representative,
-						"parametric_test" : stats.parametric_test,
+						"parametric_test_by_pls_pearson": halla.stats.parametric_test_by_pls_pearson,
+						"parametric_test_by_representative": halla.stats.parametric_test_by_representative,
+						"parametric_test" : halla.stats.parametric_test,
 						
 						# G-Test
-						"g-test":stats.g_test
+						"g-test":halla.stats.g_test
 						}
 
 	strMethod = method
@@ -1546,7 +1544,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 				Current_Family_Children[i].set_nominal_pvalue(_actor(Current_Family_Children[i]))
 			aP = [ Current_Family_Children[i].get_nominal_pvalue() for i in range(len(Current_Family_Children)) ]
 			# claculate adjusted p-value
-			aP_adjusted, pRank = stats.p_adjust(aP, fQ)
+			aP_adjusted, pRank = halla.stats.p_adjust(aP, fQ)
 			for i in range(len(Current_Family_Children)):
 				Current_Family_Children[i].set_adjusted_pvalue(aP_adjusted[i])
 				Current_Family_Children[i].set_family_rank(pRank[i])
@@ -1647,7 +1645,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 		print "--- number of passed from nominal tests:", len(passed_tests)
 		performed_tests = array(performed_tests)
 		#print "Nominal p-values", performed_tests[:, 1]
-		aP_adjusted, pRank = stats.p_adjust(performed_tests[:, 1], fQ)
+		aP_adjusted, pRank = halla.stats.p_adjust(performed_tests[:, 1], fQ)
 		#print "ajusted pvalue: ", aP_adjusted
 		for i in range(len(performed_tests)):
 			if performed_tests[i][1] <= aP_adjusted[i] and max_r_t <= pRank[i]:
@@ -1718,7 +1716,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 		end_level_tests = array(end_level_tests)
 		performed_tests = array(performed_tests)
 		print "Nominal p-values", end_level_tests[:, 1]
-		aP_adjusted, pRank = stats.p_adjust(end_level_tests[:, 1], fQ)
+		aP_adjusted, pRank = halla.stats.p_adjust(end_level_tests[:, 1], fQ)
 		print "ajusted pvalue: ", aP_adjusted
 		for i in range(len(end_level_tests)):
 			if end_level_tests[i][1] <= aP_adjusted[i] and max_r_t <= pRank[i]:
