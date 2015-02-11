@@ -81,12 +81,24 @@ Note: Creating a clone of the repository requires [Mercurial](http://mercurial.s
 
 For the steps that follow, $HAllA_PATH is the location that HAllA was download (ie $HAllA_PATH=/home/user/halla/ with the file "readme.md" found in this folder).
 
-## Updating the environment ##
-To update the environment, add the path to the HAllA download directory ($HAllA_PATH) to your paths.
+## Install HAllA  ##
 
-1. Add this line to the .bashrc file located in your home directory ($HOME) : `` export PYTHONPATH=$PYTHONPATH:$HAllA_PATH ``
-1. Add this line to the .bashrc file located in your home directory ($HOME) : `` export PATH=$PATH:$HAllA_PATH/halla/ ``
-1.  Run this command to update your current environment: ``$ source $HOME/.bashrc ``
+To install HAllA if you have admin priviledges (ie root):
+1. From the HAllA directory run : `` $ python setup.py install `` 
+
+To install HAllA if you do NOT have admin privileges (ie root):
+1. Select a directory where you have write permissions to install HAllA ($DIR)
+1. Create the directory where the HAllA executables will be installed : `` $ mkdir -p $DIR/bin/ ``
+1. Add the bin directory to your path : `` $ export PATH=$PATH:$DIR/bin/ ``
+1. Create the directory where the HAllA libraries will be installed : `` $ mkdir -p $DIR/lib/ ``
+1. Add the lib directory to your pythonpath : `` $ export PYTHONPATH=$PYTHONPATH:$DIR/lib/ ``
+1. From the HAllA directory run : `` $ python setup.py install --install-scripts $DIR/bin/ --install-lib $DIR/lib/ `` 
+
+NOTE: The changes to the paths made if you do not have admin priviledges will only be in effect while your shell is open. 
+Closing your shell or opening a new shell will not include these changes to the paths. If you are running in a bash shell 
+(you can check this by typing: `` $ ps -p $$ `` ), add the two export statements to your bashrc file located at ~/.bashrc . 
+Then run: `` $ source ~/.bashrc `` so the updates are made to your current shell. Now every time you open a new shell
+these changes to the paths will always be included.
 
 # How to Run #
 
@@ -94,7 +106,7 @@ To update the environment, add the path to the HAllA download directory ($HAllA_
 
 Type the command:
 
-`` halla_main.py -X $DATASET1 -Y DATASET2 --output $OUTPUT_DIR``
+`` halla -X $DATASET1 -Y DATASET2 --output $OUTPUT_DIR``
 
 HAllA by default takes two tab-delimited text files as an input, where in each file, each row describes feature (data/metadata) and each column represents an instance. In other words, input `X` is a `D x N` matrix where `D` is the number of dimensions in each instance of the data and `N` is the number of instances (samples). The "edges" of the matrix should contain labels of the data, if desired. The following is an example input ::
 
@@ -153,7 +165,7 @@ The input folder contains four demo input files. These files are tab-delimitated
 
 To run the HAllA demo type the command:
 
-`` halla_main.py -X input/X_syntheticData.txt -Y Y_syntheticData.txt -o $OUTPUT_DIR ``
+`` halla -X input/X_syntheticData.txt -Y Y_syntheticData.txt -o $OUTPUT_DIR ``
 
 $OUTPUT_DIR is the output directory
 
@@ -215,7 +227,7 @@ Level	Dataset 1	Dataset 2
 ```
 # Complete option list #
 ```
-usage: halla_main.py [-h] -X <input_dataset_1.txt> [-Y input_dataset_2.txt] -o
+usage: halla [-h] -X <input_dataset_1.txt> [-Y input_dataset_2.txt] -o
                 <output> [--plotting_results] [-q q_value]
                 [-s similarity threshold] [-f fdr] [-i iterations] [-m metric]
                 [-d decomposition] [-j adjusting] [-t test] [-v verbosity]

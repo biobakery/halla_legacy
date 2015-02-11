@@ -21,18 +21,17 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Multiple Association Testing",
         ],
-    long_description=open('README.txt').read(),
+    long_description=open('readme.md').read(),
     install_requires=[  #### version numbers based on what comes with Anaconda Python, March 26, 2014 
         "Numpy >= 1.7.1",
         "Scipy >= 0.13.0",
         "Matplotlib >= 1.1.1",
         "Scikit-learn  >= 0.14.1" 
     ],
-    package_data={"testdata": ['halla/testdata', ]},
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'halla = halla.halla_cli:_main',
+            'halla = halla.halla_main:_main',
         ],
         }
  )

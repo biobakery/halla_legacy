@@ -944,7 +944,7 @@ def parse_arguments (args):
     """ 
     Parse the arguments from the user
     """
-    argp = argparse.ArgumentParser(prog="halla_main.py",
+    argp = argparse.ArgumentParser(
         description="Hierarchical All-against-All significance association testing.")
             
     argp.add_argument(
