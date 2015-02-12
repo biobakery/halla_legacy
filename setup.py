@@ -26,7 +26,10 @@ setup(
         "Numpy >= 1.7.1",
         "Scipy >= 0.13.0",
         "Matplotlib >= 1.1.1",
-        "Scikit-learn  >= 0.14.1" 
+        "Scikit-learn  >= 0.14.1",
+        "minepy >= 1.0.0", #for MIC in evaluation package 
+        "pandas >=0.15.2"
+ 
     ],
     packages=find_packages(),
     entry_points={
