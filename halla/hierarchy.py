@@ -1558,7 +1558,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 					max_r_t = pRank[i]
 					# print "max_r_t", max_r_t
 			for i in range(len(aP)):
-				if pRank[i] <= max_r_t:
+				if pRank[i] <= max_r_t and Current_Family_Children[i].get_nominal_pvalue() <= fQ:
 					number_passed_tests += 1
 					print "-- associations after BHY fdr controlling"
 					if bVerbose:

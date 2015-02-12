@@ -36,8 +36,6 @@ import halla.stats
 class HAllA():
     
     def __init__(self, X, Y): 
-        
-        print "set default argument!"
         self.distance = "nmi"
         self.decomposition = "pca" 
         self.fdr_function = "default"
@@ -372,8 +370,7 @@ class HAllA():
         #print(self.meta_array[1])    
         X = self.meta_array[0]
         Y = self.meta_array[1]
-        iX, iY = len(X[0]), len(Y[0])
-        
+        iX, iY = len(X), len(Y)
         S = -1 * np.ones((iX, iY , 2))  # # matrix of all associations; symmetric if using a symmetric measure of association  
         
         Z = self.meta_alla 
@@ -432,8 +429,8 @@ class HAllA():
                 
                 aaBag, fAssoc, fP_adjust = aLine
                 listBag1, listBag2 = aaBag 
-                #aBag1, aBag2 = array(listBag1), array(listBag2)
-                
+                aBag1, aBag2 = array(listBag1), array(listBag2)
+                print aBag1 , aBag2
                 for i, j in itertools.product(listBag1, listBag2):
                     S[i][j][0] = fAssoc 
                     S[i][j][1] = fP_adjust
