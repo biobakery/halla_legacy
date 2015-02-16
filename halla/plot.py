@@ -148,7 +148,7 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
     # Plot ROC curve
     plt.figure()
     for i in range(len(roc_info)):
-        plt.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]], label='ROC curve of class {0} (area = {1:0.2f})'
+        plt.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]], label='{0} (area = {1:0.2f})'
                                        ''.format(str(roc_info[i][0]), roc_auc[roc_info[i][0]]))   
     plt.plot([0, 1], [0, 1], 'k--')
     plt.xlim([0.0, 1.0])

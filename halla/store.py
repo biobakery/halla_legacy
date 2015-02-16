@@ -429,8 +429,8 @@ class HAllA():
                 
                 aaBag, fAssoc, fP_adjust = aLine
                 listBag1, listBag2 = aaBag 
-                aBag1, aBag2 = array(listBag1), array(listBag2)
-                print aBag1 , aBag2
+                #aBag1, aBag2 = array(listBag1), array(listBag2)
+                #print aBag1 , aBag2
                 for i, j in itertools.product(listBag1, listBag2):
                     S[i][j][0] = fAssoc 
                     S[i][j][1] = fP_adjust
@@ -486,8 +486,8 @@ class HAllA():
         # self.meta_report = [] 
 
         aP = self.meta_summary
-        iRow1 = len(self.meta_array[0][0])
-        iRow2 = len(self.meta_array[1][0])
+        iRow1 = len(self.meta_array[0])
+        iRow2 = len(self.meta_array[1])
 
         for i, j in itertools.product(range(iRow1), range(iRow2)):
             # ## i <= j 
@@ -553,48 +553,71 @@ class HAllA():
                                      fP_adjust,
                                      association_similarity])
                 bcsvw.writerow(aLineOut)
-                plt.figure()
-                cluster1 = [self.meta_array[0][i] for i in iX]
-                X_labels = np.array([self.aOutName1[i] for i in iX])
-                
+               
                 if self.plotting_results:
+                    cluster1 = [self.meta_array[0][i] for i in iX]
+                    discretized_cluster1 = [self.meta_feature[0][i] for i in iX]
+                    X_labels = np.array([self.aOutName1[i] for i in iX])
+                
                     print "--- plotting associations ",association_number," ..."
                     import pandas as pd
-                    filename = self.output_dir + "/association" + str(association_number) + '/'
+                    association_dir = self.output_dir + "/association_"+ str(association_number) + '/'
+                    filename = association_dir +"original_data" + '/'
+                    discretized_filename = association_dir+"discretized_data" + '/'
                     dir = os.path.dirname(filename)
-
+                    discretized_dir = os.path.dirname(discretized_filename)
                     # remove the directory if it exists
                     if os.path.isdir(dir):
                         try:
-                            shutil.rmtree(dir)
+                            shutil.rmtree(association_dir)
+                            #shutil.rmtree(dir)
+                            #shutil.rmtree(discretized_dir)
                         except EnvironmentError:
                             sys.exit("Unable to remove directory: "+dir)
                     
                     # create new directory
                     try:
+                        os.mkdir(association_dir)
                         os.mkdir(dir)
+                        os.mkdir(discretized_dir)
                     except EnvironmentError:
                         sys.exit("Unable to create directory: "+dir)
-
+                    plt.figure()    
                     df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
                     axes = pd.tools.plotting.scatter_matrix(df)
-                    
-                    # plt.tight_layout()
-                    
                     plt.savefig(filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    
+                    plt.figure()
+                    discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
+                    discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df)
+                    plt.savefig(discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    
                     cluster2 = [self.meta_array[1][i] for i in iY]
+                    discretized_cluster2 = [self.meta_feature[1][i] for i in iY]
                     Y_labels = np.array([self.aOutName2[i] for i in iY])
                     plt.figure()
                     df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
                     axes = pd.tools.plotting.scatter_matrix(df)
-                    # plt.tight_layout()
                     plt.savefig(filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    
+                    plt.figure()
+                    discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
+                    discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df)
+                    plt.savefig(discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+
+                    plt.figure()
                     df1 = np.array(cluster1, dtype=float)
                     df2 = np.array(cluster2, dtype=float)
-                    plt.figure()
                     plt.scatter(halla.stats.pca(df1), halla.stats.pca(df2), alpha=0.5)
                     plt.savefig(filename + '/association_' + str(association_number) + '.pdf')
-                    # plt.figure()
+                    
+                    plt.figure()
+                    discretized_df1 = np.array(discretized_cluster1, dtype=float)
+                    discretized_df2 = np.array(discretized_cluster2, dtype=float)
+                    plt.figure()
+                    plt.scatter( halla.stats.discretize(halla.stats.pca(discretized_df1)),  halla.stats.discretize(halla.stats.pca(discretized_df2)), alpha=0.5)
+                    plt.savefig(discretized_filename + '/association_' + str(association_number) + '.pdf')
+                    
                     plt.close("all")
                 
         def _report_compared_clusters():
@@ -813,9 +836,9 @@ class HAllA():
         # featurize 
         start_time = time.time()
         self._featurize()
-        ecution_time_temp = time.time() - start_time
-        csvw.writerow(["featurize time", ecution_time_temp ])
-        print("--- %s seconds: _featurize ---" % ecution_time_temp)
+        excution_time_temp = time.time() - start_time
+        csvw.writerow(["featurize time", excution_time_temp ])
+        print("--- %s seconds: _featurize ---" % excution_time_temp)
         
         # hierarchical clustering 
         start_time = time.time()
@@ -827,32 +850,32 @@ class HAllA():
         # coupling clusters hierarchically 
         start_time = time.time()
         self._couple()
-        ecution_time_temp = time.time() - start_time
-        csvw.writerow(["Coupling hypotheses tree time", ecution_time_temp ])
-        print("--- %s seconds: _couple ---" % ecution_time_temp)
+        excution_time_temp = time.time() - start_time
+        csvw.writerow(["Coupling hypotheses tree time", excution_time_temp ])
+        print("--- %s seconds: _couple ---" % excution_time_temp)
         # hypotheses testing
         print("--- association hypotheses testing is started, this task may take longer ...")
         start_time = time.time()
         self._hypotheses_testing()
-        ecution_time_temp = time.time() - start_time
-        csvw.writerow(["Hypotheses testing time", ecution_time_temp ])
-        print("--- %s seconds: _hypothesis testing ---" % ecution_time_temp)
+        excution_time_temp = time.time() - start_time
+        csvw.writerow(["Hypotheses testing time", excution_time_temp ])
+        print("--- %s seconds: _hypothesis testing ---" % excution_time_temp)
         
         # Generate a report
         start_time = time.time() 
         self._summary_statistics('final') 
         ecution_time_temp = time.time() - start_time
-        csvw.writerow(["Summary statistics time", ecution_time_temp ])
-        print("--- %s seconds: _summary_statistics ---" % ecution_time_temp)
+        csvw.writerow(["Summary statistics time", excution_time_temp ])
+        print("--- %s seconds: _summary_statistics ---" % excution_time_temp)
         
         start_time = time.time() 
         results = self._report()
-        ecution_time_temp = time.time() - start_time
-        csvw.writerow(["Plotting results time", ecution_time_temp ])
-        print("--- %s seconds: plotting results time ---" % ecution_time_temp)
-        ecution_time_temp = time.time() - execution_time
+        excution_time_temp = time.time() - start_time
+        csvw.writerow(["Plotting results time", excution_time_temp ])
+        print("--- %s seconds: plotting results time ---" % excution_time_temp)
+        excution_time_temp = time.time() - execution_time
         csvw.writerow(["Total execution time time", ecution_time_temp ])
-        print("\n--- in %s seconds HAllA is successfully done ---" % ecution_time_temp )
+        print("\n--- in %s seconds HAllA is successfully done ---" % excution_time_temp )
         return results
     
     def view_singleton(self, pBags):
