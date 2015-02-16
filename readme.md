@@ -1,5 +1,4 @@
-**HAllA: Hierarchical All-against-All association testing 
-**
+#**HAllA: Hierarchical All-against-All association testing **#
 
 [TOC]
 
