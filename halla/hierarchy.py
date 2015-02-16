@@ -46,8 +46,8 @@ class Tree():
 		self.right_distance = right_distance
 		self.adjuste_pvalue = None
 		self.similarity_score = None
-		self.left_first_pc = None
-		self.right_first_pc = None
+		self.left_first_rep = None
+		self.right_first_rep = None
 
 	def pop(self):
 		# pop one of the children, else return none, since this amounts to killing the singleton 
@@ -112,17 +112,17 @@ class Tree():
 	def set_similarity_score(self, similarity_score=None):
 		self.similarity_score = similarity_score
 		
-	def set_left_first_pc(self, pc):
-		self.left_first_pc = pc
+	def set_left_first_rep(self, pc):
+		self.left_first_rep = pc
 	
-	def set_right_first_pc(self, pc):
-		self.right_first_pc = pc
+	def set_right_first_rep(self, pc):
+		self.right_first_rep = pc
 		
-	def get_left_first_pc(self):
-		return self.left_first_pc
+	def get_left_first_rep(self):
+		return self.left_first_rep
 	
-	def get_right_first_pc(self):
-		return self.right_first_pc
+	def get_right_first_rep(self):
+		return self.right_first_rep
 	
 	def set_nominal_pvalue(self, pvalue):
 		self.nominal_pvalue = pvalue
@@ -140,16 +140,16 @@ class Tree():
 		if self.get_nominal_pvalue() < pvalue_threshold and \
 			1.0 - self.get_left_distance() > sim_threshold and \
 		    1.0 - self.get_right_distance() > sim_threshold and \
-		    self.get_left_first_pc() > pc_threshold and \
-		    self.get_right_first_pc()> pc_threshold :
+		    self.get_left_first_rep() > pc_threshold and \
+		    self.get_right_first_rep()> pc_threshold :
 			return True
 		else:
 			return False
 	
 	def is_bypass(self, pvalue_threshold = .05):
 		if self.get_nominal_pvalue() > 1.0 - pvalue_threshold or\
-		   (self.get_left_first_pc() > .75 and \
-		   self.get_right_first_pc()> .75):
+		(self.get_left_first_rep() > .75 and \
+		 self.get_right_first_rep()> .75): 
 			return True
 		else:
 			return False
@@ -161,10 +161,10 @@ class Tree():
 		print "---- similarity_score score              :", self.get_similarity_score()
 		print "---- first cluster's features      :", self.get_data()[0]
 		print "---- first cluster similarity_score      :", 1.0 - self.get_left_distance()
-		print "---- first pc of the first cluster :", self.get_left_first_pc()
+		print "---- first pc of the first cluster :", self.get_left_first_rep()
 		print "---- second cluster's features     :", self.get_data()[1]
 		print "---- second cluster similarity_score     :", 1.0 - self.get_right_distance()
-		print "---- first pc of the second cluster:", self.get_right_first_pc(), "\n"
+		print "---- first pc of the second cluster:", self.get_right_first_rep(), "\n"
 	
 	def set_family_rank(self, rank= None):
 		self.family_rank = rank
@@ -1475,7 +1475,6 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 	pHashMethods = {"permutation" : halla.stats.permutation_test,
 						"permutation_test_by_multiple_representative" : halla.stats.permutation_test_by_multiple_representative,
 						"permutation_test_by_medoid": halla.stats.permutation_test_by_medoid,
-						"permutation_test_by_pls_nmi": halla.stats.permutation_test_by_pls_nmi,
 						
 						# parametric tests
 						"parametric_test_by_pls_pearson": halla.stats.parametric_test_by_pls_pearson,
@@ -1741,10 +1740,10 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 
 		aIndicies = pNode.get_data() 
 		aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays
-		dP, similarity, left_first_pc, right_first_pc = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
+		dP, similarity, left_first_rep, right_first_rep = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
 		pNode.set_similarity_score(similarity)
-		pNode.set_left_first_pc(left_first_pc)
-		pNode.set_right_first_pc(right_first_pc)
+		pNode.set_left_first_rep(left_first_rep)
+		pNode.set_right_first_rep(right_first_rep)
 		
 			
 		# aOut.append( [aIndicies, dP] ) #### dP needs to appended AFTER multiple hypothesis correction

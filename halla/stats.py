@@ -108,7 +108,7 @@ def pca(pArray, iComponents=1):
 	 	iCol = None 
 
 	 	return pArray
-def first_pc(pArray, iComponents=1):
+def first_rep(pArray, decomposition, iComponents=1 ):
 	
 	from sklearn.decomposition import PCA
 	pPCA = PCA(n_components=iComponents)
@@ -144,7 +144,7 @@ def ica(pArray, iComponents=1):
 
 	 	return pArray
 
-def cca(pArray1, pArray2, iComponents=1):
+def cca(pArray1, pArray2, StrMetric, iComponents=1):
 	"""
 	Input N X D matrix 
 	Output: D x N matrix 
@@ -169,57 +169,6 @@ def cca(pArray1, pArray2, iComponents=1):
 	return X_cout, Y_cout 
 
 
-def cca_p(pArray1, pArray2):
-
-	cc1, cc2 = cca(pArray1, pArray2)
-
-	return pearsonr(cc1, cc2)[1] 
-
-def cca_score(pArray1, pArray2, strMethod="pearson", bPval=1, bParam=False):
-	# from sklearn.cross_decomposition import CCA
-	import scipy.stats 
-
-	pArray1 = array(pArray1)
-	pArray2 = array(pArray2)
-
-	if pArray1.ndim == 1:
-		pArray1 = array([pArray1])
-	if pArray2.ndim == 1:
-		pArray2 = array([pArray2])
-
-	X_c, Y_c = cca(pArray1, pArray2, iComponents=1)
-	
-	if X_c.ndim > 1:
-		X_c = list(X_c[0])
-	if Y_c.ndim > 1:
-		Y_c = list(Y_c[0])
-	
-	return scipy.stats.pearsonr(X_c, Y_c)[0]
-
-def cca_score_nmi(pArray1, pArray2):
-	import scipy.stats 
-
-	pArray1 = array(pArray1)
-	pArray2 = array(pArray2)
-
-	if pArray1.ndim == 1:
-		pArray1 = array([pArray1])
-	if pArray2.ndim == 1:
-		pArray2 = array([pArray2])
-
-	X_c, Y_c = cca(pArray1, pArray2, iComponents=1)
-	
-	if X_c.ndim > 1:
-		X_c = list(X_c[0])
-	if Y_c.ndim > 1:
-		Y_c = list(Y_c[0])
-	
-	X_cd = discretize(X_c)
-	Y_cd = discretize(Y_c)
-
-	return  halla.distance.nmi(X_cd, Y_cd)
-	# return scipy.stats.pearsonr( X_c, Y_c )[0]
-
 def pls(pArray1, pArray2, iComponents=1):
 
 	import sklearn.cross_decomposition	
@@ -237,54 +186,19 @@ def pls(pArray1, pArray2, iComponents=1):
 		X_plsout = X_plsout[0]
 	if Y_plsout.ndim > 1:
 		Y_plsout = Y_plsout[0]
-	# print X_cout 
+	#print X_plsout, Y_plsout 
 
 	# return array(X_cout), array(Y_cout)
 	return X_plsout, Y_plsout 
 
-def pls_score(pArray1, pArray2, strMethod="pearson", bPval=1, bParam=False):
+def similarity_score(X, Y, strMetric="nmi", bPval=1, bParam=False):
 	# from sklearn.cross_decomposition import CCA
-	import scipy.stats 
-
-	pArray1 = array(pArray1)
-	pArray2 = array(pArray2)
-
-	if pArray1.ndim == 1:
-		pArray1 = array([pArray1])
-	if pArray2.ndim == 1:
-		pArray2 = array([pArray2])
-
-	X_c, Y_c = pls(pArray1, pArray2, iComponents=1)
-	
-	if X_c.ndim > 1:
-		X_c = list(X_c[0])
-	if Y_c.ndim > 1:
-		Y_c = list(Y_c[0])
-	
-	return scipy.stats.pearsonr(X_c, Y_c)[0]
-
-def pls_score_nmi(pArray1, pArray2):
-	import scipy.stats 
-
-	pArray1 = array(pArray1)
-	pArray2 = array(pArray2)
-
-	if pArray1.ndim == 1:
-		pArray1 = array([pArray1])
-	if pArray2.ndim == 1:
-		pArray2 = array([pArray2])
-
-	X_c, Y_c = pls(pArray1, pArray2, iComponents=1)
-	
-	if X_c.ndim > 1:
-		X_c = list(X_c[0])
-	if Y_c.ndim > 1:
-		Y_c = list(Y_c[0])
-	
-	X_cd = discretize(X_c)
-	Y_cd = discretize(Y_c)
-
-	return  halla.distance.nmi(X_cd, Y_cd)
+	#import scipy.stats 
+	X_c = discretize (X)
+	Y_c = discretize (Y)
+	hash_metric = halla.distance.c_hash_metric
+	pMethd = hash_metric[strMetric]
+	return pMethd(X_c, Y_c)
 
 
 def plsc():
@@ -500,7 +414,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 
 	strMetric = metric 
 	# step 5 in a case of new decomposition method
-	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
+	pHashDecomposition = {'pls':pls, 'cca':cca, "pca": pca, "kpca": kpca, "ica":ica }
 	pHashMetric = halla.distance.c_hash_metric 
 	
 	def _permutation(pVec):
@@ -511,13 +425,17 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	
 	aDist = [] 
-
+	left_rep = 1.0
+	right_rep = 1.0
 	#### Calculate Point estimate 
-	pRep1, pRep2 = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
-	left_pc = first_pc(pArray1)
-	right_pc = first_pc(pArray2)
+	if decomposition in ['pls', 'cca']:
+		pRep1, pRep2 = pDe(pArray1, pArray2, metric)
+	else:
+		pRep1, pRep2 = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
+		left_rep = first_rep(pArray1, decomposition)
+		right_rep = first_rep(pArray2, decomposition)
 	fAssociation = pMe(pRep1, pRep2) 
-	# print left_pc, right_pc, fAssociation
+	# print left_rep, right_rep, fAssociation
 	#### Perform Permutation 
 	for _ in xrange(iIter):
 
@@ -543,7 +461,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	
 	assert(fP <= 1.0)
 	# print fP
-	return fP, fAssociation, left_pc, right_pc
+	return fP, fAssociation, left_rep, right_rep
 
 def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000):
 	"""
@@ -567,8 +485,8 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 	pRep1, pRep2 = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(halla.distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 	print "pRep1:", pRep1
 	print "pRep2:", pRep2
-	left_pc = first_pc(pArray1)
-	right_pc = first_pc(pArray2)
+	left_rep = first_rep(pArray1)
+	right_rep = first_rep(pArray2)
 	fAssociation = pMe(pRep1, pRep2) 
 	
 	filtered_pRep1 = []
@@ -615,7 +533,7 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 	# g, fP, dof, expctd = scipy.stats.chi2_contingency([filtered_pRep1, filtered_pRep2], lambda_="log-likelihood")
 	
 	# print "G-test, Pvalue:", fP 
-	return fP, fAssociation, left_pc, right_pc
+	return fP, fAssociation, left_rep, right_rep
 def parametric_test_by_max_pca(pArray1, pArray2, k=2, metric="spearman", iIter=1000):
 
 	aOut = [] 
@@ -728,7 +646,7 @@ def permutation_test_by_cca(pArray1, pArray2, metric="nmi", iIter=1000):
 	pRep1, pRep2 = cca(pArray1, pArray2)
 	
 	aDist = [] 
-	fAssociation = cca_score_nmi(pRep1, pRep2)
+	fAssociation = similarity_score(pRep1, pRep2, strMetric= strMetric)
 
 	#### Perform Permutaiton 
 	for _ in xrange(iIter):
@@ -768,14 +686,13 @@ def permutation_test_by_cca(pArray1, pArray2, metric="nmi", iIter=1000):
 
 	fP = ((1.0 - fPercentile / 100.0) * iIter + 1) / (iIter + 1)
 
-	return fP
+	return fP, fAssociation, pRep1[0], pRep2[0]
 
 def permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=1000):
 
 	# numpy.random.seed(0)
 
 	strMetric = metric 
-	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
 	pHashMetric = halla.distance.c_hash_metric 
 	
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function	
@@ -802,10 +719,10 @@ def permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=1000):
 	# pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] if bool(py.distance.c_hash_association_method_discretize[strMetric]) else [pDe( pA ) for pA in [pArray1, pArray2]]
 
 	#### Calculate Point Estimate 
-	pRep1, pRep2 = pls(pArray1, pArray2)
+	pRep1, pRep2 = pls(pArray1, pArray2, metric)
 	
 	aDist = [] 
-	fAssociation = pls_score_nmi(pRep1, pRep2)
+	fAssociation = similarity_score(pRep1, pRep2, strMetric = metric)
 
 	#### Perform Permutaiton 
 	for _ in xrange(iIter):
@@ -845,7 +762,7 @@ def permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=1000):
 
 	fP = ((1.0 - fPercentile / 100.0) * iIter + 1) / (iIter + 1)
 
-	return fP
+	return fP, fAssociation, pRep1[0], pRep2[0]
 
 def permutation_test_by_copula():
 	pass 
@@ -876,7 +793,7 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 	return dPPerm
 
 def permutation_test(pArray1, pArray2, metric, decomposition, iIter):
-	if decomposition in ["pca", "ica", "kpca"]:
+	if decomposition in ['cca', 'pls',"pca", "ica", "kpca"]:
 		return permutation_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter)
 	
 	if decomposition in ["average"]:
@@ -884,6 +801,8 @@ def permutation_test(pArray1, pArray2, metric, decomposition, iIter):
 	
 	if decomposition in ["cca"]:
 		return permutation_test_by_cca(pArray1, pArray2, metric=metric, iIter=iIter)
+	if decomposition in ["pls"]:
+		return permutation_test_by_pls(pArray1, pArray2, metric, iIter)
 
 def g_test(pArray1, pArray2, metric, decomposition, iIter):
 	if decomposition in ["pca", "ica", "kpca"]:
@@ -956,10 +875,6 @@ def parametric_test_by_pls_pearson(pArray1, pArray2, iIter=1000):
 	fP = pearsonr(X_pls, Y_pls)[1]
 
 	return fP
-
-def permutation_test_by_pls_nmi(pArray1, pArray2, iIter=1000):
-	return permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=iIter)
-
 
 #=========================================================
 # Cake Cutting 

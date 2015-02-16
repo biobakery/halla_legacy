@@ -36,7 +36,7 @@ import halla.stats
 class HAllA():
     
     def __init__(self, X, Y): 
-        self.distance = "nmi"
+        self.distance = "ami"
         self.decomposition = "pca" 
         self.fdr_function = "default"
         self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
@@ -535,19 +535,19 @@ class HAllA():
                 fP = association.get_nominal_pvalue()
                 fP_adjust = association.get_adjusted_pvalue()
                 clusterX_similarity = 1.0 - association.get_left_distance()
-                clusterX_first_pc = association.get_left_first_pc()
+                clusterX_first_rep = association.get_left_first_rep()
                 clusterY_similarity = 1.0 - association.get_right_distance()
-                clusterY_first_pc = association.get_right_first_pc()
+                clusterY_first_rep = association.get_right_first_rep()
                 association_similarity = association.get_similarity_score()
                 
                 aLineOut = map(str, [association_number,
                                      str(';'.join(self.aOutName1[i] for i in iX)),
                                      clusterX_similarity,
-                                     clusterX_first_pc,
+                                     clusterX_first_rep,
                                      " ", 
                                      str(';'.join(self.aOutName2[i] for i in iY)),
                                      clusterY_similarity,
-                                     clusterY_first_pc,
+                                     clusterY_first_rep,
                                      " ",
                                      fP,
                                      fP_adjust,
