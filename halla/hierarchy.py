@@ -39,7 +39,7 @@ class Tree():
 	A general object, tree need not be 2-tree 
 	'''	
 
-	def __init__(self, data=None, left_distance=None, right_distance=None, nmi=None):
+	def __init__(self, data=None, left_distance=None, right_distance=None, similarity=None):
 		self.m_pData = data 
 		self.m_arrayChildren = []
 		self.left_distance = left_distance
@@ -1214,7 +1214,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 	# print "Coupled Tree", reduce_tree_by_layer(aOut)
 	return aOut
 		
-def naive_all_against_all(pArray1, pArray2, strMethod="permutation_test_by_representative", iIter=100):
+def naive_all_against_all(pArray1, pArray2, method="permutation", metric="nmi", fQ=0.1,
+	bVerbose=False, iIter=1000):
 
 	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative,
 						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
@@ -1222,21 +1223,28 @@ def naive_all_against_all(pArray1, pArray2, strMethod="permutation_test_by_repre
 
 	iRow = len(pArray1)
 	iCol = len(pArray2)
-
+	test =  Tree()
 	aOut = [] 
-
+	aFinal = []
 	for i, j in itertools.product(range(iRow), range(iCol)):
-
+		data = [[i], [j]]
+		test.add_data(data)
 		pDist = phashMethods[strMethod]
-		fVal = pDist(array([pArray1[i]]), array([pArray2[j]]), iIter=iIter)
-		aOut.append([[i, j], fVal])
+		fP, similarity, left_rep, right_rep = pDist(array([pArray1[i]]), array([pArray2[j]]), iIter=iIter)
+		test.set_nominal-pvalue(fP)
+		test.set_similarity(similarity)
+		test.set_left_rep()
+		test.set_right_rep()
+		aOut.append(test)
+		if fP < fQ:
+			aFinal.append(test)
 
-	aOut_header = zip(*aOut)[0]
-	aOut_adjusted = halla.stats.p_adjust(zip(*aOut)[1])
+	#aOut_header = zip(*aOut)[0]
+	#aOut_adjusted = halla.stats.p_adjust(zip(*aOut)[1])
 
-	return zip(aOut_header, aOut_adjusted)
+	#return zip(aOut_header, aOut_adjusted)
 	# return numpy.reshape( aOut, (iRow,iCol) )
-
+	return aFinal, aOut
 
 def traverse_by_layer(pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction=None):
 	"""

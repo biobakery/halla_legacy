@@ -303,10 +303,6 @@ class HAllA():
         self.meta_alla = halla.hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose) 
         # # Choose to keep to 2 arrays for now -- change later to generalize 
         #return self.meta_alla 
-    
-    def _naive_all_against_all_mic(self, iIter=100):
-        self.meta_alla = halla.hierarchy.naive_all_against_all(self.meta_array[0], self.meta_array[1], strMethod="permutation_test_by_representative_mic", iIter=iIter)
-        return self.meta_alla
 
     def _layerwise_all_against_all(self):
 
