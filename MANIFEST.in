@@ -1,2 +1,2 @@
-include *.txt
-recursive-include  testdata *.txt *.pcl
+include *.txt *.md
+recursive-include examples *.txt 
