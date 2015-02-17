@@ -17,6 +17,7 @@ import numpy as np
 
 import halla.distance
 import halla.stats
+from unicodedata import decomposition
 
 # # statistics packages 
 sys.setrecursionlimit(20000)
@@ -147,9 +148,9 @@ class Tree():
 			return False
 	
 	def is_bypass(self, pvalue_threshold = .05):
-		if self.get_nominal_pvalue() > 1.0 - pvalue_threshold or\
-		(self.get_left_first_rep() > .75 and \
-		 self.get_right_first_rep()> .75): 
+		if self.get_nominal_pvalue() > 1.0 - pvalue_threshold:# or\
+		#(self.get_left_first_rep() > .75 and \
+		 #self.get_right_first_rep()> .75): 
 			return True
 		else:
 			return False
@@ -1214,27 +1215,39 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 	# print "Coupled Tree", reduce_tree_by_layer(aOut)
 	return aOut
 		
-def naive_all_against_all(pArray1, pArray2, method="permutation", metric="nmi", fQ=0.1,
+def naive_all_against_all(pArray1, pArray2, decomposition = "pca", method="permutation", metric="nmi", fQ=0.1,
 	bVerbose=False, iIter=1000):
 
-	phashMethods = {"permutation_test_by_representative" : halla.stats.permutation_test_by_representative,
-						"permutation_test_by_average" : halla.stats.permutation_test_by_average,
-						"parametric_test" : halla.stats.parametric_test}
+	pHashMethods = {"permutation" : halla.stats.permutation_test,
+						"permutation_test_by_multiple_representative" : halla.stats.permutation_test_by_multiple_representative,
+						"permutation_test_by_medoid": halla.stats.permutation_test_by_medoid,
+						
+						# parametric tests
+						"parametric_test_by_pls_pearson": halla.stats.parametric_test_by_pls_pearson,
+						"parametric_test_by_representative": halla.stats.parametric_test_by_representative,
+						"parametric_test" : halla.stats.parametric_test,
+						
+						# G-Test
+						"g-test":halla.stats.g_test
+						}
 
+	strMethod = method
+	pMethod = pHashMethods[strMethod]
 	iRow = len(pArray1)
 	iCol = len(pArray2)
-	test =  Tree()
+	test =  Tree(left_distance=0.0, right_distance=0.0)
 	aOut = [] 
 	aFinal = []
 	for i, j in itertools.product(range(iRow), range(iCol)):
 		data = [[i], [j]]
 		test.add_data(data)
-		pDist = phashMethods[strMethod]
-		fP, similarity, left_rep, right_rep = pDist(array([pArray1[i]]), array([pArray2[j]]), iIter=iIter)
-		test.set_nominal-pvalue(fP)
-		test.set_similarity(similarity)
-		test.set_left_rep()
-		test.set_right_rep()
+		fP, similarity, left_rep, right_rep = pMethod(array([pArray1[i]]), array([pArray2[j]]), metric = metric, decomposition = decomposition, iIter=iIter)
+		test.set_nominal_pvalue(fP)
+		test.set_similarity_score(similarity)
+		test.set_left_first_rep(1.0)
+		test.set_right_first_rep(1.0)
+		test.set_adjusted_pvalue(fP)
+
 		aOut.append(test)
 		if fP < fQ:
 			aFinal.append(test)

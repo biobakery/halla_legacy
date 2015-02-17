@@ -156,6 +156,12 @@ def parse_arguments (args):
          help="A threshold for similarity to count a cluster as one unit and no consider sub-clusters as sub-unit.")    
     
     argp.add_argument(
+        "--descending",
+        help="function for descending approach, True: halla for hierarchical descending, False: alla for all-against-all test.", 
+        default = "True",
+        )
+    
+    argp.add_argument(
         "-f", metavar="fdr",
         dest="strFDR",
         type=str,
@@ -174,14 +180,14 @@ def parse_arguments (args):
         dest="strMetric",
         type=str,
         default="nmi",
-        help="Metric to be used for similarity measurement, NMI, MIC, Pearson.")
+        help="Metric to be used for similarity measurement, [default = NMI, options are NMI, AMI, MIC, Pearson]")
     
     argp.add_argument(
         "-d", metavar="decomposition",
         dest="strDecomposition",
         type=str,
         default="pca",
-        help="The approach for reducing dimensions (or decomposition)[default = pca, options are pca, cca, kpca, ica]")    
+        help="The approach for reducing dimensions (or decomposition)[default = pca, options are pca, cca, kpca, ica, pls]")    
     
     argp.add_argument(
         "-j",  metavar="adjusting",

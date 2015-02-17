@@ -798,11 +798,7 @@ def permutation_test(pArray1, pArray2, metric, decomposition, iIter):
 	
 	if decomposition in ["average"]:
 		return permutation_test_by_average(pArray1, pArray2, metric=metric, iIter=iIter)
-	
-	if decomposition in ["cca"]:
-		return permutation_test_by_cca(pArray1, pArray2, metric=metric, iIter=iIter)
-	if decomposition in ["pls"]:
-		return permutation_test_by_pls(pArray1, pArray2, metric, iIter)
+
 
 def g_test(pArray1, pArray2, metric, decomposition, iIter):
 	if decomposition in ["pca", "ica", "kpca"]:

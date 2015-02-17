@@ -45,11 +45,12 @@ class HAllA():
         self.p_adjust_method = "BH"
         self.randomization_method = "permutation"  # method to generate error bars 
         self.strStep = "uniform"
-        self.verbose = False 
+        self.verbose = False
+        self.descending = True 
             
         self.summary_method = "final"
         self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
-        self.output_dir = "./output"
+        self.output_dir = "./"
         self.plotting_results = False
         #==================================================================#
         # Mutable Meta Objects  
@@ -291,15 +292,17 @@ class HAllA():
         #return self.meta_hypothesis_tree 
 
     def _naive_all_against_all(self, iIter=100):
-        self.meta_alla = halla.hierarchy.naive_all_against_all(self.meta_array[0], self.meta_array[1], iIter=iIter)
+        self.meta_alla = halla.hierarchy.naive_all_against_all(self.meta_feature[0], self.meta_feature[1], decomposition = self.decomposition, method="permutation", metric=self.distance, fQ=self.q,
+    bVerbose=False, iIter = self.iterations)
         return self.meta_alla 
     def _hypotheses_testing(self):
             
         fQ = self.q
-        
+            
         if self.verbose:
             print ("HAllA PROMPT: q value", fQ)
-            print ("q value is", fQ)
+            print ("q value is", fQ) 
+        
         self.meta_alla = halla.hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose) 
         # # Choose to keep to 2 arrays for now -- change later to generalize 
         #return self.meta_alla 
@@ -815,10 +818,6 @@ class HAllA():
 
         """
 
-        if self.q == 1.0:
-            strMethod = "naive"
-            #return self.all_agains_all()
-            # set up all-against-all
         try:    
             performance_file  = open(str(self.output_dir)+'/performance.txt', 'w')
         except IOError:
@@ -835,27 +834,34 @@ class HAllA():
         excution_time_temp = time.time() - start_time
         csvw.writerow(["featurize time", excution_time_temp ])
         print("--- %s seconds: _featurize ---" % excution_time_temp)
-        
-        # hierarchical clustering 
-        start_time = time.time()
-        self._hclust()
-        ecution_time_temp = time.time() - start_time
-        csvw.writerow(["Hierarchical clustering time", ecution_time_temp ])
-        print("--- %s seconds: _hclust ---" % ecution_time_temp)
-        
-        # coupling clusters hierarchically 
-        start_time = time.time()
-        self._couple()
-        excution_time_temp = time.time() - start_time
-        csvw.writerow(["Coupling hypotheses tree time", excution_time_temp ])
-        print("--- %s seconds: _couple ---" % excution_time_temp)
-        # hypotheses testing
-        print("--- association hypotheses testing is started, this task may take longer ...")
-        start_time = time.time()
-        self._hypotheses_testing()
-        excution_time_temp = time.time() - start_time
-        csvw.writerow(["Hypotheses testing time", excution_time_temp ])
-        print("--- %s seconds: _hypothesis testing ---" % excution_time_temp)
+        if not self.descending:
+            print("--- association hypotheses testing is started, this task may take longer ...")
+            start_time = time.time()
+            self._naive_all_against_all()
+            excution_time_temp = time.time() - start_time
+            csvw.writerow(["Hypotheses testing time", excution_time_temp ])
+            print("--- %s seconds: _hypothesis testing ---" % excution_time_temp)
+        else:
+            # hierarchical clustering 
+            start_time = time.time()
+            self._hclust()
+            ecution_time_temp = time.time() - start_time
+            csvw.writerow(["Hierarchical clustering time", ecution_time_temp ])
+            print("--- %s seconds: _hclust ---" % ecution_time_temp)
+            
+            # coupling clusters hierarchically 
+            start_time = time.time()
+            self._couple()
+            excution_time_temp = time.time() - start_time
+            csvw.writerow(["Coupling hypotheses tree time", excution_time_temp ])
+            print("--- %s seconds: _couple ---" % excution_time_temp)
+            # hypotheses testing
+            print("--- association hypotheses testing is started, this task may take longer ...")
+            start_time = time.time()
+            self._hypotheses_testing()
+            excution_time_temp = time.time() - start_time
+            csvw.writerow(["Hypotheses testing time", excution_time_temp ])
+            print("--- %s seconds: _hypothesis testing ---" % excution_time_temp)
         
         # Generate a report
         start_time = time.time() 
