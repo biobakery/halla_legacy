@@ -1,6 +1,8 @@
-##### halla setup.py
-import multiprocessing
-from setuptools import setup, find_packages
+
+try:
+    from setuptools import setup, find_packages
+except ImportError:
+    sys.exit("Please install setuptools.")
 
 
 setup(
