@@ -496,7 +496,8 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
 			scipy.cluster.hierarchy.dendrogram(Z)
 		plt.gcf()
 		global fig_num
-		plt.savefig(output_dir+"/Dendrogram_" + str(fig_num) + ".pdf", dpi=500)
+		plt.figure("Hierarcichal clusters of Dataset "+ fig_num,  dpi=300)
+		plt.savefig(output_dir+"/Dendrogram_" + str(fig_num) + ".pdf")
 		fig_num += 1
 		plt.close("all")
 	# print "Linkage Matrix:", Z
@@ -1215,11 +1216,10 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 	# print "Coupled Tree", reduce_tree_by_layer(aOut)
 	return aOut
 		
-def naive_all_against_all(pArray1, pArray2, decomposition = "pca", method="permutation", metric="nmi", fQ=0.1,
+def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", method="permutation", metric="nmi", fQ=0.1,
 	bVerbose=False, iIter=1000):
 
 	pHashMethods = {"permutation" : halla.stats.permutation_test,
-						"permutation_test_by_multiple_representative" : halla.stats.permutation_test_by_multiple_representative,
 						"permutation_test_by_medoid": halla.stats.permutation_test_by_medoid,
 						
 						# parametric tests
@@ -1238,6 +1238,8 @@ def naive_all_against_all(pArray1, pArray2, decomposition = "pca", method="permu
 	test =  Tree(left_distance=0.0, right_distance=0.0)
 	aOut = [] 
 	aFinal = []
+	aP = []
+	tests = []
 	for i, j in itertools.product(range(iRow), range(iCol)):
 		data = [[i], [j]]
 		test.add_data(data)
@@ -1247,11 +1249,31 @@ def naive_all_against_all(pArray1, pArray2, decomposition = "pca", method="permu
 		test.set_left_first_rep(1.0)
 		test.set_right_first_rep(1.0)
 		test.set_adjusted_pvalue(fP)
-
-		aOut.append(test)
-		if fP < fQ:
-			aFinal.append(test)
-
+		aP.append(fP)
+		tests.append(test)
+		
+	aP_adjusted, pRank = halla.stats.p_adjust(aP, fQ)
+	for i in range(len(tests)):
+		tests[i].set_adjusted_pvalue(aP_adjusted[i])
+		tests[i].set_family_rank(pRank[i])
+	max_r_t = 0
+			#print "aP", aP
+			#print "aP_adjusted: ", aP_adjusted  
+	for i in range(len(tests)):
+		if aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
+			max_r_t = pRank[i]
+			# print "max_r_t", max_r_t
+	for i in range(len(aP)):
+		if pRank[i] <= max_r_t:
+			print "-- associations after BH fdr controlling"
+			if bVerbose:
+				tests[i].report()
+			aOut.append(tests[i])
+			#aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+			aFinal.append(tests[i])
+		else :
+			#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+			aOut.append(tests[i])
 	#aOut_header = zip(*aOut)[0]
 	#aOut_adjusted = halla.stats.p_adjust(zip(*aOut)[1])
 

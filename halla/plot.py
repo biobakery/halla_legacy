@@ -19,14 +19,18 @@ def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods'
     import numpy as np
     # multiple box plots on one figure
     
-    pl.figure("HAllA False Discovery Rate Controlling")
-    pl.title("HAllA False Discovery Rate Controlling")
+    pl.figure("HAllA False Discovery Rate Controlling", dpi= 300, figsize=(10, 5))
+    if ylabel == "FDR":
+        pl.title("False Discovery Rate Controlling")
+    if ylabel == "Recall":
+        pl.title("Statistical Power")
+        
     ax = pl.axes()
     pl.hold(True)
     if len(labels) > 0:
         ax.set_xticklabels(labels)
     pl.xlabel(xlabel)
-    pl.xticks(range(len(labels)), labels, rotation=30, ha='right')
+    pl.xticks(range(len(labels)), labels, rotation=60, ha='right')
     pl.tight_layout()
     pl.ylabel(ylabel)
     pl.xlim([-0.05, 1.15])
@@ -47,6 +51,7 @@ def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods'
     # hB.set_visible(False)
         hR.set_visible(False)
     # savefig('box7')
+    
     pl.savefig(figure_name + '.pdf')
     pl.savefig(figure_name + '.png')
     #pl.show()
@@ -54,7 +59,7 @@ def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods'
 
 def scatter_plot(x=None, y=None, alpha=.1, figure_name='Figure2', xlabel="Recall", ylabel="FDR", labels=None):
     import pylab as pl
-    pl.figure("Recall vs. FDR")
+    pl.figure("Recall vs. FDR", dpi= 300)
     pl.title("Recall vs. FDR")
     ax = pl.axes()
     pl.hold(True)
@@ -146,7 +151,7 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
         roc_name += '_' + roc_info[i][0] 
         
     # Plot ROC curve
-    plt.figure()
+    plt.figure(dpi= 300)
     for i in range(len(roc_info)):
         plt.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]], label='{0} (area = {1:0.2f})'
                                        ''.format(str(roc_info[i][0]), roc_auc[roc_info[i][0]]))   
@@ -180,7 +185,7 @@ def heatmap(D, filename='Dendrogram'):
                 D[i, j] = abs(x[i] - x[j])
                 D[j, i] = D[i, j]
     # Compute and plot first dendrogram.
-    fig = pylab.figure(figsize=(10, 10))
+    fig = pylab.figure(dpi= 300, figsize=(10, 10))
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6])
     Y = sch.linkage(D, method='single')
     Z1 = sch.dendrogram(Y, orientation='right')
