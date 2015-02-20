@@ -496,7 +496,7 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
 			scipy.cluster.hierarchy.dendrogram(Z)
 		plt.gcf()
 		global fig_num
-		plt.figure("Hierarcichal clusters of Dataset "+ fig_num,  dpi=300)
+		plt.figure("Hierarcichal clusters of Dataset "+ str(fig_num),  dpi=300)
 		plt.savefig(output_dir+"/Dendrogram_" + str(fig_num) + ".pdf")
 		fig_num += 1
 		plt.close("all")
@@ -1251,29 +1251,42 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
 		test.set_adjusted_pvalue(fP)
 		aP.append(fP)
 		tests.append(test)
+		if fdr == "simple":
+			if fP <= fQ:
+				print "-- associations after BH fdr controlling"
+				if bVerbose:
+					tests[i].report()
+				aOut.append(tests[i])
+				#aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+				aFinal.append(tests[i])
+			else :
+				#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+				aOut.append(tests[i])
+				
 		
-	aP_adjusted, pRank = halla.stats.p_adjust(aP, fQ)
-	for i in range(len(tests)):
-		tests[i].set_adjusted_pvalue(aP_adjusted[i])
-		tests[i].set_family_rank(pRank[i])
-	max_r_t = 0
-			#print "aP", aP
-			#print "aP_adjusted: ", aP_adjusted  
-	for i in range(len(tests)):
-		if aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
-			max_r_t = pRank[i]
-			# print "max_r_t", max_r_t
-	for i in range(len(aP)):
-		if pRank[i] <= max_r_t:
-			print "-- associations after BH fdr controlling"
-			if bVerbose:
-				tests[i].report()
-			aOut.append(tests[i])
-			#aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-			aFinal.append(tests[i])
-		else :
-			#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-			aOut.append(tests[i])
+	if fdr == "BH":	
+		aP_adjusted, pRank = halla.stats.p_adjust(aP, fQ)
+		for i in range(len(tests)):
+			tests[i].set_adjusted_pvalue(aP_adjusted[i])
+			tests[i].set_family_rank(pRank[i])
+		max_r_t = 0
+				#print "aP", aP
+				#print "aP_adjusted: ", aP_adjusted  
+		for i in range(len(tests)):
+			if aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
+				max_r_t = pRank[i]
+				# print "max_r_t", max_r_t
+		for i in range(len(aP)):
+			if pRank[i] <= max_r_t:
+				print "-- associations after BH fdr controlling"
+				if bVerbose:
+					tests[i].report()
+				aOut.append(tests[i])
+				#aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+				aFinal.append(tests[i])
+			else :
+				#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+				aOut.append(tests[i])
 	#aOut_header = zip(*aOut)[0]
 	#aOut_adjusted = halla.stats.p_adjust(zip(*aOut)[1])
 

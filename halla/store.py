@@ -102,7 +102,6 @@ class HAllA():
         self.hash_metric          = halla.distance.c_hash_metric 
 
         self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q", "distance", "iterations", "decomposition", "p_adjust_method", "randomization_method"]
-
         # # END INIT 
 
     #==================================================================#
@@ -826,49 +825,51 @@ class HAllA():
         csvw.writerow(["Decomposition method: ", self.decomposition])
         csvw.writerow(["Similarity method: ", self.distance]) 
         csvw.writerow(["q: FDR cut-off : ", self.q]) 
-    
         execution_time = time.time()
-        # featurize 
-        start_time = time.time()
-        self._featurize()
-        excution_time_temp = time.time() - start_time
-        csvw.writerow(["featurize time", excution_time_temp ])
-        print("--- %s seconds: _featurize ---" % excution_time_temp)
+        if halla.distance.c_hash_association_method_discretize[self.distance]:
+            # featurize 
+            start_time = time.time()
+            self._featurize()
+            excution_time_temp = time.time() - start_time
+            csvw.writerow(["featurize time", excution_time_temp ])
+            print("--- %s seconds: featurize data time ---" % excution_time_temp)
+        else:
+            self.meta_feature = self.meta_array
         if not self.descending:
             print("--- association hypotheses testing is started, this task may take longer ...")
             start_time = time.time()
             self._naive_all_against_all()
             excution_time_temp = time.time() - start_time
             csvw.writerow(["Hypotheses testing time", excution_time_temp ])
-            print("--- %s seconds: _hypothesis testing ---" % excution_time_temp)
+            print("--- %s seconds: hypotheses testing time ---" % excution_time_temp)
         else:
             # hierarchical clustering 
             start_time = time.time()
             self._hclust()
             ecution_time_temp = time.time() - start_time
             csvw.writerow(["Hierarchical clustering time", ecution_time_temp ])
-            print("--- %s seconds: _hclust ---" % ecution_time_temp)
+            print("--- %s seconds: hierarchical clustering time ---" % ecution_time_temp)
             
             # coupling clusters hierarchically 
             start_time = time.time()
             self._couple()
             excution_time_temp = time.time() - start_time
             csvw.writerow(["Coupling hypotheses tree time", excution_time_temp ])
-            print("--- %s seconds: _couple ---" % excution_time_temp)
+            print("--- %s seconds: coupling hypotheses tree time ---" % excution_time_temp)
             # hypotheses testing
             print("--- association hypotheses testing is started, this task may take longer ...")
             start_time = time.time()
             self._hypotheses_testing()
             excution_time_temp = time.time() - start_time
             csvw.writerow(["Hypotheses testing time", excution_time_temp ])
-            print("--- %s seconds: _hypothesis testing ---" % excution_time_temp)
+            print("--- %s seconds: hypotheses testing time ---" % excution_time_temp)
         
         # Generate a report
         start_time = time.time() 
         self._summary_statistics('final') 
         ecution_time_temp = time.time() - start_time
         csvw.writerow(["Summary statistics time", excution_time_temp ])
-        print("--- %s seconds: _summary_statistics ---" % excution_time_temp)
+        print("--- %s seconds: summary statistics time ---" % excution_time_temp)
         
         start_time = time.time() 
         results = self._report()

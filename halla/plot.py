@@ -30,7 +30,7 @@ def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods'
     if len(labels) > 0:
         ax.set_xticklabels(labels)
     pl.xlabel(xlabel)
-    pl.xticks(range(len(labels)), labels, rotation=60, ha='right')
+    pl.xticks(range(len(labels)), labels, rotation=90, ha='right')
     pl.tight_layout()
     pl.ylabel(ylabel)
     pl.xlim([-0.05, 1.15])

@@ -24,7 +24,7 @@ from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, \
 #==========================================================================#
 # CONSTANTS 
 #==========================================================================#
-c_hash_association_method_discretize = {"pearson": False,
+c_hash_association_method_discretize = {"pearson": True,
 										"spearman": False,
 										"kw": False,
 										"anova": False,
