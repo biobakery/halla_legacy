@@ -486,7 +486,7 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
 
 	D = pdist(pArray, metric=pDistance)
 	# print "Distance",D
-	# plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
+	plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
 	Z = linkage(D, metric=pDistance)
 	if plotting_result:
 		print "--- plotting dentrogram ... "

@@ -630,9 +630,9 @@ class HAllA():
                 aLineOut = map(str, [str(level), str(';'.join(self.aOutName1[i] for i in iX)), str(';'.join(self.aOutName2[i] for i in iY))])
                 csvwc.writerow(aLineOut)
 
-        def _heatmap():
+        def _heatmap_associations():
             if self.plotting_results:
-                print "--- plotting heatmaps using R ..."
+                print "--- plotting heatmap associations using R ..."
                 from scipy.stats.stats import pearsonr
                 global associated_feature_X_indecies
                 X_labels = np.array([self.aOutName1[i] for i in associated_feature_X_indecies])
@@ -674,12 +674,51 @@ class HAllA():
                     ro.r('rownames(p) = labRow')
                     ro.r('pheatmap(p, , labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10)')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                     ro.r('dev.off()')
-
+        def _heatmap_datasets():
+            if self.plotting_results:
+                print "--- plotting heatmap datasets using R ..."
+                from scipy.stats.stats import pearsonr
+                X_indecies = len(self.aOutName1)
+                X_labels = np.array([self.aOutName1[i] for i in range(X_indecies)])
+                Y_indecies = len(self.aOutName1)
+                Y_labels = np.array([self.aOutName2[i] for i in range(Y_indecies)])
+                df1 = np.array(self.meta_feature[0], dtype=float)
+                df2 = np.array(self.meta_feature[1], dtype=float)
+                drows1 = np.zeros(shape=(X_indecies, X_indecies))
+                drows2 = np.zeros(shape=(Y_indecies, Y_indecies))
+                
+                for i in range(X_indecies):
+                    for j in range(X_indecies):
+                        drows1[i][j] = halla.distance.NormalizedMutualInformation(df1[i], df1[j]).get_distance() 
+                
+                for i in range(Y_indecies):
+                    for j in range(Y_indecies):
+                        drows2[i][j] = halla.distance.NormalizedMutualInformation(df1[i], df2[j]).get_distance()       
+                
+                import rpy2.robjects as ro
+                #import pandas.rpy.common as com
+                import rpy2.robjects.numpy2ri
+                rpy2.robjects.numpy2ri.activate()
+                ro.r('library("pheatmap")')
+                ro.globalenv['drows1'] = drows1
+                ro.globalenv['labRow'] = X_labels 
+                ro.globalenv['D1'] = str(self.output_dir)+"/D1_heatmap.pdf"
+                ro.r('rownames(drows1) = labRow')
+                ro.r('pheatmap(drows1, filename =D1, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, dendrogram="row", Colv="NA", show_colnames = F, cluster_cols=F, clustering_method="single")')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                ro.r('dev.off()')
+                ro.globalenv['drows2'] = drows2
+                ro.globalenv['labRow'] = Y_labels
+                ro.globalenv['D2'] = str(self.output_dir)+"/D2_heatmap.pdf"
+                ro.r('rownames(drows2) = labRow')
+                ro.r('pheatmap(drows2, filename =D2, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, dendrogram="row", Colv="NA", show_colnames = F, cluster_cols=F, clustering_method="single")')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                ro.r('dev.off()')
+                
         # Execute report functions
         _report_all_tests()
         _report_and_plot_associations()
         _report_compared_clusters()
-        #_heatmap()
+        #_heatmap_associations()
+        _heatmap_datasets()
         
         return self.meta_report 
 
