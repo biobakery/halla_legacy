@@ -17,6 +17,7 @@ import numpy as np
 
 import halla.distance
 import halla.stats
+import halla.plot
 from unicodedata import decomposition
 
 # # statistics packages 
@@ -486,20 +487,24 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
 
 	D = pdist(pArray, metric=pDistance)
 	# print "Distance",D
-	plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
-	Z = linkage(D, metric=pDistance)
+	#plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
+	
 	if plotting_result:
+		
 		print "--- plotting dentrogram ... "
-		if labels:
-			scipy.cluster.hierarchy.dendrogram(Z, labels=labels, leaf_rotation=90)
-		else:
-			scipy.cluster.hierarchy.dendrogram(Z)
-		plt.gcf()
+		#plt.figure("Hierarcichal clusters of Dataset "+ str(fig_num),  dpi=300)
+		#if labels:
+		#	scipy.cluster.hierarchy.dendrogram(Z, labels=labels, leaf_rotation=90)
+		#else:
+		#	scipy.cluster.hierarchy.dendrogram(Z)
+		#plt.gcf()
 		global fig_num
-		plt.figure("Hierarcichal clusters of Dataset "+ str(fig_num),  dpi=300)
-		plt.savefig(output_dir+"/Dendrogram_" + str(fig_num) + ".pdf")
+		Z = halla.plot.heatmap(pArray, xlabels = labels, filename= output_dir+"/hierarchical_heatmap_" + str(fig_num))
+		#plt.savefig(output_dir+"/Dendrogram1_" + str(fig_num) + ".pdf")
 		fig_num += 1
-		plt.close("all")
+	else:
+		Z = linkage(D, metric=pDistance, method= "single")
+		#plt.close("all")
 	# print "Linkage Matrix:", Z
 	# print fcluster(Z, .75 )
 	# print fcluster(Z, .9 )

@@ -10,7 +10,11 @@ including all graphics and 'data object to plot' transformations.
 # import dot_parser
 import pylab
 import sys
-
+import halla.distance
+import scipy.cluster 
+from scipy.cluster.hierarchy import linkage, to_tree
+from scipy.spatial.distance import pdist
+from matplotlib.pyplot import xlabel
 # import pydot
 
 def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods', ylabel=None, labels=None):
@@ -166,8 +170,73 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
     plt.savefig(figure_name + '.pdf')
     plt.show()
     # return plt
+def heatmap_distance(pArray1, pArray2 = None, xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", ):
+    import scipy
+    import pylab
+    import scipy.cluster.hierarchy as sch
+    if pArray2 == None:
+        pArray2 = pArray1
+    pMetric = halla.distance.c_hash_metric[metric] 
+    # # Remember, pMetric is a notion of _strength_, not _distance_ 
+    # print str(pMetric)
+    def pDistance(x, y):
+        return  1.0 - pMetric(x, y)
+    
+    #D = pdist(pArray, metric=pDistance)
+    D = scipy.zeros([len(pArray1), len(pArray2)])
+    for i in range(len(pArray1)):
+        for j in range(len(pArray2)):
+            D[i][j] = pDistance(pArray1[i], pArray2[j])
+    #print "Distance",D
+    #plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
+    Z = linkage(D, method = "single")
+    
+    # Compute and plot first dendrogram.
+    fig = pylab.figure(dpi = 300,figsize=(len(pArray1)/3+2,len(pArray2)/3+2))
+    ax1 = fig.add_axes([0.09,0.1,0.2,0.6])
+    Y = sch.linkage(D, method='single')
+    Z1 = sch.dendrogram(Y, orientation='right')
+    ax1.set_xticks([])
+    ax1.set_yticks([])
+    
+    # Compute and plot second dendrogram.
+    ax2 = fig.add_axes([0.3,0.71,0.6,0.2])
+    Y = sch.linkage(D, method='single')
+    Z2 = sch.dendrogram(Y)
+    ax2.set_xticks([])
+    ax2.set_yticks([])
+    
+    # Plot distance matrix.
+    axmatrix = fig.add_axes([0.3,0.1,0.6,0.6])
+    idx1 = Z1['leaves']
+    idx2 = Z2['leaves']
+    D = D[idx1,:]
+    D = D[:,idx2]
+    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)
+    axmatrix.set_xticks([])
+    axmatrix.set_yticks([])
+    
+    #axcolor = fig.add_axes([0.91,0.1,0.02,0.6])
+    
+    axmatrix.set_xticks(range(len(pArray1)))
+    axmatrix.set_xticklabels(idx1, minor=False)
+    axmatrix.xaxis.set_label_position('bottom')
+    axmatrix.xaxis.tick_bottom()
+    
+    pylab.xticks(rotation=-90, fontsize=10)
+    
+    axmatrix.set_yticks(range(len(pArray2)))
+    axmatrix.set_yticklabels(idx2, minor=False)
+    axmatrix.yaxis.set_label_position('right')
+    axmatrix.yaxis.tick_right()
+ 
+    # Plot colorbar.
+    axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
+    pylab.colorbar(im, cax=axcolor)
+
+    fig.savefig(filename + '.pdf')
         
-def heatmap(D, filename='Dendrogram'):
+def heatmap(pArray, xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", ):
     import scipy
     import pylab
     # import dot_parser
@@ -175,7 +244,7 @@ def heatmap(D, filename='Dendrogram'):
     from numpy.matlib import rand
     from array import array
     # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
-    if len(D) == 0: 
+    '''if len(D) == 0: 
         # Generate random features and distance matrix.
         print "The distance matrix is empty. The function generates a random matrix."
         x = scipy.rand(4)
@@ -184,18 +253,29 @@ def heatmap(D, filename='Dendrogram'):
             for j in range(i, 4):
                 D[i, j] = abs(x[i] - x[j])
                 D[j, i] = D[i, j]
+     '''      
+    pMetric = halla.distance.c_hash_metric[metric] 
+    # # Remember, pMetric is a notion of _strength_, not _distance_ 
+    # print str(pMetric)
+    def pDistance(x, y):
+        return  1.0 - pMetric(x, y)
+
+    #D = pdist(pArray, metric=pDistance)
+    # print "Distance",D
+    #plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
+    #Z = linkage(D, metric=pDistance)
     # Compute and plot first dendrogram.
-    fig = pylab.figure(dpi= 300, figsize=(10, 10))
-    ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6])
-    Y = sch.linkage(D, method='single')
-    Z1 = sch.dendrogram(Y, orientation='right')
+    fig = pylab.figure(dpi= 300, figsize=(len(pArray[0])/3+2, len(pArray)/3+2))
+    ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)
+    Y1 = sch.linkage(pArray, metric=pDistance, method=method)
+    Z1 = sch.dendrogram(Y1, orientation='right')#, labels= xlabels)
     ax1.set_xticks([])
     ax1.set_yticks([])
     
     # Compute and plot second dendrogram.
-    ax2 = fig.add_axes([0.3, 0.71, 0.6, 0.2])
-    Y = sch.linkage(D, method='single')
-    Z2 = sch.dendrogram(Y)
+    ax2 = fig.add_axes([0.3, 0.71, 0.6, 0.2], frame_on=True)
+    Y2 = sch.linkage(pArray.T)#, metric=pDistance, method=method)
+    Z2 = sch.dendrogram(Y2)
     ax2.set_xticks([])
     ax2.set_yticks([])
     
@@ -203,26 +283,39 @@ def heatmap(D, filename='Dendrogram'):
     axmatrix = fig.add_axes([0.3, 0.1, 0.6, 0.6])
     idx1 = Z1['leaves']
     idx2 = Z2['leaves']
-    D = D[idx1, :]
-    D = D[:, idx2]
-    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.afmhot)
-    axmatrix.set_xticks([])
-    axmatrix.set_yticks([])
+    pArray = pArray[idx1, :]
+    pArray = pArray[:, idx2]
     
+    
+    im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)
+    
+    
+    axmatrix.set_xticks(range(len(idx2)))
+    axmatrix.set_xticklabels(idx2, minor=False)
+    axmatrix.xaxis.set_label_position('bottom')
+    axmatrix.xaxis.tick_bottom()
+    pylab.xticks(rotation=-90, fontsize=10)
+    
+    label1 = [xlabels[i] for i in idx1]
+    axmatrix.set_yticks(range(len(idx1)))
+    axmatrix.set_yticklabels(label1, minor=False)
+    axmatrix.yaxis.set_label_position('right')
+    axmatrix.yaxis.tick_right()
+    pylab.xticks(rotation=0, fontsize=10)
     # Plot colorbar.
-    axcolor = fig.add_axes([0.91, 0.1, 0.02, 0.6])
-    pylab.colorbar(im, cax=axcolor)
-    fig.show()
-    fig.savefig(filename + '.pdf')
+    #axcolor = fig.add_axes([0.91, 0.1, 0.02, 0.6])
+    #pylab.colorbar(im, cax=axcolor)
+    #fig.show()
+    
     '''
-    axmatrix.set_xticks(range(40))
+    axmatrix.set_xticks(range(len(xlabels)))
     axmatrix.set_xticklabels(idx1, minor=False)
     axmatrix.xaxis.set_label_position('bottom')
     axmatrix.xaxis.tick_bottom()
     
     pylab.xticks(rotation=-90, fontsize=4)
     
-    axmatrix.set_yticks(range(40))
+    #axmatrix.set_yticks(range(40))
     axmatrix.set_yticklabels(idx2, minor=False)
     axmatrix.yaxis.set_label_position('right')
     axmatrix.yaxis.tick_right()
@@ -230,5 +323,9 @@ def heatmap(D, filename='Dendrogram'):
     #(0.5,0,0.5,1) adds an Axes on the right half of the figure. (0,0.5,1,0.5) adds an Axes on the top half of the figure.
     #Most people probably use add_subplot for its convenience. I like add_axes for its control.
     #To remove the border, use add_axes([left,bottom,width,height], frame_on=False)
-    axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
     '''
+    axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
+    pylab.colorbar(im, cax=axcolor)
+    fig.savefig(filename + '.pdf')
+    heatmap_distance(pArray, xlabels = xlabels, filename=filename+"_distance", metric = "nmi", method = "single", )
+    return Y1
