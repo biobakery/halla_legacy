@@ -216,6 +216,12 @@ def parse_arguments (args):
         action="store_true",
         default=False)
     
+    argp.add_argument(
+        "--header",
+        dest="header",
+        action="store_true",
+        help="Input files contain a header line, [default is FALSE]") 
+
     return argp.parse_args()
 
 def set_HAllA_object (H, args):
@@ -231,7 +237,6 @@ def set_HAllA_object (H, args):
     H.threshold = args.dThreshold_similiarity
     H.output_dir = args.output_dir
     H.plotting_results = args.plotting_results
-    H.bypass_discretizing = args.bypass_discretizing 
     istm = list()  # X and Y are used to store datasets
     
     # If Y was not set - we use X
@@ -246,7 +251,7 @@ def set_HAllA_object (H, args):
     else:
         H.strFile1, H.strFile2 = istm[0], istm[0]
         
-    aOut1, aOut2 = Input (H.strFile1.name, H.strFile2.name).get()
+    aOut1, aOut2 = Input (H.strFile1.name, H.strFile2.name, headers=args.header).get()
     H.plotting_results = args.plotting_results
     (H.meta_array[0], H.aOutName1, H.aOutType1, H.aOutHead1) = aOut1 
     (H.meta_array[1], H.aOutName2, H.aOutType2, H.aOutHead2) = aOut2 
