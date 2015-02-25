@@ -1,4 +1,5 @@
 """ Class to store HAllA data """
+from matplotlib.pyplot import ylabel
 
 # Test if matplotlib is installed
 try:
@@ -52,6 +53,7 @@ class HAllA():
         self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
         self.output_dir = "./"
         self.plotting_results = False
+        bypass_discretizing = False
         #==================================================================#
         # Mutable Meta Objects  
         #==================================================================#
@@ -603,11 +605,12 @@ class HAllA():
                     discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
                     discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df)
                     plt.savefig(discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                    halla.plot.heatmap(np.array(discretized_cluster2), xlabels =X_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
+                    halla.plot.heatmap(np.array(discretized_cluster2), xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
                     
                     plt.figure()
                     df1 = np.array(cluster1, dtype=float)
                     df2 = np.array(cluster2, dtype=float)
+                    
                     plt.scatter(halla.stats.pca(df1)[0], halla.stats.pca(df2)[0], alpha=0.5)
                     plt.savefig(filename + '/association_' + str(association_number) + '.pdf')
                     
@@ -615,7 +618,15 @@ class HAllA():
                     discretized_df1 = np.array(discretized_cluster1, dtype=float)
                     discretized_df2 = np.array(discretized_cluster2, dtype=float)
                     plt.figure()
-                    plt.scatter( halla.stats.discretize(halla.stats.pca(discretized_df1)),  halla.stats.discretize(halla.stats.pca(discretized_df2)), alpha=0.5)
+                    x = halla.stats.pca(discretized_df1)[0]
+                    y = halla.stats.pca(discretized_df2)[0]
+                    '''for i in range(len(x)):
+                        x += np.random.normal(x[i], 3, 100)
+                    for i in range(len(y)):
+                        y += np.random.normal(y[i], 3, 100)
+                    '''
+                    #plt.scatter( halla.stats.discretize(halla.stats.pca(discretized_df1)),  halla.stats.discretize(halla.stats.pca(discretized_df2)), alpha=0.5)
+                    plt.scatter( x, y, alpha=0.5)
                     plt.savefig(discretized_filename + '/association_' + str(association_number) + '.pdf')
                     
                     plt.close("all")
@@ -634,7 +645,6 @@ class HAllA():
         def _heatmap_associations():
             if self.plotting_results:
                 print "--- plotting heatmap of `associations using  ..."
-                from scipy.stats.stats import pearsonr
                 global associated_feature_X_indecies
                 X_labels = np.array([self.aOutName1[i] for i in associated_feature_X_indecies])
                 global associated_feature_Y_indecies
@@ -644,13 +654,8 @@ class HAllA():
                 df1 = np.array(cluster1, dtype=float)
                 df2 = np.array(cluster2, dtype=float)
                 p = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
-                for i in range(len(associated_feature_X_indecies)):
-                    for j in range(len(associated_feature_Y_indecies)):
-                        p[i][j] = pearsonr(df1[i], df2[j])[0]
                 nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
-                for i in range(len(associated_feature_X_indecies)):
-                    for j in range(len(associated_feature_Y_indecies)):
-                        nmi[i][j] = halla.distance.NormalizedMutualInformation(df1[i], df2[j]).get_distance()
+                halla.plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =associated_feature_X_indecies, ylabels = associated_feature_Y_indecies, filename = str(self.output_dir)+'/all_heatmap' )
         def _heatmap_associations_R():
             if self.plotting_results:
                 print "--- plotting heatmap associations using R ..."
@@ -742,6 +747,7 @@ class HAllA():
         _report_compared_clusters()
         #_heatmap_associations_R()
         #_heatmap_datasets_R()
+        _heatmap_associations()
         
         return self.meta_report 
 
@@ -888,7 +894,7 @@ class HAllA():
         csvw.writerow(["Similarity method: ", self.distance]) 
         csvw.writerow(["q: FDR cut-off : ", self.q]) 
         execution_time = time.time()
-        if halla.distance.c_hash_association_method_discretize[self.distance]:
+        if halla.distance.c_hash_association_method_discretize[self.distance] or not self.bypass_discretizing:
             # featurize 
             start_time = time.time()
             self._featurize()
@@ -897,6 +903,7 @@ class HAllA():
             print("--- %s seconds: featurize data time ---" % excution_time_temp)
         else:
             self.meta_feature = self.meta_array
+        halla.plot.heatmap2(pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], xlabels =self.aOutName1, ylabels = self.aOutName2, filename = str(self.output_dir)+'/heatmap2_all' )
         if not self.descending:
             print("--- association hypotheses testing is started, this task may take longer ...")
             start_time = time.time()

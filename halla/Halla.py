@@ -127,19 +127,6 @@ def parse_arguments (args):
         type=argparse.FileType("r"),
         default=None,
         help="Second file: Tab-delimited text input file, one row per feature, one column per measurement - If not selected, we will use the first file (-X).")
-    
-    argp.add_argument(
-        "-o", "--output",
-        dest = "output_dir", 
-        help="directory to write output files\n[REQUIRED]", 
-        metavar="<output>", 
-        required=True)
-    
-    argp.add_argument(
-        "--plotting_results", 
-        help="plotting results\n", 
-        action="store_true",
-        default=False)
 
     argp.add_argument(
         "-q", metavar="q_value",
@@ -210,6 +197,25 @@ def parse_arguments (args):
         default= False,#10 - (logging.WARNING / 10)
         help="Debug logging level; increase for greater verbosity")
     
+    argp.add_argument(
+        "-o", "--output",
+        dest = "output_dir", 
+        help="directory to write output files\n[REQUIRED]", 
+        metavar="<output>", 
+        required=True)
+    
+    argp.add_argument(
+        "--plotting_results", 
+        help="plotting results\n", 
+        action="store_true",
+        default=False)
+    
+    argp.add_argument(
+        "--bypass_discretizing", 
+        help="bypass the discretizing step\n", 
+        action="store_true",
+        default=False)
+    
     return argp.parse_args()
 
 def set_HAllA_object (H, args):
@@ -225,8 +231,9 @@ def set_HAllA_object (H, args):
     H.threshold = args.dThreshold_similiarity
     H.output_dir = args.output_dir
     H.plotting_results = args.plotting_results
+    H.bypass_discretizing = args.bypass_discretizing 
     istm = list()  # X and Y are used to store datasets
-     
+    
     # If Y was not set - we use X
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  

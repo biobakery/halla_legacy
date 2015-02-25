@@ -16,6 +16,7 @@ from scipy.cluster.hierarchy import linkage, to_tree
 from scipy.spatial.distance import pdist
 from matplotlib.pyplot import xlabel
 # import pydot
+import math
 
 def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods', ylabel=None, labels=None):
     
@@ -170,12 +171,13 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
     plt.savefig(figure_name + '.pdf')
     plt.show()
     # return plt
-def heatmap_distance(pArray1, pArray2 = None, xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", ):
+def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='./hierarchical_heatmap2', metric = "nmi", method = "single", colLable = False, rowLabel = True):
     import scipy
     import pylab
     import scipy.cluster.hierarchy as sch
-    if pArray2 == None:
+    if pArray2 == None :
         pArray2 = pArray1
+        ylabels = xlabels
     pMetric = halla.distance.c_hash_metric[metric] 
     # # Remember, pMetric is a notion of _strength_, not _distance_ 
     # print str(pMetric)
@@ -187,56 +189,69 @@ def heatmap_distance(pArray1, pArray2 = None, xlabels = None, filename='./hierar
     for i in range(len(pArray1)):
         for j in range(len(pArray2)):
             D[i][j] = pDistance(pArray1[i], pArray2[j])
-    #print "Distance",D
-    #plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
-    Z = linkage(D, method = "single")
     
     # Compute and plot first dendrogram.
-    fig = pylab.figure(dpi = 300,figsize=(len(pArray1)/3+2,len(pArray2)/3+2))
+    fig = pylab.figure(dpi = 300,figsize=(math.ceil(len(pArray2)/5.0), math.ceil(len(pArray1)/5.0)))
     ax1 = fig.add_axes([0.09,0.1,0.2,0.6])
-    Y = sch.linkage(D, method='single')
-    Z1 = sch.dendrogram(Y, orientation='right')
+    Y1 = sch.linkage(D, method = "single")
+    if len(Y1) > 1:
+        Z1 = sch.dendrogram(Y1, orientation='right')
     ax1.set_xticks([])
     ax1.set_yticks([])
     
     # Compute and plot second dendrogram.
     ax2 = fig.add_axes([0.3,0.71,0.6,0.2])
-    Y = sch.linkage(D, method='single')
-    Z2 = sch.dendrogram(Y)
+    Y2 = sch.linkage(D.T, method = "single")
+    if len(Y2) > 1:
+        Z2 = sch.dendrogram(Y2)
     ax2.set_xticks([])
     ax2.set_yticks([])
     
     # Plot distance matrix.
     axmatrix = fig.add_axes([0.3,0.1,0.6,0.6])
-    idx1 = Z1['leaves']
-    idx2 = Z2['leaves']
+    if len(Y1) > 1:
+        idx1 = Z1['leaves']
+    else:
+        idx1 = [0]
+    
+    if len(Y2) > 1:
+        idx2 = Z2['leaves']
+    else:
+        idx2 = [0]
     D = D[idx1,:]
     D = D[:,idx2]
-    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)
+    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)#YlGnBu
     axmatrix.set_xticks([])
     axmatrix.set_yticks([])
-    
-    #axcolor = fig.add_axes([0.91,0.1,0.02,0.6])
-    
-    axmatrix.set_xticks(range(len(pArray1)))
-    axmatrix.set_xticklabels(idx1, minor=False)
-    axmatrix.xaxis.set_label_position('bottom')
-    axmatrix.xaxis.tick_bottom()
-    
-    pylab.xticks(rotation=-90, fontsize=10)
-    
-    axmatrix.set_yticks(range(len(pArray2)))
-    axmatrix.set_yticklabels(idx2, minor=False)
-    axmatrix.yaxis.set_label_position('right')
-    axmatrix.yaxis.tick_right()
- 
+    if colLable:    
+        if len(ylabels) == len(idx2):
+            label2 = [ylabels[i] for i in idx2]
+        else:
+            label2 = idx2
+        
+        axmatrix.set_xticks(range(len(pArray2)))
+        axmatrix.set_xticklabels(label2, minor=False)
+        axmatrix.xaxis.set_label_position('bottom')
+        axmatrix.xaxis.tick_bottom()
+        pylab.xticks(rotation=-90, fontsize=6)
+    if rowLabel:
+        if len(xlabels) == len(idx1):
+            label1 = [xlabels[i] for i in idx1]
+        else:
+            label1 = idx1
+        axmatrix.set_yticks(range(len(pArray1)))
+        axmatrix.set_yticklabels(label1, minor=False)
+        axmatrix.yaxis.set_label_position('right')
+        axmatrix.yaxis.tick_right()
+        pylab.yticks(rotation=0, fontsize=6)
+   
     # Plot colorbar.
     axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
     pylab.colorbar(im, cax=axcolor)
 
     fig.savefig(filename + '.pdf')
         
-def heatmap(pArray, xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", ):
+def heatmap(pArray, xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True ):
     import scipy
     import pylab
     # import dot_parser
@@ -265,67 +280,115 @@ def heatmap(pArray, xlabels = None, filename='./hierarchical_heatmap', metric = 
     #plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
     #Z = linkage(D, metric=pDistance)
     # Compute and plot first dendrogram.
-    fig = pylab.figure(dpi= 300, figsize=(len(pArray[0])/3+2, len(pArray)/3+2))
+    fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(pArray[0])/5.0), math.ceil(len(pArray)/5.0))))
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)
     Y1 = sch.linkage(pArray, metric=pDistance, method=method)
-    Z1 = sch.dendrogram(Y1, orientation='right')#, labels= xlabels)
+    if len(Y1) > 1:
+        Z1 = sch.dendrogram(Y1, orientation='right')#, labels= xlabels)
     ax1.set_xticks([])
     ax1.set_yticks([])
     
     # Compute and plot second dendrogram.
     ax2 = fig.add_axes([0.3, 0.71, 0.6, 0.2], frame_on=True)
     Y2 = sch.linkage(pArray.T)#, metric=pDistance, method=method)
-    Z2 = sch.dendrogram(Y2)
+    if len(Y2) > 1:
+        Z2 = sch.dendrogram(Y2)
     ax2.set_xticks([])
     ax2.set_yticks([])
     
     # Plot distance matrix.
     axmatrix = fig.add_axes([0.3, 0.1, 0.6, 0.6])
-    idx1 = Z1['leaves']
-    idx2 = Z2['leaves']
+    if len(Y1) > 1:
+        idx1 = Z1['leaves']
+    else:
+        idx1 = [0]
+        
+    if len(Y2) > 1:
+        idx2 = Z2['leaves']
+    else:
+        idx2 = [0]
+    
     pArray = pArray[idx1, :]
     pArray = pArray[:, idx2]
     
     
-    im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)
-    
-    
-    axmatrix.set_xticks(range(len(idx2)))
-    axmatrix.set_xticklabels(idx2, minor=False)
-    axmatrix.xaxis.set_label_position('bottom')
-    axmatrix.xaxis.tick_bottom()
-    pylab.xticks(rotation=-90, fontsize=10)
-    
-    label1 = [xlabels[i] for i in idx1]
-    axmatrix.set_yticks(range(len(idx1)))
-    axmatrix.set_yticklabels(label1, minor=False)
-    axmatrix.yaxis.set_label_position('right')
-    axmatrix.yaxis.tick_right()
-    pylab.xticks(rotation=0, fontsize=10)
-    # Plot colorbar.
-    #axcolor = fig.add_axes([0.91, 0.1, 0.02, 0.6])
-    #pylab.colorbar(im, cax=axcolor)
-    #fig.show()
-    
-    '''
-    axmatrix.set_xticks(range(len(xlabels)))
-    axmatrix.set_xticklabels(idx1, minor=False)
-    axmatrix.xaxis.set_label_position('bottom')
-    axmatrix.xaxis.tick_bottom()
-    
-    pylab.xticks(rotation=-90, fontsize=4)
-    
-    #axmatrix.set_yticks(range(40))
-    axmatrix.set_yticklabels(idx2, minor=False)
-    axmatrix.yaxis.set_label_position('right')
-    axmatrix.yaxis.tick_right()
-    
-    #(0.5,0,0.5,1) adds an Axes on the right half of the figure. (0,0.5,1,0.5) adds an Axes on the top half of the figure.
-    #Most people probably use add_subplot for its convenience. I like add_axes for its control.
-    #To remove the border, use add_axes([left,bottom,width,height], frame_on=False)
-    '''
+    im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)#YlGnBu
+    if colLable:
+        if len(ylabels) == len(idx2):
+            label2 = [ylabels[i] for i in idx2]
+        else:
+            label2 = idx2
+        axmatrix.set_xticks(range(len(idx2)))
+        axmatrix.set_xticklabels(label2, minor=False)
+        axmatrix.xaxis.set_label_position('bottom')
+        axmatrix.xaxis.tick_bottom()
+        pylab.xticks(rotation=90, fontsize=6)
+    if rowLabel:
+        if len(xlabels) == len(idx1):
+            label1 = [xlabels[i] for i in idx1]
+        else:
+            label1 = idx1
+        axmatrix.set_yticks(range(len(idx1)))
+        axmatrix.set_yticklabels(label1, minor=False)
+        axmatrix.yaxis.set_label_position('right')
+        axmatrix.yaxis.tick_right()
+        pylab.yticks(rotation=0, fontsize=6)
+       
     axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
     pylab.colorbar(im, cax=axcolor)
     fig.savefig(filename + '.pdf')
-    heatmap_distance(pArray, xlabels = xlabels, filename=filename+"_distance", metric = "nmi", method = "single", )
+    heatmap2(pArray, xlabels = xlabels, filename=filename+"_distance", metric = "nmi", method = "single", )
     return Y1
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def grouped_boxplots2(data, xlabels):
+    '''data = [[np.random.normal(i, 1, 30) for i in range(2)],
+            [np.random.normal(i, 1.5, 30) for i in range(3)],
+            [np.random.normal(i, 2, 30) for i in range(4)]]
+    '''
+    fig, ax = plt.subplots()
+    groups = grouped_boxplots(data, ax, max_width=0.5,
+                              patch_artist=True, notch=True)
+
+    colors = ['lightgreen', 'bisque']#'lavender', 'lightblue',
+    for item in groups:
+        for color, patch in zip(colors, item['boxes']):
+            patch.set(facecolor=color)
+
+    proxy_artists = groups[-1]['boxes']
+    ax.legend(proxy_artists, ['Recall', 'FDR'], loc='best')
+    pylab.xticks(rotation=90, fontsize=6)
+    ax.set(xlabel='Method', ylabel='', axisbelow=True,
+           xticklabels=xlabels)
+
+    ax.grid(axis='y', ls='-', color='white', lw=2)
+    ax.patch.set(facecolor='0.95')
+    plt.savefig("Grouped_Recall_FDR.pdf")
+    plt.show()
+
+def grouped_boxplots(data_groups, ax=None, max_width=0.8, pad=0.05, **kwargs):
+    if ax is None:
+        ax = plt.gca()
+
+    max_group_size = max(len(item) for item in data_groups)
+    total_padding = pad * (max_group_size - 1)
+    width = (max_width - total_padding) / max_group_size
+    kwargs['widths'] = width
+
+    def positions(group, i):
+        span = width * len(group) + pad * (len(group) - 1)
+        ends = (span - width) / 2
+        x = np.linspace(-ends, ends, len(group))
+        return x + i
+
+    artists = []
+    for i, group in enumerate(data_groups, start=1):
+        artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
+        artists.append(artist)
+
+    ax.margins(0.05)
+    ax.set(xticks=np.arange(len(data_groups)) + 1)
+    ax.autoscale()
+    return artists
