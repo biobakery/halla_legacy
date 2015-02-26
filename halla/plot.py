@@ -385,14 +385,22 @@ def grouped_boxplots(data_groups, ax, max_width=0.8, pad=0.05, **kwargs):
         return x + i
 
     artists = []
+    ends = 0
     for i, group in enumerate(data_groups, start=1):
         
         #if flag:
-        artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
-        if i % 2 == 1:
-           ax.bar( width * len(group) + pad * (len(group) - 1)-width/2 -pad , 5 , zorder=0, color="0.95", width=(width+pad)*2, edgecolor="none" )
-           #plt.setp(artist, color ='red')
+        pos = positions(group, i)
+        artist = ax.boxplot(group, positions= pos, **kwargs)
+        if i % 2 == 0:
+            print pos
+            ax.bar( np.mean(pos)-(width+pad), 1 , zorder=0, color="0.99", width=(width+pad)*2, edgecolor="none" )
+            #'''width * len(group) + pad * (len(group) - 1)-width/2 -pad'''
+            #plt.setp(artist, color ='red')
         #artist.patch.set(facecolor='0.1')
+        else:
+           ax.bar( np.mean(pos)-(width+pad), 1 , zorder=0, color="0.95", width=(width+pad)*2, edgecolor="none" ) 
+        span = width * len(group) + pad * (len(group) - 1)
+        ends = (span - width) / 2
         artists.append(artist)
         flag = False
     #else:
