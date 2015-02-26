@@ -591,8 +591,7 @@ class HAllA():
                     discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
                     discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df)
                     plt.savefig(discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                    halla.plot.heatmap(np.array(discretized_cluster1), xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap' )
-                    
+                                 
                     cluster2 = [self.meta_array[1][i] for i in iY]
                     discretized_cluster2 = [self.meta_feature[1][i] for i in iY]
                     Y_labels = np.array([self.aOutName2[i] for i in iY])
@@ -601,11 +600,24 @@ class HAllA():
                     axes = pd.tools.plotting.scatter_matrix(df)
                     plt.savefig(filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     
+                    
                     plt.figure()
                     discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
                     discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df)
                     plt.savefig(discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                    halla.plot.heatmap(np.array(discretized_cluster2), xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
+                    
+                    # heatmap cluster in an association
+                    x_label_order1 = None
+                    x_label_order2 = None      
+                    if len(discretized_cluster1) > len(discretized_cluster2):
+                        halla.plot.heatmap(np.array(discretized_cluster1), x_label_order1, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap', )
+                        x_label_order =  x_label_order1
+                        halla.plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
+                    else:
+                        halla.plot.heatmap(np.array(discretized_cluster2), x_label_order2, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap'  ) 
+                        x_label_order =  x_label_order1 
+                        halla.plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
+                    
                     
                     plt.figure()
                     df1 = np.array(cluster1, dtype=float)

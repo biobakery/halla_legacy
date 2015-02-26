@@ -152,13 +152,16 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
         fpr[roc_info[i][0]] = roc_info[i][1]
         # print ((roc_info[i][1])[0])
         tpr[roc_info[i][0]] = roc_info[i][2]
-        roc_auc[roc_info[i][0]] = auc(fpr[roc_info[i][0]], tpr[roc_info[i][0]])
+        roc_auc[roc_info[i][0]] = auc(fpr[roc_info[i][0]], tpr[roc_info[i][0]] )
         roc_name += '_' + roc_info[i][0] 
         
     # Plot ROC curve
     plt.figure(dpi= 300)
     for i in range(len(roc_info)):
-        plt.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]], label='{0} (area = {1:0.2f})'
+        params = {'legend.fontsize': 6,
+        'legend.linewidth': 2}
+        plt.rcParams.update(params)
+        plt.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='{0} (area = {1:0.2f})'
                                        ''.format(str(roc_info[i][0]), roc_auc[roc_info[i][0]]))   
     plt.plot([0, 1], [0, 1], 'k--')
     plt.xlim([0.0, 1.0])
@@ -251,7 +254,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
 
     fig.savefig(filename + '.pdf')
         
-def heatmap(pArray, xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True ):
+def heatmap(pArray, xlabels_order = None, xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True ):
     import scipy
     import pylab
     # import dot_parser
@@ -289,12 +292,13 @@ def heatmap(pArray, xlabels = None, filename='./hierarchical_heatmap', metric = 
     ax1.set_yticks([])
     
     # Compute and plot second dendrogram.
-    ax2 = fig.add_axes([0.3, 0.71, 0.6, 0.2], frame_on=True)
-    Y2 = sch.linkage(pArray.T)#, metric=pDistance, method=method)
-    if len(Y2) > 1:
-        Z2 = sch.dendrogram(Y2)
-    ax2.set_xticks([])
-    ax2.set_yticks([])
+    if xlabels_order is None:
+        ax2 = fig.add_axes([0.3, 0.71, 0.6, 0.2], frame_on=True)
+        Y2 = sch.linkage(pArray.T)#, metric=pDistance, method=method)
+        if len(Y2) > 1:
+            Z2 = sch.dendrogram(Y2)
+        ax2.set_xticks([])
+        ax2.set_yticks([])
     
     # Plot distance matrix.
     axmatrix = fig.add_axes([0.3, 0.1, 0.6, 0.6])
@@ -303,13 +307,18 @@ def heatmap(pArray, xlabels = None, filename='./hierarchical_heatmap', metric = 
     else:
         idx1 = [0]
         
-    if len(Y2) > 1:
+    if len(Y2) > 1 and xlabels_order is not None:
         idx2 = Z2['leaves']
     else:
         idx2 = [0]
     
     pArray = pArray[idx1, :]
-    pArray = pArray[:, idx2]
+    if xlabels_order is None:
+        pArray = pArray[:, idx2]
+        xlabels_order = idx2
+    else:
+        pArray = pArray[:, xlabels_order]
+        
     
     
     im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)#YlGnBu
@@ -392,7 +401,7 @@ def grouped_boxplots(data_groups, ax, max_width=0.8, pad=0.05, **kwargs):
         pos = positions(group, i)
         artist = ax.boxplot(group, positions= pos, **kwargs)
         if i % 2 == 0:
-            print pos
+            #print pos
             ax.bar( np.mean(pos)-(width+pad), 1 , zorder=0, color="0.99", width=(width+pad)*2, edgecolor="none" )
             #'''width * len(group) + pad * (len(group) - 1)-width/2 -pad'''
             #plt.setp(artist, color ='red')
