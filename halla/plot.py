@@ -105,7 +105,7 @@ def scatter_plot(x=None, y=None, alpha=.1, figure_name='Figure2', xlabel="Recall
     # savefig('box7')
     pl.savefig('Figure2.pdf')
     pl.savefig('Figure2.png')
-    pl.show()
+    #pl.show()
     return
     # fig, ax = pl.subplots()
     # ax.scatter(x, y)
@@ -169,7 +169,7 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
     plt.legend(loc="lower right")
     # plt.savefig('./test/'+roc_name+'foo.pdf')
     plt.savefig(figure_name + '.pdf')
-    plt.show()
+    #plt.show()
     # return plt
 def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='./hierarchical_heatmap2', metric = "nmi", method = "single", colLable = False, rowLabel = True):
     import scipy
@@ -348,9 +348,8 @@ def grouped_boxplots2(data, xlabels):
             [np.random.normal(i, 1.5, 30) for i in range(3)],
             [np.random.normal(i, 2, 30) for i in range(4)]]
     '''
-    fig, ax = plt.subplots()
-    groups = grouped_boxplots(data, ax, max_width=0.5,
-                              patch_artist=True, notch=True)
+    fig, ax = plt.subplots(dpi= 300, figsize=(10, 5)) #( len(data)/2+5, 5))
+    groups = grouped_boxplots(data, ax, patch_artist=True, max_width=0.9, notch=0, sym='+', vert=1, whis=1.5)
 
     colors = ['lightgreen', 'bisque']#'lavender', 'lightblue',
     for item in groups:
@@ -359,19 +358,21 @@ def grouped_boxplots2(data, xlabels):
 
     proxy_artists = groups[-1]['boxes']
     ax.legend(proxy_artists, ['Recall', 'FDR'], loc='best')
-    pylab.xticks(rotation=90, fontsize=6)
+    pylab.xticks(rotation=90, fontsize=10)
+    #ax.xticks(range(len(labels)), labels, rotation=90, ha='right')
+    #ax.tight_layout()
     ax.set(xlabel='Method', ylabel='', axisbelow=True,
            xticklabels=xlabels)
 
-    ax.grid(axis='y', ls='-', color='white', lw=2)
-    ax.patch.set(facecolor='0.95')
+    #ax.grid(axis='y', ls='-', color='white', lw=2)
+    #ax.patch.set(facecolor='0.95')
     plt.savefig("Grouped_Recall_FDR.pdf")
-    plt.show()
+    #plt.show()
 
-def grouped_boxplots(data_groups, ax=None, max_width=0.8, pad=0.05, **kwargs):
+def grouped_boxplots(data_groups, ax, max_width=0.8, pad=0.05, **kwargs):
     if ax is None:
         ax = plt.gca()
-
+        
     max_group_size = max(len(item) for item in data_groups)
     total_padding = pad * (max_group_size - 1)
     width = (max_width - total_padding) / max_group_size
@@ -385,8 +386,20 @@ def grouped_boxplots(data_groups, ax=None, max_width=0.8, pad=0.05, **kwargs):
 
     artists = []
     for i, group in enumerate(data_groups, start=1):
+        
+        #if flag:
         artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
+        if i % 2 == 1:
+           ax.bar( width * len(group) + pad * (len(group) - 1)-width/2 -pad , 5 , zorder=0, color="0.95", width=(width+pad)*2, edgecolor="none" )
+           #plt.setp(artist, color ='red')
+        #artist.patch.set(facecolor='0.1')
         artists.append(artist)
+        flag = False
+    #else:
+        artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
+        #artist.patch.set(facecolor='0.95')
+        artists.append(artist)
+        flage = True
 
     ax.margins(0.05)
     ax.set(xticks=np.arange(len(data_groups)) + 1)
