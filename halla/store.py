@@ -607,15 +607,17 @@ class HAllA():
                     plt.savefig(discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     
                     # heatmap cluster in an association
-                    x_label_order1 = None
-                    x_label_order2 = None      
-                    if len(discretized_cluster1) > len(discretized_cluster2):
+                    x_label_order1 = []
+                    x_label_order2 = []      
+                    if len(discretized_cluster1) >= len(discretized_cluster2):
                         halla.plot.heatmap(np.array(discretized_cluster1), x_label_order1, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap', )
                         x_label_order =  x_label_order1
+                        print "after1", x_label_order
                         halla.plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
                     else:
                         halla.plot.heatmap(np.array(discretized_cluster2), x_label_order2, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap'  ) 
-                        x_label_order =  x_label_order1 
+                        x_label_order =  x_label_order2
+                        print "after2", x_label_order 
                         halla.plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
                     
                     

@@ -254,7 +254,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
 
     fig.savefig(filename + '.pdf')
         
-def heatmap(pArray, xlabels_order = None, xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True ):
+def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True):
     import scipy
     import pylab
     # import dot_parser
@@ -292,13 +292,15 @@ def heatmap(pArray, xlabels_order = None, xlabels = None, filename='./hierarchic
     ax1.set_yticks([])
     
     # Compute and plot second dendrogram.
-    if xlabels_order is None:
+    if len(xlabels_order) == 0:
         ax2 = fig.add_axes([0.3, 0.71, 0.6, 0.2], frame_on=True)
         Y2 = sch.linkage(pArray.T)#, metric=pDistance, method=method)
         if len(Y2) > 1:
             Z2 = sch.dendrogram(Y2)
         ax2.set_xticks([])
         ax2.set_yticks([])
+    else:
+        Y2 = []
     
     # Plot distance matrix.
     axmatrix = fig.add_axes([0.3, 0.1, 0.6, 0.6])
@@ -307,19 +309,19 @@ def heatmap(pArray, xlabels_order = None, xlabels = None, filename='./hierarchic
     else:
         idx1 = [0]
         
-    if len(Y2) > 1 and xlabels_order is not None:
+    if len(Y2) > 1:
         idx2 = Z2['leaves']
     else:
         idx2 = [0]
     
     pArray = pArray[idx1, :]
-    if xlabels_order is None:
+    if len(xlabels_order) == 0:
         pArray = pArray[:, idx2]
-        xlabels_order = idx2
+        xlabels_order.extend(idx2)
     else:
         pArray = pArray[:, xlabels_order]
         
-    
+    print "inside heatmap", xlabels_order
     
     im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)#YlGnBu
     if colLable:
