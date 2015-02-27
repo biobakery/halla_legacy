@@ -357,8 +357,13 @@ def grouped_boxplots2(data, xlabels):
             [np.random.normal(i, 1.5, 30) for i in range(3)],
             [np.random.normal(i, 2, 30) for i in range(4)]]
     '''
+    #ax = plt.axes()
+    
     fig, ax = plt.subplots(dpi= 300, figsize=(10, 5)) #( len(data)/2+5, 5))
-    groups = grouped_boxplots(data, ax, patch_artist=True, max_width=0.9, notch=0, sym='+', vert=1, whis=1.5)
+    #plt.hold(True)
+    #plt.xlim([-0.05, 1.15])
+    #plt.ylim([-0.05, 1.15])
+    groups = grouped_boxplots(data, ax, patch_artist=True, max_width=0.5, notch=0, sym='+', vert=1, whis=1.5)
 
     colors = ['lightgreen', 'bisque']#'lavender', 'lightblue',
     for item in groups:
@@ -370,25 +375,30 @@ def grouped_boxplots2(data, xlabels):
     pylab.xticks(rotation=90, fontsize=10)
     #ax.xticks(range(len(labels)), labels, rotation=90, ha='right')
     #ax.tight_layout()
-    ax.set(xlabel='Method', ylabel='', axisbelow=True,
-           xticklabels=xlabels)
-
+    if len(xlabels) > 0:
+        ax.set_xticklabels(xlabels)
+    #ax.xlabel('Method')
+    #ax.xticks(range(len(xlabels)), xlabels, rotation=90, ha='right')
+    
+    
+    ax.set(xlabel='Method', ylabel='', axisbelow=True, xticklabels=xlabels)
+    plt.tight_layout()
     #ax.grid(axis='y', ls='-', color='white', lw=2)
     #ax.patch.set(facecolor='0.95')
     plt.savefig("Grouped_Recall_FDR.pdf")
     #plt.show()
 
-def grouped_boxplots(data_groups, ax, max_width=0.8, pad=0.05, **kwargs):
+def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
     if ax is None:
         ax = plt.gca()
         
     max_group_size = max(len(item) for item in data_groups)
-    total_padding = pad * (max_group_size - 1)
+    total_padding = pad  * (max_group_size - 1)     
     width = (max_width - total_padding) / max_group_size
     kwargs['widths'] = width
 
     def positions(group, i):
-        span = width * len(group) + pad * (len(group) - 1)
+        span = width * len(group) + pad * (len(group)-1)
         ends = (span - width) / 2
         x = np.linspace(-ends, ends, len(group))
         return x + i
@@ -402,17 +412,13 @@ def grouped_boxplots(data_groups, ax, max_width=0.8, pad=0.05, **kwargs):
         artist = ax.boxplot(group, positions= pos, **kwargs)
         if i % 2 == 0:
             #print pos
-            ax.bar( np.mean(pos)-(width+pad), 1 , zorder=0, color="0.99", width=(width+pad)*2, edgecolor="none" )
+            ax.bar( np.mean(pos)-(width+pad), 1 , zorder=0, color=".995", width=(width+2*pad)*2, edgecolor="none" )
             #'''width * len(group) + pad * (len(group) - 1)-width/2 -pad'''
             #plt.setp(artist, color ='red')
         #artist.patch.set(facecolor='0.1')
         else:
-           ax.bar( np.mean(pos)-(width+pad), 1 , zorder=0, color="0.95", width=(width+pad)*2, edgecolor="none" ) 
-        span = width * len(group) + pad * (len(group) - 1)
-        ends = (span - width) / 2
-        artists.append(artist)
-        flag = False
-    #else:
+           ax.bar( np.mean(pos)-(width+pad), 1 , zorder=0, color="0.98", width=(width+2*pad)*2, edgecolor="none" ) 
+           
         artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
         #artist.patch.set(facecolor='0.95')
         artists.append(artist)
