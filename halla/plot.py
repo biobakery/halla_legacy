@@ -410,12 +410,12 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
         artist = ax.boxplot(group, positions= pos, **kwargs)
         if i % 2 == 0:
             #print pos
-            ax.bar( np.mean(pos)-(width+pad), 1 , zorder=0, color=".995", width=(width+2*pad)*2, edgecolor="none" )
+            ax.bar( np.mean(pos)-(width+pad), 1 , zorder=0, color=".985", width=(width+2*pad)*2, edgecolor="none" )
             #'''width * len(group) + pad * (len(group) - 1)-width/2 -pad'''
             #plt.setp(artist, color ='red')
         #artist.patch.set(facecolor='0.1')
         else:
-           ax.bar( np.mean(pos)-(width+pad), 1 , zorder=0, color="0.98", width=(width+2*pad)*2, edgecolor="none" ) 
+           ax.bar( np.mean(pos)-(width+pad), 1 , zorder=0, color="0.975", width=(width+2*pad)*2, edgecolor="none" ) 
            
         artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
         #artist.patch.set(facecolor='0.95')
