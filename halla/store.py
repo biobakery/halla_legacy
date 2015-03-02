@@ -608,7 +608,9 @@ class HAllA():
                     
                     # heatmap cluster in an association
                     x_label_order = []
-                    if len(discretized_cluster1[0]) >= len(discretized_cluster2[0]):
+                    if len(discretized_cluster1) >= len(discretized_cluster2):
+                        print len(discretized_cluster1), ">=", len(discretized_cluster2)
+                        print len(x_label_order)     
                         halla.plot.heatmap(np.array(discretized_cluster1), x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap', )
                         #x_label_order =  x_label_order1
                         #print "after1", x_label_order

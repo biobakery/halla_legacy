@@ -15,8 +15,6 @@ import scipy.cluster
 from scipy.cluster.hierarchy import linkage, to_tree
 from scipy.spatial.distance import pdist
 from matplotlib.pyplot import xlabel
-import numpy as np
-import matplotlib.pyplot as plt
 # import pydot
 import math
 
@@ -195,7 +193,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
         for j in range(len(pArray2)):
             D[i][j] = pDistance(pArray1[i], pArray2[j])
     # Compute and plot first dendrogram.
-    fig = plt.figure(dpi = 300,figsize=(math.ceil(len(pArray2)/5.0), math.ceil(len(pArray1)/5.0)))
+    fig = pylab.figure(dpi = 300,figsize=(math.ceil(len(pArray2)/5.0), math.ceil(len(pArray1)/5.0)))
     ax1 = fig.add_axes([0.09,0.1,0.2,0.6])
     Y1 = sch.linkage(D, method = "single")
     if len(Y1) > 1:
@@ -252,7 +250,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     # Plot colorbar.
     axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
     pylab.colorbar(im, cax=axcolor)
-    #fig.tight_layout()
+
     fig.savefig(filename + '.pdf')
         
 def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True):
@@ -284,7 +282,7 @@ def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical
     #plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
     #Z = linkage(D, metric=pDistance)
     # Compute and plot first dendrogram.
-    fig = plt.figure(dpi= 300, figsize=(1, math.ceil(len(pArray)/5.0)))
+    fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(pArray[0])/5.0)),(math.ceil(len(pArray[0])/5.0))))
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)
     Y1 = sch.linkage(pArray, metric=pDistance, method=method)
     if len(Y1) > 1:
@@ -345,10 +343,12 @@ def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical
        
     axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
     pylab.colorbar(im, cax=axcolor)
-    #plt.tight_layout()
     fig.savefig(filename + '.pdf')
     #heatmap2(pArray, xlabels = xlabels, filename=filename+"_distance", metric = "nmi", method = "single", )
     return Y1
+
+import numpy as np
+import matplotlib.pyplot as plt
 
 def grouped_boxplots2(data, xlabels):
     '''data = [[np.random.normal(i, 1, 30) for i in range(2)],
@@ -410,12 +410,12 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
         artist = ax.boxplot(group, positions= pos, **kwargs)
         if i % 2 == 0:
             #print pos
-            ax.bar( np.mean(pos)-(width+pad), 1 , zorder=0, color=".985", width=(width+2*pad)*2, edgecolor="none" )
+            ax.bar( np.mean(pos)-(width+2*pad), 1 , zorder=0, color=".995", width=(width+2*pad)*2, edgecolor="none" )
             #'''width * len(group) + pad * (len(group) - 1)-width/2 -pad'''
             #plt.setp(artist, color ='red')
         #artist.patch.set(facecolor='0.1')
         else:
-           ax.bar( np.mean(pos)-(width+pad), 1 , zorder=0, color="0.975", width=(width+2*pad)*2, edgecolor="none" ) 
+           ax.bar( np.mean(pos)-(width+2*pad), 1 , zorder=0, color="0.98", width=(width+2*pad)*2, edgecolor="none" ) 
            
         artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
         #artist.patch.set(facecolor='0.95')

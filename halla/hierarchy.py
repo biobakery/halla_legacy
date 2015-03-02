@@ -1631,7 +1631,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 					#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
 					aOut.append(Current_Family_Children[i])
 					#if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-					if Current_Family_Children[i].is_bypass(Current_Family_Children[i].get_adjusted_pvalue(), test_level = level) :
+					if Current_Family_Children[i].is_bypass(Current_Family_Children[i].get_adjusted_pvalue()) :
 						if bVerbose:
 							print "Bypass, no hope to find an association in the branch with p-value: ", \
 					aP[i], " and ", len(Current_Family_Children[i].get_children()), \
