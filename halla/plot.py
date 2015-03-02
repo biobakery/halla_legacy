@@ -252,6 +252,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     pylab.colorbar(im, cax=axcolor)
 
     fig.savefig(filename + '.pdf')
+    pylab.close()
         
 def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True):
     import scipy
@@ -345,6 +346,7 @@ def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical
     pylab.colorbar(im, cax=axcolor)
     fig.savefig(filename + '.pdf')
     #heatmap2(pArray, xlabels = xlabels, filename=filename+"_distance", metric = "nmi", method = "single", )
+    pylab.close()
     return Y1
 
 import numpy as np
@@ -361,7 +363,7 @@ def grouped_boxplots2(data, xlabels):
     #plt.hold(True)
     #plt.xlim([-0.05, 1.15])
     #plt.ylim([-0.05, 1.15])
-    groups = grouped_boxplots(data, ax, patch_artist=True, max_width=0.5, notch=0, sym='+', vert=1, whis=1.5)
+    groups = grouped_boxplots(data, ax, patch_artist=True, max_width=0.5, notch=0, sym='+', vert=1, whis=1.0)
 
     colors = ['lightgreen', 'bisque']#'lavender', 'lightblue',
     for item in groups:
@@ -385,6 +387,7 @@ def grouped_boxplots2(data, xlabels):
     #ax.patch.set(facecolor='0.95')
     plt.savefig("Grouped_Recall_FDR.pdf")
     #plt.show()
+    plt.close()
 
 def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
     if ax is None:
@@ -410,12 +413,12 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
         artist = ax.boxplot(group, positions= pos, **kwargs)
         if i % 2 == 0:
             #print pos
-            ax.bar( np.mean(pos)-(width+2*pad), 1 , zorder=0, color=".995", width=(width+2*pad)*2, edgecolor="none" )
+            ax.bar( np.mean(pos)-(width+2*pad), 1 , zorder=0, color=".985", width=(width+2*pad)*2, edgecolor="none" )
             #'''width * len(group) + pad * (len(group) - 1)-width/2 -pad'''
             #plt.setp(artist, color ='red')
         #artist.patch.set(facecolor='0.1')
         else:
-           ax.bar( np.mean(pos)-(width+2*pad), 1 , zorder=0, color="0.98", width=(width+2*pad)*2, edgecolor="none" ) 
+           ax.bar( np.mean(pos)-(width+2*pad), 1 , zorder=0, color="0.975", width=(width+2*pad)*2, edgecolor="none" ) 
            
         artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
         #artist.patch.set(facecolor='0.95')

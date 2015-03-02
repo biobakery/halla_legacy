@@ -610,16 +610,20 @@ class HAllA():
                     x_label_order = []
                     if len(discretized_cluster1) >= len(discretized_cluster2):
                         print len(discretized_cluster1), ">=", len(discretized_cluster2)
-                        print len(x_label_order)     
+                        print "Before1: ",len(x_label_order)     
                         halla.plot.heatmap(np.array(discretized_cluster1), x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap', )
                         #x_label_order =  x_label_order1
                         #print "after1", x_label_order
-                        halla.plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
+                        print "After1: ",len(x_label_order)
+                        halla.plot.heatmap(np.array(discretized_cluster2), xlabels_order = x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
                     else:
+                        print len(discretized_cluster1), ">=", len(discretized_cluster2)
+                        print "Before2: ",len(x_label_order) 
                         halla.plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap'  ) 
                         x_label_order =  x_label_order
                         #print "after2", x_label_order 
-                        halla.plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
+                        print "After2: ",len(x_label_order)
+                        halla.plot.heatmap(np.array(discretized_cluster2), xlabels_order = x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
                 
                     halla.plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'Distance' + str(association_number) + '_heatmap' )
                     halla.plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, metric = "pearson", filename =filename + 'Distance' + str(association_number) + '_heatmap' )  
