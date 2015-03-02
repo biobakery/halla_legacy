@@ -1620,7 +1620,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 			for i in range(len(aP)):
 				if pRank[i] <= max_r_t:
 					number_passed_tests += 1
-					print "-- associations after BHY fdr controlling"
+					print "-- associations after fdr correction"
 					if bVerbose:
 						Current_Family_Children[i].report()
 					#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])

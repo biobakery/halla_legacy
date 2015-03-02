@@ -15,6 +15,8 @@ import scipy.cluster
 from scipy.cluster.hierarchy import linkage, to_tree
 from scipy.spatial.distance import pdist
 from matplotlib.pyplot import xlabel
+import numpy as np
+import matplotlib.pyplot as plt
 # import pydot
 import math
 
@@ -174,7 +176,7 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
     plt.savefig(figure_name + '.pdf')
     #plt.show()
     # return plt
-def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='./hierarchical_heatmap2', metric = "nmi", method = "single", colLable = False, rowLabel = True):
+def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='./hierarchical_heatmap2', metric = "nmi", method = "single", colLable = True, rowLabel = True):
     import scipy
     import pylab
     import scipy.cluster.hierarchy as sch
@@ -192,9 +194,8 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     for i in range(len(pArray1)):
         for j in range(len(pArray2)):
             D[i][j] = pDistance(pArray1[i], pArray2[j])
-    
     # Compute and plot first dendrogram.
-    fig = pylab.figure(dpi = 300,figsize=(math.ceil(len(pArray2)/5.0), math.ceil(len(pArray1)/5.0)))
+    fig = plt.figure(dpi = 300,figsize=(math.ceil(len(pArray2)/5.0), math.ceil(len(pArray1)/5.0)))
     ax1 = fig.add_axes([0.09,0.1,0.2,0.6])
     Y1 = sch.linkage(D, method = "single")
     if len(Y1) > 1:
@@ -223,7 +224,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
         idx2 = [0]
     D = D[idx1,:]
     D = D[:,idx2]
-    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)#YlGnBu
+    im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)#YlGnBu #afmhot
     axmatrix.set_xticks([])
     axmatrix.set_yticks([])
     if colLable:    
@@ -251,7 +252,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     # Plot colorbar.
     axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
     pylab.colorbar(im, cax=axcolor)
-
+    #fig.tight_layout()
     fig.savefig(filename + '.pdf')
         
 def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True):
@@ -283,7 +284,7 @@ def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical
     #plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
     #Z = linkage(D, metric=pDistance)
     # Compute and plot first dendrogram.
-    fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(pArray[0])/5.0), math.ceil(len(pArray)/5.0))))
+    fig = plt.figure(dpi= 300, figsize=(1, math.ceil(len(pArray)/5.0)))
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)
     Y1 = sch.linkage(pArray, metric=pDistance, method=method)
     if len(Y1) > 1:
@@ -319,10 +320,7 @@ def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical
         pArray = pArray[:, idx2]
         xlabels_order.extend(idx2)
     else:
-        pArray = pArray[:, xlabels_order]
-        
-    print "inside heatmap", xlabels_order
-    
+        pArray = pArray[:, xlabels_order]    
     im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)#YlGnBu
     if colLable:
         if len(ylabels) == len(idx2):
@@ -347,12 +345,10 @@ def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical
        
     axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
     pylab.colorbar(im, cax=axcolor)
+    #plt.tight_layout()
     fig.savefig(filename + '.pdf')
-    heatmap2(pArray, xlabels = xlabels, filename=filename+"_distance", metric = "nmi", method = "single", )
+    #heatmap2(pArray, xlabels = xlabels, filename=filename+"_distance", metric = "nmi", method = "single", )
     return Y1
-
-import numpy as np
-import matplotlib.pyplot as plt
 
 def grouped_boxplots2(data, xlabels):
     '''data = [[np.random.normal(i, 1, 30) for i in range(2)],
@@ -426,7 +422,7 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
         artists.append(artist)
         flage = True
 
-    ax.margins(0.05)
+    ax.margins(0.01)
     ax.set(xticks=np.arange(len(data_groups)) + 1)
     ax.autoscale()
     return artists
