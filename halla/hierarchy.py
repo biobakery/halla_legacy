@@ -148,8 +148,8 @@ class Tree():
 		else:
 			return False
 	
-	def is_bypass(self, pvalue_threshold = .05, test_level =1 ):
-		if self.get_nominal_pvalue() * test_level > 1.0 - pvalue_threshold:# or\
+	def is_bypass(self, q = .05, test_level =1 ):
+		if self.get_nominal_pvalue() * 2.0 > 1.0 - q:# or\
 		#(self.get_left_first_rep() > .75 and \
 		 #self.get_right_first_rep()> .75): 
 			return True
@@ -1631,7 +1631,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 					#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
 					aOut.append(Current_Family_Children[i])
 					#if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-					if Current_Family_Children[i].is_bypass(Current_Family_Children[i].get_adjusted_pvalue()) :
+					if Current_Family_Children[i].is_bypass(q = Current_Family_Children[i].get_adjusted_pvalue()) :
 						if bVerbose:
 							print "Bypass, no hope to find an association in the branch with p-value: ", \
 					aP[i], " and ", len(Current_Family_Children[i].get_children()), \
@@ -1720,6 +1720,77 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 				aOut.append([performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]])
 		print "--- number of passed tests after BH FDR controlling:", len(aFinal)	
 		print "--- number of performed tests:", len(performed_tests)									
+		return aFinal, aOut
+	def _bh_level_testing():
+		apChildren = [pTree]
+		level = 1
+		number_performed_tests = 0 
+		number_passed_tests = 0
+		next_level_apChildren = []
+		current_level_tests = []
+		while apChildren:
+			current_level_tests.extend(apChildren.pop(0).get_children())
+			
+			if len (apChildren) != 0 :
+				continue
+			else:
+				number_performed_tests += len(current_level_tests)
+				for i in range(len(current_level_tests)):
+					current_level_tests[i].set_nominal_pvalue(_actor(current_level_tests[i]))
+				aP = [ current_level_tests[i].get_nominal_pvalue() for i in range(len(current_level_tests)) ]
+				# claculate adjusted p-value
+				aP_adjusted, pRank = halla.stats.p_adjust(aP, fQ)
+				for i in range(len(current_level_tests)):
+					current_level_tests[i].set_adjusted_pvalue(aP_adjusted[i])
+					current_level_tests[i].set_family_rank(pRank[i])
+
+				max_r_t = 0
+				for i in range(len(current_level_tests)):
+					if aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
+						max_r_t = pRank[i]
+						# print "max_r_t", max_r_t
+				for i in range(len(aP)):
+					if pRank[i] <= max_r_t:
+						number_passed_tests += 1
+						print "-- associations after fdr correction"
+						if bVerbose:
+							current_level_tests[i].report()
+						#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+						aOut.append(current_level_tests[i])
+						#aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+						aFinal.append(current_level_tests[i])
+					else :
+						#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+						#print i, range(len(current_level_tests)), current_level_tests[i]
+						aOut.append(current_level_tests[i])
+						#if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
+						if current_level_tests[i].is_bypass(q = current_level_tests[i].get_adjusted_pvalue()) :
+							if bVerbose:
+								print "Bypass, no hope to find an association in the branch with p-value: ", \
+						aP[i], " and ", len(current_level_tests[i].get_children()), \
+						 " sub-hypotheses.", current_level_tests[i].get_data()[0], \
+						  "   ", current_level_tests[i].get_data()[1]
+							
+						elif current_level_tests[i].is_leaf():
+							if bVerbose:
+								print "End of branch, leaf!"
+							# aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
+						else:
+							if bVerbose:
+								print "Gray area with p-value:", aP[i]
+							next_level_apChildren.append(current_level_tests[i])
+						
+						if bVerbose:
+							print "Hypotheses testing level ", level, " is finished."
+						# number_performed_test += len(next_level_apChildren)
+				apChildren = next_level_apChildren
+				level += 1
+				next_level_apChildren = []
+				current_level_tests = []
+				aP = []
+
+		print "--- number of performed tests:", number_performed_tests
+		print "--- number of passed tests after BHY FDR controlling:", number_passed_tests										
 		return aFinal, aOut
 	def _rh_hypothesis_testing():
 		apChildren = [pTree]
@@ -1813,6 +1884,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 
 	fdr_function = {"default": _bhy_hypothesis_testing,
 							"BHY": _bhy_hypothesis_testing,
+							"BHL":_bh_level_testing,
 							"BH":  _bh_hypothesis_testing,
 							"RH": _rh_hypothesis_testing,
 							"simple":_simple_hypothesis_testing}
