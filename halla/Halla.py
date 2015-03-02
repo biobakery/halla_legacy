@@ -153,7 +153,7 @@ def parse_arguments (args):
         dest="strFDR",
         type=str,
         default = "BHY",
-        help="function for maximize statistical power and control false discovery rate, simple, BHY, BHL, BH, RH.")
+        help="function for maximize statistical power and control false discovery rate, simple, BHF, BHL, BH, RH.")
 
     argp.add_argument(
         "-i", metavar="iterations",

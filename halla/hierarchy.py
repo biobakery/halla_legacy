@@ -148,8 +148,8 @@ class Tree():
 		else:
 			return False
 	
-	def is_bypass(self, q = .05, test_level =1 ):
-		if self.get_nominal_pvalue() * 2.0 > 1.0 - q:# or\
+	def is_bypass(self, q = .05, test_level =1.0 ):
+		if self.get_nominal_pvalue()  > 1.0 - q:# or\
 		#(self.get_left_first_rep() > .75 and \
 		 #self.get_right_first_rep()> .75): 
 			return True
@@ -1587,7 +1587,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 		print "--- number of passed tests without FDR controlling:", number_passed_tests		
 		return aFinal, aOut
 	
-	def _bhy_hypothesis_testing():
+	def _bh_family_testing():
 		apChildren = [pTree]
 		level = 1
 		number_performed_tests = 0 
@@ -1631,7 +1631,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 					#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
 					aOut.append(Current_Family_Children[i])
 					#if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-					if Current_Family_Children[i].is_bypass(q = Current_Family_Children[i].get_adjusted_pvalue()) :
+					if Current_Family_Children[i].is_bypass(q = Current_Family_Children[i].get_adjusted_pvalue(), test_level = math.log(len(Current_Family_Children[i].get_data()[0])* len(Current_Family_Children[i].get_data()[1]), 2)) :
 						if bVerbose:
 							print "Bypass, no hope to find an association in the branch with p-value: ", \
 					aP[i], " and ", len(Current_Family_Children[i].get_children()), \
@@ -1764,7 +1764,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 						#print i, range(len(current_level_tests)), current_level_tests[i]
 						aOut.append(current_level_tests[i])
 						#if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-						if current_level_tests[i].is_bypass(q = current_level_tests[i].get_adjusted_pvalue()) :
+						if current_level_tests[i].is_bypass(q = current_level_tests[i].get_adjusted_pvalue(), test_level = math.log(len(current_level_tests[i].get_data()[0])* len(current_level_tests[i].get_data()[1]), 2)) :
 							if bVerbose:
 								print "Bypass, no hope to find an association in the branch with p-value: ", \
 						aP[i], " and ", len(current_level_tests[i].get_children()), \
@@ -1882,8 +1882,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 
 		return dP 
 
-	fdr_function = {"default": _bhy_hypothesis_testing,
-							"BHY": _bhy_hypothesis_testing,
+	fdr_function = {"default": _bh_family_testing,
+							"BHF": _bh_family_testing,
 							"BHL":_bh_level_testing,
 							"BH":  _bh_hypothesis_testing,
 							"RH": _rh_hypothesis_testing,
