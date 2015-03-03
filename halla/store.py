@@ -25,13 +25,14 @@ import math
 
 #  Load a halla module to check the installation
 try:
-    import halla.hierarchy
+    from . import hierarchy
 except ImportError:
     sys.exit("CRITICAL ERROR: Unable to find the hierarchy module." + 
-        " Please check your install.")
+        " Please check your halla install.")
 
-import halla.distance
-import halla.stats
+from . import distance
+from . import stats
+from . import plot
 
 
 class HAllA():
@@ -99,9 +100,9 @@ class HAllA():
         self.__author__             = ["Gholamali.Rahnavard", "YS Joseph Moon", "Curtis Huttenhower"]
         self.__contact__         = "gholamali.rahnavard@gmail.com"
 
-        self.hash_decomposition = halla.stats.c_hash_decomposition
+        self.hash_decomposition = stats.c_hash_decomposition
 
-        self.hash_metric          = halla.distance.c_hash_metric 
+        self.hash_metric          = distance.c_hash_metric 
 
         self.keys_attribute = ["__description__", "__version__", "__author__", "__contact__", "q", "distance", "iterations", "decomposition", "p_adjust_method", "randomization_method"]
         # # END INIT 
@@ -262,7 +263,7 @@ class HAllA():
         if not self.aOutName1:
             self.aOutName1 = [str(i) for i in range(len(self.meta_array[0])) ]
             self.aOutName2 = [str(i) for i in range(len(self.meta_array[1])) ]
-        self.meta_feature = self.m(self.meta_array, halla.stats.discretize)
+        self.meta_feature = self.m(self.meta_array, stats.discretize)
         return self.meta_feature
 
     def _featurize(self, strMethod="_discretize"):
@@ -277,15 +278,15 @@ class HAllA():
 
     def _hclust(self):
         # print self.meta_feature
-        self.meta_data_tree.append(halla.hierarchy.hclust(self.meta_feature[0] , strMetric= self.distance, labels=self.aOutName1, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
-        self.meta_data_tree.append(halla.hierarchy.hclust(self.meta_feature[1] , strMetric= self.distance, labels=self.aOutName2, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
+        self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[0] , strMetric= self.distance, labels=self.aOutName1, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
+        self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[1] , strMetric= self.distance, labels=self.aOutName2, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
         # self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x , bTree=True) )
         # print self.meta_data_tree
         return self.meta_data_tree 
 
     def _couple(self):
                 
-        self.meta_hypothesis_tree = halla.hierarchy.couple_tree(apClusterNode1=[self.meta_data_tree[0]],
+        self.meta_hypothesis_tree = hierarchy.couple_tree(apClusterNode1=[self.meta_data_tree[0]],
                 apClusterNode2=[self.meta_data_tree[1]],
                 pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], func=self.distance, threshold = self.threshold)[0]
         
@@ -293,7 +294,7 @@ class HAllA():
         #return self.meta_hypothesis_tree 
 
     def _naive_all_against_all(self, iIter=100):
-        self.meta_alla = halla.hierarchy.naive_all_against_all(self.meta_feature[0], self.meta_feature[1], decomposition = self.decomposition, method="permutation", metric=self.distance, fQ=self.q,
+        self.meta_alla = hierarchy.naive_all_against_all(self.meta_feature[0], self.meta_feature[1], decomposition = self.decomposition, method="permutation", metric=self.distance, fQ=self.q,
     bVerbose=False, iIter = self.iterations)
         return self.meta_alla 
     def _hypotheses_testing(self):
@@ -304,7 +305,7 @@ class HAllA():
             print ("HAllA PROMPT: q value", fQ)
             print ("q value is", fQ) 
         
-        self.meta_alla = halla.hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose) 
+        self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose) 
         # # Choose to keep to 2 arrays for now -- change later to generalize 
         #return self.meta_alla 
 
@@ -315,7 +316,7 @@ class HAllA():
         tX, tY = self.meta_data_tree[0], self.meta_data_tree[1]
         iX, iY = X.shape[0], Y.shape[0]
 
-        aOut = filter(bool, list(halla.hierarchy.layerwise_all_against_all(tX, tY, X, Y)))
+        aOut = filter(bool, list(hierarchy.layerwise_all_against_all(tX, tY, X, Y)))
 
         aMetaOut = [] 
 
@@ -611,41 +612,41 @@ class HAllA():
                     if len(discretized_cluster1) >= len(discretized_cluster2):
                         #print len(discretized_cluster1), ">=", len(discretized_cluster2)
                         #print "Before1: ",len(x_label_order)     
-                        halla.plot.heatmap(np.array(discretized_cluster1), x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap', )
+                        plot.heatmap(np.array(discretized_cluster1), x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap', )
                         #x_label_order =  x_label_order1
                         #print "after1", x_label_order
                         #print "After1: ",len(x_label_order)
-                        halla.plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
+                        plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
                     else:
                         #print len(discretized_cluster2), ">=", len(discretized_cluster1)
                         #print "Before2: ",len(x_label_order) 
-                        halla.plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap'  ) 
+                        plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap'  ) 
                         #x_label_order =  x_label_order
                         #print "after2", x_label_order 
                         #print "After2: ",len(x_label_order)
-                        halla.plot.heatmap(np.array(discretized_cluster1), xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap' )
+                        plot.heatmap(np.array(discretized_cluster1), xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap' )
                 
-                    halla.plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'Distance' + str(association_number) + '_heatmap' )
-                    halla.plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, metric = "pearson", filename =filename + 'Distance' + str(association_number) + '_heatmap' )  
+                    plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'Distance' + str(association_number) + '_heatmap' )
+                    plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, metric = "pearson", filename =filename + 'Distance' + str(association_number) + '_heatmap' )  
                     plt.figure()
                     df1 = np.array(cluster1, dtype=float)
                     df2 = np.array(cluster2, dtype=float)
                     
-                    plt.scatter(halla.stats.pca(df1)[0], halla.stats.pca(df2)[0], alpha=0.5)
+                    plt.scatter(stats.pca(df1)[0], stats.pca(df2)[0], alpha=0.5)
                     plt.savefig(filename + '/association_' + str(association_number) + '.pdf')
                     
                     plt.figure()
                     discretized_df1 = np.array(discretized_cluster1, dtype=float)
                     discretized_df2 = np.array(discretized_cluster2, dtype=float)
                     plt.figure()
-                    x = halla.stats.pca(discretized_df1)[0]
-                    y = halla.stats.pca(discretized_df2)[0]
+                    x = stats.pca(discretized_df1)[0]
+                    y = stats.pca(discretized_df2)[0]
                     '''for i in range(len(x)):
                         x += np.random.normal(x[i], 3, 100)
                     for i in range(len(y)):
                         y += np.random.normal(y[i], 3, 100)
                     '''
-                    #plt.scatter( halla.stats.discretize(halla.stats.pca(discretized_df1)),  halla.stats.discretize(halla.stats.pca(discretized_df2)), alpha=0.5)
+                    #plt.scatter( stats.discretize(stats.pca(discretized_df1)),  stats.discretize(stats.pca(discretized_df2)), alpha=0.5)
                     plt.scatter( x, y, alpha=0.5)
                     plt.savefig(discretized_filename + '/association_' + str(association_number) + '.pdf')
                     
@@ -655,7 +656,7 @@ class HAllA():
             output_file_compared_clusters  = open(str(self.output_dir)+'/all_compared_clusters_hypotheses_tree.txt', 'w')
             csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab)
             csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
-            for line in halla.hierarchy.reduce_tree_by_layer([self.meta_hypothesis_tree]):
+            for line in hierarchy.reduce_tree_by_layer([self.meta_hypothesis_tree]):
                 (level, clusters) = line
                 iX, iY = clusters[0], clusters[1]
                 fP = line[1]
@@ -675,7 +676,7 @@ class HAllA():
                 df2 = np.array(cluster2, dtype=float)
                 p = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
                 nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
-                halla.plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =associated_feature_X_indecies, ylabels = associated_feature_Y_indecies, filename = str(self.output_dir)+'/all_heatmap' )
+                plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =associated_feature_X_indecies, ylabels = associated_feature_Y_indecies, filename = str(self.output_dir)+'/all_heatmap' )
         def _heatmap_associations_R():
             if self.plotting_results:
                 print "--- plotting heatmap associations using R ..."
@@ -695,7 +696,7 @@ class HAllA():
                 nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
                 for i in range(len(associated_feature_X_indecies)):
                     for j in range(len(associated_feature_Y_indecies)):
-                        nmi[i][j] = halla.distance.NormalizedMutualInformation(df1[i], df2[j]).get_distance()
+                        nmi[i][j] = distance.NormalizedMutualInformation(df1[i], df2[j]).get_distance()
                         
                 
                 import rpy2.robjects as ro
@@ -737,11 +738,11 @@ class HAllA():
                 
                 for i in range(X_indecies):
                     for j in range(X_indecies):
-                        drows1[i][j] = halla.distance.NormalizedMutualInformation(df1[i], df1[j]).get_distance() 
+                        drows1[i][j] = distance.NormalizedMutualInformation(df1[i], df1[j]).get_distance() 
                 
                 for i in range(Y_indecies):
                     for j in range(Y_indecies):
-                        drows2[i][j] = halla.distance.NormalizedMutualInformation(df2[i], df2[j]).get_distance()       
+                        drows2[i][j] = distance.NormalizedMutualInformation(df2[i], df2[j]).get_distance()       
                 
                 import rpy2.robjects as ro
                 #import pandas.rpy.common as com
@@ -914,7 +915,7 @@ class HAllA():
         csvw.writerow(["Similarity method: ", self.distance]) 
         csvw.writerow(["q: FDR cut-off : ", self.q]) 
         execution_time = time.time()
-        if halla.distance.c_hash_association_method_discretize[self.distance] or not self.bypass_discretizing:
+        if distance.c_hash_association_method_discretize[self.distance] or not self.bypass_discretizing:
             # featurize 
             start_time = time.time()
             self._featurize()
@@ -923,7 +924,7 @@ class HAllA():
             print("--- %s seconds: featurize data time ---" % excution_time_temp)
         else:
             self.meta_feature = self.meta_array
-        halla.plot.heatmap2(pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], xlabels =self.aOutName1, ylabels = self.aOutName2, filename = str(self.output_dir)+'/heatmap2_all' )
+        plot.heatmap2(pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], xlabels =self.aOutName1, ylabels = self.aOutName2, filename = str(self.output_dir)+'/heatmap2_all' )
         if not self.descending:
             print("--- association hypotheses testing is started, this task may take longer ...")
             start_time = time.time()

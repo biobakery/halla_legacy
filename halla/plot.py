@@ -10,7 +10,7 @@ including all graphics and 'data object to plot' transformations.
 # import dot_parser
 import pylab
 import sys
-import halla.distance
+from . import distance
 import scipy.cluster 
 from scipy.cluster.hierarchy import linkage, to_tree
 from scipy.spatial.distance import pdist
@@ -181,7 +181,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     if len(pArray2) == 0:
         pArray2 = pArray1
         ylabels = xlabels
-    pMetric = halla.distance.c_hash_metric[metric] 
+    pMetric = distance.c_hash_metric[metric] 
     # # Remember, pMetric is a notion of _strength_, not _distance_ 
     # print str(pMetric)
     def pDistance(x, y):
@@ -272,7 +272,7 @@ def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical
                 D[i, j] = abs(x[i] - x[j])
                 D[j, i] = D[i, j]
      '''      
-    pMetric = halla.distance.c_hash_metric[metric] 
+    pMetric = distance.c_hash_metric[metric] 
     # # Remember, pMetric is a notion of _strength_, not _distance_ 
     # print str(pMetric)
     def pDistance(x, y):

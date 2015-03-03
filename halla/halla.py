@@ -44,14 +44,12 @@ except ImportError:
     
 #  Load a halla module to check the installation
 try:
-    import halla.hierarchy
+    from . import store
 except ImportError:
-    sys.exit("CRITICAL ERROR: Unable to find the hierarchy module." + 
-        " Please check your install.") 
+    sys.exit("CRITICAL ERROR: Unable to find the store module." + 
+        " Please check your halla install.") 
 
-import halla.stats, halla.distance, halla.store
-from halla.parser import Input, Output
-
+from . import parser
 
 def get_halla_base_directory():
     """ 
@@ -251,7 +249,7 @@ def set_HAllA_object (H, args):
     else:
         H.strFile1, H.strFile2 = istm[0], istm[0]
         
-    aOut1, aOut2 = Input (H.strFile1.name, H.strFile2.name, headers=args.header).get()
+    aOut1, aOut2 = parser.Input (H.strFile1.name, H.strFile2.name, headers=args.header).get()
     H.plotting_results = args.plotting_results
     (H.meta_array[0], H.aOutName1, H.aOutType1, H.aOutHead1) = aOut1 
     (H.meta_array[1], H.aOutName2, H.aOutType2, H.aOutHead2) = aOut2 
@@ -261,7 +259,7 @@ def _main():
     # Parse arguments from command line
     args=parse_arguments(sys.argv)
     check_requirements(args)
-    H = halla.store.HAllA(X = None, Y = None)
+    H = store.HAllA(X = None, Y = None)
     set_HAllA_object(H, args)         
     aaOut = H.run()	
     
