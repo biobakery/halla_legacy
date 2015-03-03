@@ -178,7 +178,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     import scipy
     import pylab
     import scipy.cluster.hierarchy as sch
-    if pArray2 == None :
+    if len(pArray2) == 0:
         pArray2 = pArray1
         ylabels = xlabels
     pMetric = halla.distance.c_hash_metric[metric] 
@@ -283,7 +283,7 @@ def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical
     #plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
     #Z = linkage(D, metric=pDistance)
     # Compute and plot first dendrogram.
-    fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(pArray[0])/5.0)),(math.ceil(len(pArray[0])/5.0))))
+    fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(pArray[0])/5.0)),(math.ceil(len(pArray)/5.0))))
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)
     Y1 = sch.linkage(pArray, metric=pDistance, method=method)
     if len(Y1) > 1:
@@ -413,12 +413,12 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
         artist = ax.boxplot(group, positions= pos, **kwargs)
         if i % 2 == 0:
             #print pos
-            ax.bar( np.mean(pos)-(width+2*pad), 1 , zorder=0, color=".98", width=(width+2*pad)*2, edgecolor="none" )
+            ax.bar( np.mean(pos)-(width+2*pad), 1 , zorder=0, color=".985", width=(width+2*pad)*2, edgecolor="none" )
             #'''width * len(group) + pad * (len(group) - 1)-width/2 -pad'''
             #plt.setp(artist, color ='red')
         #artist.patch.set(facecolor='0.1')
         else:
-           ax.bar( np.mean(pos)-(width+2*pad), 1 , zorder=0, color="0.96", width=(width+2*pad)*2, edgecolor="none" ) 
+           ax.bar( np.mean(pos)-(width+2*pad), 1 , zorder=0, color="0.955", width=(width+2*pad)*2, edgecolor="none" ) 
            
         artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
         #artist.patch.set(facecolor='0.95')

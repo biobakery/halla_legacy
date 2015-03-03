@@ -174,7 +174,7 @@ def parse_arguments (args):
         dest="strDecomposition",
         type=str,
         default="pca",
-        help="The approach for reducing dimensions (or decomposition)[default = pca, options are pca, cca, kpca, ica, pls]")    
+        help="The approach for reducing dimensions (or decomposition)[default = pca, options are pca, ica, cca, kpca, pls]")    
     
     argp.add_argument(
         "-j",  metavar="adjusting",
@@ -188,7 +188,7 @@ def parse_arguments (args):
         dest="strRandomization",
         type=str,
         default="permutation",
-        help="The approach for association test, [default is permutation, options are permutation and G-test]")  
+        help="The approach for association test, [default is permutation, options is permutation test]")  
      
     argp.add_argument(
         "-v", "--verbose", metavar="verbosity",
