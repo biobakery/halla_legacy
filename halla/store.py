@@ -584,12 +584,12 @@ class HAllA():
                         sys.exit("Unable to create directory: "+dir)
                     plt.figure()    
                     df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
-                    axes = pd.tools.plotting.scatter_matrix(df)
+                    axes = pd.tools.plotting.scatter_matrix(df, alpha = 0.5, range_padding = 0.05)
                     plt.savefig(filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     
                     plt.figure()
                     discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
-                    discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df)
+                    discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df, alpha = 0.5, range_padding = 0.05 )
                     plt.savefig(discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                                  
                     cluster2 = [self.meta_array[1][i] for i in iY]
@@ -597,13 +597,13 @@ class HAllA():
                     Y_labels = np.array([self.aOutName2[i] for i in iY])
                     plt.figure()
                     df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-                    axes = pd.tools.plotting.scatter_matrix(df)
+                    axes = pd.tools.plotting.scatter_matrix(df, alpha = 0.5, range_padding = 0.05)
                     plt.savefig(filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     
                     
                     plt.figure()
                     discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
-                    discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df)
+                    discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df, alpha = 0.5, range_padding = 0.05)
                     plt.savefig(discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     
                     # heatmap cluster in an association
@@ -615,15 +615,15 @@ class HAllA():
                         #x_label_order =  x_label_order1
                         #print "after1", x_label_order
                         #print "After1: ",len(x_label_order)
-                        halla.plot.heatmap(np.array(discretized_cluster2), xlabels_order = x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
+                        halla.plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
                     else:
                         #print len(discretized_cluster2), ">=", len(discretized_cluster1)
                         #print "Before2: ",len(x_label_order) 
                         halla.plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap'  ) 
-                        x_label_order =  x_label_order
+                        #x_label_order =  x_label_order
                         #print "after2", x_label_order 
                         #print "After2: ",len(x_label_order)
-                        halla.plot.heatmap(np.array(discretized_cluster1), xlabels_order = x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
+                        halla.plot.heatmap(np.array(discretized_cluster1), xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap' )
                 
                     halla.plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'Distance' + str(association_number) + '_heatmap' )
                     halla.plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, metric = "pearson", filename =filename + 'Distance' + str(association_number) + '_heatmap' )  
@@ -664,7 +664,7 @@ class HAllA():
                 csvwc.writerow(aLineOut)
         def _heatmap_associations():
             if self.plotting_results:
-                print "--- plotting heatmap of `associations using  ..."
+                print "--- plotting heatmap of associations  ..."
                 global associated_feature_X_indecies
                 X_labels = np.array([self.aOutName1[i] for i in associated_feature_X_indecies])
                 global associated_feature_Y_indecies

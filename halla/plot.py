@@ -425,7 +425,7 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
         artists.append(artist)
         flage = True
 
-    ax.margins(0.01)
+    ax.margins(0.05)
     ax.set(xticks=np.arange(len(data_groups)) + 1)
     ax.autoscale()
     return artists
