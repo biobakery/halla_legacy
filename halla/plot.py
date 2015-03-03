@@ -156,7 +156,7 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
         roc_name += '_' + roc_info[i][0] 
         
     # Plot ROC curve
-    plt.figure(dpi= 300)
+    plt.figure(dpi= 300, figsize=(4, 4))
     for i in range(len(roc_info)):
         params = {'legend.fontsize': 6,
         'legend.linewidth': 2}
@@ -359,7 +359,7 @@ def grouped_boxplots2(data, xlabels):
     '''
     #ax = plt.axes()
     
-    fig, ax = plt.subplots(dpi= 300, figsize=(10, 5)) #( len(data)/2+5, 5))
+    fig, ax = plt.subplots(dpi= 300, figsize=(4, 4)) #( len(data)/2+5, 5))
     #plt.hold(True)
     #plt.xlim([-0.05, 1.15])
     #plt.ylim([-0.05, 1.15])
