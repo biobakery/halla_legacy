@@ -490,8 +490,8 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
 	#plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
 	
 	if plotting_result:
-		
-		print "--- plotting dentrogram ... "
+		global fig_num
+		print "--- plotting heatmap for Dataset", str(fig_num)," ... "
 		#plt.figure("Hierarcichal clusters of Dataset "+ str(fig_num),  dpi=300)
 		#if labels:
 		#	scipy.cluster.hierarchy.dendrogram(Z, labels=labels, leaf_rotation=90)

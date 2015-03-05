@@ -188,6 +188,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
         return  1.0 - pMetric(x, y)
     
     #D = pdist(pArray, metric=pDistance)
+    #print len(pArray1), len(pArray2)
     D = scipy.zeros([len(pArray1), len(pArray2)])
     for i in range(len(pArray1)):
         for j in range(len(pArray2)):
