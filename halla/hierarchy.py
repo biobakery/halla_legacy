@@ -1655,7 +1655,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 				level += 1
 				next_level_apChildren = []
 		print "--- number of performed tests:", number_performed_tests
-		print "--- number of passed tests after BHY FDR controlling:", number_passed_tests										
+		print "--- number of passed tests after FDR controlling:", number_passed_tests										
 		return aFinal, aOut
 	def _bh_hypothesis_testing():
 		apChildren = [pTree]
@@ -1718,7 +1718,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 				aFinal.append([performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]])
 			else :
 				aOut.append([performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]])
-		print "--- number of passed tests after BH FDR controlling:", len(aFinal)	
+		print "--- number of passed tests after FDR controlling:", len(aFinal)	
 		print "--- number of performed tests:", len(performed_tests)									
 		return aFinal, aOut
 	def _bh_level_testing():
@@ -1790,7 +1790,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 				aP = []
 
 		print "--- number of performed tests:", number_performed_tests
-		print "--- number of passed tests after BHY FDR controlling:", number_passed_tests										
+		print "--- number of passed tests after FDR controlling:", number_passed_tests										
 		return aFinal, aOut
 	def _rh_hypothesis_testing():
 		apChildren = [pTree]
@@ -1860,7 +1860,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 				aFinal.append([end_level_tests[i][0].get_data(), float(end_level_tests[i][1]) , aP_adjusted[i]])
 			else :
 				aOut.append([end_level_tests[i][0].get_data(), float(end_level_tests[i][1]) , aP_adjusted[i]])
-		print "--- number of passed tests after RH FDR controllin:", len(aFinal)										
+		print "--- number of passed tests after FDR controllin:", len(aFinal)										
 		return aFinal, aOut
 	
 	def _actor(pNode):

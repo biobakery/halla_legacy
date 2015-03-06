@@ -585,12 +585,15 @@ class HAllA():
                         sys.exit("Unable to create directory: "+dir)
                     plt.figure()    
                     df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
-                    axes = pd.tools.plotting.scatter_matrix(df, alpha = 0.5, range_padding = 0.05)
+                    
+                    axes = pd.tools.plotting.scatter_matrix(df, alpha = 0.5, range_padding = 0.2, figsize=(len(df.columns)*.6+3.5, len(df.columns)*.6+3.5))
+                    
                     plt.savefig(filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     
                     plt.figure()
                     discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
-                    discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df, alpha = 0.5, range_padding = 0.05 )
+                    discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df, alpha = 0.5, range_padding = 0.2, figsize=(len(discretized_df.columns)*.6+3.5, len(discretized_df.columns)*.6+3.5) )
+                    
                     plt.savefig(discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                                  
                     cluster2 = [self.meta_array[1][i] for i in iY]
@@ -598,13 +601,15 @@ class HAllA():
                     Y_labels = np.array([self.aOutName2[i] for i in iY])
                     plt.figure()
                     df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-                    axes = pd.tools.plotting.scatter_matrix(df, alpha = 0.5, range_padding = 0.05)
+                    axes = pd.tools.plotting.scatter_matrix(df, alpha = .5, range_padding = 0.2, figsize=(len(df.columns)*.6+3.5, len(df.columns)*.6+3.5))
+                    
                     plt.savefig(filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     
                     
                     plt.figure()
                     discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
-                    discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df, alpha = 0.5, range_padding = 0.05)
+                    discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df, alpha = .5, range_padding = 0.2, figsize=(len(discretized_df.columns)*.6+3.5, len(discretized_df.columns)*.6+3.5))
+                    
                     plt.savefig(discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     
                     # heatmap cluster in an association
@@ -626,19 +631,19 @@ class HAllA():
                         #print "After2: ",len(x_label_order)
                         plot.heatmap(np.array(discretized_cluster1), xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap' )
                 
-                    plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'Distance' + str(association_number) + '_heatmap' )
-                    plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, metric = "pearson", filename =filename + 'Distance' + str(association_number) + '_heatmap' )  
+                    plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'AllA_association_' + str(association_number) + '_heatmap' )
+                    plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename =filename + 'AllA_association_' + str(association_number) + '_heatmap' )  
                     plt.figure()
                     df1 = np.array(cluster1, dtype=float)
                     df2 = np.array(cluster2, dtype=float)
                     
                     plt.scatter(stats.pca(df1)[0], stats.pca(df2)[0], alpha=0.5)
+                    
                     plt.savefig(filename + '/association_' + str(association_number) + '.pdf')
                     
                     plt.figure()
                     discretized_df1 = np.array(discretized_cluster1, dtype=float)
                     discretized_df2 = np.array(discretized_cluster2, dtype=float)
-                    plt.figure()
                     x = stats.pca(discretized_df1)[0]
                     y = stats.pca(discretized_df2)[0]
                     '''for i in range(len(x)):
@@ -647,7 +652,8 @@ class HAllA():
                         y += np.random.normal(y[i], 3, 100)
                     '''
                     #plt.scatter( stats.discretize(stats.pca(discretized_df1)),  stats.discretize(stats.pca(discretized_df2)), alpha=0.5)
-                    plt.scatter( x, y, alpha=0.5)
+                    plt.scatter( x, y, alpha=0.4)
+                    
                     plt.savefig(discretized_filename + '/association_' + str(association_number) + '.pdf')
                     
                     plt.close("all")

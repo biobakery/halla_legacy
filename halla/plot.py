@@ -174,7 +174,7 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
     plt.savefig(figure_name + '.pdf')
     #plt.show()
     # return plt
-def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='./hierarchical_heatmap2', metric = "nmi", method = "single", colLable = True, rowLabel = True):
+def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='./hierarchical_heatmap2', metric = "nmi", method = "single", colLable = True, rowLabel = True, color_bar = False):
     import scipy
     import pylab
     import scipy.cluster.hierarchy as sch
@@ -194,7 +194,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
         for j in range(len(pArray2)):
             D[i][j] = pDistance(pArray1[i], pArray2[j])
     # Compute and plot first dendrogram.
-    fig = pylab.figure(dpi = 300,figsize=(math.ceil(len(pArray2)/5.0), math.ceil(len(pArray1)/5.0)))
+    fig = pylab.figure(dpi = 300,figsize=(math.ceil(len(pArray2)/5.0)+2, math.ceil(len(pArray1)/5.0)+2))
     ax1 = fig.add_axes([0.09,0.1,0.2,0.6])
     Y1 = sch.linkage(D, method = "single")
     if len(Y1) > 1:
@@ -249,13 +249,14 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
         pylab.yticks(rotation=0, fontsize=6)
    
     # Plot colorbar.
-    axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
-    pylab.colorbar(im, cax=axcolor)
+    if color_bar:
+        axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
+        pylab.colorbar(im, cax=axcolor)
 
     fig.savefig(filename + '.pdf')
     pylab.close()
         
-def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True):
+def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True, color_bar = False):
     import scipy
     import pylab
     # import dot_parser
@@ -342,9 +343,9 @@ def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical
         axmatrix.yaxis.set_label_position('right')
         axmatrix.yaxis.tick_right()
         pylab.yticks(rotation=0, fontsize=6)
-       
-    axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
-    pylab.colorbar(im, cax=axcolor)
+    if color_bar:   
+        axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
+        pylab.colorbar(im, cax=axcolor)
     fig.savefig(filename + '.pdf')
     #heatmap2(pArray, xlabels = xlabels, filename=filename+"_distance", metric = "nmi", method = "single", )
     pylab.close()
