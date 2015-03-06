@@ -586,31 +586,20 @@ class HAllA():
                     plt.figure()    
                     df = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
                     
-                    axes = pd.tools.plotting.scatter_matrix(df, alpha = 0.5, range_padding = 0.2, figsize=(len(df.columns)*.6+3.5, len(df.columns)*.6+3.5))
+                    axes = plot.scatter_matrix(df, filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     
-                    plt.savefig(filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                    
-                    plt.figure()
                     discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
-                    discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df, alpha = 0.5, range_padding = 0.2, figsize=(len(discretized_df.columns)*.6+3.5, len(discretized_df.columns)*.6+3.5) )
-                    
-                    plt.savefig(discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                                  
                     cluster2 = [self.meta_array[1][i] for i in iY]
                     discretized_cluster2 = [self.meta_feature[1][i] for i in iY]
                     Y_labels = np.array([self.aOutName2[i] for i in iY])
-                    plt.figure()
+
                     df = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-                    axes = pd.tools.plotting.scatter_matrix(df, alpha = .5, range_padding = 0.2, figsize=(len(df.columns)*.6+3.5, len(df.columns)*.6+3.5))
+                    axes = plot.scatter_matrix(df, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     
-                    plt.savefig(filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                    
-                    
-                    plt.figure()
                     discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
-                    discretized_axes = pd.tools.plotting.scatter_matrix(discretized_df, alpha = .5, range_padding = 0.2, figsize=(len(discretized_df.columns)*.6+3.5, len(discretized_df.columns)*.6+3.5))
-                    
-                    plt.savefig(discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     
                     # heatmap cluster in an association
                     x_label_order = []
@@ -974,7 +963,7 @@ class HAllA():
         print("--- %s seconds: plotting results time ---" % excution_time_temp)
         excution_time_temp = time.time() - execution_time
         csvw.writerow(["Total execution time time", ecution_time_temp ])
-        print("\n--- in %s seconds HAllA is successfully done ---" % excution_time_temp )
+        print("\n--- in %s seconds the task is successfully done ---" % excution_time_temp )
         return results
     
     def view_singleton(self, pBags):

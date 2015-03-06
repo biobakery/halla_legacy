@@ -17,6 +17,7 @@ from scipy.spatial.distance import pdist
 from matplotlib.pyplot import xlabel
 # import pydot
 import math
+import pandas as pd
 
 def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods', ylabel=None, labels=None):
     
@@ -431,3 +432,23 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
     ax.set(xticks=np.arange(len(data_groups)) + 1)
     ax.autoscale()
     return artists
+
+def scatter_matrix(df, filename = None):
+    plt.figure()
+    axs = pd.tools.plotting.scatter_matrix(df, alpha = .5, range_padding = 0.2, figsize=(len(df.columns)*.6+3.5, len(df.columns)*.6+3.5))
+
+    def wrap(txt, width=8):
+        '''helper function to wrap text for long labels'''
+        import textwrap
+        return '\n'.join(textwrap.wrap(txt, width))
+    
+    for ax in axs[:,0]: # the left boundary
+        ax.grid('off', axis='both')
+        ax.set_ylabel(wrap(ax.get_ylabel()), rotation=0, va='center', labelpad=20)
+        ax.set_yticks([])
+    
+    for ax in axs[-1,:]: # the lower boundary
+        ax.grid('off', axis='both')
+        ax.set_xlabel(wrap(ax.get_xlabel()), rotation=90)
+        ax.set_xticks([])
+    plt.savefig(filename)
