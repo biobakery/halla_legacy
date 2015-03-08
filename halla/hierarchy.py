@@ -1269,7 +1269,7 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
 				aOut.append(tests[i])
 				
 		
-	if fdr == "BH":	
+	if fdr  in ["BH", "BHF", "BHL", "BHY"]:	
 		aP_adjusted, pRank = stats.p_adjust(aP, fQ)
 		for i in range(len(tests)):
 			tests[i].set_adjusted_pvalue(aP_adjusted[i])

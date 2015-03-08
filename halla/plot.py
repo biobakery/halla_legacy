@@ -443,12 +443,12 @@ def scatter_matrix(df, filename = None):
         return '\n'.join(textwrap.wrap(txt, width))
     
     for ax in axs[:,0]: # the left boundary
-        ax.grid('off', axis='both')
+        #ax.grid('off', axis='both')
         ax.set_ylabel(wrap(ax.get_ylabel()), rotation=0, va='center', labelpad=20)
-        ax.set_yticks([])
+        #ax.set_yticks([])
     
     for ax in axs[-1,:]: # the lower boundary
-        ax.grid('off', axis='both')
+        #ax.grid('off', axis='both')
         ax.set_xlabel(wrap(ax.get_xlabel()), rotation=90)
-        ax.set_xticks([])
+        #ax.set_xticks([])
     plt.savefig(filename)

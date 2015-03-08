@@ -294,7 +294,7 @@ class HAllA():
         #return self.meta_hypothesis_tree 
 
     def _naive_all_against_all(self, iIter=100):
-        self.meta_alla = hierarchy.naive_all_against_all(self.meta_feature[0], self.meta_feature[1], decomposition = self.decomposition, method="permutation", metric=self.distance, fQ=self.q,
+        self.meta_alla = hierarchy.naive_all_against_all(self.meta_feature[0], self.meta_feature[1], decomposition = self.decomposition, method=self.randomization_method, metric=self.distance, fQ=self.q, fdr = self.fdr_function,
     bVerbose=False, iIter = self.iterations)
         return self.meta_alla 
     def _hypotheses_testing(self):
