@@ -32,7 +32,7 @@ c_hash_association_method_discretize = {"pearson": False,
 										"fisher": False,
 										"nmi": True,
 										"mi": True,
-                                        "mic": True,
+                                        "mic": False,
                                         "ami": True
 										}
 
@@ -277,15 +277,20 @@ def pearson(X, Y):
     X = [float(x) for x in X]
     Y = [float(y) for y in Y]
     return scipy.stats.pearsonr(X, Y)[0]
-def mic (pArray1, pArray2):
+def mic (X, Y):
     try:
         import minepy
         from minepy import MINE
     except (ImportError):
         sys.exit("CRITICAL ERROR:2 Unable to import minepy package." + 
             " Please check your install.") 
+    if X.ndim > 1: 
+        X = X[0]
+        print X
+    if Y.ndim > 1:
+        Y = Y[0]
     mine = MINE(alpha=0.6, c=15)
-    mine.compute_score(pArray1, pArray2)
+    mine.compute_score(X, Y)
     # print "MIC:" , mine.mic()
     return mine.mic()
 

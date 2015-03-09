@@ -452,9 +452,9 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	right_rep = 1.0
 	#### Calculate Point estimate 
 	if decomposition in ['pls', 'cca']:
-		pRep1, pRep2 = pDe(pArray1, pArray2, metric)
+		[pRep1, pRep2] = pDe(pArray1, pArray2, metric)
 	else:
-		pRep1, pRep2 = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
+		[pRep1, pRep2] = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 		left_rep = first_rep(pArray1, decomposition)
 		right_rep = first_rep(pArray2, decomposition)
 	fAssociation = pMe(pRep1, pRep2) 
