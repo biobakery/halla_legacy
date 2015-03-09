@@ -120,12 +120,12 @@ def mds(pArray, iComponents=1):
 	 	iRow, iCol = pArray.shape
 	 	mds = manifold.MDS(n_components=iComponents, max_iter=3000, eps=1e-9, random_state=seed,
                    dissimilarity="precomputed", n_jobs=1)
-	 	pos = mds.fit(pArray.T).embedding_ 
-		# # doing this matrix inversion twice doesn't seem to be a good idea 
-		# print"PCA:",   pPCA.fit_transform( pArray.T ).T 
+		pos = mds.fit_transform(similarities)
+		
+
 		print "End MDS", pos.T
 		return pos.T
-
+		
 	 except ValueError:
 	 	iRow = pArray.shape
 	 	iCol = None 
