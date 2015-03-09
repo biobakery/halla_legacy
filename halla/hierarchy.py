@@ -1240,14 +1240,18 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
 	pMethod = pHashMethods[strMethod]
 	iRow = len(pArray1)
 	iCol = len(pArray2)
-	test =  Tree(left_distance=0.0, right_distance=0.0)
+	
 	aOut = [] 
 	aFinal = []
 	aP = []
 	tests = []
+	t = 0
+	#print iRow, iCol
 	for i, j in itertools.product(range(iRow), range(iCol)):
+		test =  Tree(left_distance=0.0, right_distance=0.0)
 		data = [[i], [j]]
 		test.add_data(data)
+		#print i, j
 		fP, similarity, left_rep, right_rep = pMethod(array([pArray1[i]]), array([pArray2[j]]), metric = metric, decomposition = decomposition, iIter=iIter)
 		test.set_nominal_pvalue(fP)
 		test.set_similarity_score(similarity)
@@ -1256,19 +1260,20 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
 		test.set_adjusted_pvalue(fP)
 		aP.append(fP)
 		tests.append(test)
+		
 		if fdr == "simple":
 			if fP <= fQ:
 				print "-- associations after BH fdr controlling"
 				if bVerbose:
-					tests[i].report()
-				aOut.append(tests[i])
+					tests[t].report()
+				aOut.append(tests[t])
 				#aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-				aFinal.append(tests[i])
+				aFinal.append(tests[t])
 			else :
 				#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-				aOut.append(tests[i])
-				
-		
+				aOut.append(tests[t])
+		t += 1	
+	print "number of tetsts", t	
 	if fdr  in ["BH", "BHF", "BHL", "BHY"]:	
 		aP_adjusted, pRank = stats.p_adjust(aP, fQ)
 		for i in range(len(tests)):
@@ -1280,7 +1285,7 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
 		for i in range(len(tests)):
 			if aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
 				max_r_t = pRank[i]
-				# print "max_r_t", max_r_t
+				print "max_r_t", max_r_t
 		for i in range(len(aP)):
 			if pRank[i] <= max_r_t:
 				print "-- associations after BH fdr controlling"
