@@ -123,7 +123,7 @@ def mds(pArray, iComponents=1):
 	 	pos = mds.fit(pArray.T).embedding_ 
 		# # doing this matrix inversion twice doesn't seem to be a good idea 
 		# print"PCA:",   pPCA.fit_transform( pArray.T ).T 
-		# print "End PCA"
+		print "End MDS", pos.T
 		return pos.T
 
 	 except ValueError:
