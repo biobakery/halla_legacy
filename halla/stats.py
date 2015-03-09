@@ -17,7 +17,7 @@ from scipy.stats import scoreatpercentile, pearsonr, rankdata, percentileofscore
 
 import sklearn 
 from sklearn.metrics import roc_curve, auc 
-
+from sklearn import manifold
 from . import distance
 
 
@@ -102,6 +102,29 @@ def pca(pArray, iComponents=1):
 		# print"PCA:",   pPCA.fit_transform( pArray.T ).T 
 		# print "End PCA"
 		return pPCA.fit_transform(pArray.T).T
+
+	 except ValueError:
+	 	iRow = pArray.shape
+	 	iCol = None 
+
+	 	return pArray
+def mds(pArray, iComponents=1):
+	 """
+	 Input: N x D matrix 
+	 Output: D x N matrix 
+
+	 """
+	 from sklearn.decomposition import MDS
+	 # print "pArray:", pArray
+	 try:
+	 	iRow, iCol = pArray.shape
+	 	mds = manifold.MDS(n_components=iComponents, max_iter=3000, eps=1e-9, random_state=seed,
+                   dissimilarity="precomputed", n_jobs=1)
+	 	pos = mds.fit(pArray.T).embedding_ 
+		# # doing this matrix inversion twice doesn't seem to be a good idea 
+		# print"PCA:",   pPCA.fit_transform( pArray.T ).T 
+		# print "End PCA"
+		return pos.T
 
 	 except ValueError:
 	 	iRow = pArray.shape
@@ -414,7 +437,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 
 	strMetric = metric 
 	# step 5 in a case of new decomposition method
-	pHashDecomposition = {'pls':pls, 'cca':cca, "pca": pca, "kpca": kpca, "ica":ica }
+	pHashDecomposition = {'pls':pls, 'cca':cca, "pca": pca, "kpca": kpca, "ica":ica, "mds":mds }
 	pHashMetric = distance.c_hash_metric 
 	
 	def _permutation(pVec):
