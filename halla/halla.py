@@ -133,13 +133,13 @@ def parse_arguments (args):
         default=0.1,
         help="Q-value for overall significance tests (cut-off for false discovery rate).")
     
-    '''argp.add_argument(
+    argp.add_argument(
         "-s", metavar="similarity threshold",
          dest="dThreshold_similiarity", 
          type=str,
          default=.01,
          help="A threshold for similarity to count a cluster as one unit and no consider sub-clusters as sub-unit.")    
-    '''
+    
     argp.add_argument(
         "--descending",
         help="function for descending approach, True: halla for hierarchical descending, False: alla for all-against-all test.", 

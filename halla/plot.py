@@ -452,3 +452,19 @@ def scatter_matrix(df, filename = None):
         ax.set_xlabel(wrap(ax.get_xlabel()), rotation=90)
         #ax.set_xticks([])
     plt.savefig(filename)
+
+def confusion_matrix(X, Y):
+    from sklearn.metrics import confusion_matrix
+    # Compute confusion matrix
+    cm = confusion_matrix(X, Y, filename)
+    
+    print(cm)
+    
+    # Show confusion matrix in a separate window
+    plt.matshow(cm)
+    plt.title('Confusion matrix')
+    plt.colorbar()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.show()(y_test, y_pred)
+    plt.savefig(filename)
