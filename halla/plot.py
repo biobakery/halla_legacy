@@ -458,13 +458,13 @@ def confusion_matrix(X, Y, filename):
     # Compute confusion matrix
     cm = confusion_matrix(X, Y)
     
-    print(cm)
+    #print(cm)
     
     # Show confusion matrix in a separate window
-    plt.matshow(cm)
-    plt.title('Confusion matrix')
+    plt.matshow(cm, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)
+    plt.title('Association between the representatives')
     plt.colorbar()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
-    plt.show()(y_test, y_pred)
+    plt.ylabel('First PC from the first cluster')
+    plt.xlabel('First PC from the second cluster')
+    #plt.show()(y_test, y_pred)
     plt.savefig(filename)

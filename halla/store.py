@@ -633,8 +633,8 @@ class HAllA():
                     plt.figure()
                     discretized_df1 = np.array(discretized_cluster1, dtype=float)
                     discretized_df2 = np.array(discretized_cluster2, dtype=float)
-                    x = stats.pca(discretized_df1)[0]
-                    y = stats.pca(discretized_df2)[0]
+                    x = stats.discretize(stats.pca(discretized_df1)[0])
+                    y = stats.discretize(stats.pca(discretized_df2)[0])
                     '''for i in range(len(x)):
                         x += np.random.normal(x[i], 3, 100)
                     for i in range(len(y)):
@@ -645,7 +645,7 @@ class HAllA():
                     
                     plt.savefig(discretized_filename + '/association_' + str(association_number) + '.pdf')
                     
-                    #plot.confusion_matrix(x, y, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
+                    plot.confusion_matrix(x, y, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
                     plt.close("all")
                 
         def _report_compared_clusters():
