@@ -645,7 +645,7 @@ class HAllA():
                     
                     plt.savefig(discretized_filename + '/association_' + str(association_number) + '.pdf')
                     
-                    plot.confusion_matrix(x, y, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
+                    #plot.confusion_matrix(x, y, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
                     plt.close("all")
                 
         def _report_compared_clusters():

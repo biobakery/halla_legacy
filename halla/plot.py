@@ -453,10 +453,10 @@ def scatter_matrix(df, filename = None):
         #ax.set_xticks([])
     plt.savefig(filename)
 
-def confusion_matrix(X, Y):
+def confusion_matrix(X, Y, filename):
     from sklearn.metrics import confusion_matrix
     # Compute confusion matrix
-    cm = confusion_matrix(X, Y, filename)
+    cm = confusion_matrix(X, Y)
     
     print(cm)
     
