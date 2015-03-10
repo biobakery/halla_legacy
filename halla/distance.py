@@ -32,7 +32,7 @@ c_hash_association_method_discretize = {"pearson": False,
 										"fisher": False,
 										"nmi": True,
 										"mi": True,
-                                        "mic": False,
+                                        "mic": True,
                                         "ami": True
 										}
 
