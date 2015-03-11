@@ -51,6 +51,7 @@ class Tree():
 		self.left_first_rep = None
 		self.right_first_rep = None
 		self.already_tested = False
+		self.already_passed = False
 
 	def pop(self):
 		# pop one of the children, else return none, since this amounts to killing the singleton 
@@ -1696,8 +1697,9 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 						max_r_t = pRank[i]
 						# print "max_r_t", max_r_t
 				for i in range(len(all_aP)):
-					if pRank[i] <= max_r_t and not all_performed_tests[i].already_tested:
+					if pRank[i] <= max_r_t and not all_performed_tests[i].already_passed:
 						number_passed_tests += 1
+						all_performed_tests[i].already_passed = True
 						all_performed_tests[i].already_tested = True
 						print "-- associations after fdr correction"
 						if bVerbose:
@@ -1732,6 +1734,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 							print "Hypotheses testing level ", level, " is finished."
 						# number_performed_test += len(next_level_apChildren)
 				apChildren = next_level_apChildren
+				#print "level: ", level, "#test: ", number_performed_tests
 				level += 1
 				next_level_apChildren = []
 				current_level_tests = []

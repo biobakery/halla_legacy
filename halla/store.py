@@ -627,7 +627,7 @@ class HAllA():
                     df2 = np.array(cluster2, dtype=float)
                     
                     plt.scatter(stats.pca(df1)[0], stats.pca(df2)[0], alpha=0.5)
-                    
+                    plt.tight_layout()
                     plt.savefig(filename + '/association_' + str(association_number) + '.pdf')
                     
                     plt.figure()
@@ -642,7 +642,7 @@ class HAllA():
                     '''
                     #plt.scatter( stats.discretize(stats.pca(discretized_df1)),  stats.discretize(stats.pca(discretized_df2)), alpha=0.5)
                     plt.scatter( x, y, alpha=0.4)
-                    
+                    plt.tight_layout()
                     plt.savefig(discretized_filename + '/association_' + str(association_number) + '.pdf')
                     
                     plot.confusion_matrix(x, y, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )

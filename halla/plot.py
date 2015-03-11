@@ -172,6 +172,7 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
     plt.title('Receiver operating characteristic')
     plt.legend(loc="lower right")
     # plt.savefig('./test/'+roc_name+'foo.pdf')
+    plt.tight_layout()
     plt.savefig(figure_name + '.pdf')
     #plt.show()
     # return plt
@@ -253,7 +254,6 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     if color_bar:
         axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
         pylab.colorbar(im, cax=axcolor)
-
     fig.savefig(filename + '.pdf')
     pylab.close()
         
@@ -362,7 +362,7 @@ def grouped_boxplots2(data, xlabels):
     '''
     #ax = plt.axes()
     
-    fig, ax = plt.subplots(dpi= 300, figsize=(4, 4)) #( len(data)/2+5, 5))
+    fig, ax = plt.subplots(dpi= 300, figsize=( len(data)/2+5, 5))# figsize=(4, 4)) 
     #plt.hold(True)
     #plt.xlim([-0.05, 1.15])
     #plt.ylim([-0.05, 1.15])
@@ -451,6 +451,7 @@ def scatter_matrix(df, filename = None):
         #ax.grid('off', axis='both')
         ax.set_xlabel(wrap(ax.get_xlabel()), rotation=90)
         #ax.set_xticks([])
+    plt.tight_layout()
     plt.savefig(filename)
 
 def confusion_matrix(X, Y, filename):
@@ -463,8 +464,12 @@ def confusion_matrix(X, Y, filename):
     # Show confusion matrix in a separate window
     plt.matshow(cm, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)
     plt.title('Association between the representatives')
-    plt.colorbar()
+    cb = plt.colorbar()
     plt.ylabel('First PC from the first cluster')
     plt.xlabel('First PC from the second cluster')
     #plt.show()(y_test, y_pred)
+    labels = np.arange(0,len(X),1)
+    loc    = labels 
+    cb.set_ticks(loc)
+    cb.set_ticklabels(labels)
     plt.savefig(filename)
