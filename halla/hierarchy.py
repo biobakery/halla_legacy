@@ -50,6 +50,7 @@ class Tree():
 		self.similarity_score = None
 		self.left_first_rep = None
 		self.right_first_rep = None
+		self.already_tested = False
 
 	def pop(self):
 		# pop one of the children, else return none, since this amounts to killing the singleton 
@@ -1273,7 +1274,7 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
 				#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
 				aOut.append(tests[t])
 		t += 1	
-	print "number of tetsts", t	
+	#print "number of tetsts", t	
 	if fdr  in ["BH", "BHF", "BHL", "BHY"]:	
 		aP_adjusted, pRank = stats.p_adjust(aP, fQ)
 		for i in range(len(tests)):
@@ -1285,7 +1286,7 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
 		for i in range(len(tests)):
 			if aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
 				max_r_t = pRank[i]
-				print "max_r_t", max_r_t
+				#print "max_r_t", max_r_t
 		for i in range(len(aP)):
 			if pRank[i] <= max_r_t:
 				print "-- associations after BH fdr controlling"
@@ -1662,70 +1663,84 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 		print "--- number of performed tests:", number_performed_tests
 		print "--- number of passed tests after FDR controlling:", number_passed_tests										
 		return aFinal, aOut
-	def _bh_hypothesis_testing():
+	def _bh_all_testing():
 		apChildren = [pTree]
 		level = 1
-		passed_tests = []
-		performed_tests = []
+		number_performed_tests = 0 
+		number_passed_tests = 0
 		next_level_apChildren = []
+		current_level_tests = []
+		all_performed_tests = []
+		all_aP = []
 		while apChildren:
-			Current_Family_Children = apChildren.pop(0).get_children()
-		
-			# claculate nominal p-value
-			for i in range(len(Current_Family_Children)):
-				Current_Family_Children[i].set_nominal_pvalue(_actor(Current_Family_Children[i]))
-			aP = [ Current_Family_Children[i].get_nominal_pvalue() for i in range(len(Current_Family_Children)) ]
+			current_level_tests.extend(apChildren.pop(0).get_children())
 			
-			for i in range(len(aP)):
-				# print "NMI", Current_Family_Children[i].get_similarity_score()
-				performed_tests.append([Current_Family_Children[i], float(aP[i])])
-				if  Current_Family_Children[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
-					Current_Family_Children[i].report()
-					passed_tests.append([Current_Family_Children[i], float(aP[i])])
-				elif Current_Family_Children[i].is_bypass(pvalue_threshold = fQ) :
-					if bVerbose:
-						print "Bypass, no hope to find an association in the branch with p-value: ", \
-					aP[i], " and ", len(Current_Family_Children[i].get_children()), \
-					 " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
-					  "   ", Current_Family_Children[i].get_data()[1]
-					
-				elif Current_Family_Children[i].is_leaf():
-					if bVerbose:
-						print "End of branch, leaf!"
-					# aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
-				else:
-					if bVerbose:
-						print "Gray area with p-value:", aP[i]
-					next_level_apChildren.append(Current_Family_Children[i])
-			
+			if len (apChildren) != 0 :
+				continue
+			else:
+				number_performed_tests += len(current_level_tests)
+				for i in range(len(current_level_tests)):
+					current_level_tests[i].set_nominal_pvalue(_actor(current_level_tests[i]))
+				aP = [ current_level_tests[i].get_nominal_pvalue() for i in range(len(current_level_tests)) ]
+				all_aP.extend(aP)
+				all_performed_tests.extend(current_level_tests)
+				# claculate adjusted p-value
+				aP_adjusted, pRank = stats.p_adjust(all_aP, fQ)
+				for i in range(len(all_performed_tests)):
+					all_performed_tests[i].set_adjusted_pvalue(aP_adjusted[i])
+					all_performed_tests[i].set_family_rank(pRank[i])
 
-			if not apChildren:
-				print "Hypotheses testing level ", level, " is finished."
+				max_r_t = 0
+				for i in range(len(all_performed_tests)):
+					if all_aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
+						max_r_t = pRank[i]
+						# print "max_r_t", max_r_t
+				for i in range(len(all_aP)):
+					if pRank[i] <= max_r_t and not all_performed_tests[i].already_tested:
+						number_passed_tests += 1
+						all_performed_tests[i].already_tested = True
+						print "-- associations after fdr correction"
+						if bVerbose:
+							all_performed_tests[i].report()
+						#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+						aOut.append(all_performed_tests[i])
+						#aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+						aFinal.append(all_performed_tests[i])
+					elif not all_performed_tests[i].already_tested:
+						all_performed_tests[i].already_tested = True
+						#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+						#print i, range(len(current_level_tests)), current_level_tests[i]
+						aOut.append(all_performed_tests[i])
+						#if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
+						if all_performed_tests[i].is_bypass(q = all_performed_tests[i].get_adjusted_pvalue(), test_level = math.log(len(all_performed_tests[i].get_data()[0])* len(all_performed_tests[i].get_data()[1]), 2)) :
+							if bVerbose:
+								print "Bypass, no hope to find an association in the branch with p-value: ", \
+						aP[i], " and ", len(all_performed_tests[i].get_children()), \
+						 " sub-hypotheses.", all_performed_tests[i].get_data()[0], \
+						  "   ", all_performed_tests[i].get_data()[1]
+							
+						elif all_performed_tests[i].is_leaf():
+							if bVerbose:
+								print "End of branch, leaf!"
+							# aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
+						else:
+							if bVerbose:
+								print "Gray area with p-value:", aP[i]
+							next_level_apChildren.append(all_performed_tests[i])
+						
+						if bVerbose:
+							print "Hypotheses testing level ", level, " is finished."
+						# number_performed_test += len(next_level_apChildren)
 				apChildren = next_level_apChildren
 				level += 1
 				next_level_apChildren = []
-				
-		max_r_t = 0
-		print "--- number of performed tests:", len(performed_tests)
-		print "--- number of passed from nominal tests:", len(passed_tests)
-		performed_tests = array(performed_tests)
-		#print "Nominal p-values", performed_tests[:, 1]
-		aP_adjusted, pRank = stats.p_adjust(performed_tests[:, 1], fQ)
-		#print "ajusted pvalue: ", aP_adjusted
-		for i in range(len(performed_tests)):
-			if performed_tests[i][1] <= aP_adjusted[i] and max_r_t <= pRank[i]:
-				max_r_t = pRank[i]
-				print "max_r_t", max_r_t
-		for i in range(len(performed_tests[:, 1])):
-			if pRank[i] <= max_r_t:
-				print "************Pass with p-value:", performed_tests[i][1], performed_tests[i][0].get_data()[0], performed_tests[i][0].get_data()[1], aP_adjusted[i]
-				aOut.append([performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]])
-				aFinal.append([performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]])
-			else :
-				aOut.append([performed_tests[i][0].get_data(), float(performed_tests[i][1]) , aP_adjusted[i]])
-		print "--- number of passed tests after FDR controlling:", len(aFinal)	
-		print "--- number of performed tests:", len(performed_tests)									
+				current_level_tests = []
+				aP = []
+
+		print "--- number of performed tests:", number_performed_tests
+		print "--- number of passed tests after FDR controlling:", number_passed_tests										
 		return aFinal, aOut
+
 	def _bh_level_testing():
 		apChildren = [pTree]
 		level = 1
@@ -1797,6 +1812,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 		print "--- number of performed tests:", number_performed_tests
 		print "--- number of passed tests after FDR controlling:", number_passed_tests										
 		return aFinal, aOut
+	
 	def _rh_hypothesis_testing():
 		apChildren = [pTree]
 		level = 1
@@ -1890,7 +1906,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 	fdr_function = {"default": _bh_family_testing,
 							"BHF": _bh_family_testing,
 							"BHL":_bh_level_testing,
-							"BH":  _bh_hypothesis_testing,
+							"BHA":_bh_all_testing,
 							"RH": _rh_hypothesis_testing,
 							"simple":_simple_hypothesis_testing}
 	#======================================#
