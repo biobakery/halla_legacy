@@ -231,45 +231,57 @@ Level	Dataset 1	Dataset 2
 ```
 # Complete option list #
 ```
-usage: halla [-h] -X <input_dataset_1.txt> [-Y input_dataset_2.txt] -o
-                <output> [--plotting_results] [-q q_value]
-                [-s similarity threshold] [-f fdr] [-i iterations] [-m metric]
-                [-d decomposition] [-j adjusting] [-t test] [-v verbosity]
+usage: halla [-h] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o
+             <output> [-q <0.1>] [-s <0.01>] [--descending] [-f {BHF,BHL,BHA}]
+             [-i <1000>] [-m {nmi,ami,pearson}]
+             [--decomposition {pca,cca,kpca,pls}] [-a {BH,FDR,Bonferroni,BHY}]
+             [-t {permutation}] [-v] [--plotting-results]
+             [--bypass-discretizing] [--header]
 
-Hierarchical All-against-All significance association testing.
+Hierarchical All-against-All significance association testing
 
 optional arguments:
   -h, --help            show this help message and exit
   -X <input_dataset_1.txt>
-                        First file: Tab-delimited text input file, one row per
-                        feature, one column per measurement.
-  -Y input_dataset_2.txt
-                        Second file: Tab-delimited text input file, one row
-                        per feature, one column per measurement - If not
-                        selected, we will use the first file (-X).
+                        first file: Tab-delimited text input file, one row per feature, one column per measurement
+                        [REQUIRED]
+  -Y <input_dataset_2.txt>
+                        second file: Tab-delimited text input file, one row per feature, one column per measurement
+                        [default = the first file (-X)]
   -o <output>, --output <output>
-                        directory to write output files [REQUIRED]
-  --plotting_results    plotting results
-  -q q_value            Q-value for overall significance tests (cut-off for
-                        false discovery rate).
-  -s similarity threshold
-                        A threshold for similarity to count a cluster as one
-                        unit and no consider sub-clusters as sub-unit.
-  -f fdr                function for maximize statistical power and control
-                        false discovery rate, simple, BHY, BH, RH.
-  -i iterations         Number of iterations for nonparametric significance
-                        testing (permutation test)
-  -m metric             Metric to be used for similarity measurement, NMI,
-                        MIC, Pearson.
-  -d decomposition      The approach for reducing dimensions (or
-                        decomposition)[default = pca, options are pca, cca,
-                        kpca, ica]
-  -j adjusting          The approach for calculating adjusted p-value [default
-                        = BH]
-  -t test               The approach for association test, [default is
-                        permutation, options are permutation and G-test]
-  -v verbosity, --verbose verbosity
-                        Debug logging level; increase for greater verbosity
+                        directory to write output files
+                        [REQUIRED]
+  -q <0.1>, --q-value <0.1>
+                        q-value for overall significance tests (cut-off for false discovery rate)
+                        [default = 0.1]
+  -s <0.01>, --similarity-threshold <0.01>
+                        threshold for similarity to count a cluster as one unit and not consider sub-clusters as sub-unit
+                        [default = 0.01]
+  --descending          hierarchical descending
+                        [default = all-against-all]
+  -f {BHF,BHL,BHA}, --fdr {BHF,BHL,BHA}
+                        function to maximize statistical power and control false discovery rate
+                        [default = BHF]
+  -i <1000>, --iterations <1000>
+                        iterations for nonparametric significance testing (permutation test)
+                        [default = 1000]
+  -m {nmi,ami,pearson}, --metric {nmi,ami,pearson}
+                        metric to be used for similarity measurement
+                        [default = nmi]
+  --decomposition {pca,cca,kpca,pls}
+                        approach for reducing dimensions (or decomposition) 
+                        [default = pca]
+  -a {BH,FDR,Bonferroni,BHY}, --adjusting {BH,FDR,Bonferroni,BHY}
+                        approach for calculating adjusted p-value 
+                        [default = BH]
+  -t {permutation}, --test {permutation}
+                        approach for association test
+                        [default = permutation]
+  -v, --verbose         additional output is printed
+  --plotting-results    plot the results
+  --bypass-discretizing
+                        bypass the discretizing step
+  --header              the input files contain a header line
 ```
 # Frequently Asked Questions #
 

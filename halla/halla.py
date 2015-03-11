@@ -112,88 +112,20 @@ def parse_arguments (args):
     Parse the arguments from the user
     """
     argp = argparse.ArgumentParser(
-        description="Hierarchical All-against-All significance association testing.")
+        description="Hierarchical All-against-All significance association testing",
+        formatter_class=argparse.RawTextHelpFormatter)
             
     argp.add_argument(
         "-X", metavar="<input_dataset_1.txt>",
         type=argparse.FileType("r"), default=sys.stdin,
-        help="First file: Tab-delimited text input file, one row per feature, one column per measurement.",
+        help="first file: Tab-delimited text input file, one row per feature, one column per measurement\n[REQUIRED]",
         required=True)        
             
     argp.add_argument(
-        "-Y", metavar="input_dataset_2.txt",
+        "-Y", metavar="<input_dataset_2.txt>",
         type=argparse.FileType("r"),
         default=None,
-        help="Second file: Tab-delimited text input file, one row per feature, one column per measurement - If not selected, we will use the first file (-X).")
-
-    argp.add_argument(
-        "-q", metavar="q_value",
-        dest="dQ",
-        type=float,
-        default=0.1,
-        help="Q-value for overall significance tests (cut-off for false discovery rate).")
-    
-    argp.add_argument(
-        "-s", metavar="similarity threshold",
-         dest="dThreshold_similiarity", 
-         type=str,
-         default=.01,
-         help="A threshold for similarity to count a cluster as one unit and no consider sub-clusters as sub-unit.")    
-    
-    argp.add_argument(
-        "--descending",
-        help="function for descending approach, True: halla for hierarchical descending, False: alla for all-against-all test.", 
-        default = "True",
-        )
-    
-    argp.add_argument(
-        "-f", metavar="fdr",
-        dest="strFDR",
-        type=str,
-        default = "BHF",
-        help="function for maximize statistical power and control false discovery rate, simple, BHF, BHL, BHA.")
-
-    argp.add_argument(
-        "-i", metavar="iterations",
-        dest="iIter",
-        type=int,
-        default=1000,
-        help="Number of iterations for nonparametric significance testing (permutation test)")
-
-    argp.add_argument(
-        "-m", metavar="metric",
-        dest="strMetric",
-        type=str,
-        default="nmi",
-        help="Metric to be used for similarity measurement, [default = NMI, options are NMI, AMI, MIC, Pearson]")
-    
-    argp.add_argument(
-        "-d", metavar="decomposition",
-        dest="strDecomposition",
-        type=str,
-        default="pca",
-        help="The approach for reducing dimensions (or decomposition)[default = pca, options are pca, ica, cca, kpca, pls]")    
-    
-    argp.add_argument(
-        "-j",  metavar="adjusting",
-        dest="strAdjust",    
-        type=str,
-        default="BH",
-        help="The approach for calculating adjusted p-value [default = BH]")
-    
-    argp.add_argument(
-        "-t", metavar="test",
-        dest="strRandomization",
-        type=str,
-        default="permutation",
-        help="The approach for association test, [default is permutation, options is permutation test]")  
-     
-    argp.add_argument(
-        "-v", "--verbose", metavar="verbosity",
-        dest="iDebug",
-        type=int,
-        default= False,#10 - (logging.WARNING / 10)
-        help="Debug logging level; increase for greater verbosity")
+        help="second file: Tab-delimited text input file, one row per feature, one column per measurement\n[default = the first file (-X)]")
     
     argp.add_argument(
         "-o", "--output",
@@ -201,24 +133,89 @@ def parse_arguments (args):
         help="directory to write output files\n[REQUIRED]", 
         metavar="<output>", 
         required=True)
+
+    argp.add_argument(
+        "-q", "--q-value",
+        metavar="<0.1>",
+        dest="dQ",
+        type=float,
+        default=0.1,
+        help="q-value for overall significance tests (cut-off for false discovery rate)\n[default = 0.1]")
     
     argp.add_argument(
-        "--plotting_results", 
-        help="plotting results\n", 
-        action="store_true",
-        default=False)
+        "-s", "--similarity-threshold",
+         metavar="<0.01>",
+         dest="dThreshold_similiarity", 
+         type=float,
+         default=0.01,
+         help="threshold for similarity to count a cluster as one unit and not consider sub-clusters as sub-unit\n[default = 0.01]")    
     
     argp.add_argument(
-        "--bypass_discretizing", 
-        help="bypass the discretizing step\n", 
+        "--descending",
+        help="hierarchical descending\n[default = all-against-all]", 
+        action="store_true")
+    
+    argp.add_argument(
+        "-f","--fdr",
+        dest="strFDR",
+        default = "BHF",
+        choices=["BHF","BHL","BHA"],
+        help="function to maximize statistical power and control false discovery rate\n[default = BHF]")
+
+    argp.add_argument(
+        "-i","--iterations", metavar="<1000>",
+        dest="iIter",
+        type=int,
+        default=1000,
+        help="iterations for nonparametric significance testing (permutation test)\n[default = 1000]")
+
+    argp.add_argument(
+        "-m","--metric",
+        dest="strMetric",
+        default="nmi",
+        choices=["nmi","ami","pearson"],
+        help="metric to be used for similarity measurement\n[default = nmi]")
+    
+    argp.add_argument(
+        "--decomposition",
+        dest="strDecomposition",
+        default="pca",
+        choices=["pca","cca","kpca","pls"],
+        help="approach for reducing dimensions (or decomposition)\n[default = pca]")    
+    
+    argp.add_argument(
+        "-a","--adjusting",
+        dest="strAdjust",    
+        default="BH",
+        choices=["BH", "FDR", "Bonferroni", "BHY"],
+        help="approach for calculating adjusted p-value\n[default = BH]")
+    
+    argp.add_argument(
+        "-t","--test",
+        dest="strRandomization",
+        default="permutation",
+        choices=["permutation"],
+        help="approach for association test\n[default = permutation]")  
+     
+    argp.add_argument(
+        "-v", "--verbose",
         action="store_true",
-        default=False)
+        help="additional output is printed")
+    
+    argp.add_argument(
+        "--plotting-results", 
+        help="plot the results", 
+        action="store_true")
+    
+    argp.add_argument(
+        "--bypass-discretizing", 
+        help="bypass the discretizing step", 
+        action="store_true")
     
     argp.add_argument(
         "--header",
-        dest="header",
         action="store_true",
-        help="Input files contain a header line, [default is FALSE]") 
+        help="the input files contain a header line") 
 
     return argp.parse_args()
 
@@ -231,7 +228,7 @@ def set_HAllA_object (H, args):
     H.p_adjust_method = args.strAdjust
     H.randomization_method = args.strRandomization  # method to generate error bars 
     H.strStep = "uniform"
-    H.verbose = args.iDebug
+    H.verbose = args.verbose
     H.threshold = args.dThreshold_similiarity
     H.output_dir = args.output_dir
     H.plotting_results = args.plotting_results
