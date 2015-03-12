@@ -54,7 +54,7 @@ please let us know, sign up for the HAllA Users Group (halla-users@googlegroups.
 		* Windows (>= XP) 
 
 
-## Softwares ##
+## Software ##
 ```
 * Python (>= 2.7)
 * Numpy (>= 1.7.1)
@@ -62,7 +62,7 @@ please let us know, sign up for the HAllA Users Group (halla-users@googlegroups.
 * Scikit-learn (>=0.13)
 * matplotlib
 ```
-** Optional for plotting results by using --plotting_results option in command line **
+** Optional for plotting results by using the --plotting_results option **
 ```
 * Pandas (>=0.15.2)
 ```
@@ -80,29 +80,11 @@ Note: Creating a clone of the repository requires [Mercurial](http://mercurial.s
 
 ## Install HAllA  ##
 
-How to install HAllA if you have admin priviledges (ie root):
+From the HAllA directory run: 
 
-1. From the HAllA directory run : 
+        $ python setup.py install
 
-        $ python setup.py install 
-
-
-How to install HAllA if you do not have admin privileges (ie root):
-
-1. Select a directory where you have write permissions to install HAllA ($DIR)
-1. Create the directory where the HAllA executables will be installed : `` $ mkdir -p $DIR/bin/ ``
-1. Add the bin directory to your path : `` $ export PATH=$PATH:$DIR/bin/ ``
-1. Create the directory where the HAllA libraries will be installed : `` $ mkdir -p $DIR/lib/ ``
-1. Add the lib directory to your pythonpath : `` $ export PYTHONPATH=$PYTHONPATH:$DIR/lib/ ``
-1. From the HAllA directory run :  
-
-        $ python setup.py install --install-scripts $DIR/bin/ --install-lib $DIR/lib/ 
-
-NOTE: The changes to the paths made if you do not have admin priviledges will only be in effect while your shell is open. 
-Closing your shell or opening a new shell will not include these changes to the paths. If you are running in a bash shell 
-(you can check this by typing: `` $ ps -p $$ `` ), add the two export statements to your bashrc file located at ~/.bashrc . 
-Then run: `` $ source ~/.bashrc `` so the updates are made to your current shell. Now every time you open a new shell
-these changes to the paths will always be included.
+Note: If you do not have write permissions to '/usr/lib/', then add the option "--user" to the install command. This will install the python package into subdirectories of '~/.local'.
 
 # How to Run #
 
