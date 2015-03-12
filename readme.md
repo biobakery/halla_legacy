@@ -73,7 +73,7 @@ You can download the latest HAllA release or the development version.
 
 Option 1: Latest Release (Recommended)
 
-* [Download](https://bitbucket.org/biobakery/halla/get/tip.tar.gz) and unpack the latest release of HAllA.
+* [Download](https://bitbucket.org/biobakery/halla/get/0.5.0.tar.gz) and unpack the latest release of HAllA.
 
 Option 2: Development Version
 
