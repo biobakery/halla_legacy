@@ -216,7 +216,7 @@ Level	Dataset 1	Dataset 2
 usage: halla [-h] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o
              <output> [-q <0.1>] [-s <0.01>] [--descending] [-f {BHF,BHL,BHA}]
              [-i <1000>] [-m {nmi,ami,pearson}]
-             [--decomposition {pca,cca,kpca,pls}] [-a {BH,FDR,Bonferroni,BHY}]
+             [--decomposition {pca,cca,kpca,pls}]
              [-t {permutation}] [-v] [--plotting-results]
              [--bypass-discretizing] [--header]
 
