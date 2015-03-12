@@ -4,20 +4,17 @@
 
 ## Description ##
 
-Gholamali Rahnavard, Yo Sup Moon, Curtis Huttenhower
-
-Google Group
- halla-users: https://groups.google.com/forum/#!forum/halla-users
-
-License
- MIT License
-
 URL
  http://huttenhower.sph.harvard.edu/halla
 
 Citation
  Gholamali Rahnavard, Yo Sup Moon, George Weingart, Lauren J. McIver, Eric A. Franzosa, Levi Waldron, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation)
 
+Google Group
+ halla-users: https://groups.google.com/forum/#!forum/halla-users
+
+License
+ MIT License
 --------------------------------------------
 
 HAllA (pronounced [challah](http://en.wikipedia.org/wiki/Challah)) is an
