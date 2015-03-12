@@ -46,13 +46,10 @@ please let us know, sign up for the HAllA Users Group (halla-users@googlegroups.
 # Requirements #
 
 ## Operating System ##
-	* Supported 
-		* Ubuntu Linux (>= 12.04) 
-		* Mac OS X (>= 10.7)
-
-	* Untested  
-		* Windows (>= XP) 
-
+```
+* Linux 
+* Mac OS X (>= 10.7.4) 
+```
 
 ## Software ##
 ```
