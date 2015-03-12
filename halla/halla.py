@@ -225,7 +225,7 @@ def set_HAllA_object (H, args):
     H.fdr_function = args.strFDR
     H.q = args.dQ  
     H.iterations = args.iIter
-    H.p_adjust_method = args.strAdjust
+    #H.p_adjust_method = args.strAdjust
     H.randomization_method = args.strRandomization  # method to generate error bars 
     H.strStep = "uniform"
     H.verbose = args.verbose
