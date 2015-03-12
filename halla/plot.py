@@ -468,8 +468,8 @@ def confusion_matrix(X, Y, filename):
     plt.ylabel('First PC from the first cluster')
     plt.xlabel('First PC from the second cluster')
     #plt.show()(y_test, y_pred)
-    labels = np.arange(0,len(X),1)
-    loc    = labels 
-    cb.set_ticks(loc)
-    cb.set_ticklabels(labels)
+    #labels = np.arange(0,len(X),1)
+    #loc    = labels 
+    #cb.set_ticks(loc)
+    #cb.set_ticklabels(labels)
     plt.savefig(filename)
