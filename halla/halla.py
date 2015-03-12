@@ -183,13 +183,13 @@ def parse_arguments (args):
         choices=["pca","cca","kpca","pls"],
         help="approach for reducing dimensions (or decomposition)\n[default = pca]")    
     
-    argp.add_argument(
+    '''argp.add_argument(
         "-a","--adjusting",
         dest="strAdjust",    
         default="BH",
         choices=["BH", "FDR", "Bonferroni", "BHY"],
         help="approach for calculating adjusted p-value\n[default = BH]")
-    
+    '''
     argp.add_argument(
         "-t","--test",
         dest="strRandomization",

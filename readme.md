@@ -16,7 +16,7 @@ URL
  http://huttenhower.sph.harvard.edu/halla
 
 Citation
- Gholamali Rahnavard, Yo Sup Moon, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation)
+ Gholamali Rahnavard, Yo Sup Moon, George Weingart, Lauren J. McIver, Eric A. Franzosa, Levi Waldron, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation)
 
 --------------------------------------------
 
@@ -271,9 +271,6 @@ optional arguments:
   --decomposition {pca,cca,kpca,pls}
                         approach for reducing dimensions (or decomposition) 
                         [default = pca]
-  -a {BH,FDR,Bonferroni,BHY}, --adjusting {BH,FDR,Bonferroni,BHY}
-                        approach for calculating adjusted p-value 
-                        [default = BH]
   -t {permutation}, --test {permutation}
                         approach for association test
                         [default = permutation]
