@@ -69,20 +69,27 @@ please let us know, sign up for the HAllA Users Group (halla-users@googlegroups.
 # Installation #
 
 ## Downloading HAllA ##
-HAllA can be downloaded in two ways:
+You can download the latest HAllA release or the development version.
 
-* [Download](https://bitbucket.org/biobakery/halla/downloads) a compressed set of files.
-* Create a clone of the repository on your computer with the command: 
+Option 1: Latest Release (Recommended)
+
+* [Download](https://bitbucket.org/biobakery/halla/get/tip.tar.gz) and unpack the latest release of HAllA.
+
+Option 2: Development Version
+
+* Create a clone of the repository: 
 	
 	``hg clone https://bitbucket.org/biobakery/halla ``
 
-Note: Creating a clone of the repository requires [Mercurial](http://mercurial.selenic.com/) to be installed. Once the repository has been cloned upgrading to the latest release of HAllA is simple. Just type ``hg pull -u`` from within the repository which will download the latest release. Then follow the install steps to update your install.
+	Note: Creating a clone of the repository requires [Mercurial](http://mercurial.selenic.com/) to be installed. Once the repository has been cloned upgrading to the latest development version of HAllA is simple. Just type ``hg pull -u`` from within the repository.
 
-## Install HAllA  ##
+For the steps that follow, $HAllA_PATH is the location of the HAllA directory (ie $HAllA_PATH=/home/user/halla/ with this readme file found in this folder).
 
-From the HAllA directory run: 
 
-        $ python setup.py install
+## Installing HAllA  ##
+
+1. Move to the HAllA directory : ``$ cd HAllA_PATH ``
+1. Install HAllA: ``$ python setup.py install``
 
 Note: If you do not have write permissions to '/usr/lib/', then add the option "--user" to the install command. This will install the python package into subdirectories of '~/.local'.
 
