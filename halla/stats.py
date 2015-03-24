@@ -1265,7 +1265,7 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 				aOut.append(line)
 			else:
 				aOut.append(_discretize_continuous(line))
-
+		#print aOut
 		return array(aOut)
 
 	except Exception:

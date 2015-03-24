@@ -1225,7 +1225,7 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 		
 def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", method="permutation", metric="nmi", fQ=0.1,
 	bVerbose=False, iIter=1000):
-
+	
 	pHashMethods = {"permutation" : stats.permutation_test,
 						"permutation_test_by_medoid": stats.permutation_test_by_medoid,
 						

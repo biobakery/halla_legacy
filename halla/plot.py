@@ -257,13 +257,14 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     fig.savefig(filename + '.pdf')
     pylab.close()
         
-def heatmap(pArray, xlabels_order = [], xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True, color_bar = False):
+def heatmap(Data, xlabels_order = [], xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True, color_bar = False):
     import scipy
     import pylab
     # import dot_parser
     import scipy.cluster.hierarchy as sch
     from numpy.matlib import rand
     from array import array
+    pArray =  Data
     # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
     '''if len(D) == 0: 
         # Generate random features and distance matrix.
