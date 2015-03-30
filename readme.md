@@ -22,9 +22,9 @@ License
     * [Basic usage](#markdown-header-basic-usage)
     * [Output files](#markdown-header-output-files)
 
-        1. [Significant Discovered Associations](#markdown-header-1-significant-discovered-associations)
-        2. [All Association Results One-by-One](#markdown-header-2-all-association-results-one-by-one)
-        3. [All Compared Clusters from the Hypotheses Tree](#markdown-header-3-all-compared-clusters-from-the-hypotheses-tree)
+        1. [Significant Discovered Associations File](#markdown-header-1-significant-discovered-associations-file)
+        2. [All Association Results One-by-One File](#markdown-header-2-all-association-results-one-by-one-file)
+        3. [All Compared Clusters from the Hypotheses Tree File](#markdown-header-3-all-compared-clusters-from-the-hypotheses-tree-file)
 
 * [Demo runs](#markdown-header-demo-runs)
 * [Complete option list](#markdown-header-complete-option-list)
@@ -143,11 +143,11 @@ is not likely to be caused by the noise in the data).
 
 $OUTPUT_DIR = the output directory
 
-Three tab-delimited output files will be created:
+** Three tab-delimited output files will be created: **
 
-### 1. Significant Discovered Associations ###
+### 1. Significant Discovered Associations File ###
 
-File: $OUTPUT_DIR/associations.tsv
+File name: $OUTPUT_DIR/associations.tsv
 
 ```
 Association Number	Clusters First Dataset	Cluster Similarity Score (NMI)	Explained Variance by the First PC of the cluster	 	Clusters Second Dataset	Cluster Similarity Score (NMI)	Explained Variance by the First PC of the cluster	 	nominal-pvalue	adjusted-pvalue	SImilarity score between Clusters (NMI)
@@ -156,9 +156,9 @@ Association Number	Clusters First Dataset	Cluster Similarity Score (NMI)	Explain
 3	3;4;5	0.243583717	0.64574729	 	3;4;5	0.250180471	0.61356624	 	0.022977023	0.033333333	0.222516454 
 ```
 
-### 2. All Association Results One-by-One ###
+### 2. All Association Results One-by-One File ###
 
-File: $OUTPUT_DIR/all_association_results_one_by_one.tsv
+File name: $OUTPUT_DIR/all_association_results_one_by_one.tsv
 
 ```
 ./input/X_syntheticData.txt	./input/Y_syntheticData.txt	nominal-pvalue	adjusted-pvalue
@@ -191,9 +191,9 @@ File: $OUTPUT_DIR/all_association_results_one_by_one.tsv
 8	8	0.000999001	0.011111111
 ```
 
-### 3. All Compared Clusters from the Hypotheses Tree ###
+### 3. All Compared Clusters from the Hypotheses Tree File ###
 
-File:  $OUTPUT_DIR/all_compared_clusters_hypotheses_tree.tsv
+File name:  $OUTPUT_DIR/all_compared_clusters_hypotheses_tree.tsv
 
 ```
 Level	Dataset 1	Dataset 2
