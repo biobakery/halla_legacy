@@ -25,6 +25,7 @@ License
         1. [Significant Discovered Associations File](#markdown-header-1-significant-discovered-associations-file)
         2. [All Association Results One-by-One File](#markdown-header-2-all-association-results-one-by-one-file)
         3. [All Compared Clusters from the Hypotheses Tree File](#markdown-header-3-all-compared-clusters-from-the-hypotheses-tree-file)
+        4. [Optional Plotting Results Files](#markdown-header-4-option-plotting-results-files)
 
 * [Demo runs](#markdown-header-demo-runs)
 * [Complete option list](#markdown-header-complete-option-list)
@@ -209,7 +210,9 @@ Level	Dataset 1	Dataset 2
 1	6;7;8	2;0;1
 ```
 
-** Optional outputs if --plotting_results is used in command line:**
+### 4. Optional Plotting Results Files ###
+
+If the option "--plotting-results" is provided, the following files will also be written:
 
 1. $OUTPUT_DIR/associationsN/ (for all associations from 0..N if there is any)
 	1. association_1.pdf
@@ -221,7 +224,7 @@ Level	Dataset 1	Dataset 2
 
 ## Demo runs ##
 
-The input folder contains four demo input files. These files are tab-delimitated files.
+The input folder contains two demo input files. These files are tab-delimitated files.
 
 To run the HAllA demo type the command:
 
