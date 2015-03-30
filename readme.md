@@ -1,21 +1,36 @@
-#**HAllA: Hierarchical All-against-All association testing **#
+#HAllA: Hierarchical All-against-All association testing #
 
-[TOC]
+[HAllA](http://huttenhower.sph.harvard.edu/halla)
 
-## Description ##
+Gholamali Rahnavard, Yo Sup Moon, George Weingart, Lauren J. McIver, Eric A. Franzosa, Levi Waldron, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation) 
 
-URL
- http://huttenhower.sph.harvard.edu/halla
-
-Citation
- Gholamali Rahnavard, Yo Sup Moon, George Weingart, Lauren J. McIver, Eric A. Franzosa, Levi Waldron, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation)
-
-Google Group
- halla-users: https://groups.google.com/forum/#!forum/halla-users
+[HAllA Users Google Group](https://groups.google.com/forum/#!forum/halla-users)
 
 License
  MIT License
 --------------------------------------------
+
+## Contents ##
+* [Description](#markdown-header-description)
+* [Requirements](#markdown-header-requirements)
+    * [Operating System](#markdown-header-operating-system)
+    * [Software](#markdown-header-software)
+* [Installation](#markdown-header-installation)
+    * [Downloading HAllA](#markdown-header-downloading-halla)
+    * [Installing HAllA](#markdown-header-installing-halla)
+* [How to Run](#markdown-header-how-to-run)
+    * [Basic usage](#markdown-header-basic-usage)
+    * [Output files](#markdown-header-output)
+
+        1. [Significant Discovered Associations](#markdown-header-1-significant-discovered-associations)
+        2. [All Association Results One-by-One](#markdown-header-2-all-association-results-one-by-one)
+        3. [All Compared Clusters from the Hypotheses Tree](#markdown-header-3-all-compared-clusters-from-the-hypothesis-tree)
+
+* [Demo runs](#markdown-header-demo-runs)
+* [Complete option list](#markdown-header-complete-option-list)
+* [Frequently Asked Questions](#markdown-header-frequently-asked-questions)
+
+## Description ##
 
 HAllA (pronounced [challah](http://en.wikipedia.org/wiki/Challah)) is an
 end-to-end statistical method for Hierarchical All-against-All discovery of
@@ -40,15 +55,15 @@ variables.  It's your one-stop shop for statistical significance!
 If you use this tool, the included scripts, or any related code in your work,
 please let us know, sign up for the HAllA Users Group (halla-users@googlegroups.com), and pass along any issues or feedback.
 
-# Requirements #
+## Requirements ##
 
-## Operating System ##
+### Operating System ###
 ```
 * Linux 
 * Mac OS X (>= 10.7.4) 
 ```
 
-## Software ##
+### Software ###
 ```
 * Python (>= 2.7)
 * Numpy (>= 1.7.1)
@@ -60,9 +75,9 @@ please let us know, sign up for the HAllA Users Group (halla-users@googlegroups.
 ```
 * Pandas (>=0.15.2)
 ```
-# Installation #
+## Installation ##
 
-## Downloading HAllA ##
+### Downloading HAllA ###
 You can download the latest HAllA release or the development version.
 
 Option 1: Latest Release (Recommended)
@@ -75,21 +90,18 @@ Option 2: Development Version
 	
 	``hg clone https://bitbucket.org/biobakery/halla ``
 
-	Note: Creating a clone of the repository requires [Mercurial](http://mercurial.selenic.com/) to be installed. Once the repository has been cloned upgrading to the latest development version of HAllA is simple. Just type ``hg pull -u`` from within the repository.
+	Note: Creating a clone of the repository requires [Mercurial](http://mercurial.selenic.com/) to be installed. 
 
-For the steps that follow, $HAllA_PATH is the location of the HAllA directory (ie $HAllA_PATH=/home/user/halla/ with this readme file found in this folder).
-
-
-## Installing HAllA  ##
+### Installing HAllA  ###
 
 1. Move to the HAllA directory : ``$ cd HAllA_PATH ``
 1. Install HAllA: ``$ python setup.py install``
 
 Note: If you do not have write permissions to '/usr/lib/', then add the option "--user" to the install command. This will install the python package into subdirectories of '~/.local'.
 
-# How to Run #
+## How to Run ##
 
-## Basic usage ##
+### Basic usage ###
 
 Type the command:
 
@@ -115,10 +127,10 @@ HAllA by default takes two tab-delimited text files as an input, where in each f
 
 Note: the input files have the same samples(columns) but features(rows) could be different. 
 
-### Output ###
+## Output files ##
 -----------------------------------------------
 
-HAllA by default prints a tab-delimited text file as output ::
+HAllA by default prints a tab-delimited text file as output:
 
 	+----------+----------+-------+------+------+
 	| One      | Two      | NMI   | Pperm| Padjust|
@@ -131,43 +143,23 @@ is not likely to be caused by the noise in the data).
 
 $OUTPUT_DIR = the output directory
 
-**Three output files will be created:**
+Three tab-delimited output files will be created:
 
-1. $OUTPUT_DIR/associations.tsv
-1. $OUTPUT_DIR/all_association_results_one_by_one.tsv
-1. $OUTPUT_DIR/all_compared_clusters_hypotheses_tree.tsv
+### 1. Significant Discovered Associations ###
 
-** Optional outputs if --plotting_results is used in command line:**
+File: $OUTPUT_DIR/associations.tsv
 
-1. $OUTPUT_DIR/associationsN/ (for all associations from 0..N if there is any)
-	1. association_1.pdf
-	1. Dataset_1_cluster_N_scatter_matrix.pdf
-	1. Dataset_2_cluster_N_scatter_matrix.pdf
-1. $OUTPUT_DIR/Pearson_heatmap.pdf
-1. $OUTPUT_DIR/NMI_heatmap.pdf
-
-## Demo runs ##
-
-The input folder contains four demo input files. These files are tab-delimitated files.
-
-To run the HAllA demo type the command:
-
-`` halla -X examples/X_syntheticData.txt -Y examples/Y_syntheticData.txt -o $OUTPUT_DIR ``
-
-$OUTPUT_DIR is the output directory
-
-## Output files ##
-
-HAllA produces three output files which by default are tab-delimited text.
-
-### Significant Discovered Associations ###
 ```
 Association Number	Clusters First Dataset	Cluster Similarity Score (NMI)	Explained Variance by the First PC of the cluster	 	Clusters Second Dataset	Cluster Similarity Score (NMI)	Explained Variance by the First PC of the cluster	 	nominal-pvalue	adjusted-pvalue	SImilarity score between Clusters (NMI)
 1	6;7;8	0.294140401	0.647012305	 	6;7;8	0.249909049	0.642530249	 	0.000999001	0.011111111	0.259588486
 2	0;1;2	0.286179622	0.653736652	 	2;0;1	0.259510749	0.541880507	 	0.002997003	0.022222222	0.238560794
 3	3;4;5	0.243583717	0.64574729	 	3;4;5	0.250180471	0.61356624	 	0.022977023	0.033333333	0.222516454 
 ```
-### All Association Results One-by-One ###
+
+### 2. All Association Results One-by-One ###
+
+File: $OUTPUT_DIR/all_association_results_one_by_one.tsv
+
 ```
 ./input/X_syntheticData.txt	./input/Y_syntheticData.txt	nominal-pvalue	adjusted-pvalue
 0	0	0.002997003	0.022222222
@@ -198,7 +190,11 @@ Association Number	Clusters First Dataset	Cluster Similarity Score (NMI)	Explain
 8	7	0.000999001	0.011111111
 8	8	0.000999001	0.011111111
 ```
-### All Compared Clusters from the Hypotheses Tree ###
+
+### 3. All Compared Clusters from the Hypotheses Tree ###
+
+File:  $OUTPUT_DIR/all_compared_clusters_hypotheses_tree.tsv
+
 ```
 Level	Dataset 1	Dataset 2
 0	0;1;2;6;7;8;3;4;5	3;4;5;2;0;1;6;7;8
@@ -212,7 +208,28 @@ Level	Dataset 1	Dataset 2
 1	6;7;8	6;7;8
 1	6;7;8	2;0;1
 ```
-# Complete option list #
+
+** Optional outputs if --plotting_results is used in command line:**
+
+1. $OUTPUT_DIR/associationsN/ (for all associations from 0..N if there is any)
+	1. association_1.pdf
+	2. Dataset_1_cluster_N_scatter_matrix.pdf
+	3. Dataset_2_cluster_N_scatter_matrix.pdf
+2. $OUTPUT_DIR/Pearson_heatmap.pdf
+3. $OUTPUT_DIR/NMI_heatmap.pdf
+
+
+## Demo runs ##
+
+The input folder contains four demo input files. These files are tab-delimitated files.
+
+To run the HAllA demo type the command:
+
+`` halla -X examples/X_syntheticData.txt -Y examples/Y_syntheticData.txt -o $OUTPUT_DIR ``
+
+$OUTPUT_DIR is the output directory
+
+## Complete option list ##
 ```
 usage: halla [-h] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o
              <output> [-q <0.1>] [-s <0.01>] [--descending] [-f {BHF,BHL,BHA}]
@@ -263,6 +280,6 @@ optional arguments:
                         bypass the discretizing step
   --header              the input files contain a header line
 ```
-# Frequently Asked Questions #
+## Frequently Asked Questions ##
 
 Please see all FAQ at the [ halla-users google group]( https://groups.google.com/forum/#!forum/halla-users).
