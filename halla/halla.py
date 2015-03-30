@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import sys
-import halla
 
 # Check the python version
 REQUIRED_PYTHON_VERSION_MAJOR = 2
