@@ -25,7 +25,7 @@ License
         1. [Significant Discovered Associations File](#markdown-header-1-significant-discovered-associations-file)
         2. [All Association Results One-by-One File](#markdown-header-2-all-association-results-one-by-one-file)
         3. [All Compared Clusters from the Hypotheses Tree File](#markdown-header-3-all-compared-clusters-from-the-hypotheses-tree-file)
-        4. [Optional Plotting Results Files](#markdown-header-4-option-plotting-results-files)
+        4. [Optional Plotting Results Files](#markdown-header-4-optional-plotting-results-files)
 
 * [Demo runs](#markdown-header-demo-runs)
 * [Complete option list](#markdown-header-complete-option-list)
