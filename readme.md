@@ -20,11 +20,11 @@ License
     * [Installing HAllA](#markdown-header-installing-halla)
 * [How to Run](#markdown-header-how-to-run)
     * [Basic usage](#markdown-header-basic-usage)
-    * [Output files](#markdown-header-output)
+    * [Output files](#markdown-header-output-files)
 
         1. [Significant Discovered Associations](#markdown-header-1-significant-discovered-associations)
         2. [All Association Results One-by-One](#markdown-header-2-all-association-results-one-by-one)
-        3. [All Compared Clusters from the Hypotheses Tree](#markdown-header-3-all-compared-clusters-from-the-hypothesis-tree)
+        3. [All Compared Clusters from the Hypotheses Tree](#markdown-header-3-all-compared-clusters-from-the-hypotheses-tree)
 
 * [Demo runs](#markdown-header-demo-runs)
 * [Complete option list](#markdown-header-complete-option-list)
