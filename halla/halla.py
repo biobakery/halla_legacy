@@ -157,7 +157,7 @@ def parse_arguments (args):
     argp.add_argument(
         "-f","--fdr",
         dest="strFDR",
-        default = "BHF",
+        default = "BHL",
         choices=["BHF","BHL","BHA"],
         help="function to maximize statistical power and control false discovery rate\n[default = BHF]")
 
@@ -172,7 +172,7 @@ def parse_arguments (args):
         "-m","--metric",
         dest="strMetric",
         default="nmi",
-        choices=["nmi","ami","pearson"],
+        choices=["nmi","ami","mic","pearson"],
         help="metric to be used for similarity measurement\n[default = nmi]")
     
     argp.add_argument(

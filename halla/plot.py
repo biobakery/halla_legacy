@@ -323,6 +323,7 @@ def heatmap(Data, xlabels_order = [], xlabels = None, filename='./hierarchical_h
         pArray = pArray[:, idx2]
         xlabels_order.extend(idx2)
     else:
+        #pass
         pArray = pArray[:, xlabels_order]    
     im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)#YlGnBu
     if colLable:

@@ -286,7 +286,7 @@ def mic (X, Y):
             " Please check your install.") 
     if X.ndim > 1: 
         X = X[0]
-        print X
+        #print X
     if Y.ndim > 1:
         Y = Y[0]
     mine = MINE(alpha=0.6, c=15)

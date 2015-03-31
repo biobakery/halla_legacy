@@ -8,7 +8,7 @@ from itertools import compress
 from itertools import product
 import itertools
 import math
-from numpy import array 
+from numpy import array , std
 import numpy 
 from numpy.random import shuffle, binomial, normal, multinomial 
 import scipy
@@ -452,9 +452,11 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	right_rep = 1.0
 	#### Calculate Point estimate 
 	if decomposition in ['pls', 'cca']:
-		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric))
+		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
 	else:
 		[pRep1, pRep2] = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
+		#print "1:", pRep1
+		#print "2:", pRep2
 		left_rep = first_rep(pArray1, decomposition)
 		right_rep = first_rep(pArray2, decomposition)
 	fAssociation = pMe(pRep1, pRep2) 
@@ -506,8 +508,8 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 	
 	#### Caclulate Point estimate 
 	pRep1, pRep2 = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
-	print "pRep1:", pRep1
-	print "pRep2:", pRep2
+	#print "pRep1:", pRep1
+	#print "pRep2:", pRep2
 	left_rep = first_rep(pArray1)
 	right_rep = first_rep(pArray2)
 	fAssociation = pMe(pRep1, pRep2) 
@@ -1245,13 +1247,15 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 		# This is still a bit buggy since ( [0, 0, 0, 1, 2, 2, 2, 2], 3 ) will exhibit suboptimal behavior
 		aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
 		astrRet = [None] * len(astrValues)
+		#print "aiIndices:", aiIndices
+		#print "astrRet:", astrRet
 		iPrev = 0
 		for i, iIndex in enumerate(aiIndices):
 			# If you're on a tie, you can't increase the bin number
 			# Otherwise, increase by at most one
 			iPrev = astrRet[iIndex] = iPrev if (i and (astrValues[iIndex] == astrValues[aiIndices[i - 1]])) else \
 				min(iPrev + 1, int(iN * i / float(len(astrValues))))
-		
+			#print "astrRet:", astrRet
 		return astrRet
 
 	try:
@@ -1270,6 +1274,7 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 
 	except Exception:
 		iN = len(pArray)
+		#print "in discritizing exception!!!!"
 		return _discretize_continuous(pArray)
 
 def discretize2d(pX, pY, method=None):

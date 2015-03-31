@@ -500,7 +500,7 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
 		#else:
 		#	scipy.cluster.hierarchy.dendrogram(Z)
 		#plt.gcf()
-		global fig_num
+		#global fig_num
 		Z = plot.heatmap(pArray, xlabels = labels, filename= output_dir+"/hierarchical_heatmap_" + str(fig_num))
 		#plt.savefig(output_dir+"/Dendrogram1_" + str(fig_num) + ".pdf")
 		fig_num += 1
@@ -514,6 +514,7 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
 	
 	# cutted_Z = np.where(Z[:,2]<.7)
 	# print  cutted_Z 
+	#print  Z
 	# scipy.all( (Z[:,3] >= .4, Z[:,3] <= .6), axis=0 ).nonzero()
 	# print pos.distance()
 	return to_tree(Z) if bTree else Z 
