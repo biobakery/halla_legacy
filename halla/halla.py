@@ -37,6 +37,8 @@ except ImportError:
     
 # Test if matplotlib is installed
 try:
+    import matplotlib
+    matplotlib.use('Agg')
     import matplotlib.pyplot as plt
 except ImportError:
     sys.exit("Please install matplotlib")
