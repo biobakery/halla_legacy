@@ -108,23 +108,23 @@ Type the command:
 
 `` halla -X $DATASET1 -Y DATASET2 --output $OUTPUT_DIR``
 
-HAllA by default takes two tab-delimited text files as an input, where in each file, each row describes feature (data/metadata) and each column represents an instance. In other words, input `X` is a `D x N` matrix where `D` is the number of dimensions in each instance of the data and `N` is the number of instances (samples). The "edges" of the matrix should contain labels of the data, if desired. The following is an example input ::
+HAllA by default takes two tab-delimited text files as an input, where in each file, each row describes feature (data/metadata) and each column represents an instance. In other words, input `X` is a `D x N` matrix where `D` is the number of dimensions in each instance of the data and `N` is the number of instances (samples). The "edges" of the matrix should contain labels of the data, if desired. 
 
-	+---------+---------+---------+--------+
-	|         | Sample1 | Sample2 | Sample3|
-	+---------+---------+---------+--------+
-	| DataX1 | 0       | 1       | 2      |
-	+---------+---------+---------+--------+ 
-	| DataX2 | 1.5     | 100.2   | -30.7  |
-	+---------+---------+---------+--------+
+The following is an example input:
 
-	+---------+---------+---------+--------+
-	|         | Sample1 | Sample2 | Sample3|
-	+---------+---------+---------+--------+
-	| DataY1  | 0       | 1       | 2      |
-	+---------+---------+---------+--------+ 
-	| DataY2  | 1.5     | 100.2   | -30.7  |
-	+---------+---------+---------+--------+
+
+Feature | Sample1 | Sample2 | Sample3
+------------- | ------------- | ------------- | -------------
+DataX1 | 0       | 1       | 2 
+DataX2 | 1.5     | 100.2   | -30.7
+
+
+
+Feature | Sample1 | Sample2 | Sample3
+------------- | ------------- | ------------- | -------------
+DataY1  | 0       | 1       | 2 
+DataY2  | 1.5     | 100.2   | -30.7
+
 
 Note: the input files have the same samples(columns) but features(rows) could be different. 
 
@@ -133,11 +133,13 @@ Note: the input files have the same samples(columns) but features(rows) could be
 
 HAllA by default prints a tab-delimited text file as output:
 
-	+----------+----------+-------+------+------+
-	| One      | Two      | NMI   | Pperm| Padjust|
-	+ ---------+----------+-------+------+------+
-	| X_CLUSTER| Y_CLUSTER| 0.64  | 0.02 | 0.008|
-	+----------+----------+-------+------+------+  	
+
+
+One      | Two      | NMI   | Pperm| Padjust
+------------- | ------------- | ------------- | ------------- | -------------
+X_CLUSTER| Y_CLUSTER| 0.64  | 0.02 | 0.008
+
+
 
 `NMIS` stands for "normalized mutual information", which is an information-theoretic measure of association between two random variables. `Pperm` and `Padjust` corresponds to the p-values of the permutation tests and adjusted p-value from Benjamini-Hochberg-Yekutieli approach used to assess the statistical significance of the mutual information distance (i.e. lower p-values signify that the association between two variables 
 is not likely to be caused by the noise in the data).  
