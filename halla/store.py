@@ -523,7 +523,7 @@ class HAllA():
             output_file_associations  = open(str(self.output_dir)+'/associations.txt', 'w')
             bcsvw = csv.writer(output_file_associations, csv.excel_tab)
             #bcsvw.writerow(["Method: " + self.decomposition +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
-            bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
+            bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the First PC of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
     
             sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.nominal_pvalue)
             for association in sorted_associations:
@@ -600,8 +600,8 @@ class HAllA():
                     
                     discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
                     discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                    concatenated_df = pd.concat([df1, df2],axis=1)
-                    axes = plot.scatter_matrix(concatenated_df, filename =filename + 'Concatenated_' + str(association_number) + '_scatter_matrix.pdf')
+                    #concatenated_df = pd.concat([df1, df2],axis=1)
+                    #axes = plot.scatter_matrix(concatenated_df, filename =filename + 'Concatenated_' + str(association_number) + '_scatter_matrix.pdf')
                     # heatmap cluster in an association
                     x_label_order = []
                     if len(discretized_cluster1) >= len(discretized_cluster2):

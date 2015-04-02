@@ -195,7 +195,7 @@ def parse_arguments (args):
         "-t","--test",
         dest="strRandomization",
         default="permutation",
-        choices=["permutation"],
+        choices=["permutation","g-test"],
         help="approach for association test\n[default = permutation]")  
      
     argp.add_argument(

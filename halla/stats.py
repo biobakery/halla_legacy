@@ -495,45 +495,53 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 
 	metric = {pca": pca} 
 	"""
+	# numpy.random.seed(0)
+	# return g_test_by_representative( pArray1, pArray2, metric = "nmi", decomposition = "pca", iIter = 1000 )
 	X, Y = pArray1, pArray2 
-	
+
 	strMetric = metric 
 	# step 5 in a case of new decomposition method
-	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
+	pHashDecomposition = {'pls':pls, 'cca':cca, "pca": pca, "kpca": kpca, "ica":ica, "mds":mds }
 	pHashMetric = distance.c_hash_metric 
 	
+	def _permutation(pVec):
+		return numpy.random.permutation(pVec)
+
 	pDe = pHashDecomposition[decomposition]
 	pMe = pHashMetric[strMetric] 
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	
-	#### Caclulate Point estimate 
-	pRep1, pRep2 = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
-	#print "pRep1:", pRep1
-	#print "pRep2:", pRep2
-	left_rep = first_rep(pArray1)
-	right_rep = first_rep(pArray2)
+	aDist = [] 
+	left_rep = 1.0
+	right_rep = 1.0
+	#### Calculate Point estimate 
+	if decomposition in ['pls', 'cca']:
+		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
+	else:
+		[pRep1, pRep2] = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
+		#print "1:", pRep1
+		#print "2:", pRep2
+		left_rep = first_rep(pArray1, decomposition)
+		right_rep = first_rep(pArray2, decomposition)
 	fAssociation = pMe(pRep1, pRep2) 
-	
-	filtered_pRep1 = []
-	filtered_pRep2 = []
-	for i in range(len(pRep1)):
-		if pRep1[i] or pRep2[i]:
-			filtered_pRep1.append(pRep1[i])
-			filtered_pRep2.append(pRep2[i])
-	# compute degrees of freedom for table
-	xdf = len(set(filtered_pRep1)) - 1
-	ydf = len(set(filtered_pRep2)) - 1
-	df = xdf * ydf
-	print "degrees of freedom... =", df
-	n = len (filtered_pRep1)
 	import os, sys, re, glob, argparse
 	from random import choice, random, shuffle
 	from collections import Counter
 	from scipy.stats import chi2
 	from math import log, exp, sqrt
-	mi = distance.NormalizedMutualInformation(pRep1, pRep2).get_distance()
+	'''
+	# constants
+	trials = 10000
+	chars = "ABC"
+	n = 100
+	k = 0.2 # degree of coupling
+	
+	# generate random data
+	x = [choice( chars ) for i in range( n )]
+	y = [x[i] if random() < k else choice( chars ) for i in range( n )]
+	'''
 	# mutual information
-	def _mutinfo( x, y ):
+	def mutinfo( x, y ):
 	    px, py, pxy = [Counter() for i in range( 3 )]
 	    assert len( x ) == len( y ), "unequal lengths"
 	    delta = 1 / float( len( x ) )
@@ -546,18 +554,37 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 	        S += value * ( log( value, 2 ) - log( px[xchar], 2 ) - log( py[ychar], 2 ) )
 	    return S
 	
-	
 	# actual value
-	#mi = _mutinfo( filtered_pRep1, filtered_pRep1 )
-	print "nmi", mi
-	mi_natural_log = mi / log(exp(1.0), 2.0)
-	print "nmi_natural_log"
-	fP = 1 - chi2.cdf(2.0 * n * mi_natural_log, df)
-	print "G-test P-value: ", fP
-				
-	# g, fP, dof, expctd = scipy.stats.chi2_contingency([filtered_pRep1, filtered_pRep2], lambda_="log-likelihood")
+	mi = distance.mi( pRep1, pRep2 )
+	print "mutual information... =", mi
 	
-	# print "G-test, Pvalue:", fP 
+	# compute degrees of freedom for table
+	xdf = len( set( pRep1 ) ) - 1
+	ydf = len( set( pRep2 ) ) - 1
+	df = xdf * ydf
+	print "degrees of freedom... =", df
+	
+	# calculate a pvalue from permutation
+	pvalue = 0
+	delta = 1 / float( iIter )
+	for t in range( iIter ):
+	    y2 = pRep2[:]
+	    y2 = numpy.random.permutation( y2 )
+	    if distance.mi( pRep1, y2 ) >= mi:
+	        pvalue += delta
+	print "permutation P-value.. =", pvalue
+	
+	# calculate a pvalue based on a G test
+	# G = 2 * N * MI, with MI measured in nats (not bits)
+	# behaves as a contingency chi^2, with df=(rows-1)(cols-1)
+	mi_natural_log = mi / log( exp( 1 ), 2 )
+	fP = 1 - chi2.cdf( 2 * len(pRep1) * mi_natural_log, df )
+	print "G-test P-value....... =", fP
+	
+	#permerror = 2 * sqrt( pvalue * ( 1 - pvalue ) / float( trials ) )
+	#print "permutation error.... =", permerror
+	#print "within perm error.... =", abs( pvalue - pvalue2 ) < permerror
+
 	return fP, fAssociation, left_rep, right_rep
 def parametric_test_by_max_pca(pArray1, pArray2, k=2, metric="spearman", iIter=1000):
 
@@ -826,15 +853,11 @@ def permutation_test(pArray1, pArray2, metric, decomposition, iIter):
 
 
 def g_test(pArray1, pArray2, metric, decomposition, iIter):
-	if decomposition in ["pca", "ica", "kpca"]:
+	if decomposition in ['cca', 'pls',"pca", "ica", "kpca"]:
 		return g_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter)
-	'''
+	
 	if decomposition in ["average"]:
 		return g_test_by_average(pArray1, pArray2, metric=metric, iIter=iIter)
-	
-	if decomposition in ["cca"]:
-		return g_test_by_cca(pArray1, pArray2, metric=metric, iIter=iIter)
-	'''
 def parametric_test(pArray1, pArray2):
 	
 	# numpy.random.seed(0)
@@ -1212,7 +1235,10 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 
 	>>> discretize( [0.1, 0, 0, 0, 0, 0, 0, 0, 0] )
 	[1, 0, 0, 0, 0, 0, 0, 0, 0]
-
+	
+	>>> discretize( [0.001, 0.002, 0.003, 0.004, 1, 2, 3, 4, 100] )
+	[0, 0, 0, 1, 1, 1, 2, 2, 2]
+	
 	>>> discretize( [0.992299, 1, 1, 0.999696, 0.999605, 0.663081, 0.978293, 0.987621, 0.997237, 0.999915, 0.984792, 0.998338, 0.999207, 0.98051, 0.997984, 0.999219, 0.579824, 0.998983, 0.720498, 1, 0.803619, 0.970992, 1, 0.952881, 0.999866, 0.997153, 0.014053, 0.998049, 0.977727, 0.971233, 0.995309, 0.0010376, 1, 0.989373, 0.989161, 0.91637, 1, 0.99977, 0.960816, 0.998025, 1, 0.998852, 0.960849, 0.957963, 0.998733, 0.999426, 0.876182, 0.998509, 0.988527, 0.998265, 0.943673] )
 	[3, 6, 6, 5, 5, 0, 2, 2, 3, 5, 2, 4, 4, 2, 3, 5, 0, 4, 0, 6, 0, 1, 6, 1, 5, 3, 0, 3, 2, 1, 3, 0, 6, 3, 2, 0, 6, 5, 1, 3, 6, 4, 1, 1, 4, 5, 0, 4, 2, 4, 1]
 	
@@ -1232,7 +1258,8 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 	       [ 0.,  0.,  1.,  1.]])
 
 	"""
-
+	
+	
 
 	def _discretize_continuous(astrValues, iN=iN): 
 		
@@ -1279,7 +1306,6 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 
 def discretize2d(pX, pY, method=None):
 	pass 
-
 
 #=========================================================
 # Classification and Validation 
