@@ -935,9 +935,9 @@ class HAllA():
             # hierarchical clustering 
             start_time = time.time()
             self._hclust()
-            ecution_time_temp = time.time() - start_time
-            csvw.writerow(["Hierarchical clustering time", ecution_time_temp ])
-            print("--- %s seconds: hierarchical clustering time ---" % ecution_time_temp)
+            excution_time_temp = time.time() - start_time
+            csvw.writerow(["Hierarchical clustering time", excution_time_temp ])
+            print("--- %s seconds: hierarchical clustering time ---" % excution_time_temp)
             
             # coupling clusters hierarchically 
             start_time = time.time()
@@ -956,7 +956,7 @@ class HAllA():
         # Generate a report
         start_time = time.time() 
         self._summary_statistics('final') 
-        ecution_time_temp = time.time() - start_time
+        excution_time_temp = time.time() - start_time
         csvw.writerow(["Summary statistics time", excution_time_temp ])
         print("--- %s seconds: summary statistics time ---" % excution_time_temp)
         
@@ -966,8 +966,8 @@ class HAllA():
         csvw.writerow(["Plotting results time", excution_time_temp ])
         print("--- %s seconds: plotting results time ---" % excution_time_temp)
         excution_time_temp = time.time() - execution_time
-        csvw.writerow(["Total execution time time", ecution_time_temp ])
-        print("\n--- in %s seconds the task is successfully done ---" % excution_time_temp )
+        csvw.writerow(["Total execution time ---", excution_time_temp ])
+        print("\n--- in %s seconds the task is successfully done ---", excution_time_temp )
         return results
     
     def view_singleton(self, pBags):

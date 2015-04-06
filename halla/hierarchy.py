@@ -151,9 +151,9 @@ class Tree():
 			return False
 	
 	def is_bypass(self, q = .05, test_level =1.0 ):
-		if self.get_adjusted_pvalue()  > 1.0 - q or\
-		(self.get_left_first_rep() > .85 and \
-		 self.get_right_first_rep()> .85): 
+		if self.get_adjusted_pvalue()  > 1.0 - q:# or\
+		#(self.get_left_first_rep() > .85 and \
+		# self.get_right_first_rep()> .85): 
 			return True
 		else:
 			return False

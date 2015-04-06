@@ -63,7 +63,7 @@ def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods'
     #pl.show()
     pl.close()
 
-def scatter_plot(x=None, y=None, alpha=.1, figure_name='Figure2', xlabel="Recall", ylabel="FDR", labels=None):
+def scatter_plot(x=None, y=None, alpha=.1, file_name='Figure2', xlabel="Recall", ylabel="FDR", labels=None):
     import pylab as pl
     pl.figure("Recall vs. FDR", dpi= 300)
     pl.title("Recall vs. FDR")
@@ -357,7 +357,7 @@ def heatmap(Data, xlabels_order = [], xlabels = None, filename='./hierarchical_h
 import numpy as np
 import matplotlib.pyplot as plt
 
-def grouped_boxplots2(data, xlabels):
+def grouped_boxplots2(data, xlabels, file_name ="Grouped_Recall_FDR"):
     '''data = [[np.random.normal(i, 1, 30) for i in range(2)],
             [np.random.normal(i, 1.5, 30) for i in range(3)],
             [np.random.normal(i, 2, 30) for i in range(4)]]
@@ -390,7 +390,7 @@ def grouped_boxplots2(data, xlabels):
     plt.tight_layout()
     #ax.grid(axis='y', ls='-', color='white', lw=2)
     #ax.patch.set(facecolor='0.95')
-    plt.savefig("Grouped_Recall_FDR.pdf")
+    plt.savefig(file_name+".pdf")
     #plt.show()
     plt.close()
 
