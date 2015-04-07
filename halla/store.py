@@ -600,7 +600,7 @@ class HAllA():
                     
                     discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
                     discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                    #concatenated_df = pd.concat([df1, df2],axis=1)
+                    concatenated_df = pd.concat([df1, df2],axis=1)
                     #axes = plot.scatter_matrix(concatenated_df, filename =filename + 'Concatenated_' + str(association_number) + '_scatter_matrix.pdf')
                     # heatmap cluster in an association
                     x_label_order = []
@@ -624,16 +624,25 @@ class HAllA():
                     plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'AllA_association_' + str(association_number) + '_heatmap' )
                     plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename =filename + 'AllA_association_' + str(association_number) + '_heatmap' )  
                     plt.figure()
+                    fig = plt.figure(figsize=(5, 4))
+                    # Create an Axes object.
+                    ax = fig.add_subplot(1,1,1) # one row, one column, first plot
                     df1 = np.array(cluster1, dtype=float)
                     df2 = np.array(cluster2, dtype=float)
-                    
-                    plt.scatter(stats.pca(df1)[0], stats.pca(df2)[0], alpha=0.5)
-                    plt.tight_layout()
-                    plt.savefig(filename + '/association_' + str(association_number) + '.pdf')
+                    ax.set_xlabel("First Principal Component of the First cluster")
+                    ax.set_ylabel("First Principal Component of the Second cluster")
+                    ax.scatter(stats.pca(df1)[0], stats.pca(df2)[0], alpha=0.5)
+                    fig.tight_layout()
+                    fig.savefig(filename + '/association_' + str(association_number) + '.pdf')
                     
                     plt.figure()
+                    fig = plt.figure(figsize=(5, 4))
+                    # Create an Axes object.
+                    ax = fig.add_subplot(1,1,1) # one row, one column, first plot
                     discretized_df1 = np.array(discretized_cluster1, dtype=float)
                     discretized_df2 = np.array(discretized_cluster2, dtype=float)
+                    ax.set_xlabel("First Principal Component of the First cluster")
+                    ax.set_ylabel("First Principal Component of the Second cluster")
                     x = stats.discretize(stats.pca(discretized_df1)[0])
                     y = stats.discretize(stats.pca(discretized_df2)[0])
                     '''for i in range(len(x)):
@@ -642,9 +651,9 @@ class HAllA():
                         y += np.random.normal(y[i], 3, 100)
                     '''
                     #plt.scatter( stats.discretize(stats.pca(discretized_df1)),  stats.discretize(stats.pca(discretized_df2)), alpha=0.5)
-                    plt.scatter( x, y, alpha=0.4)
-                    plt.tight_layout()
-                    plt.savefig(discretized_filename + '/association_' + str(association_number) + '.pdf')
+                    ax.scatter( x, y, alpha=0.4)
+                    fig.tight_layout()
+                    fig.savefig(discretized_filename + '/association_' + str(association_number) + '.pdf')
                     
                     plot.confusion_matrix(x, y, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
                     plot.heatmap(array([x]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'PCDataset_1_cluster_' + str(association_number) + '_heatmap')
@@ -967,7 +976,7 @@ class HAllA():
         print("--- %s seconds: plotting results time ---" % excution_time_temp)
         excution_time_temp = time.time() - execution_time
         csvw.writerow(["Total execution time ---", excution_time_temp ])
-        print("--- in %s seconds the task is successfully done ---", excution_time_temp )
+        print("--- in %s seconds the task is successfully done ---" % excution_time_temp )
         return results
     
     def view_singleton(self, pBags):
