@@ -923,7 +923,7 @@ class HAllA():
             print("--- %s seconds: featurize data time ---" % excution_time_temp)
         else:
             self.meta_feature = self.meta_array
-        plot.heatmap2(pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], xlabels =self.aOutName1, ylabels = self.aOutName2, filename = str(self.output_dir)+'/heatmap2_all' )
+        #plot.heatmap2(pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], xlabels =self.aOutName1, ylabels = self.aOutName2, filename = str(self.output_dir)+'/heatmap2_all' )
         if not self.descending:
             print("--- association hypotheses testing is started, this task may take longer ...")
             start_time = time.time()
@@ -967,7 +967,7 @@ class HAllA():
         print("--- %s seconds: plotting results time ---" % excution_time_temp)
         excution_time_temp = time.time() - execution_time
         csvw.writerow(["Total execution time ---", excution_time_temp ])
-        print("\n--- in %s seconds the task is successfully done ---", excution_time_temp )
+        print("--- in %s seconds the task is successfully done ---", excution_time_temp )
         return results
     
     def view_singleton(self, pBags):
