@@ -141,7 +141,7 @@ class Tree():
 		return self.adjusted_pvalue
 	
 	def is_association(self, pvalue_threshold, pc_threshold, sim_threshold):
-		if self.get_nominal_pvalue() < pvalue_threshold and \
+		if self.get_adjusted_pvalue() < pvalue_threshold and \
 			1.0 - self.get_left_distance() > sim_threshold and \
 		    1.0 - self.get_right_distance() > sim_threshold and \
 		    self.get_left_first_rep() > pc_threshold and \
@@ -1626,7 +1626,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 					max_r_t = pRank[i]
 					# print "max_r_t", max_r_t
 			for i in range(len(aP)):
-				if pRank[i] <= max_r_t:
+				if pRank[i] <= max_r_t and current_level_tests[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
 					number_passed_tests += 1
 					print "-- associations after fdr correction"
 					if bVerbose:
@@ -1774,7 +1774,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 						max_r_t = pRank[i]
 						# print "max_r_t", max_r_t
 				for i in range(len(aP)):
-					if pRank[i] <= max_r_t:
+					if pRank[i] <= max_r_t and current_level_tests[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
 						number_passed_tests += 1
 						print "-- associations after fdr correction"
 						if bVerbose:
