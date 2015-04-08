@@ -1266,7 +1266,7 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
 		
 		if fdr == "simple":
 			if fP <= fQ:
-				print "-- associations after BH fdr controlling"
+				print "-- association after BH fdr controlling"
 				if bVerbose:
 					tests[t].report()
 				aOut.append(tests[t])
