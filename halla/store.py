@@ -623,19 +623,20 @@ class HAllA():
                     x_label_order = []
                     plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'AllA_association_' + str(association_number) + '_heatmap' )
                     plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename =filename + 'AllA_association_' + str(association_number) + '_heatmap' )  
-                    plt.figure()
+                    #plt.figure()
                     fig = plt.figure(figsize=(5, 4))
                     # Create an Axes object.
                     ax = fig.add_subplot(1,1,1) # one row, one column, first plot
                     df1 = np.array(cluster1, dtype=float)
                     df2 = np.array(cluster2, dtype=float)
+                    
                     ax.set_xlabel("First Principal Component of the First cluster")
                     ax.set_ylabel("First Principal Component of the Second cluster")
                     ax.scatter(stats.pca(df1)[0], stats.pca(df2)[0], alpha=0.5)
                     fig.tight_layout()
                     fig.savefig(filename + '/association_' + str(association_number) + '.pdf')
                     
-                    plt.figure()
+                    #plt.figure()
                     fig = plt.figure(figsize=(5, 4))
                     # Create an Axes object.
                     ax = fig.add_subplot(1,1,1) # one row, one column, first plot
