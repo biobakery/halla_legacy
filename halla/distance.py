@@ -274,8 +274,8 @@ def pearson(X, Y):
     	X = X[0]
     if Y.ndim > 1:
     	Y = Y[0]
-    X = [float(x) for x in X]
-    Y = [float(y) for y in Y]
+    #X = [float(x) for x in X]
+    #Y = [float(y) for y in Y]
     return scipy.stats.pearsonr(X, Y)[0]
 def mic (X, Y):
     try:
