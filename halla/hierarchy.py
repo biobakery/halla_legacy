@@ -982,7 +982,7 @@ def _is_start(ClusterNode, X, func, distance):
 def _is_stop(ClusterNode, dataSet, max_dist_cluster, threshold = None):
 		node_indeces = reduce_tree(ClusterNode)
 		first_PC = stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
-		if ClusterNode.is_leaf() or _percentage(ClusterNode.dist, max_dist_cluster) < .1 or first_PC > .9:
+		if ClusterNode.is_leaf(): #or _percentage(ClusterNode.dist, max_dist_cluster) < .1 or first_PC > .9:
 			#print "Node: ",node_indeces
 			#print "dist:", ClusterNode.dist, " first_PC:", first_PC,"\n"
 			return True
