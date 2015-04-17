@@ -454,7 +454,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	if decomposition in ['pls', 'cca']:
 		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
 	else:
-		[pRep1, pRep2] = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
+		[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 		#print "1:", pRep1
 		#print "2:", pRep2
 		left_rep = first_rep(pArray1, decomposition)

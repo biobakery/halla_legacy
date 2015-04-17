@@ -141,16 +141,16 @@ class Tree():
 		return self.adjusted_pvalue
 	
 	def is_association(self, pvalue_threshold, pc_threshold, sim_threshold):
-		return True
-		'''if self.get_adjusted_pvalue() < pvalue_threshold and \
+		#return True
+		if self.get_adjusted_pvalue() < pvalue_threshold and \
 			1.0 - self.get_left_distance() > sim_threshold and \
 		    1.0 - self.get_right_distance() > sim_threshold and \
-		    self.get_left_first_rep() > pc_threshold and \
-		    self.get_right_first_rep()> pc_threshold:
+		    self.get_left_first_rep() > .5 and \
+		    self.get_right_first_rep()> .5:
 			return True
 		else:
 			return False
-		'''
+		
 	def is_bypass(self, test_level =1.0 ):
 		if self.get_adjusted_pvalue()  > 1.0 - self.get_nominal_pvalue()*test_level or\
 		(self.get_left_first_rep() > .9 and \

@@ -24,7 +24,7 @@ from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, \
 #==========================================================================#
 # CONSTANTS 
 #==========================================================================#
-c_hash_association_method_discretize = {"pearson": False,
+c_hash_association_method_discretize = {"pearson": True,
 										"spearman": False,
 										"kw": False,
 										"anova": False,
@@ -276,6 +276,7 @@ def pearson(X, Y):
     	Y = Y[0]
     #X = [float(x) for x in X]
     #Y = [float(y) for y in Y]
+    #print "pearson:", scipy.stats.pearsonr(X, Y)[0]
     return scipy.stats.pearsonr(X, Y)[0]
 def mic (X, Y):
     try:
