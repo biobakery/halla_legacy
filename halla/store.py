@@ -925,7 +925,7 @@ class HAllA():
         csvw.writerow(["q: FDR cut-off : ", self.q]) 
         execution_time = time.time()
         if distance.c_hash_association_method_discretize[self.distance] or not self.bypass_discretizing:
-            print "Hello"
+            #print "featurize is started!"
             # featurize 
             start_time = time.time()
             self._featurize()

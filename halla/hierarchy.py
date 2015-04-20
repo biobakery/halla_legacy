@@ -32,6 +32,10 @@ max_dist = 1.0
 
 global fig_num 
 fig_num = 1
+
+global hypotheses_tree_heigth 
+hypotheses_tree_heigth = 0
+
 # class ClusterNode #scipy.cluster.hierarchy.ClusterNode
 class Tree():
 	''' 
@@ -52,6 +56,7 @@ class Tree():
 		self.right_first_rep = None
 		self.already_tested = False
 		self.already_passed = False
+		self.level_number = 1
 
 	def pop(self):
 		# pop one of the children, else return none, since this amounts to killing the singleton 
@@ -141,20 +146,30 @@ class Tree():
 		return self.adjusted_pvalue
 	
 	def is_association(self, pvalue_threshold, pc_threshold, sim_threshold):
-		#return True
-		if self.get_adjusted_pvalue() < pvalue_threshold and \
-			1.0 - self.get_left_distance() > sim_threshold and \
-		    1.0 - self.get_right_distance() > sim_threshold and \
-		    self.get_left_first_rep() > .5 and \
-		    self.get_right_first_rep()> .5:
+		return True
+		'''if self.get_adjusted_pvalue() < pvalue_threshold and \
+			1.0 - self.get_left_distance() > .1 and \
+		    1.0 - self.get_right_distance() > .1 and \
+		    self.get_left_first_rep() > .2 and \
+		    self.get_right_first_rep()> .2:
 			return True
 		else:
 			return False
-		
-	def is_bypass(self, test_level =1.0 ):
-		if self.get_adjusted_pvalue()  > 1.0 - self.get_nominal_pvalue()*test_level or\
-		(self.get_left_first_rep() > .9 and \
-		self.get_right_first_rep()> .9): 
+			'''
+	def is_bypass(self ):#
+		'''global hypotheses_tree_heigth
+		p = self.get_nominal_pvalue() * (hypotheses_tree_heigth + self.get_level_number())
+		if p>1.0 or p<0.0:
+			return True
+		'''
+		sub_hepotheses = len(self.get_data()[0]) * len(self.get_data()[1])
+		#/ len(self.get_data()[0])* len(self.get_data()[1]) or\
+		#  test_level/ (hypotheses_tree_heigth - self.get_level_number()+1) or\
+		#if self.get_adjusted_pvalue()  >  self.get_nominal_pvalue() / test_level * self.get_level_number()/ hypotheses_tree_heigth or\
+		if self.get_adjusted_pvalue()  > 1.0 - self.get_nominal_pvalue(): 
+			#(self.get_left_first_rep() > .9 and \
+			#self.get_right_first_rep()> .9)
+			print "bypass n", sub_hepotheses, "log ", math.log(sub_hepotheses, 2), " l ",self.get_level_number()," q", self.get_adjusted_pvalue()," p", self.get_nominal_pvalue() , self.get_nominal_pvalue() * sub_hepotheses / math.log(sub_hepotheses, 2)
 			return True
 		else:
 			return False
@@ -176,6 +191,10 @@ class Tree():
 		
 	def get_family_rank(self):
 		return self.family_rank
+	def set_level_number(self, level_number):
+		self.level_number = level_number
+	def get_level_number(self):
+		return self.level_number
 
 class Gardener():
 	"""
@@ -1077,7 +1096,7 @@ def _cutree (clusterNodelist):
 				sub_clusterNode += [node]
 		sub_clusters = sub_clusterNode
 		clusterNode = temp_apChildren
-	while len(sub_clusters) < round(math.log(n, 2)):
+	while len(sub_clusters) < round(math.log(n, 2) + .5):
 		max_dist_node = sub_clusters[0]
 		for i in range(len(sub_clusters)):
 			if max_dist_node.dist < sub_clusters[i].dist:
@@ -1160,10 +1179,10 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 	for a, b in itertools.product(apClusterNode1, apClusterNode2):
 		data1 = reduce_tree(a)
 		data2 = reduce_tree(b)
-
 	pStump = Tree([data1, data2])
+	pStump.set_level_number(0)
 	aOut.append(pStump)
-
+	
 	apChildren1 = _cutree (apClusterNode1)
 	apChildren2 = _cutree (apClusterNode2)
 	
@@ -1173,11 +1192,12 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 		data1 = reduce_tree(a)
 		data2 = reduce_tree(b)
 		tempTree = Tree(data=[data1, data2], left_distance=a.dist, right_distance=b.dist)
+		tempTree.set_level_number(1)
 		childList.append(tempTree)
 		L.append((tempTree, (a, b)))
 	pStump.add_children(childList)
-	
 	next_L = []
+	level_number = 2
 	while L:
 		
 		(pStump, (a, b)) = L.pop(0)
@@ -1212,6 +1232,7 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 			data1 = reduce_tree(a1)
 			data2 = reduce_tree(b1)
 			tempTree = Tree(data=[data1, data2], left_distance=a1.dist, right_distance=b1.dist)
+			tempTree.set_level_number(level_number)
 			childList.append(tempTree)
 			# print childList
 			# if len(data1) > 1 or len(data2) > 1:
@@ -1219,10 +1240,15 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 			# print L					
 		pStump.add_children(childList)
 		if not L:
-			# print "Next level of Coupling"
+			#print "Next level of Coupling", level_number
 			L = next_L
+			next_L = []
+			level_number += 1
 			# L.extend(childList)
 	# print "Coupled Tree", reduce_tree_by_layer(aOut)
+	global hypotheses_tree_heigth
+	hypotheses_tree_heigth = level_number
+	#print "level_number", level_number
 	return aOut
 		
 def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", method="permutation", metric="nmi", fQ=0.1,
@@ -1627,7 +1653,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 					max_r_t = pRank[i]
 					# print "max_r_t", max_r_t
 			for i in range(len(aP)):
-				if pRank[i] <= max_r_t and current_level_tests[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
+				if pRank[i] <= max_r_t and Current_Family_Children[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
 					number_passed_tests += 1
 					print "-- associations after fdr correction"
 					if bVerbose:
@@ -1747,6 +1773,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 		return aFinal, aOut
 
 	def _bh_level_testing():
+		q = fQ
 		apChildren = [pTree]
 		level = 1
 		number_performed_tests = 0 
@@ -1763,7 +1790,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 					current_level_tests[i].set_nominal_pvalue(_actor(current_level_tests[i]))
 				aP = [ current_level_tests[i].get_nominal_pvalue() for i in range(len(current_level_tests)) ]
 				# claculate adjusted p-value
-				aP_adjusted, pRank = stats.p_adjust(aP, fQ)
+				aP_adjusted, pRank = stats.p_adjust(aP, q)
 				for i in range(len(current_level_tests)):
 					current_level_tests[i].set_adjusted_pvalue(aP_adjusted[i])
 					current_level_tests[i].set_family_rank(pRank[i])
@@ -1788,7 +1815,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 						#print i, range(len(current_level_tests)), current_level_tests[i]
 						aOut.append(current_level_tests[i])
 						#if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-						if current_level_tests[i].is_bypass(test_level = math.log(len(current_level_tests[i].get_data()[0])* len(current_level_tests[i].get_data()[1]), 2)-1.0) :
+						if current_level_tests[i].is_bypass() :
 							if bVerbose:
 								print "Bypass, no hope to find an association in the branch with p-value: ", \
 						aP[i], " and ", len(current_level_tests[i].get_children()), \
@@ -1808,10 +1835,12 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 							print "Hypotheses testing level ", level, " is finished."
 						# number_performed_test += len(next_level_apChildren)
 				apChildren = next_level_apChildren
+				print "Hypotheses testing level ", level, " is finished."
 				level += 1
 				next_level_apChildren = []
 				current_level_tests = []
 				aP = []
+				#q = q - q*max_r_t/10.0
 
 		print "--- number of performed tests:", number_performed_tests
 		print "--- number of passed tests after FDR controlling:", number_passed_tests										
