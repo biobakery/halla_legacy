@@ -147,29 +147,26 @@ class Tree():
 	
 	def is_association(self, pvalue_threshold, pc_threshold, sim_threshold):
 		return True
-		'''if self.get_adjusted_pvalue() < pvalue_threshold and \
-			1.0 - self.get_left_distance() > .1 and \
+	
+		if 1.0 - self.get_left_distance() > .1 and \
 		    1.0 - self.get_right_distance() > .1 and \
 		    self.get_left_first_rep() > .2 and \
 		    self.get_right_first_rep()> .2:
 			return True
 		else:
 			return False
-			'''
+		
 	def is_bypass(self ):#
-		'''global hypotheses_tree_heigth
-		p = self.get_nominal_pvalue() * (hypotheses_tree_heigth + self.get_level_number())
-		if p>1.0 or p<0.0:
-			return True
-		'''
+		
+		return False
 		sub_hepotheses = len(self.get_data()[0]) * len(self.get_data()[1])
 		#/ len(self.get_data()[0])* len(self.get_data()[1]) or\
 		#  test_level/ (hypotheses_tree_heigth - self.get_level_number()+1) or\
 		#if self.get_adjusted_pvalue()  >  self.get_nominal_pvalue() / test_level * self.get_level_number()/ hypotheses_tree_heigth or\
-		if self.get_adjusted_pvalue()  > 1.0 - self.get_nominal_pvalue(): 
+		if self.get_adjusted_pvalue()  > 1.0 - self.get_nominal_pvalue() / self.get_level_number():# or\
 			#(self.get_left_first_rep() > .9 and \
-			#self.get_right_first_rep()> .9)
-			print "bypass n", sub_hepotheses, "log ", math.log(sub_hepotheses, 2), " l ",self.get_level_number()," q", self.get_adjusted_pvalue()," p", self.get_nominal_pvalue() , self.get_nominal_pvalue() * sub_hepotheses / math.log(sub_hepotheses, 2)
+			#self.get_right_first_rep()> .9):
+			print "bypass n", sub_hepotheses, "log ", math.log(sub_hepotheses, 2), " l ",self.get_level_number()," q", self.get_adjusted_pvalue()," p", self.get_nominal_pvalue()
 			return True
 		else:
 			return False
@@ -1001,7 +998,7 @@ def _is_start(ClusterNode, X, func, distance):
 def _is_stop(ClusterNode, dataSet, max_dist_cluster, threshold = None):
 		node_indeces = reduce_tree(ClusterNode)
 		first_PC = stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
-		if ClusterNode.is_leaf() or _percentage(ClusterNode.dist, max_dist_cluster) < .1 or first_PC > .9:
+		if len(node_indeces) ==1:#ClusterNode.is_leaf() or :# or _percentage(ClusterNode.dist, max_dist_cluster) < .1 or first_PC > .9:
 			#print "Node: ",node_indeces
 			#print "dist:", ClusterNode.dist, " first_PC:", first_PC,"\n"
 			return True
@@ -1087,6 +1084,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist):
 	clusterNode = clusterNodelist
 	n = clusterNode[0].get_count()
+	print "n: ", n
 	sub_clusters = []
 	while clusterNode :
 		temp_apChildren = []
@@ -1096,7 +1094,7 @@ def _cutree (clusterNodelist):
 				sub_clusterNode += [node]
 		sub_clusters = sub_clusterNode
 		clusterNode = temp_apChildren
-	while len(sub_clusters) < round(math.log(n, 2) + .5):
+	while len(sub_clusters) < round(math.log(n, 2) ):
 		max_dist_node = sub_clusters[0]
 		for i in range(len(sub_clusters)):
 			if max_dist_node.dist < sub_clusters[i].dist:
@@ -1107,6 +1105,7 @@ def _cutree (clusterNodelist):
 			sub_clusters.remove(max_dist_node)
 		else:
 			break
+	print "len of subcluster: ", len(sub_clusters)
 	return sub_clusters
 
 	
@@ -1185,7 +1184,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 	
 	apChildren1 = _cutree (apClusterNode1)
 	apChildren2 = _cutree (apClusterNode2)
-	
+	#print apChildren1
+	#print apChildren2
 	childList = []
 	L = []	
 	for a, b in itertools.product(apChildren1, apChildren2):
@@ -1196,39 +1196,44 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 		childList.append(tempTree)
 		L.append((tempTree, (a, b)))
 	pStump.add_children(childList)
+	#print "child list:", childList
 	next_L = []
 	level_number = 2
-	while L:
+	while len(L) > 0:
 		
-		(pStump, (a, b)) = L.pop(0)
-		
+		(tempNode, (a, b)) = L.pop(0)
+		#print "child list:", tempNode
+		#continue
 		data1 = reduce_tree(a)
 		data2 = reduce_tree(b)
 				
 		bTauX = _is_stop(a, X, max_dist_cluster1, threshold)  # ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
 		bTauY = _is_stop(b, Y, max_dist_cluster2, threshold)  # ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
-		if (bTauX == True) and (bTauY == True):
+		if bTauX and bTauY :
+			print"leaf both"
 			continue
-
-		apChildren1 = [a]
 		apChildren2 = [b]
 		if not bTauX:
 			apChildren1 = _cutree([a])  # _filter_true([a.left,a.right])
 			# print "Children 1: "#, apChildren1
 			# for node in apChildren1:
 				# print reduce_tree(node)
+		else:
+			apChildren1 = [a]
 		if not bTauY:
 			apChildren2 = _cutree([b])
+		else:
+			apChildren2 = [b]
 
 		# new_distance = numpy.mean([distance1, distance2])
-		LChild = [(a, b) for a, b in itertools.product(apChildren1, apChildren2)] 
+		#print apChildren1
+		#print apChildren2
+		LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren1, apChildren2)] 
 		# print "After appending", L 
 		childList = []
 		while LChild:
 			(a1, b1) = LChild.pop(0)
-			
 			# for a,b in itertools.product( apClusterNode1, apClusterNode2 ):
-	
 			data1 = reduce_tree(a1)
 			data2 = reduce_tree(b1)
 			tempTree = Tree(data=[data1, data2], left_distance=a1.dist, right_distance=b1.dist)
@@ -1236,15 +1241,18 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 			childList.append(tempTree)
 			# print childList
 			# if len(data1) > 1 or len(data2) > 1:
-			next_L.append((tempTree, (a1, b1)))
+			next_L.append((tempTree, ( a1, b1)))
 			# print L					
-		pStump.add_children(childList)
-		if not L:
-			#print "Next level of Coupling", level_number
+		tempNode.add_children(childList)
+		if len(L) == 0:
+			print "*****Next level of Coupling", level_number
 			L = next_L
-			next_L = []
+			
+			#next_L = []
+			print "len Next: ",len(next_L)
 			level_number += 1
-			# L.extend(childList)
+			#L.extend(next_L)
+			print "len: ",len(L)
 	# print "Coupled Tree", reduce_tree_by_layer(aOut)
 	global hypotheses_tree_heigth
 	hypotheses_tree_heigth = level_number
@@ -1666,7 +1674,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 					#aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
 					aOut.append(Current_Family_Children[i])
 					#if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-					if Current_Family_Children[i].is_bypass(test_level = math.log(len(Current_Family_Children[i].get_data()[0])* len(Current_Family_Children[i].get_data()[1]), 2)) :
+					if Current_Family_Children[i].is_bypass() :
 						if bVerbose:
 							print "Bypass, no hope to find an association in the branch with p-value: ", \
 					aP[i], " and ", len(Current_Family_Children[i].get_children()), \
@@ -1742,7 +1750,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 						#print i, range(len(current_level_tests)), current_level_tests[i]
 						aOut.append(all_performed_tests[i])
 						#if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-						if all_performed_tests[i].is_bypass(test_level = math.log(len(all_performed_tests[i].get_data()[0])* len(all_performed_tests[i].get_data()[1]), 2)) :
+						if all_performed_tests[i].is_bypass() :
 							if bVerbose:
 								print "Bypass, no hope to find an association in the branch with p-value: ", \
 						aP[i], " and ", len(all_performed_tests[i].get_children()), \
