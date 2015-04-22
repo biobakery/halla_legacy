@@ -146,7 +146,7 @@ class Tree():
 		return self.adjusted_pvalue
 	
 	def is_association(self, pvalue_threshold, pc_threshold, sim_threshold):
-		return True
+		#return True
 	
 		if 1.0 - self.get_left_distance() > .1 and \
 		    1.0 - self.get_right_distance() > .1 and \
@@ -158,7 +158,7 @@ class Tree():
 		
 	def is_bypass(self ):#
 		
-		return False
+		#return False
 		sub_hepotheses = len(self.get_data()[0]) * len(self.get_data()[1])
 		#/ len(self.get_data()[0])* len(self.get_data()[1]) or\
 		#  test_level/ (hypotheses_tree_heigth - self.get_level_number()+1) or\
@@ -1199,9 +1199,9 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 	#print "child list:", childList
 	next_L = []
 	level_number = 2
-	while len(L) > 0:
+	while L:
 		
-		(tempNode, (a, b)) = L.pop(0)
+		(pStump, (a, b)) = L.pop(0)
 		#print "child list:", tempNode
 		#continue
 		data1 = reduce_tree(a)
@@ -1214,10 +1214,7 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 			continue
 		apChildren2 = [b]
 		if not bTauX:
-			apChildren1 = _cutree([a])  # _filter_true([a.left,a.right])
-			# print "Children 1: "#, apChildren1
-			# for node in apChildren1:
-				# print reduce_tree(node)
+			apChildren1 = _cutree([a])  
 		else:
 			apChildren1 = [a]
 		if not bTauY:
@@ -1243,8 +1240,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 			# if len(data1) > 1 or len(data2) > 1:
 			next_L.append((tempTree, ( a1, b1)))
 			# print L					
-		tempNode.add_children(childList)
-		if len(L) == 0:
+		pStump.add_children(childList)
+		if not L:
 			print "*****Next level of Coupling", level_number
 			L = next_L
 			
@@ -1252,7 +1249,9 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 			print "len Next: ",len(next_L)
 			level_number += 1
 			#L.extend(next_L)
-			print "len: ",len(L)
+			#next_L = []
+			print "******************len: ",len(L)
+			print "******************len: ",len(next_L)
 	# print "Coupled Tree", reduce_tree_by_layer(aOut)
 	global hypotheses_tree_heigth
 	hypotheses_tree_heigth = level_number
@@ -1692,7 +1691,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 					
 			if not apChildren:
 				if bVerbose:
-					print "Hypotheses testing level ", level, " is finished."
+					print "Family Hypotheses testing at level ", level, " is finished."
+				print "Family hypotheses testing at level ", level, " is finished."
 				# number_performed_test += len(next_level_apChildren)
 				apChildren = next_level_apChildren
 				level += 1
