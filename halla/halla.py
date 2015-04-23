@@ -51,6 +51,7 @@ except ImportError:
         " Please check your halla install.") 
 
 from . import parser
+from . import hierarchy
 
 def get_halla_base_directory():
     """ 
@@ -217,6 +218,12 @@ def parse_arguments (args):
         "--header",
         action="store_true",
         help="the input files contain a header line") 
+    
+    argp.add_argument(
+        "--nproc", metavar="<1>",
+        type=int,
+        default=1,
+        help="the number of processing units available\n[default = 1]")
 
     return argp.parse_args()
 
@@ -257,6 +264,10 @@ def _main():
     # Parse arguments from command line
     args=parse_arguments(sys.argv)
     check_requirements(args)
+    
+    # Set the number of processing units available
+    hierarchy.NPROC = args.nproc
+    
     H = store.HAllA(X = None, Y = None)
     set_HAllA_object(H, args)         
     aaOut = H.run()	
