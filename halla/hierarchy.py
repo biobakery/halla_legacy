@@ -18,6 +18,57 @@ import numpy as np
 from . import distance
 from . import stats
 from . import plot
+
+# number of available processors
+NPROC = 1
+
+def multi_pMethod(args):
+    """
+    Runs the pMethod function and returns the results plus the id of the node
+    """
+	
+    id, pMethod, pArray1, pArray2, metric, decomposition, iIter = args
+	
+    dP, similarity, left_first_rep, right_first_rep = pMethod(pArray1, pArray2,  metric = metric, decomposition = decomposition, iIter=iIter)
+
+    return id, dP, similarity, left_first_rep, right_first_rep
+
+def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter):
+    """
+    Return the results from applying the data to the actor function
+    """
+	
+    def _multi_pMethod_args(current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter):
+        for i in xrange(len(current_level_tests)):
+        	aIndicies = current_level_tests[i].get_data()
+        	aIndiciesMapped = map(array, aIndicies)
+        	yield [i, pMethod, pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], metric, decomposition, iIter]
+	
+    if NPROC > 1:
+        import multiprocessing
+    	
+        pool = multiprocessing.Pool(NPROC)
+	    
+        results_by_id = pool.map(multi_pMethod, _multi_pMethod_args(current_level_tests, 
+            pMethod, pArray1, pArray2, metric, decomposition, iIter))
+        pool.close()
+        pool.join()
+        
+        # order the results by id and apply results to nodes
+        result = [0] * len(results_by_id)
+        for id, dP, similarity, left_first_rep, right_first_rep in results_by_id:
+        	result[id]=dP
+        	current_level_tests[id].set_similarity_score(similarity)
+        	current_level_tests[id].set_left_first_rep(left_first_rep)
+        	current_level_tests[id].set_right_first_rep(right_first_rep)
+    
+    else:
+        result=[]
+        for i in xrange(len(current_level_tests)):
+            result.append(_actor(current_level_tests[i]))
+
+    return result
+
 from unicodedata import decomposition
 
 # # statistics packages 
@@ -1789,8 +1840,12 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 				continue
 			else:
 				number_performed_tests += len(current_level_tests)
+
+				p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter)
+				
 				for i in range(len(current_level_tests)):
-					current_level_tests[i].set_nominal_pvalue(_actor(current_level_tests[i]))
+					current_level_tests[i].set_nominal_pvalue(p_values[i])
+					
 				aP = [ current_level_tests[i].get_nominal_pvalue() for i in range(len(current_level_tests)) ]
 				# claculate adjusted p-value
 				aP_adjusted, pRank = stats.p_adjust(aP, q)
@@ -1923,10 +1978,10 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 	def _actor(pNode):
 		"""
 		Performs a certain action at the node
-
+		
 			* E.g. compares two bags, reports distance and p-values 
 		"""
-
+	
 		aIndicies = pNode.get_data() 
 		aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays
 		dP, similarity, left_first_rep, right_first_rep = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
@@ -1938,6 +1993,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
 		# aOut.append( [aIndicies, dP] ) #### dP needs to appended AFTER multiple hypothesis correction
 
 		return dP 
+	
 
 	fdr_function = {"default": _bh_family_testing,
 							"BHF": _bh_family_testing,
