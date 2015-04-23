@@ -166,7 +166,7 @@ class Tree():
 		if self.get_adjusted_pvalue()  > 1.0 - self.get_nominal_pvalue():#/ sub_hepotheses * (hypotheses_tree_heigth -self.get_level_number() +1):#/ self.get_level_number():# or\
 			#(self.get_left_first_rep() > .9 and \
 			#self.get_right_first_rep()> .9):
-			#print "bypass "#, sub_hepotheses, "log ", math.log(sub_hepotheses, 2), " l ",self.get_level_number()," q", self.get_adjusted_pvalue()," p", self.get_nominal_pvalue()
+			print "bypass "#, sub_hepotheses, "log ", math.log(sub_hepotheses, 2), " l ",self.get_level_number()," q", self.get_adjusted_pvalue()," p", self.get_nominal_pvalue()
 			return True
 		else:
 			return False
