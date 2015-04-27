@@ -376,8 +376,8 @@ class HAllA():
         
         Z = self.meta_alla 
         _final, _all = map(array, Z)  # # Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree
-        Z_final = array([[_final[i].get_data(), _final[i].get_nominal_pvalue(), _final[i].get_adjusted_pvalue()] for i in range(len(_final))])
-        Z_all = array([[_all[i].get_data(), _all[i].get_nominal_pvalue(), _all[i].get_adjusted_pvalue()] for i in range(len(_all))])    
+        Z_final = array([[_final[i].get_data(), _final[i].get_pvalue(), _final[i].get_qvalue()] for i in range(len(_final))])
+        Z_all = array([[_all[i].get_data(), _all[i].get_pvalue(), _all[i].get_qvalue()] for i in range(len(_all))])    
             
         # ## Sort the final Z to make sure p-value consolidation happens correctly 
         Z_final_dummy = [-1.0 * (len(line[0][0]) + len(line[0][1])) for line in Z_final]
@@ -525,7 +525,7 @@ class HAllA():
             #bcsvw.writerow(["Method: " + self.decomposition +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
             bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the First PC of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
     
-            sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.nominal_pvalue)
+            sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.pvalue)
             for association in sorted_associations:
                 association_number += 1
                 iX, iY = association.get_data()
@@ -533,8 +533,8 @@ class HAllA():
                 associated_feature_X_indecies += iX
                 global associated_feature_Y_indecies
                 associated_feature_Y_indecies += iY
-                fP = association.get_nominal_pvalue()
-                fP_adjust = association.get_adjusted_pvalue()
+                fP = association.get_pvalue()
+                fP_adjust = association.get_qvalue()
                 clusterX_similarity = 1.0 - association.get_left_distance()
                 clusterX_first_rep = association.get_left_first_rep()
                 clusterY_similarity = 1.0 - association.get_right_distance()
