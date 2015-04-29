@@ -257,7 +257,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     fig.savefig(filename + '.pdf')
     pylab.close()
         
-def heatmap(Data, xlabels_order = [], xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True, color_bar = False):
+def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True, color_bar = False):
     import scipy
     import pylab
     # import dot_parser
@@ -289,7 +289,10 @@ def heatmap(Data, xlabels_order = [], xlabels = None, filename='./hierarchical_h
     # Compute and plot first dendrogram.
     fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(pArray[0])/5.0)),(math.ceil(len(pArray)/5.0))))
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)
-    Y1 = sch.linkage(pArray, metric=pDistance, method=method)
+    if len(D) > 0:
+        Y1 = sch.linkage(D, metric=pDistance, method=method)
+    else:
+        Y1 = sch.linkage(pArray, metric=pDistance, method=method)
     if len(Y1) > 1:
         Z1 = sch.dendrogram(Y1, orientation='right')#, labels= xlabels)
     ax1.set_xticks([])

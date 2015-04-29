@@ -575,10 +575,10 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
     def pDistance(x, y):
         return  1.0 - pMetric(x, y)
 
-    D = pdist(pArray, metric=pDistance)
+    
     # print "Distance",D
     #plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
-    
+    D = pdist(pArray, metric=pDistance)
     if plotting_result:
         global fig_num
         print "--- plotting heatmap for Dataset", str(fig_num)," ... "
@@ -589,10 +589,11 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
         #    scipy.cluster.hierarchy.dendrogram(Z)
         #plt.gcf()
         #global fig_num
-        Z = plot.heatmap(pArray, xlabels = labels, filename= output_dir+"/hierarchical_heatmap_" + str(fig_num))
+        Z = plot.heatmap(pArray, D, xlabels = labels, filename= output_dir+"/hierarchical_heatmap_" + str(fig_num))
         #plt.savefig(output_dir+"/Dendrogram1_" + str(fig_num) + ".pdf")
         fig_num += 1
     else:
+        
         Z = linkage(D, metric=pDistance, method= "single")
         #plt.close("all")
     # print "Linkage Matrix:", Z

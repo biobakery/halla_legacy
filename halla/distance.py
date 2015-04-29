@@ -191,7 +191,7 @@ def mi(pData1, pData2):
 	(3, 3) 0.311278124459
 	"""
 
-	return MutualInformation(pData1, pData2).get_distance()
+	return math.log(math.e, 2) * mutual_info_score(pData1, pData2)#return MutualInformation(pData1, pData2).get_distance()
 
 def nmi(pData1, pData2):
 	"""
@@ -225,7 +225,7 @@ def nmi(pData1, pData2):
 
 	"""
 
-	return NormalizedMutualInformation(pData1, pData2).get_distance() 
+	return normalized_mutual_info_score(pData1, pData2) #return NormalizedMutualInformation(pData1, pData2).get_distance() 
 
 def ami(pData1, pData2):
 	""" 
@@ -259,7 +259,7 @@ def ami(pData1, pData2):
 
 	"""
 
-	return AdjustedMutualInformation(pData1, pData2).get_distance()
+	return adjusted_mutual_info_score(pData1, pData2) #return AdjustedMutualInformation(pData1, pData2).get_distance()
 
 # ## Changeset March 11, 2014
 # ## NB: As a general rule, always use notion of "strength" of association; i.e. 0 for non-associated and 1 for strongly associated 
