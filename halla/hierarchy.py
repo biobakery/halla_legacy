@@ -203,7 +203,7 @@ class Tree():
     def get_qvalue(self):
         return self.qvalue
     
-    def is_association(self, pvalue_threshold, pc_threshold, sim_threshold):
+    def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold):
         #return True
     
         if (1.0 - self.get_left_distance() >= .25 or self.get_left_first_rep() >= .35) and \
@@ -246,7 +246,7 @@ class Tree():
     def get_rank(self):
         return self.rank
     
-    #def is_association(self):
+    #def is_qualified_association(self):
     #    return self.significance
     
     #def set_significance_status(self):
@@ -1673,7 +1673,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 Current_Family_Children[i].set_pvalue(_actor(Current_Family_Children[i]))
             
                 aOut.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_pvalue(), Current_Family_Children[i].get_pvalue()])
-                if Current_Family_Children[i].is_association(pvalue_threshold = fQ, pc_threshold = afThreshold , sim_threshold = afThreshold):
+                if Current_Family_Children[i].is_qualified_association(pvalue_threshold = fQ, pc_threshold = afThreshold , sim_threshold = afThreshold):
                     Current_Family_Children[i].report()
                     number_passed_tests += 1
                     aFinal.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_pvalue(), Current_Family_Children[i].get_pvalue()])
@@ -1727,7 +1727,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                     max_r_t = pRank[i]
                     # print "max_r_t", max_r_t
             for i in range(len(aP)):
-                if pRank[i] <= max_r_t and Current_Family_Children[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
+                if pRank[i] <= max_r_t and Current_Family_Children[i].is_qualified_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
                     number_passed_tests += 1
                     print "-- associations after fdr correction"
                     if bVerbose:
@@ -1917,7 +1917,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 for i in range(len(current_level_tests)):
                     if current_level_tests[i].get_significance_status() == None and\
                     current_level_tests[i].get_rank() <= max_r_t and\
-                    current_level_tests[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
+                    current_level_tests[i].is_qualified_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
                         number_passed_tests += 1
                         if bVerbose:
                             current_level_tests[i].report()
@@ -2017,7 +2017,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
             for i in range(len(aP)):
                 # print "NMI", Current_Family_Children[i].get_similarity_score()
                 performed_tests.append([Current_Family_Children[i], float(aP[i])])    
-                if Current_Family_Children[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
+                if Current_Family_Children[i].is_qualified_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
                     Current_Family_Children[i].report()
                     end_level_tests.append([Current_Family_Children[i], float(aP[i])])
                     round1_passed_tests.append([Current_Family_Children[i], float(aP[i])])
