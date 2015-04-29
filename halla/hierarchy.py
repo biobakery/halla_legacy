@@ -206,8 +206,8 @@ class Tree():
     def is_association(self, pvalue_threshold, pc_threshold, sim_threshold):
         #return True
     
-        if (1.0 - self.get_left_distance() >= .2 and self.get_left_first_rep() >= .3) and \
-            (1.0 - self.get_right_distance() >= .2 and self.get_right_first_rep() >= .3) :
+        if (1.0 - self.get_left_distance() >= .25 or self.get_left_first_rep() >= .35) and \
+            (1.0 - self.get_right_distance() >= .25 or self.get_right_first_rep() >= .35) :
             return True
         else:
             return False
