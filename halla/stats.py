@@ -101,7 +101,9 @@ def pca(pArray, iComponents=1):
 		# # doing this matrix inversion twice doesn't seem to be a good idea 
 		# print"PCA:",   pPCA.fit_transform( pArray.T ).T 
 		# print "End PCA"
-		return pPCA.fit_transform(pArray.T).T
+		pcs = pPCA.fit_transform(pArray.T).T
+		#print "Loading:", pPCA.components_
+		return pcs
 
 	 except ValueError:
 	 	iRow = pArray.shape
@@ -476,7 +478,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 
 		# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	
-	fPercentile = percentileofscore(aDist, fAssociation, kind="mean")  # #source: Good 2000  
+	fPercentile = percentileofscore(aDist, fAssociation, kind = 'strict')#, kind="mean")  # #source: Good 2000  
 	# ## \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
 	# ## k number of iterations, \hat{X} is randomized version of X 
 	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 

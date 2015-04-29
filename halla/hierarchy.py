@@ -204,12 +204,10 @@ class Tree():
         return self.qvalue
     
     def is_association(self, pvalue_threshold, pc_threshold, sim_threshold):
-        return True
+        #return True
     
-        if 1.0 - self.get_left_distance() > .1 and \
-            1.0 - self.get_right_distance() > .1 and \
-            self.get_left_first_rep() > .2 and \
-            self.get_right_first_rep()> .2:
+        if (1.0 - self.get_left_distance() >= .2 and self.get_left_first_rep() >= .3) and \
+            (1.0 - self.get_right_distance() >= .2 and self.get_right_first_rep() >= .3) :
             return True
         else:
             return False
@@ -221,9 +219,10 @@ class Tree():
         #/ len(self.get_data()[0])* len(self.get_data()[1]) or\
         #  test_level/ (hypotheses_tree_heigth - self.get_level_number()+1) or\
         #if self.get_qvalue()  >  self.get_pvalue() / test_level * self.get_level_number()/ hypotheses_tree_heigth or\
-        if self.get_qvalue()  > 1.0 - self.get_pvalue():#/ sub_hepotheses * (hypotheses_tree_heigth -self.get_level_number() +1):#/ self.get_level_number():# or\
-            #(self.get_left_first_rep() > .9 and \
-            #self.get_right_first_rep()> .9):
+        #/ sub_hepotheses * (hypotheses_tree_heigth -self.get_level_number() +1):#/ self.get_level_number():#
+        if self.get_qvalue()  > 1.0 - self.get_pvalue() or\
+            (self.get_left_first_rep() > .6 and \
+            self.get_right_first_rep()> .6):
             print "bypass "#, sub_hepotheses, "log ", math.log(sub_hepotheses, 2), " l ",self.get_level_number()," q", self.get_qvalue()," p", self.get_pvalue()
             return True
         else:
@@ -1153,9 +1152,10 @@ def _cutree_overall (clusterNodelist, X, func, distance):
         next_dist = _percentage(numpy.min(aDist))
     # print len(sub_clusters), n            
     return sub_clusters , next_dist
-def _cutree (clusterNodelist):
+def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
+    number_of_sub_cluters_threshold = round(math.log(n, 2))#* 2 #if first else round(math.log(n, 2)) 
     #print "n: ", n
     sub_clusters = []
     while clusterNode :
@@ -1166,7 +1166,7 @@ def _cutree (clusterNodelist):
                 sub_clusterNode += [node]
         sub_clusters = sub_clusterNode
         clusterNode = temp_apChildren
-    while len(sub_clusters) < round(math.log(n, 2) ):
+    while len(sub_clusters) < number_of_sub_cluters_threshold:
         max_dist_node = sub_clusters[0]
         for i in range(len(sub_clusters)):
             if max_dist_node.dist < sub_clusters[i].dist:
@@ -1254,8 +1254,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     pStump.set_level_number(0)
     aOut.append(pStump)
     
-    apChildren1 = _cutree (apClusterNode1)
-    apChildren2 = _cutree (apClusterNode2)
+    apChildren1 = _cutree (apClusterNode1, first = True)
+    apChildren2 = _cutree (apClusterNode2, first =  True)
     #print apChildren1
     #print apChildren2
     childList = []
@@ -1850,12 +1850,18 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
     def _bh_level_testing():
         q = fQ
         apChildren = [pTree]
+        n1 = len(pTree.get_data()[0])
+        n2 = len(pTree.get_data()[1])
+        n1 = n1/math.log(n1,2)
+        n2 = n2/math.log(n2,2)
         level = 1
         number_performed_tests = 0 
         number_passed_tests = 0
         next_level_apChildren = []
         current_level_tests = []
+        #temp_current_level_tests = []
         leaves_hypotheses = []
+        #previous_unqualified_hypotheses = []
         while apChildren:
             temp_hypothesis = apChildren.pop(0)
             #if temp_hypothesis.get_children():
@@ -1867,12 +1873,25 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                     temp_sub_hypotheses[i].set_significance_status(temp_hypothesis.get_significance_status())
                     temp_sub_hypotheses[i].set_pvalue(temp_hypothesis.get_pvalue()) 
                     temp_sub_hypotheses[i].set_qvalue(temp_hypothesis.get_qvalue())
+            else:
+                number_performed_tests += len(temp_sub_hypotheses)
+            #temp_current_level_tests.extend(temp_sub_hypotheses)
             current_level_tests.extend(temp_sub_hypotheses)
             if len (apChildren) > 0:
                 continue
-            elif len(current_level_tests) > 0 :
-                number_performed_tests += len(current_level_tests)
-                current_level_tests.extend(leaves_hypotheses)
+            '''             
+            current_level_tests.extend(previous_unqualified_hypotheses)
+            previous_unqualified_hypotheses = []
+            for i in range(len(temp_current_level_tests)):
+                if len(temp_current_level_tests[i].get_data()[0]) >= n1/2 and len(temp_current_level_tests[i].get_data()[1]) >= n2/2:
+                    current_level_tests.append(temp_current_level_tests[i]) 
+                else:
+                    previous_unqualified_hypotheses.append(temp_current_level_tests[i])
+             '''   
+            if len(current_level_tests) > 0 :
+                #number_performed_tests += len(current_level_tests)
+                #if n1 < 2 and n2 < 2:
+                #current_level_tests.extend(leaves_hypotheses)
                 print "number of hypotheses in level:", len(current_level_tests)
                 #if not len(current_level_tests):
                 #    continue
@@ -1880,13 +1899,14 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 
                 for i in range(len(current_level_tests)):
                     current_level_tests[i].set_pvalue(p_values[i])
+                    #print "Pvalue", i, " :", p_values[i]
                     
                 aP = [ current_level_tests[i].get_pvalue() for i in range(len(current_level_tests)) ]
                 # claculate adjusted p-value
-                aP_adjusted, pRank = stats.p_adjust(aP, fQ)
+                aP_adjusted, pRank = stats.p_adjust(aP, q)
                 for i in range(len(current_level_tests)):
-                    #if current_level_tests[i].get_qvalue() == None:
-                    current_level_tests[i].set_qvalue(aP_adjusted[i])
+                    if current_level_tests[i].get_qvalue() == None:
+                        current_level_tests[i].set_qvalue(aP_adjusted[i])
                     current_level_tests[i].set_rank(pRank[i])
 
                 max_r_t = 0
@@ -1895,8 +1915,9 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                         max_r_t = current_level_tests[i].get_rank()
                         #print "max_r_t", max_r_t
                 for i in range(len(current_level_tests)):
-                    if current_level_tests[i].get_rank() <= max_r_t and\
-                    current_level_tests[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ) and current_level_tests[i].get_significance_status() == None:
+                    if current_level_tests[i].get_significance_status() == None and\
+                    current_level_tests[i].get_rank() <= max_r_t and\
+                    current_level_tests[i].is_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
                         number_passed_tests += 1
                         if bVerbose:
                             current_level_tests[i].report()
@@ -1904,41 +1925,73 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                         current_level_tests[i].set_significance_status(True)
                         aOut.append(current_level_tests[i])
                         aFinal.append(current_level_tests[i])
-                        next_level_apChildren.append(current_level_tests[i])
+                        #next_level_apChildren.append(current_level_tests[i])
                     else:
-                        if current_level_tests[i].is_bypass() and current_level_tests[i].get_significance_status() == None:
-                            if current_level_tests[i].significance == None:
-                                current_level_tests[i].set_significance_status(False)
+                        if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():# and current_level_tests[i].get_significance_status() == None:
+                            current_level_tests[i].set_significance_status(False)
                             aOut.append(current_level_tests[i])
                             if bVerbose:
                                 print "Bypass, no hope to find an association in the branch with p-value: ", \
                         aP[i], " and ", len(current_level_tests[i].get_children()), \
                          " sub-hypotheses.", current_level_tests[i].get_data()[0], \
                           "   ", current_level_tests[i].get_data()[1]
+                            #next_level_apChildren.append(current_level_tests[i])
                             
                         elif current_level_tests[i].is_leaf():
                             if bVerbose:
                                 print "End of branch, leaf!"
-                            next_level_apChildren.append(current_level_tests[i])
+                            #next_level_apChildren.append(current_level_tests[i])
+                            if current_level_tests[i].get_significance_status() == None:
+                                current_level_tests[i].set_significance_status(False)
+                                aOut.append(current_level_tests[i])
+                            
                         else:
                             if bVerbose:
                                 print "Gray area with p-value:", aP[i]
-                            next_level_apChildren.append(current_level_tests[i])
+                            #next_level_apChildren.append(current_level_tests[i])
                         
                         if bVerbose:
                             print "Hypotheses testing level ", level, " is finished."                        
                             
-            apChildren = next_level_apChildren #current_level_tests
+            apChildren = current_level_tests #next_level_apChildren #
             print "Hypotheses testing level ", level, "with ",len(current_level_tests), "hypotheses is finished."
             level += 1
+            #q = fQ - fQ*max_r_t/100.0
+            if len(current_level_tests)>0:
+                #q = fQ - fQ*max_r_t/len(current_level_tests)
+                print "Next level q:", q
+                last_current_level_tests = current_level_tests
             next_level_apChildren = []
             current_level_tests = []
+            #temp_current_level_tests = []
+            last_current_level_tests = leaves_hypotheses
             leaves_hypotheses = []
             aP = []
-                #q = q - q*max_r_t/10.0
+            #return aFinal, aOut
+            #n1 = n1 /math.log(n1,2) if n1 > 2 else 1
+            #n2 = n2 /math.log(n2, 2) if n2 > 2 else 1
+            #q = fQ - fQ*max_r_t/100.0 
 
         print "--- number of performed tests:", number_performed_tests
-        print "--- number of passed tests after FDR controlling:", number_passed_tests                                        
+        print "--- number of passed tests after FDR controlling:", number_passed_tests 
+        '''aFinal1= []
+        aOut1=[]
+        aP = [ last_current_level_tests[i].get_pvalue() for i in range(len(last_current_level_tests)) ]
+                # claculate adjusted p-value
+        aP_adjusted, pRank = stats.p_adjust(aP, q)
+        max_r_t = 0
+        for i in range(len(last_current_level_tests)):
+            if last_current_level_tests[i].get_pvalue() <= aP_adjusted[i] and\
+             max_r_t <= pRank[i]:
+                max_r_t = pRank[i]
+                #print "max_r_t", max_r_t
+        for i in range(len(last_current_level_tests)):
+            if pRank[i] <= max_r_t:
+                aOut1.append(last_current_level_tests[i])
+                aFinal1.append(last_current_level_tests[i])
+            else:
+                aOut1.append(last_current_level_tests[i])
+        '''                                  
         return aFinal, aOut
     
     def _rh_hypothesis_testing():
