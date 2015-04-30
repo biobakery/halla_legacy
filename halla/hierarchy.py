@@ -589,7 +589,7 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
         #    scipy.cluster.hierarchy.dendrogram(Z)
         #plt.gcf()
         #global fig_num
-        Z = plot.heatmap(pArray, D, xlabels = labels, filename= output_dir+"/hierarchical_heatmap_" + str(fig_num))
+        Z = plot.heatmap(pArray, D, xlabels_order = [], xlabels = labels, filename= output_dir+"/hierarchical_heatmap_" + str(fig_num))
         #plt.savefig(output_dir+"/Dendrogram1_" + str(fig_num) + ".pdf")
         fig_num += 1
     else:

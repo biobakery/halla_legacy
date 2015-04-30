@@ -48,7 +48,7 @@ class HAllA():
         self.randomization_method = "permutation"  # method to generate error bars 
         self.strStep = "uniform"
         self.verbose = False
-        self.descending = True 
+        self.descending = "HAllA" 
             
         self.summary_method = "final"
         self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
