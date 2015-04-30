@@ -153,9 +153,11 @@ def parse_arguments (args):
          help="threshold for similarity to count a cluster as one unit and not consider sub-clusters as sub-unit\n[default = 0.01]")    
     
     argp.add_argument(
-        "--descending",
-        help="hierarchical descending\n[default = all-against-all]", 
-        action="store_true")
+        "-a","--descending",
+        dest="strDescending",
+        default = "HAllA",
+        choices=["HAllA","AllA"],
+        help="descending approach\n[default = HAllA for hierarchical all-against-all]")
     
     argp.add_argument(
         "-f","--fdr",
@@ -179,7 +181,7 @@ def parse_arguments (args):
         help="metric to be used for similarity measurement\n[default = nmi]")
     
     argp.add_argument(
-        "--decomposition",
+        "-d","--decomposition",
         dest="strDecomposition",
         default="pca",
         choices=["pca","cca","kpca","pls"],
@@ -240,6 +242,7 @@ def set_HAllA_object (H, args):
     H.threshold = args.dThreshold_similiarity
     H.output_dir = args.output_dir
     H.plotting_results = args.plotting_results
+    H.descending = args.strDescending
     istm = list()  # X and Y are used to store datasets
     
     # If Y was not set - we use X

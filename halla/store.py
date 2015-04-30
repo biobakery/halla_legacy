@@ -935,14 +935,14 @@ class HAllA():
         else:
             self.meta_feature = self.meta_array
         #plot.heatmap2(pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], xlabels =self.aOutName1, ylabels = self.aOutName2, filename = str(self.output_dir)+'/heatmap2_all' )
-        if not self.descending:
+        if self.descending == "AllA":
             print("--- association hypotheses testing is started, this task may take longer ...")
             start_time = time.time()
             self._naive_all_against_all()
             excution_time_temp = time.time() - start_time
             csvw.writerow(["Hypotheses testing time", excution_time_temp ])
             print("--- %s seconds: hypotheses testing time ---" % excution_time_temp)
-        else:
+        elif self.descending == "HAllA":
             # hierarchical clustering 
             start_time = time.time()
             self._hclust()
