@@ -20,7 +20,6 @@ from sklearn.metrics import roc_curve, auc
 from sklearn import manifold
 from . import distance
 
-
 # External dependencies 
 # from scipy.stats import percentileofscore
 # ML plug-in 
@@ -103,7 +102,43 @@ def pca(pArray, iComponents=1):
 		# print "End PCA"
 		pcs = pPCA.fit_transform(pArray.T).T
 		#print "Loading:", pPCA.components_
-		return pcs
+		return (pcs[0], pPCA.explained_variance_ratio_[0])
+
+	 except ValueError:
+	 	iRow = pArray.shape
+	 	iCol = None 
+
+	 	return pArray
+def nlpca(pArray, iComponents=1):
+	 """
+	 Input: N x D matrix 
+	 Output: D x N matrix 
+
+	 """
+	 from sklearn.decomposition import PCA
+	 #print "pArray:", pArray
+	 _, number_sample = pArray.shape
+	 t = int(number_sample/math.sqrt(number_sample))
+	 s = int(number_sample/t)
+	 #print t
+	 first_pc = []	
+	 try:
+	 	for i in range (t):
+		 	#print pArray.shape 
+		 	pPCA = PCA(n_components=iComponents)
+			# # doing this matrix inversion twice doesn't seem to be a good idea 
+			# print"PCA:",   pPCA.fit_transform( pArray.T ).T 
+			# print "End PCA"
+			sub_pArray = pArray[:, s*i:s*(i+1)-1]
+			#print sub_pArray.shape
+			sub_pc = pPCA.fit_transform(sub_pArray.T).T
+			#print "sub_pc", sub_pc
+			first_pc.extend(sub_pc[0])#map(math.fabs, sub_pc[0]))
+			#print "first PC", i,": ",len(first_pc)
+			
+			#print "Loading:", pPCA.components_
+		#print "first PC shape", i,": ",len(first_pc)
+		return array([first_pc])
 
 	 except ValueError:
 	 	iRow = pArray.shape
@@ -235,6 +270,13 @@ def kernel_cca():
 def kernel_cca_score():
 	pass 
 
+c_hash_decomposition = {"pca"    : pca,
+						"nlpca"    : nlpca,
+                        "ica"    : ica,
+                        "cca"	 : cca,
+                        "pls"	 : pls,
+                        "kpca"   : kpca,
+                        "average": None }
 def get_medoid(pArray, iAxis=0, pMetric=distance.l2):
 	"""
 	Input: numpy array 
@@ -259,7 +301,7 @@ def get_medoid(pArray, iAxis=0, pMetric=distance.l2):
 
 
 def get_representative(pArray, pMethod=None):
-	hash_method = {None: get_medoid, "pca": pca, "ica": ica }
+	hash_method = c_hash_decomposition
 	return hash_method[pMethod](pArray)
 
 
@@ -392,7 +434,7 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 	# numpy.random.seed(0)
 
 	strMetric = metric 
-	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
+	pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
 	
 	def _permutation(pVec):
@@ -431,15 +473,13 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	Input: 
 	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 1000
 
-	metric = {pca": pca} 
 	"""
 	# numpy.random.seed(0)
 	# return g_test_by_representative( pArray1, pArray2, metric = "nmi", decomposition = "pca", iIter = 1000 )
 	X, Y = pArray1, pArray2 
-
 	strMetric = metric 
 	# step 5 in a case of new decomposition method
-	pHashDecomposition = {'pls':pls, 'cca':cca, "pca": pca, "kpca": kpca, "ica":ica, "mds":mds }
+	pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
 	
 	def _permutation(pVec):
@@ -448,19 +488,26 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	pDe = pHashDecomposition[decomposition]
 	pMe = pHashMetric[strMetric] 
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function
-	
 	aDist = [] 
 	left_rep = 1.0
 	right_rep = 1.0
-	#### Calculate Point estimate 
-	if decomposition in ['pls', 'cca']:
+	#### Calculate Point estimate
+	if decomposition =='pca':
+		[(pRep1, left_rep) , (pRep2, right_rep)] = [pDe(pA) for pA in [pArray1, pArray2]]
+		if bool(distance.c_hash_association_method_discretize[strMetric]):
+			[pRep1, pRep2] = [discretize(pA) for pA in [pRep1, pRep2] ]		 
+	elif decomposition in ['pls', 'cca']:
 		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
+		#print "1:", pRep1
+		#print "2:", pRep2
 	else:
 		[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 		#print "1:", pRep1
 		#print "2:", pRep2
-		left_rep = first_rep(pArray1, decomposition)
-		right_rep = first_rep(pArray2, decomposition)
+		#if decomposition == 'nlpca':
+		#	left_rep = first_rep(pArray1, decomposition)
+		#	right_rep = first_rep(pArray2, decomposition)
+	#print left_rep
 	fAssociation = pMe(pRep1, pRep2) 
 	# print left_rep, right_rep, fAssociation
 	#### Perform Permutation 
@@ -487,7 +534,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	fP = ((1.0 - fPercentile / 100.0) * iIter + 1) / (iIter + 1)
 	
 	assert(fP <= 1.0)
-	# print fP
+	#print fP
 	return fP, fAssociation, left_rep, right_rep
 
 def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000):
@@ -503,7 +550,7 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 
 	strMetric = metric 
 	# step 5 in a case of new decomposition method
-	pHashDecomposition = {'pls':pls, 'cca':cca, "pca": pca, "kpca": kpca, "ica":ica, "mds":mds }
+	pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
 	
 	def _permutation(pVec):
@@ -670,7 +717,7 @@ def permutation_test_by_cca(pArray1, pArray2, metric="nmi", iIter=1000):
 	# numpy.random.seed(0)
 
 	strMetric = metric 
-	pHashDecomposition = {"pca": pca, "kpca": kpca, "ica":ica }
+	pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
 	
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function	
@@ -825,7 +872,7 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 
 	# numpy.random.seed(0)
 
-	pHashDecomposition = {"pca": pca, "ica":ica}
+	pHashDecomposition = c_hash_decomposition
 	
 	pHashMetric = distance.c_hash_metric
 
@@ -847,7 +894,8 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 	return dPPerm
 
 def permutation_test(pArray1, pArray2, metric, decomposition, iIter):
-	if decomposition in ['cca', 'pls',"pca", "ica", "kpca"]:
+	
+	if decomposition in ['cca', 'pls',"pca", "nlpca", "ica", "kpca"]:
 		return permutation_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter)
 	
 	if decomposition in ["average"]:
@@ -855,7 +903,7 @@ def permutation_test(pArray1, pArray2, metric, decomposition, iIter):
 
 
 def g_test(pArray1, pArray2, metric, decomposition, iIter):
-	if decomposition in ['cca', 'pls',"pca", "ica", "kpca"]:
+	if decomposition in ['cca', 'pls',"pca", "nlpca", "ica", "kpca"]:
 		return g_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter)
 	
 	if decomposition in ["average"]:
@@ -1419,9 +1467,3 @@ def bag2association(aaBag, A):
 	assert(len(A_conditional_flattened) == len(A_emp_conditional_flattened))
 
 	return A_conditional_flattened, A_emp_conditional_flattened
-
-c_hash_decomposition = {"pca"    : pca,
-                        "ica"    : ica,
-                        "cca"	 : cca,
-                        "pls"	 : pls,
-                        "average": None }

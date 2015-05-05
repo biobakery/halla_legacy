@@ -22,7 +22,7 @@ import sys
 import shutil 
 import time
 import math
-
+import datetime
 #  Load a halla module to check the installation
 try:
     from . import hierarchy
@@ -630,9 +630,12 @@ class HAllA():
                     df1 = np.array(cluster1, dtype=float)
                     df2 = np.array(cluster2, dtype=float)
                     
+                    decomposition_method = self.hash_decomposition[self.decomposition]
+                    x_pc1 = decomposition_method(df1)[0]
+                    y_pc1 = decomposition_method(df2)[0]
                     ax.set_xlabel("First Principal Component of the First cluster")
                     ax.set_ylabel("First Principal Component of the Second cluster")
-                    ax.scatter(stats.pca(df1)[0], stats.pca(df2)[0], alpha=0.5)
+                    ax.scatter(x_pc1, y_pc1, alpha=0.5)
                     fig.tight_layout()
                     fig.savefig(filename + '/association_' + str(association_number) + '.pdf')
                     
@@ -644,21 +647,35 @@ class HAllA():
                     discretized_df2 = np.array(discretized_cluster2, dtype=float)
                     ax.set_xlabel("First Principal Component of the First cluster")
                     ax.set_ylabel("First Principal Component of the Second cluster")
-                    x = stats.discretize(stats.pca(discretized_df1)[0])
-                    y = stats.discretize(stats.pca(discretized_df2)[0])
+                    
+                    
                     '''for i in range(len(x)):
                         x += np.random.normal(x[i], 3, 100)
                     for i in range(len(y)):
                         y += np.random.normal(y[i], 3, 100)
                     '''
+                    d_x_d_pc1 = stats.discretize(decomposition_method(discretized_df1)[0])
+                    d_y_d_pc1 = stats.discretize(decomposition_method(discretized_df2)[0])
+                    
+                    d_x_pc1 = decomposition_method(discretized_df1)[0]
+                    d_y_pc1 = decomposition_method(discretized_df2)[0]
                     #plt.scatter( stats.discretize(stats.pca(discretized_df1)),  stats.discretize(stats.pca(discretized_df2)), alpha=0.5)
-                    ax.scatter( x, y, alpha=0.4)
+                    ax.scatter( d_x_d_pc1, d_y_d_pc1, alpha=0.4)
                     fig.tight_layout()
                     fig.savefig(discretized_filename + '/association_' + str(association_number) + '.pdf')
-                    
-                    plot.confusion_matrix(x, y, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
-                    plot.heatmap(array([x]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'PCDataset_1_cluster_' + str(association_number) + '_heatmap')
-                    plot.heatmap(array([y]), xlabels_order= x_label_order,  xlabels =X_labels, filename =discretized_filename + 'PCDataset_2_cluster_' + str(association_number) + '_heatmap')
+                   
+                    x_d_pc1 = stats.discretize(x_pc1)
+                    y_d_pc1 = stats.discretize(y_pc1)
+                    if self.bypass_discretizing:
+                        x_data = x_d_pc1
+                        y_data = y_d_pc1
+                    else:
+                        x_data = d_x_d_pc1
+                        y_data = d_y_d_pc1
+                    plot.confusion_matrix(x_data, y_data, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
+                    plot.confusion_matrix(x_d_pc1, y_d_pc1, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix_pc_orginal_data.pdf' )
+                    plot.heatmap(array([x_data]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'PCDataset_1_cluster_' + str(association_number) + '_heatmap')
+                    plot.heatmap(array([y_data]), xlabels_order= x_label_order,  xlabels =X_labels, filename =discretized_filename + 'PCDataset_2_cluster_' + str(association_number) + '_heatmap')
                     plt.close("all")
                 
         def _report_compared_clusters():
@@ -914,7 +931,6 @@ class HAllA():
         * Visually, looks much nicer and is much nicely wrapped if functions are entirely self-contained and we do not have to pass around pointers 
 
         """
-
         try:    
             performance_file  = open(str(self.output_dir)+'/performance.txt', 'w')
         except IOError:
@@ -930,8 +946,8 @@ class HAllA():
             start_time = time.time()
             self._featurize()
             excution_time_temp = time.time() - start_time
-            csvw.writerow(["featurize time", excution_time_temp ])
-            print("--- %s seconds: featurize data time ---" % excution_time_temp)
+            csvw.writerow(["featurize time", str(datetime.timedelta(seconds=excution_time_temp)) ])
+            print("--- %s h:m:s featurize data time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
         else:
             self.meta_feature = self.meta_array
         #plot.heatmap2(pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], xlabels =self.aOutName1, ylabels = self.aOutName2, filename = str(self.output_dir)+'/heatmap2_all' )
@@ -940,45 +956,45 @@ class HAllA():
             start_time = time.time()
             self._naive_all_against_all()
             excution_time_temp = time.time() - start_time
-            csvw.writerow(["Hypotheses testing time", excution_time_temp ])
-            print("--- %s seconds: hypotheses testing time ---" % excution_time_temp)
+            csvw.writerow(["Hypotheses testing time", str(datetime.timedelta(seconds=excution_time_temp)) ])
+            print("--- %s h:m:s seconds: hypotheses testing time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
         elif self.descending == "HAllA":
             # hierarchical clustering 
             start_time = time.time()
             self._hclust()
             excution_time_temp = time.time() - start_time
-            csvw.writerow(["Hierarchical clustering time", excution_time_temp ])
-            print("--- %s seconds: hierarchical clustering time ---" % excution_time_temp)
+            csvw.writerow(["Hierarchical clustering time", str(datetime.timedelta(seconds=excution_time_temp)) ])
+            print("--- %s h:m:s seconds: hierarchical clustering time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
             
             # coupling clusters hierarchically 
             start_time = time.time()
             self._couple()
             excution_time_temp = time.time() - start_time
-            csvw.writerow(["Coupling hypotheses tree time", excution_time_temp ])
-            print("--- %s seconds: coupling hypotheses tree time ---" % excution_time_temp)
+            csvw.writerow(["Coupling hypotheses tree time", str(datetime.timedelta(seconds=excution_time_temp)) ])
+            print("--- %s h:m:s coupling hypotheses tree time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
             # hypotheses testing
             print("--- association hypotheses testing is started, this task may take longer ...")
             start_time = time.time()
             self._hypotheses_testing()
             excution_time_temp = time.time() - start_time
-            csvw.writerow(["Hypotheses testing time", excution_time_temp ])
-            print("--- %s seconds: hypotheses testing time ---" % excution_time_temp)
+            csvw.writerow(["Hypotheses testing time", str(datetime.timedelta(seconds=excution_time_temp)) ])
+            print("--- %s h:m:s hypotheses testing time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
         
         # Generate a report
         start_time = time.time() 
         self._summary_statistics('final') 
         excution_time_temp = time.time() - start_time
         csvw.writerow(["Summary statistics time", excution_time_temp ])
-        print("--- %s seconds: summary statistics time ---" % excution_time_temp)
+        print("--- %s h:m:s summary statistics time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
         
         start_time = time.time() 
         results = self._report()
         excution_time_temp = time.time() - start_time
-        csvw.writerow(["Plotting results time", excution_time_temp ])
-        print("--- %s seconds: plotting results time ---" % excution_time_temp)
+        csvw.writerow(["Plotting results time", str(datetime.timedelta(seconds=excution_time_temp)) ])
+        print("--- %s h:m:s plotting results time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
         excution_time_temp = time.time() - execution_time
-        csvw.writerow(["Total execution time ---", excution_time_temp ])
-        print("--- in %s seconds the task is successfully done ---" % excution_time_temp )
+        csvw.writerow(["Total execution time ---", str(datetime.timedelta(seconds=excution_time_temp))])
+        print("--- in %s h:m:s the task is successfully done ---" % str(datetime.timedelta(seconds=excution_time_temp)) )
         return results
     
     def view_singleton(self, pBags):

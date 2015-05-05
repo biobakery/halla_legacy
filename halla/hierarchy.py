@@ -215,14 +215,14 @@ class Tree():
     def is_bypass(self ):#
         
         #return False
-        sub_hepotheses = math.log(len(self.get_data()[0]) * len(self.get_data()[1]), 2)
+        #sub_hepotheses = math.log(len(self.get_data()[0]) * len(self.get_data()[1]), 2)
         #/ len(self.get_data()[0])* len(self.get_data()[1]) or\
         #  test_level/ (hypotheses_tree_heigth - self.get_level_number()+1) or\
         #if self.get_qvalue()  >  self.get_pvalue() / test_level * self.get_level_number()/ hypotheses_tree_heigth or\
         #/ sub_hepotheses * (hypotheses_tree_heigth -self.get_level_number() +1):#/ self.get_level_number():#
-        if self.get_qvalue()  > 1.0 - self.get_pvalue() or\
-            (self.get_left_first_rep() > .6 and \
-            self.get_right_first_rep()> .6):
+        if self.get_qvalue()  > 1.0 - self.get_pvalue():# and\
+            #(self.get_left_first_rep() > .6 and \
+            #self.get_right_first_rep()> .6):
             print "bypass "#, sub_hepotheses, "log ", math.log(sub_hepotheses, 2), " l ",self.get_level_number()," q", self.get_qvalue()," p", self.get_pvalue()
             return True
         else:
@@ -1892,7 +1892,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
             if len(current_level_tests) > 0 :
                 #number_performed_tests += len(current_level_tests)
                 #if n1 < 2 and n2 < 2:
-                #current_level_tests.extend(leaves_hypotheses)
+                current_level_tests.extend(leaves_hypotheses)
                 print "number of hypotheses in level:", len(current_level_tests)
                 #if not len(current_level_tests):
                 #    continue
@@ -1960,7 +1960,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
             #q = fQ - fQ*max_r_t/100.0
             if len(current_level_tests)>0:
                 #q = fQ - fQ*max_r_t/len(current_level_tests)
-                print "Next level q:", q
+                #print "Next level q:", q
                 last_current_level_tests = current_level_tests
             next_level_apChildren = []
             current_level_tests = []
