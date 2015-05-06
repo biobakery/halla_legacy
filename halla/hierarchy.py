@@ -39,24 +39,33 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2
     Return the results from applying the data to the actor function
     """
     
-    def _multi_pMethod_args(current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter):
-        for i in xrange(len(current_level_tests)):
-            aIndicies = current_level_tests[i].get_data()
+    def _multi_pMethod_args(current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter, ids_to_process):
+        for id in ids_to_process:
+            aIndicies = current_level_tests[id].get_data()
             aIndiciesMapped = map(array, aIndicies)
-            yield [i, pMethod, pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], metric, decomposition, iIter]
+            yield [id, pMethod, pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], metric, decomposition, iIter]
     
     if NPROC > 1:
         import multiprocessing
         
         pool = multiprocessing.Pool(NPROC)
         
+        # check for tests that already have pvalues as these do not need to be recomputed
+        ids_to_process=[]
+        result = [0] * len(current_level_tests)
+        for id in xrange(len(current_level_tests)):
+            if not current_level_tests[id].get_significance_status() is None:
+                result[id]=current_level_tests[id].get_pvalue()
+            else:
+                ids_to_process.append(id)
+        
+        
         results_by_id = pool.map(multi_pMethod, _multi_pMethod_args(current_level_tests, 
-            pMethod, pArray1, pArray2, metric, decomposition, iIter))
+            pMethod, pArray1, pArray2, metric, decomposition, iIter, ids_to_process))
         pool.close()
         pool.join()
         
         # order the results by id and apply results to nodes
-        result = [0] * len(results_by_id)
         for id, dP, similarity, left_first_rep, right_first_rep in results_by_id:
             result[id]=dP
             current_level_tests[id].set_similarity_score(similarity)
