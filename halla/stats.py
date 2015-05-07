@@ -132,6 +132,7 @@ def nlpca(pArray, iComponents=1):
 			sub_pArray = pArray[:, s*i:s*(i+1)-1]
 			#print sub_pArray.shape
 			sub_pc = pPCA.fit_transform(sub_pArray.T).T
+			
 			#print "sub_pc", sub_pc
 			first_pc.extend(sub_pc[0])#map(math.fabs, sub_pc[0]))
 			#print "first PC", i,": ",len(first_pc)

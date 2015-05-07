@@ -463,7 +463,7 @@ def scatter_matrix(df, filename = None):
 def confusion_matrix(X, Y, filename):
     from sklearn.metrics import confusion_matrix
     # Compute confusion matrix
-    cm = confusion_matrix(X, Y)
+    cm = confusion_matrix(y_true= Y, y_pred=X)
     
     #print(cm)
     
@@ -471,8 +471,9 @@ def confusion_matrix(X, Y, filename):
     plt.matshow(cm, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)
     plt.title('Association between the representatives')
     cb = plt.colorbar()
-    plt.ylabel('First PC from the first cluster')
-    plt.xlabel('First PC from the second cluster')
+    plt.xlabel('First PC from the first cluster')
+    plt.ylabel('First PC from the second cluster')
+    
     #plt.show()(y_test, y_pred)
     #labels = np.arange(0,len(X),1)
     #loc    = labels 

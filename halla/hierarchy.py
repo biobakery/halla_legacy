@@ -2095,7 +2095,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
         return dP 
     
 
-    fdr_function = {"default": _bh_family_testing,
+    fdr_function = {"default": _bh_level_testing,
                             "BHF": _bh_family_testing,
                             "BHL":_bh_level_testing,
                             "BHA":_bh_all_testing,

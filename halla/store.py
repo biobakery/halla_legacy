@@ -38,9 +38,9 @@ from . import plot
 class HAllA():
     
     def __init__(self, X, Y): 
-        self.distance = "ami"
+        self.distance = "nmi"
         self.decomposition = "pca" 
-        self.fdr_function = "default"
+        self.fdr_function = "BHL"
         self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
         self.q = .1  
         self.iterations = 1000
@@ -622,19 +622,22 @@ class HAllA():
                         plot.heatmap(np.array(discretized_cluster1), xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap' )
                     x_label_order = []
                     plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'AllA_association_' + str(association_number) + '_heatmap' )
-                    plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename =filename + 'AllA_association_' + str(association_number) + '_heatmap' )  
+                    #Heatmap on continue datasets
+                    #plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename =filename + 'AllA_association_' + str(association_number) + '_heatmap' )  
                     #plt.figure()
                     fig = plt.figure(figsize=(5, 4))
                     # Create an Axes object.
                     ax = fig.add_subplot(1,1,1) # one row, one column, first plot
+                    plt.rc('xtick', labelsize=6) 
+                    plt.rc('ytick', labelsize=6) 
                     df1 = np.array(cluster1, dtype=float)
                     df2 = np.array(cluster2, dtype=float)
                     
                     decomposition_method = self.hash_decomposition[self.decomposition]
                     x_pc1 = decomposition_method(df1)[0]
                     y_pc1 = decomposition_method(df2)[0]
-                    ax.set_xlabel("First Principal Component of the First cluster")
-                    ax.set_ylabel("First Principal Component of the Second cluster")
+                    ax.set_xlabel("First Principal Component of the First cluster", fontsize = 6)
+                    ax.set_ylabel("First Principal Component of the Second cluster", fontsize = 6)
                     ax.scatter(x_pc1, y_pc1, alpha=0.5)
                     fig.tight_layout()
                     fig.savefig(filename + '/association_' + str(association_number) + '.pdf')
@@ -643,10 +646,12 @@ class HAllA():
                     fig = plt.figure(figsize=(5, 4))
                     # Create an Axes object.
                     ax = fig.add_subplot(1,1,1) # one row, one column, first plot
+                    plt.rc('xtick', labelsize=6) 
+                    plt.rc('ytick', labelsize=6) 
                     discretized_df1 = np.array(discretized_cluster1, dtype=float)
                     discretized_df2 = np.array(discretized_cluster2, dtype=float)
-                    ax.set_xlabel("First Principal Component of the First cluster")
-                    ax.set_ylabel("First Principal Component of the Second cluster")
+                    ax.set_xlabel("First Principal Component of the First cluster", fontsize = 6)
+                    ax.set_ylabel("First Principal Component of the Second cluster", fontsize = 6)
                     
                     
                     '''for i in range(len(x)):
@@ -957,14 +962,14 @@ class HAllA():
             self._naive_all_against_all()
             excution_time_temp = time.time() - start_time
             csvw.writerow(["Hypotheses testing time", str(datetime.timedelta(seconds=excution_time_temp)) ])
-            print("--- %s h:m:s seconds: hypotheses testing time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
+            print("--- %s h:m:s hypotheses testing time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
         elif self.descending == "HAllA":
             # hierarchical clustering 
             start_time = time.time()
             self._hclust()
             excution_time_temp = time.time() - start_time
             csvw.writerow(["Hierarchical clustering time", str(datetime.timedelta(seconds=excution_time_temp)) ])
-            print("--- %s h:m:s seconds: hierarchical clustering time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
+            print("--- %s h:m:s hierarchical clustering time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
             
             # coupling clusters hierarchically 
             start_time = time.time()
