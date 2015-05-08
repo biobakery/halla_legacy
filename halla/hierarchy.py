@@ -124,6 +124,11 @@ class Tree():
         self.level_number = 1
         self.significance =  None
         self.rank = None
+        self.left_loading= None
+        self.right_loading = None
+     
+    def set_right_loading(self, right_loading):
+         self.right_loading = right_loading
 
     def pop(self):
         # pop one of the children, else return none, since this amounts to killing the singleton 
@@ -199,6 +204,17 @@ class Tree():
     
     def get_right_first_rep(self):
         return self.right_first_rep
+    def set_left_loading(self, left_loading):
+        self.left_loading = left_loading
+     
+    def set_right_loading(self, right_loading):
+         self.right_loading = right_loading
+    
+    def get_left_loading(self):
+        return self.left_loading 
+     
+    def get_right_loading(self):
+        return self.right_loading 
     
     def set_pvalue(self, pvalue):
         self.pvalue = pvalue
@@ -215,10 +231,26 @@ class Tree():
     def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold):
         #return True
     
-        if (1.0 - self.get_left_distance() >= .25 or self.get_left_first_rep() >= .35) and \
-            (1.0 - self.get_right_distance() >= .25 or self.get_right_first_rep() >= .35) :
-            return True
+        '''if ((1.0 - self.get_left_distance() >= .2 and self.get_left_first_rep() >= .3) and \
+            (1.0 - self.get_right_distance() >= .2 and self.get_right_first_rep() >= .3)) or\
+            (1.0 - self.get_left_distance() >= .25 and 1.0 - self.get_right_distance() >= .25) or\
+            (self.get_left_first_rep() >= .5 and self.get_right_first_rep() >= .5) :'''
+        #if self.get_qvalue() > 2 * self.get_pvalue():
+        return True
+        #else:
+        #    return False
+        left_loading_dist1 = math.fabs(max(self.get_left_loading()) - np.mean(self.get_left_loading()))
+        left_loading_dist2 = math.fabs(min(self.get_left_loading()) - np.mean(self.get_left_loading()))
+        right_loading_dist1 = math.fabs(max(self.get_right_loading()) - np.mean(self.get_right_loading()))
+        right_loading_dist2 = math.fabs(min(self.get_right_loading()) - np.mean(self.get_right_loading()))
+        max_right_loading_dist = math.fabs(max(self.get_right_loading()) - min(self.get_right_loading()))
+        left_loading_dist = math.fabs(left_loading_dist1 -left_loading_dist2)
+        right_loading_dist = math.fabs(right_loading_dist1 - right_loading_dist2)
+        if left_loading_dist <= .075 and right_loading_dist <= .075 :
+                        return True
         else:
+            print left_loading_dist, " ",self.get_data()[0], " ", right_loading_dist, " ", self.get_data()[1]," ", self.similarity_score,\
+            self.get_left_loading(), " ", self.get_right_loading()
             return False
         
     def is_bypass(self ):#
@@ -229,9 +261,9 @@ class Tree():
         #  test_level/ (hypotheses_tree_heigth - self.get_level_number()+1) or\
         #if self.get_qvalue()  >  self.get_pvalue() / test_level * self.get_level_number()/ hypotheses_tree_heigth or\
         #/ sub_hepotheses * (hypotheses_tree_heigth -self.get_level_number() +1):#/ self.get_level_number():#
-        if self.get_qvalue()  > 1.0 - self.get_pvalue():# and\
-            #(self.get_left_first_rep() > .6 and \
-            #self.get_right_first_rep()> .6):
+        if self.get_qvalue()  > 1.0 - self.get_pvalue():# or\
+            #(self.get_left_first_rep() > .9 and \
+            #self.get_right_first_rep()> .9):
             print "bypass "#, sub_hepotheses, "log ", math.log(sub_hepotheses, 2), " l ",self.get_level_number()," q", self.get_qvalue()," p", self.get_pvalue()
             return True
         else:
@@ -1165,7 +1197,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(math.log(n, 2))#* 2 #if first else round(math.log(n, 2)) 
+    number_of_sub_cluters_threshold = round(math.log(n, 2)+.5)#*1.5 if first else round(math.log(n, 2)) 
     #print "n: ", n
     sub_clusters = []
     while clusterNode :
@@ -1587,7 +1619,7 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
 def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
-    iIter=1000, pursuer_method="nonparameteric", decomposition = "pca", bVerbose=False, afThreshold=.2, fAlpha=0.05):
+    iIter=1000, pursuer_method="nonparameteric", decomposition = "pca", bVerbose=False, afThreshold=.2, fAlpha=0.05, orginal_data = None):
     """
     Perform all-against-all on a hypothesis tree.
 
@@ -1962,7 +1994,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                         
                         if bVerbose:
                             print "Hypotheses testing level ", level, " is finished."                        
-                            
+            #return aFinal, aOut                
             apChildren = current_level_tests #next_level_apChildren #
             print "Hypotheses testing level ", level, "with ",len(current_level_tests), "hypotheses is finished."
             level += 1
@@ -2081,13 +2113,16 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
         
             * E.g. compares two bags, reports distance and p-values 
         """
-    
+        orginal_data_0 = array(orginal_data[0])
+        orginal_data_1 = array(orginal_data[1])
         aIndicies = pNode.get_data() 
         aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays
-        dP, similarity, left_first_rep, right_first_rep = pMethod(pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
+        dP, similarity, left_first_rep, right_first_rep, left_loading, right_loading = pMethod(orginal_data_0[aIndiciesMapped[0]], orginal_data_1[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
         pNode.set_similarity_score(similarity)
         pNode.set_left_first_rep(left_first_rep)
         pNode.set_right_first_rep(right_first_rep)
+        pNode.set_left_loading(left_loading)
+        pNode.set_right_loading(right_loading)
         
             
         # aOut.append( [aIndicies, dP] ) #### dP needs to appended AFTER multiple hypothesis correction

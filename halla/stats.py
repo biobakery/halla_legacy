@@ -19,6 +19,7 @@ import sklearn
 from sklearn.metrics import roc_curve, auc 
 from sklearn import manifold
 from . import distance
+from halla.stats import get_medoid
 
 # External dependencies 
 # from scipy.stats import percentileofscore
@@ -100,15 +101,17 @@ def pca(pArray, iComponents=1):
 		# # doing this matrix inversion twice doesn't seem to be a good idea 
 		# print"PCA:",   pPCA.fit_transform( pArray.T ).T 
 		# print "End PCA"
+		
 		pcs = pPCA.fit_transform(pArray.T).T
 		#print "Loading:", pPCA.components_
-		return (pcs[0], pPCA.explained_variance_ratio_[0])
+		loadings = pPCA.components_
+		return (pcs[0], pPCA.explained_variance_ratio_[0], loadings[0])
 
 	 except ValueError:
 	 	iRow = pArray.shape
 	 	iCol = None 
 
-	 	return pArray
+	 	return pArray, 1.0
 def nlpca(pArray, iComponents=1):
 	 """
 	 Input: N x D matrix 
@@ -252,6 +255,13 @@ def pls(pArray1, pArray2, iComponents=1):
 	# return array(X_cout), array(Y_cout)
 	return X_plsout, Y_plsout 
 
+def mean(X):
+	rep = map(round,numpy.mean(X, axis=0))
+	return rep
+
+def medoid(X):
+	return X[len(X)/2]
+
 def similarity_score(X, Y, strMetric="nmi", bPval=1, bParam=False):
 	# from sklearn.cross_decomposition import CCA
 	#import scipy.stats 
@@ -277,6 +287,9 @@ c_hash_decomposition = {"pca"    : pca,
                         "cca"	 : cca,
                         "pls"	 : pls,
                         "kpca"   : kpca,
+                        "medoid" : medoid,
+                        "mean"   : mean,
+                        "centered-medoid" : get_medoid,
                         "average": None }
 def get_medoid(pArray, iAxis=0, pMetric=distance.l2):
 	"""
@@ -492,11 +505,22 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	aDist = [] 
 	left_rep = 1.0
 	right_rep = 1.0
+	left_loading = []
+	right_loading = []
 	#### Calculate Point estimate
+	'''if decomposition =='centeroid-medoid':
+		pRep1 = pDe(pArray1, 0, pMe) #mean(pArray1)#[len(pArray1)/2]
+		pRep2 = pDe(pArray2, 0, pMe)#mean(pArray2)#[len(pArray2)/2]
+	elif decomposition == 'mean':
+		pRep1 = mean(pArray1) #mean(pArray1)#[len(pArray1)/2]
+		pRep2 = mean(pArray2)#mean(pArray2)#[len(pArray2)/2]
+	elif decomposition == 'medoid1':
+		pRep1 = medoid(pArray1) #mean(pArray1)#[len(pArray1)/2]
+		pRep2 = medoid(pArray2)#mean(pArray2)#[len(pArray2)/2]'''
 	if decomposition =='pca':
-		[(pRep1, left_rep) , (pRep2, right_rep)] = [pDe(pA) for pA in [pArray1, pArray2]]
+		[(pRep1, left_rep, left_loading) , (pRep2, right_rep, right_loading)] = [pDe(pA) for pA in [pArray1, pArray2]]
 		if bool(distance.c_hash_association_method_discretize[strMetric]):
-			[pRep1, pRep2] = [discretize(pA) for pA in [pRep1, pRep2] ]		 
+			[pRep1, pRep2] = [discretize(aRep) for aRepA in [pRep1, pRep2] ]		 
 	elif decomposition in ['pls', 'cca']:
 		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
 		#print "1:", pRep1
@@ -509,6 +533,8 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		#	left_rep = first_rep(pArray1, decomposition)
 		#	right_rep = first_rep(pArray2, decomposition)
 	#print left_rep
+	#print "left loading: ", left_loading
+	#print "right loading: ", right_loading
 	fAssociation = pMe(pRep1, pRep2) 
 	# print left_rep, right_rep, fAssociation
 	#### Perform Permutation 
@@ -536,7 +562,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	
 	assert(fP <= 1.0)
 	#print fP
-	return fP, fAssociation, left_rep, right_rep
+	return fP, fAssociation, left_rep, right_rep, left_loading, right_loading 
 
 def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000):
 	"""
