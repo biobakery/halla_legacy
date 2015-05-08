@@ -659,11 +659,11 @@ class HAllA():
                     for i in range(len(y)):
                         y += np.random.normal(y[i], 3, 100)
                     '''
-                    d_x_d_pc1 = stats.discretize(decomposition_method(discretized_df1)[0])
-                    d_y_d_pc1 = stats.discretize(decomposition_method(discretized_df2)[0])
+                    d_x_d_pc1 = stats.discretize(decomposition_method(discretized_df1))
+                    d_y_d_pc1 = stats.discretize(decomposition_method(discretized_df2))
                     
-                    d_x_pc1 = decomposition_method(discretized_df1)[0]
-                    d_y_pc1 = decomposition_method(discretized_df2)[0]
+                    d_x_pc1 = decomposition_method(discretized_df1)
+                    d_y_pc1 = decomposition_method(discretized_df2)
                     #plt.scatter( stats.discretize(stats.pca(discretized_df1)),  stats.discretize(stats.pca(discretized_df2)), alpha=0.5)
                     ax.scatter( d_x_d_pc1, d_y_d_pc1, alpha=0.4)
                     fig.tight_layout()

@@ -1197,7 +1197,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(math.log(n, 2)+.5)#*1.5 if first else round(math.log(n, 2)) 
+    number_of_sub_cluters_threshold = round(math.log(n, 2))#*1.5 if first else round(math.log(n, 2)) 
     #print "n: ", n
     sub_clusters = []
     while clusterNode :
@@ -2113,11 +2113,18 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
         
             * E.g. compares two bags, reports distance and p-values 
         """
-        orginal_data_0 = array(orginal_data[0])
-        orginal_data_1 = array(orginal_data[1])
         aIndicies = pNode.get_data() 
         aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays
-        dP, similarity, left_first_rep, right_first_rep, left_loading, right_loading = pMethod(orginal_data_0[aIndiciesMapped[0]], orginal_data_1[aIndiciesMapped[1]],  metric = metric, decomposition = decomposition, iIter=iIter)
+        if decomposition != "pca":
+            X = pArray1[aIndiciesMapped[0]]
+            Y = pArray2[aIndiciesMapped[1]]
+        else:
+            orginal_data_0 = array(orginal_data[0])
+            orginal_data_1 = array(orginal_data[1])
+            X = orginal_data_0[aIndiciesMapped[0]]
+            Y = orginal_data_1[aIndiciesMapped[1]]
+
+        dP, similarity, left_first_rep, right_first_rep, left_loading, right_loading = pMethod(X, Y,  metric = metric, decomposition = decomposition, iIter=iIter)
         pNode.set_similarity_score(similarity)
         pNode.set_left_first_rep(left_first_rep)
         pNode.set_right_first_rep(right_first_rep)
