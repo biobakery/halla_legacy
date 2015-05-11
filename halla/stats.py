@@ -19,6 +19,7 @@ import sklearn
 from sklearn.metrics import roc_curve, auc 
 from sklearn import manifold
 from . import distance
+from scipy.spatial.distance import pdist
 
 # External dependencies 
 # from scipy.stats import percentileofscore
@@ -294,13 +295,25 @@ def get_medoid(pArray, iAxis=0, pMetric=distance.l2):
 	"""
 
 	d = pMetric 
-
+	def pDistance(x, y):
+		return  1.0 - pMetric(x, y)
+	D = pdist(pArray, metric=pDistance)
+	mean_index = 0
+	med = 0.0 
+	i = 0
+	for i in range(len(D)):
+		temp_mean = numpy.mean(D[i])
+		if med >= temp_mean:
+			med = temp_mean
+			mean_index = i
+	return pArray[mean_index, :]
+			
 	pArray = (pArray.T if iAxis == 1 else pArray) 
 
 	mean_vec = numpy.mean(pArray, 0) 
 	
 	pArrayCenter = pArray - (mean_vec * numpy.ones(pArray.shape))
-
+	print pArray[numpy.argsort(map(numpy.linalg.norm, pArrayCenter))[0], :]
 	return pArray[numpy.argsort(map(numpy.linalg.norm, pArrayCenter))[0], :]
 
 
@@ -308,7 +321,7 @@ def get_representative(pArray, pMethod=None):
 	hash_method = c_hash_decomposition
 	return hash_method[pMethod](pArray)
 
-c_hash_decomposition = {"pca"    : pca,
+c_hash_decomposition = {"pca"    : pca,"dpca"    : pca,
 						"nlpca"    : nlpca,
                         "ica"    : ica,
                         "cca"	 : cca,
@@ -517,7 +530,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	elif decomposition == 'medoid':
 		pRep1 = medoid(pArray1)
 		pRep2 = medoid(pArray2)
-	elif decomposition =='pca':
+	elif decomposition in['pca', "dpca"]:
 		[(pRep1, left_rep, left_loading) , (pRep2, right_rep, right_loading)] = [pDe(pA) for pA in [pArray1, pArray2]]
 		if bool(distance.c_hash_association_method_discretize[strMetric]):
 			[pRep1, pRep2] = [discretize(aRep) for aRep in [pRep1, pRep2] ]
@@ -925,7 +938,7 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 
 def permutation_test(pArray1, pArray2, metric, decomposition, iIter):
 	
-	if decomposition in ['cca', 'pls',"pca", "nlpca", "ica", "kpca","centroid-medoid","medoid","mean"]:
+	if decomposition in ['cca', 'pls',"pca", "dpca", "nlpca", "ica", "kpca","centroid-medoid","medoid","mean"]:
 		return permutation_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter)
 	
 	if decomposition in ["average"]:

@@ -228,17 +228,13 @@ class Tree():
     def get_qvalue(self):
         return self.qvalue
     
-    def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold):
+    def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold, ):
         #return True
     
-        '''if ((1.0 - self.get_left_distance() >= .2 and self.get_left_first_rep() >= .3) and \
-            (1.0 - self.get_right_distance() >= .2 and self.get_right_first_rep() >= .3)) or\
-            (1.0 - self.get_left_distance() >= .25 and 1.0 - self.get_right_distance() >= .25) or\
-            (self.get_left_first_rep() >= .5 and self.get_right_first_rep() >= .5) :'''
-        #if self.get_qvalue() > 2 * self.get_pvalue():
-        return True
-        #else:
-        #    return False
+        if self.get_qvalue() > 2 * self.get_pvalue():
+            return True
+        else:
+            return False
         left_loading_dist1 = math.fabs(max(self.get_left_loading()) - np.mean(self.get_left_loading()))
         left_loading_dist2 = math.fabs(min(self.get_left_loading()) - np.mean(self.get_left_loading()))
         right_loading_dist1 = math.fabs(max(self.get_right_loading()) - np.mean(self.get_right_loading()))
@@ -252,7 +248,8 @@ class Tree():
             print left_loading_dist, " ",self.get_data()[0], " ", right_loading_dist, " ", self.get_data()[1]," ", self.similarity_score,\
             self.get_left_loading(), " ", self.get_right_loading()
             return False
-        
+        #if ((1.0 - self.get_left_distance() >= .25 or self.get_left_first_rep() >= .3) and \
+         #   (1.0 - self.get_right_distance() >= .25 or self.get_right_first_rep() >= .35)) and\
     def is_bypass(self ):#
         
         #return False

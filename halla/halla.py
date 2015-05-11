@@ -184,7 +184,7 @@ def parse_arguments (args):
         "-d","--decomposition",
         dest="strDecomposition",
         default="pca",
-        choices=["pca", "nlpca", "cca","kpca","pls","medoid", "mean", "centroid-medoid"],
+        choices=["pca", "dpca", "cca","kpca","pls","medoid", "mean", "centroid-medoid"],
         help="approach for reducing dimensions (or decomposition)\n[default = pca]")    
     
     '''argp.add_argument(
