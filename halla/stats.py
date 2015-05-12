@@ -259,7 +259,7 @@ def mean(X):
 	rep = map(round,numpy.mean(X, axis=0))
 	return rep
 
-def medoid(X):
+def middle(X):
 	return X[len(X)/2]
 
 def similarity_score(X, Y, strMetric="nmi", bPval=1, bParam=False):
@@ -281,7 +281,6 @@ def kernel_cca():
 def kernel_cca_score():
 	pass 
 
-
 def get_medoid(pArray, iAxis=0, pMetric=distance.l2):
 	"""
 	Input: numpy array 
@@ -292,6 +291,21 @@ def get_medoid(pArray, iAxis=0, pMetric=distance.l2):
 
 	Can define arbitrary metric passed in as a function to pMetric 
 
+	"""
+
+	d = pMetric 
+				
+	pArray = (pArray.T if iAxis == 1 else pArray) 
+
+	mean_vec = numpy.mean(pArray, 0) 
+	
+	pArrayCenter = pArray - (mean_vec * numpy.ones(pArray.shape))
+	#print pArray[numpy.argsort(map(numpy.linalg.norm, pArrayCenter))[0], :]
+	return pArray[numpy.argsort(map(numpy.linalg.norm, pArrayCenter))[0], :]
+def medoid(pArray, iAxis=0, pMetric=distance.nmi):
+	"""
+	Input: numpy array 
+	Output: float
 	"""
 
 	d = pMetric 
@@ -307,15 +321,6 @@ def get_medoid(pArray, iAxis=0, pMetric=distance.l2):
 			med = temp_mean
 			mean_index = i
 	return pArray[mean_index, :]
-			
-	pArray = (pArray.T if iAxis == 1 else pArray) 
-
-	mean_vec = numpy.mean(pArray, 0) 
-	
-	pArrayCenter = pArray - (mean_vec * numpy.ones(pArray.shape))
-	print pArray[numpy.argsort(map(numpy.linalg.norm, pArrayCenter))[0], :]
-	return pArray[numpy.argsort(map(numpy.linalg.norm, pArrayCenter))[0], :]
-
 
 def get_representative(pArray, pMethod=None):
 	hash_method = c_hash_decomposition
