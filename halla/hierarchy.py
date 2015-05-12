@@ -229,10 +229,10 @@ class Tree():
         return self.qvalue
     
     def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold, ):
-        return True
+        #return True
     
         if ((1.0 - self.get_left_distance() >= .25 or self.get_left_first_rep() >= .35) and \
-               (1.0 - self.get_right_distance() >= .25 or self.get_right_first_rep() >= .35)) and self.get_pvalue() < .05 :
+               (1.0 - self.get_right_distance() >= .25 or self.get_right_first_rep() >= .35)) and self.get_qvalue() < .021 :
             return True
         else:
             return False

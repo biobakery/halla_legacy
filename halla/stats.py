@@ -19,7 +19,7 @@ import sklearn
 from sklearn.metrics import roc_curve, auc 
 from sklearn import manifold
 from . import distance
-from scipy.spatial.distance import pdist
+from scipy.spatial.distance import pdist, squareform
 
 # External dependencies 
 # from scipy.stats import percentileofscore
@@ -311,9 +311,10 @@ def medoid(pArray, iAxis=0, pMetric=distance.nmi):
 	d = pMetric 
 	def pDistance(x, y):
 		return  1.0 - pMetric(x, y)
-	D = pdist(pArray, metric=pDistance)
+	D = squareform(pdist(pArray, metric=pDistance))
+	#print D
 	mean_index = 0
-	med = 0.0 
+	med = 1.0 
 	i = 0
 	for i in range(len(D)):
 		temp_mean = numpy.mean(D[i])
@@ -386,7 +387,7 @@ def bh(afPVAL, q):
 	# iLenReduced = len(afPVAL_reduced)
 	# pRank = scipy.stats.rankdata( afPVAL) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	# # source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
-	pRank = rankdata(afPVAL, method='ordinal')
+	pRank = rankdata(afPVAL, method='average')
 
 	aOut = [] 
 	iLen = len(afPVAL)
