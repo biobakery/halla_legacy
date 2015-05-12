@@ -584,9 +584,9 @@ class HAllA():
                     except EnvironmentError:
                         sys.exit("Unable to create directory: "+dir)
                     plt.figure()    
-                    df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
+                    #df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
                     
-                    axes = plot.scatter_matrix(df1, filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    #axes = plot.scatter_matrix(df1, filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     
                     discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
                     discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
@@ -595,12 +595,12 @@ class HAllA():
                     discretized_cluster2 = [self.meta_feature[1][i] for i in iY]
                     Y_labels = np.array([self.aOutName2[i] for i in iY])
 
-                    df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-                    axes = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    #df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
+                    #axes = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     
                     discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
                     discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                    concatenated_df = pd.concat([df1, df2],axis=1)
+                    #concatenated_df = pd.concat([df1, df2],axis=1)
                     #axes = plot.scatter_matrix(concatenated_df, filename =filename + 'Concatenated_' + str(association_number) + '_scatter_matrix.pdf')
                     # heatmap cluster in an association
                     x_label_order = []
@@ -630,15 +630,15 @@ class HAllA():
                     ax = fig.add_subplot(1,1,1) # one row, one column, first plot
                     plt.rc('xtick', labelsize=6) 
                     plt.rc('ytick', labelsize=6) 
-                    df1 = np.array(cluster1, dtype=float)
-                    df2 = np.array(cluster2, dtype=float)
+                    df1 = np.array(cluster1)#, dtype=float)
+                    df2 = np.array(cluster2)#, dtype=float)
                     
                     decomposition_method = self.hash_decomposition[self.decomposition]
                     x_pc1 = decomposition_method(df1)[0]
                     y_pc1 = decomposition_method(df2)[0]
                     ax.set_xlabel("First Principal Component of the First cluster", fontsize = 6)
                     ax.set_ylabel("First Principal Component of the Second cluster", fontsize = 6)
-                    ax.scatter(x_pc1, y_pc1, alpha=0.5)
+                    #ax.scatter(x_pc1, y_pc1, alpha=0.5)
                     fig.tight_layout()
                     fig.savefig(filename + '/association_' + str(association_number) + '.pdf')
                     
