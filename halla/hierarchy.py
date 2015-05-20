@@ -229,10 +229,10 @@ class Tree():
         return self.qvalue
     
     def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold, ):
-        #return True
+        return True
     
-        if ((1.0 - self.get_left_distance() >= .25 or self.get_left_first_rep() >= .35) and \
-               (1.0 - self.get_right_distance() >= .25 or self.get_right_first_rep() >= .35)) and self.get_qvalue() < .021 :
+        if ((1.0 - self.get_left_distance() >= .9 or self.get_left_first_rep() >= .9) and \
+               (1.0 - self.get_right_distance() >= .9 or self.get_right_first_rep() >= .9)) :
             return True
         else:
             return False
@@ -1195,7 +1195,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(math.log(n, 2))#*1.5 if first else round(math.log(n, 2)) 
+    number_of_sub_cluters_threshold = round(math.log(n, 2)*1.5) if first else round(math.log(n, 2)) 
     #print "n: ", n
     sub_clusters = []
     while clusterNode :
@@ -1396,7 +1396,7 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
         data = [[i], [j]]
         test.add_data(data)
         #print i, j
-        fP, similarity, left_rep, right_rep = pMethod(array([pArray1[i]]), array([pArray2[j]]), metric = metric, decomposition = decomposition, iIter=iIter)
+        fP, similarity, left_rep, right_rep, _, _ = pMethod(array([pArray1[i]]), array([pArray2[j]]), metric = metric, decomposition = decomposition, iIter=iIter)
         test.set_pvalue(fP)
         test.set_similarity_score(similarity)
         test.set_left_first_rep(1.0)
@@ -2033,7 +2033,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 aOut1.append(last_current_level_tests[i])
         '''                                  
         return aFinal, aOut
-    
+        
     def _rh_hypothesis_testing():
         apChildren = [pTree]
         level = 1

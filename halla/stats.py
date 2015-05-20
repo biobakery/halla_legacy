@@ -20,6 +20,11 @@ from sklearn.metrics import roc_curve, auc
 from sklearn import manifold
 from . import distance
 from scipy.spatial.distance import pdist, squareform
+import pandas as pd
+try:
+	from mca import MCA
+except ImportError:
+	sys.exit("Please install mca properly")
 
 # External dependencies 
 # from scipy.stats import percentileofscore
@@ -87,6 +92,64 @@ def pca_explained_variance_ratio_(pArray, iComponents=1):
 	return pPCA.explained_variance_ratio_ 
 
 	
+def mca_method(pArray, iComponents=1):
+	"""
+	Input: N x D matrix 
+	Output: D x N matrix 
+	"""
+	if len(pArray) < 2:
+		#print "len A:", len(pArray)
+		return pArray[0,:] 
+	
+	from rpy2 import robjects as ro
+	from rpy2.robjects import r
+	from rpy2.robjects.packages import importr
+	#import rpy2.robjects as ro
+	import pandas.rpy.common as com
+	import rpy2.robjects.numpy2ri
+	rpy2.robjects.numpy2ri.activate()
+	dataFrame1 = pd.DataFrame(pArray.T, dtype= str)
+	#print dataFrame1.shape
+	ro.r('library(FactoMineR)')
+	ro.globalenv['r_dataframe'] = com.convert_to_r_dataframe(dataFrame1)
+	#ro.globalenv['number_sub'] = dataFrame1.shape[1] 
+	#print dataFrame1.shape[1] 
+	ro.r('data(r_dataframe)')
+	
+	# To do it for all names
+	ro.r('col_names <- names(r_dataframe)') 
+	# do it for some names in a vector named 'col_names' 
+	ro.r('r_dataframe[,col_names] <- lapply(r_dataframe[,col_names] , factor)')
+	#ro.r('r_dataframe = r_dataframe[,  c("1")]')
+	ro.globalenv['mca1'] = ro.r('MCA(r_dataframe, ncp =1, method = "Burt", graph = FALSE)')
+	rep = ro.r('mca1$ind$coord[,1]')
+	#print ro.r('mca1$eig[1,2]')
+	#ro.r('plot.MCA(mca1,  cex=.7)')
+	#print list(rep)
+	#print rep
+	return discretize(list(rep))
+	'''
+	if len(pArray) < 2:
+		#print "len A:", len(pArray)
+		return pArray[0,:]
+	#try:	
+		dataFrame = pd.DataFrame(pArray.T)
+		#print len(dataFrame.columns)
+		print dataFrame.shape
+		mca_counts = MCA(dataFrame, ncols=3)#, cols=None, ncols=None, benzecri=True, TOL=1e-4)
+		#print mca_counts.fs_r(1)
+		#print "mcacounts shape:", mca_counts.fs_r().shape
+		#print(mca_counts.L)
+		print "Explained variance:", mca_counts.expl_var(greenacre=False, N=1)
+		#print(mca_counts.inertia, mca_counts.L.sum())
+		print mca_counts.fs_r()
+	
+		return discretize(mca_counts.fs_r(N=1)[0].T)
+	except:
+		#print "len A:", len(pArray)
+		#return  medoid(pArray)#pArray[len(pArray)-1, :]
+		#sys.exit("Error with mca")
+	'''
 def pca(pArray, iComponents=1):
 	 """
 	 Input: N x D matrix 
@@ -281,7 +344,7 @@ def kernel_cca():
 def kernel_cca_score():
 	pass 
 
-def get_medoid(pArray, iAxis=0, pMetric=distance.l2):
+def get_medoid_centroid(pArray, iAxis=0, pMetric=distance.l2):
 	"""
 	Input: numpy array 
 	Output: float
@@ -328,6 +391,7 @@ def get_representative(pArray, pMethod=None):
 	return hash_method[pMethod](pArray)
 
 c_hash_decomposition = {"pca"    : pca,"dpca"    : pca,
+						"mca"    : mca_method,
 						"nlpca"    : nlpca,
                         "ica"    : ica,
                         "cca"	 : cca,
@@ -335,7 +399,7 @@ c_hash_decomposition = {"pca"    : pca,"dpca"    : pca,
                         "kpca"   : kpca,
                         "medoid" : medoid,
                         "mean"   : mean,
-                        "centroid-medoid" : get_medoid,
+                        "centroid-medoid" : get_medoid_centroid,
                         "average": None }
 #=========================================================
 # Multiple comparison adjustment 
@@ -387,7 +451,7 @@ def bh(afPVAL, q):
 	# iLenReduced = len(afPVAL_reduced)
 	# pRank = scipy.stats.rankdata( afPVAL) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	# # source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
-	pRank = rankdata(afPVAL, method='average')
+	pRank = rankdata(afPVAL, method='max') #'ordinal'
 
 	aOut = [] 
 	iLen = len(afPVAL)
@@ -472,13 +536,13 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 	def _permutation(pVec):
 		return numpy.random.permutation(pVec)
 
-	pDe = get_medoid
+	pDe = get_medoid_centroid
 	pMe = pHashMetric[strMetric] 
 
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	
-	pRep1 = get_medoid(discretize(pArray1), 0, pMe)
-	pRep2 = get_medoid(discretize(pArray1), 0, pMe)
+	pRep1 = get_medoid_centroid(discretize(pArray1), 0, pMe)
+	pRep2 = get_medoid_centroid(discretize(pArray1), 0, pMe)
 
 	# pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] 
 
@@ -527,9 +591,19 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	right_loading = []
 	#print pArray1[0]
 	#### Calculate Point estimate
-	if decomposition =='centroid-medoid':
-		pRep1 = get_medoid(pArray1, 0, pMe) #mean(pArray1)#[len(pArray1)/2]
-		pRep2 = get_medoid(pArray2, 0, pMe)#mean(pArray2)#[len(pArray2)/2]
+	if len(pArray1) == 1 and len(pArray2) == 1:
+		if decomposition == "pca":
+			pRep1 = discretize(pArray1[0, :])
+			pRep2 = discretize(pArray2[0, :])
+		else:
+			pRep1 = pArray1[0, :]
+			pRep2 = pArray2[0, :]
+	elif decomposition == 'mca':
+		pRep1 = mca_method(pArray1) #mean(pArray1)#[len(pArray1)/2]
+		pRep2 = mca_method(pArray2)#mean(pArray2)#[len(pArray2)/2]	
+	elif decomposition =='centroid-medoid':
+		pRep1 = get_medoid_centroid(pArray1, 0, pMe) #mean(pArray1)#[len(pArray1)/2]
+		pRep2 = get_medoid_centroid(pArray2, 0, pMe)#mean(pArray2)#[len(pArray2)/2]
 	elif decomposition == 'mean':
 		pRep1 = mean(pArray1) #mean(pArray1)#[len(pArray1)/2]
 		pRep2 = mean(pArray2)#mean(pArray2)#[len(pArray2)/2]
@@ -944,7 +1018,7 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 
 def permutation_test(pArray1, pArray2, metric, decomposition, iIter):
 	
-	if decomposition in ['cca', 'pls',"pca", "dpca", "nlpca", "ica", "kpca","centroid-medoid","medoid","mean"]:
+	if decomposition in ['cca', 'pls',"pca", "dpca", "nlpca", "ica", "kpca","centroid-medoid","medoid","mean", "mca"]:
 		return permutation_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter)
 	
 	if decomposition in ["average"]:
