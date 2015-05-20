@@ -97,6 +97,7 @@ def mca_method(pArray, iComponents=1):
 	Input: N x D matrix 
 	Output: D x N matrix 
 	"""
+	'''
 	if len(pArray) < 2:
 		#print "len A:", len(pArray)
 		return pArray[0,:] 
@@ -133,23 +134,23 @@ def mca_method(pArray, iComponents=1):
 		#print "len A:", len(pArray)
 		return pArray[0,:]
 	#try:	
-		dataFrame = pd.DataFrame(pArray.T)
-		#print len(dataFrame.columns)
-		print dataFrame.shape
-		mca_counts = MCA(dataFrame, ncols=3)#, cols=None, ncols=None, benzecri=True, TOL=1e-4)
-		#print mca_counts.fs_r(1)
-		#print "mcacounts shape:", mca_counts.fs_r().shape
-		#print(mca_counts.L)
-		print "Explained variance:", mca_counts.expl_var(greenacre=False, N=1)
-		#print(mca_counts.inertia, mca_counts.L.sum())
-		print mca_counts.fs_r()
-	
-		return discretize(mca_counts.fs_r(N=1)[0].T)
-	except:
+	dataFrame = pd.DataFrame(pArray.T)
+	#print len(dataFrame.columns)
+	print dataFrame.shape
+	mca_counts = MCA(dataFrame)#, cols=None, ncols=None, benzecri=True, TOL=1e-4)
+	#print mca_counts.fs_r(1)
+	#print "mcacounts shape:", mca_counts.fs_r().shape
+	#print(mca_counts.L)
+	print "Explained variance:", mca_counts.expl_var(greenacre=False, N=1)
+	#print(mca_counts.inertia, mca_counts.L.sum())
+	#print mca_counts.fs_r()
+
+	return discretize(mca_counts.fs_r(N=1)[0].T)
+	#except:
 		#print "len A:", len(pArray)
 		#return  medoid(pArray)#pArray[len(pArray)-1, :]
 		#sys.exit("Error with mca")
-	'''
+	
 def pca(pArray, iComponents=1):
 	 """
 	 Input: N x D matrix 
@@ -451,7 +452,7 @@ def bh(afPVAL, q):
 	# iLenReduced = len(afPVAL_reduced)
 	# pRank = scipy.stats.rankdata( afPVAL) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	# # source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
-	pRank = rankdata(afPVAL, method='max') #'ordinal'
+	pRank = rankdata(afPVAL, method= 'ordinal')
 
 	aOut = [] 
 	iLen = len(afPVAL)
