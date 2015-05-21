@@ -22,7 +22,7 @@ from . import distance
 from scipy.spatial.distance import pdist, squareform
 import pandas as pd
 try:
-	from mca import MCA
+	from mca import mca
 except ImportError:
 	sys.exit("Please install mca properly")
 
@@ -97,7 +97,6 @@ def mca_method(pArray, iComponents=1):
 	Input: N x D matrix 
 	Output: D x N matrix 
 	"""
-	'''
 	if len(pArray) < 2:
 		#print "len A:", len(pArray)
 		return pArray[0,:] 
@@ -131,26 +130,27 @@ def mca_method(pArray, iComponents=1):
 	return discretize(list(rep))
 	'''
 	if len(pArray) < 2:
-		#print "len A:", len(pArray)
+		print "len A:", len(pArray)
 		return pArray[0,:]
-	#try:	
 	dataFrame = pd.DataFrame(pArray.T)
-	#print len(dataFrame.columns)
-	print dataFrame.shape
-	mca_counts = MCA(dataFrame)#, cols=None, ncols=None, benzecri=True, TOL=1e-4)
-	#print mca_counts.fs_r(1)
-	#print "mcacounts shape:", mca_counts.fs_r().shape
-	#print(mca_counts.L)
-	print "Explained variance:", mca_counts.expl_var(greenacre=False, N=1)
-	#print(mca_counts.inertia, mca_counts.L.sum())
-	#print mca_counts.fs_r()
-
-	return discretize(mca_counts.fs_r(N=1)[0].T)
-	#except:
-		#print "len A:", len(pArray)
-		#return  medoid(pArray)#pArray[len(pArray)-1, :]
+	try:	
+		#print len(dataFrame.columns)
+		#print dataFrame.shape
+		mca_counts = mca(dataFrame, benzecri=True)#, cols=None, ncols=None, benzecri=True, TOL=1e-4)
+		#print mca_counts.fs_r(1)
+		#print "mcacounts shape:", mca_counts.fs_r().shape
+		#print(mca_counts.L)
+		#print "Explained variance:", mca_counts.expl_var(greenacre=False, N=1)
+		#print(mca_counts.inertia, mca_counts.L.sum())
+		#print mca_counts.fs_r()
+		print "len A in MCA:", dataFrame.shape
+		return discretize(mca_counts.fs_r(N=1)[:,0].T)
+	except:
+		print "len A in except:", dataFrame.shape
+		return  medoid(pArray)#pArray[len(pArray)-1, :]
 		#sys.exit("Error with mca")
-	
+	'''
+
 def pca(pArray, iComponents=1):
 	 """
 	 Input: N x D matrix 
@@ -386,7 +386,12 @@ def medoid(pArray, iAxis=0, pMetric=distance.nmi):
 			med = temp_mean
 			mean_index = i
 	return pArray[mean_index, :]
-
+def concat(pArray, iAxis=0, pMetric=distance.nmi):
+	"""
+	Input: numpy array 
+	Output: float
+	"""
+	return pArray.flatten()
 def get_representative(pArray, pMethod=None):
 	hash_method = c_hash_decomposition
 	return hash_method[pMethod](pArray)
@@ -608,7 +613,15 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	elif decomposition == 'mean':
 		pRep1 = mean(pArray1) #mean(pArray1)#[len(pArray1)/2]
 		pRep2 = mean(pArray2)#mean(pArray2)#[len(pArray2)/2]
+	elif decomposition == 'concat':
+		
+		pRep1_all = concat(pArray1)
+		pRep2_all = concat(pArray2)
+		l =  min(len(pRep1_all), len(pRep2_all))
+		pRep1 = pRep1_all[0:l]
+		pRep2 = pRep2_all[0:l]
 	elif decomposition == 'medoid':
+		l =  min(len(pArray1, pArray2))
 		pRep1 = medoid(pArray1)
 		pRep2 = medoid(pArray2)
 	elif decomposition in['pca', "dpca"]:

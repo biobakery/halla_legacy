@@ -517,8 +517,7 @@ class HAllA():
                 aLineOut = map(str, [self.aOutName1[iX], self.aOutName2[iY], fP, fP_adjust])
                 csvw.writerow(aLineOut)
 
-            
-        def _report_and_plot_associations ():    
+        def _report_associations():    
             association_number = 0
             output_file_associations  = open(str(self.output_dir)+'/associations.txt', 'w')
             bcsvw = csv.writer(output_file_associations, csv.excel_tab)
@@ -554,7 +553,45 @@ class HAllA():
                                      fP_adjust,
                                      association_similarity])
                 bcsvw.writerow(aLineOut)
-               
+                    
+        def _plot_associations ():    
+            association_number = 0
+            #output_file_associations  = open(str(self.output_dir)+'/associations.txt', 'w')
+            #bcsvw = csv.writer(output_file_associations, csv.excel_tab)
+            #bcsvw.writerow(["Method: " + self.decomposition +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
+            #bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the First PC of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
+    
+            sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.pvalue)
+            for association in sorted_associations:
+                association_number += 1
+                iX, iY = association.get_data()
+                global associated_feature_X_indecies
+                associated_feature_X_indecies += iX
+                global associated_feature_Y_indecies
+                associated_feature_Y_indecies += iY
+                #fP = association.get_pvalue()
+                #fP_adjust = association.get_qvalue()
+                #clusterX_similarity = 1.0 - association.get_left_distance()
+                #clusterX_first_rep = association.get_left_first_rep()
+                #clusterY_similarity = 1.0 - association.get_right_distance()
+               # clusterY_first_rep = association.get_right_first_rep()
+              #  association_similarity = association.get_similarity_score()
+                
+                ''' 
+                aLineOut = map(str, [association_number,
+                                     str(';'.join(self.aOutName1[i] for i in iX)),
+                                     clusterX_similarity,
+                                     clusterX_first_rep,
+                                     " ", 
+                                     str(';'.join(self.aOutName2[i] for i in iY)),
+                                     clusterY_similarity,
+                                     clusterY_first_rep,
+                                     " ",
+                                     fP,
+                                     fP_adjust,
+                                     association_similarity])
+                bcsvw.writerow(aLineOut)
+               '''
                 if self.plotting_results:
                     cluster1 = [self.meta_array[0][i] for i in iX]
                     discretized_cluster1 = [self.meta_feature[0][i] for i in iX]
@@ -584,23 +621,24 @@ class HAllA():
                     except EnvironmentError:
                         sys.exit("Unable to create directory: "+dir)
                     plt.figure()    
-                    df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
+                    #df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
                     
-                    axes = plot.scatter_matrix(df1, filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                    
-                    discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
-                    discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    #axes = plot.scatter_matrix(df1, filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    if len(discretized_cluster1) < 10:
+                        discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
+                        
+                        discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                                  
                     cluster2 = [self.meta_array[1][i] for i in iY]
                     discretized_cluster2 = [self.meta_feature[1][i] for i in iY]
                     Y_labels = np.array([self.aOutName2[i] for i in iY])
 
-                    df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-                    axes = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                    
-                    discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
-                    discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                    concatenated_df = pd.concat([df1, df2],axis=1)
+                    #df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
+                    #axes = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    if len(discretized_cluster2) < 10:
+                        discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
+                        discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    #concatenated_df = pd.concat([df1, df2],axis=1)
                     #axes = plot.scatter_matrix(concatenated_df, filename =filename + 'Concatenated_' + str(association_number) + '_scatter_matrix.pdf')
                     # heatmap cluster in an association
                     x_label_order = []
@@ -630,17 +668,17 @@ class HAllA():
                     ax = fig.add_subplot(1,1,1) # one row, one column, first plot
                     plt.rc('xtick', labelsize=6) 
                     plt.rc('ytick', labelsize=6) 
-                    df1 = np.array(cluster1, dtype=float)
-                    df2 = np.array(cluster2, dtype=float)
+                    #df1 = np.array(cluster1, dtype=float)
+                    #df2 = np.array(cluster2, dtype=float)
                     
                     decomposition_method = self.hash_decomposition[self.decomposition]
-                    x_pc1 = decomposition_method(df1)[0]
-                    y_pc1 = decomposition_method(df2)[0]
-                    ax.set_xlabel("First Principal Component of the First cluster", fontsize = 6)
-                    ax.set_ylabel("First Principal Component of the Second cluster", fontsize = 6)
-                    ax.scatter(x_pc1, y_pc1, alpha=0.5)
-                    fig.tight_layout()
-                    fig.savefig(filename + '/association_' + str(association_number) + '.pdf')
+                    #x_rep = decomposition_method(df1)[0]
+                    #y_rep = decomposition_method(df2)[0]
+                    #ax.set_xlabel("First Principal Component of the First cluster", fontsize = 6)
+                    #ax.set_ylabel("First Principal Component of the Second cluster", fontsize = 6)
+                    #ax.scatter(x_rep, y_rep, alpha=0.5)
+                    #fig.tight_layout()
+                    #fig.savefig(filename + '/association_' + str(association_number) + '.pdf')
                     
                     #plt.figure()
                     fig = plt.figure(figsize=(5, 4))
@@ -659,28 +697,29 @@ class HAllA():
                     for i in range(len(y)):
                         y += np.random.normal(y[i], 3, 100)
                     '''
-                    d_x_d_pc1 = stats.discretize(decomposition_method(discretized_df1))
-                    d_y_d_pc1 = stats.discretize(decomposition_method(discretized_df2))
+                    d_x_d_rep = stats.discretize(decomposition_method(discretized_df1))
+                    d_y_d_rep = stats.discretize(decomposition_method(discretized_df2))
                     
-                    d_x_pc1 = decomposition_method(discretized_df1)
-                    d_y_pc1 = decomposition_method(discretized_df2)
+                    d_x_rep = decomposition_method(discretized_df1)
+                    d_y_rep = decomposition_method(discretized_df2)
                     #plt.scatter( stats.discretize(stats.pca(discretized_df1)),  stats.discretize(stats.pca(discretized_df2)), alpha=0.5)
-                    ax.scatter( d_x_d_pc1, d_y_d_pc1, alpha=0.4)
+                    ax.scatter( d_x_d_rep, d_y_d_rep, alpha=0.4)
                     fig.tight_layout()
                     fig.savefig(discretized_filename + '/association_' + str(association_number) + '.pdf')
                    
-                    x_d_pc1 = stats.discretize(x_pc1)
-                    y_d_pc1 = stats.discretize(y_pc1)
+                    '''x_d_pc1 = stats.discretize(x_rep)
+                    y_d_pc1 = stats.discretize(y_rep)
                     if self.bypass_discretizing:
                         x_data = x_d_pc1
                         y_data = y_d_pc1
                     else:
                         x_data = d_x_d_pc1
                         y_data = d_y_d_pc1
-                    plot.confusion_matrix(x_data, y_data, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
-                    plot.confusion_matrix(x_d_pc1, y_d_pc1, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix_pc_orginal_data.pdf' )
-                    plot.heatmap(array([x_data]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'PCDataset_1_cluster_' + str(association_number) + '_heatmap')
-                    plot.heatmap(array([y_data]), xlabels_order= x_label_order,  xlabels =X_labels, filename =discretized_filename + 'PCDataset_2_cluster_' + str(association_number) + '_heatmap')
+                    '''
+                    plot.confusion_matrix(d_x_d_rep, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
+                    #plot.confusion_matrix(x_d_pc1, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix_pc_orginal_data.pdf' )
+                    plot.heatmap(array([d_x_d_rep]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'PCDataset_1_cluster_' + str(association_number) + '_heatmap')
+                    plot.heatmap(array([d_y_d_rep]), xlabels_order= x_label_order,  xlabels =X_labels, filename =discretized_filename + 'PCDataset_2_cluster_' + str(association_number) + '_heatmap')
                     plt.close("all")
                 
         def _report_compared_clusters():
@@ -795,7 +834,8 @@ class HAllA():
                 
         # Execute report functions
         _report_all_tests()
-        _report_and_plot_associations()
+        _report_associations()
+        _plot_associations()
         _report_compared_clusters()
         #_heatmap_associations_R()
         #_heatmap_datasets_R()
