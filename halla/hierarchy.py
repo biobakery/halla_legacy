@@ -1980,7 +1980,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                         elif current_level_tests[i].is_leaf():
                             if bVerbose:
                                 print "End of branch, leaf!"
-                            #next_level_apChildren.append(current_level_tests[i])
+                            next_level_apChildren.append(current_level_tests[i])
                             if current_level_tests[i].get_significance_status() == None:
                                 current_level_tests[i].set_significance_status(False)
                                 aOut.append(current_level_tests[i])
@@ -1988,12 +1988,12 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                         else:
                             if bVerbose:
                                 print "Gray area with p-value:", aP[i]
-                            #next_level_apChildren.append(current_level_tests[i])
+                            next_level_apChildren.append(current_level_tests[i])
                         
                         if bVerbose:
                             print "Hypotheses testing level ", level, " is finished."                        
             #return aFinal, aOut                
-            apChildren = current_level_tests #next_level_apChildren #
+            apChildren = next_level_apChildren #current_level_tests #
             print "Hypotheses testing level ", level, "with ",len(current_level_tests), "hypotheses is finished."
             level += 1
             #q = fQ - fQ*max_r_t/100.0

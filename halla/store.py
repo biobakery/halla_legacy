@@ -659,7 +659,7 @@ class HAllA():
                         #print "After2: ",len(x_label_order)
                         plot.heatmap(np.array(discretized_cluster1), xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap' )
                     x_label_order = []
-                    plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'AllA_association_' + str(association_number) + '_heatmap' )
+                    #plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'AllA_association_' + str(association_number) + '_heatmap' )
                     #Heatmap on continue datasets
                     #plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename =filename + 'AllA_association_' + str(association_number) + '_heatmap' )  
                     #plt.figure()
