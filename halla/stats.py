@@ -1445,9 +1445,22 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 
 	"""
 	
-	
+	def _discretize_continuous(astrValues, iN=iN):
+		if iN == None:
+			# Default to rounded sqrt(n) if no bin count requested
+			iN = round(math.sqrt(len(astrValues)))  # **0.5 + 0.5)
+		elif iN == 0:
+			iN = len(astrValues)
+		else:
+			iN = min(iN, len(set(astrValues)))
+		
+		pRank = rankdata(astrValues, method= 'ordinal')
+		astrRet = [None] * len(astrValues)
+		for i in range(len(astrValues)):
+			astrRet[i] = int(numpy.ceil(pRank[i]/iN))
+		return astrRet
 
-	def _discretize_continuous(astrValues, iN=iN): 
+	def _discretize_continuous_orginal(astrValues, iN=iN): 
 		
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
