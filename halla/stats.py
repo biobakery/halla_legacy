@@ -21,11 +21,11 @@ from sklearn import manifold
 from . import distance
 from scipy.spatial.distance import pdist, squareform
 import pandas as pd
-try:
+'''try:
 	from mca import mca
 except ImportError:
 	sys.exit("Please install mca properly")
-
+'''
 # External dependencies 
 # from scipy.stats import percentileofscore
 # ML plug-in 

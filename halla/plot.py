@@ -471,8 +471,8 @@ def confusion_matrix(X, Y, filename):
     plt.matshow(cm, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)
     plt.title('Association between the representatives')
     cb = plt.colorbar()
-    plt.xlabel('First PC from the first cluster')
-    plt.ylabel('First PC from the second cluster')
+    plt.xlabel('First representative from the first cluster')
+    plt.ylabel('First representative from the second cluster')
     
     #plt.show()(y_test, y_pred)
     #labels = np.arange(0,len(X),1)
