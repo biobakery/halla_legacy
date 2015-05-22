@@ -621,7 +621,6 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		pRep1 = pRep1_all[0:l]
 		pRep2 = pRep2_all[0:l]
 	elif decomposition == 'medoid':
-		l =  min(len(pArray1, pArray2))
 		pRep1 = medoid(pArray1)
 		pRep2 = medoid(pArray2)
 	elif decomposition in['pca', "dpca"]:

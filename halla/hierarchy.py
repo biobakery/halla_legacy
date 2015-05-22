@@ -262,7 +262,7 @@ class Tree():
         if self.get_qvalue()  > 1.0 - self.get_pvalue():# or\
             #(self.get_left_first_rep() > .9 and \
             #self.get_right_first_rep()> .9):
-            print "bypass "#, sub_hepotheses, "log ", math.log(sub_hepotheses, 2), " l ",self.get_level_number()," q", self.get_qvalue()," p", self.get_pvalue()
+            #print "bypass "#, sub_hepotheses, "log ", math.log(sub_hepotheses, 2), " l ",self.get_level_number()," q", self.get_qvalue()," p", self.get_pvalue()
             return True
         else:
             return False
