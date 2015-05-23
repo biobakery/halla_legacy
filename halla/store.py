@@ -620,10 +620,12 @@ class HAllA():
                         os.mkdir(discretized_dir)
                     except EnvironmentError:
                         sys.exit("Unable to create directory: "+dir)
-                    plt.figure()    
-                    #df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
-                    
-                    #axes = plot.scatter_matrix(df1, filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    plt.figure()  
+                    try: 
+                        df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
+                        axes = plot.scatter_matrix(df1, filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    except:
+                        pass
                     if len(discretized_cluster1) < 10:
                         discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
                         
@@ -632,9 +634,11 @@ class HAllA():
                     cluster2 = [self.meta_array[1][i] for i in iY]
                     discretized_cluster2 = [self.meta_feature[1][i] for i in iY]
                     Y_labels = np.array([self.aOutName2[i] for i in iY])
-
-                    #df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-                    #axes = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    try:
+                        df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
+                        axes = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    except:
+                        pass
                     if len(discretized_cluster2) < 10:
                         discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
                         discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')

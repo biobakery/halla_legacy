@@ -1993,7 +1993,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                         if bVerbose:
                             print "Hypotheses testing level ", level, " is finished."                        
             #return aFinal, aOut                
-            apChildren = next_level_apChildren #current_level_tests #
+            apChildren = current_level_tests #next_level_apChildren #
             print "Hypotheses testing level ", level, "with ",len(current_level_tests), "hypotheses is finished."
             level += 1
             #q = fQ - fQ*max_r_t/100.0

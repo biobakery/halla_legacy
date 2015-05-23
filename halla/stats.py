@@ -1453,14 +1453,17 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 			iN = len(astrValues)
 		else:
 			iN = min(iN, len(set(astrValues)))
-		
-		if type(astrValues) == str or type(astrValues) == bool:
+		try:
+			order = rankdata(astrValues, method= 'ordinal')
+		except: 
+			
+		#if type(astrValues[0]) == str or type(astrValues[0]) == bool:
 			temp = numpy.array(astrValues).argsort()
 			order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
 			order = rankdata(order, method= 'ordinal') #array([order[i]+1.0 for i in range(len(order))])
 			print "str"
-		elif type(astrValues) == float or type(astrValues) == int:
-			order = rankdata(astrValues, method= 'ordinal')
+		#elif type(astrValues[0]) == float or type(astrValues[0]) == int:
+
 		#print "prank",order
 		'''
 		
