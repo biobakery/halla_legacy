@@ -1454,10 +1454,23 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 		else:
 			iN = min(iN, len(set(astrValues)))
 		
-		pRank = rankdata(astrValues, method= 'ordinal')
+		if type(astrValues) == str or type(astrValues) == bool:
+			temp = numpy.array(astrValues).argsort()
+			order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
+			order = rankdata(order, method= 'ordinal') #array([order[i]+1.0 for i in range(len(order))])
+			print "str"
+		elif type(astrValues) == float or type(astrValues) == int:
+			order = rankdata(astrValues, method= 'ordinal')
+		#print "prank",order
+		'''
+		
+		print "ranks", order
+		'''
+		#aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
+		#print "aiIndices", aiIndices
 		astrRet = [None] * len(astrValues)
 		for i in range(len(astrValues)):
-			astrRet[i] = int(numpy.ceil(pRank[i]/iN))
+			astrRet[i] = int(numpy.ceil(order[i]/iN))
 		return astrRet
 
 	def _discretize_continuous_orginal(astrValues, iN=iN): 
