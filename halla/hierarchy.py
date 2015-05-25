@@ -248,18 +248,21 @@ class Tree():
         number_right_features = len(self.get_data()[1])
         #print "Left:", number_left_features, len(self.get_left_loading())
         #print "Right:", number_right_features, len(self.get_right_loading())
+        print self.get_left_loading(), self.get_data()[0]
+        print self.get_right_loading(), self.get_data()[1]
+        
         if len(self.get_left_loading()) == 1 and len(self.get_right_loading()) == 1:
             print self.get_left_loading(), self.get_right_loading
             return True
-        print "\n"
+        #print "\n"
         for i in range(len(self.get_left_loading())):
             #print self.get_left_loading()[i]
-            if self.get_left_loading()[i] < .5:
+            if math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
                 return False
-        print "\n"
+        #print "\n"
         for i in range(len(self.get_right_loading())):
             #print self.get_right_loading()[i]
-            if self.get_right_loading()[i] < .5:
+            if math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                 return False
         return True    
             
