@@ -30,9 +30,9 @@ def multi_pMethod(args):
     
     id, pMethod, pArray1, pArray2, metric, decomposition, iIter = args
     
-    dP, similarity, left_first_rep, right_first_rep = pMethod(pArray1, pArray2,  metric = metric, decomposition = decomposition, iIter=iIter)
+    dP, similarity, left_first_rep_variance, right_first_rep_variance = pMethod(pArray1, pArray2,  metric = metric, decomposition = decomposition, iIter=iIter)
 
-    return id, dP, similarity, left_first_rep, right_first_rep
+    return id, dP, similarity, left_first_rep_variance, right_first_rep_variance
 
 def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter):
     """
@@ -66,11 +66,11 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2
         pool.join()
         
         # order the results by id and apply results to nodes
-        for id, dP, similarity, left_first_rep, right_first_rep in results_by_id:
+        for id, dP, similarity, left_first_rep_variance, right_first_rep_variance in results_by_id:
             result[id]=dP
             current_level_tests[id].set_similarity_score(similarity)
-            current_level_tests[id].set_left_first_rep(left_first_rep)
-            current_level_tests[id].set_right_first_rep(right_first_rep)
+            current_level_tests[id].set_left_first_rep_variance(left_first_rep_variance)
+            current_level_tests[id].set_right_first_rep_variance(right_first_rep_variance)
     
     else:
         result=[]
@@ -117,8 +117,8 @@ class Tree():
         self.pvalue = None
         self.qvalue = None
         self.similarity_score = None
-        self.left_first_rep = None
-        self.right_first_rep = None
+        self.left_first_rep_variance = None
+        self.right_first_rep_variance = None
         self.already_tested = False
         self.already_passed = False
         self.level_number = 1
@@ -126,6 +126,8 @@ class Tree():
         self.rank = None
         self.left_loading= None
         self.right_loading = None
+        self.right_rep = None
+        self.left_rep = None
      
     def set_right_loading(self, right_loading):
          self.right_loading = right_loading
@@ -193,17 +195,18 @@ class Tree():
     def set_similarity_score(self, similarity_score=None):
         self.similarity_score = similarity_score
         
-    def set_left_first_rep(self, pc):
-        self.left_first_rep = pc
+    def set_left_first_rep_variance(self, pc):
+        self.left_first_rep_variance = pc
     
-    def set_right_first_rep(self, pc):
-        self.right_first_rep = pc
+    def set_right_first_rep_variance(self, pc):
+        self.right_first_rep_variance = pc
         
-    def get_left_first_rep(self):
-        return self.left_first_rep
+    def get_left_first_rep_variance(self):
+        return self.left_first_rep_variance
     
-    def get_right_first_rep(self):
-        return self.right_first_rep
+    def get_right_first_rep_variance(self):
+        return self.right_first_rep_variance
+    
     def set_left_loading(self, left_loading):
         self.left_loading = left_loading
      
@@ -228,11 +231,47 @@ class Tree():
     def get_qvalue(self):
         return self.qvalue
     
-    def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold, ):
-        return True
+    def set_left_rep(self, left_rep):
+        self.left_rep = left_rep
     
-        if ((1.0 - self.get_left_distance() >= .9 or self.get_left_first_rep() >= .9) and \
-               (1.0 - self.get_right_distance() >= .9 or self.get_right_first_rep() >= .9)) :
+    def set_right_rep(self, right_rep):
+        self.right_rep = right_rep
+        
+    def get_left_rep(self):
+        return self.left_rep
+    
+    def get_right_rep(self):
+        return self.right_rep
+    
+    def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold, ):
+        number_left_features = len(self.get_data()[0])
+        number_right_features = len(self.get_data()[1])
+        #print "Left:", number_left_features, len(self.get_left_loading())
+        #print "Right:", number_right_features, len(self.get_right_loading())
+        if len(self.get_left_loading()) == 1 and len(self.get_right_loading()) == 1:
+            print self.get_left_loading(), self.get_right_loading
+            return True
+        print "\n"
+        for i in range(len(self.get_left_loading())):
+            #print self.get_left_loading()[i]
+            if self.get_left_loading()[i] < .5:
+                return False
+        print "\n"
+        for i in range(len(self.get_right_loading())):
+            #print self.get_right_loading()[i]
+            if self.get_right_loading()[i] < .5:
+                return False
+        return True    
+            
+        '''
+        if all([ True if self.get_left_loading()[i] >= .5 else False for i in range(len(self.get_left_loading()))]) and\
+        all([ True if self.get_right_loading()[i] >= .5 else False for i in range(len(self.get_right_loading()))]):
+            print self.get_left_loading(), self.get_right_loading()
+            return True
+        else:
+            False
+        if ((1.0 - self.get_left_distance() >= .9 or self.get_left_first_rep_variance() >= .9) and \
+               (1.0 - self.get_right_distance() >= .9 or self.get_right_first_rep_variance() >= .9)) :
             return True
         else:
             return False
@@ -249,8 +288,9 @@ class Tree():
             print left_loading_dist, " ",self.get_data()[0], " ", right_loading_dist, " ", self.get_data()[1]," ", self.similarity_score,\
             self.get_left_loading(), " ", self.get_right_loading()
             return False
-        #if ((1.0 - self.get_left_distance() >= .25 or self.get_left_first_rep() >= .3) and \
-         #   (1.0 - self.get_right_distance() >= .25 or self.get_right_first_rep() >= .35)) and\
+        #if ((1.0 - self.get_left_distance() >= .25 or self.get_left_first_rep_variance() >= .3) and \
+         #   (1.0 - self.get_right_distance() >= .25 or self.get_right_first_rep_variance() >= .35)) and\
+         '''
     def is_bypass(self ):#
         
         #return False
@@ -260,8 +300,8 @@ class Tree():
         #if self.get_qvalue()  >  self.get_pvalue() / test_level * self.get_level_number()/ hypotheses_tree_heigth or\
         #/ sub_hepotheses * (hypotheses_tree_heigth -self.get_level_number() +1):#/ self.get_level_number():#
         if self.get_qvalue()  > 1.0 - self.get_pvalue():# or\
-            #(self.get_left_first_rep() > .9 and \
-            #self.get_right_first_rep()> .9):
+            #(self.get_left_first_rep_variance() > .9 and \
+            #self.get_right_first_rep_variance()> .9):
             #print "bypass "#, sub_hepotheses, "log ", math.log(sub_hepotheses, 2), " l ",self.get_level_number()," q", self.get_qvalue()," p", self.get_pvalue()
             return True
         else:
@@ -274,10 +314,10 @@ class Tree():
         print "---- similarity_score score              :", self.get_similarity_score()
         print "---- first cluster's features      :", self.get_data()[0]
         print "---- first cluster similarity_score      :", 1.0 - self.get_left_distance()
-        print "---- first pc of the first cluster :", self.get_left_first_rep()
+        print "---- first pc of the first cluster :", self.get_left_first_rep_variance()
         print "---- second cluster's features     :", self.get_data()[1]
         print "---- second cluster similarity_score     :", 1.0 - self.get_right_distance()
-        print "---- first pc of the second cluster:", self.get_right_first_rep(), "\n"
+        print "---- first pc of the second cluster:", self.get_right_first_rep_variance(), "\n"
     
     def set_rank(self, rank= None):
         self.rank = rank
@@ -1195,7 +1235,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = min(round(2*math.log(n, 2) +.5 ), round(math.sqrt(n) + .5)) if first else round(math.log(n, 2) +.5) 
+    number_of_sub_cluters_threshold = min(round(2*math.log(n, 2)  ), round(math.sqrt(n) )) if first else round(math.log(n, 2) +.5) 
     #print "n: ", n
     sub_clusters = []
     while clusterNode :
@@ -1399,8 +1439,8 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
         fP, similarity, left_rep, right_rep, _, _ = pMethod(array([pArray1[i]]), array([pArray2[j]]), metric = metric, decomposition = decomposition, iIter=iIter)
         test.set_pvalue(fP)
         test.set_similarity_score(similarity)
-        test.set_left_first_rep(1.0)
-        test.set_right_first_rep(1.0)
+        test.set_left_first_rep_variance(1.0)
+        test.set_right_first_rep_variance(1.0)
         test.set_qvalue(fP)
         aP.append(fP)
         tests.append(test)
@@ -1993,7 +2033,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                         if bVerbose:
                             print "Hypotheses testing level ", level, " is finished."                        
             #return aFinal, aOut                
-            apChildren = current_level_tests #next_level_apChildren #
+            apChildren = next_level_apChildren #current_level_tests #
             print "Hypotheses testing level ", level, "with ",len(current_level_tests), "hypotheses is finished."
             level += 1
             #q = fQ - fQ*max_r_t/100.0
@@ -2122,12 +2162,14 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
             X = orginal_data_0[aIndiciesMapped[0]]
             Y = orginal_data_1[aIndiciesMapped[1]]
 
-        dP, similarity, left_first_rep, right_first_rep, left_loading, right_loading = pMethod(X, Y,  metric = metric, decomposition = decomposition, iIter=iIter)
+        dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y,  metric = metric, decomposition = decomposition, iIter=iIter)
         pNode.set_similarity_score(similarity)
-        pNode.set_left_first_rep(left_first_rep)
-        pNode.set_right_first_rep(right_first_rep)
+        pNode.set_left_first_rep_variance(left_first_rep_variance)
+        pNode.set_right_first_rep_variance(right_first_rep_variance)
         pNode.set_left_loading(left_loading)
         pNode.set_right_loading(right_loading)
+        pNode.set_left_rep(left_rep)
+        pNode.set_right_rep(right_rep)
         
             
         # aOut.append( [aIndicies, dP] ) #### dP needs to appended AFTER multiple hypothesis correction

@@ -535,9 +535,9 @@ class HAllA():
                 fP = association.get_pvalue()
                 fP_adjust = association.get_qvalue()
                 clusterX_similarity = 1.0 - association.get_left_distance()
-                clusterX_first_rep = association.get_left_first_rep()
+                clusterX_first_rep = association.get_left_first_rep_variance()
                 clusterY_similarity = 1.0 - association.get_right_distance()
-                clusterY_first_rep = association.get_right_first_rep()
+                clusterY_first_rep = association.get_right_first_rep_variance()
                 association_similarity = association.get_similarity_score()
                 
                 aLineOut = map(str, [association_number,
@@ -639,7 +639,7 @@ class HAllA():
                         axes = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     except:
                         pass
-                    if len(discretized_cluster2) < 10:
+                    if len(discretized_cluster2) < 20:
                         discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
                         discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     #concatenated_df = pd.concat([df1, df2],axis=1)
@@ -701,13 +701,14 @@ class HAllA():
                     for i in range(len(y)):
                         y += np.random.normal(y[i], 3, 100)
                     '''
-                    d_x_d_rep = stats.discretize(decomposition_method(discretized_df1))
-                    d_y_d_rep = stats.discretize(decomposition_method(discretized_df2))
+                    d_x_d_rep = association.get_left_rep()#stats.discretize(decomposition_method(discretized_df1))
+                    d_y_d_rep = association.get_right_rep()#stats.discretize(decomposition_method(discretized_df2))
                     
-                    d_x_rep = decomposition_method(discretized_df1)
-                    d_y_rep = decomposition_method(discretized_df2)
+                    #d_x_rep = decomposition_method(discretized_df1)
+                    #d_y_rep = decomposition_method(discretized_df2)
                     #plt.scatter( stats.discretize(stats.pca(discretized_df1)),  stats.discretize(stats.pca(discretized_df2)), alpha=0.5)
-                    ax.scatter( d_x_d_rep, d_y_d_rep, alpha=0.4)
+                    #ax.scatter( d_x_d_rep, d_y_d_rep, alpha=0.4)
+                    ax.scatter( association.get_left_rep(), association.get_right_rep(), alpha=0.4)
                     fig.tight_layout()
                     fig.savefig(discretized_filename + '/association_' + str(association_number) + '.pdf')
                    

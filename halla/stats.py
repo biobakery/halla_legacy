@@ -21,6 +21,7 @@ from sklearn import manifold
 from . import distance
 from scipy.spatial.distance import pdist, squareform
 import pandas as pd
+from sklearn.metrics.metrics import explained_variance_score
 '''try:
 	from mca import mca
 except ImportError:
@@ -98,8 +99,8 @@ def mca_method(pArray, iComponents=1):
 	Output: D x N matrix 
 	"""
 	if len(pArray) < 2:
-		#print "len A:", len(pArray)
-		return pArray[0,:] 
+		#print "len A<2:",  (list(pArray[0]), 1.0, [1.0] )
+		return (list(pArray[0]), 1.0, [1.0] )
 	
 	from rpy2 import robjects as ro
 	from rpy2.robjects import r
@@ -123,11 +124,14 @@ def mca_method(pArray, iComponents=1):
 	#ro.r('r_dataframe = r_dataframe[,  c("1")]')
 	ro.globalenv['mca1'] = ro.r('MCA(r_dataframe, ncp =1, method = "Burt", graph = FALSE)')
 	rep = ro.r('mca1$ind$coord[,1]')
+	loading =  ro.r('mca1$var$eta2[,1]')
+	explained_variance_1 = ro.r('mca1$eig[1,2]')
 	#print ro.r('mca1$eig[1,2]')
 	#ro.r('plot.MCA(mca1,  cex=.7)')
 	#print list(rep)
 	#print rep
-	return discretize(list(rep))
+	#print (discretize(list(rep)), explained_variance_1, loading)
+	return (discretize(list(rep)), list(explained_variance_1)[0], list(loading))
 	'''
 	if len(pArray) < 2:
 		print "len A:", len(pArray)
@@ -591,8 +595,8 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	pMe = pHashMetric[strMetric] 
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	aDist = [] 
-	left_rep = 1.0
-	right_rep = 1.0
+	left_rep_variance = 1.0
+	right_rep_variance = 1.0
 	left_loading = []
 	right_loading = []
 	#print pArray1[0]
@@ -605,8 +609,8 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 			pRep1 = pArray1[0, :]
 			pRep2 = pArray2[0, :]
 	elif decomposition == 'mca':
-		pRep1 = mca_method(pArray1) #mean(pArray1)#[len(pArray1)/2]
-		pRep2 = mca_method(pArray2)#mean(pArray2)#[len(pArray2)/2]	
+		pRep1, left_rep_variance, left_loading = mca_method(pArray1) #mean(pArray1)#[len(pArray1)/2]
+		pRep2, right_rep_variance, right_loading = mca_method(pArray2)#mean(pArray2)#[len(pArray2)/2]	
 	elif decomposition =='centroid-medoid':
 		pRep1 = get_medoid_centroid(pArray1, 0, pMe) #mean(pArray1)#[len(pArray1)/2]
 		pRep2 = get_medoid_centroid(pArray2, 0, pMe)#mean(pArray2)#[len(pArray2)/2]
@@ -624,7 +628,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		pRep1 = medoid(pArray1)
 		pRep2 = medoid(pArray2)
 	elif decomposition in['pca', "dpca"]:
-		[(pRep1, left_rep, left_loading) , (pRep2, right_rep, right_loading)] = [pDe(pA) for pA in [pArray1, pArray2]]
+		[(pRep1, left_rep_variance, left_loading) , (pRep2, right_rep_variance, right_loading)] = [pDe(pA) for pA in [pArray1, pArray2]]
 		if bool(distance.c_hash_association_method_discretize[strMetric]):
 			[pRep1, pRep2] = [discretize(aRep) for aRep in [pRep1, pRep2] ]
 	elif decomposition in ['pls', 'cca']:
@@ -636,16 +640,16 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		#print "1:", pRep1
 		#print "2:", pRep2
 		#if decomposition == 'nlpca':
-		#	left_rep = first_rep(pArray1, decomposition)
-		#	right_rep = first_rep(pArray2, decomposition)
-	#print left_rep
+		#	left_rep_variance = first_rep(pArray1, decomposition)
+		#	right_rep_variance = first_rep(pArray2, decomposition)
+	#print left_rep_variance
 	#print "left loading: ", left_loading
 	#print "right loading: ", right_loading
 	#if decomposition != "pca":
 	#	fAssociation = numpy.mean(numpy.array([pMe(pArray1[i], pArray2[j]) for i, j in itertools.product(range(len(pArray1)), range(len(pArray2)))]))
 	#else:
 	fAssociation = pMe(pRep1, pRep2) 
-	# print left_rep, right_rep, fAssociation
+	# print left_rep_variance, right_rep_variance, fAssociation
 	#### Perform Permutation 
 	for _ in xrange(iIter):
 
@@ -671,7 +675,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	
 	assert(fP <= 1.0)
 	#print fP
-	return fP, fAssociation, left_rep, right_rep, left_loading, right_loading 
+	return fP, fAssociation, left_rep_variance, right_rep_variance, left_loading, right_loading, pRep1, pRep2 
 
 def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000):
 	"""
@@ -697,8 +701,8 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	
 	aDist = [] 
-	left_rep = 1.0
-	right_rep = 1.0
+	left_rep_variance = 1.0
+	right_rep_variance = 1.0
 	#### Calculate Point estimate 
 	if decomposition in ['pls', 'cca']:
 		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
@@ -706,8 +710,8 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 		[pRep1, pRep2] = [ discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 		#print "1:", pRep1
 		#print "2:", pRep2
-		left_rep = first_rep(pArray1, decomposition)
-		right_rep = first_rep(pArray2, decomposition)
+		left_rep_variance = first_rep(pArray1, decomposition)
+		right_rep_variance = first_rep(pArray2, decomposition)
 	fAssociation = pMe(pRep1, pRep2) 
 	import os, sys, re, glob, argparse
 	from random import choice, random, shuffle
@@ -770,7 +774,7 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 	#print "permutation error.... =", permerror
 	#print "within perm error.... =", abs( pvalue - pvalue2 ) < permerror
 
-	return fP, fAssociation, left_rep, right_rep
+	return fP, fAssociation, left_rep_variance, right_rep_variance
 def parametric_test_by_max_pca(pArray1, pArray2, k=2, metric="spearman", iIter=1000):
 
 	aOut = [] 
