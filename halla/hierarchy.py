@@ -243,7 +243,7 @@ class Tree():
     def get_right_rep(self):
         return self.right_rep
     
-    def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold, ):
+    def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold ):
         number_left_features = len(self.get_data()[0])
         number_right_features = len(self.get_data()[1])
         #print "Left:", number_left_features, len(self.get_left_loading())
@@ -257,12 +257,12 @@ class Tree():
         #print "\n"
         for i in range(len(self.get_left_loading())):
             #print self.get_left_loading()[i]
-            if math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
+            if math.fabs(self.get_left_loading()[i]) < .15:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
                 return False
         #print "\n"
         for i in range(len(self.get_right_loading())):
             #print self.get_right_loading()[i]
-            if math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
+            if math.fabs(self.get_right_loading()[i]) < .15:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                 return False
         return True    
             
@@ -1238,7 +1238,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = min(round(2*math.log(n, 2)  ), round(math.sqrt(n) )) if first else round(math.log(n, 2) +.5) 
+    number_of_sub_cluters_threshold = round(2*math.log(n, 2)) if first else round(math.log(n, 2)) # min(round(2*math.log(n, 2)), round(math.sqrt(n)))
     #print "n: ", n
     sub_clusters = []
     while clusterNode :

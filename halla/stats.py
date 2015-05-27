@@ -122,9 +122,11 @@ def mca_method(pArray, iComponents=1):
 	# do it for some names in a vector named 'col_names' 
 	ro.r('r_dataframe[,col_names] <- lapply(r_dataframe[,col_names] , factor)')
 	#ro.r('r_dataframe = r_dataframe[,  c("1")]')
-	ro.globalenv['mca1'] = ro.r('MCA(r_dataframe, ncp =1, method = "Burt", graph = FALSE)')
+	ro.globalenv['mca1'] = ro.r('MCA(r_dataframe, ncp =2, method = "Burt", graph = FALSE)')
 	rep = ro.r('mca1$ind$coord[,1]')
 	loading =  ro.r('mca1$var$eta2[,1]')
+	#print ro.r('mca1$var$eta2[,1]')
+	#print ro.r('mca1$var$eta2[,2]')
 	explained_variance_1 = ro.r('mca1$eig[1,2]')
 	#print ro.r('mca1$eig[1,2]')
 	#ro.r('plot.MCA(mca1,  cex=.7)')
