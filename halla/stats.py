@@ -100,7 +100,7 @@ def mca_method(pArray, iComponents=1):
 	"""
 	if len(pArray) < 2:
 		#print "len A<2:",  (list(pArray[0]), 1.0, [1.0] )
-		return (list(pArray[0]), 1.0, [1.0] )
+		return (pArray[0], 1.0, [1.0] )
 	
 	from rpy2 import robjects as ro
 	from rpy2.robjects import r

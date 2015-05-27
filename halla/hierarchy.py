@@ -248,8 +248,8 @@ class Tree():
         number_right_features = len(self.get_data()[1])
         #print "Left:", number_left_features, len(self.get_left_loading())
         #print "Right:", number_right_features, len(self.get_right_loading())
-        print self.get_left_loading(), self.get_data()[0]
-        print self.get_right_loading(), self.get_data()[1]
+        #print self.get_left_loading(), self.get_data()[0]
+        #print self.get_right_loading(), self.get_data()[1]
         
         if len(self.get_left_loading()) == 1 and len(self.get_right_loading()) == 1:
             print self.get_left_loading(), self.get_right_loading
@@ -1439,12 +1439,14 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
         data = [[i], [j]]
         test.add_data(data)
         #print i, j
-        fP, similarity, left_rep, right_rep, _, _ = pMethod(array([pArray1[i]]), array([pArray2[j]]), metric = metric, decomposition = decomposition, iIter=iIter)
+        fP, similarity, left_rep, right_rep, loading_left, loading_right, left_rep, right_rep = pMethod(array([pArray1[i]]), array([pArray2[j]]), metric = metric, decomposition = decomposition, iIter=iIter)
         test.set_pvalue(fP)
         test.set_similarity_score(similarity)
         test.set_left_first_rep_variance(1.0)
         test.set_right_first_rep_variance(1.0)
         test.set_qvalue(fP)
+        test.set_left_rep(left_rep)
+        test.set_right_rep(right_rep)
         aP.append(fP)
         tests.append(test)
         
