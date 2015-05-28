@@ -622,11 +622,12 @@ class HAllA():
                         sys.exit("Unable to create directory: "+dir)
                     plt.figure()  
                     try: 
-                        df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
-                        axes = plot.scatter_matrix(df1, filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                        if len(discretized_cluster1) < 20:
+                            df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
+                            axes = plot.scatter_matrix(df1, filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     except:
                         pass
-                    if len(discretized_cluster1) < 10:
+                    if len(discretized_cluster1) < 20:
                         discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
                         
                         discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
@@ -635,8 +636,9 @@ class HAllA():
                     discretized_cluster2 = [self.meta_feature[1][i] for i in iY]
                     Y_labels = np.array([self.aOutName2[i] for i in iY])
                     try:
-                        df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-                        axes = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                        if len(discretized_cluster1) < 20:
+                            df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
+                            axes = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     except:
                         pass
                     if len(discretized_cluster2) < 20:

@@ -270,10 +270,10 @@ def ami(pData1, pData2):
 def pearson(X, Y):
     X = array(X)
     Y = array(Y)
-    if X.ndim > 1: 
-    	X = X[0]
-    if Y.ndim > 1:
-    	Y = Y[0]
+    #if X.ndim > 1: 
+    #	X = X[0]
+    #if Y.ndim > 1:
+    #	Y = Y[0]
     #X = [float(x) for x in X]
     #Y = [float(y) for y in Y]
     #print "pearson:", scipy.stats.pearsonr(X, Y)[0]
@@ -285,11 +285,11 @@ def mic (X, Y):
     except (ImportError):
         sys.exit("CRITICAL ERROR:2 Unable to import minepy package." + 
             " Please check your install.") 
-    if X.ndim > 1: 
-        X = X[0]
+    #if X.ndim > 1: 
+        #X = X[0]
         #print X
-    if Y.ndim > 1:
-        Y = Y[0]
+    #if Y.ndim > 1:
+        #Y = Y[0]
     mine = MINE(alpha=0.6, c=15)
     mine.compute_score(X, Y)
     # print "MIC:" , mine.mic()
