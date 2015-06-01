@@ -622,12 +622,12 @@ class HAllA():
                         sys.exit("Unable to create directory: "+dir)
                     plt.figure()  
                     try: 
-                        if len(discretized_cluster1) < 20:
+                        if len(discretized_cluster1) < 15:
                             df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
                             axes = plot.scatter_matrix(df1, filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     except:
                         pass
-                    if len(discretized_cluster1) < 20:
+                    if len(discretized_cluster1) < 15:
                         discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
                         
                         discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
@@ -636,12 +636,12 @@ class HAllA():
                     discretized_cluster2 = [self.meta_feature[1][i] for i in iY]
                     Y_labels = np.array([self.aOutName2[i] for i in iY])
                     try:
-                        if len(discretized_cluster1) < 20:
+                        if len(discretized_cluster1) < 15:
                             df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
                             axes = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     except:
                         pass
-                    if len(discretized_cluster2) < 20:
+                    if len(discretized_cluster2) < 15:
                         discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
                         discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     #concatenated_df = pd.concat([df1, df2],axis=1)
@@ -694,8 +694,8 @@ class HAllA():
                     plt.rc('ytick', labelsize=6) 
                     discretized_df1 = np.array(discretized_cluster1, dtype=float)
                     discretized_df2 = np.array(discretized_cluster2, dtype=float)
-                    ax.set_xlabel("First Principal Component of the First cluster", fontsize = 6)
-                    ax.set_ylabel("First Principal Component of the Second cluster", fontsize = 6)
+                    ax.set_xlabel("Representative of the First Cluster", fontsize = 10)
+                    ax.set_ylabel("Representative of the Second Cluster", fontsize = 10)
                     
                     
                     '''for i in range(len(x)):
@@ -842,8 +842,8 @@ class HAllA():
         # Execute report functions
         _report_all_tests()
         _report_associations()
-        _plot_associations()
         _report_compared_clusters()
+        _plot_associations()
         #_heatmap_associations_R()
         #_heatmap_datasets_R()
         #_heatmap_associations()

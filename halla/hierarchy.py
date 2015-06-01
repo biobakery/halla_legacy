@@ -248,8 +248,8 @@ class Tree():
         number_right_features = len(self.get_data()[1])
         #print "Left:", number_left_features, len(self.get_left_loading())
         #print "Right:", number_right_features, len(self.get_right_loading())
-        #print self.get_left_loading(), self.get_data()[0]
-        #print self.get_right_loading(), self.get_data()[1]
+        print self.get_left_loading(), self.get_data()[0]
+        print self.get_right_loading(), self.get_data()[1]
         
         if len(self.get_left_loading()) == 1 and len(self.get_right_loading()) == 1:
             print self.get_left_loading(), self.get_right_loading
@@ -655,7 +655,8 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
     # # Remember, pMetric is a notion of _strength_, not _distance_ 
     # print str(pMetric)
     def pDistance(x, y):
-        return  1.0 - pMetric(x, y)
+        dist = math.fabs(1.0 - pMetric(x, y))
+        return  dist
 
     
     # print "Distance",D
@@ -1238,7 +1239,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(2*math.log(n, 2)) if first else round(math.log(n, 2)) # min(round(2*math.log(n, 2)), round(math.sqrt(n)))
+    number_of_sub_cluters_threshold = round(2*math.log(n, 2)) if first else round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
     #print "n: ", n
     sub_clusters = []
     while clusterNode :
