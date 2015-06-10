@@ -305,7 +305,7 @@ class Tree():
         if self.get_qvalue()  > 1.0 - self.get_pvalue():# or\
             #(self.get_left_first_rep_variance() > .9 and \
             #self.get_right_first_rep_variance()> .9):
-            #print "bypass "#, sub_hepotheses, "log ", math.log(sub_hepotheses, 2), " l ",self.get_level_number()," q", self.get_qvalue()," p", self.get_pvalue()
+            print "bypass "#, sub_hepotheses, "log ", math.log(sub_hepotheses, 2), " l ",self.get_level_number()," q", self.get_qvalue()," p", self.get_pvalue()
             return True
         else:
             return False
@@ -1465,9 +1465,9 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
         t += 1    
     #print "number of tetsts", t    
     if fdr  in ["BH", "BHF", "BHL", "BHY"]:    
-        aP_adjusted, pRank = stats.p_adjust(aP, fQ)
+        aP_adjusted, pRank, q= stats.p_adjust(aP, fQ)
         for i in range(len(tests)):
-            tests[i].set_qvalue(aP_adjusted[i])
+            tests[i].set_qvalue(q[i])
             tests[i].set_rank(pRank[i])
         max_r_t = 0
                 #print "aP", aP
@@ -1799,9 +1799,9 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 Current_Family_Children[i].set_pvalue(_actor(Current_Family_Children[i]))
             aP = [ Current_Family_Children[i].get_pvalue() for i in range(len(Current_Family_Children)) ]
             # claculate adjusted p-value
-            aP_adjusted, pRank = stats.p_adjust(aP, fQ)
+            aP_adjusted, pRank, q = stats.p_adjust(aP, fQ)
             for i in range(len(Current_Family_Children)):
-                Current_Family_Children[i].set_qvalue(aP_adjusted[i])
+                Current_Family_Children[i].set_qvalue(q[i])
                 Current_Family_Children[i].set_rank(pRank[i])
                 
                 
@@ -1875,9 +1875,9 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 all_aP.extend(aP)
                 all_performed_tests.extend(current_level_tests)
                 # claculate adjusted p-value
-                aP_adjusted, pRank = stats.p_adjust(all_aP, fQ)
+                aP_adjusted, pRank, q = stats.p_adjust(all_aP, fQ)
                 for i in range(len(all_performed_tests)):
-                    all_performed_tests[i].set_qvalue(aP_adjusted[i])
+                    all_performed_tests[i].set_qvalue(q[i])
                     all_performed_tests[i].set_rank(pRank[i])
 
                 max_r_t = 0
@@ -1934,12 +1934,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
         return aFinal, aOut
 
     def _bh_level_testing():
-        q = fQ
         apChildren = [pTree]
-        n1 = len(pTree.get_data()[0])
-        n2 = len(pTree.get_data()[1])
-        n1 = n1/math.log(n1,2)
-        n2 = n2/math.log(n2,2)
         level = 1
         number_performed_tests = 0 
         number_passed_tests = 0
@@ -1987,12 +1982,12 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                     current_level_tests[i].set_pvalue(p_values[i])
                     #print "Pvalue", i, " :", p_values[i]
                     
-                aP = [ current_level_tests[i].get_pvalue() for i in range(len(current_level_tests)) ]
+                #aP = [ current_level_tests[i].get_pvalue() for i in range(len(current_level_tests)) ]
                 # claculate adjusted p-value
-                aP_adjusted, pRank = stats.p_adjust(aP, q)
+                aP_adjusted, pRank, q = stats.p_adjust(p_values, fQ)
                 for i in range(len(current_level_tests)):
                     if current_level_tests[i].get_qvalue() == None:
-                        current_level_tests[i].set_qvalue(aP_adjusted[i])
+                        current_level_tests[i].set_qvalue(q[i])
                     current_level_tests[i].set_rank(pRank[i])
 
                 max_r_t = 0
@@ -2039,7 +2034,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                         if bVerbose:
                             print "Hypotheses testing level ", level, " is finished."                        
             #return aFinal, aOut                
-            apChildren = next_level_apChildren #current_level_tests #
+            apChildren = current_level_tests #next_level_apChildren #
             print "Hypotheses testing level ", level, "with ",len(current_level_tests), "hypotheses is finished."
             level += 1
             #q = fQ - fQ*max_r_t/100.0
@@ -2064,7 +2059,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
         aOut1=[]
         aP = [ last_current_level_tests[i].get_pvalue() for i in range(len(last_current_level_tests)) ]
                 # claculate adjusted p-value
-        aP_adjusted, pRank = stats.p_adjust(aP, q)
+        aP_adjusted, pRank = stats.p_adjust(aP, fQ)
         max_r_t = 0
         for i in range(len(last_current_level_tests)):
             if last_current_level_tests[i].get_pvalue() <= aP_adjusted[i] and\
@@ -2135,7 +2130,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
         end_level_tests = array(end_level_tests)
         performed_tests = array(performed_tests)
         print "Nominal p-values", end_level_tests[:, 1]
-        aP_adjusted, pRank = stats.p_adjust(end_level_tests[:, 1], fQ)
+        aP_adjusted, pRank, q = stats.p_adjust(end_level_tests[:, 1], fQ)
         print "ajusted pvalue: ", aP_adjusted
         for i in range(len(end_level_tests)):
             if end_level_tests[i][1] <= aP_adjusted[i] and max_r_t <= pRank[i]:
@@ -2143,11 +2138,11 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 #print "max_r_t", max_r_t
         for i in range(len(end_level_tests[:, 1])):
             if pRank[i] <= max_r_t:
-                print "--- Pass with p-value:", end_level_tests[i][1], " adjusted_pvalue: ", aP_adjusted[i], end_level_tests[i][0].get_data()[0], end_level_tests[i][0].get_data()[1]
-                aOut.append([end_level_tests[i][0].get_data(), float(end_level_tests[i][1]) , aP_adjusted[i]])
-                aFinal.append([end_level_tests[i][0].get_data(), float(end_level_tests[i][1]) , aP_adjusted[i]])
+                print "--- Pass with p-value:", end_level_tests[i][1], " q value: ", q[i], end_level_tests[i][0].get_data()[0], end_level_tests[i][0].get_data()[1]
+                aOut.append([end_level_tests[i][0].get_data(), float(end_level_tests[i][1]) , q[i]])
+                aFinal.append([end_level_tests[i][0].get_data(), float(end_level_tests[i][1]) , q[i]])
             else :
-                aOut.append([end_level_tests[i][0].get_data(), float(end_level_tests[i][1]) , aP_adjusted[i]])
+                aOut.append([end_level_tests[i][0].get_data(), float(end_level_tests[i][1]) , q[i]])
         print "--- number of passed tests after FDR controllin:", len(aFinal)                                        
         return aFinal, aOut
     

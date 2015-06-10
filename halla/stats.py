@@ -465,16 +465,19 @@ def bh(afPVAL, q):
 	# # source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
 	pRank = rankdata(afPVAL, method= 'ordinal')
 
-	aOut = [] 
+	aAjusted = [] 
+	aQvalue = []
 	iLen = len(afPVAL)
 	for i, fP in enumerate(afPVAL):
 		# fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
 		fAdjusted = q * 1.0 * pRank[i] / iLen  # iLenReduced
-		aOut.append(fAdjusted)
+		qvalue = fP * iLen / pRank[i]
+		aAjusted.append(fAdjusted)
+		aQvalue.append(qvalue)
 	# print aOut
 	# assert( all(map(lambda x: x <= 1.0, aOut)) ) ##sanity check 
 
-	return aOut, pRank 
+	return aAjusted, pRank, aQvalue
 
 def p_adjust(pval, q, method="BH"):
 	"""
@@ -657,7 +660,8 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 
 		#XP = array([numpy.random.permutation(x) for x in X])
 		#YP = array([numpy.random.permutation(y) for y in Y])
-
+		#pRep1_, _, _ = mca_method(XP) #mean(pArray1)#[len(pArray1)/2]
+		#pRep2_, _, _ = mca_method(YP)#
 		#pRep1_, pRep2_ = [ discretize(pDe(pA))[0] for pA in [XP, YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 		permuted_pRep2 = numpy.random.permutation(pRep2)
 		# Similarity score between representatives  
