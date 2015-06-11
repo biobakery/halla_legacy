@@ -305,7 +305,7 @@ class Tree():
         if self.get_qvalue()  > 1.0 - self.get_pvalue():# or\
             #(self.get_left_first_rep_variance() > .9 and \
             #self.get_right_first_rep_variance()> .9):
-            #print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
+            print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
             return True
         else:
             return False
