@@ -1,7 +1,8 @@
 #HAllA: Hierarchical All-against-All association testing #
 HAllA is an acronym for Hierarchical All-against-All association testing, and is designed as a command-line tool to find associations in high-dimensional, heterogeneous datasets. 
 
-**If you use the HUMAnN2 software, please cite our manuscript:**
+*If you use the HUMAnN2 software, please cite our manuscript:*
+
 Gholamali Rahnavard, Yo Sup Moon, George Weingart, Lauren J. McIver, Eric A. Franzosa, Levi Waldron, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation) 
 
 HAllA (pronounced [challah](http://en.wikipedia.org/wiki/Challah)) is an
@@ -20,7 +21,8 @@ getting tripped up by high-dimensionality.
 
 For additional information, please see the [HAllA User Manual](http://huttenhower.sph.harvard.edu/halla/manual).
 
-[HAllA Users Google Group](https://groups.google.com/forum/#!forum/halla-users)
+If you use this tool, the included scripts, or any related code in your work,
+please let us know, sign up for the HAllA Users Group [HAllA Users Google Group](https://groups.google.com/forum/#!forum/halla-users), and pass along any issues or feedback.
 
 License
  MIT License
@@ -28,7 +30,7 @@ License
 
 ## Contents ##
 * [Features](#markdown-header-features)
-* [Workflow](#markdown-header-workflow)
+* [Overview](#markdown-header-workflow)
 * [Requirements](#markdown-header-requirements)
     * [Operating System](#markdown-header-operating-system)
     * [Software](#markdown-header-software)
@@ -65,10 +67,9 @@ Its advantages include:
 3. Reliability: HAllA utilizes hierarchical false discovery correction to limit false discoveries and loss of statistical power attributed to multiple hypothesis testing. 
 
 4. Extensibility
-If you use this tool, the included scripts, or any related code in your work,
-please let us know, sign up for the HAllA Users Group (halla-users@googlegroups.com), and pass along any issues or feedback.
 
-## Workflow ##
+
+## Overview ##
 
 ![](http://huttenhower.sph.harvard.edu//sites/default/files/Figure1_0.png)
 
