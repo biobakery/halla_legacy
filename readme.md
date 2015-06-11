@@ -91,6 +91,7 @@ Its advantages include:
 * matplotlib
 * R and FactoMineR package
 * Pandas (>=0.15.2)
+```
 
 
 ## Installation ##
