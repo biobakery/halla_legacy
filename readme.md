@@ -1,8 +1,24 @@
 #HAllA: Hierarchical All-against-All association testing #
+HAllA is an acronym for Hierarchical All-against-All association testing, and is designed as a command-line tool to find associations in high-dimensional, heterogeneous datasets. 
 
-[HAllA](http://huttenhower.sph.harvard.edu/halla)
-
+**If you use the HUMAnN2 software, please cite our manuscript:**
 Gholamali Rahnavard, Yo Sup Moon, George Weingart, Lauren J. McIver, Eric A. Franzosa, Levi Waldron, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation) 
+
+HAllA (pronounced [challah](http://en.wikipedia.org/wiki/Challah)) is an
+end-to-end statistical method for Hierarchical All-against-All discovery of
+significant relationships among data features with high power.  HAllA is robust
+to data type, operating both on continuous and categorical values, and works well
+both on homogeneous datasets (where all measurements are of the same type, e.g.
+gene expression microarrays) and on heterogeneous data (containing measurements
+with different units or types, e.g. patient clinical metadata).  Finally, it is
+also aware of multiple input, multiple output problems, in which data might
+contain of two (or more) distinct subsets sharing an index (e.g. clinical metadata,
+genotypes, microarrays, and microbiomes all drawn from the same subjects).  In
+all of these cases, HAllA will identify which pairs of features (genes,
+microbes, loci, etc.) share statistically significant co-variation, without
+getting tripped up by high-dimensionality.
+
+For additional information, please see the [HAllA User Manual](http://huttenhower.sph.harvard.edu/halla/manual).
 
 [HAllA Users Google Group](https://groups.google.com/forum/#!forum/halla-users)
 
@@ -11,7 +27,8 @@ License
 --------------------------------------------
 
 ## Contents ##
-* [Description](#markdown-header-description)
+* [Features](#markdown-header-features)
+* [Workflow](#markdown-header-workflow)
 * [Requirements](#markdown-header-requirements)
     * [Operating System](#markdown-header-operating-system)
     * [Software](#markdown-header-software)
@@ -31,30 +48,30 @@ License
 * [Complete option list](#markdown-header-complete-option-list)
 * [Frequently Asked Questions](#markdown-header-frequently-asked-questions)
 
-## Description ##
+## Features ##
 
-HAllA (pronounced [challah](http://en.wikipedia.org/wiki/Challah)) is an
-end-to-end statistical method for Hierarchical All-against-All discovery of
-significant relationships among data features with high power.  HAllA is robust
-to data type, operating both on continuous and categorical values, and works well
-both on homogeneous datasets (where all measurements are of the same type, e.g.
-gene expression microarrays) and on heterogeneous data (containing measurements
-with different units or types, e.g. patient clinical metadata).  Finally, it is
-also aware of multiple input, multiple output problems, in which data might
-contain of two (or more) distinct subsets sharing an index (e.g. clinical metadata,
-genotypes, microarrays, and microbiomes all drawn from the same subjects).  In
-all of these cases, HAllA will identify which pairs of features (genes,
-microbes, loci, etc.) share statistically significant co-variation, without
-getting tripped up by high-dimensionality.
 
 In short, HAllA is like testing for correlation among all pairs of variables
 in a high-dimensional dataset, but without tripping over multiple hypothesis
 testing, the problem of figuring out what "correlation" means for different
 units or scales, or differentiating between predictor/input or response/output
 variables.  It's your one-stop shop for statistical significance!
+Its advantages include:   
 
+1. Generality: HAllA can handle datasets of mixed data types: categorical, binary, continuous, lexical (text strings with or without inherent order)
+
+2. Efficiency: Rather than checking all possible possible associations, HAllA prioritizes computation such that only statistically promising candidate variables are tested in detail.
+
+3. Reliability: HAllA utilizes hierarchical false discovery correction to limit false discoveries and loss of statistical power attributed to multiple hypothesis testing. 
+
+4. Extensibility
 If you use this tool, the included scripts, or any related code in your work,
 please let us know, sign up for the HAllA Users Group (halla-users@googlegroups.com), and pass along any issues or feedback.
+
+## Workflow ##
+
+![](http://huttenhower.sph.harvard.edu//sites/default/files/Figure1_0.png)
+
 
 ## Requirements ##
 
@@ -75,6 +92,8 @@ please let us know, sign up for the HAllA Users Group (halla-users@googlegroups.
 ** Optional for plotting results by using the --plotting_results option **
 ```
 * Pandas (>=0.15.2)
+```
+* R and FactoMineR package
 ```
 ## Installation ##
 
