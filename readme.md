@@ -89,13 +89,10 @@ Its advantages include:
 * Scipy (>= 0.12) 
 * Scikit-learn (>=0.13)
 * matplotlib
-```
-** Optional for plotting results by using the --plotting_results option **
-```
-* Pandas (>=0.15.2)
-```
 * R and FactoMineR package
-```
+* Pandas (>=0.15.2)
+
+
 ## Installation ##
 
 ### Downloading HAllA ###
