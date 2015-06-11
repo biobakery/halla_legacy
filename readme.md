@@ -3,7 +3,7 @@ HAllA is an acronym for Hierarchical All-against-All association testing, and is
 
 *If you use the HUMAnN2 software, please cite our manuscript:*
 
-Gholamali Rahnavard, Yo Sup Moon, George Weingart, Lauren J. McIver, Eric A. Franzosa, Levi Waldron, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation) 
+Gholamali Rahnavard, Yo Sup Moon, Lauren J. McIver, George Weingart, Eric A. Franzosa, Levi Waldron, Curtis Huttenhower, "Retrieving Signal from Noise in Big Data: An Information-Theoretic Approach to Hierarchical Exploratory Data Analysis" (In Preparation) 
 
 HAllA (pronounced [challah](http://en.wikipedia.org/wiki/Challah)) is an
 end-to-end statistical method for Hierarchical All-against-All discovery of
