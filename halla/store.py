@@ -189,7 +189,13 @@ class HAllA():
         """
 
         return self._check(pObject, [list, tuple, np.ndarray])
-
+   
+    def _bypass_discretizing(self):
+        if not distance.c_hash_association_method_discretize[self.distance] or  self.bypass_discretizing or\
+            self.distance in ["pearson"] or self.decomposition in ["pca", "ica"] :
+            return True
+        else:
+            return False
     #==========================================================#
     # Static Methods 
     #==========================================================# 
@@ -258,11 +264,12 @@ class HAllA():
     #==========================================================#
     # Helper Functions 
     #==========================================================# 
-
-    def _discretize(self):
+    def _name_features(self):
         if not self.aOutName1:
             self.aOutName1 = [str(i) for i in range(len(self.meta_array[0])) ]
+        if not self.aOutName2:
             self.aOutName2 = [str(i) for i in range(len(self.meta_array[1])) ]
+    def _discretize(self):
         self.meta_feature = self.m(self.meta_array, stats.discretize)
         return self.meta_feature
 
@@ -514,6 +521,7 @@ class HAllA():
                 iX, iY = line[0]
                 fP = line[1]
                 fP_adjust = line[2]
+                #print line
                 aLineOut = map(str, [self.aOutName1[iX], self.aOutName2[iY], fP, fP_adjust])
                 csvw.writerow(aLineOut)
 
@@ -960,7 +968,7 @@ class HAllA():
         
         for item in self.keys_attribute:
             sys.stderr.write("\t".join([item, str(getattr(self, item))]) + "\n") 
-
+    
     def run(self):
         
         """
@@ -991,8 +999,12 @@ class HAllA():
         csvw.writerow(["Decomposition method: ", self.decomposition])
         csvw.writerow(["Similarity method: ", self.distance]) 
         csvw.writerow(["q: FDR cut-off : ", self.q]) 
+        
+        self._name_features()
         execution_time = time.time()
-        if distance.c_hash_association_method_discretize[self.distance] or not self.bypass_discretizing:
+        if self._bypass_discretizing():
+             self.meta_feature = self.meta_array
+        else:
             #print "featurize is started!"
             # featurize 
             start_time = time.time()
@@ -1000,8 +1012,7 @@ class HAllA():
             excution_time_temp = time.time() - start_time
             csvw.writerow(["featurize time", str(datetime.timedelta(seconds=excution_time_temp)) ])
             print("--- %s h:m:s featurize data time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
-        else:
-            self.meta_feature = self.meta_array
+           
         #plot.heatmap2(pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], xlabels =self.aOutName1, ylabels = self.aOutName2, filename = str(self.output_dir)+'/heatmap2_all' )
         if self.descending == "AllA":
             print("--- association hypotheses testing is started, this task may take longer ...")

@@ -305,7 +305,7 @@ class Tree():
         if self.get_qvalue()  > 1.0 - self.get_pvalue():# or\
             #(self.get_left_first_rep_variance() > .9 and \
             #self.get_right_first_rep_variance()> .9):
-            print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
+            #print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
             return True
         else:
             return False
@@ -1239,7 +1239,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(2*math.log(n, 2)) if first else round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
+    number_of_sub_cluters_threshold = round(2*math.log(n, 2)) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
     #print "n: ", n
     sub_clusters = []
     while clusterNode :
@@ -2145,7 +2145,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
         """
         aIndicies = pNode.get_data() 
         aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays
-        if decomposition != "pca":
+        '''if decomposition not in ["pca", "ica"]:
             X = pArray1[aIndiciesMapped[0]]
             Y = pArray2[aIndiciesMapped[1]]
         else:
@@ -2153,7 +2153,9 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
             orginal_data_1 = array(orginal_data[1])
             X = orginal_data_0[aIndiciesMapped[0]]
             Y = orginal_data_1[aIndiciesMapped[1]]
-
+        '''
+        X = pArray1[aIndiciesMapped[0]]
+        Y = pArray2[aIndiciesMapped[1]]
         dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y,  metric = metric, decomposition = decomposition, iIter=iIter)
         pNode.set_similarity_score(similarity)
         pNode.set_left_first_rep_variance(left_first_rep_variance)
