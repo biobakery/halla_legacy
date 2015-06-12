@@ -416,6 +416,45 @@ c_hash_decomposition = {"pca"    : pca,"dpca"    : pca,
 #=========================================================
 # Multiple comparison adjustment 
 #=========================================================
+def by(afPVAL, q):
+	"""
+	Implement the benjamini-Yekutieli hierarchical hypothesis testing criterion 
+	In practice, used for implementing Yekutieli criterion *per layer*.  
+
+
+	Parameters
+	-------------
+
+		afPVAL : list 
+		 	list of p-values 
+
+
+	Returns 
+	--------------
+
+		abOUT : list 
+			boolean vector corresponding to which hypothesis test rejected, corresponding to p-value 
+
+	"""
+	from fractions import Fraction
+	harmonic_number = lambda n: sum(Fraction(1, d) for d in xrange(1, n+1))
+	
+	pRank = rankdata(afPVAL, method= 'ordinal')
+
+	aAjusted = [] 
+	aQvalue = []
+	iLen = len(afPVAL)
+	for i, fP in enumerate(afPVAL):
+		# fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
+		q_bar = q / harmonic_number(iLen)
+		fAdjusted = q_bar * 1.0 * pRank[i] / iLen  # iLenReduced
+		qvalue = fP * iLen / pRank[i] 
+		aAjusted.append(fAdjusted)
+		aQvalue.append(qvalue)
+	# print aOut
+	# assert( all(map(lambda x: x <= 1.0, aOut)) ) ##sanity check 
+
+	return aAjusted, pRank, aQvalue
 
 def bh(afPVAL, q):
 	"""
@@ -607,35 +646,25 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	#print pArray1[0]
 	#### Calculate Point estimate
 	if len(pArray1) == 1 and len(pArray2) == 1:
-		if decomposition == "pca":
-			pRep1 = discretize(pArray1[0, :])
-			pRep2 = discretize(pArray2[0, :])
-		else:
-			pRep1 = pArray1[0, :]
-			pRep2 = pArray2[0, :]
+		#if decomposition == "pca":
+		#	pRep1 = discretize(pArray1[0, :])
+		#	pRep2 = discretize(pArray2[0, :])
+		#else:
+		pRep1 = pArray1[0, :]
+		pRep2 = pArray2[0, :]
 	elif decomposition == 'mca':
 		pRep1, left_rep_variance, left_loading = mca_method(pArray1) #mean(pArray1)#[len(pArray1)/2]
 		pRep2, right_rep_variance, right_loading = mca_method(pArray2)#mean(pArray2)#[len(pArray2)/2]	
-	elif decomposition =='centroid-medoid':
-		pRep1 = get_medoid_centroid(pArray1, 0, pMe) #mean(pArray1)#[len(pArray1)/2]
-		pRep2 = get_medoid_centroid(pArray2, 0, pMe)#mean(pArray2)#[len(pArray2)/2]
-	elif decomposition == 'mean':
-		pRep1 = mean(pArray1) #mean(pArray1)#[len(pArray1)/2]
-		pRep2 = mean(pArray2)#mean(pArray2)#[len(pArray2)/2]
-	elif decomposition == 'concat':
-		
-		pRep1_all = concat(pArray1)
-		pRep2_all = concat(pArray2)
-		l =  min(len(pRep1_all), len(pRep2_all))
-		pRep1 = pRep1_all[0:l]
-		pRep2 = pRep2_all[0:l]
 	elif decomposition == 'medoid':
 		pRep1 = medoid(pArray1)
 		pRep2 = medoid(pArray2)
-	elif decomposition in['pca', "dpca"]:
+	elif decomposition == "pca":
 		[(pRep1, left_rep_variance, left_loading) , (pRep2, right_rep_variance, right_loading)] = [pDe(pA) for pA in [pArray1, pArray2]]
 		if bool(distance.c_hash_association_method_discretize[strMetric]):
 			[pRep1, pRep2] = [discretize(aRep) for aRep in [pRep1, pRep2] ]
+	elif decomposition == "ica":
+		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
+		 
 	elif decomposition in ['pls', 'cca']:
 		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
 		#print "1:", pRep1

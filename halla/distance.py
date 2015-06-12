@@ -270,10 +270,10 @@ def ami(pData1, pData2):
 def pearson(X, Y):
     X = array(X)
     Y = array(Y)
-    #if X.ndim > 1: 
-    #	X = X[0]
-    #if Y.ndim > 1:
-    #	Y = Y[0]
+    if X.ndim > 1: 
+    	X = X[0]
+    if Y.ndim > 1:
+    	Y = Y[0]
     #X = [float(x) for x in X]
     #Y = [float(y) for y in Y]
     #print "pearson:", scipy.stats.pearsonr(X, Y)[0]
