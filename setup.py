@@ -31,6 +31,8 @@ setup(
         #"Scikit-learn  >= 0.14.1",
         #"minepy >= 1.0.0", #for MIC in evaluation package 
         #"pandas >=0.15.2"
+        #"R >= 3.1.0",
+        "rpy2 >= 0.0.0"
     ],
     packages=find_packages(),
     entry_points={

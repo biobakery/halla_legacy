@@ -402,7 +402,8 @@ def get_representative(pArray, pMethod=None):
 	hash_method = c_hash_decomposition
 	return hash_method[pMethod](pArray)
 
-c_hash_decomposition = {"pca"    : pca,"dpca"    : pca,
+c_hash_decomposition = {"none":	"none",
+						"pca"    : pca,"dpca"    : pca,
 						"mca"    : mca_method,
 						"nlpca"    : nlpca,
                         "ica"    : ica,
@@ -645,7 +646,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	right_loading = []
 	#print pArray1[0]
 	#### Calculate Point estimate
-	if len(pArray1) == 1 and len(pArray2) == 1:
+	if (len(pArray1) == 1 and len(pArray2) == 1) or decomposition =="none":
 		#if decomposition == "pca":
 		#	pRep1 = discretize(pArray1[0, :])
 		#	pRep2 = discretize(pArray2[0, :])
@@ -1070,7 +1071,7 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 
 def permutation_test(pArray1, pArray2, metric, decomposition, iIter):
 	
-	if decomposition in ['cca', 'pls',"pca", "dpca", "nlpca", "ica", "kpca","centroid-medoid","medoid","mean", "mca"]:
+	if decomposition in ['none','cca', 'pls',"pca", "dpca", "nlpca", "ica", "kpca","centroid-medoid","medoid","mean", "mca"]:
 		return permutation_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter)
 	
 	if decomposition in ["average"]:

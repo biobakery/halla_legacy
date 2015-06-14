@@ -1067,3 +1067,11 @@ class HAllA():
                 aOut.append([aIndices, fP])
         return aOut 
     
+    def is_correct_submethods_combination(self ): 
+        if (self.descending == "AllA" and not self.decomposition == 'none') or\
+                            (self.descending == "HAllA" and self.decomposition in ["none","pls", "cca"]) or\
+                            (self.decomposition in ["ica","pca"] and self.metric != "pearson") or\
+                            (self.decomposition == "mca" and self.metric == "pearson"):
+                False
+        else:
+            return True

@@ -107,7 +107,7 @@ def check_requirements(args):
             "Please select another directory.")
         
     print("Output files will be written to: " + output_dir) 
-    
+  
 
 def parse_arguments (args):
     """ 
