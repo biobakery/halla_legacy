@@ -288,7 +288,7 @@ class HAllA():
         self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[0] , strMetric= self.distance, labels=self.aOutName1, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
         self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[1] , strMetric= self.distance, labels=self.aOutName2, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
         # self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x , bTree=True) )
-        # print self.meta_data_tree
+        #print self.meta_data_tree
         return self.meta_data_tree 
 
     def _couple(self):
@@ -1001,9 +1001,12 @@ class HAllA():
         csvw.writerow(["q: FDR cut-off : ", self.q]) 
         
         self._name_features()
+        if not self.is_correct_submethods_combination():
+            sys.exit("Please ckeck the combination of your options!!!!")
         execution_time = time.time()
         if self._bypass_discretizing():
-             self.meta_feature = self.meta_array
+            self.meta_feature = array([np.asarray(self.meta_array[0], dtype = float), np.asarray(self.meta_array[1], dtype = float)])
+            print self.meta_feature
         else:
             #print "featurize is started!"
             # featurize 
@@ -1012,7 +1015,7 @@ class HAllA():
             excution_time_temp = time.time() - start_time
             csvw.writerow(["featurize time", str(datetime.timedelta(seconds=excution_time_temp)) ])
             print("--- %s h:m:s featurize data time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
-           
+            print self.meta_feature
         #plot.heatmap2(pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], xlabels =self.aOutName1, ylabels = self.aOutName2, filename = str(self.output_dir)+'/heatmap2_all' )
         if self.descending == "AllA":
             print("--- association hypotheses testing is started, this task may take longer ...")
@@ -1070,8 +1073,8 @@ class HAllA():
     def is_correct_submethods_combination(self ): 
         if (self.descending == "AllA" and not self.decomposition == 'none') or\
                             (self.descending == "HAllA" and self.decomposition in ["none","pls", "cca"]) or\
-                            (self.decomposition in ["ica","pca"] and self.metric != "pearson") or\
-                            (self.decomposition == "mca" and self.metric == "pearson"):
+                            (self.decomposition in ["ica","pca"] and self.distance != "pearson") or\
+                            (self.decomposition == "mca" and self.distance == "pearson"):
                 False
         else:
             return True

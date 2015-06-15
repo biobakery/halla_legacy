@@ -280,21 +280,22 @@ optional arguments:
   -s <0.01>, --similarity-threshold <0.01>
                         threshold for similarity to count a cluster as one unit and not consider sub-clusters as sub-unit
                         [default = 0.01]
-  --descending          hierarchical descending
-                        [default = all-against-all]
-  -f {BHF,BHL,BHA}, --fdr {BHF,BHL,BHA}
+  -a {HAllA,AllA}, --descending {HAllA,AllA}
+                        descending approach
+                        [default = HAllA for hierarchical all-against-all]
+  -f {BHL,BHF,BHA}, --fdr {BHL,BHF,BHA}
                         function to maximize statistical power and control false discovery rate
-                        [default = BHF]
+                        [default = BHL]
   -i <1000>, --iterations <1000>
                         iterations for nonparametric significance testing (permutation test)
                         [default = 1000]
-  -m {nmi,ami,pearson}, --metric {nmi,ami,pearson}
+  -m {nmi,ami,mic,pearson}, --metric {nmi,ami,mic,pearson}
                         metric to be used for similarity measurement
                         [default = nmi]
-  --decomposition {pca,cca,kpca,pls}
-                        approach for reducing dimensions (or decomposition) 
-                        [default = pca]
-  -t {permutation}, --test {permutation}
+  -d {pca,ica,cca,kpca,pls,medoid,mean,mca}, --decomposition {pca,ica,cca,kpca,pls,medoid,mean,mca}
+                        approach for reducing dimensions (or decomposition)
+                        [default = mca]
+  -t {permutation,g-test}, --test {permutation,g-test}
                         approach for association test
                         [default = permutation]
   -v, --verbose         additional output is printed
@@ -302,6 +303,8 @@ optional arguments:
   --bypass-discretizing
                         bypass the discretizing step
   --header              the input files contain a header line
+  --nproc <1>           the number of processing units available
+                        [default = 1]
 ```
 ## Frequently Asked Questions ##
 

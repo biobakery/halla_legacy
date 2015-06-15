@@ -305,7 +305,7 @@ class Tree():
         if self.get_qvalue()  > 1.0 - self.get_pvalue():# or\
             #(self.get_left_first_rep_variance() > .9 and \
             #self.get_right_first_rep_variance()> .9):
-            #print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
+            print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
             return True
         else:
             return False
@@ -1152,7 +1152,7 @@ def _is_start(ClusterNode, X, func, distance):
 
 def _is_stop(ClusterNode, dataSet, max_dist_cluster, threshold = None):
         node_indeces = reduce_tree(ClusterNode)
-        first_PC = stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
+        #first_PC = stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
         if ClusterNode.is_leaf():# or _percentage(ClusterNode.dist, max_dist_cluster) < .1 or first_PC > .9:
             #print "Node: ",node_indeces
             #print "dist:", ClusterNode.dist, " first_PC:", first_PC,"\n"

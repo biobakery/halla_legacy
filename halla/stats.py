@@ -84,7 +84,7 @@ def pca_explained_variance_ratio_(pArray, iComponents=1):
 	 """
 	from sklearn.decomposition import PCA
 
- 	iRow, iCol = pArray.shape 
+ 	#iRow, iCol = pArray.shape 
  	pPCA = PCA(n_components=iComponents)
 	# # doing this matrix inversion twice doesn't seem to be a good idea 
 	pPCA.fit(pArray.T)
@@ -664,8 +664,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		if bool(distance.c_hash_association_method_discretize[strMetric]):
 			[pRep1, pRep2] = [discretize(aRep) for aRep in [pRep1, pRep2] ]
 	elif decomposition == "ica":
-		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
-		 
+		[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 	elif decomposition in ['pls', 'cca']:
 		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
 		#print "1:", pRep1
