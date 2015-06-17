@@ -1006,7 +1006,7 @@ class HAllA():
         execution_time = time.time()
         if self._bypass_discretizing():
             self.meta_feature = array([np.asarray(self.meta_array[0], dtype = float), np.asarray(self.meta_array[1], dtype = float)])
-            print self.meta_feature
+            #print self.meta_feature
         else:
             #print "featurize is started!"
             # featurize 
@@ -1015,7 +1015,7 @@ class HAllA():
             excution_time_temp = time.time() - start_time
             csvw.writerow(["featurize time", str(datetime.timedelta(seconds=excution_time_temp)) ])
             print("--- %s h:m:s featurize data time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
-            print self.meta_feature
+            #print self.meta_feature
         #plot.heatmap2(pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], xlabels =self.aOutName1, ylabels = self.aOutName2, filename = str(self.output_dir)+'/heatmap2_all' )
         if self.descending == "AllA":
             print("--- association hypotheses testing is started, this task may take longer ...")
@@ -1071,7 +1071,7 @@ class HAllA():
         return aOut 
     
     def is_correct_submethods_combination(self ): 
-        if (self.descending == "AllA" and not self.decomposition == 'none') or\
+        if (self.descending == "AllA" and not self.decomposition in ['none', 'pls', 'cca', 'pca', 'ica']) or\
                             (self.descending == "HAllA" and self.decomposition in ["none","pls", "cca"]) or\
                             (self.decomposition in ["ica","pca"] and self.distance != "pearson") or\
                             (self.decomposition == "mca" and self.distance == "pearson"):

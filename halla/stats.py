@@ -664,7 +664,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		if bool(distance.c_hash_association_method_discretize[strMetric]):
 			[pRep1, pRep2] = [discretize(aRep) for aRep in [pRep1, pRep2] ]
 	elif decomposition == "ica":
-		[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
+		[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA)[0] for pA in [pArray1, pArray2]]
 	elif decomposition in ['pls', 'cca']:
 		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
 		#print "1:", pRep1
