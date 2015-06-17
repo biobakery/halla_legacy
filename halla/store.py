@@ -724,13 +724,14 @@ class HAllA():
                    
                     '''x_d_pc1 = stats.discretize(x_rep)
                     y_d_pc1 = stats.discretize(y_rep)
-                    if self.bypass_discretizing:
-                        x_data = x_d_pc1
-                        y_data = y_d_pc1
-                    else:
-                        x_data = d_x_d_pc1
-                        y_data = d_y_d_pc1
                     '''
+                    if self.bypass_discretizing:
+                        d_x_d_rep = stats.discretize(association.get_left_rep())#stats.discretize(decomposition_method(discretized_df1))
+                        d_y_d_rep = stats.discretize(association.get_right_rep())#stats.discretize(decomposition_method(discretized_df2))
+                    else:
+                        d_x_d_rep = association.get_left_rep()#stats.discretize(decomposition_method(discretized_df1))
+                        d_y_d_rep = association.get_right_rep()#stats.discretize(decomposition_method(discretized_df2))
+                    
                     plot.confusion_matrix(d_x_d_rep, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
                     #plot.confusion_matrix(x_d_pc1, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix_pc_orginal_data.pdf' )
                     plot.heatmap(array([d_x_d_rep]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'PCDataset_1_cluster_' + str(association_number) + '_heatmap')
