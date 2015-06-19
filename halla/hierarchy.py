@@ -302,7 +302,7 @@ class Tree():
         #  test_level/ (hypotheses_tree_heigth - self.get_level_number()+1) or\
         #if self.get_qvalue()  >  self.get_pvalue() / test_level * self.get_level_number()/ hypotheses_tree_heigth or\
         #/ sub_hepotheses * (hypotheses_tree_heigth -self.get_level_number() +1):#/ self.get_level_number():#
-        if self.get_qvalue()  > 1.0 - self.get_pvalue():# or\
+        if self.get_pvalue()  > (1.0 - .25):# or\
             #(self.get_left_first_rep_variance() > .9 and \
             #self.get_right_first_rep_variance()> .9):
             print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
@@ -1467,7 +1467,7 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
     if fdr  in ["BH", "BHF", "BHL", "BHY"]:    
         aP_adjusted, pRank, q= stats.p_adjust(aP, fQ)
         for i in range(len(tests)):
-            tests[i].set_qvalue(q[i])
+            tests[i].set_qvalue(aP_adjusted[i])
             tests[i].set_rank(pRank[i])
         max_r_t = 0
                 #print "aP", aP
@@ -1801,7 +1801,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
             # claculate adjusted p-value
             aP_adjusted, pRank, q = stats.p_adjust(aP, fQ)
             for i in range(len(Current_Family_Children)):
-                Current_Family_Children[i].set_qvalue(q[i])
+                Current_Family_Children[i].set_qvalue(aP_adjusted[i])
                 Current_Family_Children[i].set_rank(pRank[i])
                 
                 
@@ -1877,7 +1877,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 # claculate adjusted p-value
                 aP_adjusted, pRank, q = stats.p_adjust(all_aP, fQ)
                 for i in range(len(all_performed_tests)):
-                    all_performed_tests[i].set_qvalue(q[i])
+                    all_performed_tests[i].set_qvalue(aP_adjusted[i])
                     all_performed_tests[i].set_rank(pRank[i])
 
                 max_r_t = 0
@@ -1978,7 +1978,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 aP_adjusted, pRank, q = stats.p_adjust(p_values, fQ)
                 for i in range(len(current_level_tests)):
                     if current_level_tests[i].get_qvalue() == None:
-                        current_level_tests[i].set_qvalue(q[i])
+                        current_level_tests[i].set_qvalue(aP_adjusted[i])
                     current_level_tests[i].set_rank(pRank[i])
 
                 max_r_t = 0

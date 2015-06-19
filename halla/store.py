@@ -1072,9 +1072,9 @@ class HAllA():
         return aOut 
     
     def is_correct_submethods_combination(self ): 
-        if (self.descending == "AllA" and not self.decomposition in ['none', 'pls', 'cca']) or\
-                            (self.descending == "HAllA" and self.decomposition in ["none","pls", "cca"]) or\
-                            (self.decomposition in ["ica","pca"] and self.distance != "pearson") or\
+        if (self.descending == "AllA" and not self.decomposition =='none') or\
+                            (self.descending == "HAllA" and self.decomposition =='none') or\
+                            (self.decomposition in ["ica","pca",'pls', 'cca', 'kpca'] and self.distance != "pearson") or\
                             (self.decomposition == "mca" and self.distance == "pearson"):
                 False
         else:
