@@ -141,7 +141,7 @@ def parse_arguments (args):
         metavar="<0.1>",
         dest="dQ",
         type=float,
-        default=0.1,
+        default=0.2,
         help="q-value for overall significance tests (cut-off for false discovery rate)\n[default = 0.1]")
     
     argp.add_argument(
@@ -184,7 +184,7 @@ def parse_arguments (args):
         "-d","--decomposition",
         dest="strDecomposition",
         default="mca",
-        choices=["none", "pca", "ica", "cca","kpca","pls","medoid", "mean", "mca"],
+        choices=["none", "mca", "pca", "ica", "cca","kpca","pls","medoid", "mean"],
         help="approach for reducing dimensions (or decomposition)\n[default = mca]")    
     
     '''argp.add_argument(

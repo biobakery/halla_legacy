@@ -562,7 +562,8 @@ class HAllA():
                                      association_similarity])
                 bcsvw.writerow(aLineOut)
                     
-        def _plot_associations ():    
+        def _plot_associations ():
+            import pandas as pd    
             association_number = 0
             #output_file_associations  = open(str(self.output_dir)+'/associations.txt', 'w')
             #bcsvw = csv.writer(output_file_associations, csv.excel_tab)
@@ -601,12 +602,10 @@ class HAllA():
                 bcsvw.writerow(aLineOut)
                '''
                 if self.plotting_results:
+                    print "--- plotting associations ",association_number," ..."
                     cluster1 = [self.meta_array[0][i] for i in iX]
                     discretized_cluster1 = [self.meta_feature[0][i] for i in iX]
                     X_labels = np.array([self.aOutName1[i] for i in iX])
-                
-                    print "--- plotting associations ",association_number," ..."
-                    import pandas as pd
                     association_dir = self.output_dir + "/association_"+ str(association_number) + '/'
                     filename = association_dir +"original_data" + '/'
                     discretized_filename = association_dir+"discretized_data" + '/'
@@ -630,12 +629,13 @@ class HAllA():
                         sys.exit("Unable to create directory: "+dir)
                     plt.figure()  
                     try: 
-                        if len(discretized_cluster1) < 15:
+                        if len(discretized_cluster1) < 40:
+                            #print len(discretized_cluster1)
                             df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
                             axes = plot.scatter_matrix(df1, filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     except:
                         pass
-                    if len(discretized_cluster1) < 15:
+                    if len(discretized_cluster1) < 40:
                         discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
                         
                         discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
@@ -644,12 +644,12 @@ class HAllA():
                     discretized_cluster2 = [self.meta_feature[1][i] for i in iY]
                     Y_labels = np.array([self.aOutName2[i] for i in iY])
                     try:
-                        if len(discretized_cluster1) < 15:
+                        if len(discretized_cluster2) < 40:
                             df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
                             axes = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     except:
                         pass
-                    if len(discretized_cluster2) < 15:
+                    if len(discretized_cluster2) < 40:
                         discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
                         discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                     #concatenated_df = pd.concat([df1, df2],axis=1)
@@ -853,7 +853,7 @@ class HAllA():
         _report_associations()
         _report_compared_clusters()
         _plot_associations()
-        #_heatmap_associations_R()
+        #_heatmap_associations()
         #_heatmap_datasets_R()
         #_heatmap_associations()
         

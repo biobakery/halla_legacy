@@ -243,28 +243,62 @@ class Tree():
     def get_right_rep(self):
         return self.right_rep
     
-    def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold ):
+    def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold, decomp = 'mca' ):
+        return True
+    
         number_left_features = len(self.get_data()[0])
         number_right_features = len(self.get_data()[1])
         #print "Left:", number_left_features, len(self.get_left_loading())
         #print "Right:", number_right_features, len(self.get_right_loading())
-        print self.get_left_loading(), self.get_data()[0]
-        print self.get_right_loading(), self.get_data()[1]
+        #print self.get_left_loading(), self.get_data()[0]
+        #print self.get_right_loading(), self.get_data()[1]
         
         if len(self.get_left_loading()) == 1 and len(self.get_right_loading()) == 1:
-            print self.get_left_loading(), self.get_right_loading
+            #print self.get_left_loading(), self.get_right_loading
             return True
-        #print "\n"
-        for i in range(len(self.get_left_loading())):
-            #print self.get_left_loading()[i]
-            if math.fabs(self.get_left_loading()[i]) < .15:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
-                return False
-        #print "\n"
-        for i in range(len(self.get_right_loading())):
-            #print self.get_right_loading()[i]
-            if math.fabs(self.get_right_loading()[i]) < .15:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
-                return False
-        return True    
+   
+        '''
+        if decomp == 'mca':
+            counter = 0
+            if len(self.get_right_loading()) > 1:
+                right_loading_threshold = .1 #math.sqrt(1.0/len(self.get_right_loading())) - .01
+                for i in range(len(self.get_right_loading())):
+                    #print "right:", self.get_right_loading()[i]
+                    if math.fabs(self.get_right_loading()[i]) < right_loading_threshold:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
+                        return False
+                        counter += 1
+                        if counter > (number_right_features/2 +1):
+                            return False
+            counter = 0
+            if len(self.get_left_loading()) > 1:
+                    left_loading_threshold = .1 #math.sqrt(1.0/len(self.get_left_loading())) - .01
+                    for i in range(len(self.get_left_loading())):
+                        #print "left:", self.get_left_loading()[i]
+                        if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
+                            return False
+                            counter += 1
+                            if counter > (number_left_features/2):
+                                return False
+            return True
+        '''
+        if len(self.get_right_loading()) > 1:
+                right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) - .1
+                for i in range(len(self.get_right_loading())):
+                    #print "right:", self.get_right_loading()[i]
+                    if math.fabs(self.get_right_loading()[i]) < right_loading_threshold:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
+                        counter += 1
+                        if counter > (number_right_features/2):
+                            return False
+        counter = 0
+        if len(self.get_left_loading()) > 1:
+                left_loading_threshold = math.sqrt(1.0/len(self.get_left_loading())) - .1
+                for i in range(len(self.get_left_loading())):
+                    #print "left:", self.get_left_loading()[i]
+                    if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
+                        counter += 1
+                        if counter > (number_left_features/2):
+                            return False
+        return True 
             
         '''
         if all([ True if self.get_left_loading()[i] >= .5 else False for i in range(len(self.get_left_loading()))]) and\
@@ -302,7 +336,7 @@ class Tree():
         #  test_level/ (hypotheses_tree_heigth - self.get_level_number()+1) or\
         #if self.get_qvalue()  >  self.get_pvalue() / test_level * self.get_level_number()/ hypotheses_tree_heigth or\
         #/ sub_hepotheses * (hypotheses_tree_heigth -self.get_level_number() +1):#/ self.get_level_number():#
-        if self.get_pvalue()  > (1.0 - .25):# or\
+        if self.get_qvalue()  > (1.0 - .2):# or\
             #(self.get_left_first_rep_variance() > .9 and \
             #self.get_right_first_rep_variance()> .9):
             print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
@@ -1151,7 +1185,7 @@ def _is_start(ClusterNode, X, func, distance):
         return False
 
 def _is_stop(ClusterNode, dataSet, max_dist_cluster, threshold = None):
-        node_indeces = reduce_tree(ClusterNode)
+        #node_indeces = reduce_tree(ClusterNode)
         #first_PC = stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
         if ClusterNode.is_leaf():# or _percentage(ClusterNode.dist, max_dist_cluster) < .1 or first_PC > .9:
             #print "Node: ",node_indeces
@@ -1240,6 +1274,7 @@ def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
     number_of_sub_cluters_threshold = round(2*math.log(n, 2)) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
+    number_of_feature_in_each_cluter_threshold = n/2
     #print "n: ", n
     sub_clusters = []
     while clusterNode :
@@ -1262,6 +1297,24 @@ def _cutree (clusterNodelist, first = False):
         else:
             break
     #print "len of subcluster: ", len(sub_clusters)
+    '''
+    temp_sub_clusters = []
+    temp_sub_clusters += sub_clusters
+    next_iter_sub_clusters = []
+    while len(sub_clusters) > 0:
+        for sub_cluster in sub_clusters:
+            if  sub_cluster.get_count() > number_of_feature_in_each_cluter_threshold:
+                print "number of features in cluster with", n, " features: ",sub_cluster.get_count()
+                sub_sub_clusters = truncate_tree([sub_cluster], level=0, skip=1)
+                temp_sub_clusters.remove(sub_cluster)
+                temp_sub_clusters += sub_sub_clusters
+                next_iter_sub_clusters += sub_sub_clusters
+            else:
+                print "!!!Good!!!number of features in cluster with", n, " features: ",sub_cluster.get_count()
+        sub_clusters = next_iter_sub_clusters
+        next_iter_sub_clusters = []
+     '''   
+
     return sub_clusters
 
     
@@ -1663,7 +1716,7 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
 def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
-    iIter=1000, pursuer_method="nonparameteric", decomposition = "pca", bVerbose=False, afThreshold=.2, fAlpha=0.05, orginal_data = None):
+    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, afThreshold=.2, fAlpha=0.05, orginal_data = None):
     """
     Perform all-against-all on a hypothesis tree.
 
@@ -1759,7 +1812,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 Current_Family_Children[i].set_pvalue(_actor(Current_Family_Children[i]))
             
                 aOut.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_pvalue(), Current_Family_Children[i].get_pvalue()])
-                if Current_Family_Children[i].is_qualified_association(pvalue_threshold = fQ, pc_threshold = afThreshold , sim_threshold = afThreshold):
+                if Current_Family_Children[i].is_qualified_association(pvalue_threshold = fQ, pc_threshold = afThreshold , sim_threshold = afThreshold, decomp = decomposition):
                     Current_Family_Children[i].report()
                     number_passed_tests += 1
                     aFinal.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_pvalue(), Current_Family_Children[i].get_pvalue()])
@@ -1813,7 +1866,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                     max_r_t = pRank[i]
                     # print "max_r_t", max_r_t
             for i in range(len(aP)):
-                if pRank[i] <= max_r_t and Current_Family_Children[i].is_qualified_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
+                if pRank[i] <= max_r_t and Current_Family_Children[i].is_qualified_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ, decomp = decomposition):
                     number_passed_tests += 1
                     print "-- associations after fdr correction"
                     if bVerbose:
@@ -1989,7 +2042,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 for i in range(len(current_level_tests)):
                     if current_level_tests[i].get_significance_status() == None and\
                     current_level_tests[i].get_rank() <= max_r_t and\
-                    current_level_tests[i].is_qualified_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
+                    current_level_tests[i].is_qualified_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ, decomp = decomposition):
                         number_passed_tests += 1
                         if bVerbose:
                             current_level_tests[i].report()
@@ -2089,7 +2142,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
             for i in range(len(aP)):
                 # print "NMI", Current_Family_Children[i].get_similarity_score()
                 performed_tests.append([Current_Family_Children[i], float(aP[i])])    
-                if Current_Family_Children[i].is_qualified_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ):
+                if Current_Family_Children[i].is_qualified_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ, decomp = decomposition):
                     Current_Family_Children[i].report()
                     end_level_tests.append([Current_Family_Children[i], float(aP[i])])
                     round1_passed_tests.append([Current_Family_Children[i], float(aP[i])])
