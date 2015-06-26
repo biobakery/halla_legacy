@@ -79,6 +79,7 @@ class HAllA():
         self.strFile2 = None
         self.outcome = None
         self.pvalues = None
+        
         #==================================================================#
         # Static Objects  
         #==================================================================#
@@ -992,6 +993,9 @@ class HAllA():
         * Visually, looks much nicer and is much nicely wrapped if functions are entirely self-contained and we do not have to pass around pointers 
 
         """
+        if self.output_dir == "./":
+            self.output_dir = "./"+self.descending+'_'+self.distance+'_'+self.decomposition +'_'+ str(len(self.meta_array[0]))+'_'+str(len(self.meta_array[0][1]))
+            os.mkdir(self.output_dir)
         try:    
             performance_file  = open(str(self.output_dir)+'/performance.txt', 'w')
         except IOError:
