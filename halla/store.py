@@ -42,7 +42,7 @@ class HAllA():
         self.decomposition = "pca" 
         self.fdr_function = "BHL"
         self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
-        self.q = .1  
+        self.q = .2  
         self.iterations = 1000
         self.p_adjust_method = "BH"
         self.randomization_method = "permutation"  # method to generate error bars 
