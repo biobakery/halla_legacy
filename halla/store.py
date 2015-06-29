@@ -997,21 +997,21 @@ class HAllA():
             self.output_dir = "./"+self.descending+'_'+self.distance+'_'+self.decomposition +'_'+ str(len(self.meta_array[0]))+'_'+str(len(self.meta_array[0][1]))
             if not os.path.isdir(self.output_dir):
                 try:
-                    print("Creating output directory: " + self.out_dir)
-                    os.mkdir(self.out_dir)
+                    print("Creating output directory: " + self.output_dir)
+                    os.mkdir(self.output_dir)
                 except EnvironmentError:
                     sys.exit("CRITICAL ERROR: Unable to create output directory.")
             else:
                 try:
-                    print("Removing the old output directory: " + self.out_dir)
-                    shutil.rmtree(self.out_dir)
-                    print("Creating output directory: " + self.out_dir)
-                    os.mkdir(self.out_dir)
+                    print("Removing the old output directory: " + self.output_dir)
+                    shutil.rmtree(self.output_dir)
+                    print("Creating output directory: " + self.output_dir)
+                    os.mkdir(self.output_dir)
                 except EnvironmentError:
                     sys.exit("CRITICAL ERROR: Unable to create output directory.")
         
         try:    
-            performance_file  = open(str(self.self.out_dir)+'/performance.txt', 'w')
+            performance_file  = open(str(self.output_dir)+'/performance.txt', 'w')
         except IOError:
             sys.exit("IO Exception: "+self.output_dir+"/performance.txt") 
         csvw = csv.writer(performance_file, csv.excel_tab)
