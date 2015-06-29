@@ -55,6 +55,7 @@ class HAllA():
         self.output_dir = "./"
         self.plotting_results = False
         self.bypass_discretizing = False
+        self.apply_stop_condition = False
         #==================================================================#
         # Mutable Meta Objects  
         #==================================================================#
@@ -313,7 +314,7 @@ class HAllA():
             print ("HAllA PROMPT: q value", fQ)
             print ("q value is", fQ) 
         
-        self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose,  orginal_data = self.meta_array) 
+        self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose, apply_stop_condition = self.apply_stop_condition, orginal_data = self.meta_array) 
         # # Choose to keep to 2 arrays for now -- change later to generalize 
         #return self.meta_alla 
 

@@ -215,6 +215,11 @@ def parse_arguments (args):
         "--bypass-discretizing", 
         help="bypass the discretizing step", 
         action="store_true")
+    argp.add_argument(
+        "--apply-stop-condition",
+        dest ="apply_stop_condition", 
+        help="stops when p_value > 1 - adusted_pavlue", 
+        action="store_true")
     
     argp.add_argument(
         "--header",
@@ -244,7 +249,7 @@ def set_HAllA_object (H, args):
     H.plotting_results = args.plotting_results
     H.descending = args.strDescending
     istm = list()  # X and Y are used to store datasets
-    
+    H.apply_stop_condition = args.apply_stop_condition
     # If Y was not set - we use X
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  
