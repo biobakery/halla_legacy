@@ -330,16 +330,16 @@ class Tree():
          '''
     def is_bypass(self ):#
         
-        #return False
+        return False
         #sub_hepotheses = math.log(len(self.get_data()[0]) * len(self.get_data()[1]), 2)
         #/ len(self.get_data()[0])* len(self.get_data()[1]) or\
         #  test_level/ (hypotheses_tree_heigth - self.get_level_number()+1) or\
         #if self.get_qvalue()  >  self.get_pvalue() / test_level * self.get_level_number()/ hypotheses_tree_heigth or\
         #/ sub_hepotheses * (hypotheses_tree_heigth -self.get_level_number() +1):#/ self.get_level_number():#
-        if self.get_qvalue()  > (1.0 - .2):# or\
+        if self.get_pvalue() > (1.0 - self.get_qvalue()):# or\
             #(self.get_left_first_rep_variance() > .9 and \
             #self.get_right_first_rep_variance()> .9):
-            print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
+            #print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
             return True
         else:
             return False

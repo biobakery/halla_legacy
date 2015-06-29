@@ -995,6 +995,7 @@ class HAllA():
         """
         if self.output_dir == "./":
             self.output_dir = "./"+self.descending+'_'+self.distance+'_'+self.decomposition +'_'+ str(len(self.meta_array[0]))+'_'+str(len(self.meta_array[0][1]))
+            shutil.rmtree(self.output_dir)
             os.mkdir(self.output_dir)
         try:    
             performance_file  = open(str(self.output_dir)+'/performance.txt', 'w')
