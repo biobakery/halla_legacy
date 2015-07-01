@@ -733,11 +733,11 @@ class HAllA():
                     else:
                         d_x_d_rep = association.get_left_rep()#stats.discretize(decomposition_method(discretized_df1))
                         d_y_d_rep = association.get_right_rep()#stats.discretize(decomposition_method(discretized_df2))
-                    
+                    d_x_d_rep, d_y_d_rep = zip(*sorted(zip(d_x_d_rep, d_y_d_rep)))
                     plot.confusion_matrix(d_x_d_rep, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
                     #plot.confusion_matrix(x_d_pc1, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix_pc_orginal_data.pdf' )
-                    plot.heatmap(array([d_x_d_rep]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'PCDataset_1_cluster_' + str(association_number) + '_heatmap')
-                    plot.heatmap(array([d_y_d_rep]), xlabels_order= x_label_order,  xlabels =X_labels, filename =discretized_filename + 'PCDataset_2_cluster_' + str(association_number) + '_heatmap')
+                    plot.heatmap(array([d_x_d_rep]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'PCDataset_1_cluster_' + str(association_number) + '_heatmap', sortCol = False)
+                    plot.heatmap(array([d_y_d_rep]), xlabels_order= x_label_order,  xlabels =X_labels, filename =discretized_filename + 'PCDataset_2_cluster_' + str(association_number) + '_heatmap', sortCol = False)
                     plt.close("all")
                 
         def _report_compared_clusters():

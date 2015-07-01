@@ -257,7 +257,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     fig.savefig(filename + '.pdf')
     pylab.close()
         
-def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True, color_bar = False):
+def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True, color_bar = False, sortCol = True):
     import scipy
     import pylab
     # import dot_parser
@@ -322,12 +322,13 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarch
         idx2 = [0]
     
     pArray = pArray[idx1, :]
-    if len(xlabels_order) == 0:
-        pArray = pArray[:, idx2]
-        xlabels_order.extend(idx2)
-    else:
-        #pass
-        pArray = pArray[:, xlabels_order]    
+    if sortCol:
+        if len(xlabels_order) == 0 :
+            pArray = pArray[:, idx2]
+            xlabels_order.extend(idx2)
+        else:
+            #pass
+            pArray = pArray[:, xlabels_order]    
     im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)#YlGnBu
     if colLable:
         if len(ylabels) == len(idx2):

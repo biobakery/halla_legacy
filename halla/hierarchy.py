@@ -244,7 +244,7 @@ class Tree():
         return self.right_rep
     
     def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold, decomp = 'mca' ):
-        return True
+        #return True
     
         number_left_features = len(self.get_data()[0])
         number_right_features = len(self.get_data()[1])
@@ -257,7 +257,7 @@ class Tree():
             #print self.get_left_loading(), self.get_right_loading
             return True
    
-        '''
+        
         if decomp == 'mca':
             counter = 0
             if len(self.get_right_loading()) > 1:
@@ -280,7 +280,8 @@ class Tree():
                             if counter > (number_left_features/2):
                                 return False
             return True
-        '''
+        else:# NOT MCA
+            return True
         if len(self.get_right_loading()) > 1:
                 right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) - .1
                 for i in range(len(self.get_right_loading())):
