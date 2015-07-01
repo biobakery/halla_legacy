@@ -261,7 +261,7 @@ class Tree():
         if decomp == 'mca':
             counter = 0
             if len(self.get_right_loading()) > 1:
-                right_loading_threshold = .1 #math.sqrt(1.0/len(self.get_right_loading())) - .01
+                right_loading_threshold = .15 #math.sqrt(1.0/len(self.get_right_loading())) - .01
                 for i in range(len(self.get_right_loading())):
                     #print "right:", self.get_right_loading()[i]
                     if math.fabs(self.get_right_loading()[i]) < right_loading_threshold:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
@@ -271,7 +271,7 @@ class Tree():
                             return False
             counter = 0
             if len(self.get_left_loading()) > 1:
-                    left_loading_threshold = .1 #math.sqrt(1.0/len(self.get_left_loading())) - .01
+                    left_loading_threshold = .15 #math.sqrt(1.0/len(self.get_left_loading())) - .01
                     for i in range(len(self.get_left_loading())):
                         #print "left:", self.get_left_loading()[i]
                         if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
@@ -1190,7 +1190,7 @@ def _is_start(ClusterNode, X, func, distance):
 def _is_stop(ClusterNode, dataSet, max_dist_cluster, threshold = None):
         #node_indeces = reduce_tree(ClusterNode)
         #first_PC = stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
-        if ClusterNode.is_leaf():# or _percentage(ClusterNode.dist, max_dist_cluster) < .1 or first_PC > .9:
+        if ClusterNode.is_leaf() or _percentage(ClusterNode.dist, max_dist_cluster) < .25:# or first_PC > .9:
             #print "Node: ",node_indeces
             #print "dist:", ClusterNode.dist, " first_PC:", first_PC,"\n"
             return True
