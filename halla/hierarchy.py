@@ -1387,8 +1387,12 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 
     # Create the root of the coupling tree
     for a, b in itertools.product(apClusterNode1, apClusterNode2):
-        data1 = a.pre_order(lambda x: x.id)
-        data2 = b.pre_order(lambda x: x.id)
+        try:
+            data1 = a.pre_order(lambda x: x.id)
+            data2 = b.pre_order(lambda x: x.id)
+        except:
+            data1 = reduce_tree(a)
+            data2 = reduce_tree(b)
     pStump = Tree([data1, data2])
     pStump.set_level_number(0)
     aOut.append(pStump)
@@ -1400,8 +1404,12 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     childList = []
     L = []    
     for a, b in itertools.product(apChildren1, apChildren2):
-        data1 = a.pre_order(lambda x: x.id)
-        data2 = b.pre_order(lambda x: x.id)
+        try:
+            data1 = a.pre_order(lambda x: x.id)
+            data2 = b.pre_order(lambda x: x.id)
+        except:
+            data1 = reduce_tree(a)
+            data2 = reduce_tree(b)
         tempTree = Tree(data=[data1, data2], left_distance=a.dist, right_distance=b.dist)
         tempTree.set_level_number(1)
         childList.append(tempTree)
@@ -1414,9 +1422,12 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
         (pStump, (a, b)) = L.pop(0)
         #print "child list:", tempNode
         #continue
-        data1 = a.pre_order(lambda x: x.id)
-        data2 = b.pre_order(lambda x: x.id)
-                
+        try:
+            data1 = a.pre_order(lambda x: x.id)
+            data2 = b.pre_order(lambda x: x.id)
+        except:
+            data1 = reduce_tree(a)
+            data2 = reduce_tree(b)        
         bTauX = _is_stop(a, X, max_dist_cluster1, threshold)  # ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
         bTauY = _is_stop(b, Y, max_dist_cluster2, threshold)  # ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
         if bTauX and bTauY :
@@ -1444,8 +1455,13 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
         childList = []
         while LChild:
             (a1, b1) = LChild.pop(0)
-            data1 = a1.pre_order(lambda x: x.id)
-            data2 = b1.pre_order(lambda x: x.id)
+            try:
+                data1 = a1.pre_order(lambda x: x.id)
+                data2 = b1.pre_order(lambda x: x.id)
+            except:
+                data1 = reduce_tree(a1)
+                data2 = reduce_tree(b1)
+            
             tempTree = Tree(data=[data1, data2], left_distance=a1.dist, right_distance=b1.dist)
             tempTree.set_level_number(level_number)
             childList.append(tempTree)
