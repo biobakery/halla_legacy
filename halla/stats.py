@@ -683,21 +683,22 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	#	fAssociation = numpy.mean(numpy.array([pMe(pArray1[i], pArray2[j]) for i, j in itertools.product(range(len(pArray1)), range(len(pArray2)))]))
 	#else:
 		
-	fAssociation = pMe(pRep1, pRep2) 
+	fAssociation = pMe(pRep1, pRep2)
+	fP = 1.0 
 	# print left_rep_variance, right_rep_variance, fAssociation
 	#### Perform Permutation 
 	
-	def _calculate_pvalue():
+	def _calculate_pvalue(iter):
 		fPercentile = percentileofscore(aDist, fAssociation, kind = 'strict')#, kind="mean")  # #source: Good 2000  
 	# ## \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
 	# ## k number of iterations, \hat{X} is randomized version of X 
 	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
 	# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
 
-		fP = ((1.0 - fPercentile / 100.0) * iIter + 1) / (iIter + 1)
+		fP = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
 		return fP
 	
-	fP = 1.0
+	iter = iIter
 	for i in xrange(iIter):
 
 		#XP = array([numpy.random.permutation(x) for x in X])
@@ -706,8 +707,9 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		#pRep2_, _, _ = mca_method(YP)#
 		#pRep1_, pRep2_ = [ discretize(pDe(pA))[0] for pA in [XP, YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 		if i % 50 == 0:
-			new_fP = _calculate_pvalue()
+			new_fP = _calculate_pvalue(i)
 			if new_fP >= fP:
+				iter = i
 				#print "Break before the end of permutation iterations"
 				break
 			else: 
@@ -726,7 +728,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
 	# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
 
-	fP = ((1.0 - fPercentile / 100.0) * iIter + 1) / (iIter + 1)
+	fP = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
 	
 	assert(fP <= 1.0)
 	#print fP

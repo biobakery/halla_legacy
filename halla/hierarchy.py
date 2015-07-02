@@ -9,7 +9,7 @@ import math
 from numpy import array , rank
 import numpy 
 import scipy.cluster 
-from scipy.cluster.hierarchy import linkage, to_tree
+from scipy.cluster.hierarchy import linkage, to_tree, leaves_list
 from scipy.spatial.distance import pdist
 import sys
 import matplotlib.pyplot as plt
@@ -250,8 +250,8 @@ class Tree():
         number_right_features = len(self.get_data()[1])
         #print "Left:", number_left_features, len(self.get_left_loading())
         #print "Right:", number_right_features, len(self.get_right_loading())
-        #print self.get_left_loading(), self.get_data()[0]
-        #print self.get_right_loading(), self.get_data()[1]
+        print self.get_left_loading(), self.get_data()[0]
+        print self.get_right_loading(), self.get_data()[1]
         
         if len(self.get_left_loading()) == 1 and len(self.get_right_loading()) == 1:
             #print self.get_left_loading(), self.get_right_loading
@@ -331,14 +331,13 @@ class Tree():
          '''
     def is_bypass(self, apply_stop_condition, q  ):#
         if apply_stop_condition:
-            if self.get_pvalue() > (1.0 - q):# or\
+            if self.get_pvalue() > (1.0 - self.get_qvalue()):# or\  # the same as 1-p<q ~ p>1-q
             #(self.get_left_first_rep_variance() > .9 and \
             #self.get_right_first_rep_variance()> .9):
-                print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
+                #print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
                 return True
             else:
                 return False
-            return False
         return False
         #sub_hepotheses = math.log(len(self.get_data()[0]) * len(self.get_data()[1]), 2)
         #/ len(self.get_data()[0])* len(self.get_data()[1]) or\
@@ -1276,7 +1275,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(2*math.log(n, 2)) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
+    number_of_sub_cluters_threshold = round(2*math.log(n, 2) + .5) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
     number_of_feature_in_each_cluter_threshold = n/2
     #print "n: ", n
     sub_clusters = []
@@ -1388,8 +1387,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 
     # Create the root of the coupling tree
     for a, b in itertools.product(apClusterNode1, apClusterNode2):
-        data1 = reduce_tree(a)
-        data2 = reduce_tree(b)
+        data1 = a.pre_order(lambda x: x.id)
+        data2 = b.pre_order(lambda x: x.id)
     pStump = Tree([data1, data2])
     pStump.set_level_number(0)
     aOut.append(pStump)
@@ -1401,8 +1400,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     childList = []
     L = []    
     for a, b in itertools.product(apChildren1, apChildren2):
-        data1 = reduce_tree(a)
-        data2 = reduce_tree(b)
+        data1 = a.pre_order(lambda x: x.id)
+        data2 = b.pre_order(lambda x: x.id)
         tempTree = Tree(data=[data1, data2], left_distance=a.dist, right_distance=b.dist)
         tempTree.set_level_number(1)
         childList.append(tempTree)
@@ -1415,8 +1414,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
         (pStump, (a, b)) = L.pop(0)
         #print "child list:", tempNode
         #continue
-        data1 = reduce_tree(a)
-        data2 = reduce_tree(b)
+        data1 = a.pre_order(lambda x: x.id)
+        data2 = b.pre_order(lambda x: x.id)
                 
         bTauX = _is_stop(a, X, max_dist_cluster1, threshold)  # ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
         bTauY = _is_stop(b, Y, max_dist_cluster2, threshold)  # ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
@@ -1445,8 +1444,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
         childList = []
         while LChild:
             (a1, b1) = LChild.pop(0)
-            data1 = reduce_tree(a1)
-            data2 = reduce_tree(b1)
+            data1 = a1.pre_order(lambda x: x.id)
+            data2 = b1.pre_order(lambda x: x.id)
             tempTree = Tree(data=[data1, data2], left_distance=a1.dist, right_distance=b1.dist)
             tempTree.set_level_number(level_number)
             childList.append(tempTree)
@@ -1719,7 +1718,7 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
 def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
-    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, afThreshold=.2, fAlpha=0.05, apply_stop_condition = True, orginal_data = None):
+    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, afThreshold=.2, fAlpha=0.05, apply_stop_condition = True):
     """
     Perform all-against-all on a hypothesis tree.
 

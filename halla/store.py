@@ -54,6 +54,7 @@ class HAllA():
         self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
         self.output_dir = "./"
         self.plotting_results = False
+        self.heatmap_all = False
         self.bypass_discretizing = False
         self.apply_stop_condition = False
         #==================================================================#
@@ -314,7 +315,7 @@ class HAllA():
             print ("HAllA PROMPT: q value", fQ)
             print ("q value is", fQ) 
         
-        self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose, apply_stop_condition = self.apply_stop_condition, orginal_data = self.meta_array) 
+        self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose, apply_stop_condition = self.apply_stop_condition) 
         # # Choose to keep to 2 arrays for now -- change later to generalize 
         #return self.meta_alla 
 
@@ -532,7 +533,7 @@ class HAllA():
             output_file_associations  = open(str(self.output_dir)+'/associations.txt', 'w')
             bcsvw = csv.writer(output_file_associations, csv.excel_tab)
             #bcsvw.writerow(["Method: " + self.decomposition +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
-            bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the first representative of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
+            bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
     
             sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.pvalue)
             for association in sorted_associations:
@@ -736,8 +737,8 @@ class HAllA():
                     d_x_d_rep, d_y_d_rep = zip(*sorted(zip(d_x_d_rep, d_y_d_rep)))
                     plot.confusion_matrix(d_x_d_rep, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
                     #plot.confusion_matrix(x_d_pc1, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix_pc_orginal_data.pdf' )
-                    plot.heatmap(array([d_x_d_rep]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'PCDataset_1_cluster_' + str(association_number) + '_heatmap', sortCol = False)
-                    plot.heatmap(array([d_y_d_rep]), xlabels_order= x_label_order,  xlabels =X_labels, filename =discretized_filename + 'PCDataset_2_cluster_' + str(association_number) + '_heatmap', sortCol = False)
+                    plot.heatmap(array([d_x_d_rep]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Rep1_' + str(association_number) + '_heatmap', sortCol = False)
+                    plot.heatmap(array([d_y_d_rep]), xlabels_order= x_label_order,  xlabels =X_labels, filename =discretized_filename + 'Rep2_' + str(association_number) + '_heatmap', sortCol = False)
                     plt.close("all")
                 
         def _report_compared_clusters():
@@ -755,16 +756,18 @@ class HAllA():
             if self.plotting_results:
                 print "--- plotting heatmap of associations  ..."
                 global associated_feature_X_indecies
-                X_labels = np.array([self.aOutName1[i] for i in associated_feature_X_indecies])
+                Xs = list(set(associated_feature_X_indecies))
+                X_labels = np.array([self.aOutName1[i] for i in Xs])
                 global associated_feature_Y_indecies
-                Y_labels = np.array([self.aOutName2[i] for i in associated_feature_Y_indecies])
-                cluster1 = [self.meta_feature[0][i] for i in associated_feature_X_indecies]    
-                cluster2 = [self.meta_feature[1][i] for i in associated_feature_Y_indecies]
+                Ys = list(set(associated_feature_Y_indecies))
+                Y_labels = np.array([self.aOutName2[i] for i in Ys])
+                cluster1 = [self.meta_feature[0][i] for i in Xs]    
+                cluster2 = [self.meta_feature[1][i] for i in Ys]
                 df1 = np.array(cluster1, dtype=float)
                 df2 = np.array(cluster2, dtype=float)
-                p = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
-                nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
-                plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =associated_feature_X_indecies, ylabels = associated_feature_Y_indecies, filename = str(self.output_dir)+'/all_heatmap' )
+                p = np.zeros(shape=(len(Xs), len(Ys)))
+                nmi = np.zeros(shape=(len(Xs), len(Ys)))
+                plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =Xs, ylabels = Ys, filename = str(self.output_dir)+'/all_heatmap' )
         def _heatmap_associations_R():
             if self.plotting_results:
                 print "--- plotting heatmap associations using R ..."
@@ -855,7 +858,8 @@ class HAllA():
         _report_associations()
         _report_compared_clusters()
         _plot_associations()
-        #_heatmap_associations()
+        if self.heatmap_all:
+            _heatmap_associations()
         #_heatmap_datasets_R()
         #_heatmap_associations()
         

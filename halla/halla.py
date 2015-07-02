@@ -210,6 +210,10 @@ def parse_arguments (args):
         "--plotting-results", 
         help="plot the results", 
         action="store_true")
+    argp.add_argument(
+        "--heatmap-all", 
+        help="plot a heatmap for all participated features in at least one association", 
+        action="store_true")
     
     argp.add_argument(
         "--bypass-discretizing", 
@@ -247,6 +251,7 @@ def set_HAllA_object (H, args):
     H.threshold = args.dThreshold_similiarity
     H.output_dir = args.output_dir
     H.plotting_results = args.plotting_results
+    H.heatmap_all = args.heatmap_all
     H.descending = args.strDescending
     istm = list()  # X and Y are used to store datasets
     H.apply_stop_condition = args.apply_stop_condition
