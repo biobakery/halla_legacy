@@ -243,7 +243,7 @@ class Tree():
     def get_right_rep(self):
         return self.right_rep
     
-    def is_qualified_association(self, pvalue_threshold, pc_threshold, sim_threshold, decomp = 'mca' ):
+    def is_qualified_association(self, pvalue_threshold, pc_threshold, robustness, decomp = 'mca' ):
         #return True
     
         number_left_features = len(self.get_data()[0])
@@ -261,7 +261,7 @@ class Tree():
         if decomp == 'mca':
             counter = 0
             if len(self.get_right_loading()) > 1:
-                right_loading_threshold = .15 #math.sqrt(1.0/len(self.get_right_loading())) - .01
+                right_loading_threshold = robustness/2.0 #math.sqrt(1.0/len(self.get_right_loading())) - .01
                 for i in range(len(self.get_right_loading())):
                     #print "right:", self.get_right_loading()[i]
                     if math.fabs(self.get_right_loading()[i]) < right_loading_threshold:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
@@ -271,7 +271,7 @@ class Tree():
                             return False
             counter = 0
             if len(self.get_left_loading()) > 1:
-                    left_loading_threshold = .15 #math.sqrt(1.0/len(self.get_left_loading())) - .01
+                    left_loading_threshold = robustness/2.0 #math.sqrt(1.0/len(self.get_left_loading())) - .01
                     for i in range(len(self.get_left_loading())):
                         #print "left:", self.get_left_loading()[i]
                         if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
@@ -1186,7 +1186,7 @@ def _is_start(ClusterNode, X, func, distance):
     else: 
         return False
 
-def _is_stop(ClusterNode, dataSet, max_dist_cluster, threshold = None):
+def _is_stop(ClusterNode, dataSet, max_dist_cluster):
         #node_indeces = reduce_tree(ClusterNode)
         #first_PC = stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
         if ClusterNode.is_leaf() or _percentage(ClusterNode.dist, max_dist_cluster) < .25:# or first_PC > .9:
@@ -1275,7 +1275,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(2*math.log(n, 2) + .5) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
+    number_of_sub_cluters_threshold = round(math.log(n, 2) + .5) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
     number_of_feature_in_each_cluter_threshold = n/2
     #print "n: ", n
     sub_clusters = []
@@ -1320,7 +1320,7 @@ def _cutree (clusterNodelist, first = False):
     return sub_clusters
 
     
-def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uniform", strLinkage="min", func="nmi", threshold = None):
+def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uniform", strLinkage="min", func="nmi", robustness = None):
     
     """
     Couples two data trees to produce a hypothesis tree 
@@ -1428,8 +1428,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
         except:
             data1 = reduce_tree(a)
             data2 = reduce_tree(b)        
-        bTauX = _is_stop(a, X, max_dist_cluster1, threshold)  # ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
-        bTauY = _is_stop(b, Y, max_dist_cluster2, threshold)  # ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
+        bTauX = _is_stop(a, X, max_dist_cluster1)  # ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
+        bTauY = _is_stop(b, Y, max_dist_cluster2)  # ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
         if bTauX and bTauY :
             #print"leaf both"
             if L:
@@ -1734,7 +1734,7 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
 def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
-    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, afThreshold=.2, fAlpha=0.05, apply_stop_condition = True):
+    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness=.5, fAlpha=0.05, apply_stop_condition = True):
     """
     Perform all-against-all on a hypothesis tree.
 
@@ -1830,7 +1830,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 Current_Family_Children[i].set_pvalue(_actor(Current_Family_Children[i]))
             
                 aOut.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_pvalue(), Current_Family_Children[i].get_pvalue()])
-                if Current_Family_Children[i].is_qualified_association(pvalue_threshold = fQ, pc_threshold = afThreshold , sim_threshold = afThreshold, decomp = decomposition):
+                if Current_Family_Children[i].is_qualified_association(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
                     Current_Family_Children[i].report()
                     number_passed_tests += 1
                     aFinal.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_pvalue(), Current_Family_Children[i].get_pvalue()])
@@ -1884,7 +1884,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                     max_r_t = pRank[i]
                     # print "max_r_t", max_r_t
             for i in range(len(aP)):
-                if pRank[i] <= max_r_t and Current_Family_Children[i].is_qualified_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ, decomp = decomposition):
+                if pRank[i] <= max_r_t and Current_Family_Children[i].is_qualified_association(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
                     number_passed_tests += 1
                     print "-- associations after fdr correction"
                     if bVerbose:
@@ -2060,7 +2060,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 for i in range(len(current_level_tests)):
                     if current_level_tests[i].get_significance_status() == None and\
                     current_level_tests[i].get_rank() <= max_r_t and\
-                    current_level_tests[i].is_qualified_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ, decomp = decomposition):
+                    current_level_tests[i].is_qualified_association(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
                         number_passed_tests += 1
                         if bVerbose:
                             current_level_tests[i].report()
@@ -2160,7 +2160,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
             for i in range(len(aP)):
                 # print "NMI", Current_Family_Children[i].get_similarity_score()
                 performed_tests.append([Current_Family_Children[i], float(aP[i])])    
-                if Current_Family_Children[i].is_qualified_association(pc_threshold = afThreshold, sim_threshold = afThreshold, pvalue_threshold = fQ, decomp = decomposition):
+                if Current_Family_Children[i].is_qualified_association(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
                     Current_Family_Children[i].report()
                     end_level_tests.append([Current_Family_Children[i], float(aP[i])])
                     round1_passed_tests.append([Current_Family_Children[i], float(aP[i])])

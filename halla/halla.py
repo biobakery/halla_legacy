@@ -138,19 +138,19 @@ def parse_arguments (args):
 
     argp.add_argument(
         "-q", "--q-value",
-        metavar="<0.1>",
+        metavar="<0.2>",
         dest="dQ",
         type=float,
         default=0.2,
         help="q-value for overall significance tests (cut-off for false discovery rate)\n[default = 0.1]")
     
     argp.add_argument(
-        "-s", "--similarity-threshold",
-         metavar="<0.01>",
-         dest="dThreshold_similiarity", 
+        "-r", "--robustness",
+         metavar="<0.5>",
+         dest="robustness", 
          type=float,
-         default=0.01,
-         help="threshold for similarity to count a cluster as one unit and not consider sub-clusters as sub-unit\n[default = 0.01]")    
+         default=0.5,
+         help="threshold for robustness\n[default = 0.5]")    
     
     argp.add_argument(
         "-a","--descending",
@@ -248,7 +248,7 @@ def set_HAllA_object (H, args):
     H.randomization_method = args.strRandomization  # method to generate error bars 
     H.strStep = "uniform"
     H.verbose = args.verbose
-    H.threshold = args.dThreshold_similiarity
+    H.robustness = args.robustness
     H.output_dir = args.output_dir
     H.plotting_results = args.plotting_results
     H.heatmap_all = args.heatmap_all

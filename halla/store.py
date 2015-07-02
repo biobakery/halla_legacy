@@ -76,7 +76,7 @@ class HAllA():
         self.aOut = None  # summary output for naive approaches_
         self.aOutName1 = None 
         self.aOutName2 = None 
-        self.threshold = .05
+        self.robustness = .5
         self.strFile1 = None
         self.strFile2 = None
         self.outcome = None
@@ -298,7 +298,7 @@ class HAllA():
                 
         self.meta_hypothesis_tree = hierarchy.couple_tree(apClusterNode1=[self.meta_data_tree[0]],
                 apClusterNode2=[self.meta_data_tree[1]],
-                pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], func=self.distance, threshold = self.threshold)[0]
+                pArray1=self.meta_feature[0], pArray2=self.meta_feature[1], func=self.distance, robustness = self.robustness)[0]
         
         # # remember, `couple_tree` returns object wrapped in list 
         #return self.meta_hypothesis_tree 
@@ -315,7 +315,7 @@ class HAllA():
             print ("HAllA PROMPT: q value", fQ)
             print ("q value is", fQ) 
         
-        self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, afThreshold=self.threshold, bVerbose=self.verbose, apply_stop_condition = self.apply_stop_condition) 
+        self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, robustness=self.robustness, bVerbose=self.verbose, apply_stop_condition = self.apply_stop_condition) 
         # # Choose to keep to 2 arrays for now -- change later to generalize 
         #return self.meta_alla 
 
@@ -766,27 +766,29 @@ class HAllA():
                 df1 = np.array(cluster1, dtype=float)
                 df2 = np.array(cluster2, dtype=float)
                 p = np.zeros(shape=(len(Xs), len(Ys)))
-                nmi = np.zeros(shape=(len(Xs), len(Ys)))
+                #nmi = np.zeros(shape=(len(Xs), len(Ys)))
                 plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =Xs, ylabels = Ys, filename = str(self.output_dir)+'/all_heatmap' )
         def _heatmap_associations_R():
             if self.plotting_results:
                 print "--- plotting heatmap associations using R ..."
                 from scipy.stats.stats import pearsonr
                 global associated_feature_X_indecies
-                X_labels = np.array([self.aOutName1[i] for i in associated_feature_X_indecies])
+                Xs = list(set(associated_feature_X_indecies)) 
+                X_labels = np.array([self.aOutName1[i] for i in Xs])
                 global associated_feature_Y_indecies
-                Y_labels = np.array([self.aOutName2[i] for i in associated_feature_Y_indecies])
-                cluster1 = [self.meta_feature[0][i] for i in associated_feature_X_indecies]    
-                cluster2 = [self.meta_feature[1][i] for i in associated_feature_Y_indecies]
+                Ys = list(set(associated_feature_Y_indecies))
+                Y_labels = np.array([self.aOutName2[i] for i in Ys])
+                cluster1 = [self.meta_feature[0][i] for i in Xs]    
+                cluster2 = [self.meta_feature[1][i] for i in Ys]
                 df1 = np.array(cluster1, dtype=float)
                 df2 = np.array(cluster2, dtype=float)
-                p = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
-                for i in range(len(associated_feature_X_indecies)):
-                    for j in range(len(associated_feature_Y_indecies)):
+                p = np.zeros(shape=(len(Xs), len(Ys)))
+                for i in range(len(Xs)):
+                    for j in range(len(Ys)):
                         p[i][j] = pearsonr(df1[i], df2[j])[0]
-                nmi = np.zeros(shape=(len(associated_feature_X_indecies), len(associated_feature_Y_indecies)))
-                for i in range(len(associated_feature_X_indecies)):
-                    for j in range(len(associated_feature_Y_indecies)):
+                nmi = np.zeros(shape=(len(Xs), len(Ys)))
+                for i in range(len(Xs)):
+                    for j in range(len(Ys)):
                         nmi[i][j] = distance.NormalizedMutualInformation(df1[i], df2[j]).get_distance()
                         
                 
@@ -860,8 +862,8 @@ class HAllA():
         _plot_associations()
         if self.heatmap_all:
             _heatmap_associations()
+            _heatmap_associations_R()
         #_heatmap_datasets_R()
-        #_heatmap_associations()
         
         return self.meta_report 
 
