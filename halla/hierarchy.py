@@ -1275,7 +1275,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(math.log(n, 2) + .5) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
+    number_of_sub_cluters_threshold = round(math.log(n, 2) * 2 + .5) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
     number_of_feature_in_each_cluter_threshold = n/2
     #print "n: ", n
     sub_clusters = []
