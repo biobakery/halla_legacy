@@ -264,7 +264,7 @@ class Tree():
                 right_loading_threshold = robustness/2.0 #math.sqrt(1.0/len(self.get_right_loading())) - .01
                 for i in range(len(self.get_right_loading())):
                     #print "right:", self.get_right_loading()[i]
-                    if math.fabs(self.get_right_loading()[i]) < right_loading_threshold:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
+                    if np.mean(self.get_right_loading()) < .5 :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                         return False
                         counter += 1
                         if counter > (number_right_features/2 +1):
@@ -274,7 +274,7 @@ class Tree():
                     left_loading_threshold = robustness/2.0 #math.sqrt(1.0/len(self.get_left_loading())) - .01
                     for i in range(len(self.get_left_loading())):
                         #print "left:", self.get_left_loading()[i]
-                        if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
+                        if np.mean(self.get_left_loading()) < left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
                             return False
                             counter += 1
                             if counter > (number_left_features/2):
@@ -1275,7 +1275,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(math.log(n, 2) * 2 + .5) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
+    number_of_sub_cluters_threshold = round(math.log(n, 2) * 2) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
     number_of_feature_in_each_cluter_threshold = n/2
     #print "n: ", n
     sub_clusters = []
