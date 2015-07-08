@@ -706,10 +706,11 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		#pRep1_, _, _ = mca_method(XP) #mean(pArray1)#[len(pArray1)/2]
 		#pRep2_, _, _ = mca_method(YP)#
 		#pRep1_, pRep2_ = [ discretize(pDe(pA))[0] for pA in [XP, YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
+		iter = i
 		if i % 50 == 0:
 			new_fP = _calculate_pvalue(i)
-			if new_fP >= fP:
-				iter = i
+			if new_fP > fP:
+				
 				#print "Break before the end of permutation iterations"
 				break
 			else: 
@@ -1522,7 +1523,7 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 			temp = numpy.array(astrValues).argsort()
 			order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
 			order = rankdata(order, method= 'ordinal') #array([order[i]+1.0 for i in range(len(order))])
-			print "str"
+			print "Discretizing categorical data!!!"
 		#elif type(astrValues[0]) == float or type(astrValues[0]) == int:
 
 		#print "prank",order

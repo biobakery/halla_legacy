@@ -250,8 +250,8 @@ class Tree():
         number_right_features = len(self.get_data()[1])
         #print "Left:", number_left_features, len(self.get_left_loading())
         #print "Right:", number_right_features, len(self.get_right_loading())
-        print self.get_left_loading(), self.get_data()[0]
-        print self.get_right_loading(), self.get_data()[1]
+        #print self.get_left_loading(), self.get_data()[0]
+        #print self.get_right_loading(), self.get_data()[1]
         
         if len(self.get_left_loading()) == 1 and len(self.get_right_loading()) == 1:
             #print self.get_left_loading(), self.get_right_loading
@@ -264,7 +264,8 @@ class Tree():
                 right_loading_threshold = robustness/2.0 #math.sqrt(1.0/len(self.get_right_loading())) - .01
                 for i in range(len(self.get_right_loading())):
                     #print "right:", self.get_right_loading()[i]
-                    if np.mean(self.get_right_loading()) < .5 :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
+                    #if np.mean(self.get_right_loading()) < .5 :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
+                    if math.fabs(self.get_right_loading()[i]) < right_loading_threshold :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                         return False
                         counter += 1
                         if counter > (number_right_features/2 +1):
@@ -274,7 +275,8 @@ class Tree():
                     left_loading_threshold = robustness/2.0 #math.sqrt(1.0/len(self.get_left_loading())) - .01
                     for i in range(len(self.get_left_loading())):
                         #print "left:", self.get_left_loading()[i]
-                        if np.mean(self.get_left_loading()) < left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
+                        #if np.mean(self.get_left_loading()) < .5:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
+                        if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:
                             return False
                             counter += 1
                             if counter > (number_left_features/2):
@@ -331,7 +333,7 @@ class Tree():
          '''
     def is_bypass(self, apply_stop_condition, q  ):#
         if apply_stop_condition:
-            if self.get_pvalue() > (1.0 - self.get_qvalue()):# or\  # the same as 1-p<q ~ p>1-q
+            if self.get_qvalue() > (1.0 - self.get_pvalue()):# or\  # the same as 1-p<q ~ p>1-q
             #(self.get_left_first_rep_variance() > .9 and \
             #self.get_right_first_rep_variance()> .9):
                 #print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
@@ -1189,7 +1191,7 @@ def _is_start(ClusterNode, X, func, distance):
 def _is_stop(ClusterNode, dataSet, max_dist_cluster):
         #node_indeces = reduce_tree(ClusterNode)
         #first_PC = stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
-        if ClusterNode.is_leaf() or _percentage(ClusterNode.dist, max_dist_cluster) < .25:# or first_PC > .9:
+        if ClusterNode.is_leaf():# or _percentage(ClusterNode.dist, max_dist_cluster) < .25:# or first_PC > .9:
             #print "Node: ",node_indeces
             #print "dist:", ClusterNode.dist, " first_PC:", first_PC,"\n"
             return True
@@ -1275,7 +1277,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(math.log(n, 2) * 2) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
+    number_of_sub_cluters_threshold = round(math.log(n, 2) * 2 + .5) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
     number_of_feature_in_each_cluter_threshold = n/2
     #print "n: ", n
     sub_clusters = []
@@ -2096,7 +2098,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                         if bVerbose:
                             print "Hypotheses testing level ", level, " is finished."                        
             #return aFinal, aOut                
-            apChildren = current_level_tests #next_level_apChildren #current_level_tests #
+            apChildren = current_level_tests #next_level_apChildren #
             print "Hypotheses testing level ", level, "with ",len(current_level_tests), "hypotheses is finished."
             level += 1
             #q = fQ - fQ*max_r_t/100.0

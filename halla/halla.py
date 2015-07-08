@@ -149,7 +149,7 @@ def parse_arguments (args):
          metavar="<0.5>",
          dest="robustness", 
          type=float,
-         default=0.5,
+         default=1.0,
          help="threshold for robustness\n[default = 0.5]")    
     
     argp.add_argument(
