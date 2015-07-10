@@ -1508,6 +1508,16 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 	"""
 	
 	def _discretize_continuous(astrValues, iN=iN):
+		if len(set(astrValues)) < math.sqrt(len(astrValues)):
+			try:
+				return rankdata(astrValues, method= 'dense')
+			except:
+				temp = numpy.array(astrValues).argsort()
+				order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
+				order = rankdata(order, method= 'dense') #array([order[i]+1.0 for i in range(len(order))])
+				print "Discretizing categorical data!!!"
+					
+				
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
 			iN = round(math.sqrt(len(astrValues)))  # **0.5 + 0.5)
@@ -1515,6 +1525,7 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 			iN = len(astrValues)
 		else:
 			iN = min(iN, len(set(astrValues)))
+		
 		try:
 			order = rankdata(astrValues, method= 'ordinal')
 		except: 
