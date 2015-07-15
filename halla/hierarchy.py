@@ -336,6 +336,8 @@ class Tree():
             if self.get_qvalue() > (1.0 - self.get_pvalue()):# or\  # the same as 1-p<q ~ p>1-q
             #(self.get_left_first_rep_variance() > .9 and \
             #self.get_right_first_rep_variance()> .9):
+                #print self.get_left_loading(), self.get_data()[0]
+                #print self.get_right_loading(), self.get_data()[1]
                 #print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
                 return True
             else:
@@ -1277,7 +1279,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(math.log(n, 2) + .5) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
+    number_of_sub_cluters_threshold = round(math.log(n, 2)*2) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
     number_of_feature_in_each_cluter_threshold = n/2
     #print "n: ", n
     sub_clusters = []

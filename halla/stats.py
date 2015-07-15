@@ -707,6 +707,11 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		#pRep2_, _, _ = mca_method(YP)#
 		#pRep1_, pRep2_ = [ discretize(pDe(pA))[0] for pA in [XP, YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 		iter = i
+		permuted_pRep2 = numpy.random.permutation(pRep2)
+		# Similarity score between representatives  
+		#fAssociation_permuted = pMe(pRep1_, pRep2_)  # NMI
+		fAssociation_permuted = pMe(pRep1, permuted_pRep2)  # NMI
+		aDist.append(fAssociation_permuted)
 		if i % 50 == 0:
 			new_fP = _calculate_pvalue(i)
 			if new_fP > fP:
@@ -715,11 +720,6 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 				break
 			else: 
 				fP = new_fP
-		permuted_pRep2 = numpy.random.permutation(pRep2)
-		# Similarity score between representatives  
-		#fAssociation_ = pMe(pRep1_, pRep2_)  # NMI
-		fAssociation_ = pMe(pRep1, permuted_pRep2)  # NMI
-		aDist.append(fAssociation_)
 
 		# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	

@@ -761,13 +761,14 @@ class HAllA():
                 global associated_feature_Y_indecies
                 Ys = list(set(associated_feature_Y_indecies))
                 Y_labels = np.array([self.aOutName2[i] for i in Ys])
-                cluster1 = [self.meta_feature[0][i] for i in Xs]    
-                cluster2 = [self.meta_feature[1][i] for i in Ys]
-                df1 = np.array(cluster1, dtype=float)
-                df2 = np.array(cluster2, dtype=float)
-                p = np.zeros(shape=(len(Xs), len(Ys)))
-                #nmi = np.zeros(shape=(len(Xs), len(Ys)))
-                plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =Xs, ylabels = Ys, filename = str(self.output_dir)+'/all_heatmap' )
+                if len(Xs) > 0 and len(Ys) > 0: 
+                    cluster1 = [self.meta_feature[0][i] for i in Xs]    
+                    cluster2 = [self.meta_feature[1][i] for i in Ys]
+                    df1 = np.array(cluster1, dtype=float)
+                    df2 = np.array(cluster2, dtype=float)
+                    p = np.zeros(shape=(len(Xs), len(Ys)))
+                    #nmi = np.zeros(shape=(len(Xs), len(Ys)))
+                    plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename = str(self.output_dir)+'/all_nmi_heatmap' )
         def _heatmap_associations_R():
             if self.plotting_results:
                 print "--- plotting heatmap associations using R ..."
@@ -778,42 +779,43 @@ class HAllA():
                 global associated_feature_Y_indecies
                 Ys = list(set(associated_feature_Y_indecies))
                 Y_labels = np.array([self.aOutName2[i] for i in Ys])
-                cluster1 = [self.meta_feature[0][i] for i in Xs]    
-                cluster2 = [self.meta_feature[1][i] for i in Ys]
-                df1 = np.array(cluster1, dtype=float)
-                df2 = np.array(cluster2, dtype=float)
-                p = np.zeros(shape=(len(Xs), len(Ys)))
-                for i in range(len(Xs)):
-                    for j in range(len(Ys)):
-                        p[i][j] = pearsonr(df1[i], df2[j])[0]
-                nmi = np.zeros(shape=(len(Xs), len(Ys)))
-                for i in range(len(Xs)):
-                    for j in range(len(Ys)):
-                        nmi[i][j] = distance.NormalizedMutualInformation(df1[i], df2[j]).get_distance()
-                        
-                
-                import rpy2.robjects as ro
-                #import pandas.rpy.common as com
-                import rpy2.robjects.numpy2ri
-                rpy2.robjects.numpy2ri.activate()
-                ro.r('library("pheatmap")')
-                ro.globalenv['nmi'] = nmi
-                ro.globalenv['labRow'] = X_labels 
-                ro.globalenv['labCol'] = Y_labels
-                if len(associated_feature_X_indecies)>1 and len(associated_feature_Y_indecies)>1 :
+                if len(Xs) > 0 and len(Ys) > 0: 
+                    cluster1 = [self.meta_feature[0][i] for i in Xs]    
+                    cluster2 = [self.meta_feature[1][i] for i in Ys]
+                    df1 = np.array(cluster1, dtype=float)
+                    df2 = np.array(cluster2, dtype=float)
+                    p = np.zeros(shape=(len(Xs), len(Ys)))
+                    for i in range(len(Xs)):
+                        for j in range(len(Ys)):
+                            p[i][j] = pearsonr(df1[i], df2[j])[0]
+                    nmi = np.zeros(shape=(len(Xs), len(Ys)))
+                    for i in range(len(Xs)):
+                        for j in range(len(Ys)):
+                            nmi[i][j] = self.hash_metric[self.distance](df1[i], df2[j])
+                            
+                    
+                    import rpy2.robjects as ro
+                    #import pandas.rpy.common as com
+                    import rpy2.robjects.numpy2ri
+                    rpy2.robjects.numpy2ri.activate()
+                    ro.r('library("pheatmap")')
+                    ro.globalenv['nmi'] = nmi
+                    ro.globalenv['labRow'] = X_labels 
+                    ro.globalenv['labCol'] = Y_labels
                     #ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
-                    ro.globalenv['output_file_NMI'] = str(self.output_dir)+"/NMI_heatmap.pdf"
+                    ro.globalenv['output_file_NMI'] = str(self.output_dir)+"/" + self.distance+"_heatmap.pdf"
                     ro.globalenv['output_file_Pearson'] = str(self.output_dir)+"/Pearson_heatmap.pdf"
                     ro.r('colnames(nmi) = labCol')
                     ro.r('rownames(nmi) = labRow')
-                    ro.r('pheatmap(nmi, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T)')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                    ro.r('pheatmap(nmi, labRow = labRow, labCol = labCol, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=T, cluster_cols=T)')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                     ro.r('dev.off()')
-                    ro.globalenv['p'] = p
-                    #ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
-                    ro.r('colnames(p) = labCol')
-                    ro.r('rownames(p) = labRow')
-                    ro.r('pheatmap(p, , labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10)')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-                    ro.r('dev.off()')
+                    if self.distance != "pearson":
+                        ro.globalenv['p'] = p
+                        #ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
+                        ro.r('colnames(p) = labCol')
+                        ro.r('rownames(p) = labRow')
+                        ro.r('pheatmap(p, ,labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=T, cluster_cols=T)')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                        ro.r('dev.off()')
         def _heatmap_datasets_R():
             if self.plotting_results:
                 
@@ -824,36 +826,37 @@ class HAllA():
                 X_labels = np.array([self.aOutName1[i] for i in range(X_indecies)])
                 Y_indecies = len(self.aOutName2)
                 Y_labels = np.array([self.aOutName2[i] for i in range(Y_indecies)])
-                df1 = np.array(self.meta_feature[0], dtype=float)
-                df2 = np.array(self.meta_feature[1], dtype=float)
-                drows1 = np.zeros(shape=(X_indecies, X_indecies))
-                drows2 = np.zeros(shape=(Y_indecies, Y_indecies))
-                
-                for i in range(X_indecies):
-                    for j in range(X_indecies):
-                        drows1[i][j] = distance.NormalizedMutualInformation(df1[i], df1[j]).get_distance() 
-                
-                for i in range(Y_indecies):
-                    for j in range(Y_indecies):
-                        drows2[i][j] = distance.NormalizedMutualInformation(df2[i], df2[j]).get_distance()       
-                
-                import rpy2.robjects as ro
-                #import pandas.rpy.common as com
-                import rpy2.robjects.numpy2ri
-                rpy2.robjects.numpy2ri.activate()
-                ro.r('library("pheatmap")')
-                ro.globalenv['drows1'] = drows1
-                ro.globalenv['labRow'] = X_labels 
-                ro.globalenv['D1'] = str(self.output_dir)+"/D1_heatmap.pdf"
-                ro.r('rownames(drows1) = labRow')
-                ro.r('pheatmap(drows1, filename =D1, cellwidth = 10, treeheight_row = 100, cellheight = 10, fontsize = 10, show_rownames = T, dendrogram="row", Colv="NA", show_colnames = F, cluster_cols=F, clustering_method="single")')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-                ro.r('dev.off()')
-                ro.globalenv['drows2'] = drows2
-                ro.globalenv['labRow'] = Y_labels
-                ro.globalenv['D2'] = str(self.output_dir)+"/D2_heatmap.pdf"
-                ro.r('rownames(drows2) = labRow')
-                ro.r('pheatmap(drows2, filename =D2, cellwidth = 10, cellheight = 10, fontsize = 10, treeheight_row =  200, show_rownames = T, dendrogram="row", Colv="NA", show_colnames = F, cluster_cols=F, clustering_method="single")')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-                ro.r('dev.off()')
+                if len(X_labels) > 0 and len(Y_labels) > 0: 
+                    df1 = np.array(self.meta_feature[0], dtype=float)
+                    df2 = np.array(self.meta_feature[1], dtype=float)
+                    drows1 = np.zeros(shape=(X_indecies, X_indecies))
+                    drows2 = np.zeros(shape=(Y_indecies, Y_indecies))
+                    
+                    for i in range(X_indecies):
+                        for j in range(X_indecies):
+                            drows1[i][j] = self.hash_metric[self.distance](df1[i], df1[j]) 
+                    
+                    for i in range(Y_indecies):
+                        for j in range(Y_indecies):
+                            drows2[i][j] = self.hash_metric[self.distance](df2[i], df2[j])    
+                    
+                    import rpy2.robjects as ro
+                    #import pandas.rpy.common as com
+                    import rpy2.robjects.numpy2ri
+                    rpy2.robjects.numpy2ri.activate()
+                    ro.r('library("pheatmap")')
+                    ro.globalenv['drows1'] = drows1
+                    ro.globalenv['labRow'] = X_labels 
+                    ro.globalenv['D1'] = str(self.output_dir)+"/D1_heatmap.pdf"
+                    ro.r('rownames(drows1) = labRow')
+                    ro.r('pheatmap(drows1, filename =D1, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T,  show_colnames = F, cluster_cols=T, dendrogram="row")')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                    ro.r('dev.off()')
+                    ro.globalenv['drows2'] = drows2
+                    ro.globalenv['labRow'] = Y_labels
+                    ro.globalenv['D2'] = str(self.output_dir)+"/D2_heatmap.pdf"
+                    ro.r('rownames(drows2) = labRow')
+                    ro.r('pheatmap(drows2, filename =D2, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T,  show_colnames = F, cluster_cols=T, dendrogram="row")')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                    ro.r('dev.off()')
                 
         # Execute report functions
         _report_all_tests()
@@ -863,7 +866,7 @@ class HAllA():
         if self.heatmap_all:
             _heatmap_associations()
             _heatmap_associations_R()
-        #_heatmap_datasets_R()
+            _heatmap_datasets_R()
         
         return self.meta_report 
 
@@ -1025,6 +1028,8 @@ class HAllA():
         csvw.writerow(["Decomposition method: ", self.decomposition])
         csvw.writerow(["Similarity method: ", self.distance]) 
         csvw.writerow(["q: FDR cut-off : ", self.q]) 
+        csvw.writerow(["r: effect size for robustness : ", self.robustness]) 
+        csvw.writerow(["Applied stop condition : ", self.apply_stop_condition]) 
         
         self._name_features()
         if not self.is_correct_submethods_combination():
@@ -1085,7 +1090,7 @@ class HAllA():
         csvw.writerow(["Plotting results time", str(datetime.timedelta(seconds=excution_time_temp)) ])
         print("--- %s h:m:s plotting results time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
         excution_time_temp = time.time() - execution_time
-        csvw.writerow(["Total execution time ---", str(datetime.timedelta(seconds=excution_time_temp))])
+        csvw.writerow(["Total execution time", str(datetime.timedelta(seconds=excution_time_temp))])
         print("--- in %s h:m:s the task is successfully done ---" % str(datetime.timedelta(seconds=excution_time_temp)) )
         return results
     
