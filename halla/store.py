@@ -826,7 +826,7 @@ class HAllA():
                         #ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
                         ro.r('colnames(p) = labCol')
                         ro.r('rownames(p) = labRow')
-                        ro.r('pheatmap(p, ,labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=T, cluster_cols=T, display_numbers = anottation_cell)')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                        ro.r('pheatmap(p, ,labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=T, cluster_cols=T, display_numbers = matrix(ifelse(test > 0, "*", ""), nrow(test)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                         ro.r('dev.off()')
         def _heatmap_datasets_R():
             if self.plotting_results:
