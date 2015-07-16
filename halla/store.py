@@ -564,7 +564,7 @@ class HAllA():
                                      fP_adjust,
                                      association_similarity])
                 bcsvw.writerow(aLineOut)
-                    
+        sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.pvalue)            
         def _plot_associations ():
             import pandas as pd    
             association_number = 0
@@ -573,7 +573,7 @@ class HAllA():
             #bcsvw.writerow(["Method: " + self.decomposition +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
             #bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the First PC of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
     
-            sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.pvalue)
+            
             for association in sorted_associations:
                 association_number += 1
                 iX, iY = association.get_data()
@@ -789,17 +789,29 @@ class HAllA():
                         for j in range(len(Ys)):
                             p[i][j] = pearsonr(df1[i], df2[j])[0]
                     nmi = np.zeros(shape=(len(Xs), len(Ys)))
+                    def _is_in_an_assciostions(i,j):
+                        for association in sorted_associations:
+                            iX, iY = association.get_data()
+                            if i in iX and j in iY:
+                                return True
+                        return False
+                         
                     for i in range(len(Xs)):
                         for j in range(len(Ys)):
                             nmi[i][j] = self.hash_metric[self.distance](df1[i], df2[j])
-                            
-                    
+                    anottation_cell = np.zeros(shape=(len(Xs), len(Ys)))                   
+                    for i in range(len(Xs)):
+                        for j in range(len(Ys)):
+                            if _is_in_an_assciostions(i,j): #for association in sorted_associations:
+                                anottation_cell[i][j] = 1        
+                    #print anottation_cell
                     import rpy2.robjects as ro
                     #import pandas.rpy.common as com
                     import rpy2.robjects.numpy2ri
                     rpy2.robjects.numpy2ri.activate()
                     ro.r('library("pheatmap")')
                     ro.globalenv['nmi'] = nmi
+                    ro.globalenv['test'] = anottation_cell
                     ro.globalenv['labRow'] = X_labels 
                     ro.globalenv['labCol'] = Y_labels
                     #ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
@@ -807,14 +819,14 @@ class HAllA():
                     ro.globalenv['output_file_Pearson'] = str(self.output_dir)+"/Pearson_heatmap.pdf"
                     ro.r('colnames(nmi) = labCol')
                     ro.r('rownames(nmi) = labRow')
-                    ro.r('pheatmap(nmi, labRow = labRow, labCol = labCol, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=T, cluster_cols=T)')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                    ro.r('pheatmap(nmi, labRow = labRow, labCol = labCol, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=T, cluster_cols=T, display_numbers = matrix(ifelse(test > 0, "*", ""), nrow(test)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                     ro.r('dev.off()')
                     if self.distance != "pearson":
                         ro.globalenv['p'] = p
                         #ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
                         ro.r('colnames(p) = labCol')
                         ro.r('rownames(p) = labRow')
-                        ro.r('pheatmap(p, ,labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=T, cluster_cols=T)')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                        ro.r('pheatmap(p, ,labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=T, cluster_cols=T, display_numbers = anottation_cell)')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                         ro.r('dev.off()')
         def _heatmap_datasets_R():
             if self.plotting_results:
