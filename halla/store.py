@@ -840,14 +840,14 @@ class HAllA():
                     ro.globalenv['output_file_Pearson'] = str(self.output_dir)+"/Pearson_heatmap.pdf"
                     ro.r('rownames(nmi) = labRow')
                     ro.r('colnames(nmi) = labCol')
-                    ro.r('pheatmap(nmi, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix1 > 0, "*", ""), nrow(sig_matrix1)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                    ro.r('pheatmap(nmi, labRow = labRow, labCol = labCol, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix1 > 0, "*", ""), nrow(sig_matrix1)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                     ro.r('dev.off()')
                     if self.distance != "pearson":
                         ro.globalenv['p'] = p
                         #ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
                         ro.r('rownames(p) = labRow')
                         ro.r('colnames(p) = labCol')
-                        ro.r('pheatmap(p, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix2 > 0, "*", ""), nrow(sig_matrix2)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                        ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix2 > 0, "*", ""), nrow(sig_matrix2)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                         ro.r('dev.off()')
         def _heatmap_datasets_R():
             if self.plotting_results:
