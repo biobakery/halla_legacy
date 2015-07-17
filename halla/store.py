@@ -34,6 +34,9 @@ from . import distance
 from . import stats
 from . import plot
 
+global D1_features_order , D2_features_order 
+D1_features_order  = []
+D2_features_order  = []
 
 class HAllA():
     
@@ -285,11 +288,16 @@ class HAllA():
 
         if pMethod:
             return pMethod()
-
+    
     def _hclust(self):
         # print self.meta_feature
-        self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[0] , strMetric= self.distance, labels=self.aOutName1, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
-        self.meta_data_tree.append(hierarchy.hclust(self.meta_feature[1] , strMetric= self.distance, labels=self.aOutName2, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir))
+        global D1_features_order
+        tree1, D1_features_order = hierarchy.hclust(self.meta_feature[0] , strMetric= self.distance, labels=self.aOutName1, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir)
+        self.meta_data_tree.append(tree1)
+        #print D1_features_order
+        global D2_features_order
+        tree2, D2_features_order = hierarchy.hclust(self.meta_feature[1] , strMetric= self.distance, labels=self.aOutName2, bTree=True, plotting_result = self.plotting_results , output_dir = self.output_dir)
+        self.meta_data_tree.append(tree2)
         # self.meta_data_tree = self.m( self.meta_feature, lambda x: hclust(x , bTree=True) )
         #print self.meta_data_tree
         return self.meta_data_tree 
@@ -564,7 +572,10 @@ class HAllA():
                                      fP_adjust,
                                      association_similarity])
                 bcsvw.writerow(aLineOut)
-        sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.pvalue)            
+        sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.pvalue)
+        global D1_features_order, D2_features_order
+        D1_features_order  = [i for i in range(len(self.meta_array[0]))]   
+        D2_features_order  = [i for i in range(len(self.meta_array[1]))]         
         def _plot_associations ():
             import pandas as pd    
             association_number = 0
@@ -761,7 +772,7 @@ class HAllA():
                 global associated_feature_Y_indecies
                 Ys = list(set(associated_feature_Y_indecies))
                 Y_labels = np.array([self.aOutName2[i] for i in Ys])
-                if len(Xs) > 0 and len(Ys) > 0: 
+                if len(Xs) > 1 and len(Ys) > 1: 
                     cluster1 = [self.meta_feature[0][i] for i in Xs]    
                     cluster2 = [self.meta_feature[1][i] for i in Ys]
                     df1 = np.array(cluster1, dtype=float)
@@ -779,16 +790,21 @@ class HAllA():
                 global associated_feature_Y_indecies
                 Ys = list(set(associated_feature_Y_indecies))
                 Y_labels = np.array([self.aOutName2[i] for i in Ys])
-                if len(Xs) > 0 and len(Ys) > 0: 
-                    cluster1 = [self.meta_feature[0][i] for i in Xs]    
-                    cluster2 = [self.meta_feature[1][i] for i in Ys]
-                    df1 = np.array(cluster1, dtype=float)
-                    df2 = np.array(cluster2, dtype=float)
-                    p = np.zeros(shape=(len(Xs), len(Ys)))
-                    for i in range(len(Xs)):
-                        for j in range(len(Ys)):
-                            p[i][j] = pearsonr(df1[i], df2[j])[0]
-                    nmi = np.zeros(shape=(len(Xs), len(Ys)))
+                if len(Xs) > 1 and len(Ys) > 1: 
+                    #cluster1 = [self.meta_feature[0][i] for i in Xs]    
+                    #cluster2 = [self.meta_feature[1][i] for i in Ys]
+                    #df1 = np.array(cluster1, dtype=float)
+                    #df2 = np.array(cluster2, dtype=float)
+                    #D1_features_order = sch.dendrogram(self.meta_data_tree[0], orientation='right')['leaves'] 
+                    #D2_features_order = sch.dendrogram(self.meta_data_tree[1], orientation='right')['leaves']
+                    global D1_features_order, D2_features_order
+                    #print D1_features_order, D2_features_order
+                    p = np.zeros(shape=(len(D1_features_order), len(D2_features_order))) 
+                    
+                    for i in range(len(D1_features_order)):
+                        for j in range(len(D2_features_order)):
+                            p[i][j] = pearsonr(np.array(self.meta_array[0][D1_features_order[i]], dtype=float), np.array(self.meta_array[1][D2_features_order[j]], dtype=float))[0]
+                    nmi = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))
                     def _is_in_an_assciostions(i,j):
                         for association in sorted_associations:
                             iX, iY = association.get_data()
@@ -796,14 +812,18 @@ class HAllA():
                                 return True
                         return False
                          
-                    for i in range(len(Xs)):
-                        for j in range(len(Ys)):
-                            nmi[i][j] = self.hash_metric[self.distance](df1[i], df2[j])
-                    anottation_cell = np.zeros(shape=(len(Xs), len(Ys)))                   
-                    for i in range(len(Xs)):
-                        for j in range(len(Ys)):
-                            if _is_in_an_assciostions(i,j): #for association in sorted_associations:
+                    for i in range(len(D1_features_order)):
+                        for j in range(len(D2_features_order)):
+                            nmi[i][j] = self.hash_metric[self.distance](self.meta_feature[0][D1_features_order[i]], self.meta_feature[1][D2_features_order[j]])
+                     
+                   
+                    anottation_cell = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))                
+                    for i in range(len(D1_features_order)):
+                        for j in range(len(D2_features_order)):
+                            if _is_in_an_assciostions(D1_features_order[i],D2_features_order[j]): #for association in sorted_associations:
                                 anottation_cell[i][j] = 1        
+                    #anottation_cell = [D1_features_order]
+                    #anottation_cell = [ anottation_cell[:][j] for j in D2_features_order]
                     #print anottation_cell
                     import rpy2.robjects as ro
                     #import pandas.rpy.common as com
@@ -811,22 +831,23 @@ class HAllA():
                     rpy2.robjects.numpy2ri.activate()
                     ro.r('library("pheatmap")')
                     ro.globalenv['nmi'] = nmi
-                    ro.globalenv['test'] = anottation_cell
-                    ro.globalenv['labRow'] = X_labels 
-                    ro.globalenv['labCol'] = Y_labels
+                    ro.globalenv['sig_matrix1'] = anottation_cell
+                    ro.globalenv['sig_matrix2'] = anottation_cell
+                    ro.globalenv['labRow'] = D1_features_order #X_labels 
+                    ro.globalenv['labCol'] = D2_features_order #Y_labels
                     #ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
                     ro.globalenv['output_file_NMI'] = str(self.output_dir)+"/" + self.distance+"_heatmap.pdf"
                     ro.globalenv['output_file_Pearson'] = str(self.output_dir)+"/Pearson_heatmap.pdf"
-                    ro.r('colnames(nmi) = labCol')
                     ro.r('rownames(nmi) = labRow')
-                    ro.r('pheatmap(nmi, labRow = labRow, labCol = labCol, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=T, cluster_cols=T, display_numbers = matrix(ifelse(test > 0, "*", ""), nrow(test)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                    ro.r('colnames(nmi) = labCol')
+                    ro.r('pheatmap(nmi, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix1 > 0, "*", ""), nrow(sig_matrix1)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                     ro.r('dev.off()')
                     if self.distance != "pearson":
                         ro.globalenv['p'] = p
                         #ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
-                        ro.r('colnames(p) = labCol')
                         ro.r('rownames(p) = labRow')
-                        ro.r('pheatmap(p, ,labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=T, cluster_cols=T, display_numbers = matrix(ifelse(test > 0, "*", ""), nrow(test)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                        ro.r('colnames(p) = labCol')
+                        ro.r('pheatmap(p, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix2 > 0, "*", ""), nrow(sig_matrix2)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                         ro.r('dev.off()')
         def _heatmap_datasets_R():
             if self.plotting_results:
@@ -838,7 +859,7 @@ class HAllA():
                 X_labels = np.array([self.aOutName1[i] for i in range(X_indecies)])
                 Y_indecies = len(self.aOutName2)
                 Y_labels = np.array([self.aOutName2[i] for i in range(Y_indecies)])
-                if len(X_labels) > 0 and len(Y_labels) > 0: 
+                if len(X_labels) > 1 and len(Y_labels) > 1: 
                     df1 = np.array(self.meta_feature[0], dtype=float)
                     df2 = np.array(self.meta_feature[1], dtype=float)
                     drows1 = np.zeros(shape=(X_indecies, X_indecies))

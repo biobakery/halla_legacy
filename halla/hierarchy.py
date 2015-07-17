@@ -729,7 +729,9 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
     #print  Z
     # scipy.all( (Z[:,3] >= .4, Z[:,3] <= .6), axis=0 ).nonzero()
     # print pos.distance()
-    return to_tree(Z) if bTree else Z 
+    import scipy.cluster.hierarchy as sch
+    #print sch.dendrogram(Z, orientation='right')['leaves']
+    return to_tree(Z) if bTree else Z, sch.dendrogram(Z, orientation='right')['leaves'] 
 
 
 def dendrogram(Z):
