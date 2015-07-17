@@ -786,10 +786,10 @@ class HAllA():
                 from scipy.stats.stats import pearsonr
                 global associated_feature_X_indecies
                 Xs = list(set(associated_feature_X_indecies)) 
-                X_labels = np.array([self.aOutName1[i] for i in Xs])
+                X_labels = np.array([self.aOutName1[i] for i in D1_features_order])
                 global associated_feature_Y_indecies
                 Ys = list(set(associated_feature_Y_indecies))
-                Y_labels = np.array([self.aOutName2[i] for i in Ys])
+                Y_labels = np.array([self.aOutName2[i] for i in D2_features_order])
                 if len(Xs) > 1 and len(Ys) > 1: 
                     #cluster1 = [self.meta_feature[0][i] for i in Xs]    
                     #cluster2 = [self.meta_feature[1][i] for i in Ys]
