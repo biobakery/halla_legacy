@@ -833,8 +833,8 @@ class HAllA():
                     ro.globalenv['nmi'] = nmi
                     ro.globalenv['sig_matrix1'] = anottation_cell
                     ro.globalenv['sig_matrix2'] = anottation_cell
-                    ro.globalenv['labRow'] = D1_features_order #X_labels 
-                    ro.globalenv['labCol'] = D2_features_order #Y_labels
+                    ro.globalenv['labRow'] = X_labels 
+                    ro.globalenv['labCol'] = Y_labels
                     #ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
                     ro.globalenv['output_file_NMI'] = str(self.output_dir)+"/" + self.distance+"_heatmap.pdf"
                     ro.globalenv['output_file_Pearson'] = str(self.output_dir)+"/Pearson_heatmap.pdf"
