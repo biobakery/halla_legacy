@@ -278,6 +278,17 @@ def pearson(X, Y):
     #Y = [float(y) for y in Y]
     #print "pearson:", scipy.stats.pearsonr(X, Y)[0]
     return scipy.stats.pearsonr(X, Y)[0]
+def spearman(X, Y):
+    X = array(X)
+    Y = array(Y)
+    if X.ndim > 1: 
+        X = X[0]
+    if Y.ndim > 1:
+        Y = Y[0]
+    #X = [float(x) for x in X]
+    #Y = [float(y) for y in Y]
+    #print "pearson:", scipy.stats.pearsonr(X, Y)[0]
+    return scipy.stats.spearmanr(X, Y)[0]
 def mic (X, Y):
     try:
         import minepy
@@ -300,6 +311,7 @@ c_hash_metric = {"nmi": nmi,
 				"l2": l2,
                 "ami":ami,
 				"pearson": pearson,
+                "spearman": spearman,
                 "mic": mic
 				}
 

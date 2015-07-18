@@ -573,9 +573,10 @@ class HAllA():
                                      association_similarity])
                 bcsvw.writerow(aLineOut)
         sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.pvalue)
-        global D1_features_order, D2_features_order
-        D1_features_order  = [i for i in range(len(self.meta_array[0]))]   
-        D2_features_order  = [i for i in range(len(self.meta_array[1]))]         
+        if self.descending == "AllA":
+            global D1_features_order, D2_features_order
+            D1_features_order  = [i for i in range(len(self.meta_array[0]))]   
+            D2_features_order  = [i for i in range(len(self.meta_array[1]))]         
         def _plot_associations ():
             import pandas as pd    
             association_number = 0
@@ -786,19 +787,18 @@ class HAllA():
                 from scipy.stats.stats import pearsonr
                 global associated_feature_X_indecies
                 Xs = list(set(associated_feature_X_indecies)) 
-                X_labels = np.array([self.aOutName1[i] for i in D1_features_order])
+                
                 global associated_feature_Y_indecies
                 Ys = list(set(associated_feature_Y_indecies))
-                Y_labels = np.array([self.aOutName2[i] for i in D2_features_order])
+                
                 if len(Xs) > 1 and len(Ys) > 1: 
-                    #cluster1 = [self.meta_feature[0][i] for i in Xs]    
-                    #cluster2 = [self.meta_feature[1][i] for i in Ys]
-                    #df1 = np.array(cluster1, dtype=float)
-                    #df2 = np.array(cluster2, dtype=float)
-                    #D1_features_order = sch.dendrogram(self.meta_data_tree[0], orientation='right')['leaves'] 
-                    #D2_features_order = sch.dendrogram(self.meta_data_tree[1], orientation='right')['leaves']
                     global D1_features_order, D2_features_order
-                    #print D1_features_order, D2_features_order
+                    D1_features_order = [D1_features_order[i] for i in range (len(D1_features_order))  if D1_features_order[i] in Xs ] 
+                    D2_features_order = [D2_features_order[i] for i in range (len(D2_features_order))  if D2_features_order[i] in Ys ] 
+                    
+                    X_labels = np.array([self.aOutName1[i] for i in D1_features_order])
+                    Y_labels = np.array([self.aOutName2[i] for i in D2_features_order])
+                    
                     p = np.zeros(shape=(len(D1_features_order), len(D2_features_order))) 
                     
                     for i in range(len(D1_features_order)):
@@ -811,7 +811,7 @@ class HAllA():
                             if i in iX and j in iY:
                                 return True
                         return False
-                         
+                      
                     for i in range(len(D1_features_order)):
                         for j in range(len(D2_features_order)):
                             nmi[i][j] = self.hash_metric[self.distance](self.meta_feature[0][D1_features_order[i]], self.meta_feature[1][D2_features_order[j]])
@@ -840,14 +840,23 @@ class HAllA():
                     ro.globalenv['output_file_Pearson'] = str(self.output_dir)+"/Pearson_heatmap.pdf"
                     ro.r('rownames(nmi) = labRow')
                     ro.r('colnames(nmi) = labCol')
-                    ro.r('pheatmap(nmi, labRow = labRow, labCol = labCol, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix1 > 0, "*", ""), nrow(sig_matrix1)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                    if distance.c_hash_association_method_discretize[self.distance]:
+                        ro.r('pheatmap(nmi, color = rev(heat.colors(100)),labRow = labRow, labCol = labCol, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix1 > 0, "*", ""), nrow(sig_matrix1)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                    else:
+                        ro.r('pheatmap(nmi,labRow = labRow, labCol = labCol, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix1 > 0, "*", ""), nrow(sig_matrix1)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+
                     ro.r('dev.off()')
                     if self.distance != "pearson":
                         ro.globalenv['p'] = p
                         #ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
                         ro.r('rownames(p) = labRow')
                         ro.r('colnames(p) = labCol')
-                        ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix2 > 0, "*", ""), nrow(sig_matrix2)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                        if distance.c_hash_association_method_discretize[self.distance]:
+                            ro.r('pheatmap(p, color = rev(heat.colors(100)), labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix2 > 0, "*", ""), nrow(sig_matrix2)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                        else:
+                            ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix2 > 0, "*", ""), nrow(sig_matrix2)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+
+                            
                         ro.r('dev.off()')
         def _heatmap_datasets_R():
             if self.plotting_results:

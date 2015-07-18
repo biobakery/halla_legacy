@@ -177,7 +177,7 @@ def parse_arguments (args):
         "-m","--metric",
         dest="strMetric",
         default="nmi",
-        choices=["nmi","ami","mic","pearson"],
+        choices=["nmi","ami","mic","pearson", "spearman"],
         help="metric to be used for similarity measurement\n[default = nmi]")
     
     argp.add_argument(
