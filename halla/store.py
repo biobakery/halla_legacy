@@ -807,6 +807,10 @@ class HAllA():
                 X_labels = np.array([self.aOutName1[i] for i in D1_features_order])
                 Y_labels = np.array([self.aOutName2[i] for i in D2_features_order])
                 
+                import re
+                X_labels_circos = np.array([re.sub('[^a-zA-Z0-9 ' ' \n\.]', '_', self.aOutName1[i]).replace(' ','_') for i in D1_features_order])
+                Y_labels_circos = np.array([re.sub('[^a-zA-Z0-9 ' ' \n\.]', '_', self.aOutName2[i]).replace(' ','_') for i in D2_features_order])
+
                 p = np.zeros(shape=(len(D1_features_order), len(D2_features_order))) 
                 for i in range(len(D1_features_order)):
                     for j in range(len(D2_features_order)):
@@ -839,8 +843,8 @@ class HAllA():
                 for i in range(len(D1_features_order)):
                     for j in range(len(D2_features_order)):
                         if _is_in_an_assciostions(D1_features_order[i],D2_features_order[j]): #for association in sorted_associations:
-                            circos_tabel[i][j] = int(similarity_score[i][j]*1000)
-                plot.writeData(circos_tabel, str(self.output_dir)+"/" + self.distance+"_circos_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "Data")         
+                            circos_tabel[i][j] = int(similarity_score[i][j]*100)
+                plot.writeData(circos_tabel, str(self.output_dir)+"/" + self.distance+"_circos_table.txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
                 plot.writeData(similarity_score,str(self.output_dir)+"/" + self.distance+"_similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
                 #anottation_cell = [D1_features_order]
                 #anottation_cell = [ anottation_cell[:][j] for j in D2_features_order]
