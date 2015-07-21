@@ -243,7 +243,7 @@ class Tree():
     def get_right_rep(self):
         return self.right_rep
     
-    def is_qualified_association(self, pvalue_threshold, pc_threshold, robustness, decomp = 'mca' ):
+    def is_representative(self, pvalue_threshold, pc_threshold, robustness, decomp = 'mca' ):
         #return True
     
         number_left_features = len(self.get_data()[0])
@@ -368,7 +368,7 @@ class Tree():
     def get_rank(self):
         return self.rank
     
-    #def is_qualified_association(self):
+    #def is_representative(self):
     #    return self.significance
     
     #def set_significance_status(self):
@@ -1836,7 +1836,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 Current_Family_Children[i].set_pvalue(_actor(Current_Family_Children[i]))
             
                 aOut.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_pvalue(), Current_Family_Children[i].get_pvalue()])
-                if Current_Family_Children[i].is_qualified_association(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
+                if Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
                     Current_Family_Children[i].report()
                     number_passed_tests += 1
                     aFinal.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_pvalue(), Current_Family_Children[i].get_pvalue()])
@@ -1844,7 +1844,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                     next_level_apChildren.append(Current_Family_Children[i])
                     if bVerbose: 
                         print "Conitinue, gray area with p-value:", Current_Family_Children[i].get_pvalue()
-                elif Current_Family_Children[i].is_bypass(apply_stop_condition, q=fQ):
+                elif Current_Family_Children[i].is_bypass(apply_stop_condition, q=fQ) and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
                     if bVerbose:
                         print "Stop: no chance of association by descending", Current_Family_Children[i].get_pvalue()
             if not apChildren:
@@ -1890,7 +1890,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                     max_r_t = pRank[i]
                     # print "max_r_t", max_r_t
             for i in range(len(aP)):
-                if pRank[i] <= max_r_t and Current_Family_Children[i].is_qualified_association(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
+                if pRank[i] <= max_r_t and Current_Family_Children[i].is_representative(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
                     number_passed_tests += 1
                     print "-- associations after fdr correction"
                     if bVerbose:
@@ -1903,7 +1903,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                     #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
                     aOut.append(Current_Family_Children[i])
                     #if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-                    if Current_Family_Children[i].is_bypass(apply_stop_condition, q=fQ):
+                    if Current_Family_Children[i].is_bypass(apply_stop_condition, q=fQ) and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
                         if bVerbose:
                             print "Bypass, no hope to find an association in the branch with p-value: ", \
                     aP[i], " and ", len(Current_Family_Children[i].get_children()), \
@@ -1980,7 +1980,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                         #print i, range(len(current_level_tests)), current_level_tests[i]
                         aOut.append(all_performed_tests[i])
                         #if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-                        if all_performed_tests[i].is_bypass(apply_stop_condition, q=fQ) :
+                        if all_performed_tests[i].is_bypass(apply_stop_condition, q=fQ) and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition) :
                             if bVerbose:
                                 print "Bypass, no hope to find an association in the branch with p-value: ", \
                         aP[i], " and ", len(all_performed_tests[i].get_children()), \
@@ -2066,7 +2066,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                 for i in range(len(current_level_tests)):
                     if current_level_tests[i].get_significance_status() == None and\
                     current_level_tests[i].get_rank() <= max_r_t and\
-                    current_level_tests[i].is_qualified_association(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
+                    current_level_tests[i].is_representative(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
                         number_passed_tests += 1
                         if bVerbose:
                             current_level_tests[i].report()
@@ -2076,7 +2076,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                         aFinal.append(current_level_tests[i])
                         #next_level_apChildren.append(current_level_tests[i])
                     else:
-                        if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass(apply_stop_condition, q = fQ):# and current_level_tests[i].get_significance_status() == None:
+                        if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass(apply_stop_condition, q = fQ) and current_level_tests[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):# and current_level_tests[i].get_significance_status() == None:
                             current_level_tests[i].set_significance_status(False)
                             aOut.append(current_level_tests[i])
                             if bVerbose:
@@ -2166,7 +2166,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
             for i in range(len(aP)):
                 # print "NMI", Current_Family_Children[i].get_similarity_score()
                 performed_tests.append([Current_Family_Children[i], float(aP[i])])    
-                if Current_Family_Children[i].is_qualified_association(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
+                if Current_Family_Children[i].is_representative(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
                     Current_Family_Children[i].report()
                     end_level_tests.append([Current_Family_Children[i], float(aP[i])])
                     round1_passed_tests.append([Current_Family_Children[i], float(aP[i])])
@@ -2174,7 +2174,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                     end_level_tests.append([Current_Family_Children[i], float(aP[i])])
                     if bVerbose:
                         print "End of branch, leaf!"
-                elif Current_Family_Children[i].is_bypass(apply_stop_condition, q = fQ) :
+                elif Current_Family_Children[i].is_bypass(apply_stop_condition, q = fQ) and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
                     if bVerbose:
                         print "Bypass, no hope to find an association in the branch with p-value: ", \
                     aP[i], " and ", len(Current_Family_Children[i].get_children()), \

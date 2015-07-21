@@ -537,7 +537,8 @@ class HAllA():
                 csvw.writerow(aLineOut)
 
         def _report_associations():    
-            association_number = 0
+            number_of_association = 0
+            number_of_association_faeture = 0
             output_file_associations  = open(str(self.output_dir)+'/associations.txt', 'w')
             bcsvw = csv.writer(output_file_associations, csv.excel_tab)
             #bcsvw.writerow(["Method: " + self.decomposition +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
@@ -545,8 +546,9 @@ class HAllA():
     
             sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.pvalue)
             for association in sorted_associations:
-                association_number += 1
+                number_of_association += 1
                 iX, iY = association.get_data()
+                number_of_association_faeture += (len( iX) * len(iY))
                 global associated_feature_X_indecies
                 associated_feature_X_indecies += iX
                 global associated_feature_Y_indecies
@@ -559,7 +561,7 @@ class HAllA():
                 clusterY_first_rep = association.get_right_first_rep_variance()
                 association_similarity = association.get_similarity_score()
                 
-                aLineOut = map(str, [association_number,
+                aLineOut = map(str, [number_of_association,
                                      str(';'.join(self.aOutName1[i] for i in iX)),
                                      clusterX_similarity,
                                      clusterX_first_rep,
@@ -572,6 +574,13 @@ class HAllA():
                                      fP_adjust,
                                      association_similarity])
                 bcsvw.writerow(aLineOut)
+            performance_file = open(str(self.output_dir)+'/performance.txt', 'w') 
+            csvw = csv.writer(performance_file, csv.excel_tab)
+            csvw.writerow(["Number of association cluster-by-cluster:", number_of_association])
+            csvw.writerow(["Number of association feature-by-feature: ", number_of_association_faeture])
+            csvw.writerow([])
+            performance_file.close()
+            
         sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.pvalue)
         if self.descending == "AllA":
             global D1_features_order, D2_features_order
@@ -790,73 +799,93 @@ class HAllA():
                 
                 global associated_feature_Y_indecies
                 Ys = list(set(associated_feature_Y_indecies))
+            
+                global D1_features_order, D2_features_order
+                D1_features_order = [D1_features_order[i] for i in range (len(D1_features_order))  if D1_features_order[i] in Xs ] 
+                D2_features_order = [D2_features_order[i] for i in range (len(D2_features_order))  if D2_features_order[i] in Ys ] 
                 
+                X_labels = np.array([self.aOutName1[i] for i in D1_features_order])
+                Y_labels = np.array([self.aOutName2[i] for i in D2_features_order])
+                
+                p = np.zeros(shape=(len(D1_features_order), len(D2_features_order))) 
+                for i in range(len(D1_features_order)):
+                    for j in range(len(D2_features_order)):
+                        p[i][j] = pearsonr(np.array(self.meta_array[0][D1_features_order[i]], dtype=float), np.array(self.meta_array[1][D2_features_order[j]], dtype=float))[0]
+                
+                similarity_score = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))
+                def _is_in_an_assciostions(i,j):
+                    for association in sorted_associations:
+                        iX, iY = association.get_data()
+                        if i in iX and j in iY:
+                            return True
+                    return False
+                  
+                for i in range(len(D1_features_order)):
+                    for j in range(len(D2_features_order)):
+                        similarity_score[i][j] = self.hash_metric[self.distance](self.meta_feature[0][D1_features_order[i]], self.meta_feature[1][D2_features_order[j]])
+                '''with open('similarity_score.csv', 'w') as csvfile:
+                    writer = csv.writer(csvfile)
+                    writer.writerow(Y_labels)
+                    [writer.writerow(r) for r in similarity_score] 
+                '''
+                
+                anottation_cell = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))                
+                for i in range(len(D1_features_order)):
+                    for j in range(len(D2_features_order)):
+                        if _is_in_an_assciostions(D1_features_order[i],D2_features_order[j]): #for association in sorted_associations:
+                            anottation_cell[i][j] = 1
+                            
+                circos_tabel = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))
+                for i in range(len(D1_features_order)):
+                    for j in range(len(D2_features_order)):
+                        if _is_in_an_assciostions(D1_features_order[i],D2_features_order[j]): #for association in sorted_associations:
+                            circos_tabel[i][j] = int(similarity_score[i][j]*1000)
+                plot.writeData(circos_tabel, str(self.output_dir)+"/" + self.distance+"_circos_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "Data")         
+                plot.writeData(similarity_score,str(self.output_dir)+"/" + self.distance+"_similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
+                #anottation_cell = [D1_features_order]
+                #anottation_cell = [ anottation_cell[:][j] for j in D2_features_order]
+                #print anottation_cell
+                import rpy2.robjects as ro
+                #import pandas.rpy.common as com
+                import rpy2.robjects.numpy2ri
+                rpy2.robjects.numpy2ri.activate()
+                ro.globalenv['similarity_score'] = similarity_score
+                ro.globalenv['labRow'] = X_labels 
+                ro.globalenv['labCol'] = Y_labels
+                ro.globalenv['sig_matrix'] = anottation_cell
+                #ro.globalenv['circos_table'] = circos_tabel
+                Ext_Y_labels = ["labels"] + list(Y_labels)
+                ro.globalenv['Ext_labCol'] = Ext_Y_labels
+                ro.r('rownames(similarity_score) = labRow')
+                ro.r('colnames(similarity_score) = labCol')
+                ro.r('rownames(sig_matrix) = labRow')
+                ro.r('colnames(sig_matrix) = labCol')
+                #ro.r('rownames(circos_table) = labRow')
+                #ro.r('colnames(circos_table) = labCol')
+               # ro.globalenv['output_table_similarity_score'] = str(self.output_dir)+"/" + self.distance+"_similarity_table.txt"
+                ro.globalenv['output_asscoaiation_table'] = str(self.output_dir)+"/" + self.distance+"_asscoaitaion_table.txt"
+                ro.globalenv['output_circus_table'] = str(self.output_dir)+"/" + self.distance+"_circos_table.txt"
+                #ro.r('write.table(similarity_score , output_table_similarity_score, sep = "\t", eol = "\n", quote = F, col.names = NA, row.names = labRow)')
+                ro.r('write.table(sig_matrix , output_asscoaiation_table, sep = "\t", eol = "\n", quote = F, col.names =NA , row.names = labRow)')
+                #ro.r('write.table(circos_table , output_circus_table, sep = "\t", eol = "\n", quote = F, col.names =NA , row.names = labRow)')
                 if len(Xs) > 1 and len(Ys) > 1: 
-                    global D1_features_order, D2_features_order
-                    D1_features_order = [D1_features_order[i] for i in range (len(D1_features_order))  if D1_features_order[i] in Xs ] 
-                    D2_features_order = [D2_features_order[i] for i in range (len(D2_features_order))  if D2_features_order[i] in Ys ] 
-                    
-                    X_labels = np.array([self.aOutName1[i] for i in D1_features_order])
-                    Y_labels = np.array([self.aOutName2[i] for i in D2_features_order])
-                    
-                    p = np.zeros(shape=(len(D1_features_order), len(D2_features_order))) 
-                    
-                    for i in range(len(D1_features_order)):
-                        for j in range(len(D2_features_order)):
-                            p[i][j] = pearsonr(np.array(self.meta_array[0][D1_features_order[i]], dtype=float), np.array(self.meta_array[1][D2_features_order[j]], dtype=float))[0]
-                    nmi = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))
-                    def _is_in_an_assciostions(i,j):
-                        for association in sorted_associations:
-                            iX, iY = association.get_data()
-                            if i in iX and j in iY:
-                                return True
-                        return False
-                      
-                    for i in range(len(D1_features_order)):
-                        for j in range(len(D2_features_order)):
-                            nmi[i][j] = self.hash_metric[self.distance](self.meta_feature[0][D1_features_order[i]], self.meta_feature[1][D2_features_order[j]])
-                     
-                   
-                    anottation_cell = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))                
-                    for i in range(len(D1_features_order)):
-                        for j in range(len(D2_features_order)):
-                            if _is_in_an_assciostions(D1_features_order[i],D2_features_order[j]): #for association in sorted_associations:
-                                anottation_cell[i][j] = 1        
-                    #anottation_cell = [D1_features_order]
-                    #anottation_cell = [ anottation_cell[:][j] for j in D2_features_order]
-                    #print anottation_cell
-                    import rpy2.robjects as ro
-                    #import pandas.rpy.common as com
-                    import rpy2.robjects.numpy2ri
-                    rpy2.robjects.numpy2ri.activate()
                     ro.r('library("pheatmap")')
-                    ro.globalenv['nmi'] = nmi
-                    ro.globalenv['sig_matrix1'] = anottation_cell
-                    ro.globalenv['sig_matrix2'] = anottation_cell
-                    ro.globalenv['labRow'] = X_labels 
-                    ro.globalenv['labCol'] = Y_labels
-                    #ro.r('pdf(file = "./output/NMI_heatmap.pdf")')
-                    ro.globalenv['output_file_NMI'] = str(self.output_dir)+"/" + self.distance+"_heatmap.pdf"
+                    ro.globalenv['output_heatmap_similarity_score'] = str(self.output_dir)+"/" + self.distance+"_heatmap.pdf"
                     ro.globalenv['output_file_Pearson'] = str(self.output_dir)+"/Pearson_heatmap.pdf"
-                    ro.r('rownames(nmi) = labRow')
-                    ro.r('colnames(nmi) = labCol')
                     if distance.c_hash_association_method_discretize[self.distance]:
-                        ro.r('pheatmap(nmi, color = rev(heat.colors(100)),labRow = labRow, labCol = labCol, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix1 > 0, "*", ""), nrow(sig_matrix1)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                        ro.r('pheatmap(similarity_score, color = rev(heat.colors(100)),labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                     else:
-                        ro.r('pheatmap(nmi,labRow = labRow, labCol = labCol, filename =output_file_NMI, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix1 > 0, "*", ""), nrow(sig_matrix1)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-
+                        ro.r('pheatmap(similarity_score,labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                     ro.r('dev.off()')
                     if self.distance != "pearson":
                         ro.globalenv['p'] = p
                         #ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
                         ro.r('rownames(p) = labRow')
                         ro.r('colnames(p) = labCol')
-                        if distance.c_hash_association_method_discretize[self.distance]:
-                            ro.r('pheatmap(p, color = rev(heat.colors(100)), labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix2 > 0, "*", ""), nrow(sig_matrix2)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-                        else:
-                            ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix2 > 0, "*", ""), nrow(sig_matrix2)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-
-                            
+                        #if distance.c_hash_association_method_discretize[self.distance]:
+                        ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                        #else:
+                        #ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                         ro.r('dev.off()')
         def _heatmap_datasets_R():
             if self.plotting_results:
@@ -904,11 +933,11 @@ class HAllA():
         _report_all_tests()
         _report_associations()
         _report_compared_clusters()
-        _plot_associations()
         if self.heatmap_all:
             _heatmap_associations()
             _heatmap_associations_R()
             _heatmap_datasets_R()
+        _plot_associations()
         
         return self.meta_report 
 
@@ -1063,7 +1092,7 @@ class HAllA():
                     sys.exit("CRITICAL ERROR: Unable to create output directory.")
         
         try:    
-            performance_file  = open(str(self.output_dir)+'/performance.txt', 'w')
+            performance_file  = open(str(self.output_dir)+'/performance.txt', 'a')
         except IOError:
             sys.exit("IO Exception: "+self.output_dir+"/performance.txt") 
         csvw = csv.writer(performance_file, csv.excel_tab)
@@ -1072,7 +1101,7 @@ class HAllA():
         csvw.writerow(["q: FDR cut-off : ", self.q]) 
         csvw.writerow(["r: effect size for robustness : ", self.robustness]) 
         csvw.writerow(["Applied stop condition : ", self.apply_stop_condition]) 
-        
+        csvw.writerow([])
         self._name_features()
         if not self.is_correct_submethods_combination():
             sys.exit("Please ckeck the combination of your options!!!!")
@@ -1134,6 +1163,7 @@ class HAllA():
         excution_time_temp = time.time() - execution_time
         csvw.writerow(["Total execution time", str(datetime.timedelta(seconds=excution_time_temp))])
         print("--- in %s h:m:s the task is successfully done ---" % str(datetime.timedelta(seconds=excution_time_temp)) )
+        performance_file.close()
         return results
     
     def view_singleton(self, pBags):
