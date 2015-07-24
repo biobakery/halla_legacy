@@ -283,6 +283,7 @@ class Tree():
                                 return False
             return True
         elif decomp == 'pca':
+            counter = 0
             if len(self.get_right_loading()) > 1:
                     right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) - .1
                     for i in range(len(self.get_right_loading())):
