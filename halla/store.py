@@ -862,7 +862,7 @@ class HAllA():
                 ro.globalenv['sig_matrix'] = anottation_cell
                 #ro.globalenv['circos_table'] = circos_tabel
                 Ext_Y_labels = ["labels"] + list(Y_labels)
-                ro.globalenv['Ext_labCol'] = Ext_Y_labels
+                #ro.globalenv['Ext_labCol'] = Ext_Y_labels
                 ro.r('rownames(similarity_score) = labRow')
                 ro.r('colnames(similarity_score) = labCol')
                 ro.r('rownames(sig_matrix) = labRow')
