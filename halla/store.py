@@ -33,6 +33,7 @@ except ImportError:
 from . import distance
 from . import stats
 from . import plot
+from . import parser
 
 global D1_features_order , D2_features_order 
 D1_features_order  = []
@@ -791,64 +792,66 @@ class HAllA():
                     #nmi = np.zeros(shape=(len(Xs), len(Ys)))
                     plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename = str(self.output_dir)+'/all_nmi_heatmap' )
         def _heatmap_associations_R():
+            from scipy.stats.stats import pearsonr
+            global associated_feature_X_indecies
+            Xs = list(set(associated_feature_X_indecies)) 
+            
+            global associated_feature_Y_indecies
+            Ys = list(set(associated_feature_Y_indecies))
+            if len(Xs) == 0 or len(Ys) == 0 :
+                return
+            global D1_features_order, D2_features_order
+            D1_features_order = [D1_features_order[i] for i in range (len(D1_features_order))  if D1_features_order[i] in Xs ] 
+            D2_features_order = [D2_features_order[i] for i in range (len(D2_features_order))  if D2_features_order[i] in Ys ] 
+            
+            X_labels = np.array([self.aOutName1[i] for i in D1_features_order])
+            Y_labels = np.array([self.aOutName2[i] for i in D2_features_order])
+            
+            import re
+            X_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', self.aOutName1[i]).replace(' ','_') for i in D1_features_order])
+            Y_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', self.aOutName2[i]).replace(' ','_') for i in D2_features_order])
+
+            p = np.zeros(shape=(len(D1_features_order), len(D2_features_order))) 
+            for i in range(len(D1_features_order)):
+                for j in range(len(D2_features_order)):
+                    p[i][j] = pearsonr(np.array(self.meta_array[0][D1_features_order[i]], dtype=float), np.array(self.meta_array[1][D2_features_order[j]], dtype=float))[0]
+            
+            similarity_score = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))
+            def _is_in_an_assciostions(i,j):
+                for association in sorted_associations:
+                    iX, iY = association.get_data()
+                    if i in iX and j in iY:
+                        return True
+                return False
+              
+            for i in range(len(D1_features_order)):
+                for j in range(len(D2_features_order)):
+                    similarity_score[i][j] = self.hash_metric[self.distance](self.meta_feature[0][D1_features_order[i]], self.meta_feature[1][D2_features_order[j]])
+            '''with open('similarity_score.csv', 'w') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(Y_labels)
+                [writer.writerow(r) for r in similarity_score] 
+            '''
+            
+            anottation_cell = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))                
+            for i in range(len(D1_features_order)):
+                for j in range(len(D2_features_order)):
+                    if _is_in_an_assciostions(D1_features_order[i],D2_features_order[j]): #for association in sorted_associations:
+                        anottation_cell[i][j] = 1
+                        
+            circos_tabel = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))
+            for i in range(len(D1_features_order)):
+                for j in range(len(D2_features_order)):
+                    if _is_in_an_assciostions(D1_features_order[i],D2_features_order[j]): #for association in sorted_associations:
+                        circos_tabel[i][j] = math.fabs(int(similarity_score[i][j]*100))
+            parser.write_table(circos_tabel, str(self.output_dir)+"/" +"circos_table_"+ self.distance+".txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
+            parser.write_table(similarity_score,str(self.output_dir)+"/" + self.distance+"_similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
+            parser.write_table(anottation_cell,str(self.output_dir)+"/" + self.distance+"_asscoaitaion_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
+            #anottation_cell = [D1_features_order]
+            #anottation_cell = [ anottation_cell[:][j] for j in D2_features_order]
+            #print anottation_cell
             if self.plotting_results:
                 print "--- plotting heatmap associations using R ..."
-                from scipy.stats.stats import pearsonr
-                global associated_feature_X_indecies
-                Xs = list(set(associated_feature_X_indecies)) 
-                
-                global associated_feature_Y_indecies
-                Ys = list(set(associated_feature_Y_indecies))
-            
-                global D1_features_order, D2_features_order
-                D1_features_order = [D1_features_order[i] for i in range (len(D1_features_order))  if D1_features_order[i] in Xs ] 
-                D2_features_order = [D2_features_order[i] for i in range (len(D2_features_order))  if D2_features_order[i] in Ys ] 
-                
-                X_labels = np.array([self.aOutName1[i] for i in D1_features_order])
-                Y_labels = np.array([self.aOutName2[i] for i in D2_features_order])
-                
-                import re
-                X_labels_circos = np.array([re.sub('[^a-zA-Z0-9 ' ' \n\.]', '_', self.aOutName1[i]).replace(' ','_') for i in D1_features_order])
-                Y_labels_circos = np.array([re.sub('[^a-zA-Z0-9 ' ' \n\.]', '_', self.aOutName2[i]).replace(' ','_') for i in D2_features_order])
-
-                p = np.zeros(shape=(len(D1_features_order), len(D2_features_order))) 
-                for i in range(len(D1_features_order)):
-                    for j in range(len(D2_features_order)):
-                        p[i][j] = pearsonr(np.array(self.meta_array[0][D1_features_order[i]], dtype=float), np.array(self.meta_array[1][D2_features_order[j]], dtype=float))[0]
-                
-                similarity_score = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))
-                def _is_in_an_assciostions(i,j):
-                    for association in sorted_associations:
-                        iX, iY = association.get_data()
-                        if i in iX and j in iY:
-                            return True
-                    return False
-                  
-                for i in range(len(D1_features_order)):
-                    for j in range(len(D2_features_order)):
-                        similarity_score[i][j] = self.hash_metric[self.distance](self.meta_feature[0][D1_features_order[i]], self.meta_feature[1][D2_features_order[j]])
-                '''with open('similarity_score.csv', 'w') as csvfile:
-                    writer = csv.writer(csvfile)
-                    writer.writerow(Y_labels)
-                    [writer.writerow(r) for r in similarity_score] 
-                '''
-                
-                anottation_cell = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))                
-                for i in range(len(D1_features_order)):
-                    for j in range(len(D2_features_order)):
-                        if _is_in_an_assciostions(D1_features_order[i],D2_features_order[j]): #for association in sorted_associations:
-                            anottation_cell[i][j] = 1
-                            
-                circos_tabel = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))
-                for i in range(len(D1_features_order)):
-                    for j in range(len(D2_features_order)):
-                        if _is_in_an_assciostions(D1_features_order[i],D2_features_order[j]): #for association in sorted_associations:
-                            circos_tabel[i][j] = int(similarity_score[i][j]*100)
-                plot.writeData(circos_tabel, str(self.output_dir)+"/" + self.distance+"_circos_table.txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
-                plot.writeData(similarity_score,str(self.output_dir)+"/" + self.distance+"_similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
-                #anottation_cell = [D1_features_order]
-                #anottation_cell = [ anottation_cell[:][j] for j in D2_features_order]
-                #print anottation_cell
                 import rpy2.robjects as ro
                 #import pandas.rpy.common as com
                 import rpy2.robjects.numpy2ri
@@ -870,7 +873,7 @@ class HAllA():
                 ro.globalenv['output_asscoaiation_table'] = str(self.output_dir)+"/" + self.distance+"_asscoaitaion_table.txt"
                 ro.globalenv['output_circus_table'] = str(self.output_dir)+"/" + self.distance+"_circos_table.txt"
                 #ro.r('write.table(similarity_score , output_table_similarity_score, sep = "\t", eol = "\n", quote = F, col.names = NA, row.names = labRow)')
-                ro.r('write.table(sig_matrix , output_asscoaiation_table, sep = "\t", eol = "\n", quote = F, col.names =NA , row.names = labRow)')
+                #ro.r('write.table(sig_matrix , output_asscoaiation_table, sep = "\t", eol = "\n", quote = F, col.names =NA , row.names = labRow)')
                 #ro.r('write.table(circos_table , output_circus_table, sep = "\t", eol = "\n", quote = F, col.names =NA , row.names = labRow)')
                 if len(Xs) > 1 and len(Ys) > 1: 
                     ro.r('library("pheatmap")')
@@ -892,9 +895,7 @@ class HAllA():
                         #ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                         ro.r('dev.off()')
         def _heatmap_datasets_R():
-            if self.plotting_results:
-                
-                
+            if self.plotting_results:          
                 print "--- plotting heatmap datasets using R ..."
                 from scipy.stats.stats import pearsonr
                 X_indecies = len(self.aOutName1)
@@ -937,9 +938,9 @@ class HAllA():
         _report_all_tests()
         _report_associations()
         _report_compared_clusters()
+        _heatmap_associations_R()
         if self.heatmap_all:
             _heatmap_associations()
-            _heatmap_associations_R()
             _heatmap_datasets_R()
         _plot_associations()
         

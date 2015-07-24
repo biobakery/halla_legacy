@@ -683,7 +683,8 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	#	fAssociation = numpy.mean(numpy.array([pMe(pArray1[i], pArray2[j]) for i, j in itertools.product(range(len(pArray1)), range(len(pArray2)))]))
 	#else:
 		
-	fAssociation = pMe(pRep1, pRep2)
+	sim_score= pMe(pRep1, pRep2)
+	fAssociation = math.fabs(sim_score)
 	fP = 1.0 
 	# print left_rep_variance, right_rep_variance, fAssociation
 	#### Perform Permutation 
@@ -710,7 +711,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		permuted_pRep2 = numpy.random.permutation(pRep2)
 		# Similarity score between representatives  
 		#fAssociation_permuted = pMe(pRep1_, pRep2_)  # NMI
-		fAssociation_permuted = pMe(pRep1, permuted_pRep2)  # NMI
+		fAssociation_permuted = math.fabs(pMe(pRep1, permuted_pRep2))  # NMI
 		aDist.append(fAssociation_permuted)
 		if i % 50 == 0:
 			new_fP = _calculate_pvalue(i)
@@ -733,7 +734,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	
 	assert(fP <= 1.0)
 	#print fP
-	return fP, fAssociation, left_rep_variance, right_rep_variance, left_loading, right_loading, pRep1, pRep2 
+	return fP, sim_score, left_rep_variance, right_rep_variance, left_loading, right_loading, pRep1, pRep2 
 
 def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000):
 	"""
@@ -1506,7 +1507,8 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 	       [ 0.,  0.,  1.,  1.]])
 
 	"""
-	
+	#from sklearn.cluster.spectral import discretize
+	#y_pred = discretize(y_true_noisy)
 	def _discretize_continuous(astrValues, iN=iN):
 		if len(set(astrValues)) < math.sqrt(len(astrValues)):
 			try:
@@ -1516,8 +1518,7 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 				order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
 				order = rankdata(order, method= 'dense') #array([order[i]+1.0 for i in range(len(order))])
 				print "Discretizing categorical data!!!"
-					
-				
+							
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
 			iN = round(math.sqrt(len(astrValues)))  # **0.5 + 0.5)
@@ -1574,8 +1575,8 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 		return astrRet
 
 	try:
-		# iRow1, iCol = pArray.shape 
-
+		# iRow1, iCol = pArray.shape
+		
 		aOut = [] 
 		# iN= len(pArray)
 		# print iN

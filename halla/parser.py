@@ -201,7 +201,65 @@ class Output:
 	def plot(self):
 		pass 
 
-
+def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "label",  corner = None):
+    
+    '''
+    wite a matrix of data in tab-delimated format file
+    
+    input:
+    data: a 2 dimensioal array of data
+    name: includes path and the name of file to save
+    rowheader
+    columnheader
+    
+    output:
+    a file tabdelimated file 
+    
+    '''
+    f = open(name, 'w')
+    # row numbers as header
+    if colheader == None:
+        if corner == None:
+            f.write('\t')
+        else:
+            f.write(corner)
+            f.write('\t')
+        for i in range(len(data[0])):
+            f.write(str(i))
+            if i < len(data[1]) - 1:
+                f.write('\t')
+        f.write('\n')
+    elif len(colheader) == len(data[0]):
+        if corner == None:
+            f.write('\t')
+        else:
+            f.write(corner)
+            f.write('\t')
+        for i in range(len(data[0][:])):
+            f.write(colheader[i])
+            if i < len(data[1]) - 1:
+                f.write('\t')
+        f.write('\n')
+    else:
+        sys.err("The lable list in not matched with the data size")
+        sys.exit()
+        
+    for i in range(len(data)):
+        if rowheader == None:
+            f.write(prefix+str(i))
+            f.write('\t')
+        elif len(colheader) == len(data[0]):
+            f.write(rowheader[i])
+            f.write('\t')
+        else:
+            sys.err("The lable list in not matched with the data size")
+            sys.exit()
+        for j in range(len(data[i])):
+                f.write(str(data[i][j]))
+                if j < len(data[i]) - 1:
+                    f.write('\t')
+        f.write('\n')
+    f.close() 
 
 
 
