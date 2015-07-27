@@ -146,11 +146,11 @@ def parse_arguments (args):
     
     argp.add_argument(
         "-r", "--robustness",
-         metavar="<0.001>",
+         #metavar="<0.001>",
          dest="robustness", 
          type=float,
-         default=0.005,
-         help="threshold for robustness\n[default = 0.001]")    
+         default=.20,
+         help="threshold for robustness\n[default = 0.20]")    
     
     argp.add_argument(
         "-a","--descending",

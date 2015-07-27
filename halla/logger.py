@@ -53,3 +53,134 @@ def _log_plot(pData, pTest, adTotal):
 		figr, "%g (%g), p_perm=%g, p_boot=%g" % (dMID, pTest.get_mutual_information(), dPOne, dPTwo),
 		["Total", "Perm", "Boot"])
 	figr.savefig("-".join((s.split("|")[-1] for s in (pOne.m_strID, pTwo.m_strID))) + ".png")
+
+def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "label",  corner = None, delimiter= '\t'):
+    
+    '''
+    wite a matrix of data in tab-delimated format file
+    
+    input:
+    data: a 2 dimensioal array of data
+    name: includes path and the name of file to save
+    rowheader
+    columnheader
+    
+    output:
+    a file tabdelimated file 
+    
+    '''
+    f = open(name, 'w')
+    # row numbers as header
+    if colheader == None:
+        if corner == None:
+            f.write(delimiter)
+        else:
+            f.write(corner)
+            f.write(delimiter)
+        for i in range(len(data[0])):
+            f.write(str(i))
+            if i < len(data[1]) - 1:
+                f.write(delimiter)
+        f.write('\n')
+    elif len(colheader) == len(data[0]):
+        if corner == None:
+            f.write(delimiter)
+        else:
+            f.write(corner)
+            f.write(delimiter)
+        for i in range(len(data[0][:])):
+            f.write(colheader[i])
+            if i < len(data[1]) - 1:
+                f.write(delimiter)
+        f.write('\n')
+    else:
+        sys.err("The lable list in not matched with the data size")
+        sys.exit()
+        
+    for i in range(len(data)):
+        if rowheader == None:
+            f.write(prefix+str(i))
+            f.write(delimiter)
+        elif len(colheader) == len(data[0]):
+            f.write(rowheader[i])
+            f.write(delimiter)
+        else:
+            sys.err("The lable list in not matched with the data size")
+            sys.exit()
+        for j in range(len(data[i])):
+                f.write(str(data[i][j]))
+                if j < len(data[i]) - 1:
+                    f.write(delimiter)
+        f.write('\n')
+    f.close() 
+    
+def write_circos_table(data, name=None, rowheader=None, colheader=None, prefix = "label",  corner = None, delimiter= '\t'):
+    
+    '''
+    wite a matrix of data in tab-delimated format file
+    
+    input:
+    data: a 2 dimensioal array of data
+    name: includes path and the name of file to save
+    rowheader
+    columnheader
+    
+    output:
+    a file tabdelimated file 
+    
+    '''
+    f = open(name, 'w')
+    
+    # write order header
+    f.write("Data")
+    f.write(delimiter)
+    f.write("Data")
+    f.write(delimiter)
+    for i in range(len(data[0])):
+            f.write(str(i+1))
+            if i < len(data[1]) - 1:
+                f.write(delimiter)
+    f.write('\n')
+    # column numbers as header
+    f.write("Data")
+    f.write(delimiter)
+    if colheader == None:
+        f.write("Data")
+        f.write(delimiter)
+        for i in range(len(data[0])):
+            f.write(str(i))
+            if i < len(data[1]) - 1:
+                f.write(delimiter)
+        f.write('\n')
+    elif len(colheader) == len(data[0]):
+        f.write("Data")
+        f.write(delimiter)
+        for i in range(len(data[0][:])):
+            f.write(colheader[i])
+            if i < len(data[1]) - 1:
+                f.write(delimiter)
+        f.write('\n')
+    else:
+        sys.err("The lable list in not matched with the data size")
+        sys.exit()
+    
+    for i in range(len(data)):
+        if rowheader == None:
+            f.write(str(i+len(data[0])))
+            f.write(prefix+str(i))
+            f.write(delimiter)
+        elif len(colheader) == len(data[0]):
+            f.write(str(i+len(data[0])+1))
+            f.write(delimiter)
+            f.write(rowheader[i])
+            f.write(delimiter)
+        else:
+            sys.err("The lable list in not matched with the data size")
+            sys.exit()
+        
+        for j in range(len(data[i])):
+                f.write(str(data[i][j]))
+                if j < len(data[i]) - 1:
+                    f.write(delimiter)
+        f.write('\n')
+    f.close() 

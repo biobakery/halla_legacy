@@ -245,13 +245,14 @@ class Tree():
     
     def is_representative(self, pvalue_threshold, pc_threshold, robustness, decomp = 'mca' ):
         #return True
-    
+        #robustness = .098
+        print robustness
         number_left_features = len(self.get_data()[0])
         number_right_features = len(self.get_data()[1])
         #print "Left:", number_left_features, len(self.get_left_loading())
         #print "Right:", number_right_features, len(self.get_right_loading())
-        #print self.get_left_loading(), self.get_data()[0]
-        #print self.get_right_loading(), self.get_data()[1]
+        print self.get_left_loading(), self.get_data()[0]
+        print self.get_right_loading(), self.get_data()[1]
         
         if len(self.get_left_loading()) == 1 and len(self.get_right_loading()) == 1:
             #print self.get_left_loading(), self.get_right_loading
@@ -261,31 +262,31 @@ class Tree():
         if decomp == 'mca':
             counter = 0
             if len(self.get_right_loading()) > 1:
-                right_loading_threshold = robustness/2.0 #math.sqrt(1.0/len(self.get_right_loading())) - .01
+                right_loading_threshold = robustness/2.000 #math.sqrt(1.0/len(self.get_right_loading())) - .01
                 for i in range(len(self.get_right_loading())):
                     #print "right:", self.get_right_loading()[i]
                     #if np.mean(self.get_right_loading()) < .5 :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                     if math.fabs(self.get_right_loading()[i]) < right_loading_threshold :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
-                        return False
                         counter += 1
-                        if counter > (number_right_features/2 +1):
+                        if counter > (number_right_features/2):
+                            print "#1:",counter
                             return False
             counter = 0
             if len(self.get_left_loading()) > 1:
-                    left_loading_threshold = robustness/2.0 #math.sqrt(1.0/len(self.get_left_loading())) - .01
+                    left_loading_threshold = robustness/2.000 #math.sqrt(1.0/len(self.get_left_loading())) - .01
                     for i in range(len(self.get_left_loading())):
                         #print "left:", self.get_left_loading()[i]
                         #if np.mean(self.get_left_loading()) < .5:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
                         if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:
-                            return False
                             counter += 1
                             if counter > (number_left_features/2):
+                                print "#2:",counter
                                 return False
             return True
         elif decomp == 'pca':
             counter = 0
             if len(self.get_right_loading()) > 1:
-                    right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) - .5
+                    right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) - .2
                     for i in range(len(self.get_right_loading())):
                         #print "right:", self.get_right_loading()[i]
                         if math.fabs(self.get_right_loading()[i]) < right_loading_threshold:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
@@ -304,35 +305,7 @@ class Tree():
             return True
         else:
             return True 
-            
-        '''
-        if all([ True if self.get_left_loading()[i] >= .5 else False for i in range(len(self.get_left_loading()))]) and\
-        all([ True if self.get_right_loading()[i] >= .5 else False for i in range(len(self.get_right_loading()))]):
-            print self.get_left_loading(), self.get_right_loading()
-            return True
-        else:
-            False
-        if ((1.0 - self.get_left_distance() >= .9 or self.get_left_first_rep_variance() >= .9) and \
-               (1.0 - self.get_right_distance() >= .9 or self.get_right_first_rep_variance() >= .9)) :
-            return True
-        else:
-            return False
-        left_loading_dist1 = math.fabs(max(self.get_left_loading()) - np.mean(self.get_left_loading()))
-        left_loading_dist2 = math.fabs(min(self.get_left_loading()) - np.mean(self.get_left_loading()))
-        right_loading_dist1 = math.fabs(max(self.get_right_loading()) - np.mean(self.get_right_loading()))
-        right_loading_dist2 = math.fabs(min(self.get_right_loading()) - np.mean(self.get_right_loading()))
-        max_right_loading_dist = math.fabs(max(self.get_right_loading()) - min(self.get_right_loading()))
-        left_loading_dist = math.fabs(left_loading_dist1 -left_loading_dist2)
-        right_loading_dist = math.fabs(right_loading_dist1 - right_loading_dist2)
-        if left_loading_dist <= .075 and right_loading_dist <= .075 :
-                        return True
-        else:
-            print left_loading_dist, " ",self.get_data()[0], " ", right_loading_dist, " ", self.get_data()[1]," ", self.similarity_score,\
-            self.get_left_loading(), " ", self.get_right_loading()
-            return False
-        #if ((1.0 - self.get_left_distance() >= .25 or self.get_left_first_rep_variance() >= .3) and \
-         #   (1.0 - self.get_right_distance() >= .25 or self.get_right_first_rep_variance() >= .35)) and\
-         '''
+        
     def is_bypass(self, apply_stop_condition, q  ):#
         if apply_stop_condition:
             if self.get_qvalue() > (1.0 - self.get_pvalue()):# or\  # the same as 1-p<q ~ p>1-q
@@ -1557,7 +1530,7 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
                 #print "max_r_t", max_r_t
         for i in range(len(aP)):
             if pRank[i] <= max_r_t:
-                print "-- associations after BH fdr controlling"
+                print "-- association after BH fdr controlling"
                 if bVerbose:
                     tests[i].report()
                 aOut.append(tests[i])
@@ -1742,7 +1715,7 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
 def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
-    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness=.5, fAlpha=0.05, apply_stop_condition = True):
+    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness = None, fAlpha=0.05, apply_stop_condition = True):
     """
     Perform all-against-all on a hypothesis tree.
 
@@ -2083,23 +2056,22 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
                             aOut.append(current_level_tests[i])
                             if bVerbose:
                                 print "Bypass, no hope to find an association in the branch with p-value: ", \
-                        aP[i], " and ", len(current_level_tests[i].get_children()), \
-                         " sub-hypotheses.", current_level_tests[i].get_data()[0], \
-                          "   ", current_level_tests[i].get_data()[1]
+                                aP[i], " and ", len(current_level_tests[i].get_children()), \
+                                " sub-hypotheses.", current_level_tests[i].get_data()[0], \
+                                "   ", current_level_tests[i].get_data()[1]
                             #next_level_apChildren.append(current_level_tests[i])
                             
                         elif current_level_tests[i].is_leaf():
                             if bVerbose:
                                 print "End of branch, leaf!"
-                            next_level_apChildren.append(current_level_tests[i])
                             if current_level_tests[i].get_significance_status() == None:
                                 current_level_tests[i].set_significance_status(False)
                                 aOut.append(current_level_tests[i])
-                            
+                            #next_level_apChildren.append(current_level_tests[i])
                         else:
                             if bVerbose:
                                 print "Gray area with p-value:", aP[i]
-                            next_level_apChildren.append(current_level_tests[i])
+                            #next_level_apChildren.append(current_level_tests[i])
                         
                         if bVerbose:
                             print "Hypotheses testing level ", level, " is finished."                        

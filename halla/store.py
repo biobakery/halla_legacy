@@ -33,7 +33,7 @@ except ImportError:
 from . import distance
 from . import stats
 from . import plot
-from . import parser
+from . import logger
 
 global D1_features_order , D2_features_order 
 D1_features_order  = []
@@ -844,9 +844,9 @@ class HAllA():
                 for j in range(len(D2_features_order)):
                     if _is_in_an_assciostions(D1_features_order[i],D2_features_order[j]): #for association in sorted_associations:
                         circos_tabel[i][j] = math.fabs(int(similarity_score[i][j]*100))
-            parser.write_table(circos_tabel, str(self.output_dir)+"/" +"circos_table_"+ self.distance+".txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
-            parser.write_table(similarity_score,str(self.output_dir)+"/" + self.distance+"_similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
-            parser.write_table(anottation_cell,str(self.output_dir)+"/" + self.distance+"_asscoaitaion_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
+            logger.write_circos_table(circos_tabel, str(self.output_dir)+"/" +"circos_table_"+ self.distance+".txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
+            logger.write_table(similarity_score,str(self.output_dir)+"/" + self.distance+"_similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
+            logger.write_table(anottation_cell,str(self.output_dir)+"/" + self.distance+"_asscoaitaion_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
             #anottation_cell = [D1_features_order]
             #anottation_cell = [ anottation_cell[:][j] for j in D2_features_order]
             #print anottation_cell
@@ -861,7 +861,7 @@ class HAllA():
                 ro.globalenv['labCol'] = Y_labels
                 ro.globalenv['sig_matrix'] = anottation_cell
                 #ro.globalenv['circos_table'] = circos_tabel
-                Ext_Y_labels = ["labels"] + list(Y_labels)
+                #Ext_Y_labels = ["labels"] + list(Y_labels)
                 #ro.globalenv['Ext_labCol'] = Ext_Y_labels
                 ro.r('rownames(similarity_score) = labRow')
                 ro.r('colnames(similarity_score) = labCol')
@@ -875,12 +875,14 @@ class HAllA():
                 #ro.r('write.table(similarity_score , output_table_similarity_score, sep = "\t", eol = "\n", quote = F, col.names = NA, row.names = labRow)')
                 #ro.r('write.table(sig_matrix , output_asscoaiation_table, sep = "\t", eol = "\n", quote = F, col.names =NA , row.names = labRow)')
                 #ro.r('write.table(circos_table , output_circus_table, sep = "\t", eol = "\n", quote = F, col.names =NA , row.names = labRow)')
+                #rev(heat.colors(100))
                 if len(Xs) > 1 and len(Ys) > 1: 
+                    ro.r('library("RColorBrewer")')
                     ro.r('library("pheatmap")')
                     ro.globalenv['output_heatmap_similarity_score'] = str(self.output_dir)+"/" + self.distance+"_heatmap.pdf"
                     ro.globalenv['output_file_Pearson'] = str(self.output_dir)+"/Pearson_heatmap.pdf"
                     if distance.c_hash_association_method_discretize[self.distance]:
-                        ro.r('pheatmap(similarity_score, color = rev(heat.colors(100)),labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                        ro.r('pheatmap(similarity_score, color = brewer.pal(100,"Reds"),labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                     else:
                         ro.r('pheatmap(similarity_score,labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                     ro.r('dev.off()')
