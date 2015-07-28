@@ -246,13 +246,13 @@ class Tree():
     def is_representative(self, pvalue_threshold, pc_threshold, robustness, decomp = 'mca' ):
         #return True
         #robustness = .098
-        print robustness
+        #print robustness
         number_left_features = len(self.get_data()[0])
         number_right_features = len(self.get_data()[1])
         #print "Left:", number_left_features, len(self.get_left_loading())
         #print "Right:", number_right_features, len(self.get_right_loading())
-        print self.get_left_loading(), self.get_data()[0]
-        print self.get_right_loading(), self.get_data()[1]
+        #print self.get_left_loading(), self.get_data()[0]
+        #print self.get_right_loading(), self.get_data()[1]
         
         if len(self.get_left_loading()) == 1 and len(self.get_right_loading()) == 1:
             #print self.get_left_loading(), self.get_right_loading
@@ -269,7 +269,7 @@ class Tree():
                     if math.fabs(self.get_right_loading()[i]) < right_loading_threshold :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                         counter += 1
                         if counter > (number_right_features/2):
-                            print "#1:",counter
+                           # print "#1:",counter
                             return False
             counter = 0
             if len(self.get_left_loading()) > 1:
@@ -280,7 +280,7 @@ class Tree():
                         if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:
                             counter += 1
                             if counter > (number_left_features/2):
-                                print "#2:",counter
+                                #print "#2:",counter
                                 return False
             return True
         elif decomp == 'pca':
