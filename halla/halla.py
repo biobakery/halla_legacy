@@ -235,6 +235,10 @@ def parse_arguments (args):
         type=int,
         default=1,
         help="the number of processing units available\n[default = 1]")
+    argp.add_argument(
+        "--seed", 
+        help="makes the random permutation reproducible results", 
+        action="store_true")
 
     return argp.parse_args()
 
@@ -255,6 +259,7 @@ def set_HAllA_object (H, args):
     H.descending = args.strDescending
     istm = list()  # X and Y are used to store datasets
     H.apply_stop_condition = args.apply_stop_condition
+    H.seed = args.seed
     # If Y was not set - we use X
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  

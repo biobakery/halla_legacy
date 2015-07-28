@@ -1715,7 +1715,7 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
 def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
-    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness = None, fAlpha=0.05, apply_stop_condition = True):
+    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness = None, fAlpha=0.05, apply_stop_condition = True, seed = False):
     """
     Perform all-against-all on a hypothesis tree.
 
@@ -2207,7 +2207,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nm
         '''
         X = pArray1[aIndiciesMapped[0]]
         Y = pArray2[aIndiciesMapped[1]]
-        dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y,  metric = metric, decomposition = decomposition, iIter=iIter)
+        dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y,  metric = metric, decomposition = decomposition, iIter=iIter, seed = seed)
         pNode.set_similarity_score(similarity)
         pNode.set_left_first_rep_variance(left_first_rep_variance)
         pNode.set_right_first_rep_variance(right_first_rep_variance)

@@ -61,6 +61,7 @@ class HAllA():
         self.heatmap_all = False
         self.bypass_discretizing = False
         self.apply_stop_condition = False
+        self.seed = False
         #==================================================================#
         # Mutable Meta Objects  
         #==================================================================#
@@ -324,7 +325,7 @@ class HAllA():
             print ("HAllA PROMPT: q value", fQ)
             print ("q value is", fQ) 
         
-        self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, robustness=self.robustness, bVerbose=self.verbose, apply_stop_condition = self.apply_stop_condition) 
+        self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, robustness=self.robustness, bVerbose=self.verbose, apply_stop_condition = self.apply_stop_condition, seed = self.seed) 
         # # Choose to keep to 2 arrays for now -- change later to generalize 
         #return self.meta_alla 
 

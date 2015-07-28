@@ -619,7 +619,7 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 
 	return fP
 	
-def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000):
+def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000, seed = False):
 	"""
 	Input: 
 	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 1000
@@ -700,6 +700,9 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		return fP
 	
 	iter = iIter
+	
+	if seed:
+		numpy.random.seed(0)
 	for i in xrange(iIter):
 
 		#XP = array([numpy.random.permutation(x) for x in X])
@@ -1092,10 +1095,10 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 
 	return dPPerm
 
-def permutation_test(pArray1, pArray2, metric, decomposition, iIter):
+def permutation_test(pArray1, pArray2, metric, decomposition, iIter, seed):
 	
 	if decomposition in ['none','cca', 'pls',"pca", "dpca", "nlpca", "ica", "kpca","centroid-medoid","medoid","mean", "mca"]:
-		return permutation_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter)
+		return permutation_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter, seed= seed)
 	
 	if decomposition in ["average"]:
 		return permutation_test_by_average(pArray1, pArray2, metric=metric, iIter=iIter)
