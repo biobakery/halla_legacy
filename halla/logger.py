@@ -138,7 +138,7 @@ def write_circos_table(data, name=None, rowheader=None, colheader=None, prefix =
     f.write(delimiter)
     for i in range(len(data[0])):
             f.write(str(i+1))
-            if i < len(data[1]) - 1:
+            if i < len(data[0]) - 1:
                 f.write(delimiter)
     f.write('\n')
     # column numbers as header
@@ -149,7 +149,7 @@ def write_circos_table(data, name=None, rowheader=None, colheader=None, prefix =
         f.write(delimiter)
         for i in range(len(data[0])):
             f.write(str(i))
-            if i < len(data[1]) - 1:
+            if i < len(data[0]) - 1:
                 f.write(delimiter)
         f.write('\n')
     elif len(colheader) == len(data[0]):
@@ -157,7 +157,7 @@ def write_circos_table(data, name=None, rowheader=None, colheader=None, prefix =
         f.write(delimiter)
         for i in range(len(data[0][:])):
             f.write(colheader[i])
-            if i < len(data[1]) - 1:
+            if i < len(data[0]) - 1:
                 f.write(delimiter)
         f.write('\n')
     else:

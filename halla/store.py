@@ -315,7 +315,7 @@ class HAllA():
 
     def _naive_all_against_all(self, iIter=100):
         self.meta_alla = hierarchy.naive_all_against_all(self.meta_feature[0], self.meta_feature[1], decomposition = self.decomposition, method=self.randomization_method, metric=self.distance, fQ=self.q, fdr = self.fdr_function,
-    bVerbose=False, iIter = self.iterations)
+    bVerbose=False, iIter = self.iterations, seed =self.seed)
         return self.meta_alla 
     def _hypotheses_testing(self):
             
@@ -844,7 +844,10 @@ class HAllA():
             for i in range(len(D1_features_order)):
                 for j in range(len(D2_features_order)):
                     if _is_in_an_assciostions(D1_features_order[i],D2_features_order[j]): #for association in sorted_associations:
-                        circos_tabel[i][j] = math.fabs(int(similarity_score[i][j]*100))
+                        try:
+                            circos_tabel[i][j] = math.fabs(int(similarity_score[i][j]*100))
+                        except:
+                            circos_tabel[i][j] = 0
             logger.write_circos_table(circos_tabel, str(self.output_dir)+"/" +"circos_table_"+ self.distance+".txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
             logger.write_table(similarity_score,str(self.output_dir)+"/" + self.distance+"_similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
             logger.write_table(anottation_cell,str(self.output_dir)+"/" + self.distance+"_asscoaitaion_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
@@ -1181,7 +1184,9 @@ class HAllA():
                 aOut.append([aIndices, fP])
         return aOut 
     
-    def is_correct_submethods_combination(self ): 
+    def is_correct_submethods_combination(self ):
+        if self.descending == "AllA" and self.decomposition == "mca":
+            self.decomposition == "none"
         if (self.descending == "AllA" and not self.decomposition =='none') or\
                             (self.descending == "HAllA" and self.decomposition =='none') or\
                             (self.decomposition in ["ica","pca",'pls', 'cca', 'kpca'] and self.distance not in ["pearson", "spearman"] ) or\

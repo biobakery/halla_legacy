@@ -1462,7 +1462,7 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     return aOut
         
 def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", method="permutation", metric="nmi", fQ=0.1,
-    bVerbose=False, iIter=1000):
+    bVerbose=False, iIter=1000, seed = False):
     
     pHashMethods = {"permutation" : stats.permutation_test,
                         "permutation_test_by_medoid": stats.permutation_test_by_medoid,
@@ -1492,7 +1492,7 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
         data = [[i], [j]]
         test.add_data(data)
         #print i, j
-        fP, similarity, left_rep, right_rep, loading_left, loading_right, left_rep, right_rep = pMethod(array([pArray1[i]]), array([pArray2[j]]), metric = metric, decomposition = decomposition, iIter=iIter)
+        fP, similarity, left_rep, right_rep, loading_left, loading_right, left_rep, right_rep = pMethod(array([pArray1[i]]), array([pArray2[j]]), metric = metric, decomposition = decomposition, iIter=iIter, seed = seed)
         test.set_pvalue(fP)
         test.set_similarity_score(similarity)
         test.set_left_first_rep_variance(1.0)
