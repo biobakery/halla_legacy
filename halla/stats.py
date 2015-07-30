@@ -700,8 +700,6 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		return fP
 	
 	iter = iIter
-	
-	
 	for i in xrange(iIter):
 		if seed:
 			numpy.random.seed(i)

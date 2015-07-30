@@ -1461,8 +1461,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     #print "Number of levels after coupling", level_number-1
     return aOut
         
-def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", method="permutation", metric="nmi", fQ=0.1,
-    bVerbose=False, iIter=1000, seed = False):
+def naive_all_against_all(pArray1, pArray2, seed,fdr= "BH", decomposition = "pca", method="permutation", metric="nmi", fQ=0.1,
+    bVerbose=False, iIter=1000,  discretize_style= 'equal-area'):
     
     pHashMethods = {"permutation" : stats.permutation_test,
                         "permutation_test_by_medoid": stats.permutation_test_by_medoid,
@@ -1492,7 +1492,7 @@ def naive_all_against_all(pArray1, pArray2, fdr= "BH", decomposition = "pca", me
         data = [[i], [j]]
         test.add_data(data)
         #print i, j
-        fP, similarity, left_rep, right_rep, loading_left, loading_right, left_rep, right_rep = pMethod(array([pArray1[i]]), array([pArray2[j]]), metric = metric, decomposition = decomposition, iIter=iIter, seed = seed)
+        fP, similarity, left_rep, right_rep, loading_left, loading_right, left_rep, right_rep = pMethod(array([pArray1[i]]), array([pArray2[j]]), metric = metric, decomposition = decomposition, iIter=iIter, seed = seed, discretize_style= discretize_style)
         test.set_pvalue(fP)
         test.set_similarity_score(similarity)
         test.set_left_first_rep_variance(1.0)
@@ -1714,8 +1714,8 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 #### Need to figure out what -- it's probably in the p-value consolidation stage 
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
-def hypotheses_testing(pTree, pArray1, pArray2, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
-    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness = None, fAlpha=0.05, apply_stop_condition = True, seed = False, discretize_style= 'equal-area'):
+def hypotheses_testing(pTree, pArray1, pArray2, seed, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
+    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness = None, fAlpha=0.05, apply_stop_condition = True, discretize_style= 'equal-area'):
     """
     Perform all-against-all on a hypothesis tree.
 
