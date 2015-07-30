@@ -93,7 +93,7 @@ def pca_explained_variance_ratio_(pArray, iComponents=1):
 	return pPCA.explained_variance_ratio_ 
 
 	
-def mca_method(pArray, iComponents=1):
+def mca_method(pArray, discretize_style, iComponents=1):
 	"""
 	Input: N x D matrix 
 	Output: D x N matrix 
@@ -133,7 +133,7 @@ def mca_method(pArray, iComponents=1):
 	#print list(rep)
 	#print rep
 	#print (discretize(list(rep)), explained_variance_1, loading)
-	return (discretize(list(rep)), list(explained_variance_1)[0], list(loading))
+	return (discretize(list(rep), style = discretize_style), list(explained_variance_1)[0], list(loading))
 	'''
 	if len(pArray) < 2:
 		print "len A:", len(pArray)
@@ -619,7 +619,7 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 
 	return fP
 	
-def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000, seed = False):
+def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000, seed = False, discretize_style = 'equal-area'):
 	"""
 	Input: 
 	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 1000
@@ -654,7 +654,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		pRep1 = pArray1[0, :]
 		pRep2 = pArray2[0, :]
 	elif decomposition == 'mca':
-		pRep1, left_rep_variance, left_loading = mca_method(pArray1) #mean(pArray1)#[len(pArray1)/2]
+		pRep1, left_rep_variance, left_loading = mca_method(pArray1, discretize_style = discretize_style) #mean(pArray1)#[len(pArray1)/2]
 		pRep2, right_rep_variance, right_loading = mca_method(pArray2)#mean(pArray2)#[len(pArray2)/2]	
 	elif decomposition == 'medoid':
 		pRep1 = medoid(pArray1)
@@ -1096,10 +1096,10 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 
 	return dPPerm
 
-def permutation_test(pArray1, pArray2, metric, decomposition, iIter, seed):
+def permutation_test(pArray1, pArray2, metric, decomposition, iIter, seed, discretize_style):
 	
 	if decomposition in ['none','cca', 'pls',"pca", "dpca", "nlpca", "ica", "kpca","centroid-medoid","medoid","mean", "mca"]:
-		return permutation_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter, seed= seed)
+		return permutation_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter, seed= seed, discretize_style = discretize_style)
 	
 	if decomposition in ["average"]:
 		return permutation_test_by_average(pArray1, pArray2, metric=metric, iIter=iIter)
@@ -1415,7 +1415,7 @@ def step_function():
 
 # ## This is a very simple linear cutting method, with \sqrt{N} bins 
 # ## To be tested with other estimators, like kernel density estimators for improved performance 
-def discretize(pArray, iN=None, method=None, aiSkip=[]):
+def discretize(pArray, style = "kmeans", iN=None, method=None, aiSkip=[]):
 	"""
 	>>> discretize( [0.1, 0.2, 0.3, 0.4] )
 	[0, 0, 1, 1]
@@ -1513,65 +1513,66 @@ def discretize(pArray, iN=None, method=None, aiSkip=[]):
 	"""
 	#from sklearn.cluster.spectral import discretize
 	#y_pred = discretize(y_true_noisy)
-	def _discretize_continuous(astrValues, iN=iN, type = 'jenks'):
-		if type == 'jenks':
-			from rpy2 import robjects as ro
-			from rpy2.robjects import r
-			from rpy2.robjects.packages import importr
-			#import rpy2.robjects as ro
-			import pandas.rpy.common as com
-			import rpy2.robjects.numpy2ri
-			import pandas as pd
-			rpy2.robjects.numpy2ri.activate()
-			dataFrame1 = pd.DataFrame(astrValues, dtype= float)
-			#print dataFrame1.shape
-			ro.r('library(classInt)')
-			ro.globalenv['number_of_bins'] = round(math.sqrt(len(astrValues)))
-			ro.globalenv['v'] =  com.convert_to_r_dataframe(dataFrame1)[0]
-			ro.r('clI <- classIntervals(v, n = number_of_bins, style = "kmeans")')
-			ro.r(' descretized_v <- findCols(clI)')
-			astrRet = ro.globalenv['descretized_v']
-			return astrRet
+	def _discretize_continuous(astrValues, iN=iN):
+		#print "Discretizing :", style
+		if iN == None:
+			# Default to rounded sqrt(n) if no bin count requested
+			iN = round(math.sqrt(len(astrValues))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
+		elif iN == 0:
+			iN = len(astrValues)
 		else:
-			if len(set(astrValues)) < math.sqrt(len(astrValues)):
-				try:
-					return rankdata(astrValues, method= 'dense')
-				except:
-					temp = numpy.array(astrValues).argsort()
-					order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
-					order = rankdata(order, method= 'dense') #array([order[i]+1.0 for i in range(len(order))])
-					print "Discretizing categorical data!!!"
-								
-			if iN == None:
-				# Default to rounded sqrt(n) if no bin count requested
-				iN = round(math.sqrt(len(astrValues)))  # **0.5 + 0.5)
-			elif iN == 0:
-				iN = len(astrValues)
-			else:
-				iN = min(iN, len(set(astrValues)))
-			
+			iN = min(iN, len(set(astrValues)))
+		if len(set(astrValues)) < math.sqrt(len(astrValues)):
 			try:
-				order = rankdata(astrValues, method= 'ordinal')
-			except: 
-				
-			#if type(astrValues[0]) == str or type(astrValues[0]) == bool:
+				return rankdata(astrValues, method= 'dense')
+			except:
 				temp = numpy.array(astrValues).argsort()
 				order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
-				order = rankdata(order, method= 'ordinal') #array([order[i]+1.0 for i in range(len(order))])
+				order = rankdata(order, method= 'dense') #array([order[i]+1.0 for i in range(len(order))])
 				print "Discretizing categorical data!!!"
-			#elif type(astrValues[0]) == float or type(astrValues[0]) == int:
-	
-			#print "prank",order
-			'''
+									
+		try:
+			if style in ['jenks', 'kmeans', 'hclust']:
+				from rpy2 import robjects as ro
+				from rpy2.robjects import r
+				from rpy2.robjects.packages import importr
+				#import rpy2.robjects as ro
+				import pandas.rpy.common as com
+				import rpy2.robjects.numpy2ri
+				import pandas as pd
+				rpy2.robjects.numpy2ri.activate()
+				dataFrame1 = pd.DataFrame(astrValues, dtype= float)
+				#print dataFrame1.shape
+				ro.r('library(classInt)')
+				ro.globalenv['number_of_bins'] = iN 
+				ro.globalenv['v'] =  com.convert_to_r_dataframe(dataFrame1)[0]
+				ro.globalenv['style'] =  style
+				ro.r('clI <- classIntervals(v, n = number_of_bins, style = style)')
+				ro.r(' descretized_v <- findCols(clI)')
+				astrRet = ro.globalenv['descretized_v']
+				return astrRet
+			else:
+				order = rankdata(astrValues, method= 'ordinal')
+		except: 
 			
-			print "ranks", order
-			'''
-			#aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
-			#print "aiIndices", aiIndices
-			astrRet = [None] * len(astrValues)
-			for i in range(len(astrValues)):
-				astrRet[i] = int(numpy.ceil(order[i]/iN))
-			return astrRet
+		#if type(astrValues[0]) == str or type(astrValues[0]) == bool:
+			temp = numpy.array(astrValues).argsort()
+			order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
+			order = rankdata(order, method= 'ordinal') #array([order[i]+1.0 for i in range(len(order))])
+			print "Discretizing categorical data!!!"
+		#elif type(astrValues[0]) == float or type(astrValues[0]) == int:
+
+		#print "prank",order
+		'''
+		
+		print "ranks", order
+		'''
+		#aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
+		#print "aiIndices", aiIndices
+		astrRet = [None] * len(astrValues)
+		for i in range(len(astrValues)):
+			astrRet[i] = int(numpy.ceil(order[i]/iN))
+		return astrRet
 
 	def _discretize_continuous_orginal(astrValues, iN=iN): 
 		

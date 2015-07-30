@@ -59,7 +59,7 @@ class HAllA():
         self.output_dir = "./"
         self.plotting_results = False
         self.heatmap_all = False
-        self.bypass_discretizing = False
+        self.strDiscretizing = 'equal-area'
         self.apply_stop_condition = False
         self.seed = False
         #==================================================================#
@@ -199,7 +199,7 @@ class HAllA():
         return self._check(pObject, [list, tuple, np.ndarray])
    
     def _bypass_discretizing(self):
-        if not distance.c_hash_association_method_discretize[self.distance] or  self.bypass_discretizing or\
+        if not distance.c_hash_association_method_discretize[self.distance] or  self.strDiscretizing == "none" or\
             self.distance in ["pearson"] or self.decomposition in ["pca", "ica"] :
             return True
         else:
@@ -209,7 +209,7 @@ class HAllA():
     #==========================================================# 
 
     @staticmethod 
-    def m(pArray, pFunc, axis=0):
+    def m(pArray, pFunc, strDiscretizing, axis=0,):
         """ 
         Maps pFunc over the array pArray 
         """
@@ -221,7 +221,7 @@ class HAllA():
             return pArray[pFunc]
         else:  # generic function type
             # print pArray.shape
-            return array([pFunc(item) for item in pArray]) 
+            return array([pFunc(item, strDiscretizing) for item in pArray]) 
 
     @staticmethod 
     def bp(pArray, pFunc, axis=0):
@@ -278,7 +278,8 @@ class HAllA():
         if not self.aOutName2:
             self.aOutName2 = [str(i) for i in range(len(self.meta_array[1])) ]
     def _discretize(self):
-        self.meta_feature = self.m(self.meta_array, stats.discretize)
+        self.meta_feature = self.m(self.meta_array, stats.discretize, self.strDiscretizing)
+        #self.meta_feature = array([stats.discretize(self.meta_array[0], self.strDiscretizing), stats.discretize(self.meta_array[1], self.strDiscretizing)])
         return self.meta_feature
 
     def _featurize(self, strMethod="_discretize"):
@@ -325,7 +326,7 @@ class HAllA():
             print ("HAllA PROMPT: q value", fQ)
             print ("q value is", fQ) 
         
-        self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, robustness=self.robustness, bVerbose=self.verbose, apply_stop_condition = self.apply_stop_condition, seed = self.seed) 
+        self.meta_alla = hierarchy.hypotheses_testing(self.meta_hypothesis_tree, self.meta_feature[0], self.meta_feature[1], method=self.randomization_method, fdr=self.fdr_function, decomposition=self.decomposition, metric= self.distance, fQ=self.q, iIter = self.iterations, robustness=self.robustness, bVerbose=self.verbose, apply_stop_condition = self.apply_stop_condition, seed = self.seed, discretize_style = self.strDiscretizing) 
         # # Choose to keep to 2 arrays for now -- change later to generalize 
         #return self.meta_alla 
 
@@ -1112,6 +1113,7 @@ class HAllA():
         csvw.writerow(["q: FDR cut-off : ", self.q]) 
         csvw.writerow(["r: effect size for robustness : ", self.robustness]) 
         csvw.writerow(["Applied stop condition : ", self.apply_stop_condition]) 
+        csvw.writerow(["Discretizing method : ", self.strDiscretizing]) 
         csvw.writerow([])
         self._name_features()
         if not self.is_correct_submethods_combination():
@@ -1121,7 +1123,7 @@ class HAllA():
             self.meta_feature = array([np.asarray(self.meta_array[0], dtype = float), np.asarray(self.meta_array[1], dtype = float)])
             #print self.meta_feature
         else:
-            #print "featurize is started!"
+            print "Featurize is started using: ", self.strDiscretizing, " style!"
             # featurize 
             start_time = time.time()
             self._featurize()

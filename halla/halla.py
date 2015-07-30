@@ -216,9 +216,11 @@ def parse_arguments (args):
         action="store_true")
     
     argp.add_argument(
-        "--bypass-discretizing", 
-        help="bypass the discretizing step", 
-        action="store_true")
+        "-k", "--discretizing", 
+        dest="strDiscretizing",
+        default="equal-area",
+        choices=["equal-area", "jenks", "hclust", "kmeans", "none"],
+        help="approach for discretizing continuous data\n[default = equal-area]")
     argp.add_argument(
         "--apply-stop-condition",
         dest ="apply_stop_condition", 
@@ -259,6 +261,7 @@ def set_HAllA_object (H, args):
     H.descending = args.strDescending
     istm = list()  # X and Y are used to store datasets
     H.apply_stop_condition = args.apply_stop_condition
+    H.strDiscretizing = args.strDiscretizing
     H.seed = args.seed
     # If Y was not set - we use X
     if args.Y == None:
