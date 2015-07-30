@@ -238,9 +238,10 @@ def parse_arguments (args):
         default=1,
         help="the number of processing units available\n[default = 1]")
     argp.add_argument(
-        "--seed", 
-        help="makes the random permutation reproducible results", 
-        action="store_true")
+        "-s", "--seed",  metavar="<1>",
+        type=int,
+        default=1,
+        help="a seed number to make the random permutation reproducible\n[default = 0]")
 
     return argp.parse_args()
 

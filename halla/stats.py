@@ -701,8 +701,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	
 	iter = iIter
 	for i in xrange(iIter):
-		if seed:
-			numpy.random.seed(i)
+		numpy.random.seed(i+seed)
 
 		#XP = array([numpy.random.permutation(x) for x in X])
 		#YP = array([numpy.random.permutation(y) for y in Y])

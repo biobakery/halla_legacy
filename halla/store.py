@@ -61,7 +61,7 @@ class HAllA():
         self.heatmap_all = False
         self.strDiscretizing = 'equal-area'
         self.apply_stop_condition = False
-        self.seed = False
+        self.seed = 0
         #==================================================================#
         # Mutable Meta Objects  
         #==================================================================#
@@ -1113,7 +1113,8 @@ class HAllA():
         csvw.writerow(["q: FDR cut-off : ", self.q]) 
         csvw.writerow(["r: effect size for robustness : ", self.robustness]) 
         csvw.writerow(["Applied stop condition : ", self.apply_stop_condition]) 
-        csvw.writerow(["Discretizing method : ", self.strDiscretizing]) 
+        csvw.writerow(["Discretizing method : ", self.strDiscretizing])
+        csvw.writerow(["Seed number: ", self.seed])  
         csvw.writerow([])
         self._name_features()
         if not self.is_correct_submethods_combination():
