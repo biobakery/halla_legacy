@@ -655,7 +655,7 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		pRep2 = pArray2[0, :]
 	elif decomposition == 'mca':
 		pRep1, left_rep_variance, left_loading = mca_method(pArray1, discretize_style = discretize_style) #mean(pArray1)#[len(pArray1)/2]
-		pRep2, right_rep_variance, right_loading = mca_method(pArray2)#mean(pArray2)#[len(pArray2)/2]	
+		pRep2, right_rep_variance, right_loading = mca_method(pArray2, discretize_style = discretize_style)#mean(pArray2)#[len(pArray2)/2]	
 	elif decomposition == 'medoid':
 		pRep1 = medoid(pArray1)
 		pRep2 = medoid(pArray2)
