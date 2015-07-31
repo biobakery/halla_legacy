@@ -1578,8 +1578,7 @@ def discretize(pArray, style = "kmeans", iN=None, method=None, aiSkip=[]):
 			iN = round(math.sqrt(len(astrValues)))  # **0.5 + 0.5)
 		elif iN == 0:
 			iN = len(astrValues)
-		else:
-			iN = min(iN, len(set(astrValues)))
+		iN = min(iN, len(set(astrValues)))
 		#print iN	
 		# This is still a bit buggy since ( [0, 0, 0, 1, 2, 2, 2, 2], 3 ) will exhibit suboptimal behavior
 		aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
