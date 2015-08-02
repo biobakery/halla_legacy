@@ -1510,62 +1510,74 @@ def discretize(pArray, style = "kmeans", iN=None, method=None, aiSkip=[]):
 	"""
 	#from sklearn.cluster.spectral import discretize
 	#y_pred = discretize(y_true_noisy)
+	if style in ['jenks', 'kmeans', 'hclust']:
+		import traceback
+		import sys
+		from rpy2 import robjects as ro
+		from rpy2.robjects import r
+		from rpy2.robjects.packages import importr
+		#import rpy2.robjects as ro
+		import pandas.rpy.common as com
+		import rpy2.robjects.numpy2ri
+		rpy2.robjects.numpy2ri.activate()
+		
+		
 	def _discretize_continuous(astrValues, iN=iN):
 		#print "Discretizing :", style
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
-			iN = round(math.sqrt(len(astrValues))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
+			iN = min(len(set(astrValues)), round(math.sqrt(len(astrValues)))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
 		elif iN == 0:
 			iN = len(astrValues)
 		else:
 			iN = min(iN, len(set(astrValues)))
-		if len(set(astrValues)) < math.sqrt(len(astrValues)):
+			
+			
+		if len(set(astrValues)) <= iN:
 			try:
 				return rankdata(astrValues, method= 'dense')
 			except:
 				temp = numpy.array(astrValues).argsort()
 				order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
 				order = rankdata(order, method= 'dense') #array([order[i]+1.0 for i in range(len(order))])
-				print "Discretizing categorical data!!!"
-									
-		try:
-			if style in ['jenks', 'kmeans', 'hclust']:
-				from rpy2 import robjects as ro
-				from rpy2.robjects import r
-				from rpy2.robjects.packages import importr
-				#import rpy2.robjects as ro
-				import pandas.rpy.common as com
-				import rpy2.robjects.numpy2ri
-				import pandas as pd
-				rpy2.robjects.numpy2ri.activate()
-				dataFrame1 = pd.DataFrame(astrValues, dtype= float)
-				#print dataFrame1.shape
-				ro.r('library(classInt)')
-				ro.globalenv['number_of_bins'] = iN 
-				ro.globalenv['v'] =  com.convert_to_r_dataframe(dataFrame1)[0]
-				ro.globalenv['style'] =  style
-				ro.r('clI <- classIntervals(v, n = number_of_bins, style = style)')
-				ro.r(' descretized_v <- findCols(clI)')
-				astrRet = ro.globalenv['descretized_v']
-				return astrRet
-			else:
-				order = rankdata(astrValues, method= 'ordinal')
-		except: 
+				return order
+				#print "Discretizing categorical data!!!"
+		else:							
+			try:
+				if style in ['jenks', 'kmeans', 'hclust']:
+					try:
+						dataFrame1 = pd.DataFrame(astrValues, dtype= float)
+						#print dataFrame1[0]
+						ro.r('library(classInt)')
+						ro.globalenv['number_of_bins'] = iN 
+						ro.globalenv['v'] =  com.convert_to_r_dataframe(dataFrame1)[0]
+						ro.globalenv['style'] =  style
+						ro.r('clI <- classIntervals(v, n = number_of_bins, style = style)')
+						ro.r(' descretized_v <- findCols(clI)')
+						astrRet = ro.globalenv['descretized_v']
+						return astrRet
+					except Exception, err:
+						print(traceback.format_exc())
+						
+						print "Discretizing as exeception in ClassInt happend!!!"
+						order = rankdata(astrValues, method= 'ordinal')
+				else:
+					order = rankdata(astrValues, method= 'ordinal')
+			except: 
+			#if type(astrValues[0]) == str or type(astrValues[0]) == bool:
+				temp = numpy.array(astrValues).argsort()
+				order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
+				order = rankdata(order, method= 'ordinal') #array([order[i]+1.0 for i in range(len(order))])
+				
+			#elif type(astrValues[0]) == float or type(astrValues[0]) == int:
+	
+			#print "prank",order
+			'''
 			
-		#if type(astrValues[0]) == str or type(astrValues[0]) == bool:
-			temp = numpy.array(astrValues).argsort()
-			order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
-			order = rankdata(order, method= 'ordinal') #array([order[i]+1.0 for i in range(len(order))])
-			print "Discretizing categorical data!!!"
-		#elif type(astrValues[0]) == float or type(astrValues[0]) == int:
-
-		#print "prank",order
-		'''
-		
-		print "ranks", order
-		'''
-		#aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
-		#print "aiIndices", aiIndices
+			print "ranks", order
+			'''
+			#aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
+			#print "aiIndices", aiIndices
 		astrRet = [None] * len(astrValues)
 		for i in range(len(astrValues)):
 			astrRet[i] = int(numpy.ceil(order[i]/iN))
@@ -1578,7 +1590,8 @@ def discretize(pArray, style = "kmeans", iN=None, method=None, aiSkip=[]):
 			iN = round(math.sqrt(len(astrValues)))  # **0.5 + 0.5)
 		elif iN == 0:
 			iN = len(astrValues)
-		iN = min(iN, len(set(astrValues)))
+		else:
+			iN = min(iN, len(set(astrValues)))
 		#print iN	
 		# This is still a bit buggy since ( [0, 0, 0, 1, 2, 2, 2, 2], 3 ) will exhibit suboptimal behavior
 		aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
