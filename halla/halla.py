@@ -27,6 +27,7 @@ import os
 import shutil 
 import time
 import math
+import random
 
 # Test if numpy is installed
 try:
@@ -238,10 +239,10 @@ def parse_arguments (args):
         default=1,
         help="the number of processing units available\n[default = 1]")
     argp.add_argument(
-        "-s", "--seed",  metavar="<1>",
+        "-s", "--seed",  metavar="<random>",
         type=int,
-        default=1,
-        help="a seed number to make the random permutation reproducible\n[default = 0]")
+        default= random.randint(1,10000),
+        help="a seed number to make the random permutation reproducible\n[default = random]")
 
     return argp.parse_args()
 

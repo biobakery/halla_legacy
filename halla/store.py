@@ -34,6 +34,7 @@ from . import distance
 from . import stats
 from . import plot
 from . import logger
+import random
 
 global D1_features_order , D2_features_order 
 D1_features_order  = []
@@ -61,8 +62,7 @@ class HAllA():
         self.heatmap_all = False
         self.strDiscretizing = 'equal-area'
         self.apply_stop_condition = False
-        self.seed = 0
-        #==================================================================#
+        self.seed = random.randint(1,10000)        #==================================================================#
         # Mutable Meta Objects  
         #==================================================================#
         self.meta_array = array([None, None])
@@ -1114,7 +1114,7 @@ class HAllA():
         csvw.writerow(["r: effect size for robustness : ", self.robustness]) 
         csvw.writerow(["Applied stop condition : ", self.apply_stop_condition]) 
         csvw.writerow(["Discretizing method : ", self.strDiscretizing])
-        csvw.writerow(["Seed number: ", self.seed])  
+        csvw.writerow(["Seed number: ", self.seed]) 
         csvw.writerow([])
         self._name_features()
         if not self.is_correct_submethods_combination():

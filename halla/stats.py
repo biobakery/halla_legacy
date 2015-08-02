@@ -13,6 +13,7 @@ import numpy
 from numpy.random import shuffle, binomial, normal, multinomial 
 import scipy
 import sys
+import random
 from scipy.stats import scoreatpercentile, pearsonr, rankdata, percentileofscore, spearmanr
 
 import sklearn 
