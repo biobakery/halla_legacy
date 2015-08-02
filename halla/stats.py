@@ -1511,16 +1511,18 @@ def discretize(pArray, style = "kmeans", iN=None, method=None, aiSkip=[]):
 	#from sklearn.cluster.spectral import discretize
 	#y_pred = discretize(y_true_noisy)
 	if style in ['jenks', 'kmeans', 'hclust']:
-		import traceback
-		import sys
-		from rpy2 import robjects as ro
-		from rpy2.robjects import r
-		from rpy2.robjects.packages import importr
-		#import rpy2.robjects as ro
-		import pandas.rpy.common as com
-		import rpy2.robjects.numpy2ri
-		rpy2.robjects.numpy2ri.activate()
-		
+		try:
+			from rpy2 import robjects as ro
+			from rpy2.robjects import r
+			from rpy2.robjects.packages import importr
+			#import rpy2.robjects as ro
+			import pandas.rpy.common as com
+			import rpy2.robjects.numpy2ri
+			rpy2.robjects.numpy2ri.activate()
+			ro.r('library(classInt)')
+			ro.globalenv['style'] =  style
+		except ImportError:
+			sys.exit("Please install R package classInt")
 		
 	def _discretize_continuous(astrValues, iN=iN):
 		#print "Discretizing :", style
@@ -1531,7 +1533,6 @@ def discretize(pArray, style = "kmeans", iN=None, method=None, aiSkip=[]):
 			iN = len(astrValues)
 		else:
 			iN = min(iN, len(set(astrValues)))
-			
 			
 		if len(set(astrValues)) <= iN:
 			try:
@@ -1548,10 +1549,8 @@ def discretize(pArray, style = "kmeans", iN=None, method=None, aiSkip=[]):
 					try:
 						dataFrame1 = pd.DataFrame(astrValues, dtype= float)
 						#print dataFrame1[0]
-						ro.r('library(classInt)')
 						ro.globalenv['number_of_bins'] = iN 
 						ro.globalenv['v'] =  com.convert_to_r_dataframe(dataFrame1)[0]
-						ro.globalenv['style'] =  style
 						ro.r('clI <- classIntervals(v, n = number_of_bins, style = style)')
 						ro.r(' descretized_v <- findCols(clI)')
 						astrRet = ro.globalenv['descretized_v']
