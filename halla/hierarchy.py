@@ -263,7 +263,12 @@ class Tree():
         if decomp == 'mca':
             counter = 0
             if len(self.get_right_loading()) > 1:
-                right_loading_threshold = robustness/2.000 #math.sqrt(1.0/len(self.get_right_loading())) - .01
+                right_loading_threshold = np.mean(self.get_right_loading()) - np.std(self.get_right_loading())#robustness/2.000 #math.sqrt(1.0/len(self.get_right_loading())) - .01
+                '''print "Right"
+                print scipy.stats.sem(self.get_right_loading())
+                print np.mean(self.get_right_loading())
+                print np.std(self.get_right_loading())
+                '''
                 for i in range(len(self.get_right_loading())):
                     #print "right:", self.get_right_loading()[i]
                     #if np.mean(self.get_right_loading()) < .5 :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
@@ -273,35 +278,41 @@ class Tree():
                            # print "#1:",counter
                             return False
             counter = 0
+            '''print "Left"
+            print scipy.stats.sem(self.get_left_loading())
+            print np.mean(self.get_left_loading())
+            print np.std(self.get_left_loading())
+            print "End left"
+            '''
             if len(self.get_left_loading()) > 1:
-                    left_loading_threshold = robustness/2.000 #math.sqrt(1.0/len(self.get_left_loading())) - .01
-                    for i in range(len(self.get_left_loading())):
-                        #print "left:", self.get_left_loading()[i]
-                        #if np.mean(self.get_left_loading()) < .5:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
-                        if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:
-                            counter += 1
-                            if counter > (number_left_features/2):
-                                #print "#2:",counter
-                                return False
+                left_loading_threshold = np.mean(self.get_left_loading()) - np.std(self.get_left_loading())# robustness/2.000 #math.sqrt(1.0/len(self.get_left_loading())) - .01
+                for i in range(len(self.get_left_loading())):
+                    #print "left:", self.get_left_loading()[i]
+                    #if np.mean(self.get_left_loading()) < .5:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
+                    if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:
+                        counter += 1
+                        if counter > (number_left_features/2):
+                            #print "#2:",counter
+                            return False
             return True
         elif decomp == 'pca':
             counter = 0
             if len(self.get_right_loading()) > 1:
-                    right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) -  scipy.stats.sem(self.get_right_loading())
+                    right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) -  np.std(self.get_right_loading())
                     for i in range(len(self.get_right_loading())):
                         #print "right:", self.get_right_loading()[i]
                         if math.fabs(self.get_right_loading()[i]) < right_loading_threshold:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                             counter += 1
-                            if counter > math.sqrt(number_right_features):#(number_right_features/2):#math.log(number_right_features,2)):
+                            if counter > (number_right_features/2):#math.log(number_right_features,2)):
                                 return False
             counter = 0
             if len(self.get_left_loading()) > 1:
-                    left_loading_threshold = math.sqrt(1.0/len(self.get_left_loading())) - scipy.stats.sem(self.get_left_loading())
+                    left_loading_threshold = math.sqrt(1.0/len(self.get_left_loading())) - np.std(self.get_left_loading())
                     for i in range(len(self.get_left_loading())):
                         #print "left:", self.get_left_loading()[i]
                         if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
                             counter += 1
-                            if counter > math.sqrt(number_left_features):# (number_left_features/2):#math.log(number_left_features,2)):
+                            if counter > (number_left_features/2):#math.log(number_left_features,2)):
                                 return False
             return True
         else:
