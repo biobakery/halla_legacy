@@ -144,7 +144,7 @@ def parse_arguments (args):
         type=float,
         default=0.2,
         help="q-value for overall significance tests (cut-off for false discovery rate)\n[default = 0.1]")
-    
+    '''
     argp.add_argument(
         "-r", "--robustness",
          #metavar="<0.001>",
@@ -152,21 +152,21 @@ def parse_arguments (args):
          type=float,
          default=0.20,
          help="threshold for robustness\n[default = 0.20]")    
-    
+    '''
     argp.add_argument(
         "-a","--descending",
         dest="strDescending",
         default = "HAllA",
         choices=["HAllA","AllA"],
         help="descending approach\n[default = HAllA for hierarchical all-against-all]")
-    
+    '''
     argp.add_argument(
         "-f","--fdr",
         dest="strFDR",
         default = "BHL",
         choices=["BHL","BHF","BHA"],
         help="function to maximize statistical power and control false discovery rate\n[default = BHL]")
-
+    '''
     argp.add_argument(
         "-i","--iterations", metavar="<1000>",
         dest="iIter",
@@ -194,14 +194,14 @@ def parse_arguments (args):
         default="BH",
         choices=["BH", "FDR", "Bonferroni", "BHY"],
         help="approach for calculating adjusted p-value\n[default = BH]")
-    '''
+    
     argp.add_argument(
         "-t","--test",
         dest="strRandomization",
         default="permutation",
         choices=["permutation","g-test"],
         help="approach for association test\n[default = permutation]")  
-     
+    '''
     argp.add_argument(
         "-v", "--verbose",
         action="store_true",
@@ -211,11 +211,11 @@ def parse_arguments (args):
         "--plotting-results", 
         help="plot the results", 
         action="store_true")
-    argp.add_argument(
+    '''argp.add_argument(
         "--heatmap-all", 
         help="plot a heatmap for all participated features in at least one association", 
         action="store_true")
-    
+    '''
     argp.add_argument(
         "-k", "--discretizing", 
         dest="strDiscretizing",
@@ -225,7 +225,7 @@ def parse_arguments (args):
     argp.add_argument(
         "--apply-stop-condition",
         dest ="apply_stop_condition", 
-        help="stops when p_value > 1 - adusted_pavlue", 
+        help="stops when q > 1 - p", 
         action="store_true")
     
     argp.add_argument(
@@ -249,17 +249,17 @@ def parse_arguments (args):
 def set_HAllA_object (H, args):
     H.distance = args.strMetric 
     H.decomposition = args.strDecomposition 
-    H.fdr_function = args.strFDR
+    #H.fdr_function = args.strFDR
     H.q = args.dQ  
     H.iterations = args.iIter
     #H.p_adjust_method = args.strAdjust
-    H.randomization_method = args.strRandomization  # method to generate error bars 
+    #H.randomization_method = args.strRandomization  # method to generate error bars 
     H.strStep = "uniform"
     H.verbose = args.verbose
-    H.robustness = float(args.robustness)
+    #H.robustness = float(args.robustness)
     H.output_dir = args.output_dir
     H.plotting_results = args.plotting_results
-    H.heatmap_all = args.heatmap_all
+    #H.heatmap_all = args.heatmap_all
     H.descending = args.strDescending
     istm = list()  # X and Y are used to store datasets
     H.apply_stop_condition = args.apply_stop_condition

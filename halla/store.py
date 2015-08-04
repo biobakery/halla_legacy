@@ -59,7 +59,7 @@ class HAllA():
         self.step_parameter = 1.0  # # a value between 0.0 and 1.0; a fractional value of the layers to be tested 
         self.output_dir = "./"
         self.plotting_results = False
-        self.heatmap_all = False
+        #self.heatmap_all = False
         self.strDiscretizing = 'equal-area'
         self.apply_stop_condition = False
         self.seed = random.randint(1,10000)        #==================================================================#
@@ -946,7 +946,7 @@ class HAllA():
         _report_associations()
         _report_compared_clusters()
         _heatmap_associations_R()
-        if self.heatmap_all:
+        if self.plotting_results:
             _heatmap_associations()
             _heatmap_datasets_R()
         _plot_associations()
