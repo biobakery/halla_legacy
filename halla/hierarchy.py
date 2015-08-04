@@ -2063,7 +2063,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, seed, method="permutation", metr
                         aFinal.append(current_level_tests[i])
                         #next_level_apChildren.append(current_level_tests[i])
                     else:
-                        if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass(apply_stop_condition, q = fQ) and current_level_tests[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):# and current_level_tests[i].get_significance_status() == None:
+                        if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass(apply_stop_condition, q = fQ) and\
+                         current_level_tests[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):# and current_level_tests[i].get_significance_status() == None:
                             current_level_tests[i].set_significance_status(False)
                             aOut.append(current_level_tests[i])
                             if bVerbose:
