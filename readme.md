@@ -244,15 +244,6 @@ $OUTPUT_DIR is the output directory
 ## Complete option list ##
 ```
 usage: halla [-h] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o
-             <output> [-q <0.1>] [-s <0.01>] [--descending] [-f {BHF,BHL,BHA}]
-             [-i <1000>] [-m {nmi,ami,pearson}]
-             [--decomposition {pca,cca,kpca,pls}]
-             [-t {permutation}] [-v] [--plotting-results]
-             [--bypass-discretizing] [--header]
-
-Hierarchical All-against-All significance association testing
-
-usage: halla [-h] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o
              <output> [-q <0.2>] [-a {HAllA,AllA}] [-i <1000>]
              [-m {nmi,ami,mic,pearson,spearman}]
              [-d {none,mca,pca,ica,cca,kpca,pls,medoid,mean}] [-v]
