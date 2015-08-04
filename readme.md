@@ -78,7 +78,7 @@ Its advantages include:
 * Scipy (>= 0.12) 
 * Scikit-learn (>=0.13)
 * matplotlib
-* R and FactoMineR package
+* R with FactoMineR package and classInt Package
 * Pandas (>=0.15.2)
 ```
 
@@ -90,7 +90,7 @@ You can download the latest HAllA release or the development version.
 
 Option 1: Latest Release (Recommended)
 
-* [Download](https://bitbucket.org/biobakery/halla/downloads/biobakery-halla-0.5.0.tar) and unpack the latest release of HAllA.
+* [Download](https://bitbucket.org/biobakery/halla/downloads/biobakery-halla-0.5.4.tar) and unpack the latest release of HAllA.
 
 Option 2: Development Version
 
@@ -252,6 +252,15 @@ usage: halla [-h] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o
 
 Hierarchical All-against-All significance association testing
 
+usage: halla [-h] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o
+             <output> [-q <0.2>] [-a {HAllA,AllA}] [-i <1000>]
+             [-m {nmi,ami,mic,pearson,spearman}]
+             [-d {none,mca,pca,ica,cca,kpca,pls,medoid,mean}] [-v]
+             [--plotting-results] [-k {equal-area,jenks,hclust,kmeans,none}]
+             [--apply-stop-condition] [--header] [--nproc <1>] [-s <random>]
+
+Hierarchical All-against-All significance association testing
+
 optional arguments:
   -h, --help            show this help message and exit
   -X <input_dataset_1.txt>
@@ -263,37 +272,34 @@ optional arguments:
   -o <output>, --output <output>
                         directory to write output files
                         [REQUIRED]
-  -q <0.1>, --q-value <0.1>
+  -q <0.2>, --q-value <0.2>
                         q-value for overall significance tests (cut-off for false discovery rate)
                         [default = 0.1]
-  -s <0.01>, --similarity-threshold <0.01>
-                        threshold for similarity to count a cluster as one unit and not consider sub-clusters as sub-unit
-                        [default = 0.01]
   -a {HAllA,AllA}, --descending {HAllA,AllA}
                         descending approach
                         [default = HAllA for hierarchical all-against-all]
-  -f {BHL,BHF,BHA}, --fdr {BHL,BHF,BHA}
-                        function to maximize statistical power and control false discovery rate
-                        [default = BHL]
   -i <1000>, --iterations <1000>
                         iterations for nonparametric significance testing (permutation test)
                         [default = 1000]
-  -m {nmi,ami,mic,pearson}, --metric {nmi,ami,mic,pearson}
+  -m {nmi,ami,mic,pearson,spearman}, --metric {nmi,ami,mic,pearson,spearman}
                         metric to be used for similarity measurement
                         [default = nmi]
-  -d {pca,ica,cca,kpca,pls,medoid,mean,mca}, --decomposition {pca,ica,cca,kpca,pls,medoid,mean,mca}
+  -d {none,mca,pca,ica,cca,kpca,pls,medoid,mean}, --decomposition {none,mca,pca,ica,cca,kpca,pls,medoid,mean}
                         approach for reducing dimensions (or decomposition)
                         [default = mca]
-  -t {permutation,g-test}, --test {permutation,g-test}
-                        approach for association test
-                        [default = permutation]
   -v, --verbose         additional output is printed
   --plotting-results    plot the results
-  --bypass-discretizing
-                        bypass the discretizing step
+  -k {equal-area,jenks,hclust,kmeans,none}, --discretizing {equal-area,jenks,hclust,kmeans,none}
+                        approach for discretizing continuous data
+                        [default = equal-area]
+  --apply-stop-condition
+                        stops when q > 1 - p
   --header              the input files contain a header line
   --nproc <1>           the number of processing units available
                         [default = 1]
+  -s <random>, --seed <random>
+                        a seed number to make the random permutation reproducible
+                        [default = random]
 ```
 ## Frequently Asked Questions ##
 
