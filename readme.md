@@ -60,7 +60,7 @@ Its advantages include:
 
 ## Overview ##
 
-![](http://huttenhower.sph.harvard.edu//sites/default/files/Figure1_0.png)
+![](http://huttenhower.sph.harvard.edu/sites/default/files/public/Figure1.png)
 
 
 ## Requirements ##
