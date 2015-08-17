@@ -69,6 +69,8 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
     a file tabdelimated file 
     
     '''
+    if data == None:
+		return
     f = open(name, 'w')
     # row numbers as header
     if colheader == None:
