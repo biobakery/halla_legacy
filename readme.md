@@ -1,9 +1,9 @@
 #HAllA: Hierarchical All-against-All association testing #
 HAllA is an acronym for Hierarchical All-against-All association testing, and is designed as a command-line tool to find associations in high-dimensional, heterogeneous datasets. 
 
-**If you use the HAllA software, please cite our manuscript:
-**
-Gholamali Rahnavard, Yo Sup Moon, Lauren J. McIver, George Weingart, Eric A. Franzosa, Levi Waldron, Curtis Huttenhower, "High-sensitivity pattern discovery in high-dimensional heterogeneous datasets" (In Preparation) 
+**If you use the HAllA software, please cite our manuscript:**
+
+Gholamali Rahnavard, Yo Sup Moon, Lauren J. McIver, George Weingart, Eric A. Franzosa, Levi Waldron, Curtis Huttenhower, **"High-sensitivity pattern discovery in high-dimensional heterogeneous datasets"** (In Preparation) 
 
 HAllA is an end-to-end statistical method for Hierarchical All-against-All discovery of significant relationships among data features with high power.  HAllA is robust to data type, operating both on continuous and categorical values, and works well both on homogeneous datasets (where all measurements are of the same type, e.g. gene expression microarrays) and on heterogeneous data (containing measurements with different units or types, e.g. patient clinical metadata).  Finally, it is also aware of multiple input, multiple output problems, in which data might contain of two (or more) distinct subsets sharing an index (e.g. clinical metadata,
 genotypes, microarrays, and microbiomes all drawn from the same subjects).  In all of these cases, HAllA will identify which pairs of features (genes, microbes, loci, etc.) share statistically significant co-variation, without getting tripped up by high-dimensionality.
@@ -41,7 +41,6 @@ License
 
 ## Features ##
 
-
 In short, HAllA is like testing for correlation among all pairs of variables
 in a high-dimensional dataset, but without tripping over multiple hypothesis
 testing, the problem of figuring out what "correlation" means for different
@@ -60,7 +59,7 @@ Its advantages include:
 
 ## Overview ##
 
-![](http://huttenhower.sph.harvard.edu//sites/default/files/Figure1_0.png)
+![](http://huttenhower.sph.harvard.edu/sites/default/files/public/Figure1.png)
 
 
 ## Requirements ##
@@ -79,6 +78,7 @@ Its advantages include:
 * Scikit-learn (>=0.13)
 * matplotlib
 * R with FactoMineR package and classInt Package
+* rpy2 (interface between Python and R)
 * Pandas (>=0.15.2)
 ```
 
@@ -148,7 +148,7 @@ X_CLUSTER| Y_CLUSTER| 0.64  | 0.02 | 0.008
 
 
 
-`NMIS` stands for "normalized mutual information", which is an information-theoretic measure of association between two random variables. `Pperm` and `Padjust` corresponds to the p-values of the permutation tests and adjusted p-value from Benjamini-Hochberg-Yekutieli approach used to assess the statistical significance of the mutual information distance (i.e. lower p-values signify that the association between two variables 
+`NMI` stands for "normalized mutual information", which is an information-theoretic measure of association between two random variables. `Pperm` and `Padjust` corresponds to the p-values of the permutation tests and adjusted p-value from Benjamini-Hochberg-Yekutieli approach used to assess the statistical significance of the mutual information distance (i.e. lower p-values signify that the association between two variables 
 is not likely to be caused by the noise in the data).  
 
 $OUTPUT_DIR = the output directory
