@@ -182,7 +182,7 @@ def pca(pArray, iComponents=1):
 	 	iRow = pArray.shape
 	 	iCol = None 
 
-	 	return pArray, 1.0
+	 	return pArray, 1.0, [1.0]
 def nlpca(pArray, iComponents=1):
 	 """
 	 Input: N x D matrix 
@@ -654,6 +654,11 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 		#else:
 		pRep1 = pArray1[0, :]
 		pRep2 = pArray2[0, :]
+		#left_rep_variance = 1.0
+		#right_rep_variance = 1.0
+		left_loading = [1.0]
+		right_loading = [1.0]
+		
 	elif decomposition == 'mca':
 		pRep1, left_rep_variance, left_loading = mca_method(pArray1, discretize_style = discretize_style) #mean(pArray1)#[len(pArray1)/2]
 		pRep2, right_rep_variance, right_loading = mca_method(pArray2, discretize_style = discretize_style)#mean(pArray2)#[len(pArray2)/2]	

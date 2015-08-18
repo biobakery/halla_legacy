@@ -28,22 +28,22 @@ def multi_pMethod(args):
     Runs the pMethod function and returns the results plus the id of the node
     """
     
-    id, pMethod, pArray1, pArray2, metric, decomposition, iIter = args
-    
-    dP, similarity, left_first_rep_variance, right_first_rep_variance = pMethod(pArray1, pArray2,  metric = metric, decomposition = decomposition, iIter=iIter)
+    id, pMethod, pArray1, pArray2, metric, decomposition, iIter, seed, discretize_style = args
+    dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(pArray1, pArray2,  metric = metric, decomposition = decomposition, iIter=iIter, seed = seed, discretize_style = discretize_style)
+    #dP, similarity, left_first_rep_variance, right_first_rep_variance = pMethod(pArray1, pArray2,  metric = metric, decomposition = decomposition, iIter=iIter)
 
-    return id, dP, similarity, left_first_rep_variance, right_first_rep_variance
+    return id, dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep
 
-def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter):
+def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter, seed, discretize_style):
     """
     Return the results from applying the data to the actor function
     """
     
-    def _multi_pMethod_args(current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter, ids_to_process):
+    def _multi_pMethod_args(current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter, seed, discretize_style, ids_to_process):
         for id in ids_to_process:
             aIndicies = current_level_tests[id].get_data()
             aIndiciesMapped = map(array, aIndicies)
-            yield [id, pMethod, pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], metric, decomposition, iIter]
+            yield [id, pMethod, pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], metric, decomposition, iIter, seed, discretize_style]
     
     if NPROC > 1:
         import multiprocessing
@@ -61,16 +61,21 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2
         
         
         results_by_id = pool.map(multi_pMethod, _multi_pMethod_args(current_level_tests, 
-            pMethod, pArray1, pArray2, metric, decomposition, iIter, ids_to_process))
+            pMethod, pArray1, pArray2, metric, decomposition, iIter, seed, discretize_style, ids_to_process))
         pool.close()
         pool.join()
         
         # order the results by id and apply results to nodes
-        for id, dP, similarity, left_first_rep_variance, right_first_rep_variance in results_by_id:
+        
+        for id, dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep in results_by_id:
             result[id]=dP
             current_level_tests[id].set_similarity_score(similarity)
             current_level_tests[id].set_left_first_rep_variance(left_first_rep_variance)
             current_level_tests[id].set_right_first_rep_variance(right_first_rep_variance)
+            current_level_tests[id].set_right_loading(right_loading)
+            current_level_tests[id].set_left_loading(left_loading)
+            current_level_tests[id].set_left_rep(left_rep)
+            current_level_tests[id].set_right_rep(right_rep)
     
     else:
         result=[]
@@ -2031,7 +2036,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, seed, method="permutation", metr
                 print "number of hypotheses in level:", len(current_level_tests)
                 #if not len(current_level_tests):
                 #    continue
-                p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter)
+                p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter, seed, discretize_style)
                 
                 for i in range(len(current_level_tests)):
                     current_level_tests[i].set_pvalue(p_values[i])
