@@ -69,11 +69,11 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
     a file tabdelimated file 
     
     '''
-    if data == None:
+    if len(data) == 0:
 		return
     f = open(name, 'w')
     # row numbers as header
-    if colheader == None:
+    if len(colheader) == 0:
         if corner == None:
             f.write(delimiter)
         else:
@@ -100,7 +100,7 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
         sys.exit()
         
     for i in range(len(data)):
-        if rowheader == None:
+        if len(rowheader) == 0:
             f.write(prefix+str(i))
             f.write(delimiter)
         elif len(colheader) == len(data[0]):
@@ -146,7 +146,7 @@ def write_circos_table(data, name=None, rowheader=None, colheader=None, prefix =
     # column numbers as header
     f.write("Data")
     f.write(delimiter)
-    if colheader == None:
+    if len(colheader) == 0:
         f.write("Data")
         f.write(delimiter)
         for i in range(len(data[0])):
@@ -167,7 +167,7 @@ def write_circos_table(data, name=None, rowheader=None, colheader=None, prefix =
         sys.exit()
     
     for i in range(len(data)):
-        if rowheader == None:
+        if len(rowheader) == 0:
             f.write(str(i+len(data[0])))
             f.write(prefix+str(i))
             f.write(delimiter)

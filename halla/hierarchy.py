@@ -1561,6 +1561,8 @@ def naive_all_against_all(pArray1, pArray2, seed,fdr= "BH", decomposition = "pca
 
     #return zip(aOut_header, aOut_adjusted)
     # return numpy.reshape( aOut, (iRow,iCol) )
+    print "--- number of performed tests:", len(aOut)
+    print "--- number of passed tests after FDR controlling:", len(aFinal) 
     return aFinal, aOut
 
 def traverse_by_layer(pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction=None):
