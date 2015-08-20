@@ -77,7 +77,7 @@ Its advantages include:
 * Scipy (>= 0.12) 
 * Scikit-learn (>=0.13)
 * matplotlib
-* R with FactoMineR package and classInt Package
+* R with FactoMineR, classInt, RColorBrewer, and pheatmap Packages
 * rpy2 (interface between Python and R)
 * Pandas (>=0.15.2)
 ```
