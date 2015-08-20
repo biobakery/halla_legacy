@@ -527,7 +527,7 @@ class HAllA():
         
         def _report_all_tests():
             output_file_all  = open(str(self.output_dir)+'/all_association_results_one_by_one.txt', 'w')
-            csvw = csv.writer(output_file_all, csv.excel_tab)
+            csvw = csv.writer(output_file_all, csv.excel_tab, delimiter='\t')
             #csvw.writerow(["Decomposition method: ", self.decomposition  +"-"+ self.distance , "q value: " + str(self.q), "metric " +self.distance])
             csvw.writerow(["First Dataset", "Second Dataset", "nominal-pvalue", "adjusted-pvalue"])
     
@@ -543,7 +543,7 @@ class HAllA():
             number_of_association = 0
             number_of_association_faeture = 0
             output_file_associations  = open(str(self.output_dir)+'/associations.txt', 'w')
-            bcsvw = csv.writer(output_file_associations, csv.excel_tab)
+            bcsvw = csv.writer(output_file_associations, csv.excel_tab, delimiter='\t')
             #bcsvw.writerow(["Method: " + self.decomposition +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
             bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
     
@@ -578,7 +578,7 @@ class HAllA():
                                      association_similarity])
                 bcsvw.writerow(aLineOut)
             performance_file = open(str(self.output_dir)+'/performance.txt', 'w') 
-            csvw = csv.writer(performance_file, csv.excel_tab)
+            csvw = csv.writer(performance_file, csv.excel_tab, delimiter='\t')
             csvw.writerow(["Number of association cluster-by-cluster:", number_of_association])
             csvw.writerow(["Number of association feature-by-feature: ", number_of_association_faeture])
             csvw.writerow([])
@@ -767,7 +767,7 @@ class HAllA():
                 
         def _report_compared_clusters():
             output_file_compared_clusters  = open(str(self.output_dir)+'/all_compared_clusters_hypotheses_tree.txt', 'w')
-            csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab)
+            csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
             csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
             for line in hierarchy.reduce_tree_by_layer([self.meta_hypothesis_tree]):
                 (level, clusters) = line
@@ -1107,11 +1107,11 @@ class HAllA():
             performance_file  = open(str(self.output_dir)+'/performance.txt', 'a')
         except IOError:
             sys.exit("IO Exception: "+self.output_dir+"/performance.txt") 
-        csvw = csv.writer(performance_file, csv.excel_tab)
+        csvw = csv.writer(performance_file, csv.excel_tab, delimiter='\t')
         csvw.writerow(["Decomposition method: ", self.decomposition])
         csvw.writerow(["Similarity method: ", self.distance]) 
         csvw.writerow(["q: FDR cut-off : ", self.q]) 
-        csvw.writerow(["r: effect size for robustness : ", self.robustness]) 
+        #csvw.writerow(["r: effect size for robustness : ", self.robustness]) 
         csvw.writerow(["Applied stop condition : ", self.apply_stop_condition]) 
         csvw.writerow(["Discretizing method : ", self.strDiscretizing])
         csvw.writerow(["Seed number: ", self.seed]) 
