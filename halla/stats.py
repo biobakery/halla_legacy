@@ -1418,7 +1418,7 @@ def step_function():
 
 # ## This is a very simple linear cutting method, with \sqrt{N} bins 
 # ## To be tested with other estimators, like kernel density estimators for improved performance 
-def discretize(pArray, style = "kmeans", iN=None, method=None, aiSkip=[]):
+def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 	"""
 	>>> discretize( [0.1, 0.2, 0.3, 0.4] )
 	[0, 0, 1, 1]

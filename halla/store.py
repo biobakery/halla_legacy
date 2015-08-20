@@ -753,8 +753,8 @@ class HAllA():
                     y_d_pc1 = stats.discretize(y_rep)
                     '''
                     if self._bypass_discretizing():
-                        d_x_d_rep = stats.discretize(association.get_left_rep())#stats.discretize(decomposition_method(discretized_df1))
-                        d_y_d_rep = stats.discretize(association.get_right_rep())#stats.discretize(decomposition_method(discretized_df2))
+                        d_x_d_rep = stats.discretize(association.get_left_rep(), style = self.strDiscretizing)#stats.discretize(decomposition_method(discretized_df1))
+                        d_y_d_rep = stats.discretize(association.get_right_rep(), style = self.strDiscretizing)#stats.discretize(decomposition_method(discretized_df2))
                     else:
                         d_x_d_rep = association.get_left_rep()#stats.discretize(decomposition_method(discretized_df1))
                         d_y_d_rep = association.get_right_rep()#stats.discretize(decomposition_method(discretized_df2))
