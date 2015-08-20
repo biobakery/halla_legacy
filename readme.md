@@ -90,7 +90,7 @@ You can download the latest HAllA release or the development version.
 
 Option 1: Latest Release (Recommended)
 
-* [Download](https://bitbucket.org/biobakery/halla/downloads/biobakery-halla-0.5.4.tar) and unpack the latest release of HAllA.
+* [Download](https://bitbucket.org/biobakery/halla/downloads/biobakery-halla-0.5.5.tar) and unpack the latest release of HAllA.
 
 Option 2: Development Version
 
