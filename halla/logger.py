@@ -69,12 +69,12 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
     a file tabdelimated file 
     
     '''
-    if len(data) == 0:
+    if not(data is None):
 		return
     f = open(name, 'w')
     # row numbers as header
-    if len(colheader) == 0:
-        if corner == None:
+    if not(colheader is None):
+        if corner is None:
             f.write(delimiter)
         else:
             f.write(corner)
@@ -85,7 +85,7 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
                 f.write(delimiter)
         f.write('\n')
     elif len(colheader) == len(data[0]):
-        if corner == None:
+        if corner is None:
             f.write(delimiter)
         else:
             f.write(corner)
@@ -100,7 +100,7 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
         sys.exit()
         
     for i in range(len(data)):
-        if len(rowheader) == 0:
+        if not(rowheader is None) :
             f.write(prefix+str(i))
             f.write(delimiter)
         elif len(colheader) == len(data[0]):
