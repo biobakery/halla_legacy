@@ -2,6 +2,7 @@
 HAllA is an acronym for Hierarchical All-against-All association testing, and is designed as a command-line tool to find associations in high-dimensional, heterogeneous datasets. 
 
 **If you use the HAllA software, please cite our manuscript:**
+
 Gholamali Rahnavard, Eric A. Franzosa, Yo Sup Moon,  Lauren J. McIver, Emma Schwager, George Weingart, Xochitl C. Morgan, Levi Waldron, Curtis Huttenhower, **"High-sensitivity pattern discovery in high-dimensional heterogeneous datasets"** (In Preparation) 
 
 HAllA is an end-to-end statistical method for Hierarchical All-against-All discovery of significant relationships among data features with high power.  HAllA is robust to data type, operating both on continuous and categorical values, and works well both on homogeneous datasets (where all measurements are of the same type, e.g. gene expression microarrays) and on heterogeneous data (containing measurements with different units or types, e.g. patient clinical metadata).  Finally, it is also aware of multiple input, multiple output problems, in which data might contain of two (or more) distinct subsets sharing an index (e.g. clinical metadata,
