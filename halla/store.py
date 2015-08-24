@@ -545,7 +545,7 @@ class HAllA():
             output_file_associations  = open(str(self.output_dir)+'/associations.txt', 'w')
             bcsvw = csv.writer(output_file_associations, csv.excel_tab, delimiter='\t')
             #bcsvw.writerow(["Method: " + self.decomposition +"-"+ self.distance , "q value: " + str(self.q), "metric " + self.distance])
-            bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
+            bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster", "Clusters Second Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
     
             sorted_associations = sorted(self.meta_alla[0], key=lambda x: x.pvalue)
             for association in sorted_associations:
@@ -564,18 +564,16 @@ class HAllA():
                 clusterY_first_rep = association.get_right_first_rep_variance()
                 association_similarity = association.get_similarity_score()
                 
-                aLineOut = map(str, [number_of_association,
+                aLineOut = [number_of_association,
                                      str(';'.join(self.aOutName1[i] for i in iX)),
                                      clusterX_similarity,
                                      clusterX_first_rep,
-                                     "\t", 
                                      str(';'.join(self.aOutName2[i] for i in iY)),
                                      clusterY_similarity,
                                      clusterY_first_rep,
-                                     "\t",
                                      fP,
                                      fP_adjust,
-                                     association_similarity])
+                                     association_similarity]
                 bcsvw.writerow(aLineOut)
             performance_file = open(str(self.output_dir)+'/performance.txt', 'w') 
             csvw = csv.writer(performance_file, csv.excel_tab, delimiter='\t')
