@@ -568,11 +568,11 @@ class HAllA():
                                      str(';'.join(self.aOutName1[i] for i in iX)),
                                      clusterX_similarity,
                                      clusterX_first_rep,
-                                     " ", 
+                                     "\t", 
                                      str(';'.join(self.aOutName2[i] for i in iY)),
                                      clusterY_similarity,
                                      clusterY_first_rep,
-                                     " ",
+                                     "\t",
                                      fP,
                                      fP_adjust,
                                      association_similarity])
