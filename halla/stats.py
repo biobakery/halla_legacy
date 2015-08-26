@@ -99,6 +99,7 @@ def mca_method(pArray, discretize_style, iComponents=1):
 	Input: N x D matrix 
 	Output: D x N matrix 
 	"""
+	#print "A", pArray
 	if len(pArray) < 2:
 		#print "len A<2:",  (list(pArray[0]), 1.0, [1.0] )
 		return (pArray[0], 1.0, [1.0] )
@@ -111,7 +112,7 @@ def mca_method(pArray, discretize_style, iComponents=1):
 	import rpy2.robjects.numpy2ri
 	rpy2.robjects.numpy2ri.activate()
 	dataFrame1 = pd.DataFrame(pArray.T, dtype= str)
-	#print dataFrame1.shape
+	print dataFrame1.shape
 	ro.r('library(FactoMineR)')
 	ro.globalenv['r_dataframe'] = com.convert_to_r_dataframe(dataFrame1)
 	#ro.globalenv['number_sub'] = dataFrame1.shape[1] 
@@ -120,6 +121,7 @@ def mca_method(pArray, discretize_style, iComponents=1):
 	
 	# To do it for all names
 	ro.r('col_names <- names(r_dataframe)') 
+	#ro.r('print (col_names[1])')
 	# do it for some names in a vector named 'col_names' 
 	ro.r('r_dataframe[,col_names] <- lapply(r_dataframe[,col_names] , factor)')
 	#ro.r('r_dataframe = r_dataframe[,  c("1")]')

@@ -792,14 +792,15 @@ class HAllA():
                     #nmi = np.zeros(shape=(len(Xs), len(Ys)))
                     plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename = str(self.output_dir)+'/all_nmi_heatmap' )
         def _heatmap_associations_R():
+            if len(associated_feature_X_indecies) == 0 or len(associated_feature_Y_indecies) == 0 :
+                return
             from scipy.stats.stats import pearsonr
             global associated_feature_X_indecies
             Xs = list(set(associated_feature_X_indecies)) 
             
             global associated_feature_Y_indecies
             Ys = list(set(associated_feature_Y_indecies))
-            if len(Xs) == 0 or len(Ys) == 0 :
-                return
+            
             global D1_features_order, D2_features_order
             D1_features_order = [D1_features_order[i] for i in range (len(D1_features_order))  if D1_features_order[i] in Xs ] 
             D2_features_order = [D2_features_order[i] for i in range (len(D2_features_order))  if D2_features_order[i] in Ys ] 
@@ -810,23 +811,24 @@ class HAllA():
             import re
             X_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', self.aOutName1[i]).replace(' ','_') for i in D1_features_order])
             Y_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', self.aOutName2[i]).replace(' ','_') for i in D2_features_order])
-
+            
+            similarity_score = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))  
+            for i in range(len(D1_features_order)):
+                for j in range(len(D2_features_order)):
+                    similarity_score[i][j] = self.hash_metric[self.distance](self.meta_feature[0][D1_features_order[i]], self.meta_feature[1][D2_features_order[j]])
+                    
             p = np.zeros(shape=(len(D1_features_order), len(D2_features_order))) 
             for i in range(len(D1_features_order)):
                 for j in range(len(D2_features_order)):
                     p[i][j] = pearsonr(np.array(self.meta_array[0][D1_features_order[i]], dtype=float), np.array(self.meta_array[1][D2_features_order[j]], dtype=float))[0]
             
-            similarity_score = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))
             def _is_in_an_assciostions(i,j):
                 for association in sorted_associations:
                     iX, iY = association.get_data()
                     if i in iX and j in iY:
                         return True
                 return False
-              
-            for i in range(len(D1_features_order)):
-                for j in range(len(D2_features_order)):
-                    similarity_score[i][j] = self.hash_metric[self.distance](self.meta_feature[0][D1_features_order[i]], self.meta_feature[1][D2_features_order[j]])
+             
             '''with open('similarity_score.csv', 'w') as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(Y_labels)
@@ -1186,8 +1188,9 @@ class HAllA():
         return aOut 
     
     def is_correct_submethods_combination(self ):
-        if self.descending == "AllA" and self.decomposition == "mca":
-            self.decomposition == "none"
+        print self.descending , self.decomposition
+        if self.descending == "AllA" and self.decomposition == 'mca':
+            self.decomposition = "none"        
         if (self.descending == "AllA" and not self.decomposition =='none') or\
                             (self.descending == "HAllA" and self.decomposition =='none') or\
                             (self.decomposition in ["ica","pca",'pls', 'cca', 'kpca'] and self.distance not in ["pearson", "spearman"] ) or\

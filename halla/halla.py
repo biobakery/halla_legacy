@@ -295,7 +295,7 @@ def _main():
     check_requirements(args)
     
     # Set the number of processing units available
-    hierarchy.NPROC = args.nproc
+    config.NPROC = args.nproc
     config.NBIN = args.nbin
     H = store.HAllA(X = None, Y = None)
     set_HAllA_object(H, args)         

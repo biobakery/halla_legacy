@@ -18,10 +18,10 @@ import numpy as np
 from . import distance
 from . import stats
 from . import plot
+from . import config
 from __builtin__ import True
 
 # number of available processors
-NPROC = 1
 
 def multi_pMethod(args):
     """
@@ -45,10 +45,9 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2
             aIndiciesMapped = map(array, aIndicies)
             yield [id, pMethod, pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], metric, decomposition, iIter, seed, discretize_style]
     
-    if NPROC > 1:
+    if config.NPROC > 1:
         import multiprocessing
-        
-        pool = multiprocessing.Pool(NPROC)
+        pool = multiprocessing.Pool(config.NPROC)
         
         # check for tests that already have pvalues as these do not need to be recomputed
         ids_to_process=[]
