@@ -112,7 +112,6 @@ def mca_method(pArray, discretize_style, iComponents=1):
 	import rpy2.robjects.numpy2ri
 	rpy2.robjects.numpy2ri.activate()
 	dataFrame1 = pd.DataFrame(pArray.T, dtype= str)
-	print dataFrame1.shape
 	ro.r('library(FactoMineR)')
 	ro.globalenv['r_dataframe'] = com.convert_to_r_dataframe(dataFrame1)
 	#ro.globalenv['number_sub'] = dataFrame1.shape[1] 
