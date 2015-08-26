@@ -53,6 +53,7 @@ except ImportError:
 
 from . import parser
 from . import hierarchy
+from . import config
 
 def get_halla_base_directory():
     """ 
@@ -239,6 +240,11 @@ def parse_arguments (args):
         default=1,
         help="the number of processing units available\n[default = 1]")
     argp.add_argument(
+        "--nbin", metavar="<None>",
+        type=int,
+        default=None,
+        help="the number of bins\n[default = None]")
+    argp.add_argument(
         "-s", "--seed",  metavar="<random>",
         type=int,
         default= random.randint(1,10000),
@@ -290,7 +296,7 @@ def _main():
     
     # Set the number of processing units available
     hierarchy.NPROC = args.nproc
-    
+    config.NBIN = args.nbin
     H = store.HAllA(X = None, Y = None)
     set_HAllA_object(H, args)         
     aaOut = H.run()	

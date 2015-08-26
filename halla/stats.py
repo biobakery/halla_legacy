@@ -19,7 +19,7 @@ from scipy.stats import scoreatpercentile, pearsonr, rankdata, percentileofscore
 import sklearn 
 from sklearn.metrics import roc_curve, auc 
 from sklearn import manifold
-from . import distance
+from . import distance, config
 from scipy.spatial.distance import pdist, squareform
 import pandas as pd
 from sklearn.metrics.metrics import explained_variance_score
@@ -1419,6 +1419,8 @@ def step_function():
 # ## This is a very simple linear cutting method, with \sqrt{N} bins 
 # ## To be tested with other estimators, like kernel density estimators for improved performance 
 def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
+	if iN == None:
+		iN= config.NBIN
 	"""
 	>>> discretize( [0.1, 0.2, 0.3, 0.4] )
 	[0, 0, 1, 1]
@@ -1531,7 +1533,6 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 			sys.exit("Please install R package classInt")
 		
 	def _discretize_continuous(astrValues, iN=iN):
-		#print "Discretizing :", style
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
 			iN = min(len(set(astrValues)), round(math.sqrt(len(astrValues)))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
@@ -1622,7 +1623,7 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 			if i in aiSkip:
 				aOut.append(line)
 			else:
-				aOut.append(_discretize_continuous(line))
+				aOut.append(_discretize_continuous(line, iN))
 		#print aOut
 		return array(aOut)
 
