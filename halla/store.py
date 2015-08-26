@@ -1188,7 +1188,6 @@ class HAllA():
         return aOut 
     
     def is_correct_submethods_combination(self ):
-        print self.descending , self.decomposition
         if self.descending == "AllA" and self.decomposition == 'mca':
             self.decomposition = "none"        
         if (self.descending == "AllA" and not self.decomposition =='none') or\
