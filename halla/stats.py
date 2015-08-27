@@ -1536,9 +1536,9 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 	def _discretize_continuous(astrValues, iN=iN):
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
-			iN = min(len(set(astrValues)), round(math.sqrt(len(astrValues)))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
+			iN = min(len(set(astrValues)), round(math.sqrt(len(set(astrValues))))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
 		elif iN == 0:
-			iN = len(astrValues)
+			iN = len(set(astrValues))
 		else:
 			iN = min(iN, len(set(astrValues)))
 			
@@ -1569,12 +1569,12 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 						print "Discretizing as exeception in ClassInt happend!!!"
 						order = rankdata(astrValues, method= 'ordinal')
 				else:
-					order = rankdata(astrValues, method= 'dense')# dense
+					order = rankdata(astrValues, method= 'min')# ordinal
 			except: 
 			#if type(astrValues[0]) == str or type(astrValues[0]) == bool:
 				temp = numpy.array(astrValues).argsort()
 				order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
-				order = rankdata(order, method= 'ordinal') # dense #array([order[i]+1.0 for i in range(len(order))])
+				order = rankdata(order, method= 'min') # ordinal #array([order[i]+1.0 for i in range(len(order))])
 				
 			#elif type(astrValues[0]) == float or type(astrValues[0]) == int:
 	
