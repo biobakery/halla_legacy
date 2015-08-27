@@ -1569,12 +1569,12 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 						print "Discretizing as exeception in ClassInt happend!!!"
 						order = rankdata(astrValues, method= 'ordinal')
 				else:
-					order = rankdata(astrValues, method= 'ordinal')
+					order = rankdata(astrValues, method= 'dense')# dense
 			except: 
 			#if type(astrValues[0]) == str or type(astrValues[0]) == bool:
 				temp = numpy.array(astrValues).argsort()
 				order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
-				order = rankdata(order, method= 'ordinal') #array([order[i]+1.0 for i in range(len(order))])
+				order = rankdata(order, method= 'ordinal') # dense #array([order[i]+1.0 for i in range(len(order))])
 				
 			#elif type(astrValues[0]) == float or type(astrValues[0]) == int:
 	

@@ -90,7 +90,7 @@ You can download the latest HAllA release or the development version.
 
 Option 1: Latest Release (Recommended)
 
-* [Download](https://bitbucket.org/biobakery/halla/downloads/biobakery-halla-0.5.5.tar) and unpack the latest release of HAllA.
+* [Download](https://bitbucket.org/biobakery/halla/downloads/biobakery-halla-0.5.6.tar) and unpack the latest release of HAllA.
 
 Option 2: Development Version
 
@@ -160,7 +160,7 @@ $OUTPUT_DIR = the output directory
 File name: $OUTPUT_DIR/associations.tsv
 
 ```
-Association Number	Clusters First Dataset	Cluster Similarity Score (NMI)	Explained Variance by the First PC of the cluster	 	Clusters Second Dataset	Cluster Similarity Score (NMI)	Explained Variance by the First PC of the cluster	 	nominal-pvalue	adjusted-pvalue	SImilarity score between Clusters (NMI)
+Association Number	Clusters First Dataset	Cluster Similarity Score	Explained Variance by the First PC of the cluster	 	Clusters Second Dataset	Cluster Similarity Score	Explained Variance by the First PC of the cluster	 	nominal-pvalue	adjusted-pvalue	SImilarity score between Clusters
 1	6;7;8	0.294140401	0.647012305	 	6;7;8	0.249909049	0.642530249	 	0.000999001	0.011111111	0.259588486
 2	0;1;2	0.286179622	0.653736652	 	2;0;1	0.259510749	0.541880507	 	0.002997003	0.022222222	0.238560794
 3	3;4;5	0.243583717	0.64574729	 	3;4;5	0.250180471	0.61356624	 	0.022977023	0.033333333	0.222516454 
