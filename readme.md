@@ -248,7 +248,8 @@ usage: halla [-h] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o
              [-m {nmi,ami,mic,pearson,spearman}]
              [-d {none,mca,pca,ica,cca,kpca,pls,medoid,mean}] [-v]
              [--plotting-results] [-k {equal-area,jenks,hclust,kmeans,none}]
-             [--apply-stop-condition] [--header] [--nproc <1>] [-s <random>]
+             [--apply-stop-condition] [--header] [--nproc <1>] [--nbin <None>]
+             [-s <random>]
 
 Hierarchical All-against-All significance association testing
 
@@ -288,6 +289,8 @@ optional arguments:
   --header              the input files contain a header line
   --nproc <1>           the number of processing units available
                         [default = 1]
+  --nbin <None>         the number of bins
+                        [default = None]
   -s <random>, --seed <random>
                         a seed number to make the random permutation reproducible
                         [default = random]
