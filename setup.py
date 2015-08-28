@@ -25,14 +25,14 @@ setup(
         ],
     long_description=open('readme.md').read(),
     install_requires=[  #### version numbers based on what comes with Anaconda Python, March 26, 2014 
-        #"Numpy >= 1.9.2",
-        #"Scipy >= 0.13.0",
-        #"Matplotlib >= 1.1.1",
-        #"Scikit-learn  >= 0.14.1",
-        #"minepy >= 1.0.0", #for MIC in evaluation package 
-        #"pandas >=0.15.2"
+        "Numpy >= 1.9.2",
+        "Scipy >= 0.13.0",
+        "Matplotlib >= 1.1.1",
+        "Scikit-learn  >= 0.14.1",
+        "minepy >= 1.0.0", #for MIC in evaluation package 
+        "pandas >=0.15.2"
         #"R >= 3.1.0",
-        #"rpy2 >= 0.0.0"
+        "rpy2 >= 0.0.0"
     ],
     packages=find_packages(),
     entry_points={
