@@ -817,11 +817,11 @@ class HAllA():
                 for j in range(len(D2_features_order)):
                     similarity_score[i][j] = self.hash_metric[self.distance](self.meta_feature[0][D1_features_order[i]], self.meta_feature[1][D2_features_order[j]])
                     
-            p = np.zeros(shape=(len(D1_features_order), len(D2_features_order))) 
+            ''''p = np.zeros(shape=(len(D1_features_order), len(D2_features_order))) 
             for i in range(len(D1_features_order)):
                 for j in range(len(D2_features_order)):
                     p[i][j] = pearsonr(np.array(self.meta_array[0][D1_features_order[i]], dtype=float), np.array(self.meta_array[1][D2_features_order[j]], dtype=float))[0]
-            
+            '''
             def _is_in_an_assciostions(i,j):
                 for association in sorted_associations:
                     iX, iY = association.get_data()
@@ -885,13 +885,13 @@ class HAllA():
                     ro.r('library("RColorBrewer")')
                     ro.r('library("pheatmap")')
                     ro.globalenv['output_heatmap_similarity_score'] = str(self.output_dir)+"/" + self.distance+"_heatmap.pdf"
-                    ro.globalenv['output_file_Pearson'] = str(self.output_dir)+"/Pearson_heatmap.pdf"
+                    #ro.globalenv['output_file_Pearson'] = str(self.output_dir)+"/Pearson_heatmap.pdf"
                     if distance.c_hash_association_method_discretize[self.distance]:
                         ro.r('pheatmap(similarity_score, color = brewer.pal(100,"Reds"),labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                     else:
                         ro.r('pheatmap(similarity_score,labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                     ro.r('dev.off()')
-                    if self.distance != "pearson":
+                    '''if self.distance != "pearson":
                         ro.globalenv['p'] = p
                         #ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
                         ro.r('rownames(p) = labRow')
@@ -901,6 +901,7 @@ class HAllA():
                         #else:
                         #ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                         ro.r('dev.off()')
+                        '''
         def _heatmap_datasets_R():
             if self.plotting_results:          
                 print "--- plotting heatmap datasets using R ..."
