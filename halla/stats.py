@@ -1546,43 +1546,46 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 			try:
 				return rankdata(astrValues, method= 'dense')
 			except:
-				temp = numpy.array(astrValues).argsort()
+				#print "Categorical data descritizing 1!"
+				#temp = numpy.array(astrValues).argsort()
 				order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
 				order = rankdata(order, method= 'dense') #array([order[i]+1.0 for i in range(len(order))])
 				return order
 				#print "Discretizing categorical data!!!"
 		else:							
-			try:
-				if style in ['jenks', 'kmeans', 'hclust']:
+			if style in ['jenks', 'kmeans', 'hclust']:
+				try:
+					dataFrame1 = pd.DataFrame(astrValues, dtype= float)
+					#print dataFrame1[0]
+					ro.globalenv['number_of_bins'] = iN 
+					ro.globalenv['v'] =  com.convert_to_r_dataframe(dataFrame1)[0]
+					ro.r('clI <- classIntervals(v, n = number_of_bins, style = style)')
+					ro.r(' descretized_v <- findCols(clI)')
+					astrRet = ro.globalenv['descretized_v']
+					return astrRet
+				except Exception, err:
+					print(traceback.format_exc())
+					
+					print "Discretizing as exeception in ClassInt happend!!!"
 					try:
-						dataFrame1 = pd.DataFrame(astrValues, dtype= float)
-						#print dataFrame1[0]
-						ro.globalenv['number_of_bins'] = iN 
-						ro.globalenv['v'] =  com.convert_to_r_dataframe(dataFrame1)[0]
-						ro.r('clI <- classIntervals(v, n = number_of_bins, style = style)')
-						ro.r(' descretized_v <- findCols(clI)')
-						astrRet = ro.globalenv['descretized_v']
-						return astrRet
-					except Exception, err:
-						print(traceback.format_exc())
-						
-						print "Discretizing as exeception in ClassInt happend!!!"
-						order = rankdata(astrValues, method= 'ordinal')
-				else:
+						order = rankdata(astrValues, method= 'min')
+					except:
+						return astrValues
+			else:
+				try:
 					order = rankdata(astrValues, method= 'min')# ordinal
-			except: 
-			#if type(astrValues[0]) == str or type(astrValues[0]) == bool:
-				temp = numpy.array(astrValues).argsort()
-				order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
-				order = rankdata(order, method= 'min') # ordinal #array([order[i]+1.0 for i in range(len(order))])
-				
+				except: 
+					#print "Categorical data descritizing 2!"
+					return astrValues
+					
+					'''
+					temp = numpy.array(astrValues).argsort()
+					order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
+					order = rankdata(order, method= 'min') # ordinal #array([order[i]+1.0 for i in range(len(order))])
+					'''
 			#elif type(astrValues[0]) == float or type(astrValues[0]) == int:
 	
 			#print "prank",order
-			'''
-			
-			print "ranks", order
-			'''
 			#aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
 			#print "aiIndices", aiIndices
 		astrRet = [None] * len(astrValues)
