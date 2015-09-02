@@ -1553,7 +1553,7 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 				order = []
 				for i, item in enumerate(astrValues):
 					order.append(dictA[item])
-				return orde
+				return order
 				#print "Discretizing categorical data!!!"
 		else:							
 			if style in ['jenks', 'kmeans', 'hclust']:
