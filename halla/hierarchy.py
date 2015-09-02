@@ -10,7 +10,7 @@ from numpy import array , rank
 import numpy 
 import scipy.cluster 
 from scipy.cluster.hierarchy import linkage, to_tree, leaves_list
-from scipy.spatial.distance import pdist
+from scipy.spatial.distance import pdist, squareform
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
@@ -692,7 +692,18 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
     
     # print "Distance",D
     #plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
-    D = pdist(pArray, metric=pDistance)
+    D = np.zeros(shape=(len(pArray), len(pArray)))  
+    for i in range(len(pArray)):
+        for j in range(i,len(pArray)):
+            if i == j:
+                D[i][j] = 0
+                continue
+            D[i][j] = pDistance(pArray[i], pArray[j])
+            D[j][i] = D[i][j]
+    #print pArray.shape  
+    D = squareform(D)   
+    #D = pdist(pArray, metric=pDistance)
+    #print D
     if plotting_result:
         global fig_num
         print "--- plotting heatmap for Dataset", str(fig_num)," ... "
@@ -703,8 +714,12 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
         #    scipy.cluster.hierarchy.dendrogram(Z)
         #plt.gcf()
         #global fig_num
-        Z = plot.heatmap(pArray, D, xlabels_order = [], xlabels = labels, filename= output_dir+"/hierarchical_heatmap_" + str(fig_num))
+        try:
+            Z = plot.heatmap(pArray, D, xlabels_order = [], xlabels = labels, filename= output_dir+"/hierarchical_heatmap_" + str(fig_num))
         #plt.savefig(output_dir+"/Dendrogram1_" + str(fig_num) + ".pdf")
+        except:
+            Z = linkage(D, metric=pDistance, method= "single")
+            print ("Issue with heatmap categorical data")
         fig_num += 1
     else:
         

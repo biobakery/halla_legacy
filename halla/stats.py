@@ -1576,8 +1576,14 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 					order = rankdata(astrValues, method= 'min')# ordinal
 				except: 
 					#print "Categorical data descritizing 2!"
-					return astrValues
-					
+					setastrValues = list(set(astrValues))
+					dictA ={}
+					for i, item in enumerate(setastrValues):
+						dictA[item] = i
+					rank = []
+					for i, item in enumerate(astrValues):
+						rank.append(dictA[item])
+					return rank
 					'''
 					temp = numpy.array(astrValues).argsort()
 					order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
