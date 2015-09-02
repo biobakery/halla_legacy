@@ -1546,11 +1546,14 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 			try:
 				return rankdata(astrValues, method= 'dense')
 			except:
-				#print "Categorical data descritizing 1!"
-				#temp = numpy.array(astrValues).argsort()
-				order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
-				order = rankdata(order, method= 'dense') #array([order[i]+1.0 for i in range(len(order))])
-				return order
+				setastrValues = list(set(astrValues))
+				dictA ={}
+				for i, item in enumerate(setastrValues):
+					dictA[item] = i
+				order = []
+				for i, item in enumerate(astrValues):
+					order.append(dictA[item])
+				return orde
 				#print "Discretizing categorical data!!!"
 		else:							
 			if style in ['jenks', 'kmeans', 'hclust']:
@@ -1580,10 +1583,10 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 					dictA ={}
 					for i, item in enumerate(setastrValues):
 						dictA[item] = i
-					rank = []
+					order = []
 					for i, item in enumerate(astrValues):
-						rank.append(dictA[item])
-					return rank
+						order.append(dictA[item])
+					return order
 					'''
 					temp = numpy.array(astrValues).argsort()
 					order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
