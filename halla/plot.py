@@ -302,7 +302,7 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarch
     if len(xlabels_order) == 0:
         ax2 = fig.add_axes([0.3, 0.71, 0.6, 0.2], frame_on=True)
         tpArray = pArray.T 
-        D2 = np.zeros(shape=(len(tpArray), len(tpArray))) 
+        '''D2 = np.zeros(shape=(len(tpArray), len(tpArray))) 
         for i in range(len(tpArray)):
             for j in range(i,len(tpArray)):
                 if i == j:
@@ -312,8 +312,8 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarch
                 D2[j][i] = D2[i][j]
         #print pArray.shape  
         D2 = squareform(D2)
-        
-        Y2 = sch.linkage(D2, metric=pDistance, method=method)
+        '''
+        Y2 = sch.linkage(pArray.T, metric=pDistance, method=method)
         if len(Y2) > 1:
             Z2 = sch.dendrogram(Y2)
         ax2.set_xticks([])
