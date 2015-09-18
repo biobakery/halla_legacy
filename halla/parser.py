@@ -10,6 +10,7 @@ import sys
 from numpy import array
 
 import numpy as np
+import pandas as pd
 
 
 class Input:
@@ -176,10 +177,40 @@ class Input:
 			header1="\t".join(self.outHead1)
 			header2="\t".join(self.outHead2)
 			if not (header1.lower() == header2.lower()):
-				sys.exit("Error: The samples are not in the same order " + 
-				    "in the two files. Please change the order or update the "+
-				    "headers." + " \n File1 header: " + header1 + "\n" +
-				    " File2 header: " + header2)
+				print("Warning: The samples are not in the same order " + 
+				    "in the two files. The program use the common samples between the two dataset based on headers")#+
+				    #"." + " \n File1 header: " + header1 + "\n" +
+				    #" File2 header: " + header2)
+				try:
+					df1 = pd.DataFrame(self.outData1, index = self.outName1, columns = self.outHead1)
+				except:
+					df1 = pd.DataFrame(self.outData1, index = self.outName1, columns = self.outHead1)
+				try:
+					df2 = pd.DataFrame(self.outData2, index = self.outName2, columns = self.outHead2)
+				except:
+					df2 = pd.DataFrame(self.outData2, index = self.outName2, columns = self.outHead2)
+				#print df1.columns.isin(df2.columns)
+				#print df2.columns.isin(df1.columns)
+				df1 = df1.loc[: , df1.columns.isin(df2.columns)]
+				df2 = df2.loc[: , df2.columns.isin(df1.columns)]
+				
+				# reorder df1 columns as the columns order of df2
+				df1 = df1.loc[:, df2.columns]
+				
+				self.outData1 = df1.values
+				self.outData2 = df2.values 
+				#print self.outData1
+				self.outName1 = list(df1.index.values) 
+				self.outName2 = list(df2.index.values) 
+				#print self.outName1
+				#self.outType1 = int
+				#self.outType2 = int 
+		
+				self.outHead1 = df1.columns.values
+				self.outHead2 = df2.columns.values 
+				#print df1
+				#print df2
+		
 
 	
 class Output:

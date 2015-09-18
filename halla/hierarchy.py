@@ -278,8 +278,8 @@ class Tree():
                     #if np.mean(self.get_right_loading()) < .5 :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                     if math.fabs(self.get_right_loading()[i]) < right_loading_threshold :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                         counter += 1
-                        if counter > (number_right_features/2):
-                           # print "#1:",counter
+                        if (counter*2) > (number_right_features/math.log(number_right_features,2)):
+                            print "#1:",counter
                             return False
             counter = 0
             '''print "Left"
@@ -295,28 +295,34 @@ class Tree():
                     #if np.mean(self.get_left_loading()) < .5:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
                     if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:
                         counter += 1
-                        if counter > (number_left_features/2):
+                        if (counter*2) > (number_left_features/math.log(number_left_features,2)):
                             #print "#2:",counter
                             return False
             return True
         elif decomp == 'pca':
             counter = 0
             if len(self.get_right_loading()) > 1:
-                    right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) -  np.std(self.get_right_loading())
+                    low_right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) -  np.std(self.get_right_loading())
+                    up_right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) +  np.std(self.get_right_loading())
                     for i in range(len(self.get_right_loading())):
                         #print "right:", self.get_right_loading()[i]
-                        if math.fabs(self.get_right_loading()[i]) < right_loading_threshold:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
+                        if math.fabs(self.get_right_loading()[i]) < low_right_loading_threshold or\
+                        math.fabs(self.get_right_loading()[i]) > up_right_loading_threshold:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                             counter += 1
-                            if counter > (number_right_features/2):#math.log(number_right_features,2)):
+                            if counter > (number_right_features/math.log(number_right_features,2)):#math.log(number_right_features,2)):
+                                #print "#1:",counter
                                 return False
             counter = 0
             if len(self.get_left_loading()) > 1:
-                    left_loading_threshold = math.sqrt(1.0/len(self.get_left_loading())) - np.std(self.get_left_loading())
+                    low_left_loading_threshold = math.sqrt(1.0/len(self.get_left_loading())) - np.std(self.get_left_loading())
+                    up_left_loading_threshold = math.sqrt(1.0/len(self.get_left_loading())) + np.std(self.get_left_loading())
                     for i in range(len(self.get_left_loading())):
                         #print "left:", self.get_left_loading()[i]
-                        if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
+                        if math.fabs(self.get_left_loading()[i]) < low_left_loading_threshold or\
+                        math.fabs(self.get_left_loading()[i]) > up_left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
                             counter += 1
-                            if counter > (number_left_features/2):#math.log(number_left_features,2)):
+                            if counter > (number_left_features/math.log(number_left_features,2)): # (number_left_features/2):#math.log(number_left_features,2)):
+                                #print "#2:",counter
                                 return False
             return True
         else:
@@ -705,7 +711,7 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
     D = squareform(D)
     '''   
     D = pdist(pArray, metric=pDistance)
-    #print D
+    #print D.shape
     if plotting_result:
         global fig_num
         print "--- plotting heatmap for Dataset", str(fig_num)," ... "

@@ -946,11 +946,11 @@ class HAllA():
         _report_all_tests()
         _report_associations()
         _report_compared_clusters()
-        _heatmap_associations_R()
         if self.plotting_results:
-            _heatmap_associations()
+            #_heatmap_associations()
+            _heatmap_associations_R()
             _heatmap_datasets_R()
-        _plot_associations()
+            _plot_associations()
         
         return self.meta_report 
 
