@@ -247,7 +247,7 @@ class Tree():
     def get_right_rep(self):
         return self.right_rep
     
-    def is_representative(self, pvalue_threshold, pc_threshold, robustness, decomp = 'mca' ):
+    def is_representative(self, pvalue_threshold, decomp = 'mca' ):
         #return True
         #robustness = .098
         #print robustness
@@ -505,7 +505,8 @@ def is_tree(pObj):
         return False 
 
 
-def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=False, plotting_result = False , output_dir = "./"):
+def hclust(pArray, labels):
+    bTree=True
     """
     Performs hierarchical clustering on an numpy array 
 
@@ -688,7 +689,7 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
         This hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV's, not just single ones 
         Use the "grouping property" as discussed by Kraskov paper. 
     """
-    pMetric = distance.c_hash_metric[strMetric] 
+    pMetric = distance.c_hash_metric[config.distance] 
     # # Remember, pMetric is a notion of _strength_, not _distance_ 
     # print str(pMetric)
     def pDistance(x, y):
@@ -712,7 +713,7 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
     '''   
     D = pdist(pArray, metric=pDistance)
     #print D.shape
-    if plotting_result:
+    if config.plotting_results:
         global fig_num
         print "--- plotting heatmap for Dataset", str(fig_num)," ... "
         #plt.figure("Hierarcichal clusters of Dataset "+ str(fig_num),  dpi=300)
@@ -722,7 +723,7 @@ def hclust(pArray, labels=None, strMetric="nmi", cluster_method="single", bTree=
         #    scipy.cluster.hierarchy.dendrogram(Z)
         #plt.gcf()
         #global fig_num
-        Z = plot.heatmap(pArray, D, xlabels_order = [], xlabels = labels, filename= output_dir+"/hierarchical_heatmap_" + str(fig_num))
+        Z = plot.heatmap(config.meta_feature[0] , D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/hierarchical_heatmap_" + str(fig_num))
         #plt.savefig(output_dir+"/Dendrogram1_" + str(fig_num) + ".pdf")
         '''except:
             Z = linkage(D, metric=pDistance, method= "single")
@@ -1340,8 +1341,9 @@ def _cutree (clusterNodelist, first = False):
     return sub_clusters
 
     
-def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uniform", strLinkage="min", func="nmi", robustness = None):
+def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uniform", strLinkage="min", robustness = None):
     
+    func = config.distance
     """
     Couples two data trees to produce a hypothesis tree 
 
@@ -1755,9 +1757,14 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 #### Need to figure out what -- it's probably in the p-value consolidation stage 
 #### Need to reverse sort by the sum of the two sizes of the bags; the problem should be fixed afterwards 
 
-def hypotheses_testing(pTree, pArray1, pArray2, seed, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
-    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness = None, fAlpha=0.05, apply_stop_condition = True, discretize_style= 'equal-area'):
+def hypotheses_testing():
+    pTree = config.meta_hypothesis_tree
+    pArray1 = config.meta_feature[0]
+    pArray2 = config.meta_feature[1]
     """
+    pTree, pArray1, pArray2, seed, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
+    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness = None, fAlpha=0.05, apply_stop_condition = True, discretize_style= 'equal-area'
+    
     Perform all-against-all on a hypothesis tree.
 
     Notes:
@@ -1790,7 +1797,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, seed, method="permutation", metr
     """
     X, Y = pArray1, pArray2 
 
-    if bVerbose:
+    if config.verbose:
         print reduce_tree_by_layer([pTree])
 
     def _start_parameter_to_iskip(start_parameter):
@@ -1834,7 +1841,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, seed, method="permutation", metr
                         "g-test":stats.g_test
                         }
 
-    strMethod = method
+    strMethod = config.randomization_method
     pMethod = pHashMethods[strMethod]
     
     def _simple_hypothesis_testing():
@@ -2027,6 +2034,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, seed, method="permutation", metr
         return aFinal, aOut
 
     def _bh_level_testing():
+        bVerbose = config.verbose
         apChildren = [pTree]
         level = 1
         number_performed_tests = 0 
@@ -2060,7 +2068,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, seed, method="permutation", metr
                 print "number of hypotheses in level:", len(current_level_tests)
                 #if not len(current_level_tests):
                 #    continue
-                p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter, seed, discretize_style)
+                p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2, config.distance, config.decomposition, config.iterations, config.seed, config.strDiscretizing)
                 
                 for i in range(len(current_level_tests)):
                     current_level_tests[i].set_pvalue(p_values[i])
@@ -2068,7 +2076,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, seed, method="permutation", metr
                     
                 #aP = [ current_level_tests[i].get_pvalue() for i in range(len(current_level_tests)) ]
                 # claculate adjusted p-value
-                aP_adjusted, pRank, q = stats.p_adjust(p_values, fQ)
+                aP_adjusted, pRank, q = stats.p_adjust(p_values, config.q)
                 for i in range(len(current_level_tests)):
                     if current_level_tests[i].get_qvalue() == None:
                         current_level_tests[i].set_qvalue(aP_adjusted[i])
@@ -2082,7 +2090,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, seed, method="permutation", metr
                 for i in range(len(current_level_tests)):
                     if current_level_tests[i].get_significance_status() == None and\
                     current_level_tests[i].get_rank() <= max_r_t and\
-                    current_level_tests[i].is_representative(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
+                    current_level_tests[i].is_representative(pvalue_threshold = config.q, decomp = config.decomposition):
                         number_passed_tests += 1
                         if bVerbose:
                             current_level_tests[i].report()
@@ -2092,8 +2100,8 @@ def hypotheses_testing(pTree, pArray1, pArray2, seed, method="permutation", metr
                         aFinal.append(current_level_tests[i])
                         #next_level_apChildren.append(current_level_tests[i])
                     else:
-                        if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass(apply_stop_condition, q = fQ) and\
-                         current_level_tests[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):# and current_level_tests[i].get_significance_status() == None:
+                        if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass(config.apply_stop_condition, q = config.q) and\
+                         current_level_tests[i].is_representative(pvalue_threshold = config.q, decomp = config.decomposition):# and current_level_tests[i].get_significance_status() == None:
                             current_level_tests[i].set_significance_status(False)
                             aOut.append(current_level_tests[i])
                             if bVerbose:
@@ -2249,7 +2257,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, seed, method="permutation", metr
         '''
         X = pArray1[aIndiciesMapped[0]]
         Y = pArray2[aIndiciesMapped[1]]
-        dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y,  metric = metric, decomposition = decomposition, iIter=iIter, seed = seed, discretize_style = discretize_style)
+        dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y,  metric = config.distance, decomposition = config.decomposition, iIter=config.iterations, seed = config.seed, discretize_style = config.strDiscretizing)
         pNode.set_similarity_score(similarity)
         pNode.set_left_first_rep_variance(left_first_rep_variance)
         pNode.set_right_first_rep_variance(right_first_rep_variance)
@@ -2273,7 +2281,7 @@ def hypotheses_testing(pTree, pArray1, pArray2, seed, method="permutation", metr
     #======================================#
     # Execute 
     #======================================#
-    strFDR = fdr
+    strFDR = config.fdr_function
     pFDR = fdr_function[strFDR]
     aFinal, aOut = pFDR()
 

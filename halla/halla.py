@@ -252,25 +252,25 @@ def parse_arguments (args):
 
     return argp.parse_args()
 
-def set_HAllA_object (H, args):
-    H.distance = args.strMetric 
-    H.decomposition = args.strDecomposition 
-    #H.fdr_function = args.strFDR
-    H.q = args.dQ  
-    H.iterations = args.iIter
-    #H.p_adjust_method = args.strAdjust
-    #H.randomization_method = args.strRandomization  # method to generate error bars 
-    H.strStep = "uniform"
-    H.verbose = args.verbose
-    #H.robustness = float(args.robustness)
-    H.output_dir = args.output_dir
-    H.plotting_results = args.plotting_results
-    #H.heatmap_all = args.heatmap_all
-    H.descending = args.strDescending
+def set_parameters(args):
+    config.distance = args.strMetric 
+    config.decomposition = args.strDecomposition 
+    #config.fdr_function = args.strFDR
+    config.q = args.dQ  
+    config.iterations = args.iIter
+    #config.p_adjust_method = args.strAdjust
+    #config.randomization_method = args.strRandomization  # method to generate error bars 
+    config.strStep = "uniform"
+    config.verbose = args.verbose
+    #config.robustness = float(args.robustness)
+    config.output_dir = args.output_dir
+    config.plotting_results = args.plotting_results
+    #config.heatmap_all = args.heatmap_all
+    config.descending = args.strDescending
     istm = list()  # X and Y are used to store datasets
-    H.apply_stop_condition = args.apply_stop_condition
-    H.strDiscretizing = args.strDiscretizing
-    H.seed = args.seed
+    config.apply_stop_condition = args.apply_stop_condition
+    config.strDiscretizing = args.strDiscretizing
+    config.seed = args.seed
     # If Y was not set - we use X
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  
@@ -279,14 +279,14 @@ def set_HAllA_object (H, args):
 
     
     if len(istm) > 1:
-        H.strFile1, H.strFile2 = istm[:2]
+        config.strFile1, config.strFile2 = istm[:2]
     else:
-        H.strFile1, H.strFile2 = istm[0], istm[0]
+        config.strFile1, config.strFile2 = istm[0], istm[0]
         
-    aOut1, aOut2 = parser.Input (H.strFile1.name, H.strFile2.name, headers=args.header).get()
-    H.plotting_results = args.plotting_results
-    (H.meta_array[0], H.aOutName1, H.aOutType1, H.aOutHead1) = aOut1 
-    (H.meta_array[1], H.aOutName2, H.aOutType2, H.aOutHead2) = aOut2 
+    aOut1, aOut2 = parser.Input (config.strFile1.name, config.strFile2.name, headers=args.header).get()
+    config.plotting_results = args.plotting_results
+    (config.meta_array[0], config.aOutName1, config.aOutType1, config.aOutHead1) = aOut1 
+    (config.meta_array[1], config.aOutName2, config.aOutType2, config.aOutHead2) = aOut2 
     
 def _main():
     
@@ -297,9 +297,9 @@ def _main():
     # Set the number of processing units available
     config.NPROC = args.nproc
     config.NBIN = args.nbin
-    H = store.HAllA(X = None, Y = None)
-    set_HAllA_object(H, args)         
-    aaOut = H.run()	
+    #H = store.HAllA(X = None, Y = None)
+    set_parameters(args)         
+    aaOut = store.run()	
     
 if __name__ == '__main__':
 	_main()
