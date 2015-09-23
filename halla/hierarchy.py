@@ -1502,9 +1502,18 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     #print "Number of levels after coupling", level_number-1
     return aOut
         
-def naive_all_against_all(pArray1, pArray2, seed,fdr= "BH", decomposition = "pca", method="permutation", metric="nmi", fQ=0.1,
-    bVerbose=False, iIter=1000,  discretize_style= 'equal-area'):
-    
+def naive_all_against_all():
+    pArray1 = config.meta_feature[0]
+    pArray2 = config.meta_feature[1]
+    seed = config.seed
+    fdr = config.fdr_function
+    decomposition = config.decomposition
+    method = config.randomization_method
+    metric = config.distance
+    fQ = config.q
+    bVerbose =  config.verbose
+    iIter= config.iterations
+    discretize_style = config.strDiscretizing
     pHashMethods = {"permutation" : stats.permutation_test,
                         "permutation_test_by_medoid": stats.permutation_test_by_medoid,
                         
