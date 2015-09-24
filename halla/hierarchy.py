@@ -723,7 +723,7 @@ def hclust(pArray, labels):
         #    scipy.cluster.hierarchy.dendrogram(Z)
         #plt.gcf()
         #global fig_num
-        Z = plot.heatmap(config.meta_feature[0] , D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/hierarchical_heatmap_" + str(fig_num))
+        Z = plot.heatmap(Data = pArray , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/hierarchical_heatmap_" + str(fig_num))
         #plt.savefig(output_dir+"/Dendrogram1_" + str(fig_num) + ".pdf")
         '''except:
             Z = linkage(D, metric=pDistance, method= "single")

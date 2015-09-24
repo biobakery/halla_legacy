@@ -301,7 +301,7 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarch
     # Compute and plot second dendrogram.
     if len(xlabels_order) == 0:
         ax2 = fig.add_axes([0.3, 0.71, 0.6, 0.2], frame_on=True)
-        tpArray = pArray.T 
+        #tpArray = pArray.T 
         '''D2 = np.zeros(shape=(len(tpArray), len(tpArray))) 
         for i in range(len(tpArray)):
             for j in range(i,len(tpArray)):
