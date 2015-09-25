@@ -693,7 +693,7 @@ def hclust(pArray, labels):
     # # Remember, pMetric is a notion of _strength_, not _distance_ 
     # print str(pMetric)
     def pDistance(x, y):
-        dist = math.fabs(1.0 - pMetric(x, y))
+        dist = 1.0 - math.fabs(pMetric(x, y))
         return  dist
 
     
