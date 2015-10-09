@@ -32,7 +32,8 @@ c_hash_association_method_discretize = {"pearson": False,
 										"fisher": False,
 										"nmi": True,
 										"mi": True,
-                                        "mic": True,
+                                        "mic": False,
+                                        "dmic":True,
                                         "ami": True
 										}
 
@@ -312,7 +313,8 @@ c_hash_metric = {"nmi": nmi,
                 "ami":ami,
 				"pearson": pearson,
                 "spearman": spearman,
-                "mic": mic
+                "mic": mic,
+                "dmic":mic
 				}
 
 # ## Visible and shareable to the outside world 

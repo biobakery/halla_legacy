@@ -105,11 +105,11 @@ def r(pArray, pFunc, axis=0):
 #==========================================================#
 # Helper Functions 
 #==========================================================# 
-def _name_features():
-    if not config.aOutName1:
-        config.aOutName1 = [str(i) for i in range(len(config.meta_array[0])) ]
-    if not config.aOutName2:
-        config.aOutName2 = [str(i) for i in range(len(config.meta_array[1])) ]
+def name_features():
+    #if not config.aOutName1:
+    config.aOutName1 = [str(i) for i in range(len(config.meta_array[0])) ]
+    #if not config.aOutName2:
+    config.aOutName2 = [str(i) for i in range(len(config.meta_array[1])) ]
 def _discretize():
     config.meta_feature = m(config.meta_array, stats.discretize, config.strDiscretizing)
     #config.meta_feature = array([stats.discretize(config.meta_array[0], config.strDiscretizing), stats.discretize(config.meta_array[1], config.strDiscretizing)])
@@ -318,7 +318,7 @@ def _report():
             iX, iY = line[0]
             fP = line[1]
             fP_adjust = line[2]
-            #print line
+            #print line, config.aOutName1, config.aOutName2
             aLineOut = map(str, [config.aOutName1[iX], config.aOutName2[iY], fP, fP_adjust])
             csvw.writerow(aLineOut)
 
@@ -783,7 +783,7 @@ def run():
     csvw.writerow(["Discretizing method : ", config.strDiscretizing])
     csvw.writerow(["Seed number: ", config.seed]) 
     csvw.writerow([])
-    _name_features()
+    #name_features()
     if not is_correct_submethods_combination():
         sys.exit("Please ckeck the combination of your options!!!!")
     execution_time = time.time()
