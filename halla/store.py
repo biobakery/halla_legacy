@@ -859,7 +859,7 @@ def is_correct_submethods_combination():
         config.decomposition = "none"        
     if (config.descending == "AllA" and not config.decomposition =='none') or\
                         (config.descending == "HAllA" and config.decomposition =='none') or\
-                        (config.decomposition in ["ica","pca",'pls', 'cca', 'kpca'] and config.distance not in ["pearson", "spearman"] ) or\
+                        (config.decomposition in ["ica","pca",'pls', 'cca', 'kpca'] and config.distance not in ["pearson", "spearman","dcor"] ) or\
                         (config.decomposition == "mca" and config.distance in ["pearson", "spearman"]):
             False
     else:
