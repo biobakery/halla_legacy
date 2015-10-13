@@ -278,7 +278,7 @@ class Tree():
                     #if np.mean(self.get_right_loading()) < .5 :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                     if math.fabs(self.get_right_loading()[i]) < right_loading_threshold :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                         counter += 1
-                        if counter > (number_right_features/math.log(number_right_features,2)):
+                        if counter >= (number_right_features/math.log(number_right_features,2)):
                             #print "#1:",counter
                             return False
             counter = 0
@@ -295,7 +295,7 @@ class Tree():
                     #if np.mean(self.get_left_loading()) < .5:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
                     if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:
                         counter += 1
-                        if counter > (number_left_features/math.log(number_left_features,2)):
+                        if counter >= (number_left_features/math.log(number_left_features,2)):
                             #print "#2:",counter
                             return False
             return True
@@ -309,7 +309,7 @@ class Tree():
                         if math.fabs(self.get_right_loading()[i]) < low_right_loading_threshold or\
                         math.fabs(self.get_right_loading()[i]) > up_right_loading_threshold:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                             counter += 1
-                            if counter > (number_right_features/math.log(number_right_features,2)):#math.log(number_right_features,2)):
+                            if counter >= (number_right_features/math.log(number_right_features,2)):#math.log(number_right_features,2)):
                                 #print "#1:",counter
                                 return False
             counter = 0
@@ -321,7 +321,7 @@ class Tree():
                         if math.fabs(self.get_left_loading()[i]) < low_left_loading_threshold or\
                         math.fabs(self.get_left_loading()[i]) > up_left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
                             counter += 1
-                            if counter > (number_left_features/math.log(number_left_features,2)): # (number_left_features/2):#math.log(number_left_features,2)):
+                            if counter >= (number_left_features/math.log(number_left_features,2)): # (number_left_features/2):#math.log(number_left_features,2)):
                                 #print "#2:",counter
                                 return False
             return True
