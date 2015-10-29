@@ -130,12 +130,14 @@ def mca_method(pArray, discretize_style, iComponents=1):
 	#print ro.r('mca1$var$eta2[,1]')
 	#print ro.r('mca1$var$eta2[,2]')
 	explained_variance_1 = ro.r('mca1$eig[1,2]')
+	#print ro.r('mca1$var$contrib')
+	#print ro.r('mca1$var$eta2[,1]')
 	#print ro.r('mca1$eig[1,2]')
 	#ro.r('plot.MCA(mca1,  cex=.7)')
 	#print list(rep)
 	#print rep
-	#print (discretize(list(rep)), explained_variance_1, loading)
-	return (discretize(list(rep), style = discretize_style), list(explained_variance_1)[0], list(loading))
+	#print (discretize(list(rep)), explained_variance_1, loading)   #[float("{0:.1f}".format(a)) for a in list(rep)]
+	return (discretize(list(rep)), list(explained_variance_1)[0], list(loading))
 	'''
 	if len(pArray) < 2:
 		print "len A:", len(pArray)
@@ -379,7 +381,9 @@ def medoid(pArray, iAxis=0, pMetric=distance.nmi):
 	Input: numpy array 
 	Output: float
 	"""
-
+	X = pArray
+	#return X[len(X)/2]
+	return pArray[len(pArray) -1, :]
 	d = pMetric 
 	def pDistance(x, y):
 		return  1.0 - pMetric(x, y)
@@ -393,6 +397,7 @@ def medoid(pArray, iAxis=0, pMetric=distance.nmi):
 		if med >= temp_mean:
 			med = temp_mean
 			mean_index = i
+	print "medoid index :", mean_index, len(pArray)
 	return pArray[mean_index, :]
 def concat(pArray, iAxis=0, pMetric=distance.nmi):
 	"""
@@ -620,7 +625,69 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 	assert(fP <= 1.0)
 
 	return fP
+def permutation_test_pvalue(X, Y, metric, seed, iIter=1000):
+	 
+	strMetric = metric 
+	# step 5 in a case of new decomposition method
+	pHashDecomposition = c_hash_decomposition
+	pHashMetric = distance.c_hash_metric 
 	
+	def _permutation(pVec):
+		return numpy.random.permutation(pVec)
+
+	pMe = pHashMetric[metric] 
+	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function
+	aDist = [] 
+	sim_score= pMe(X, Y)
+	fAssociation = math.fabs(sim_score)
+	fP = 1.0 
+	# print left_rep_variance, right_rep_variance, fAssociation
+	#### Perform Permutation 
+	
+	def _calculate_pvalue(iter):
+		fPercentile = percentileofscore(aDist, fAssociation, kind = 'strict')#, kind="mean")  # #source: Good 2000  
+	# ## \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
+	# ## k number of iterations, \hat{X} is randomized version of X 
+	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
+	# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
+
+		fP = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
+		return fP
+	
+	iter = iIter
+	for i in xrange(iIter):
+		numpy.random.seed(i+seed)
+
+		#XP = array([numpy.random.permutation(x) for x in X])
+		#YP = array([numpy.random.permutation(y) for y in Y])
+		#pRep1_, _, _ = mca_method(XP) #mean(pArray1)#[len(pArray1)/2]
+		#pRep2_, _, _ = mca_method(YP)#
+		#pRep1_, pRep2_ = [ discretize(pDe(pA))[0] for pA in [XP, YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
+		iter = i
+		permuted_Y = numpy.random.permutation(Y)
+		# Similarity score between representatives  
+		#fAssociation_permuted = pMe(pRep1_, pRep2_)  
+		fAssociation_permuted = math.fabs(pMe(X, permuted_Y))  
+		aDist.append(fAssociation_permuted)
+		if i % 50 == 0:
+			new_fP = _calculate_pvalue(i)
+			if new_fP > fP:
+				
+				#print "Break before the end of permutation iterations"
+				break
+			else: 
+				fP = new_fP
+
+		# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
+	
+	fPercentile = percentileofscore(aDist, fAssociation, kind = 'strict')#, kind="mean")  # #source: Good 2000  
+	# ## \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
+	# ## k number of iterations, \hat{X} is randomized version of X 
+	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
+	# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
+
+	fP = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
+	return fP	
 def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000, seed = False, discretize_style = 'equal-area'):
 	"""
 	Input: 
@@ -635,13 +702,11 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
 	
-	def _permutation(pVec):
-		return numpy.random.permutation(pVec)
 
-	pDe = pHashDecomposition[decomposition]
-	pMe = pHashMetric[strMetric] 
+	pDe = pHashDecomposition[config.decomposition]
+	pMe = pHashMetric[config.distance] 
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function
-	aDist = [] 
+	#aDist = [] 
 	left_rep_variance = 1.0
 	right_rep_variance = 1.0
 	left_loading = []
@@ -663,6 +728,9 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	elif decomposition == 'mca':
 		pRep1, left_rep_variance, left_loading = mca_method(pArray1, discretize_style = discretize_style) #mean(pArray1)#[len(pArray1)/2]
 		pRep2, right_rep_variance, right_loading = mca_method(pArray2, discretize_style = discretize_style)#mean(pArray2)#[len(pArray2)/2]	
+		#print len(pArray1)," Rep 1: ", pRep1,
+		#print len(pArray2)," Rep 2: ", pRep2, 
+		#print "Sim: ", pMe(pRep1, pRep2)
 	elif decomposition == 'medoid':
 		pRep1 = medoid(pArray1)
 		pRep2 = medoid(pArray2)
@@ -689,57 +757,8 @@ def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposi
 	#if decomposition != "pca":
 	#	fAssociation = numpy.mean(numpy.array([pMe(pArray1[i], pArray2[j]) for i, j in itertools.product(range(len(pArray1)), range(len(pArray2)))]))
 	#else:
-		
 	sim_score= pMe(pRep1, pRep2)
-	fAssociation = math.fabs(sim_score)
-	fP = 1.0 
-	# print left_rep_variance, right_rep_variance, fAssociation
-	#### Perform Permutation 
-	
-	def _calculate_pvalue(iter):
-		fPercentile = percentileofscore(aDist, fAssociation, kind = 'strict')#, kind="mean")  # #source: Good 2000  
-	# ## \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
-	# ## k number of iterations, \hat{X} is randomized version of X 
-	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
-	# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
-
-		fP = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
-		return fP
-	
-	iter = iIter
-	for i in xrange(iIter):
-		numpy.random.seed(i+seed)
-
-		#XP = array([numpy.random.permutation(x) for x in X])
-		#YP = array([numpy.random.permutation(y) for y in Y])
-		#pRep1_, _, _ = mca_method(XP) #mean(pArray1)#[len(pArray1)/2]
-		#pRep2_, _, _ = mca_method(YP)#
-		#pRep1_, pRep2_ = [ discretize(pDe(pA))[0] for pA in [XP, YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
-		iter = i
-		permuted_pRep2 = numpy.random.permutation(pRep2)
-		# Similarity score between representatives  
-		#fAssociation_permuted = pMe(pRep1_, pRep2_)  # NMI
-		fAssociation_permuted = math.fabs(pMe(pRep1, permuted_pRep2))  # NMI
-		aDist.append(fAssociation_permuted)
-		if i % 50 == 0:
-			new_fP = _calculate_pvalue(i)
-			if new_fP > fP:
-				
-				#print "Break before the end of permutation iterations"
-				break
-			else: 
-				fP = new_fP
-
-		# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
-	
-	fPercentile = percentileofscore(aDist, fAssociation, kind = 'strict')#, kind="mean")  # #source: Good 2000  
-	# ## \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
-	# ## k number of iterations, \hat{X} is randomized version of X 
-	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
-	# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
-
-	fP = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
-	
+	fP = permutation_test_pvalue(X=pRep1, Y=pRep2, metric = config.distance, seed=config.seed, iIter=config.iterations)
 	assert(fP <= 1.0)
 	#print fP
 	return fP, sim_score, left_rep_variance, right_rep_variance, left_loading, right_loading, pRep1, pRep2 
@@ -1536,7 +1555,7 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 	def _discretize_continuous(astrValues, iN=iN):
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
-			iN = min(len(set(astrValues)), round(math.sqrt(len(set(astrValues)))*1.5)) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
+			iN = min(len(set(astrValues)), round(math.sqrt(len(set(astrValues))))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
 		elif iN == 0:
 			iN = len(set(astrValues))
 		else:

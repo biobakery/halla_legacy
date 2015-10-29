@@ -28,7 +28,7 @@ decomposition = "pca"
 fdr_function = "BHL"
 q = .2  
 iterations = 1000
-p_adjust_method = "BH"
+p_adjust_method = "BHL"
 randomization_method = "permutation"  # method to generate error bars 
 sstrStep = "uniform"
 verbose = False
@@ -36,9 +36,10 @@ descending = "HAllA"
     
 summary_method = "final"
 output_dir = "./"
+log_input = True
 plotting_results = False
 strDiscretizing = 'equal-area'
-apply_stop_condition = False
+apply_bypass = False
 seed = random.randint(1,10000)        #==================================================================#
 # Mutable Meta Objects  
 #==================================================================#
@@ -47,6 +48,8 @@ meta_array = array([None, None])
 #meta_array[1] = Y  # .append(Y)
 meta_feature = None
 meta_threshold = None 
+X_features_cluster_order  = []
+Y_features_cluster_order  = []
 meta_data_tree = [] 
 meta_hypothesis_tree = None 
 meta_alla = None  # results of all-against-all

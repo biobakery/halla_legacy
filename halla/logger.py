@@ -69,11 +69,12 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
     a file tabdelimated file 
     
     '''
-    if not(data is None):
-		return
+    if data == None:
+    	print "Null input for writing table"
+    	return
     f = open(name, 'w')
     # row numbers as header
-    if not(colheader is None):
+    if colheader is None:
         if corner is None:
             f.write(delimiter)
         else:
@@ -96,19 +97,17 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
                 f.write(delimiter)
         f.write('\n')
     else:
-        sys.err("The lable list in not matched with the data size")
+        sys.err("The label list in not matched with the data size")
         sys.exit()
         
     for i in range(len(data)):
-        if not(rowheader is None) :
+        if rowheader is None :
             f.write(prefix+str(i))
             f.write(delimiter)
-        elif len(colheader) == len(data[0]):
+        else:
             f.write(rowheader[i])
             f.write(delimiter)
-        else:
-            sys.err("The lable list in not matched with the data size")
-            sys.exit()
+        
         for j in range(len(data[i])):
                 f.write(str(data[i][j]))
                 if j < len(data[i]) - 1:

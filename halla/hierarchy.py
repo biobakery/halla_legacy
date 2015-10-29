@@ -20,6 +20,7 @@ from . import stats
 from . import plot
 from . import config
 from __builtin__ import True
+from matplotlib.sankey import RIGHT
 
 # number of available processors
 
@@ -247,8 +248,16 @@ class Tree():
     def get_right_rep(self):
         return self.right_rep
     
-    def is_representative(self, pvalue_threshold, decomp = 'mca' ):
+    def is_representative(self, pvalue_threshold, decomp):
         #return True
+        #print "==========================================="
+        #print "Left Exp. Var.: ", self.left_first_rep_variance
+        #print "Left before: ", self.m_pData[0]
+        #print "Right Exp. Var.: ", self.right_first_rep_variance
+        #print "Right before: ", self.m_pData[1]
+        #print "Correlation with left rep:", [scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.left_rep) for i in range(len(self.m_pData[0]))]
+        #print "Correlation with right rep:", [scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep) for i in range(len(self.m_pData[1]))]
+        approach = 'effect_size'
         #robustness = .098
         #print robustness
         number_left_features = len(self.get_data()[0])
@@ -259,14 +268,13 @@ class Tree():
         #print self.get_right_loading(), self.get_data()[1]
         #print scipy.stats.sem(self.get_right_loading())
         #print scipy.stats.sem(self.get_left_loading())
-        if len(self.get_left_loading()) == 1 and len(self.get_right_loading()) == 1:
+        if len(self.get_data()[0]) <= 1 and len(self.get_data()[1]) <= 1:
             #print self.get_left_loading(), self.get_right_loading
             return True
-   
-        
-        if decomp == 'mca':
+        if decomp == 'mca1':
             counter = 0
-            if len(self.get_right_loading()) > 1:
+            if len(self.get_right_loading()) > 1 and self.right_first_rep_variance < 10.0:
+                temp_right_loading = list()
                 right_loading_threshold = np.mean(self.get_right_loading()) - np.std(self.get_right_loading())#robustness/2.000 #math.sqrt(1.0/len(self.get_right_loading())) - .01
                 '''print "Right"
                 print scipy.stats.sem(self.get_right_loading())
@@ -276,11 +284,19 @@ class Tree():
                 for i in range(len(self.get_right_loading())):
                     #print "right:", self.get_right_loading()[i]
                     #if np.mean(self.get_right_loading()) < .5 :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
-                    if math.fabs(self.get_right_loading()[i]) < right_loading_threshold :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
+                    if self.get_right_loading()[i] < right_loading_threshold :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
                         counter += 1
-                        if counter >= (number_right_features/math.log(number_right_features,2)):
+                        temp_right_loading.append(i)
+                        if counter >= (number_right_features/(math.log(number_right_features,2))):
                             #print "#1:",counter
                             return False
+                #print "Right Exp. Var.: ", self.right_first_rep_variance
+                #print "Right before: ", self.m_pData[1]
+                print "Outlier right: ",temp_right_loading
+                self.right_loading = [i for j, i in enumerate(self.right_loading) if j not in temp_right_loading]
+                self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
+                #print "Right loading: ",self.right_loading
+                #print "Right after: ", self.m_pData[1]
             counter = 0
             '''print "Left"
             print scipy.stats.sem(self.get_left_loading())
@@ -288,49 +304,224 @@ class Tree():
             print np.std(self.get_left_loading())
             print "End left"
             '''
-            if len(self.get_left_loading()) > 1:
+            if len(self.get_left_loading()) > 1 and self.left_first_rep_variance < 10.0:
+                temp_left_loading = list()
                 left_loading_threshold = np.mean(self.get_left_loading()) - np.std(self.get_left_loading())# robustness/2.000 #math.sqrt(1.0/len(self.get_left_loading())) - .01
                 for i in range(len(self.get_left_loading())):
                     #print "left:", self.get_left_loading()[i]
                     #if np.mean(self.get_left_loading()) < .5:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
-                    if math.fabs(self.get_left_loading()[i]) < left_loading_threshold:
+                    if self.get_left_loading()[i] < left_loading_threshold:
                         counter += 1
-                        if counter >= (number_left_features/math.log(number_left_features,2)):
+                        temp_left_loading.append(i)
+                        if counter >= (number_left_features/(math.log(number_left_features,2))):
                             #print "#2:",counter
                             return False
+                #print "Left Exp. Var.: ", self.left_first_rep_variance
+                #print "Left before: ", self.m_pData[0]
+                #print "after left:", [self.m_pData[0][i] for i in temp_left_loading]
+                #print "after left features:", [self.left_loading[i] for i in temp_left_loading]
+                print "Outlier left: ",temp_left_loading
+                self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
+                self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
+                #print "Left Loading: ",self.left_loading
+                #print "Left after: ", self.m_pData[0]
             return True
-        elif decomp == 'pca':
+        elif decomp == 'pca1':
             counter = 0
-            if len(self.get_right_loading()) > 1:
-                    low_right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) -  np.std(self.get_right_loading())
-                    up_right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) +  np.std(self.get_right_loading())
-                    for i in range(len(self.get_right_loading())):
-                        #print "right:", self.get_right_loading()[i]
-                        if math.fabs(self.get_right_loading()[i]) < low_right_loading_threshold or\
-                        math.fabs(self.get_right_loading()[i]) > up_right_loading_threshold:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
-                            counter += 1
-                            if counter >= (number_right_features/math.log(number_right_features,2)):#math.log(number_right_features,2)):
-                                #print "#1:",counter
-                                return False
+            if len(self.get_right_loading()) > 1 and self.right_first_rep_variance<.5:
+                temp_right_loading = list()
+                right_loading_values = [i for i in self.get_right_loading()]
+                low_right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) - np.std(right_loading_values)
+                up_right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) +  np.std(right_loading_values)
+                for i in range(len(self.get_right_loading())):
+                    #print "right:", self.get_right_loading()[i]
+                    if self.get_right_loading()[i] < low_right_loading_threshold:# or\
+                   # math.fabs(self.get_right_loading()[i]) > up_right_loading_threshold:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
+                        #numpy.delete(self.get_right_loading(), i)
+                        counter += 1
+                        temp_right_loading.append(i)
+                        #print "right:", self.get_right_loading()
+                        if counter >= (number_right_features/(math.log(number_right_features,2))):#math.log(number_right_features,2)):
+                            #print "#1:",counter
+                            return False
+                #print "after right:", [self.m_pData[1][i] for i in temp_right_loading]
+                #print "after right features:", [self.right_loading[i] for i in temp_right_loading]
+                #print "Right Exp. Var.: ", self.right_first_rep_variance
+                #print "Right before: ", self.m_pData[1]
+                self.right_loading = [i for j, i in enumerate(self.right_loading) if j not in temp_right_loading]
+                self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
+                print self.right_loading
+                #print "Right after: ", self.m_pData[1]
             counter = 0
-            if len(self.get_left_loading()) > 1:
-                    low_left_loading_threshold = math.sqrt(1.0/len(self.get_left_loading())) - np.std(self.get_left_loading())
-                    up_left_loading_threshold = math.sqrt(1.0/len(self.get_left_loading())) + np.std(self.get_left_loading())
-                    for i in range(len(self.get_left_loading())):
-                        #print "left:", self.get_left_loading()[i]
-                        if math.fabs(self.get_left_loading()[i]) < low_left_loading_threshold or\
-                        math.fabs(self.get_left_loading()[i]) > up_left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
-                            counter += 1
-                            if counter >= (number_left_features/math.log(number_left_features,2)): # (number_left_features/2):#math.log(number_left_features,2)):
-                                #print "#2:",counter
-                                return False
+            if len(self.get_left_loading()) >1 and self.left_first_rep_variance<.5:
+                temp_left_loading = list()
+                left_loading_values = [i for i in self.get_left_loading()]
+                low_left_loading_threshold = math.sqrt(1.0/len(self.get_left_loading())) - np.std(left_loading_values)
+                up_left_loading_threshold = math.sqrt(1.0/len(self.get_left_loading())) + np.std(left_loading_values)
+                for i in range(len(self.get_left_loading())):
+                    #print "left:", self.get_left_loading()[i]
+                    if self.get_left_loading()[i] < low_left_loading_threshold:# or\
+                    #math.fabs(self.get_left_loading()[i]) > up_left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
+                        
+                        #print "before:", temp_left_loading
+                        temp_left_loading.append(i)
+                        #print "after:", temp_left_loading
+                        counter += 1
+                        if counter >= (number_left_features/(math.log(number_left_features,2))): # (number_left_features/2):#math.log(number_left_features,2)):
+                            #print "#2:",counter
+                            return False
+                #print "Left Exp. Var.: ", self.left_first_rep_variance
+                #print "Left before: ", self.m_pData[0]
+                #print "after left:", [self.m_pData[0][i] for i in temp_left_loading]
+                #print "after left features:", [self.left_loading[i] for i in temp_left_loading]
+                self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
+                self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
+                print self.left_loading
+                #print "Left after: ", self.m_pData[0]
+            return True
+        elif decomp in ['medoid','pca', 'mca'] and approach != 'effect_size':
+            counter = 0
+            temp_right_loading = list()
+            for i in range(len(self.m_pData[1])):
+                if stats.permutation_test_pvalue(X=config.meta_feature[1][self.m_pData[1][i]], Y=self.right_rep, metric= config.distance, seed = config.seed, iIter = config.iterations) >.05:
+                #scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep)[1] >.05:# 
+                    counter += 1
+                    temp_right_loading.append(i)
+                    #print "right:", self.get_right_loading()
+                    if counter >= (number_right_features/(math.log(number_right_features,2))):#math.log(number_right_features,2)):
+                        print "#Outlier right cluster:",counter
+                        return False
+            
+            #self.right_loading = [i for j, i in enumerate(self.right_loading) if j not in temp_right_loading]
+            self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
+            #print temp_right_loading
+            #print "Right after: ", self.m_pData[1]
+            counter = 0
+            temp_left_loading = list()
+            for i in range(len(self.m_pData[0])):
+                if stats.permutation_test_pvalue(X=config.meta_feature[0][self.m_pData[0][i]], Y=self.right_rep, metric= config.distance, seed = config.seed, iIter = config.iterations) >.05:
+                    #scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.right_rep)[1] >.05:
+                    temp_left_loading.append(i)
+                    #print "after:", temp_left_loading
+                    counter += 1
+                    if counter >= (number_left_features/(math.log(number_left_features,2))): # (number_left_features/2):#math.log(number_left_features,2)):
+                        print "#Outlier left cluster:",counter
+                        return False
+
+            #self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
+            self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
+            #print temp_left_loading
+            return True
+        elif approach == "effect_size":
+            counter = 0
+            temp_right_loading = list()
+            reps_similarity = self.get_similarity_score()
+            pMe = distance.c_hash_metric[config.distance] 
+            left_threshold = [pMe(config.meta_feature[0][self.m_pData[0][i]], self.left_rep) for i in range(len(self.m_pData[0]))]
+            right_threshold = [pMe(config.meta_feature[1][self.m_pData[1][i]], self.right_rep) for i in range(len( self.m_pData[1]))]
+            left_rep_similarity_to_right_cluster = np.median([pMe(self.left_rep, config.meta_feature[1][self.m_pData[1][i]]) for i in range(len(self.m_pData[1]))])
+            right_rep_similarity_to_left_cluster = np.median([pMe(self.right_rep, config.meta_feature[0][self.m_pData[0][i]]) for i in range(len(self.m_pData[0]))])
+            for i in range(len(self.m_pData[1])):
+                if right_threshold[i]< (right_rep_similarity_to_left_cluster):# - np.std(right_threshold)):#scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep)[1] >.05:# 
+                    counter += 1
+                    temp_right_loading.append(i)
+                    #print "right:", self.get_right_loading()
+                    if counter > (number_right_features/(math.log(number_right_features,2))) or (counter >= number_right_features):#math.log(number_right_features,2)):
+                        #print "#Outlier right cluster:",counter
+                        return False
+            
+            #self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
+            #print temp_right_loading
+            #print "Right after: ", self.m_pData[1]
+            counter = 0
+            temp_left_loading = list()
+            for i in range(len(self.m_pData[0])):
+                if left_threshold[i]< (left_rep_similarity_to_right_cluster):# - np.std(left_threshold)): 
+                #scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.right_rep)[1] >.05:
+                    temp_left_loading.append(i)
+                    #print "after:", temp_left_loading
+                    counter += 1
+                    if counter > (number_left_features/(math.log(number_left_features,2))) or (counter >= number_left_features): # (number_left_features/2):#math.log(number_left_features,2)):
+                        #print "#Outlier left cluster:",counter
+                        return False
+
+            #self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
+            #self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
+            #print temp_left_loading
             return True
         else:
             return True 
+    def is_representative_to_bypass(self):
+        #return True
+        #print "===================bypass check========================"
+        #print "Left Exp. Var.: ", self.left_first_rep_variance
+        #print "Left before: ", self.m_pData[0]
+        #print "Right Exp. Var.: ", self.right_first_rep_variance
+        #print "Right before: ", self.m_pData[1]
+        #print "Correlation with left rep:", [scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.left_rep) for i in range(len(self.m_pData[0]))]
+        #print "Correlation with right rep:", [scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep) for i in range(len(self.m_pData[1]))]
+        approach = 'effect_size'
+
+        number_left_features = len(self.get_data()[0])
+        number_right_features = len(self.get_data()[1])
+
+        if len(self.get_data()[0]) <= 1 and len(self.get_data()[1]) <= 1:
+            #print self.get_left_loading(), self.get_right_loading
+            return True
+
+        counter = 0
+        temp_right_loading = list()
+        reps_similarity = self.get_similarity_score()
+        pMe = distance.c_hash_metric[config.distance] 
+        diam_Ar_Br = (1.0 - math.fabs(pMe(self.left_rep, self.right_rep)))
+        from itertools import product
+        left_all_sim = [pMe(config.meta_feature[1][self.m_pData[0][i]], config.meta_feature[1][self.m_pData[0][j]]) for i,j in product(range(len(self.m_pData[0])), range(len(self.m_pData[0])))]
+        right_all_sim = [pMe(config.meta_feature[1][self.m_pData[1][i]], config.meta_feature[1][self.m_pData[1][j]]) for i,j in product(range(len(self.m_pData[1])), range(len(self.m_pData[1])))]
+        diam_A_r = ((1.0 - math.fabs(min(left_all_sim))))# - math.fabs((1.0 - max(left_all_sim))))
+        diam_B_r = ((1.0 - math.fabs(min(right_all_sim))))# - math.fabs((1.0 - max(right_all_sim))))
+        #print "dime_A_r: ", diam_A_r,"  ", "dime_B_r: ", diam_B_r, "diam_Ar_Br: ", diam_Ar_Br
+        stop_threshold = (2.0 * diam_Ar_Br)/(diam_A_r + diam_B_r)
+        if stop_threshold > 4.0:
+            print stop_threshold
+            return True
+        else:
+            print stop_threshold
+            return False
+        left_rep_similarity_to_right_cluster = np.median([pMe(self.left_rep, config.meta_feature[1][self.m_pData[1][i]]) for i in range(len(self.m_pData[1]))])
+        right_rep_similarity_to_left_cluster = np.median([pMe(self.right_rep, config.meta_feature[0][self.m_pData[0][i]]) for i in range(len(self.m_pData[0]))])
+        for i in range(len(self.m_pData[1])):
+            if right_threshold[i]< (right_rep_similarity_to_left_cluster):# - np.std(right_threshold)):#scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep)[1] >.05:# 
+                counter += 1
+                temp_right_loading.append(i)
+                #print "right:", self.get_right_loading()
+                if counter >= (number_right_features/(math.log(number_right_features,2))+1):#math.log(number_right_features,2)):
+                   #print "#Outlier right cluster:",counter
+                    return False
+        #self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
+        #print temp_right_loading
+        #print "Right after: ", self.m_pData[1]
+        counter = 0
+        temp_left_loading = list()
+        for i in range(len(self.m_pData[0])):
+            if left_threshold[i]< (left_rep_similarity_to_right_cluster):# - np.std(left_threshold)): 
+            #scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.right_rep)[1] >.05:
+                temp_left_loading.append(i)
+                #print "after:", temp_left_loading
+                counter += 1
+                if counter >= (number_left_features/(math.log(number_left_features,2))+1): # (number_left_features/2):#math.log(number_left_features,2)):
+                    #print "#Outlier left cluster:",counter
+                    return False
+
+        #self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
+        #self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
+        #print temp_left_loading
+        return True
         
-    def is_bypass(self, apply_stop_condition, q  ):#
-        if apply_stop_condition:
-            if self.get_qvalue() > (1.0 - self.get_pvalue()):# or\  # the same as 1-p<q ~ p>1-q
+    def is_bypass(self ):#
+        if config.apply_bypass:
+            if self.is_representative_to_bypass():# or\  # the same as 1-p<q ~ p>1-q
+                #self.get_qvalue() > (1.0 - self.get_pvalue()) and self.is_representative(pvalue_threshold = config.q, decomp = config.decomposition)
+                #print "q: ", self.get_qvalue()
             #(self.get_left_first_rep_variance() > .9 and \
             #self.get_right_first_rep_variance()> .9):
                 #print self.get_left_loading(), self.get_data()[0]
@@ -1296,7 +1487,7 @@ def _cutree_overall (clusterNodelist, X, func, distance):
 def _cutree (clusterNodelist, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(math.log(n, 2)*2) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
+    number_of_sub_cluters_threshold = round(math.log(n, 2)+.5) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
     number_of_feature_in_each_cluter_threshold = n/2
     #print "n: ", n
     sub_clusters = []
@@ -1573,9 +1764,14 @@ def naive_all_against_all():
             tests[i].set_rank(pRank[i])
         max_r_t = 0
                 #print "aP", aP
-                #print "aP_adjusted: ", aP_adjusted  
+                #print "aP_adjusted: ", aP_adjusted
+        number_end_right_pvalues = 0
         for i in range(len(tests)):
-            if aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
+            if aP[i] >= 1.0 - aP_adjusted[i] or aP[i] <= aP_adjusted[i]:
+                number_end_right_pvalues +=1 
+        print  "number_end_right_pvalues: ", number_end_right_pvalues
+        for i in range(len(tests)):
+            if aP[i] <= (aP_adjusted[i]*len(tests)/(len(tests)- number_end_right_pvalues)) and max_r_t <= pRank[i]:
                 max_r_t = pRank[i]
                 #print "max_r_t", max_r_t
         for i in range(len(aP)):
@@ -1772,7 +1968,7 @@ def hypotheses_testing():
     pArray2 = config.meta_feature[1]
     """
     pTree, pArray1, pArray2, seed, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
-    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness = None, fAlpha=0.05, apply_stop_condition = True, discretize_style= 'equal-area'
+    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness = None, fAlpha=0.05, apply_bypass = True, discretize_style= 'equal-area'
     
     Perform all-against-all on a hypothesis tree.
 
@@ -1876,7 +2072,7 @@ def hypotheses_testing():
                     next_level_apChildren.append(Current_Family_Children[i])
                     if bVerbose: 
                         print "Conitinue, gray area with p-value:", Current_Family_Children[i].get_pvalue()
-                elif Current_Family_Children[i].is_bypass(apply_stop_condition, q=fQ) and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
+                elif Current_Family_Children[i].is_bypass() and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
                     if bVerbose:
                         print "Stop: no chance of association by descending", Current_Family_Children[i].get_pvalue()
             if not apChildren:
@@ -1935,7 +2131,7 @@ def hypotheses_testing():
                     #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
                     aOut.append(Current_Family_Children[i])
                     #if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-                    if Current_Family_Children[i].is_bypass(apply_stop_condition, q=fQ) and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
+                    if Current_Family_Children[i].is_bypass() and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
                         if bVerbose:
                             print "Bypass, no hope to find an association in the branch with p-value: ", \
                     aP[i], " and ", len(Current_Family_Children[i].get_children()), \
@@ -2012,7 +2208,7 @@ def hypotheses_testing():
                         #print i, range(len(current_level_tests)), current_level_tests[i]
                         aOut.append(all_performed_tests[i])
                         #if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-                        if all_performed_tests[i].is_bypass(apply_stop_condition, q=fQ) and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition) :
+                        if all_performed_tests[i].is_bypass() and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition) :
                             if bVerbose:
                                 print "Bypass, no hope to find an association in the branch with p-value: ", \
                         aP[i], " and ", len(all_performed_tests[i].get_children()), \
@@ -2101,6 +2297,8 @@ def hypotheses_testing():
                     current_level_tests[i].get_rank() <= max_r_t and\
                     current_level_tests[i].is_representative(pvalue_threshold = config.q, decomp = config.decomposition):
                         number_passed_tests += 1
+                        #print "Left after: ", current_level_tests[i].m_pData[0]
+                        #print "Right after: ", current_level_tests[i].m_pData[1]
                         if bVerbose:
                             current_level_tests[i].report()
                         print "-- associations after fdr correction"
@@ -2109,10 +2307,10 @@ def hypotheses_testing():
                         aFinal.append(current_level_tests[i])
                         #next_level_apChildren.append(current_level_tests[i])
                     else:
-                        if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass(config.apply_stop_condition, q = config.q) and\
-                         current_level_tests[i].is_representative(pvalue_threshold = config.q, decomp = config.decomposition):# and current_level_tests[i].get_significance_status() == None:
+                        if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():# and current_level_tests[i].get_significance_status() == None:
                             current_level_tests[i].set_significance_status(False)
                             aOut.append(current_level_tests[i])
+                            #print "Bypass!!!"
                             if bVerbose:
                                 print "Bypass, no hope to find an association in the branch with p-value: ", \
                                 aP[i], " and ", len(current_level_tests[i].get_children()), \
@@ -2207,7 +2405,7 @@ def hypotheses_testing():
                     end_level_tests.append([Current_Family_Children[i], float(aP[i])])
                     if bVerbose:
                         print "End of branch, leaf!"
-                elif Current_Family_Children[i].is_bypass(apply_stop_condition, q = fQ) and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
+                elif Current_Family_Children[i].is_bypass() and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
                     if bVerbose:
                         print "Bypass, no hope to find an association in the branch with p-value: ", \
                     aP[i], " and ", len(Current_Family_Children[i].get_children()), \

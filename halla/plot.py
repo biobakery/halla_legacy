@@ -402,7 +402,7 @@ def grouped_boxplots2(data, xlabels, file_name ="Grouped_Recall_FDR"):
     #ax.xticks(range(len(xlabels)), xlabels, rotation=90, ha='right')
     
     
-    ax.set(xlabel='Method', ylabel='', axisbelow=True, xticklabels=xlabels)
+    ax.set(xlabel='Method', ylabel='Recall/FDR', axisbelow=True, xticklabels=xlabels)
     #ax.plot([-.05, 5], [alpha, alpha], 'k-', lw=1, color='red')
     plt.tight_layout()
     #ax.grid(axis='y', ls='-', color='white', lw=2)

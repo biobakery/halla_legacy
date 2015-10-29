@@ -245,7 +245,8 @@ def parse_arguments (args):
         default=None,
         help="the number of bins\n[default = None]")
     argp.add_argument(
-        "-s", "--seed",  metavar="<random>",
+        "-s", "--seed",  
+        metavar="<random>",
         type=int,
         default= random.randint(1,10000),
         help="a seed number to make the random permutation reproducible\n[default = random]")
@@ -271,6 +272,8 @@ def set_parameters(args):
     config.apply_stop_condition = args.apply_stop_condition
     config.strDiscretizing = args.strDiscretizing
     config.seed = args.seed
+    config.NPROC = args.nproc
+    config.NBIN = args.nbin
     # If Y was not set - we use X
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  
@@ -295,8 +298,7 @@ def _main():
     check_requirements(args)
     
     # Set the number of processing units available
-    config.NPROC = args.nproc
-    config.NBIN = args.nbin
+    
     #H = store.HAllA(X = None, Y = None)
     set_parameters(args)         
     aaOut = store.run()	

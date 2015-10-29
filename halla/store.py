@@ -36,10 +36,6 @@ from . import logger
 from . import config
 import random
 
-global D1_features_order , D2_features_order 
-D1_features_order  = []
-D2_features_order  = []
-
 
 def _bypass_discretizing():
     if not distance.c_hash_association_method_discretize[config.distance] or  config.strDiscretizing == "none" or\
@@ -127,19 +123,18 @@ def _featurize(strMethod="_discretize"):
 
 def _hclust():
     # print config.meta_feature
-    global D1_features_order
-    tree1, D1_features_order = hierarchy.hclust(config.meta_feature[0], labels=config.aOutName1)
+    config.meta_data_tree = [] 
+    tree1, config.X_features_cluster_order = hierarchy.hclust(config.meta_feature[0], labels=config.aOutName1)
     config.meta_data_tree.append(tree1)
-    #print D1_features_order
-    global D2_features_order
-    tree2, D2_features_order = hierarchy.hclust(config.meta_feature[1] , labels=config.aOutName2)
+    #print config.X_features_cluster_order
+    tree2, config.Y_features_order= hierarchy.hclust(config.meta_feature[1] , labels=config.aOutName2)
     config.meta_data_tree.append(tree2)
     # config.meta_data_tree = config.m( config.meta_feature, lambda x: hclust(x , bTree=True) )
     #print config.meta_data_tree
     return config.meta_data_tree 
 
 def _couple():
-            
+    config.meta_hypothesis_tree = None        
     config.meta_hypothesis_tree = hierarchy.couple_tree(apClusterNode1=[config.meta_data_tree[0]],
             apClusterNode2=[config.meta_data_tree[1]],
             pArray1=config.meta_feature[0], pArray2=config.meta_feature[1])[0]
@@ -148,10 +143,11 @@ def _couple():
     #return config.meta_hypothesis_tree 
 
 def _naive_all_against_all(iIter=100):
+    config.meta_alla = None
     config.meta_alla = hierarchy.naive_all_against_all()
     return config.meta_alla 
 def _hypotheses_testing():
-        
+    config.meta_alla = None    
     fQ = config.q
         
     if config.verbose:
@@ -367,9 +363,8 @@ def _report():
         
     sorted_associations = sorted(config.meta_alla[0], key=lambda x: x.pvalue)
     if config.descending == "AllA":
-        global D1_features_order, D2_features_order
-        D1_features_order  = [i for i in range(len(config.meta_array[0]))]   
-        D2_features_order  = [i for i in range(len(config.meta_array[1]))]         
+        config.X_features_cluster_order  = [i for i in range(len(config.meta_array[0]))]   
+        config.Y_features_order = [i for i in range(len(config.meta_array[1]))]         
     def _plot_associations():
         import pandas as pd    
         association_number = 0
@@ -578,26 +573,25 @@ def _report():
         global associated_feature_Y_indecies
         Ys = list(set(associated_feature_Y_indecies))
         
-        global D1_features_order, D2_features_order
-        D1_features_order = [D1_features_order[i] for i in range (len(D1_features_order))  if D1_features_order[i] in Xs ] 
-        D2_features_order = [D2_features_order[i] for i in range (len(D2_features_order))  if D2_features_order[i] in Ys ] 
+        config.X_features_cluster_order = [config.X_features_cluster_order[i] for i in range (len(config.X_features_cluster_order))  if config.X_features_cluster_order[i] in Xs ] 
+        config.Y_features_order= [config.Y_features_order[i] for i in range (len(config.Y_features_order))  if config.Y_features_order[i] in Ys ] 
         
-        X_labels = np.array([config.aOutName1[i] for i in D1_features_order])
-        Y_labels = np.array([config.aOutName2[i] for i in D2_features_order])
+        X_labels = np.array([config.aOutName1[i] for i in config.X_features_cluster_order])
+        Y_labels = np.array([config.aOutName2[i] for i in config.Y_features_order])
         
         import re
-        X_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', config.aOutName1[i]).replace(' ','_') for i in D1_features_order])
-        Y_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', config.aOutName2[i]).replace(' ','_') for i in D2_features_order])
+        X_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', config.aOutName1[i]).replace(' ','_') for i in config.X_features_cluster_order])
+        Y_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', config.aOutName2[i]).replace(' ','_') for i in config.Y_features_order])
         
-        similarity_score = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))  
-        for i in range(len(D1_features_order)):
-            for j in range(len(D2_features_order)):
-                similarity_score[i][j] = distance.c_hash_metric[config.distance](config.meta_feature[0][D1_features_order[i]], config.meta_feature[1][D2_features_order[j]])
+        similarity_score = np.zeros(shape=(len(config.X_features_cluster_order), len(config.Y_features_order)))  
+        for i in range(len(config.X_features_cluster_order)):
+            for j in range(len(config.Y_features_order)):
+                similarity_score[i][j] = distance.c_hash_metric[config.distance](config.meta_feature[0][config.X_features_cluster_order[i]], config.meta_feature[1][config.Y_features_order[j]])
                 
-        ''''p = np.zeros(shape=(len(D1_features_order), len(D2_features_order))) 
-        for i in range(len(D1_features_order)):
-            for j in range(len(D2_features_order)):
-                p[i][j] = pearsonr(np.array(config.meta_array[0][D1_features_order[i]], dtype=float), np.array(config.meta_array[1][D2_features_order[j]], dtype=float))[0]
+        ''''p = np.zeros(shape=(len(config.X_features_cluster_order), len(config.Y_features_order))) 
+        for i in range(len(config.X_features_cluster_order)):
+            for j in range(len(config.Y_features_order)):
+                p[i][j] = pearsonr(np.array(config.meta_array[0][config.X_features_cluster_order[i]], dtype=float), np.array(config.meta_array[1][config.Y_features_order[j]], dtype=float))[0]
         '''
         def _is_in_an_assciostions(i,j):
             for association in sorted_associations:
@@ -612,16 +606,16 @@ def _report():
             [writer.writerow(r) for r in similarity_score] 
         '''
         
-        anottation_cell = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))                
-        for i in range(len(D1_features_order)):
-            for j in range(len(D2_features_order)):
-                if _is_in_an_assciostions(D1_features_order[i],D2_features_order[j]): #for association in sorted_associations:
+        anottation_cell = np.zeros(shape=(len(config.X_features_cluster_order), len(config.Y_features_order)))                
+        for i in range(len(config.X_features_cluster_order)):
+            for j in range(len(config.Y_features_order)):
+                if _is_in_an_assciostions(config.X_features_cluster_order[i],config.Y_features_order[j]): #for association in sorted_associations:
                     anottation_cell[i][j] = 1
                     
-        circos_tabel = np.zeros(shape=(len(D1_features_order), len(D2_features_order)))
-        for i in range(len(D1_features_order)):
-            for j in range(len(D2_features_order)):
-                if _is_in_an_assciostions(D1_features_order[i],D2_features_order[j]): #for association in sorted_associations:
+        circos_tabel = np.zeros(shape=(len(config.X_features_cluster_order), len(config.Y_features_order)))
+        for i in range(len(config.X_features_cluster_order)):
+            for j in range(len(config.Y_features_order)):
+                if _is_in_an_assciostions(config.X_features_cluster_order[i],config.Y_features_order[j]): #for association in sorted_associations:
                     try:
                         circos_tabel[i][j] = math.fabs(int(similarity_score[i][j]*100))
                     except:
@@ -629,8 +623,8 @@ def _report():
         logger.write_circos_table(circos_tabel, str(config.output_dir)+"/" +"circos_table_"+ config.distance+".txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
         logger.write_table(similarity_score,str(config.output_dir)+"/" + config.distance+"_similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
         logger.write_table(anottation_cell,str(config.output_dir)+"/" + config.distance+"_asscoaitaion_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
-        #anottation_cell = [D1_features_order]
-        #anottation_cell = [ anottation_cell[:][j] for j in D2_features_order]
+        #anottation_cell = [config.X_features_cluster_order]
+        #anottation_cell = [ anottation_cell[:][j] for j in config.Y_features_order]
         #print anottation_cell
         if config.plotting_results:
             print "--- plotting heatmap associations using R ..."
@@ -779,7 +773,7 @@ def run():
     csvw.writerow(["Similarity method: ", config.distance]) 
     csvw.writerow(["q: FDR cut-off : ", config.q]) 
     #csvw.writerow(["r: effect size for robustness : ", config.robustness]) 
-    csvw.writerow(["Applied stop condition : ", config.apply_stop_condition]) 
+    csvw.writerow(["Applied stop condition : ", config.apply_bypass]) 
     csvw.writerow(["Discretizing method : ", config.strDiscretizing])
     csvw.writerow(["Seed number: ", config.seed]) 
     csvw.writerow([])
@@ -800,6 +794,9 @@ def run():
         print("--- %s h:m:s featurize data time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
         #print config.meta_feature
     #plot.heatmap2(pArray1=config.meta_feature[0], pArray2=config.meta_feature[1], xlabels =config.aOutName1, ylabels = config.aOutName2, filename = str(config.output_dir)+'/heatmap2_all' )
+    if config.log_input:
+        logger.write_table(data=config.meta_feature[0], name=config.output_dir+"/X_dataset.txt", rowheader=config.aOutName1 , colheader=None, prefix = "label",  corner = '#', delimiter= '\t')
+        logger.write_table(data=config.meta_feature[1], name=config.output_dir+"/Y_dataset.txt", rowheader=config.aOutName2 , colheader=None, prefix = "label",  corner = '#', delimiter= '\t')
     if config.descending == "AllA":
         print("--- association hypotheses testing is started, this task may take longer ...")
         start_time = time.time()
