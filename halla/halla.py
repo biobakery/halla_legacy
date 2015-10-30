@@ -224,8 +224,8 @@ def parse_arguments (args):
         choices=["equal-area", "jenks", "hclust", "kmeans", "none"],
         help="approach for discretizing continuous data\n[default = equal-area]")
     argp.add_argument(
-        "--apply-stop-condition",
-        dest ="apply_stop_condition", 
+        "--apply-bypass",
+        dest ="apply_bypass", 
         help="stops when q > 1 - p", 
         action="store_true")
     
@@ -269,7 +269,7 @@ def set_parameters(args):
     #config.heatmap_all = args.heatmap_all
     config.descending = args.strDescending
     istm = list()  # X and Y are used to store datasets
-    config.apply_stop_condition = args.apply_stop_condition
+    config.apply_bypass = args.apply_bypass
     config.strDiscretizing = args.strDiscretizing
     config.seed = args.seed
     config.NPROC = args.nproc

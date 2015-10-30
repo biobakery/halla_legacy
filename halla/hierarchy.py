@@ -250,11 +250,11 @@ class Tree():
     
     def is_representative(self, pvalue_threshold, decomp):
         #return True
-        #print "==========================================="
+        print "==========================================="
         #print "Left Exp. Var.: ", self.left_first_rep_variance
-        #print "Left before: ", self.m_pData[0]
+        print "Left before: ", self.m_pData[0]
         #print "Right Exp. Var.: ", self.right_first_rep_variance
-        #print "Right before: ", self.m_pData[1]
+        print "Right before: ", self.m_pData[1]
         #print "Correlation with left rep:", [scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.left_rep) for i in range(len(self.m_pData[0]))]
         #print "Correlation with right rep:", [scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep) for i in range(len(self.m_pData[1]))]
         approach = 'effect_size'
@@ -427,7 +427,7 @@ class Tree():
                     temp_right_loading.append(i)
                     #print "right:", self.get_right_loading()
                     if counter > (number_right_features/(math.log(number_right_features,2))) or (counter >= number_right_features):#math.log(number_right_features,2)):
-                        #print "#Outlier right cluster:",counter
+                        print "#Outlier right cluster:",counter
                         return False
             
             #self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
@@ -442,7 +442,7 @@ class Tree():
                     #print "after:", temp_left_loading
                     counter += 1
                     if counter > (number_left_features/(math.log(number_left_features,2))) or (counter >= number_left_features): # (number_left_features/2):#math.log(number_left_features,2)):
-                        #print "#Outlier left cluster:",counter
+                        print "#Outlier left cluster:",counter
                         return False
 
             #self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
@@ -453,11 +453,11 @@ class Tree():
             return True 
     def is_representative_to_bypass(self):
         #return True
-        #print "===================bypass check========================"
+        print "===================bypass check========================"
         #print "Left Exp. Var.: ", self.left_first_rep_variance
-        #print "Left before: ", self.m_pData[0]
+        print "Left before: ", self.m_pData[0]
         #print "Right Exp. Var.: ", self.right_first_rep_variance
-        #print "Right before: ", self.m_pData[1]
+        print "Right before: ", self.m_pData[1]
         #print "Correlation with left rep:", [scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.left_rep) for i in range(len(self.m_pData[0]))]
         #print "Correlation with right rep:", [scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep) for i in range(len(self.m_pData[1]))]
         approach = 'effect_size'
@@ -479,7 +479,7 @@ class Tree():
         right_all_sim = [pMe(config.meta_feature[1][self.m_pData[1][i]], config.meta_feature[1][self.m_pData[1][j]]) for i,j in product(range(len(self.m_pData[1])), range(len(self.m_pData[1])))]
         diam_A_r = ((1.0 - math.fabs(min(left_all_sim))))# - math.fabs((1.0 - max(left_all_sim))))
         diam_B_r = ((1.0 - math.fabs(min(right_all_sim))))# - math.fabs((1.0 - max(right_all_sim))))
-        #print "dime_A_r: ", diam_A_r,"  ", "dime_B_r: ", diam_B_r, "diam_Ar_Br: ", diam_Ar_Br
+        print "dime_A_r: ", diam_A_r,"  ", "dime_B_r: ", diam_B_r, "diam_Ar_Br: ", diam_Ar_Br
         stop_threshold = (2.0 * diam_Ar_Br)/(diam_A_r + diam_B_r)
         if stop_threshold > 4.0:
             print stop_threshold
@@ -495,7 +495,7 @@ class Tree():
                 temp_right_loading.append(i)
                 #print "right:", self.get_right_loading()
                 if counter >= (number_right_features/(math.log(number_right_features,2))+1):#math.log(number_right_features,2)):
-                   #print "#Outlier right cluster:",counter
+                    print "#Outlier right cluster:",counter
                     return False
         #self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
         #print temp_right_loading
@@ -509,7 +509,7 @@ class Tree():
                 #print "after:", temp_left_loading
                 counter += 1
                 if counter >= (number_left_features/(math.log(number_left_features,2))+1): # (number_left_features/2):#math.log(number_left_features,2)):
-                    #print "#Outlier left cluster:",counter
+                    print "#Outlier left cluster:",counter
                     return False
 
         #self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
@@ -521,7 +521,7 @@ class Tree():
         if config.apply_bypass:
             if self.is_representative_to_bypass():# or\  # the same as 1-p<q ~ p>1-q
                 #self.get_qvalue() > (1.0 - self.get_pvalue()) and self.is_representative(pvalue_threshold = config.q, decomp = config.decomposition)
-                #print "q: ", self.get_qvalue()
+                print "q: ", self.get_qvalue()
             #(self.get_left_first_rep_variance() > .9 and \
             #self.get_right_first_rep_variance()> .9):
                 #print self.get_left_loading(), self.get_data()[0]
@@ -1771,6 +1771,34 @@ def naive_all_against_all():
                 number_end_right_pvalues +=1 
         print  "number_end_right_pvalues: ", number_end_right_pvalues
         for i in range(len(tests)):
+            if aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
+                max_r_t = pRank[i]
+                #print "max_r_t", max_r_t
+        for i in range(len(aP)):
+            if pRank[i] <= max_r_t:
+                print "-- association after BH fdr controlling"
+                if bVerbose:
+                    tests[i].report()
+                aOut.append(tests[i])
+                #aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+                aFinal.append(tests[i])
+            else :
+                #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
+                aOut.append(tests[i])
+    elif fdr == 'RH':
+        aP_adjusted, pRank, q= stats.p_adjust(aP, fQ)
+        for i in range(len(tests)):
+            tests[i].set_qvalue(aP_adjusted[i])
+            tests[i].set_rank(pRank[i])
+        max_r_t = 0
+                #print "aP", aP
+                #print "aP_adjusted: ", aP_adjusted
+        number_end_right_pvalues = 0
+        for i in range(len(tests)):
+            if aP[i] >= 1.0 - aP_adjusted[i] or aP[i] <= aP_adjusted[i]:
+                number_end_right_pvalues +=1 
+        print  "number_end_right_pvalues: ", number_end_right_pvalues
+        for i in range(len(tests)):
             if aP[i] <= (aP_adjusted[i]*len(tests)/(len(tests)- number_end_right_pvalues)) and max_r_t <= pRank[i]:
                 max_r_t = pRank[i]
                 #print "max_r_t", max_r_t
@@ -1785,6 +1813,8 @@ def naive_all_against_all():
             else :
                 #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
                 aOut.append(tests[i])
+    
+    
     #aOut_header = zip(*aOut)[0]
     #aOut_adjusted = stats.p_adjust(zip(*aOut)[1])
 
@@ -2297,8 +2327,8 @@ def hypotheses_testing():
                     current_level_tests[i].get_rank() <= max_r_t and\
                     current_level_tests[i].is_representative(pvalue_threshold = config.q, decomp = config.decomposition):
                         number_passed_tests += 1
-                        #print "Left after: ", current_level_tests[i].m_pData[0]
-                        #print "Right after: ", current_level_tests[i].m_pData[1]
+                        print "Left after: ", current_level_tests[i].m_pData[0]
+                        print "Right after: ", current_level_tests[i].m_pData[1]
                         if bVerbose:
                             current_level_tests[i].report()
                         print "-- associations after fdr correction"
@@ -2310,7 +2340,7 @@ def hypotheses_testing():
                         if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():# and current_level_tests[i].get_significance_status() == None:
                             current_level_tests[i].set_significance_status(False)
                             aOut.append(current_level_tests[i])
-                            #print "Bypass!!!"
+                            print "Bypass!!!"
                             if bVerbose:
                                 print "Bypass, no hope to find an association in the branch with p-value: ", \
                                 aP[i], " and ", len(current_level_tests[i].get_children()), \
