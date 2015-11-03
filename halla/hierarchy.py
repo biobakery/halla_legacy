@@ -429,7 +429,7 @@ class Tree():
                     counter += 1
                     temp_right_loading.append(i)
                     #print "right:", self.get_right_loading()
-                    if counter > (number_right_features/(math.log(number_right_features,2))) or (counter >= number_right_features):#math.log(number_right_features,2)):
+                    if (counter >= number_right_features) or counter > (number_right_features/(math.log(number_right_features,2))):#math.log(number_right_features,2)):
                         if config.verbose == 'DEBUG':
                             print "#Outlier right cluster:",counter
                         return False
@@ -446,7 +446,7 @@ class Tree():
                     temp_left_loading.append(i)
                     #print "after:", temp_left_loading
                     counter += 1
-                    if counter > (number_left_features/(math.log(number_left_features,2))) or (counter >= number_left_features): # (number_left_features/2):#math.log(number_left_features,2)):
+                    if (counter >= number_left_features) or counter > (number_left_features/(math.log(number_left_features,2))): # (number_left_features/2):#math.log(number_left_features,2)):
                         if config.verbose == 'DEBUG':
                             print "#Outlier left cluster:",counter
                         return False
