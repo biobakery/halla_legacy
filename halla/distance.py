@@ -301,11 +301,12 @@ def mic (X, Y):
     except (ImportError):
         sys.exit("CRITICAL ERROR:2 Unable to import minepy package." + 
             " Please check your install.") 
-    if X.ndim > 1: 
+    '''if X.ndim > 1: 
         X = X[0]
         #print X
     if Y.ndim > 1:
         Y = Y[0]
+        '''
     mine = MINE(alpha=0.6, c=15)
     mine.compute_score(X, Y)
     # print "MIC:" , mine.mic()

@@ -281,7 +281,7 @@ def kpca(pArray, iComponents=1):
 
 	kpca = KernelPCA(kernel="rbf", fit_inverse_transform=True, gamma=10)
 	
-	return kpca.fit_transform(pArray.T).T 
+	return kpca.fit_transform(pArray.T).T [0]
 def ica(pArray, iComponents=1):
 	 """
 	 Input: N x D matrix 
