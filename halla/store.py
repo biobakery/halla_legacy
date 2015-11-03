@@ -150,7 +150,7 @@ def _hypotheses_testing():
     config.meta_alla = None    
     fQ = config.q
         
-    if config.verbose:
+    if config.verbose == 'INFO':
         print ("HAllA PROMPT: q value", fQ)
         print ("q value is", fQ) 
     
@@ -188,7 +188,7 @@ def _summary_statistics(strMethod=None):
     Z_final_dummy = [-1.0 * (len(line[0][0]) + len(line[0][1])) for line in Z_final]
     args_sorted = np.argsort(Z_final_dummy)
     Z_final = Z_final[args_sorted]
-    if config.verbose:
+    if config.verbose == 'INFO':
         print (Z_final) 
     # assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
     def __set_outcome(Z_final):
@@ -197,7 +197,7 @@ def _summary_statistics(strMethod=None):
         config.outcome = np.zeros((len(config.meta_feature[0]),len(config.meta_feature[1])))
         
         for aLine in Z_final:
-            if config.verbose:
+            if config.verbose == 'INFO':
                 print (aLine) 
             
             aaBag, _, _ = aLine
@@ -213,7 +213,7 @@ def _summary_statistics(strMethod=None):
         config.pvalues = np.zeros((len(config.meta_feature[0]),len(config.meta_feature[1])))
         
         for aLine in Z_all:
-            if config.verbose:
+            if config.verbose == 'INFO':
                 print (aLine) 
             
             aaBag, pvalue, _ = aLine
@@ -237,7 +237,7 @@ def _summary_statistics(strMethod=None):
         """
 
         for aLine in _Z:
-            if config.verbose:
+            if config.verbose == 'INFO':
                 print (aLine) 
             
             aaBag, fAssoc, fP_adjust = aLine
@@ -259,7 +259,7 @@ def _summary_statistics(strMethod=None):
         """
 
         for aLine in _Z:
-            if config.verbose:
+            if config.verbose == 'INFO':
                 print (aLine) 
             
             aaBag, fAssoc, P_adjust = aLine
@@ -269,7 +269,7 @@ def _summary_statistics(strMethod=None):
     __set_outcome(Z_final)
     __set_pvalues(Z_all)
     if strMethod == "final":
-        if config.verbose:
+        if config.verbose == 'INFO':
             print ("Using only final p-values")
         __get_conditional_pval_from_bags(Z_final)
         assert(S.any())
@@ -277,7 +277,7 @@ def _summary_statistics(strMethod=None):
         return config.meta_summary
 
     elif strMethod == "all":
-        if config.verbose:
+        if config.verbose == 'INFO':
             print ("Using all p-values")
         __get_conditional_pval_from_bags(Z_all)
         assert(S.any())

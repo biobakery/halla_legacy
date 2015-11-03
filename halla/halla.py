@@ -205,7 +205,8 @@ def parse_arguments (args):
     '''
     argp.add_argument(
         "-v", "--verbose",
-        action="store_true",
+        dest="verbose",
+        default=config.verbose,
         help="additional output is printed")
     
     argp.add_argument(

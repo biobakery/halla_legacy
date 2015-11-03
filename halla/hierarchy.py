@@ -250,11 +250,12 @@ class Tree():
     
     def is_representative(self, pvalue_threshold, decomp):
         #return True
-        print "==========================================="
-        #print "Left Exp. Var.: ", self.left_first_rep_variance
-        print "Left before: ", self.m_pData[0]
-        #print "Right Exp. Var.: ", self.right_first_rep_variance
-        print "Right before: ", self.m_pData[1]
+        if config.verbose == 'DEBUG':
+            print "==========================================="
+            #print "Left Exp. Var.: ", self.left_first_rep_variance
+            print "Left before: ", self.m_pData[0]
+            #print "Right Exp. Var.: ", self.right_first_rep_variance
+            print "Right before: ", self.m_pData[1]
         #print "Correlation with left rep:", [scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.left_rep) for i in range(len(self.m_pData[0]))]
         #print "Correlation with right rep:", [scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep) for i in range(len(self.m_pData[1]))]
         approach = 'effect_size'
@@ -350,7 +351,7 @@ class Tree():
                 #print "Right before: ", self.m_pData[1]
                 self.right_loading = [i for j, i in enumerate(self.right_loading) if j not in temp_right_loading]
                 self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
-                print self.right_loading
+                #print self.right_loading
                 #print "Right after: ", self.m_pData[1]
             counter = 0
             if len(self.get_left_loading()) >1 and self.left_first_rep_variance<.5:
@@ -376,7 +377,7 @@ class Tree():
                 #print "after left features:", [self.left_loading[i] for i in temp_left_loading]
                 self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
                 self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
-                print self.left_loading
+                #print self.left_loading
                 #print "Left after: ", self.m_pData[0]
             return True
         elif decomp in ['medoid','pca', 'mca'] and approach != 'effect_size':
@@ -433,7 +434,8 @@ class Tree():
                             print "#Outlier right cluster:",counter
                         return False
             
-            #self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
+            self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
+            self.left_loading = [i for j, i in enumerate(self.right_loading) if j not in temp_right_loading]
             #print temp_right_loading
             #print "Right after: ", self.m_pData[1]
             counter = 0
@@ -449,20 +451,14 @@ class Tree():
                             print "#Outlier left cluster:",counter
                         return False
 
-            #self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
-            #self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
+            self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
+            self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
             #print temp_left_loading
             return True
         else:
             return True 
     def is_representative_to_bypass(self):
         #return True
-        if config.verbose == 'DEBUG':
-            print "===================bypass check========================"
-            #print "Left Exp. Var.: ", self.left_first_rep_variance
-            print "Left before: ", self.m_pData[0]
-            #print "Right Exp. Var.: ", self.right_first_rep_variance
-            print "Right before: ", self.m_pData[1]
         #print "Correlation with left rep:", [scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.left_rep) for i in range(len(self.m_pData[0]))]
         #print "Correlation with right rep:", [scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep) for i in range(len(self.m_pData[1]))]
         approach = 'effect_size'
@@ -484,15 +480,19 @@ class Tree():
         right_all_sim = [pMe(config.meta_feature[1][self.m_pData[1][i]], config.meta_feature[1][self.m_pData[1][j]]) for i,j in product(range(len(self.m_pData[1])), range(len(self.m_pData[1])))]
         diam_A_r = ((1.0 - math.fabs(min(left_all_sim))))# - math.fabs((1.0 - max(left_all_sim))))
         diam_B_r = ((1.0 - math.fabs(min(right_all_sim))))# - math.fabs((1.0 - max(right_all_sim))))
-        print "dime_A_r: ", diam_A_r,"  ", "dime_B_r: ", diam_B_r, "diam_Ar_Br: ", diam_Ar_Br
+        if config.verbose == 'DEBUG':
+            print "===================bypass check========================"
+            #print "Left Exp. Var.: ", self.left_first_rep_variance
+            print "Left before: ", self.m_pData[0]
+            #print "Right Exp. Var.: ", self.right_first_rep_variance
+            print "Right before: ", self.m_pData[1]
+            print "dime_A_r: ", diam_A_r,"  ", "dime_B_r: ", diam_B_r, "diam_Ar_Br: ", diam_Ar_Br
         if diam_A_r + diam_B_r == 0:
             return True
         stop_threshold = (2.0 * diam_Ar_Br)/(diam_A_r + diam_B_r)
-        if stop_threshold > 4.0:
-            print stop_threshold
+        if stop_threshold >= 4.0:
             return True
         else:
-            print stop_threshold
             return False
         left_rep_similarity_to_right_cluster = np.median([pMe(self.left_rep, config.meta_feature[1][self.m_pData[1][i]]) for i in range(len(self.m_pData[1]))])
         right_rep_similarity_to_left_cluster = np.median([pMe(self.right_rep, config.meta_feature[0][self.m_pData[0][i]]) for i in range(len(self.m_pData[0]))])
@@ -947,7 +947,7 @@ def hclust(pArray, labels):
     # print pos.distance()
     import scipy.cluster.hierarchy as sch
     #print sch.dendrogram(Z, orientation='right')['leaves']
-    return to_tree(Z) if bTree else Z, sch.dendrogram(Z, orientation='right')['leaves'] 
+    return to_tree(Z) if (bTree and len(pArray)>1) else Z, sch.dendrogram(Z, orientation='right')['leaves'] if len(pArray)>1 else labels[0]
 
 
 def dendrogram(Z):
@@ -1712,7 +1712,6 @@ def naive_all_against_all():
     method = config.randomization_method
     metric = config.distance
     fQ = config.q
-    bVerbose =  config.verbose
     iIter= config.iterations
     discretize_style = config.strDiscretizing
     pHashMethods = {"permutation" : stats.permutation_test,
@@ -1758,7 +1757,7 @@ def naive_all_against_all():
         if fdr == "simple":
             if fP <= fQ:
                 print "-- association after BH fdr controlling"
-                if bVerbose:
+                if config.verbose == 'INFO':
                     tests[t].report()
                 aOut.append(tests[t])
                 #aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
@@ -1795,7 +1794,7 @@ def naive_all_against_all():
         for i in range(len(aP)):
             if pRank[i] <= max_r_t:
                 print "-- association after BH fdr controlling"
-                if bVerbose:
+                if config.verbose == 'INFO':
                     tests[i].report()
                 aOut.append(tests[i])
                 #aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
@@ -1823,7 +1822,7 @@ def naive_all_against_all():
         for i in range(len(aP)):
             if pRank[i] <= max_r_t:
                 print "-- association after RH fdr controlling"
-                if bVerbose:
+                if config.verbose == 'INFO':
                     tests[i].report()
                 aOut.append(tests[i])
                 #aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
@@ -2050,7 +2049,7 @@ def hypotheses_testing():
     """
     X, Y = pArray1, pArray2 
 
-    if config.verbose:
+    if config.verbose == 'INFO':
         print reduce_tree_by_layer([pTree])
 
     def _start_parameter_to_iskip(start_parameter):
@@ -2118,14 +2117,14 @@ def hypotheses_testing():
                     aFinal.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_pvalue(), Current_Family_Children[i].get_pvalue()])
                 elif Current_Family_Children[i].get_pvalue() > fQ and Current_Family_Children[i].get_pvalue() <= 1.0 - fQ:
                     next_level_apChildren.append(Current_Family_Children[i])
-                    if bVerbose: 
+                    if config.verbose == 'INFO': 
                         print "Conitinue, gray area with p-value:", Current_Family_Children[i].get_pvalue()
                 elif Current_Family_Children[i].is_bypass() and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
-                    if bVerbose:
+                    if config.verbose == 'INFO':
                         print "Stop: no chance of association by descending", Current_Family_Children[i].get_pvalue()
             if not apChildren:
-                if bVerbose:
-                    print "Hypotheses testing level ", level, " is finished."
+                #if config.verbose == 'INFO':
+                #    print "Hypotheses testing level ", level, " is finished."
                 # number_performed_test += len(next_level_apChildren)
                 apChildren = next_level_apChildren
                 level += 1
@@ -2169,7 +2168,7 @@ def hypotheses_testing():
                 if pRank[i] <= max_r_t and Current_Family_Children[i].is_representative(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
                     number_passed_tests += 1
                     print "-- associations after fdr correction"
-                    if bVerbose:
+                    if config.verbose == 'INFO':
                         Current_Family_Children[i].report()
                     #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
                     aOut.append(Current_Family_Children[i])
@@ -2180,23 +2179,23 @@ def hypotheses_testing():
                     aOut.append(Current_Family_Children[i])
                     #if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
                     if Current_Family_Children[i].is_bypass() and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
-                        if bVerbose:
+                        if config.verbose == 'INFO':
                             print "Bypass, no hope to find an association in the branch with p-value: ", \
                     aP[i], " and ", len(Current_Family_Children[i].get_children()), \
                      " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
                       "   ", Current_Family_Children[i].get_data()[1]
                         
                     elif Current_Family_Children[i].is_leaf():
-                        if bVerbose:
+                        if config.verbose == 'INFO':
                             print "End of branch, leaf!"
                         # aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
                     else:
-                        if bVerbose:
+                        if config.verbose == 'INFO':
                             print "Gray area with p-value:", aP[i]
                         next_level_apChildren.append(Current_Family_Children[i])
                     
             if not apChildren:
-                if bVerbose:
+                if config.verbose == 'INFO':
                     print "Family Hypotheses testing at level ", level, " is finished."
                 print "Family hypotheses testing at level ", level, " is finished."
                 # number_performed_test += len(next_level_apChildren)
@@ -2244,7 +2243,7 @@ def hypotheses_testing():
                         all_performed_tests[i].already_passed = True
                         all_performed_tests[i].already_tested = True
                         print "-- associations after fdr correction"
-                        if bVerbose:
+                        if config.verbose == 'INFO':
                             all_performed_tests[i].report()
                         #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
                         aOut.append(all_performed_tests[i])
@@ -2257,23 +2256,23 @@ def hypotheses_testing():
                         aOut.append(all_performed_tests[i])
                         #if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
                         if all_performed_tests[i].is_bypass() and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition) :
-                            if bVerbose:
+                            if config.verbose == 'INFO':
                                 print "Bypass, no hope to find an association in the branch with p-value: ", \
                         aP[i], " and ", len(all_performed_tests[i].get_children()), \
                          " sub-hypotheses.", all_performed_tests[i].get_data()[0], \
                           "   ", all_performed_tests[i].get_data()[1]
                             
                         elif all_performed_tests[i].is_leaf():
-                            if bVerbose:
+                            if config.verbose == 'INFO':
                                 print "End of branch, leaf!"
                             # aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
                         else:
-                            if bVerbose:
+                            if config.verbose == 'INFO':
                                 print "Gray area with p-value:", aP[i]
                             next_level_apChildren.append(all_performed_tests[i])
                         
-                        if bVerbose:
-                            print "Hypotheses testing level ", level, " is finished."
+                        #if config.verbose == 'INFO':
+                         #   print "Hypotheses testing level ", level, " is finished."
                         # number_performed_test += len(next_level_apChildren)
                 apChildren = next_level_apChildren
                 #print "level: ", level, "#test: ", number_performed_tests
@@ -2287,7 +2286,6 @@ def hypotheses_testing():
         return aFinal, aOut
 
     def _bh_level_testing():
-        bVerbose = config.verbose
         apChildren = [pTree]
         level = 1
         number_performed_tests = 0 
@@ -2352,9 +2350,10 @@ def hypotheses_testing():
                     current_level_tests[i].get_rank() <= max_r_t and\
                     current_level_tests[i].is_representative(pvalue_threshold = config.q, decomp = config.decomposition):
                         number_passed_tests += 1
-                        print "Left after: ", current_level_tests[i].m_pData[0]
-                        print "Right after: ", current_level_tests[i].m_pData[1]
-                        if bVerbose:
+                        if config.verbose == 'DEBUG':
+                            print "Left after: ", current_level_tests[i].m_pData[0]
+                            print "Right after: ", current_level_tests[i].m_pData[1]
+                        if config.verbose == 'INFO':
                             current_level_tests[i].report()
                         print "-- associations after fdr correction"
                         current_level_tests[i].set_significance_status(True)
@@ -2365,8 +2364,9 @@ def hypotheses_testing():
                         if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():# and current_level_tests[i].get_significance_status() == None:
                             current_level_tests[i].set_significance_status(False)
                             aOut.append(current_level_tests[i])
-                            print "Bypass!!!"
-                            if bVerbose:
+                            if config.verbose == 'DEBUG':
+                                print "Bypass!!!"
+                            if config.verbose == 'INFO':
                                 print "Bypass, no hope to find an association in the branch with p-value: ", \
                                 aP[i], " and ", len(current_level_tests[i].get_children()), \
                                 " sub-hypotheses.", current_level_tests[i].get_data()[0], \
@@ -2374,18 +2374,18 @@ def hypotheses_testing():
                             #next_level_apChildren.append(current_level_tests[i])
                             
                         elif current_level_tests[i].is_leaf():
-                            if bVerbose:
+                            if config.verbose == 'INFO':
                                 print "End of branch, leaf!"
                             if current_level_tests[i].get_significance_status() == None:
                                 current_level_tests[i].set_significance_status(False)
                                 aOut.append(current_level_tests[i])
                             #next_level_apChildren.append(current_level_tests[i])
-                        else:
-                            if bVerbose:
-                                print "Gray area with p-value:", aP[i]
+                        #else:
+                            #if config.verbose == 'INFO':
+                                #print "Gray area with p-value:", aP[i]
                             #next_level_apChildren.append(current_level_tests[i])
                         
-                        if bVerbose:
+                        if config.verbose == 'INFO':
                             print "Hypotheses testing level ", level, " is finished."                        
             #return aFinal, aOut                
             apChildren = current_level_tests #next_level_apChildren #
@@ -2458,21 +2458,21 @@ def hypotheses_testing():
                     round1_passed_tests.append([Current_Family_Children[i], float(aP[i])])
                 elif Current_Family_Children[i].is_leaf():
                     end_level_tests.append([Current_Family_Children[i], float(aP[i])])
-                    if bVerbose:
+                    if config.verbose == 'INFO':
                         print "End of branch, leaf!"
                 elif Current_Family_Children[i].is_bypass() and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
-                    if bVerbose:
+                    if config.verbose == 'INFO':
                         print "Bypass, no hope to find an association in the branch with p-value: ", \
                     aP[i], " and ", len(Current_Family_Children[i].get_children()), \
                      " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
                       "   ", Current_Family_Children[i].get_data()[1]
                 else:
-                    if bVerbose:
+                    if config.verbose == 'INFO':
                         print "Gray area with p-value:", aP[i]
                     next_level_apChildren.append(Current_Family_Children[i])
                 
             if not apChildren:
-                if bVerbose:
+                if config.verbose == 'INFO':
                     print "Hypotheses testing level ", level, " is finished.", "number of hypotheses in the next level: ", len(next_level_apChildren)
                 apChildren = next_level_apChildren
                 level += 1

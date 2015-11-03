@@ -754,7 +754,7 @@ def permutation_test_pvalue(X, Y, metric, seed, iIter=1000):
 	# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
 	
 	fP = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
-	fp = estimate_p_value(fAssociation, aDist)
+	#fp = estimate_p_value(fAssociation, aDist)
 	#num_exceedances = _calculate_num_exceedances(fAssociation, aDist)
 	#new_fP = _estimate_p_value(num_exceedances, len(aDist))
 	#print "Estimated PValue:",new_fP, "Pvalue_perm:", fP
