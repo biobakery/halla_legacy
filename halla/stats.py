@@ -31,7 +31,27 @@ except ImportError:
 # External dependencies 
 # from scipy.stats import percentileofscore
 # ML plug-in 
-# Internal dependencies 
+# Internal dependencies
+def pvalues2qvalues ( pvalues, adjusted=False ):
+    n = len( pvalues )
+    # after sorting, index[i] is the original index of the ith-ranked value
+    index = range( n )
+    index = sorted( index, key=lambda i: pvalues[i] )
+    pvalues = sorted( pvalues )
+    qvalues = [pvalues[i-1] * n / i for i in range( 1, n+1 )]
+    # adjust qvalues to enforce monotonic behavior?
+    # q( i ) = min( q( i..n ) )
+    if adjusted:
+        qvalues.reverse()
+        for i in range( 1, n ):
+            if qvalues[i] > qvalues[i-1]:
+                qvalues[i] = qvalues[i-1]
+        qvalues.reverse()
+    # rebuild qvalues in the original order
+    ordered_qvalues = [None for q in qvalues]
+    for i, q in enumerate( qvalues ):
+        ordered_qvalues[index[i]] = q
+    return ordered_qvalues 
 def fpr_tpr(condition=None, outcome=None):
 	condition_negative = numpy.where(condition < .45, 1, 0).sum();  # FP + TN
 	conditon_positive = numpy.where(condition >= .45, 1, 0).sum();  # TP + FN
@@ -625,6 +645,33 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 	assert(fP <= 1.0)
 
 	return fP
+def estimate_p_value(observed_value, random_distribution):
+    """Estimate the p-value for a permutation test.
+
+    The estimated p-value is simply `M / N`, where `M` is the number of
+    exceedances, and `M > 10`, and `N` is the number of permutations
+    performed to this point (rather than the total number of
+    permutations to be performed, or possible). For further details, see
+    Knijnenburg et al. [1]
+
+    :Parameters:
+    - `num_exceedances`: the number of values from the random
+      distribution that exceeded the observed value
+    - `num_permutations`: the number of permutations performed prior to
+      estimation
+
+    """
+    # The most precise a p-value we can predict is not 0, but 1 / N
+	# where N is the number of permutations.
+    num_permutations = len(random_distribution)
+    M = num_exceedances = len([score for score in random_distribution
+            if score >= observed_value]) 
+    if M > 10:
+        return float(num_exceedances) / num_permutations
+    else:
+    	#from scipy.stats import genpareto
+    	#genpareto.cdf(random_distribution, observed_value)
+        return float(num_exceedances) / num_permutations
 def permutation_test_pvalue(X, Y, metric, seed, iIter=1000):
 	 
 	strMetric = metric 
@@ -643,7 +690,23 @@ def permutation_test_pvalue(X, Y, metric, seed, iIter=1000):
 	fP = 1.0 
 	# print left_rep_variance, right_rep_variance, fAssociation
 	#### Perform Permutation 
+	def _calculate_num_exceedances(observed_value, random_distribution):
+	    """Determines the number of values from a random distribution which
+	    exceed or equal the observed value.
 	
+	    :Parameters:
+	    - `observed_value`: the value that was calculated from the original
+	      data
+	    - `random_distribution`: an iterable of values computed from
+	      randomized data
+	
+	    """
+	    num_exceedances = len([score for score in random_distribution
+	            if score >= observed_value])
+	    return num_exceedances
+
+
+	        	
 	def _calculate_pvalue(iter):
 		fPercentile = percentileofscore(aDist, fAssociation, kind = 'strict')#, kind="mean")  # #source: Good 2000  
 	# ## \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
@@ -651,9 +714,10 @@ def permutation_test_pvalue(X, Y, metric, seed, iIter=1000):
 	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
 	# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
 
-		fP = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
-		return fP
-	
+		pval = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
+		return pval
+	#new_fP2 = 0.0
+	#new_fP =0.0
 	iter = iIter
 	for i in xrange(iIter):
 		numpy.random.seed(i+seed)
@@ -670,13 +734,16 @@ def permutation_test_pvalue(X, Y, metric, seed, iIter=1000):
 		fAssociation_permuted = math.fabs(pMe(X, permuted_Y))  
 		aDist.append(fAssociation_permuted)
 		if i % 50 == 0:
-			new_fP = _calculate_pvalue(i)
-			if new_fP > fP:
+			new_fP2 = _calculate_pvalue(i)
+			#num_exceedances = _calculate_num_exceedances(fAssociation_permuted, aDist)
+			#new_fP = _estimate_p_value(num_exceedances, len(aDist))
+			
+			if new_fP2 > fP:
 				
 				#print "Break before the end of permutation iterations"
 				break
 			else: 
-				fP = new_fP
+				fP = new_fP2
 
 		# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	
@@ -685,8 +752,21 @@ def permutation_test_pvalue(X, Y, metric, seed, iIter=1000):
 	# ## k number of iterations, \hat{X} is randomized version of X 
 	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
 	# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
-
+	
 	fP = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
+	fp = estimate_p_value(fAssociation, aDist)
+	#num_exceedances = _calculate_num_exceedances(fAssociation, aDist)
+	#new_fP = _estimate_p_value(num_exceedances, len(aDist))
+	#print "Estimated PValue:",new_fP, "Pvalue_perm:", fP
+	'''import matplotlib.pyplot as plt
+	print sim_score, fP 
+	fig, ax = plt.subplots(1, 1)
+	ax.hist(aDist, normed=True, histtype='stepfilled', alpha=0.2)
+	ax.legend(loc='best', frameon=False)
+	plt.savefig("permut.pdf")
+	if fP < 0.001:
+		exit()
+	'''
 	return fP	
 def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000, seed = False, discretize_style = 'equal-area'):
 	"""

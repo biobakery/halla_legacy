@@ -24,14 +24,14 @@ NBIN = None # number of bins specified by user
 NPROC = 1 # number of threads to use 
 
 distance = "nmi"
-decomposition = "pca" 
+decomposition = "medoid" 
 fdr_function = "BHL"
 q = .2  
 iterations = 1000
 p_adjust_method = "BHL"
 randomization_method = "permutation"  # method to generate error bars 
 sstrStep = "uniform"
-verbose = False
+verbose = 'CRITICAL' #"DEBUG","INFO","WARNING","ERROR","CRITICAL"
 descending = "HAllA" 
     
 summary_method = "final"
@@ -39,7 +39,7 @@ output_dir = "./"
 log_input = True
 plotting_results = False
 strDiscretizing = 'equal-area'
-apply_bypass = False
+apply_bypass = True
 seed = random.randint(1,10000)        #==================================================================#
 # Mutable Meta Objects  
 #==================================================================#

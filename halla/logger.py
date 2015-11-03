@@ -69,7 +69,7 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
     a file tabdelimated file 
     
     '''
-    if data == None:
+    if data is None:
     	print "Null input for writing table"
     	return
     f = open(name, 'w')

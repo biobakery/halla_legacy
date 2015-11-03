@@ -192,6 +192,8 @@ def _summary_statistics(strMethod=None):
         print (Z_final) 
     # assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
     def __set_outcome(Z_final):
+        #all_associations = 0.0
+        #intersection_1_2_count = 0.0
         config.outcome = np.zeros((len(config.meta_feature[0]),len(config.meta_feature[1])))
         
         for aLine in Z_final:
@@ -199,9 +201,14 @@ def _summary_statistics(strMethod=None):
                 print (aLine) 
             
             aaBag, _, _ = aLine
-            listBag1, listBag2 = aaBag     
+            listBag1, listBag2 = aaBag 
+            #intersection_1_2 = [val for val in listBag1 if val in listBag2]
+            #all_associations += 1.0
+            #if len(intersection_1_2) < (len(listBag1)/2.0) and len(intersection_1_2) < (len(listBag2)/2.0):
+                  #intersection_1_2_count += 1 
             for i, j in itertools.product(listBag1, listBag2):
-                config.outcome[i][j] = 1.0 
+                config.outcome[i][j] = 1.0
+        #print "FDR= ", intersection_1_2_count/all_associations 
     def __set_pvalues(Z_all):
         config.pvalues = np.zeros((len(config.meta_feature[0]),len(config.meta_feature[1])))
         
@@ -308,7 +315,7 @@ def _report():
         output_file_all  = open(str(config.output_dir)+'/all_association_results_one_by_one.txt', 'w')
         csvw = csv.writer(output_file_all, csv.excel_tab, delimiter='\t')
         #csvw.writerow(["Decomposition method: ", config.decomposition  +"-"+ config.distance , "q value: " + str(config.q), "metric " +config.distance])
-        csvw.writerow(["First Dataset", "Second Dataset", "nominal-pvalue", "adjusted-pvalue"])
+        csvw.writerow(["First Dataset", "Second Dataset", "p-value", "q-value"])
 
         for line in aaOut:
             iX, iY = line[0]
@@ -324,7 +331,7 @@ def _report():
         output_file_associations  = open(str(config.output_dir)+'/associations.txt', 'w')
         bcsvw = csv.writer(output_file_associations, csv.excel_tab, delimiter='\t')
         #bcsvw.writerow(["Method: " + config.decomposition +"-"+ config.distance , "q value: " + str(config.q), "metric " + config.distance])
-        bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster", "Clusters Second Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
+        bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster", "Clusters Second Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster", "p-value", "q-value", "Similarity score between Clusters"])
 
         sorted_associations = sorted(config.meta_alla[0], key=lambda x: x.pvalue)
         for association in sorted_associations:
@@ -371,7 +378,7 @@ def _report():
         #output_file_associations  = open(str(config.output_dir)+'/associations.txt', 'w')
         #bcsvw = csv.writer(output_file_associations, csv.excel_tab)
         #bcsvw.writerow(["Method: " + config.decomposition +"-"+ config.distance , "q value: " + str(config.q), "metric " + config.distance])
-        #bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the First PC of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "nominal-pvalue", "adjusted-pvalue", "Similarity score between Clusters"])
+        #bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the First PC of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "p-value", "q-value", "Similarity score between Clusters"])
 
         
         for association in sorted_associations:
@@ -655,7 +662,7 @@ def _report():
             if len(Xs) > 1 and len(Ys) > 1: 
                 ro.r('library("RColorBrewer")')
                 ro.r('library("pheatmap")')
-                ro.globalenv['output_heatmap_similarity_score'] = str(config.output_dir)+"/" + config.distance+"_heatmap.pdf"
+                ro.globalenv['output_heatmap_similarity_score'] = str(config.output_dir)+"/" + "results_heatmap.pdf"
                 #ro.globalenv['output_file_Pearson'] = str(config.output_dir)+"/Pearson_heatmap.pdf"
                 if distance.c_hash_association_method_discretize[config.distance]:
                     ro.r('pheatmap(similarity_score, color = brewer.pal(100,"Reds"),labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
@@ -719,9 +726,13 @@ def _report():
     _report_compared_clusters()
     if config.plotting_results:
         #_heatmap_associations()
-        _heatmap_associations_R()
-        _heatmap_datasets_R()
-        _plot_associations()
+        from rpy2.rinterface import RRuntimeError
+        try:
+            _heatmap_associations_R()
+            _heatmap_datasets_R()
+            _plot_associations()
+        except RRuntimeError:
+            print"exception with plotting in R "
     
     return config.meta_report 
   
