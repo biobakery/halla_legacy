@@ -33,7 +33,8 @@ randomization_method = "permutation"  # method to generate error bars
 sstrStep = "uniform"
 verbose = 'CRITICAL' #"DEBUG","INFO","WARNING","ERROR","CRITICAL"
 descending = "HAllA" 
-    
+D1 = None # Distance Matrix
+D2 = None # Distance Matrix    
 summary_method = "final"
 output_dir = "./"
 log_input = True

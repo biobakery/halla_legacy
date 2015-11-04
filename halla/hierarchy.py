@@ -380,7 +380,7 @@ class Tree():
                 #print self.left_loading
                 #print "Left after: ", self.m_pData[0]
             return True
-        elif decomp in ['medoid','pca', 'mca'] and approach != 'effect_size':
+        elif approach != 'effect_size':
             counter = 0
             temp_right_loading = list()
             for i in range(len(self.m_pData[1])):
@@ -434,8 +434,8 @@ class Tree():
                             print "#Outlier right cluster:",counter
                         return False
             
-            self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
-            self.left_loading = [i for j, i in enumerate(self.right_loading) if j not in temp_right_loading]
+            #self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
+            #self.left_loading = [i for j, i in enumerate(self.right_loading) if j not in temp_right_loading]
             #print temp_right_loading
             #print "Right after: ", self.m_pData[1]
             counter = 0
@@ -451,8 +451,8 @@ class Tree():
                             print "#Outlier left cluster:",counter
                         return False
 
-            self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
-            self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
+            #self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
+            #self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
             #print temp_left_loading
             return True
         else:
@@ -894,7 +894,7 @@ def hclust(pArray, labels):
     # # Remember, pMetric is a notion of _strength_, not _distance_ 
     # print str(pMetric)
     def pDistance(x, y):
-        dist = 1.0 - math.fabs(pMetric(x, y))
+        dist = math.fabs(1.0 - math.fabs(pMetric(x, y)))
         return  dist
 
     
@@ -911,8 +911,14 @@ def hclust(pArray, labels):
             D[j][i] = D[i][j]
     #print pArray.shape  
     D = squareform(D)
-    '''   
-    D = pdist(pArray, metric=pDistance)
+    '''  
+    D = None 
+    if config.D1 is None:
+        config.D1 = pdist(pArray, metric=pDistance)
+        D = config.D1
+    elif config.D2 is None:
+        config.D2 = pdist(pArray, metric=pDistance)
+        D = config.D2
     #print D.shape
     if config.plotting_results:
         global fig_num
@@ -947,7 +953,7 @@ def hclust(pArray, labels):
     # print pos.distance()
     import scipy.cluster.hierarchy as sch
     #print sch.dendrogram(Z, orientation='right')['leaves']
-    return to_tree(Z) if (bTree and len(pArray)>1) else Z, sch.dendrogram(Z, orientation='right')['leaves'] if len(pArray)>1 else labels[0]
+    return to_tree(Z) if (bTree and len(pArray)>1) else Z, sch.dendrogram(Z, orientation='right')['leaves'] if len(pArray)>1 else sch.dendrogram(Z)['leaves']
 
 
 def dendrogram(Z):
