@@ -768,14 +768,17 @@ def permutation_test_pvalue(X, Y, metric, seed, iIter=1000):
 		exit()
 	'''
 	return fP	
-def permutation_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000, seed = False, discretize_style = 'equal-area'):
+def permutation_test_by_representative(pArray1, pArray2):
 	"""
 	Input: 
 	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 1000
 
 	"""
-	# numpy.random.seed(0)
-	# return g_test_by_representative( pArray1, pArray2, metric = "nmi", decomposition = "pca", iIter = 1000 )
+	metric = config.distance
+	decomposition = config.decomposition
+	iIter=config.iterations
+	seed = config.seed
+	discretize_style = config.strDiscretizing
 	X, Y = pArray1, pArray2 
 	strMetric = metric 
 	# step 5 in a case of new decomposition method
@@ -1199,12 +1202,12 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 
 	return dPPerm
 
-def permutation_test(pArray1, pArray2, metric, decomposition, iIter, seed, discretize_style):
+def permutation_test(pArray1, pArray2):
 	
-	if decomposition in ['none','cca', 'pls',"pca", "dpca", "nlpca", "ica", "kpca","centroid-medoid","medoid","mean", "mca"]:
-		return permutation_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter, seed= seed, discretize_style = discretize_style)
+	if config.decomposition in ['none','cca', 'pls',"pca", "dpca", "nlpca", "ica", "kpca","centroid-medoid","medoid","mean", "mca"]:
+		return permutation_test_by_representative(pArray1, pArray2)
 	
-	if decomposition in ["average"]:
+	if config.decomposition in ["average"]:
 		return permutation_test_by_average(pArray1, pArray2, metric=metric, iIter=iIter)
 
 

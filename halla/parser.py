@@ -120,14 +120,25 @@ class Input:
 				aNames = list(pArray[:, 0])
 				pArray = pArray[:, 1:]
 
-			# # Parse data types, missing values, and whitespace 
+			# # Parse data types, missing values, and whitespace
+			from sklearn.preprocessing import Imputer
+			imp = Imputer(missing_values='NaN', strategy='mean', axis=1)
+			imp.fit(pArray)
+			#Imputer(axis=0, copy=True, missing_values='NaN', strategy='mean', verbose=0)
+			#line = [[np.nan, 2], [6, np.nan], [7, 6]]
+			#print imp 
+			missing_char =" "
 			for i, line in enumerate(pArray):
 				###########line = map( lambda x: ( x.strip() if bool(x.strip()) else None ), line )
 				#*****************************************************************************************************
 				# *   Modification by George Weingart  2014/03/20                                                     *
 				# *   If the line is not full,  replace the Nones with nans                                           *
-				#*****************************************************************************************************
-				line = map(lambda x: (x.strip() if bool(x.strip()) else np.nan), line)  ###### Convert missings to nans
+				#***************************************************************************************************** 
+				
+				line = map(lambda x: (x.strip(missing_char) if bool(x.strip(missing_char)) else np.nan), line)  ###### Convert missings to nans
+				#line = df1 = pd.DataFrame(line)
+				line = imp.transform(line)[0]
+				#print line 
 				if all(line):
 					aOut.append(line)
 					if not aNames:

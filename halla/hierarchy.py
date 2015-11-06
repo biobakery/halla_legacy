@@ -411,7 +411,7 @@ class Tree():
                             print "#Outlier left cluster:",counter
                         return False
 
-            #self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
+            self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
             self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
             #print temp_left_loading
             return True
@@ -433,11 +433,6 @@ class Tree():
                         if config.verbose == 'DEBUG':
                             print "#Outlier right cluster:",counter
                         return False
-            
-            #self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
-            #self.left_loading = [i for j, i in enumerate(self.right_loading) if j not in temp_right_loading]
-            #print temp_right_loading
-            #print "Right after: ", self.m_pData[1]
             counter = 0
             temp_left_loading = list()
             for i in range(len(self.m_pData[0])):
@@ -451,9 +446,13 @@ class Tree():
                             print "#Outlier left cluster:",counter
                         return False
 
-            #self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
-            #self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
-            #print temp_left_loading
+            # Remove few outliers
+            '''self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
+            self.left_loading = [i for j, i in enumerate(self.right_loading) if j not in temp_right_loading]
+            
+            self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
+            self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
+            '''
             return True
         else:
             return True 
@@ -916,7 +915,7 @@ def hclust(pArray, labels):
     if config.D1 is None:
         config.D1 = pdist(pArray, metric=pDistance)
         D = config.D1
-    elif config.D2 is None:
+    else:
         config.D2 = pdist(pArray, metric=pDistance)
         D = config.D2
     #print D.shape
@@ -1749,7 +1748,7 @@ def naive_all_against_all():
         data = [[i], [j]]
         test.add_data(data)
         #print i, j
-        fP, similarity, left_rep, right_rep, loading_left, loading_right, left_rep, right_rep = pMethod(array([pArray1[i]]), array([pArray2[j]]), metric = metric, decomposition = decomposition, iIter=iIter, seed = seed, discretize_style= discretize_style)
+        fP, similarity, left_rep, right_rep, loading_left, loading_right, left_rep, right_rep = pMethod(array([pArray1[i]]), array([pArray2[j]]))
         test.set_pvalue(fP)
         test.set_similarity_score(similarity)
         test.set_left_first_rep_variance(1.0)
@@ -2525,7 +2524,7 @@ def hypotheses_testing():
         '''
         X = pArray1[aIndiciesMapped[0]]
         Y = pArray2[aIndiciesMapped[1]]
-        dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y,  metric = config.distance, decomposition = config.decomposition, iIter=config.iterations, seed = config.seed, discretize_style = config.strDiscretizing)
+        dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y)
         pNode.set_similarity_score(similarity)
         pNode.set_left_first_rep_variance(left_first_rep_variance)
         pNode.set_right_first_rep_variance(right_first_rep_variance)
