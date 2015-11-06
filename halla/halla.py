@@ -251,6 +251,11 @@ def parse_arguments (args):
         type=int,
         default= random.randint(1,10000),
         help="a seed number to make the random permutation reproducible\n[default = random]")
+    argp.add_argument(
+        "--missing-char", metavar="<None>",
+        dest ="missing_char",
+        default=None,
+        help="missing characters filled by\n[default = " "]")
 
     return argp.parse_args()
 
@@ -275,6 +280,7 @@ def set_parameters(args):
     config.seed = args.seed
     config.NPROC = args.nproc
     config.NBIN = args.nbin
+    config.missing_char = args.missing_char
     # If Y was not set - we use X
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  

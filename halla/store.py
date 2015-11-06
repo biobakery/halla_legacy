@@ -793,7 +793,10 @@ def run():
         sys.exit("Please ckeck the combination of your options!!!!")
     execution_time = time.time()
     if _bypass_discretizing():
-        config.meta_feature = array([np.asarray(config.meta_array[0], dtype = float), np.asarray(config.meta_array[1], dtype = float)])
+        try:
+            config.meta_feature = array([np.asarray(config.meta_array[0], dtype = float), np.asarray(config.meta_array[1], dtype = float)])
+        except:
+            sys.exit("--- Please check your data types and your similarity metric!")
         #print config.meta_feature
     else:
         print "Featurize is started using: ", config.strDiscretizing, " style!"
