@@ -122,7 +122,7 @@ class Input:
 
 			# # Parse data types, missing values, and whitespace
 			from sklearn.preprocessing import Imputer
-			imp = Imputer(missing_values='NaN', strategy='mean', axis=1)
+			imp = Imputer(missing_values='NaN', strategy='median', axis=1)
 			imp.fit(pArray)
 			#Imputer(axis=0, copy=True, missing_values='NaN', strategy='mean', verbose=0)
 			#line = [[np.nan, 2], [6, np.nan], [7, 6]]
