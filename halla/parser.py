@@ -141,7 +141,7 @@ class Input:
 				except:
 					print "there is an issue with filling missed data!"
 				#print line 
-				if all(line):
+				if all(val != config.missing_char for val in line):
 					aOut.append(line)
 					if not aNames:
 						aNames.append(i)
