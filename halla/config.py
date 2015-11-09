@@ -41,7 +41,7 @@ log_input = True
 plotting_results = False
 strDiscretizing = 'equal-area'
 apply_bypass = True
-missing_char = " "
+missing_char =" "
 seed = random.randint(1,10000)        #==================================================================#
 # Mutable Meta Objects  
 #==================================================================#

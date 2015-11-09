@@ -645,6 +645,146 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 	assert(fP <= 1.0)
 
 	return fP
+##P-value with Jason
+
+import scipy.optimize
+import scipy.stats
+
+def estimate_gpd_params_ML(samples):
+    """
+    Maximum likelihood estimate of the GPD from the given samples
+    Assumes that the location parameter is 0
+    """
+    
+    # Uses the formulae presented in slides 11-12 of Chunlin_Wang_SOSGSSD2011.pdf
+
+    maxtheta = 0.99 / max(samples)
+    print "maxtheta = ", maxtheta
+	
+	# Find the best theta (ratio between the shape and scale)
+    n = len(samples)
+    def theta_neg_profile_like(x):
+    	theta = x[0]
+    	if theta >= maxtheta or theta <= 0:
+    		return numpy.nan
+    	print "theta = ", theta
+        inner_sum = sum([math.log(1.0 - theta * x) for x in samples])
+        l = -n - inner_sum - n * math.log((-1/(n*theta)) * inner_sum)
+        return -l
+    result = scipy.optimize.minimize(theta_neg_profile_like, maxtheta / 2.0, 
+									method='Nelder-Mead', bounds=((0, maxtheta)), options={'disp': False})
+
+    # Get the best shape and scale from the best theta
+    thetahat = result.x[0]
+    print "thetahat = ", thetahat
+    shapehat = -sum([math.log(1 - thetahat * x) for x in samples]) / n
+    scalehat = shapehat / thetahat
+    return (scalehat, shapehat)
+
+def gpd_goodness_of_fit(shape, samples):
+    """
+    Goodness-of-fit test of the samples to a generalize pareto distribution
+    with the given shape
+    Returns the p-value
+    """
+
+    # KS-test for now, until I get access to the Choulakian and Stephens (2001) paper"""
+    gpd = scipy.stats.genpareto(0, shape)
+    (D,p) = scipy.stats.kstest(samples, gpd.cdf)
+    return p
+
+def estimate_tail_gpd(samples):
+    """
+    Fits a GPD to the tail of the distribution from the given samples
+    Returns a frozen GPD object and the number of samples used to estimate it
+    """
+    
+    # Algorithm proposed in Knijnenburg2009
+
+    # Sort the samples so that the tail samples are easily accessible
+    sorted_samples = samples
+    sorted_samples.sort()
+
+    # Minimum number of samples exceeding the threshold
+    minNexc = 10
+    # Initial number of samples to fit the tail with
+    Nexc = 250
+    # Amount of samples to drop Nexc by if the goodness of fit test fails
+    dNexc = 10
+
+    # Try to make Nexc at most half of the samples, but at least minNexc,
+    # but definitely no more than N-1
+    # This is only problematic if N is < Nexc*2, which should never be the case
+    Nexc = min(len(samples)-1, max(minNexc, min(Nexc, math.floor(len(samples)/2))))
+
+    while True:
+        # Fit the GPD to the samples
+        subsamples = sorted_samples[-Nexc:]
+        t = (sorted_samples[-Nexc] + subsamples[1]) / 2
+        (shape, scale) = estimate_gpd_params_ML([x - t for x in subsamples])
+
+        if Nexc <= minNexc:
+            # Too few samples - have to go with what we have
+            # TODO: Emit warning?
+            break
+        
+        # Does the GPD fit well with the samples?
+        gof = gpd_goodness_of_fit(shape, [(x - t) / scale for x in subsamples])
+        print ("Nexc = %s; t=%s; scale=%s; shape=%s; gof=%s" % (Nexc, t, scale, shape, gof))  
+        if gof < 0.05:
+            # The GPD doesn't fit this tail.. reduce the number of samples
+            Nexc = max(minNexc, Nexc - dNexc)
+        else:
+            # GPD is a good fit
+            break
+
+    print("Nexc = %s; t=%s; scale=%s; shape=%s" % (Nexc, t, scale, shape))
+    return (scipy.stats.genpareto(shape, loc=t, scale=scale), Nexc)
+
+def estimate_pvalue(x, null_samples):
+    """
+    Estimates the p-value, given the observed test statistic x and a set of
+    samples from the null distribution.
+    """
+
+    # Algorithm proposed in Knijnenburg2009
+
+    # Get M, the number of null samples greater than x
+    M = len([1 for v in null_samples if v > x])
+    N = len(null_samples)
+
+    # Use the ECDF to approximate p-values if M > 10
+    if M > 10:
+        return M / N
+
+    # Estimate the generalized pareto distribtion from tail samples
+    (gp, Nexc) = estimate_tail_gpd(null_samples)
+
+    # GPD estimate of the actual p-value
+    print ("Nexc = %s; N = %s; sf = %s; p = %s" % (Nexc, N, gp.sf(x), (Nexc / N) * gp.sf(x)))  
+    return (Nexc / N) * gp.sf(x)
+
+def prob_pvalue_lt(alpha, nexc, ntotal):
+    """
+    Probability that the p-value is less than alpha, if there are nexc
+    exceedances out of ntotal permutations
+    """
+
+    # Uses a Bayesian estimate of the p-value's actual value, using Jeffreys' prior
+    return scipy.stats.beta.cdf(alpha, 0.5 + nexc, 0.5 + ntotal - nexc)
+
+def prob_pvalue_lt_samples(alpha, x, null_samples):
+    """
+    Probability that the p-value is less than alpha, given the test
+    statistic x and a set of samples from the null distribution
+    """
+    return prob_pvalue_lt(alpha, len([1 for v in null_samples if v > x]), len(null_samples))
+
+
+## End P-vlue with Jason
+
+
+
 def estimate_p_value(observed_value, random_distribution):
     """Estimate the p-value for a permutation test.
 
@@ -672,9 +812,11 @@ def estimate_p_value(observed_value, random_distribution):
     	#from scipy.stats import genpareto
     	#genpareto.cdf(random_distribution, observed_value)
         return float(num_exceedances) / num_permutations
-def permutation_test_pvalue(X, Y, metric, seed, iIter=1000):
+def permutation_test_pvalue(X, Y):
 	 
-	strMetric = metric 
+	strMetric = config.distance 
+	seed = config.seed
+	iIter = config.iterations
 	# step 5 in a case of new decomposition method
 	pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
@@ -682,7 +824,7 @@ def permutation_test_pvalue(X, Y, metric, seed, iIter=1000):
 	def _permutation(pVec):
 		return numpy.random.permutation(pVec)
 
-	pMe = pHashMetric[metric] 
+	pMe = pHashMetric[strMetric] 
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	aDist = [] 
 	sim_score= pMe(X, Y)
@@ -734,7 +876,7 @@ def permutation_test_pvalue(X, Y, metric, seed, iIter=1000):
 		fAssociation_permuted = math.fabs(pMe(X, permuted_Y))  
 		aDist.append(fAssociation_permuted)
 		if i % 50 == 0:
-			new_fP2 = _calculate_pvalue(i)
+			new_fP2 = _calculate_pvalue(i) #estimate_pvalue(sim_score, aDist) #
 			#num_exceedances = _calculate_num_exceedances(fAssociation_permuted, aDist)
 			#new_fP = _estimate_p_value(num_exceedances, len(aDist))
 			
@@ -744,7 +886,7 @@ def permutation_test_pvalue(X, Y, metric, seed, iIter=1000):
 				break
 			else: 
 				fP = new_fP2
-
+	#fP = estimate_pvalue(sim_score, aDist)
 		# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	
 	fPercentile = percentileofscore(aDist, fAssociation, kind = 'strict')#, kind="mean")  # #source: Good 2000  
@@ -841,7 +983,7 @@ def permutation_test_by_representative(pArray1, pArray2):
 	#	fAssociation = numpy.mean(numpy.array([pMe(pArray1[i], pArray2[j]) for i, j in itertools.product(range(len(pArray1)), range(len(pArray2)))]))
 	#else:
 	sim_score= pMe(pRep1, pRep2)
-	fP = permutation_test_pvalue(X=pRep1, Y=pRep2, metric = config.distance, seed=config.seed, iIter=config.iterations)
+	fP = permutation_test_pvalue(X=pRep1, Y=pRep2)
 	assert(fP <= 1.0)
 	#print fP
 	return fP, sim_score, left_rep_variance, right_rep_variance, left_loading, right_loading, pRep1, pRep2 

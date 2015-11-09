@@ -139,7 +139,7 @@ class Input:
 				try:
 					line = imp.transform(line)[0]
 				except:
-					pass
+					print "there is an issue with filling missed data!"
 				#print line 
 				if all(line):
 					aOut.append(line)
@@ -158,7 +158,8 @@ class Input:
 							aTypes.append("LEX")
 				else:  # delete corresponding name from namespace 
 					try:
-						print aNames[i], "has missing values!"#aNames.remove(aNames[i])
+						print aNames[i], " has an issue with filling missed data!"
+						#aNames.remove(aNames[i])
 					except Exception:
 						pass  
 
