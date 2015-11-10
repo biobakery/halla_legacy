@@ -255,7 +255,7 @@ def parse_arguments (args):
         "--missing-char", metavar="<None>",
         dest ="missing_char",
         default=None,
-        help="missing characters filled by\n[default = " "]")
+        help="defines missing characters\n[default = " "]")
 
     return argp.parse_args()
 
