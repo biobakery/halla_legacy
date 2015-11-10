@@ -331,7 +331,10 @@ def _report():
         output_file_associations  = open(str(config.output_dir)+'/associations.txt', 'w')
         bcsvw = csv.writer(output_file_associations, csv.excel_tab, delimiter='\t')
         #bcsvw.writerow(["Method: " + config.decomposition +"-"+ config.distance , "q value: " + str(config.q), "metric " + config.distance])
-        bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster", "Clusters Second Dataset", "Cluster Similarity Score", "Explained Variance by the first representative of the cluster", "p-value", "q-value", "Similarity score between Clusters"])
+        bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", \
+                        "Explained Variance by the first representative of the cluster", "Clusters Second Dataset", \
+                        "Cluster Similarity Score", "Explained Variance by the first representative of the cluster", \
+                        "p-value", "q-value", "Similarity score between Clusters"])
 
         sorted_associations = sorted(config.meta_alla[0], key=lambda x: x.pvalue)
         for association in sorted_associations:
@@ -730,10 +733,16 @@ def _report():
         try:
             _heatmap_associations_R()
             _heatmap_datasets_R()
+            #_plot_associations()
+        except RRuntimeError:
+            print"exception with plotting in R "
+    if config.diagnostics_plot:
+        #_heatmap_associations()
+        from rpy2.rinterface import RRuntimeError
+        try:
             _plot_associations()
         except RRuntimeError:
             print"exception with plotting in R "
-    
     return config.meta_report 
   
 def run():

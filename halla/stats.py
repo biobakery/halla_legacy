@@ -647,140 +647,225 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 	return fP
 ##P-value with Jason
 
+
 import scipy.optimize
 import scipy.stats
+import numpy
+import math
 
 def estimate_gpd_params_ML(samples):
-    """
-    Maximum likelihood estimate of the GPD from the given samples
-    Assumes that the location parameter is 0
-    """
-    
-    # Uses the formulae presented in slides 11-12 of Chunlin_Wang_SOSGSSD2011.pdf
+	"""
+	Maximum likelihood estimate of the GPD from the given samples
+	Assumes that the location parameter is 0
+	"""
 
-    maxtheta = 0.99 / max(samples)
-    print "maxtheta = ", maxtheta
+	# Implements gpfit.m from Matlab
 	
-	# Find the best theta (ratio between the shape and scale)
-    n = len(samples)
-    def theta_neg_profile_like(x):
-    	theta = x[0]
-    	if theta >= maxtheta or theta <= 0:
-    		return numpy.nan
-    	print "theta = ", theta
-        inner_sum = sum([math.log(1.0 - theta * x) for x in samples])
-        l = -n - inner_sum - n * math.log((-1/(n*theta)) * inner_sum)
-        return -l
-    result = scipy.optimize.minimize(theta_neg_profile_like, maxtheta / 2.0, 
-									method='Nelder-Mead', bounds=((0, maxtheta)), options={'disp': False})
+	# Get an initial guess from the Method of Moments
+	n = len(samples)
+	xmean = numpy.mean(samples)
+	xvar = numpy.var(samples)
+	xmax = max(samples)
+	xsnr = xmean * xmean / xvar
+	shape0 = -.5 * (xsnr - 1)
+	scale0 = .5 * xmean * (xsnr + 1)
+	if shape0 < 0 and xmax >= -scale0/shape0:
+		# MOM failed - start with exponential
+		shape0 = 0
+		scale0 = xmean
+		
+	# Negative log-like function
+	EPS = 7./3 - 4./3 - 1 # Machine epsilon
+	def negloglike(parms, data):
+		shape = parms[0]
+		lnscale = parms[1]
+		scale = math.exp(lnscale)
 
-    # Get the best shape and scale from the best theta
-    thetahat = result.x[0]
-    print "thetahat = ", thetahat
-    shapehat = -sum([math.log(1 - thetahat * x) for x in samples]) / n
-    scalehat = shapehat / thetahat
-    return (scalehat, shapehat)
+		n = len(data)
+		Z = [x / scale for x in data]
+		
+		if abs(shape) > EPS:
+			# Non-exponential
+			if shape > 0 or max(Z) < -1/shape:
+				sumln1pkz = sum([math.log1p(shape*z) for z in Z])
+				return n * lnscale + (1 + 1/shape) * sumln1pkz
+			else:
+				return math.inf
+		else:
+			# Limiting exponential distribution as shape -> 0
+			return n * lnscale + sum(Z)
+	
+	# Find the ML estimate numerically
+	result = scipy.optimize.minimize(negloglike, (shape0, math.log(scale0)),
+		method='Nelder-Mead', args=(samples), options={'disp': False})
+	shapehat = result.x[0]
+	scalehat = math.exp(result.x[1])
+	return (shapehat, scalehat)
 
 def gpd_goodness_of_fit(shape, samples):
-    """
-    Goodness-of-fit test of the samples to a generalize pareto distribution
-    with the given shape
-    Returns the p-value
-    """
-
-    # KS-test for now, until I get access to the Choulakian and Stephens (2001) paper"""
-    gpd = scipy.stats.genpareto(0, shape)
-    (D,p) = scipy.stats.kstest(samples, gpd.cdf)
-    return p
+	"""
+	Goodness-of-fit test of the samples to a generalize pareto distribution
+	with the given shape
+	Returns the p-value
+	"""
+	
+	# KS-test for now, until I get access to the Choulakian and Stephens (2001) paper
+	gpd = scipy.stats.genpareto(shape)
+	(D,p) = scipy.stats.kstest(samples, gpd.cdf)
+	return p
 
 def estimate_tail_gpd(samples):
-    """
-    Fits a GPD to the tail of the distribution from the given samples
-    Returns a frozen GPD object and the number of samples used to estimate it
-    """
-    
-    # Algorithm proposed in Knijnenburg2009
+	"""
+	Fits a GPD to the tail of the distribution from the given samples
+	Returns a frozen GPD object and the number of samples used to estimate it
+	"""
+	
+	# Algorithm proposed in Knijnenburg2009
+	
+	# Sort the samples so that the tail samples are easily accessible
+	sorted_samples = samples
+	sorted_samples.sort()
+	
+	# Minimum number of samples exceeding the threshold
+	minNexc = 10
+	# Initial number of samples to fit the tail with
+	Nexc = 250
+	# Amount of samples to drop Nexc by if the goodness of fit test fails
+	dNexc = 10
+	
+	# Try to make Nexc at most half of the samples, but at least minNexc,
+	# but definitely no more than N-1
+	# This is only problematic if N is < Nexc*2, which should never be the case
+	Nexc = min(len(samples)-1, max(minNexc, min(Nexc, math.floor(len(samples)/2))))
+	
+	while True:
+		# Fit the GPD to the samples
+		subsamples = sorted_samples[-Nexc:]
+		t = (sorted_samples[-Nexc] + subsamples[1]) / 2
+		(shape, scale) = estimate_gpd_params_ML([x - t for x in subsamples])
+		
+		if Nexc <= minNexc:
+			# Too few samples - have to go with what we have
+			# TODO: Emit warning?
+			break
+		
+		# Does the GPD fit well with the samples?
+		gof = gpd_goodness_of_fit(shape, [(x - t) / scale for x in subsamples])
+		if gof < 0.05:
+			# The GPD doesn't fit this tail.. reduce the number of samples
+			Nexc = max(minNexc, Nexc - dNexc)
+		else:
+			# GPD is a good fit
+			break
 
-    # Sort the samples so that the tail samples are easily accessible
-    sorted_samples = samples
-    sorted_samples.sort()
-
-    # Minimum number of samples exceeding the threshold
-    minNexc = 10
-    # Initial number of samples to fit the tail with
-    Nexc = 250
-    # Amount of samples to drop Nexc by if the goodness of fit test fails
-    dNexc = 10
-
-    # Try to make Nexc at most half of the samples, but at least minNexc,
-    # but definitely no more than N-1
-    # This is only problematic if N is < Nexc*2, which should never be the case
-    Nexc = min(len(samples)-1, max(minNexc, min(Nexc, math.floor(len(samples)/2))))
-
-    while True:
-        # Fit the GPD to the samples
-        subsamples = sorted_samples[-Nexc:]
-        t = (sorted_samples[-Nexc] + subsamples[1]) / 2
-        (shape, scale) = estimate_gpd_params_ML([x - t for x in subsamples])
-
-        if Nexc <= minNexc:
-            # Too few samples - have to go with what we have
-            # TODO: Emit warning?
-            break
-        
-        # Does the GPD fit well with the samples?
-        gof = gpd_goodness_of_fit(shape, [(x - t) / scale for x in subsamples])
-        print ("Nexc = %s; t=%s; scale=%s; shape=%s; gof=%s" % (Nexc, t, scale, shape, gof))  
-        if gof < 0.05:
-            # The GPD doesn't fit this tail.. reduce the number of samples
-            Nexc = max(minNexc, Nexc - dNexc)
-        else:
-            # GPD is a good fit
-            break
-
-    print("Nexc = %s; t=%s; scale=%s; shape=%s" % (Nexc, t, scale, shape))
-    return (scipy.stats.genpareto(shape, loc=t, scale=scale), Nexc)
+	return (scipy.stats.genpareto(shape, loc=t, scale=scale), Nexc)
 
 def estimate_pvalue(x, null_samples):
-    """
-    Estimates the p-value, given the observed test statistic x and a set of
-    samples from the null distribution.
-    """
+	"""
+	Estimates the p-value, given the observed test statistic x and a set of
+	samples from the null distribution.
+	"""
+	
+	# Algorithm proposed in Knijnenburg2009
+	
+	# Get M, the number of null samples greater than x
+	M = len([1 for v in null_samples if v > x])
+	N = len(null_samples)
+	
+	# Use the ECDF to approximate p-values if M > 10
+	if M > 10 or N < 100:
+		return M / N
 
-    # Algorithm proposed in Knijnenburg2009
+	# Estimate the generalized pareto distribtion from tail samples
+	(gp, Nexc) = estimate_tail_gpd(null_samples)
 
-    # Get M, the number of null samples greater than x
-    M = len([1 for v in null_samples if v > x])
-    N = len(null_samples)
-
-    # Use the ECDF to approximate p-values if M > 10
-    if M > 10:
-        return M / N
-
-    # Estimate the generalized pareto distribtion from tail samples
-    (gp, Nexc) = estimate_tail_gpd(null_samples)
-
-    # GPD estimate of the actual p-value
-    print ("Nexc = %s; N = %s; sf = %s; p = %s" % (Nexc, N, gp.sf(x), (Nexc / N) * gp.sf(x)))  
-    return (Nexc / N) * gp.sf(x)
+	# GPD estimate of the actual p-value
+	return (Nexc / N) * gp.sf(x)
 
 def prob_pvalue_lt(alpha, nexc, ntotal):
-    """
-    Probability that the p-value is less than alpha, if there are nexc
-    exceedances out of ntotal permutations
-    """
-
-    # Uses a Bayesian estimate of the p-value's actual value, using Jeffreys' prior
-    return scipy.stats.beta.cdf(alpha, 0.5 + nexc, 0.5 + ntotal - nexc)
+	"""
+	Probability that the p-value is less than alpha, if there are nexc
+	exceedances out of ntotal permutations
+	"""
+	
+	# Use a prior with approx. 50% probability of p being < alpha
+	# and the same certainty (a+b) as Bayes' prior
+	a = 1/3 + alpha * 3/4
+	b = 2 - a
+	
+	# Bayesian estimate of the p-value's actual value
+	pvalue = scipy.stats.beta(a + nexc, b + ntotal - nexc)
+	
+	# Probability of the pvalue being < alpha
+	return pvalue.cdf(alpha)
 
 def prob_pvalue_lt_samples(alpha, x, null_samples):
-    """
-    Probability that the p-value is less than alpha, given the test
-    statistic x and a set of samples from the null distribution
-    """
-    return prob_pvalue_lt(alpha, len([1 for v in null_samples if v > x]), len(null_samples))
+	"""
+	Probability that the p-value is less than alpha, given the test
+	statistic x and a set of samples from the null distribution
+	"""
+	return prob_pvalue_lt(alpha, len([1 for v in null_samples if v > x]), len(null_samples))
+
+def permutation_test_pvalue(x, null_fun, alpha_cutoff = 0.05):
+	"""
+	Performs a permutation test of the significance of x, given the function
+	to sample the null distribution null_fun.
+	This function will exit early if it becomes clear that the p-value will
+	be greater than alpha_cutoff. In this case, the current approximation
+	of the p-value is returned.
+	"""
+
+	# The number of null samples to start with
+	start_samples = 50
+	# Number of null samples to gather in each round
+	sample_increments = 50
+	# Maximum number of null samples, at which point the GPD approximation
+	# is used
+	max_samples = 1000
+	
+	# Sample the null distribution until we've got enough to estimate the tail
+	# or if we're sure that the actual p-value is greater than the alpha cutoff
+	nullsamples = [null_fun() for x in range(0,start_samples)]
+	while len(nullsamples) < max_samples and prob_pvalue_lt_samples(alpha_cutoff, x, nullsamples) > 0.01:
+		#print("Gathering more.. N = %d; P(p<%f) = %.2f" % (len(nullsamples), alpha_cutoff, prob_pvalue_lt_samples(alpha_cutoff, x, nullsamples)))
+		nullsamples = [null_fun() for x in range(0,sample_increments)] + nullsamples
+	
+	#print("Finished gathering: N = %d; P(p<%f) = %f" % (len(nullsamples), alpha_cutoff, prob_pvalue_lt_samples(alpha_cutoff, x, nullsamples)))
+	# Estimate the p-value from the current set of samples
+	return estimate_pvalue(x, nullsamples)
 
 
+	
+### Testing functions
+	
+def test_permtest(p_true):
+	"""
+	Test permutation_test_pvalue
+	"""
+	
+	rv = scipy.stats.norm(0, 1)
+	return permutation_test_pvalue(rv.isf(p_true), rv.rvs)
+
+def verbose_test_permtest(p_true):
+	for i in range(1,10):
+		p_est = test_permtest(p_true)
+		print("P = %f; P_est = %f; ratio = %.2f" % (p_true, p_est, p_est/p_true))
+
+def test_gof():
+	rshape = 0.3
+	rscale = 5
+	rv = scipy.stats.genpareto(rshape, loc=10, scale=rscale)
+	
+	subsamples = rv.rvs(size=1000)
+	t = 10
+	(shape, scale) = estimate_gpd_params_ML([x - t for x in subsamples])
+	print("est shape, scale = %f, %f (real = %f, %f)" % (shape, scale, rshape, rscale))
+	gof = gpd_goodness_of_fit(shape, [(x - t) / scale for x in subsamples])
+	print("gof = %f" % gof)
+
+# importlib.reload(pvalue_estimation)
+# pvalue_estimation.verbose_test_permtest(0.05)
+# pvalue_estimation.test_gof()
 ## End P-vlue with Jason
 
 
