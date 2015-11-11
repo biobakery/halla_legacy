@@ -29,22 +29,22 @@ def multi_pMethod(args):
     Runs the pMethod function and returns the results plus the id of the node
     """
     
-    id, pMethod, pArray1, pArray2, metric, decomposition, iIter, seed, discretize_style = args
-    dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(pArray1, pArray2,  metric = metric, decomposition = decomposition, iIter=iIter, seed = seed, discretize_style = discretize_style)
+    id, pMethod, pArray1, pArray2 = args
+    dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(pArray1, pArray2)
     #dP, similarity, left_first_rep_variance, right_first_rep_variance = pMethod(pArray1, pArray2,  metric = metric, decomposition = decomposition, iIter=iIter)
 
     return id, dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep
 
-def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter, seed, discretize_style):
+def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2):
     """
     Return the results from applying the data to the actor function
     """
     
-    def _multi_pMethod_args(current_level_tests, pMethod, pArray1, pArray2, metric, decomposition, iIter, seed, discretize_style, ids_to_process):
+    def _multi_pMethod_args(current_level_tests, pMethod, pArray1, pArray2, ids_to_process):
         for id in ids_to_process:
             aIndicies = current_level_tests[id].get_data()
             aIndiciesMapped = map(array, aIndicies)
-            yield [id, pMethod, pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]], metric, decomposition, iIter, seed, discretize_style]
+            yield [id, pMethod, pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]]]
     
     if config.NPROC > 1:
         import multiprocessing
@@ -61,7 +61,7 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2
         
         
         results_by_id = pool.map(multi_pMethod, _multi_pMethod_args(current_level_tests, 
-            pMethod, pArray1, pArray2, metric, decomposition, iIter, seed, discretize_style, ids_to_process))
+            pMethod, pArray1, pArray2, ids_to_process))
         pool.close()
         pool.join()
         
@@ -2324,7 +2324,7 @@ def hypotheses_testing():
                 print "number of hypotheses in level:", len(current_level_tests)
                 #if not len(current_level_tests):
                 #    continue
-                p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2, config.distance, config.decomposition, config.iterations, config.seed, config.strDiscretizing)
+                p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2)
                 
                 for i in range(len(current_level_tests)):
                     current_level_tests[i].set_pvalue(p_values[i])
