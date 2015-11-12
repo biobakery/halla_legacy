@@ -1707,7 +1707,40 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     hypotheses_tree_heigth = level_number
     #print "Number of levels after coupling", level_number-1
     return aOut
+def _actor(pNode):
+    pArray1 = config.meta_feature[0]
+    pArray2 = config.meta_feature[1]
+    """
+    Performs a certain action at the node
+    
+        * E.g. compares two bags, reports distance and p-values 
+    """
+    aIndicies = pNode.get_data() 
+    aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays
+    '''if decomposition not in ["pca", "ica"]:
+        X = pArray1[aIndiciesMapped[0]]
+        Y = pArray2[aIndiciesMapped[1]]
+    else:
+        orginal_data_0 = array(orginal_data[0])
+        orginal_data_1 = array(orginal_data[1])
+        X = orginal_data_0[aIndiciesMapped[0]]
+        Y = orginal_data_1[aIndiciesMapped[1]]
+    '''
+    X = pArray1[aIndiciesMapped[0]]
+    Y = pArray2[aIndiciesMapped[1]]
+    dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y)
+    pNode.set_similarity_score(similarity)
+    pNode.set_left_first_rep_variance(left_first_rep_variance)
+    pNode.set_right_first_rep_variance(right_first_rep_variance)
+    pNode.set_left_loading(left_loading)
+    pNode.set_right_loading(right_loading)
+    pNode.set_left_rep(left_rep)
+    pNode.set_right_rep(right_rep)
+    
         
+    # aOut.append( [aIndicies, dP] ) #### dP needs to appended AFTER multiple hypothesis correction
+    
+    return dP        
 def naive_all_against_all():
     pArray1 = config.meta_feature[0]
     pArray2 = config.meta_feature[1]
@@ -1741,13 +1774,13 @@ def naive_all_against_all():
     aP = []
     tests = []
     passed_tests = []
-    t = 0
     #print iRow, iCol
     for i, j in itertools.product(range(iRow), range(iCol)):
         test =  Tree(left_distance=0.0, right_distance=0.0)
         data = [[i], [j]]
         test.add_data(data)
         #print i, j
+        '''
         fP, similarity, left_rep, right_rep, loading_left, loading_right, left_rep, right_rep = pMethod(array([pArray1[i]]), array([pArray2[j]]))
         test.set_pvalue(fP)
         test.set_similarity_score(similarity)
@@ -1757,11 +1790,14 @@ def naive_all_against_all():
         test.set_left_rep(left_rep)
         test.set_right_rep(right_rep)
         aP.append(fP)
+        '''
         tests.append(test)
-        
-        if fdr == "simple":
-            if fP <= fQ:
-                print "-- association after BH fdr controlling"
+    multiprocessing_actor(_actor, tests, pMethod, pArray1, pArray2)
+
+    if fdr == "simple":
+        for i in range(len(test)):
+            if tests[t].get_pvalue() <= fQ:
+                print "-- association after simple test"
                 if config.verbose == 'INFO':
                     tests[t].report()
                 aOut.append(tests[t])
@@ -1770,8 +1806,7 @@ def naive_all_against_all():
             else :
                 #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
                 aOut.append(tests[t])
-        t += 1    
-    print "number of tetsts", t, len(tests)
+    print "number of tetsts", len(tests)
     m = len(tests)   
     if fdr  in ["BH", "BHF", "BHL", "BHY"]:    
         aP_adjusted, pRank, q= stats.p_adjust(aP, fQ)
@@ -2505,38 +2540,7 @@ def hypotheses_testing():
         print "--- number of passed tests after FDR controllin:", len(aFinal)                                        
         return aFinal, aOut
     
-    def _actor(pNode):
-        """
-        Performs a certain action at the node
-        
-            * E.g. compares two bags, reports distance and p-values 
-        """
-        aIndicies = pNode.get_data() 
-        aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays
-        '''if decomposition not in ["pca", "ica"]:
-            X = pArray1[aIndiciesMapped[0]]
-            Y = pArray2[aIndiciesMapped[1]]
-        else:
-            orginal_data_0 = array(orginal_data[0])
-            orginal_data_1 = array(orginal_data[1])
-            X = orginal_data_0[aIndiciesMapped[0]]
-            Y = orginal_data_1[aIndiciesMapped[1]]
-        '''
-        X = pArray1[aIndiciesMapped[0]]
-        Y = pArray2[aIndiciesMapped[1]]
-        dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y)
-        pNode.set_similarity_score(similarity)
-        pNode.set_left_first_rep_variance(left_first_rep_variance)
-        pNode.set_right_first_rep_variance(right_first_rep_variance)
-        pNode.set_left_loading(left_loading)
-        pNode.set_right_loading(right_loading)
-        pNode.set_left_rep(left_rep)
-        pNode.set_right_rep(right_rep)
-        
-            
-        # aOut.append( [aIndicies, dP] ) #### dP needs to appended AFTER multiple hypothesis correction
 
-        return dP 
     
 
     fdr_function = {"default": _bh_level_testing,
