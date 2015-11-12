@@ -1707,7 +1707,22 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     hypotheses_tree_heigth = level_number
     #print "Number of levels after coupling", level_number-1
     return aOut
+pHashMethods = {"permutation" : stats.permutation_test,
+                        "permutation_test_by_medoid": stats.permutation_test_by_medoid,
+                        
+                        # parametric tests
+                        "parametric_test_by_pls_pearson": stats.parametric_test_by_pls_pearson,
+                        "parametric_test_by_representative": stats.parametric_test_by_representative,
+                        "parametric_test" : stats.parametric_test,
+                        
+                        # G-Test
+                        "g-test":stats.g_test
+                        }
+
+strMethod = config.randomization_method
+pMethod = pHashMethods[strMethod]
 def _actor(pNode):
+    
     pArray1 = config.meta_feature[0]
     pArray2 = config.meta_feature[1]
     """
@@ -1752,20 +1767,7 @@ def naive_all_against_all():
     fQ = config.q
     iIter= config.iterations
     discretize_style = config.strDiscretizing
-    pHashMethods = {"permutation" : stats.permutation_test,
-                        "permutation_test_by_medoid": stats.permutation_test_by_medoid,
-                        
-                        # parametric tests
-                        "parametric_test_by_pls_pearson": stats.parametric_test_by_pls_pearson,
-                        "parametric_test_by_representative": stats.parametric_test_by_representative,
-                        "parametric_test" : stats.parametric_test,
-                        
-                        # G-Test
-                        "g-test":stats.g_test
-                        }
-
-    strMethod = method
-    pMethod = pHashMethods[strMethod]
+    
     iRow = len(pArray1)
     iCol = len(pArray2)
     
@@ -1792,8 +1794,9 @@ def naive_all_against_all():
         aP.append(fP)
         '''
         tests.append(test)
-    multiprocessing_actor(_actor, tests, pMethod, pArray1, pArray2)
-
+    p_values = multiprocessing_actor(_actor, tests, pMethod, pArray1, pArray2)
+    for i in range(len(tests)):
+        tests[i].set_pvalue(p_values[i])
     if fdr == "simple":
         for i in range(len(test)):
             if tests[t].get_pvalue() <= fQ:
@@ -1809,29 +1812,22 @@ def naive_all_against_all():
     print "number of tetsts", len(tests)
     m = len(tests)   
     if fdr  in ["BH", "BHF", "BHL", "BHY"]:    
-        aP_adjusted, pRank, q= stats.p_adjust(aP, fQ)
+        aP_adjusted, pRank, q= stats.p_adjust(p_values, fQ)
         for i in range(len(tests)):
             tests[i].set_qvalue(aP_adjusted[i])
             tests[i].set_rank(pRank[i])
         max_r_t = 0
-                #print "aP", aP
-                #print "aP_adjusted: ", aP_adjusted
-        number_end_right_pvalues = 0
         for i in range(len(tests)):
-            if aP[i] >= 1.0 - aP_adjusted[i] or aP[i] <= aP_adjusted[i]:
-                number_end_right_pvalues +=1 
-        print  "number_end_right_pvalues: ", number_end_right_pvalues
-        for i in range(len(tests)):
-            if aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
+            if p_values[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
                 max_r_t = pRank[i]
                 #print "max_r_t", max_r_t
-        for i in range(len(aP)):
+        for i in range(len(p_values)):
             if pRank[i] <= max_r_t:
                 passed_tests.append(tests[i])
         q_values = stats.pvalues2qvalues ([passed_tests[i].get_pvalue() for i in range(len(passed_tests))], adjusted=True)
         for i in range(len(passed_tests)): 
             passed_tests[i].set_qvalue(q_values[i])
-        for i in range(len(aP)):
+        for i in range(len(p_values)):
             if pRank[i] <= max_r_t:
                 print "-- association after BH fdr controlling"
                 if config.verbose == 'INFO':
@@ -1843,7 +1839,7 @@ def naive_all_against_all():
                 #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
                 aOut.append(tests[i])
     elif fdr == 'RH':
-        aP_adjusted, pRank, q= stats.p_adjust(aP, fQ)
+        aP_adjusted, pRank, q= stats.p_adjust(p_values, fQ)
         for i in range(len(tests)):
             tests[i].set_qvalue(aP_adjusted[i])
             tests[i].set_rank(pRank[i])
@@ -1852,14 +1848,14 @@ def naive_all_against_all():
                 #print "aP_adjusted: ", aP_adjusted
         number_end_right_pvalues = 0
         for i in range(len(tests)):
-            if aP[i] >= 1.0 - aP_adjusted[i] or aP[i] <= aP_adjusted[i]:
+            if aP[i] >= 1.0 - aP_adjusted[i] or p_values[i] <= aP_adjusted[i]:
                 number_end_right_pvalues +=1 
         print  "number_end_right_pvalues: ", number_end_right_pvalues
         for i in range(len(tests)):
             if aP[i] <= (aP_adjusted[i]*len(tests)/(len(tests)- number_end_right_pvalues)) and max_r_t <= pRank[i]:
                 max_r_t = pRank[i]
                 #print "max_r_t", max_r_t
-        for i in range(len(aP)):
+        for i in range(len(p_values)):
             if pRank[i] <= max_r_t:
                 print "-- association after RH fdr controlling"
                 if config.verbose == 'INFO':
@@ -2120,21 +2116,7 @@ def hypotheses_testing():
     # iSkip = _start_parameter_to_iskip( start_parameter )
     
         
-    pHashMethods = {"permutation" : stats.permutation_test,
-                        "permutation_test_by_multiple_representative" : stats.permutation_test_by_multiple_representative,
-                        "permutation_test_by_medoid": stats.permutation_test_by_medoid,
-                        
-                        # parametric tests
-                        "parametric_test_by_pls_pearson": stats.parametric_test_by_pls_pearson,
-                        "parametric_test_by_representative": stats.parametric_test_by_representative,
-                        "parametric_test" : stats.parametric_test,
-                        
-                        # G-Test
-                        "g-test":stats.g_test
-                        }
 
-    strMethod = config.randomization_method
-    pMethod = pHashMethods[strMethod]
     
     def _simple_hypothesis_testing():
         apChildren = [pTree]
