@@ -41,8 +41,9 @@ log_input = True
 plotting_results = False
 diagnostics_plot = False
 strDiscretizing = 'equal-area'
-apply_bypass = True
+apply_stop_condition = True
 missing_char =" "
+missing_method = None
 seed = random.randint(1,10000)        #==================================================================#
 # Mutable Meta Objects  
 #==================================================================#

@@ -121,9 +121,10 @@ class Input:
 				pArray = pArray[:, 1:]
 
 			# # Parse data types, missing values, and whitespace
-			from sklearn.preprocessing import Imputer
-			imp = Imputer(missing_values='NaN', strategy='median', axis=1)
-			imp.fit(pArray)
+			if config.missing_method:
+				from sklearn.preprocessing import Imputer
+				imp = Imputer(missing_values='NaN', strategy=config.missing_method, axis=1)
+				imp.fit(pArray)
 			#Imputer(axis=0, copy=True, missing_values='NaN', strategy='mean', verbose=0)
 			#line = [[np.nan, 2], [6, np.nan], [7, 6]]
 			#print imp 
@@ -134,13 +135,18 @@ class Input:
 				# *   Modification by George Weingart  2014/03/20 # changed by Ali 2015/11/06                                                    *
 				# *   If the line is not full,  replace the Nones with nans                                           *
 				#***************************************************************************************************** 
-				line = map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else np.nan), line)  ###### Convert missings to nans
-				#line = df1 = pd.DataFrame(line)
-				try:
-					line = imp.transform(line)[0]
-				except:
-					print "there is an issue with filling missed data!"
-				#print line 
+				if config.missing_method is  None:
+					warn_message ="There is missing data in feature "+  aNames[i]+"!!! " + "Try --missing-method=method to choose your filling strategy. "
+					line = map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) 
+										else sys.exit(warn_message )), line)  ###### np.nan Convert missings to nans
+				else:
+					line = map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else np.nan ), line)  ###### np.nan Convert missings to nans
+					#line = df1 = pd.DataFrame(line)
+					try:
+						line = imp.transform(line)[0]
+					except:
+						print "there is an issue with filling missed data!"
+					#print line 
 				if all(val != config.missing_char for val in line):
 					aOut.append(line)
 					if not aNames:

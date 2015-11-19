@@ -690,7 +690,7 @@ def estimate_gpd_params_ML(samples):
 				sumln1pkz = sum([math.log1p(shape*z) for z in Z])
 				return n * lnscale + (1 + 1/shape) * sumln1pkz
 			else:
-				return math.inf
+				return float('inf')#math.inf
 		else:
 			# Limiting exponential distribution as shape -> 0
 			return n * lnscale + sum(Z)
@@ -806,7 +806,7 @@ def prob_pvalue_lt_samples(alpha, x, null_samples):
 	"""
 	return prob_pvalue_lt(alpha, len([1 for v in null_samples if v > x]), len(null_samples))
 
-def permutation_test_pvalue(x, null_fun, alpha_cutoff = 0.05):
+def nonparametric_test_pvalue(x, null_fun, alpha_cutoff = 0.05):
 	"""
 	Performs a permutation test of the significance of x, given the function
 	to sample the null distribution null_fun.
@@ -971,7 +971,7 @@ def permutation_test_pvalue(X, Y):
 				break
 			else: 
 				fP = new_fP2
-	#fP = estimate_pvalue(sim_score, aDist)
+		
 		# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	
 	fPercentile = percentileofscore(aDist, fAssociation, kind = 'strict')#, kind="mean")  # #source: Good 2000  
@@ -982,6 +982,12 @@ def permutation_test_pvalue(X, Y):
 	
 	fP = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
 	#fp = estimate_p_value(fAssociation, aDist)
+	
+	def null_fun():
+		return math.fabs(pMe(X, numpy.random.permutation(Y)))
+	fp = nonparametric_test_pvalue(fAssociation, null_fun)
+
+	
 	#num_exceedances = _calculate_num_exceedances(fAssociation, aDist)
 	#new_fP = _estimate_p_value(num_exceedances, len(aDist))
 	#print "Estimated PValue:",new_fP, "Pvalue_perm:", fP

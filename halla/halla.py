@@ -256,6 +256,12 @@ def parse_arguments (args):
         dest ="missing_char",
         default=None,
         help="defines missing characters\n[default = " "]")
+    argp.add_argument(
+        "--missing-method", metavar="<None>",
+        dest ="missing_method",
+        choices=["mean", "median", "most_frequent"],
+        default=None,
+        help="defines missing strategy to fill missing data.\n for categorical data puts all missing data in one new category \n")
 
     return argp.parse_args()
 
@@ -281,6 +287,7 @@ def set_parameters(args):
     config.NPROC = args.nproc
     config.NBIN = args.nbin
     config.missing_char = args.missing_char
+    config.missing_method = args.missing_method
     # If Y was not set - we use X
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  

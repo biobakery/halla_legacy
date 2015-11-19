@@ -793,7 +793,7 @@ def run():
     csvw.writerow(["Similarity method: ", config.distance]) 
     csvw.writerow(["q: FDR cut-off : ", config.q]) 
     #csvw.writerow(["r: effect size for robustness : ", config.robustness]) 
-    csvw.writerow(["Applied stop condition : ", config.apply_bypass]) 
+    csvw.writerow(["Applied stop condition : ", config.apply_stop_condition]) 
     csvw.writerow(["Discretizing method : ", config.strDiscretizing])
     csvw.writerow(["Seed number: ", config.seed]) 
     csvw.writerow([])

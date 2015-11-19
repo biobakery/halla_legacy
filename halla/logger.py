@@ -91,9 +91,9 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
         else:
             f.write(corner)
             f.write(delimiter)
-        for i in range(len(data[0][:])):
+        for i in range(len(data[0])):
             f.write(colheader[i])
-            if i < len(data[1]) - 1:
+            if i < len(data[0]) - 1:
                 f.write(delimiter)
         f.write('\n')
     else:
