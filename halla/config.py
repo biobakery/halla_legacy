@@ -44,7 +44,9 @@ strDiscretizing = 'equal-area'
 apply_stop_condition = True
 missing_char =" "
 missing_method = None
-seed = random.randint(1,10000)        #==================================================================#
+seed = 0 #random.randint(1,10000)
+K = 1.5 # constant for homogeneity 
+#==================================================================#
 # Mutable Meta Objects  
 #==================================================================#
 meta_array = array([None, None])

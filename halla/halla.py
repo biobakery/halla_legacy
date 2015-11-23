@@ -219,7 +219,7 @@ def parse_arguments (args):
         action="store_true")
     '''
     argp.add_argument(
-        "-k", "--discretizing", 
+        "--discretizing", 
         dest="strDiscretizing",
         default="equal-area",
         choices=["equal-area", "jenks", "hclust", "kmeans", "none"],
@@ -262,7 +262,11 @@ def parse_arguments (args):
         choices=["mean", "median", "most_frequent"],
         default=None,
         help="defines missing strategy to fill missing data.\n for categorical data puts all missing data in one new category \n")
-
+    argp.add_argument(
+        "-k",  
+        type=float,
+        default= 1.5,
+        help="a constant value for homogeneity of clusters [default = 1.5]")
     return argp.parse_args()
 
 def set_parameters(args):
@@ -288,6 +292,7 @@ def set_parameters(args):
     config.NBIN = args.nbin
     config.missing_char = args.missing_char
     config.missing_method = args.missing_method
+    config.K = args.k
     # If Y was not set - we use X
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  

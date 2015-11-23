@@ -6,7 +6,7 @@ Handles clustering and other organization schemes.
 # # structural packages 
 import itertools
 import math 
-from numpy import array , rank
+from numpy import array , rank, median
 import numpy 
 import scipy.cluster 
 from scipy.cluster.hierarchy import linkage, to_tree, leaves_list
@@ -245,7 +245,7 @@ class Tree():
         return self.right_rep
     
     def is_representative(self, pvalue_threshold, decomp):
-        #return True
+        return True
         if config.verbose == 'DEBUG':
             print "==========================================="
             #print "Left Exp. Var.: ", self.left_first_rep_variance
@@ -1550,20 +1550,22 @@ def _cutree_to_get_homogenous_clusters (clusterNodelist, dataset_number, first =
         #all_dist = [math.fabs(pMe(config.meta_feature[dataset_number][i], cluster_medoid)) for i in cluster_features[0: len(cluster_features)-1]]
         #clutser_95_percentile = np.percentile(dist_to_medoid,50)
         
-        k = 1.5
+        k = config.K
         Q1 = np.percentile(all_dist, 25)
         Q3 = np.percentile(all_dist, 75)
         IQR = Q3 - Q1
         upper_fence = Q3 + k * IQR
         lower_fence = Q1 - k * IQR
         
-        if all (val<= upper_fence and val >= lower_fence for val in all_dist):
-            #print "Homogenous cluster!!!"
-            #print "cluster:", cluster_features, all_dist
+        if all (val<= upper_fence and val >= lower_fence for val in all_dist) and\
+        not (max(all_dist)-median(all_dist)> k * math.fabs(median(all_dist)-min(all_dist))):
             sub_homogenous_clusters.extend([cluster])
-            #print "Q1: ",Q1
-            #print "Q3: ",Q3
-            #print "========================"
+            if config.verbose == 'DEBUG':
+                print "Homogenous cluster!!!"
+                print "cluster:", cluster_features, all_dist
+                print "Q1: ",Q1
+                print "Q3: ",Q3
+                print "========================"
             
         else:
             for sub_cluster in truncate_tree([cluster], level=0, skip=1):
