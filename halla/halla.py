@@ -249,8 +249,8 @@ def parse_arguments (args):
         "-s", "--seed",  
         metavar="<random>",
         type=int,
-        default= random.randint(1,10000),
-        help="a seed number to make the random permutation reproducible\n[default = random]")
+        default= 0,#random.randint(1,10000),
+        help="a seed number to make the random permutation reproducible\n[default = 0,and -1 for random number]")
     argp.add_argument(
         "--missing-char", metavar="<None>",
         dest ="missing_char",
@@ -287,7 +287,10 @@ def set_parameters(args):
     istm = list()  # X and Y are used to store datasets
     config.apply_bypass = args.apply_bypass
     config.strDiscretizing = args.strDiscretizing
-    config.seed = args.seed
+    if args.seed == -1:
+        config.seed = random.randint(1,10000)
+    else:
+        config.seed = args.seed
     config.NPROC = args.nproc
     config.NBIN = args.nbin
     config.missing_char = args.missing_char
