@@ -7,7 +7,7 @@ from abc import ABCMeta
 import abc
 import itertools
 import math
-from numpy import array
+from numpy import array, mean
 import numpy
 import scipy
 import scipy.cluster
@@ -342,6 +342,7 @@ def distcorr(X, Y):
     dcor = np.sqrt(dcov2_xy)/np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
     return dcor
 
+    
 c_hash_metric = {"nmi": nmi,
 				"mi": mi,
 				"l2": l2,

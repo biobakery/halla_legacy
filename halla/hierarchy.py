@@ -102,7 +102,7 @@ global fig_num
 fig_num = 1
 
 # class ClusterNode #scipy.cluster.hierarchy.ClusterNode
-class Tree():
+class Hypothesis_Node():
     ''' 
     A hierarchically nested structure containing nodes as
     a basic core unit    
@@ -159,8 +159,8 @@ class Tree():
         return (not(self.m_pData) and not(self.m_arrayChildren))            
 
     def add_child(self, data):
-        if not isinstance(data, Tree):
-            pChild = Tree(data)
+        if not isinstance(data, Hypothesis_Node):
+            pChild = Hypothesis_Node(data)
         else:
             pChild = data 
         self.m_arrayChildren.append(pChild)
@@ -595,7 +595,7 @@ class Gardener():
         '''
         
         if self.is_leaf():
-            return Exception("Empty Tree")
+            return Exception("Empty Hypothesis_Node")
 
         elif self.m_pData:
             pTmp = self.m_pData 
@@ -642,7 +642,7 @@ class Gardener():
 
 def lf2tree(lf):
     """
-    Functor converting from a layerform object to py Tree object 
+    Functor converting from a layerform object to py Hypothesis_Node object 
 
     Parameters
     ------------
@@ -650,22 +650,22 @@ def lf2tree(lf):
 
     Returns 
     -------------
-        t : py Tree object 
+        t : py Hypothesis_Node object 
     """ 
 
     pass 
 
 def tree2clust(pTree, exact=True):
     """
-    Functor converting from a py Tree object to a scipy ClusterNode object.
-    When exact is True, gives error when the map Tree() -> ClusterNode is not injective (more than 2 children per node)
+    Functor converting from a py Hypothesis_Node object to a scipy ClusterNode object.
+    When exact is True, gives error when the map Hypothesis_Node() -> ClusterNode is not injective (more than 2 children per node)
     """
 
     pass 
 
 def clust2tree(pTree):
     """
-    Functor converting from a scipy ClusterNode to a py Tree object; 
+    Functor converting from a scipy ClusterNode to a py Hypothesis_Node object; 
     can always be done 
     """
 
@@ -678,7 +678,7 @@ def clust2tree(pTree):
 def is_tree(pObj):
     """
     duck type implementation for checking if
-    object is ClusterNode or Tree, more or less
+    object is ClusterNode or Hypothesis_Node, more or less
     """
 
     try:
@@ -988,7 +988,7 @@ def reduce_tree(pClusterNode, pFunction=lambda x: x.id, aOut=[]):
 
     Output: a list of pFunction calls (node ids by default)
 
-    Should be designed to handle both ClusterNode and Tree types 
+    Should be designed to handle both ClusterNode and Hypothesis_Node types 
     """ 
 
     bTree = is_tree(pClusterNode)
@@ -1219,7 +1219,7 @@ def get_layer(atData, iLayer=None, bTuple=False, bIndex=False):
 
     Input: atData = a list of (iLevel, list_of_nodes_at_iLevel), iLayer = zero-indexed layer number 
 
-    BUGBUG: Need get_layer to work with ClusterNode and Tree objects as well! 
+    BUGBUG: Need get_layer to work with ClusterNode and Hypothesis_Node objects as well! 
     """
 
     if not atData:
@@ -1306,7 +1306,7 @@ def spawn_clusternode(pData, iCopy=1, iDecider=-1):
 
 def spawn_tree(pData, iCopy=0, iDecider=-1):
     """
-    Extends `spawn_clusternode` to the py.hierarchy.Tree object 
+    Extends `spawn_clusternode` to the py.hierarchy.Hypothesis_Node object 
     """
     return None 
 #-------------------------------------#
@@ -1509,11 +1509,70 @@ def _cutree_to_get_number_of_clusters (clusterNodelist, number_of_sub_cluters_th
         else:
             break
     return sub_clusters
+def descending_silhouette_coefficient(cluster, dataset_number):
+    #====check within class homogeniety
+    #Ref: http://scikit-learn.org/stable/modules/clustering.html#homogeneity-completeness-and-v-measure
+    pMe = distance.c_hash_metric[config.distance]
+    sub_cluster = truncate_tree([cluster], level=0, skip=1)
+    all_a_clusters = sub_cluster[0].pre_order(lambda x: x.id)
+    all_b_clusters = sub_cluster[1].pre_order(lambda x: x.id)
+    s_all_a = []
+    s_all_b = []
+    temp_all_a_clusters = []
+    from copy import deepcopy
+    for a_cluster in all_a_clusters:
+        if len(all_a_clusters) ==1:
+            
+            a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([a_cluster], all_a_clusters)])
+        else:
+            temp_all_a_clusters = all_a_clusters[:]#deepcopy(all_a_clusters)
+            #print 'before', all_a_clusters
+            temp_all_a_clusters.remove(a_cluster)
+            #print 'after', all_a_clusters
+            a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([a_cluster], temp_all_a_clusters)])            
+        b = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([a_cluster], all_b_clusters)])
+        s = (b-a)/max([a,b])
+        #print 's a', s, a, b
+        s_all_a.append(s)
+    if any(val <= 0.0 for val in s_all_a) or len(s_all_a) == 1:
+        return True
+    #print "silhouette_coefficient a", np.mean(s_all_a)
+    #print "child _a", all_a_clusters, " b_child", all_b_clusters 
+    for b_cluster in all_b_clusters:
+        if len(all_b_clusters) ==1:
+            
+            a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([b_cluster], all_b_clusters)])
+        else:
+            temp_all_b_clusters = all_b_clusters[:]#deepcopy(all_a_clusters)
+            #print 'before', all_a_clusters
+            temp_all_b_clusters.remove(b_cluster)
+            #print 'after', all_a_clusters
+            a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([b_cluster], temp_all_b_clusters)])            
+        b = np.mean([1.0 -  math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([b_cluster], all_a_clusters)])
+        s = (b-a)/max([a,b])
+        #print 's b', s
+        s_all_b.append(s)
+    if any(val <= 0.0 for val in s_all_b) or len(s_all_b) == 1:
+        return True
+    return False
+    #print "silhouette_coefficient b", np.mean(s_all_b)
+    #print  cluster.pre_order(lambda x: x.id)
+    #return (np.mean(s_all_a) +np.mean(s_all_b))/2.0
+    #print "Parent feature:", cluster.pre_order(lambda x: x.id)
+    
+        #print "Child:", sub_cluster.pre_order(lambda x: x.id)   
+    #print X, labels
+    #from sklearn import metrics
+    #from sklearn.metrics import pairwise_distances
+    #from sklearn.cluster import KMeans
+    #kmeans_model = KMeans(n_clusters=3, random_state=1).fit(X)
+    #labels = kmeans_model.labels_
+    #print metrics.silhouette_score(X, labels, metric='euclidean')
 def _cutree_to_get_homogenous_clusters (clusterNodelist, dataset_number, first = False):
     clusterNode = clusterNodelist
     n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(math.log(n, 2)) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
-    number_of_feature_in_each_cluter_threshold = n/2
+    number_of_sub_cluters_threshold = round(math.log(n, 2))# if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
+    #number_of_feature_in_each_cluter_threshold = n/2
     #print "n: ", n
     sub_clusters = []
     if first:
@@ -1540,11 +1599,13 @@ def _cutree_to_get_homogenous_clusters (clusterNodelist, dataset_number, first =
     else:
         sub_clusters = truncate_tree(clusterNodelist, level=0, skip=1)
     def _get_homogenous_clusters(cluster):
+        
         sub_homogenous_clusters = []
         pMe = distance.c_hash_metric[config.distance] 
         cluster_features = cluster.pre_order(lambda x: x.id)
         if len(cluster_features) == 1:
             return [cluster]
+        
         cluster_medoid = config.meta_feature[dataset_number][cluster_features[len(cluster_features)-1]]
         all_dist = [math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in combinations(cluster_features, 2)]
         #all_dist = [math.fabs(pMe(config.meta_feature[dataset_number][i], cluster_medoid)) for i in cluster_features[0: len(cluster_features)-1]]
@@ -1557,8 +1618,38 @@ def _cutree_to_get_homogenous_clusters (clusterNodelist, dataset_number, first =
         upper_fence = Q3 + k * IQR
         lower_fence = Q1 - k * IQR
         
+        #====check within class homogeniety
+        '''labels = []
+        #print "Parent feature:", cluster.pre_order(lambda x: x.id)
+        X = config.meta_feature[dataset_number][cluster.pre_order(lambda x: x.id)]
+        cluster_number = 0
+        for sub_cluster in truncate_tree([cluster], level=0, skip=2):
+            cluster_number +=1
+            labels += [cluster_number for i in range(sub_cluster.get_count())]
+            #print "Child:", sub_cluster.pre_order(lambda x: x.id)   
+        print X, labels
+        labels = np.array(labels)
+        from sklearn import metrics
+        from sklearn.metrics import pairwise_distances
+        #from sklearn.cluster import KMeans
+        #kmeans_model = KMeans(n_clusters=3, random_state=1).fit(X)
+        #labels = kmeans_model.labels_
+        print metrics.silhouette_score(X, labels, metric='euclidean')
+        '''
+        #distance.descending_silhouette_coefficient(cluster, dataset_number)
+        from scipy import stats
+        #print stats.kstest(all_dist, 'norm')[1]
+        
         if all (val<= upper_fence and val >= lower_fence for val in all_dist) and\
-        not (max(all_dist)-median(all_dist)> k * math.fabs(median(all_dist)-min(all_dist))):
+        descending_silhouette_coefficient(cluster, dataset_number):
+        #not (max(all_dist)-median(all_dist)> k * math.fabs(median(all_dist)-min(all_dist))):
+        #descending_silhouette_coefficient(cluster, dataset_number):
+        #stats.kstest(all_dist, 'norm', mode='asymp')[1] < .05:
+        #descending_silhouette_coefficient(cluster, dataset_number) >.35:
+        
+        #not (max(all_dist)-median(all_dist)> k * math.fabs(median(all_dist)-min(all_dist))):
+            #print descending_silhouette_coefficient(cluster, dataset_number)
+            # Homogeneous
             sub_homogenous_clusters.extend([cluster])
             if config.verbose == 'DEBUG':
                 print "Homogenous cluster!!!"
@@ -1566,8 +1657,14 @@ def _cutree_to_get_homogenous_clusters (clusterNodelist, dataset_number, first =
                 print "Q1: ",Q1
                 print "Q3: ",Q3
                 print "========================"
+                #import matplotlib.pyplot as plt
+                #fig, ax = plt.subplots(1, 1)
+                #ax.hist(all_dist, normed=True, histtype='stepfilled', alpha=0.2)
+                #ax.legend(loc='best', frameon=False)
+                #plt.savefig("/Users/rah/Documents/Hutlab/halla/hist"+str(stats.kstest(all_dist, 'norm')[1])+".pdf")
             
         else:
+            # Too heterogeneous 
             for sub_cluster in truncate_tree([cluster], level=0, skip=1):
                sub_homogenous_clusters.extend(_get_homogenous_clusters(sub_cluster)) 
         return sub_homogenous_clusters
@@ -1598,7 +1695,7 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
 
     Returns
     -----------
-    tH : Tree object 
+    tH : Hypothesis_Node object 
 
     Examples
     ----------------
@@ -1656,7 +1753,7 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
         except:
             data1 = reduce_tree(a)
             data2 = reduce_tree(b)
-    pStump = Tree([data1, data2])
+    pStump = Hypothesis_Node([data1, data2])
     pStump.set_level_number(0)
     aOut.append(pStump)
     
@@ -1673,7 +1770,7 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
         except:
             data1 = reduce_tree(a)
             data2 = reduce_tree(b)
-        tempTree = Tree(data=[data1, data2], left_distance=a.dist, right_distance=b.dist)
+        tempTree = Hypothesis_Node(data=[data1, data2], left_distance=a.dist, right_distance=b.dist)
         tempTree.set_level_number(1)
         childList.append(tempTree)
         L.append((tempTree, (a, b)))
@@ -1725,7 +1822,7 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
                 data1 = reduce_tree(a1)
                 data2 = reduce_tree(b1)
             
-            tempTree = Tree(data=[data1, data2], left_distance=a1.dist, right_distance=b1.dist)
+            tempTree = Hypothesis_Node(data=[data1, data2], left_distance=a1.dist, right_distance=b1.dist)
             tempTree.set_level_number(level_number)
             childList.append(tempTree)
             next_L.append((tempTree, (a1, b1)))
@@ -1737,7 +1834,7 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
                 next_L = []
                 level_number += 1
                 #print "******************len: ",len(L)
-    #print "Coupled Tree", reduce_tree_by_la
+    #print "Coupled Hypothesis_Node", reduce_tree_by_la
     #print "Number of levels after coupling", level_number-1
     return aOut
 pHashMethods = {"permutation" : stats.permutation_test,
@@ -1811,7 +1908,7 @@ def naive_all_against_all():
     passed_tests = []
     #print iRow, iCol
     for i, j in itertools.product(range(iRow), range(iCol)):
-        test =  Tree(left_distance=0.0, right_distance=0.0)
+        test =  Hypothesis_Node(left_distance=0.0, right_distance=0.0)
         data = [[i], [j]]
         test.add_data(data)
         #print i, j
@@ -2371,7 +2468,7 @@ def hypotheses_testing():
                 #number_performed_tests += len(current_level_tests)
                 #if n1 < 2 and n2 < 2:
                 current_level_tests.extend(leaves_hypotheses)
-                print "number of hypotheses in level:", len(current_level_tests)
+                print "number of hypotheses in level %s: %s" % (level, len(current_level_tests))
                 #if not len(current_level_tests):
                 #    continue
                 p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2)
@@ -2444,7 +2541,7 @@ def hypotheses_testing():
                             print "Hypotheses testing level ", level, " is finished."                        
             #return aFinal, aOut                
             apChildren = current_level_tests #next_level_apChildren #
-            print "Hypotheses testing level ", level, "with ",len(current_level_tests), "hypotheses is finished."
+            print "Hypotheses testing level", level, "with ",len(current_level_tests), "hypotheses is finished."
             level += 1
             #q = fQ - fQ*max_r_t/100.0
             if len(current_level_tests)>0:
@@ -2528,7 +2625,7 @@ def hypotheses_testing():
                 
             if not apChildren:
                 if config.verbose == 'INFO':
-                    print "Hypotheses testing level ", level, " is finished.", "number of hypotheses in the next level: ", len(next_level_apChildren)
+                    print "Hypotheses testing level %s is finished. Number of hypotheses in the next level: %s" %(level, len(next_level_apChildren))
                 apChildren = next_level_apChildren
                 level += 1
                 next_level_apChildren = []
