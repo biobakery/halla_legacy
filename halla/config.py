@@ -33,8 +33,7 @@ randomization_method = "permutation"  # method to generate error bars
 sstrStep = "uniform"
 verbose = 'CRITICAL' #"DEBUG","INFO","WARNING","ERROR","CRITICAL"
 descending = "HAllA" 
-D1 = None # Distance Matrix
-D2 = None # Distance Matrix    
+D = [None, None] # Distance Matrices 
 summary_method = "final"
 output_dir = "./"
 log_input = True
@@ -46,6 +45,7 @@ missing_char =" "
 missing_method = None
 seed = 0 #random.randint(1,10000)
 K = 1.5 # constant for homogeneity 
+null_dist = []
 #==================================================================#
 # Mutable Meta Objects  
 #==================================================================#

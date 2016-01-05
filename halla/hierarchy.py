@@ -23,6 +23,7 @@ from __builtin__ import True
 from matplotlib.sankey import RIGHT
 from itertools import product, combinations
 from unicodedata import decomposition
+from math import fabs
 sys.setrecursionlimit(20000)
 
 # Multi-threading section
@@ -252,19 +253,11 @@ class Hypothesis_Node():
             print "Left before: ", self.m_pData[0]
             #print "Right Exp. Var.: ", self.right_first_rep_variance
             print "Right before: ", self.m_pData[1]
-        #print "Correlation with left rep:", [scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.left_rep) for i in range(len(self.m_pData[0]))]
-        #print "Correlation with right rep:", [scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep) for i in range(len(self.m_pData[1]))]
         approach = 'effect_size'
         #robustness = .098
         #print robustness
         number_left_features = len(self.get_data()[0])
         number_right_features = len(self.get_data()[1])
-        #print "Left:", number_left_features, len(self.get_left_loading())
-        #print "Right:", number_right_features, len(self.get_right_loading())
-        #print self.get_left_loading(), self.get_data()[0]
-        #print self.get_right_loading(), self.get_data()[1]
-        #print scipy.stats.sem(self.get_right_loading())
-        #print scipy.stats.sem(self.get_left_loading())
         if len(self.get_data()[0]) <= 1 and len(self.get_data()[1]) <= 1:
             #print self.get_left_loading(), self.get_right_loading
             return True
@@ -878,7 +871,6 @@ def hclust(pArray, labels):
     def pDistance(x, y):
         dist = math.fabs(1.0 - math.fabs(pMetric(x, y)))
         return  dist
-
     
     # print "Distance",D
     #plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
@@ -892,16 +884,14 @@ def hclust(pArray, labels):
             D[i][j] = pDistance(pArray[i], pArray[j])
             D[j][i] = D[i][j]
     #print pArray.shape  
-    D = squareform(D)
-    '''  
-    D = None 
-    if config.D1 is None:
-        config.D1 = pdist(pArray, metric=pDistance)
-        D = config.D1
+    #D = squareform(D)
+     ''' 
+    D = pdist(pArray, metric=pDistance) 
+    if config.D[0] is None:
+        config.D[0] = D
     else:
-        config.D2 = pdist(pArray, metric=pDistance)
-        D = config.D2
-    #print D.shape
+        config.D[1] = D
+    #print D.shape,  D
     if config.plotting_results:
         global fig_num
         print "--- plotting heatmap for Dataset", str(fig_num)," ... "
@@ -934,6 +924,7 @@ def hclust(pArray, labels):
     # scipy.all( (Z[:,3] >= .4, Z[:,3] <= .6), axis=0 ).nonzero()
     # print pos.distance()
     import scipy.cluster.hierarchy as sch
+    
     #print sch.dendrogram(Z, orientation='right')['leaves']
     return to_tree(Z) if (bTree and len(pArray)>1) else Z, sch.dendrogram(Z, orientation='right')['leaves'] if len(pArray)>1 else sch.dendrogram(Z)['leaves']
 
@@ -1482,30 +1473,27 @@ def _cutree_overall (clusterNodelist, X, func, distance):
         next_dist = _percentage(numpy.min(aDist))
     # print len(sub_clusters), n            
     return sub_clusters , next_dist
-def _cutree_to_get_number_of_clusters (clusterNodelist, number_of_sub_cluters_threshold = None, first = False):
-    clusterNode = clusterNodelist
-    n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(math.log(n, 2)) if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
-    number_of_feature_in_each_cluter_threshold = n/2
-    #print "n: ", n
+def cutree_to_get_number_of_clusters (cluster):
+    n = cluster[0].get_count()
+    if n==1:
+        return cluster
+    number_of_sub_cluters_threshold = round(math.log(n, 2)) #if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
     sub_clusters = []
-    while clusterNode :
-        temp_apChildren = []
-        sub_clusterNode = truncate_tree(clusterNode, level=0, skip=1)
-        for node in clusterNode:
-            if node.is_leaf():
-                sub_clusterNode += [node]
-        sub_clusters = sub_clusterNode
-        clusterNode = temp_apChildren
+    sub_clusters = truncate_tree(cluster, level=0, skip=1)
     while len(sub_clusters) < number_of_sub_cluters_threshold:
         max_dist_node = sub_clusters[0]
+        max_dist_node_index = 0
         for i in range(len(sub_clusters)):
             if max_dist_node.dist < sub_clusters[i].dist:
                 max_dist_node = sub_clusters[i]
+                max_dist_node_index = i
         # print "Max Distance in this level", _percentage(max_dist_node.dist)
         if not max_dist_node.is_leaf():
-            sub_clusters += truncate_tree([max_dist_node], level=0, skip=1)
+            sub_clusters_to_add = truncate_tree([max_dist_node], level=0, skip=1)
             sub_clusters.remove(max_dist_node)
+            sub_clusters.insert(max_dist_node_index,sub_clusters_to_add[0])
+            if len(sub_clusters_to_add) ==2:
+                sub_clusters.insert(max_dist_node_index+1,sub_clusters_to_add[1])
         else:
             break
     return sub_clusters
@@ -1534,7 +1522,7 @@ def descending_silhouette_coefficient(cluster, dataset_number):
         s = (b-a)/max([a,b])
         #print 's a', s, a, b
         s_all_a.append(s)
-    if any(val <= 0.0 for val in s_all_a) or len(s_all_a) == 1:
+    if any(val <= 0.0 for val in s_all_a) and not len(s_all_a) == 1:
         return True
     #print "silhouette_coefficient a", np.mean(s_all_a)
     #print "child _a", all_a_clusters, " b_child", all_b_clusters 
@@ -1552,130 +1540,186 @@ def descending_silhouette_coefficient(cluster, dataset_number):
         s = (b-a)/max([a,b])
         #print 's b', s
         s_all_b.append(s)
-    if any(val <= 0.0 for val in s_all_b) or len(s_all_b) == 1:
+    if any(val <= 0.0 for val in s_all_b) and not len(s_all_b) == 1:
         return True
     return False
-    #print "silhouette_coefficient b", np.mean(s_all_b)
-    #print  cluster.pre_order(lambda x: x.id)
-    #return (np.mean(s_all_a) +np.mean(s_all_b))/2.0
-    #print "Parent feature:", cluster.pre_order(lambda x: x.id)
-    
-        #print "Child:", sub_cluster.pre_order(lambda x: x.id)   
-    #print X, labels
-    #from sklearn import metrics
-    #from sklearn.metrics import pairwise_distances
-    #from sklearn.cluster import KMeans
-    #kmeans_model = KMeans(n_clusters=3, random_state=1).fit(X)
-    #labels = kmeans_model.labels_
-    #print metrics.silhouette_score(X, labels, metric='euclidean')
-def _cutree_to_get_homogenous_clusters (clusterNodelist, dataset_number, first = False):
-    clusterNode = clusterNodelist
-    n = clusterNode[0].get_count()
-    number_of_sub_cluters_threshold = round(math.log(n, 2))# if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
-    #number_of_feature_in_each_cluter_threshold = n/2
-    #print "n: ", n
-    sub_clusters = []
-    if first:
-        while clusterNode :
-            temp_apChildren = []
-            sub_clusterNode = truncate_tree(clusterNode, level=0, skip=1)
-            for node in clusterNode:
-                if node.is_leaf():
-                    sub_clusterNode += [node]
-            sub_clusters = sub_clusterNode
-            clusterNode = temp_apChildren
-        while len(sub_clusters) < number_of_sub_cluters_threshold:
-            max_dist_node = sub_clusters[0]
-            for i in range(len(sub_clusters)):
-                if max_dist_node.dist < sub_clusters[i].dist:
-                    max_dist_node = sub_clusters[i]
-            # print "Max Distance in this level", _percentage(max_dist_node.dist)
-            if not max_dist_node.is_leaf():
-                sub_clusters += truncate_tree([max_dist_node], level=0, skip=1)
-                sub_clusters.remove(max_dist_node)
+def silhouette_coefficient(clusters, dataset_number):
+    #====check within class homogeniety
+    #Ref: http://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
+    pMe = distance.c_hash_metric[config.distance]
+    silhouette_scores = []
+    if len(clusters) == 1:
+        return [1.0]
+    for i in range(len(clusters)):
+        if i%2 == 0 and i<len(clusters)-1:
+            cluster_a = clusters[i].pre_order(lambda x: x.id)
+            cluster_b = clusters[i+1].pre_order(lambda x: x.id)
+        else:
+            cluster_a = clusters[i].pre_order(lambda x: x.id)
+            cluster_b = clusters[i-1].pre_order(lambda x: x.id)
+        #silhouette_score.append(silhouette_coefficient(cluster))
+        s_all_a = []
+        for a_feature in cluster_a:
+            if len(cluster_a) ==1:
+                a = 0.0
             else:
-                break
-    #print "len of subcluster: ", len(sub_clusters)
-    else:
-        sub_clusters = truncate_tree(clusterNodelist, level=0, skip=1)
-    def _get_homogenous_clusters(cluster):
-        
-        sub_homogenous_clusters = []
-        pMe = distance.c_hash_metric[config.distance] 
-        cluster_features = cluster.pre_order(lambda x: x.id)
-        if len(cluster_features) == 1:
-            return [cluster]
-        
-        cluster_medoid = config.meta_feature[dataset_number][cluster_features[len(cluster_features)-1]]
-        all_dist = [math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in combinations(cluster_features, 2)]
-        #all_dist = [math.fabs(pMe(config.meta_feature[dataset_number][i], cluster_medoid)) for i in cluster_features[0: len(cluster_features)-1]]
-        #clutser_95_percentile = np.percentile(dist_to_medoid,50)
-        
-        k = config.K
-        Q1 = np.percentile(all_dist, 25)
-        Q3 = np.percentile(all_dist, 75)
-        IQR = Q3 - Q1
-        upper_fence = Q3 + k * IQR
-        lower_fence = Q1 - k * IQR
-        
-        #====check within class homogeniety
-        '''labels = []
-        #print "Parent feature:", cluster.pre_order(lambda x: x.id)
-        X = config.meta_feature[dataset_number][cluster.pre_order(lambda x: x.id)]
-        cluster_number = 0
-        for sub_cluster in truncate_tree([cluster], level=0, skip=2):
-            cluster_number +=1
-            labels += [cluster_number for i in range(sub_cluster.get_count())]
-            #print "Child:", sub_cluster.pre_order(lambda x: x.id)   
-        print X, labels
-        labels = np.array(labels)
-        from sklearn import metrics
-        from sklearn.metrics import pairwise_distances
-        #from sklearn.cluster import KMeans
-        #kmeans_model = KMeans(n_clusters=3, random_state=1).fit(X)
-        #labels = kmeans_model.labels_
-        print metrics.silhouette_score(X, labels, metric='euclidean')
+                temp_a_features = cluster_a[:]#deepcopy(all_a_clusters)
+                #print 'before', all_a_clusters
+                temp_a_features.remove(a_feature)
+                #print 'a feature ', a_feature, temp_a_features
+                a = np.mean([1.0 -  math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([a_feature], temp_a_features)])            
+            b = np.mean([ 1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([a_feature], cluster_b)])
+            s = (b-a)/max([a,b])
+            #print 's a', s, a, b
+            s_all_a.append(s)
+        silhouette_scores.append(np.mean(s_all_a))
+    return silhouette_scores
+def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
+    n = cluster.get_count()
+    if n==1:
+        return cluster
+    #number_of_sub_cluters_threshold = round(math.log(n, 2)) 
+    sub_clusters = cutree_to_get_number_of_clusters([cluster])#truncate_tree([cluster], level=0, skip=1)truncate_tree([cluster], level=0, skip=1)#
+    sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, dataset_number) 
+    while not all(val ==1 for val in sub_silhouette_coefficient):#len(sub_clusters) < number_of_sub_cluters_threshold and
+        min_silhouette_node = sub_clusters[0]
+        min_silhouette_node_index = 0
+        #print 'level: ',sub_silhouette_coefficient[min_silhouette_node_index] , sub_silhouette_coefficient,\
+        # [cluster.pre_order(lambda x: x.id) for cluster in sub_clusters]
+        for i in range(len(sub_clusters)):
+            #print sub_silhouette_coefficient[min_silhouette_node_index] , sub_silhouette_coefficient[i]
+            if sub_silhouette_coefficient[min_silhouette_node_index] >= sub_silhouette_coefficient[i]:
+                min_silhouette_node = sub_clusters[i]
+                min_silhouette_node_index = i
+        # print "Max Distance in this level", _percentage(min_silhouette_node.dist)
+        if not min_silhouette_node.is_leaf():
+            sub_clusters_to_add = truncate_tree([min_silhouette_node], level=0, skip=1)#cutree_to_get_number_of_clusters([min_silhouette_node])##
+            sub_silhouette_coefficient_to_add = silhouette_coefficient(sub_clusters_to_add, dataset_number)
+        else:
+            continue
+        temp_sub_silhouette_coefficient_to_add = sub_silhouette_coefficient_to_add[:]
         '''
-        #distance.descending_silhouette_coefficient(cluster, dataset_number)
-        from scipy import stats
-        #print stats.kstest(all_dist, 'norm')[1]
+        try:
+            temp_sub_silhouette_coefficient_to_add.remove(1.0)
+        except:
+            pass
+            '''
+        if sub_silhouette_coefficient[min_silhouette_node_index] >= np.min(temp_sub_silhouette_coefficient_to_add):
+            sub_silhouette_coefficient.insert(min_silhouette_node_index, 1.0)
+            del sub_silhouette_coefficient[min_silhouette_node_index+1]
+            continue
+        #sub_clusters.insert(min_silhouette_node_index,sub_clusters_to_add[0])
+        sub_clusters.remove(min_silhouette_node)
+        #sub_silhouette_coefficient.insert(min_silhouette_node_index,sub_silhouette_coefficient_to_add[0])
+        del sub_silhouette_coefficient[min_silhouette_node_index]
+        sub_silhouette_coefficient.extend(sub_silhouette_coefficient_to_add)
+        sub_clusters.extend(sub_clusters_to_add)
+        '''if len(sub_clusters_to_add) == 2:
+            sub_clusters.insert(min_silhouette_node_index+1,sub_clusters_to_add[1])
+            sub_silhouette_coefficient.insert(min_silhouette_node_index+1,sub_silhouette_coefficient_to_add[1])
+        '''
+    return sub_clusters
+def get_homogenous_clusters(cluster, dataset_number, prev_silhouette_coefficient):
+    
+    #pMe = distance.c_hash_metric[config.distance]
+    
+    cluster_features = cluster.pre_order(lambda x: x.id)
+    if len(cluster_features) == 1:
+        return [cluster]
+    sub_homogenous_clusters = []
+    sub_clusters = truncate_tree([cluster], level=0, skip=1)#cutree_to_get_number_of_clusters([cluster])#cutree_to_get_number_of_clusters([cluster])#
+    for sub_cluster in sub_clusters:
+        if sub_cluster.get_count() == 1:
+            sub_homogenous_clusters.append(sub_cluster)
+            sub_clusters.remove(sub_cluster)
+    sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, dataset_number) 
+    #print sub_silhouette_coefficient
+    temp_sub_silhouette_coefficient= sub_silhouette_coefficient[:]
+    '''
+    try:
+        temp_sub_silhouette_coefficient.remove(1.0)
+        #temp_sub_silhouette_coefficient= [.5 if x == 1.0 else x for x in temp_sub_silhouette_coefficient]
+    except:
+        pass
+        '''
         
-        if all (val<= upper_fence and val >= lower_fence for val in all_dist) and\
-        descending_silhouette_coefficient(cluster, dataset_number):
+    if prev_silhouette_coefficient >= np.mean(temp_sub_silhouette_coefficient):
+        return [cluster]
+    else:
+        for i in range(len(sub_clusters)):
+            sub_homogenous_clusters.extend(get_homogenous_clusters(sub_clusters[i], dataset_number, sub_silhouette_coefficient[i]))
+    print [cluster.pre_order(lambda x: x.id) for cluster in sub_homogenous_clusters]
+    return sub_homogenous_clusters
+    
+    #cluster_medoid = config.meta_feature[dataset_number][cluster_features[len(cluster_features)-1]]
+    all_sim = [math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in combinations(cluster_features, 2)]
+    #print "all_sim ", all_sim
+    #all_sim = [1.0 - config.D[dataset_number][i][j] for i,j in combinations(cluster_features, 2)]
+    #print "all_sim ",all_sim
+    #S = squareform([math.exp((all_sim[i]*all_sim[i])/(2*np.std(all_sim))) for i in range(len(all_sim))])
+    #print "S ",S
+    '''A = numpy.zeros((len(S), len(S)))
+    for i in range(len(S)):
+        for j in range(len(S)):
+            A[i][j] = S[i][j] if i != j else S[i][j] - sum(S[:][j])
+    try:        
+        eigen_values, _ = numpy.linalg.eig(A)
+        print eigen_values
+    except:
+        pass
+        '''
+    #all_dist = [math.fabs(pMe(config.meta_feature[dataset_number][i], cluster_medoid)) for i in cluster_features[0: len(cluster_features)-1]]
+    #clutser_95_percentile = np.percentile(dist_to_medoid,50)
+    #print math.sqrt(len(A))
+    #print "A ",A
+    
+    k = config.K
+    Q1 = np.percentile(all_sim, 25)
+    Q3 = np.percentile(all_sim, 75)
+    IQR = Q3 - Q1
+    upper_fence = Q3 + k * IQR
+    lower_fence = Q1 - k * IQR
+    #====check within class homogeniety
+    coefficient_of_variation = np.std(all_sim)/np.mean(all_sim)
+    if descending_silhouette_coefficient(cluster, dataset_number):
+    #if all (val<= upper_fence and val >= lower_fence for val in all_sim) and coefficient_of_variation < .5:
+        print "coefficient_of_variation:", coefficient_of_variation , cluster_features
+        #descending_silhouette_coefficient(cluster, dataset_number):
         #not (max(all_dist)-median(all_dist)> k * math.fabs(median(all_dist)-min(all_dist))):
         #descending_silhouette_coefficient(cluster, dataset_number):
         #stats.kstest(all_dist, 'norm', mode='asymp')[1] < .05:
-        #descending_silhouette_coefficient(cluster, dataset_number) >.35:
-        
-        #not (max(all_dist)-median(all_dist)> k * math.fabs(median(all_dist)-min(all_dist))):
-            #print descending_silhouette_coefficient(cluster, dataset_number)
-            # Homogeneous
-            sub_homogenous_clusters.extend([cluster])
-            if config.verbose == 'DEBUG':
-                print "Homogenous cluster!!!"
-                print "cluster:", cluster_features, all_dist
-                print "Q1: ",Q1
-                print "Q3: ",Q3
-                print "========================"
-                #import matplotlib.pyplot as plt
-                #fig, ax = plt.subplots(1, 1)
-                #ax.hist(all_dist, normed=True, histtype='stepfilled', alpha=0.2)
-                #ax.legend(loc='best', frameon=False)
-                #plt.savefig("/Users/rah/Documents/Hutlab/halla/hist"+str(stats.kstest(all_dist, 'norm')[1])+".pdf")
-            
-        else:
-            # Too heterogeneous 
-            for sub_cluster in truncate_tree([cluster], level=0, skip=1):
-               sub_homogenous_clusters.extend(_get_homogenous_clusters(sub_cluster)) 
-        return sub_homogenous_clusters
-    if first:    
-        homogenous_clusters = []
-        for sub_cluster in sub_clusters:
-            homogenous_clusters.extend(_get_homogenous_clusters(sub_cluster))
-    else:
-        #sub_clusters = truncate_tree(clusterNodelist, level=0, skip=1)
-        return sub_clusters
     
+        # Homogeneous
+        sub_homogenous_clusters.extend([cluster])
+        if config.verbose == 'DEBUG':
+            print "Homogenous cluster!!!"
+            print "cluster:", cluster_features, all_sim
+            print "Q1: ",Q1
+            print "Q3: ",Q3
+            print "========================"
+            #import matplotlib.pyplot as plt
+            #fig, ax = plt.subplots(1, 1)
+            #ax.hist(all_dist, normed=True, histtype='stepfilled', alpha=0.2)
+            #ax.legend(loc='best', frameon=False)
+            #plt.savefig("/Users/rah/Documents/Hutlab/halla/hist"+str(stats.kstest(all_dist, 'norm')[1])+".pdf")
+        
+    else:
+        # Too heterogeneous 
+        print "heterogeneous coefficient_of_variation:", coefficient_of_variation, cluster_features
+        for sub_cluster in truncate_tree([cluster], level=0, skip=1):
+           sub_homogenous_clusters.extend(get_homogenous_clusters(sub_cluster, dataset_number)) 
+    return sub_homogenous_clusters
+def cutree_to_get_homogenous_clusters (clusterNodelist, dataset_number):
+    #clusterNode = clusterNodelist
+    #sub_clusters = truncate_tree(clusterNodelist, level=0, skip=1)
+    #homogenous_clusters = []
+    #for sub_cluster in sub_clusters:
+    homogenous_clusters = get_homogenous_clusters_silhouette_log(clusterNodelist[0], dataset_number)
+    #homogenous_clusters.extend(get_homogenous_clusters(clusterNodelist[0], dataset_number, prev_silhouette_coefficient = -1))
+
+    for cluster in homogenous_clusters:
+        print cluster.pre_order(lambda x: x.id) 
+    print '====================================='
     return homogenous_clusters
 
     
@@ -1757,8 +1801,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     pStump.set_level_number(0)
     aOut.append(pStump)
     
-    apChildren1 = _cutree_to_get_homogenous_clusters (apClusterNode1, dataset_number = 0,first = True)
-    apChildren2 = _cutree_to_get_homogenous_clusters (apClusterNode2, dataset_number = 1, first =  True)
+    apChildren1 = get_homogenous_clusters_silhouette_log (apClusterNode1[0], dataset_number = 0)
+    apChildren2 = get_homogenous_clusters_silhouette_log (apClusterNode2[0], dataset_number = 1)
     #print apChildren1
     #print apChildren2
     childList = []
@@ -1803,11 +1847,11 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
                     #print "******************len: ",len(L)
                 continue
         if not bTauX:
-            apChildren1 = _cutree_to_get_homogenous_clusters([a], dataset_number=0)  
+            apChildren1 = get_homogenous_clusters_silhouette_log(a,0)  
         else:
             apChildren1 = [a]
         if not bTauY:
-            apChildren2 = _cutree_to_get_homogenous_clusters([b], dataset_number =1)
+            apChildren2 = get_homogenous_clusters_silhouette_log(b,1)
         else:
             apChildren2 = [b]
 

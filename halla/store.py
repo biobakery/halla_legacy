@@ -546,7 +546,7 @@ def _report():
                 plt.close("all")
             
     def _report_compared_clusters():
-        output_file_compared_clusters  = open(str(config.output_dir)+'/all_compared_clusters_hypotheses_tree.txt', 'w')
+        output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
         csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
         csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
         for line in hierarchy.reduce_tree_by_layer([config.meta_hypothesis_tree]):
