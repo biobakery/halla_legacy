@@ -758,7 +758,7 @@ def permutation_test_pvalue(X, Y):
 	
 	def null_fun():
 		return math.fabs(pMe(X, numpy.random.permutation(Y)))
-	fp = nonparametric_test_pvalue(fAssociation, null_fun)
+	#fp = nonparametric_test_pvalue(fAssociation, null_fun)
 
 	
 	#num_exceedances = _calculate_num_exceedances(fAssociation, aDist)
