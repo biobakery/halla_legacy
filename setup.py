@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name="halla",
-    version="0.5.8",
+    version="0.6.0",
     license="MIT",
     description="HAllA is a programmatic tool for performing multiple association testing between two or more heterogeneous datasets, each containing a mixture of discrete, binary, or continuous data.",
     author="Gholamali Rahnavard, Curtis Huttenhower",

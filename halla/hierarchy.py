@@ -67,9 +67,8 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2
             pMethod, pArray1, pArray2, ids_to_process))
         pool.close()
         pool.join()
-        
+       
         # order the results by id and apply results to nodes
-        
         for id, dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep in results_by_id:
             result[id]=dP
             current_level_tests[id].set_similarity_score(similarity)
@@ -79,7 +78,6 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2
             current_level_tests[id].set_left_loading(left_loading)
             current_level_tests[id].set_left_rep(left_rep)
             current_level_tests[id].set_right_rep(right_rep)
-    
     else:
         result=[]
         for i in xrange(len(current_level_tests)):
@@ -89,7 +87,6 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2
                 result.append(_actor(current_level_tests[i]))
 
     return result
-
 
 #==========================================================================#
 # DATA STRUCTURES 
@@ -110,7 +107,6 @@ class Hypothesis_Node():
 
     A general object, tree need not be 2-tree 
     '''    
-
     def __init__(self, data=None, left_distance=None, right_distance=None, similarity=None):
         self.m_pData = data 
         self.m_arrayChildren = []
@@ -247,196 +243,42 @@ class Hypothesis_Node():
     
     def is_representative(self, pvalue_threshold, decomp):
         return True
-        if config.verbose == 'DEBUG':
-            print "==========================================="
-            #print "Left Exp. Var.: ", self.left_first_rep_variance
-            print "Left before: ", self.m_pData[0]
-            #print "Right Exp. Var.: ", self.right_first_rep_variance
-            print "Right before: ", self.m_pData[1]
-        approach = 'effect_size'
-        #robustness = .098
-        #print robustness
         number_left_features = len(self.get_data()[0])
         number_right_features = len(self.get_data()[1])
         if len(self.get_data()[0]) <= 1 and len(self.get_data()[1]) <= 1:
-            #print self.get_left_loading(), self.get_right_loading
             return True
-        if approach == "effect_size":
-            counter = 0
-            temp_right_loading = list()
-            reps_similarity = self.get_similarity_score()
-            pMe = distance.c_hash_metric[config.distance] 
-            left_threshold = [pMe(config.meta_feature[0][self.m_pData[0][i]], self.left_rep) for i in range(len(self.m_pData[0]))]
-            right_threshold = [pMe(config.meta_feature[1][self.m_pData[1][i]], self.right_rep) for i in range(len( self.m_pData[1]))]
-            left_rep_similarity_to_right_cluster = np.median([pMe(self.left_rep, config.meta_feature[1][self.m_pData[1][i]]) for i in range(len(self.m_pData[1]))])
-            right_rep_similarity_to_left_cluster = np.median([pMe(self.right_rep, config.meta_feature[0][self.m_pData[0][i]]) for i in range(len(self.m_pData[0]))])
-            for i in range(len(self.m_pData[1])):
-                if right_threshold[i]< (right_rep_similarity_to_left_cluster):# - np.std(right_threshold)):#scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep)[1] >.05:# 
-                    counter += 1
-                    temp_right_loading.append(i)
-                    #print "right:", self.get_right_loading()
-                    if (counter >= number_right_features) or counter > (number_right_features/(math.log(number_right_features,2))):#math.log(number_right_features,2)):
-                        if config.verbose == 'DEBUG':
-                            print "#Outlier right cluster:",counter
-                        return False
-            counter = 0
-            temp_left_loading = list()
-            for i in range(len(self.m_pData[0])):
-                if left_threshold[i]< (left_rep_similarity_to_right_cluster):# - np.std(left_threshold)): 
-                #scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.right_rep)[1] >.05:
-                    temp_left_loading.append(i)
-                    #print "after:", temp_left_loading
-                    counter += 1
-                    if (counter >= number_left_features) or counter > (number_left_features/(math.log(number_left_features,2))): # (number_left_features/2):#math.log(number_left_features,2)):
-                        if config.verbose == 'DEBUG':
-                            print "#Outlier left cluster:",counter
-                        return False
+        counter = 0
+        temp_right_loading = list()
+        reps_similarity = self.get_similarity_score()
+        pMe = distance.c_hash_metric[config.distance] 
+        left_threshold = [pMe(config.meta_feature[0][self.m_pData[0][i]], self.left_rep) for i in range(len(self.m_pData[0]))]
+        right_threshold = [pMe(config.meta_feature[1][self.m_pData[1][i]], self.right_rep) for i in range(len( self.m_pData[1]))]
+        left_rep_similarity_to_right_cluster = np.median([pMe(self.left_rep, config.meta_feature[1][self.m_pData[1][i]]) for i in range(len(self.m_pData[1]))])
+        right_rep_similarity_to_left_cluster = np.median([pMe(self.right_rep, config.meta_feature[0][self.m_pData[0][i]]) for i in range(len(self.m_pData[0]))])
+        for i in range(len(self.m_pData[1])):
+            if right_threshold[i]< (right_rep_similarity_to_left_cluster):# - np.std(right_threshold)):#scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep)[1] >.05:# 
+                counter += 1
+                temp_right_loading.append(i)
+                #print "right:", self.get_right_loading()
+                if (counter >= number_right_features) or counter > (number_right_features/(math.log(number_right_features,2))):#math.log(number_right_features,2)):
+                    if config.verbose == 'DEBUG':
+                        print "#Outlier right cluster:",counter
+                    return False
+        counter = 0
+        temp_left_loading = list()
+        for i in range(len(self.m_pData[0])):
+            if left_threshold[i]< (left_rep_similarity_to_right_cluster):# - np.std(left_threshold)): 
+            #scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.right_rep)[1] >.05:
+                temp_left_loading.append(i)
+                #print "after:", temp_left_loading
+                counter += 1
+                if (counter >= number_left_features) or counter > (number_left_features/(math.log(number_left_features,2))): # (number_left_features/2):#math.log(number_left_features,2)):
+                    if config.verbose == 'DEBUG':
+                        print "#Outlier left cluster:",counter
+                    return False
 
-            # Remove few outliers
-            '''self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
-            self.left_loading = [i for j, i in enumerate(self.right_loading) if j not in temp_right_loading]
-            
-            self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
-            self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
-            '''
-            return True
-        else:
-            return True 
-        '''
-        if decomp == 'mca1':
-            counter = 0
-            if len(self.get_right_loading()) > 1 and self.right_first_rep_variance < 10.0:
-                temp_right_loading = list()
-                right_loading_threshold = np.mean(self.get_right_loading()) - np.std(self.get_right_loading())#robustness/2.000 #math.sqrt(1.0/len(self.get_right_loading())) - .01
-                for i in range(len(self.get_right_loading())):
-                    #print "right:", self.get_right_loading()[i]
-                    #if np.mean(self.get_right_loading()) < .5 :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
-                    if self.get_right_loading()[i] < right_loading_threshold :# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
-                        counter += 1
-                        temp_right_loading.append(i)
-                        if counter >= (number_right_features/(math.log(number_right_features,2))):
-                            #print "#1:",counter
-                            return False
-                #print "Right Exp. Var.: ", self.right_first_rep_variance
-                #print "Right before: ", self.m_pData[1]
-                print "Outlier right: ",temp_right_loading
-                self.right_loading = [i for j, i in enumerate(self.right_loading) if j not in temp_right_loading]
-                self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
-                #print "Right loading: ",self.right_loading
-                #print "Right after: ", self.m_pData[1]
-            counter = 0
-            
-            if len(self.get_left_loading()) > 1 and self.left_first_rep_variance < 10.0:
-                temp_left_loading = list()
-                left_loading_threshold = np.mean(self.get_left_loading()) - np.std(self.get_left_loading())# robustness/2.000 #math.sqrt(1.0/len(self.get_left_loading())) - .01
-                for i in range(len(self.get_left_loading())):
-                    #print "left:", self.get_left_loading()[i]
-                    #if np.mean(self.get_left_loading()) < .5:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
-                    if self.get_left_loading()[i] < left_loading_threshold:
-                        counter += 1
-                        temp_left_loading.append(i)
-                        if counter >= (number_left_features/(math.log(number_left_features,2))):
-                            #print "#2:",counter
-                            return False
-                #print "Left Exp. Var.: ", self.left_first_rep_variance
-                #print "Left before: ", self.m_pData[0]
-                #print "after left:", [self.m_pData[0][i] for i in temp_left_loading]
-                #print "after left features:", [self.left_loading[i] for i in temp_left_loading]
-                print "Outlier left: ",temp_left_loading
-                self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
-                self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
-                #print "Left Loading: ",self.left_loading
-                #print "Left after: ", self.m_pData[0]
-            return True
-        elif decomp == 'pca1':
-            counter = 0
-            if len(self.get_right_loading()) > 1 and self.right_first_rep_variance<.5:
-                temp_right_loading = list()
-                right_loading_values = [i for i in self.get_right_loading()]
-                low_right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) - np.std(right_loading_values)
-                up_right_loading_threshold = math.sqrt(1.0/len(self.get_right_loading())) +  np.std(right_loading_values)
-                for i in range(len(self.get_right_loading())):
-                    #print "right:", self.get_right_loading()[i]
-                    if self.get_right_loading()[i] < low_right_loading_threshold:# or\
-                   # math.fabs(self.get_right_loading()[i]) > up_right_loading_threshold:# or math.fabs(max(self.get_right_loading()) - min(self.get_right_loading())) > .5:
-                        #numpy.delete(self.get_right_loading(), i)
-                        counter += 1
-                        temp_right_loading.append(i)
-                        #print "right:", self.get_right_loading()
-                        if counter >= (number_right_features/(math.log(number_right_features,2))):#math.log(number_right_features,2)):
-                            #print "#1:",counter
-                            return False
-                #print "after right:", [self.m_pData[1][i] for i in temp_right_loading]
-                #print "after right features:", [self.right_loading[i] for i in temp_right_loading]
-                #print "Right Exp. Var.: ", self.right_first_rep_variance
-                #print "Right before: ", self.m_pData[1]
-                self.right_loading = [i for j, i in enumerate(self.right_loading) if j not in temp_right_loading]
-                self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
-                #print self.right_loading
-                #print "Right after: ", self.m_pData[1]
-            counter = 0
-            if len(self.get_left_loading()) >1 and self.left_first_rep_variance<.5:
-                temp_left_loading = list()
-                left_loading_values = [i for i in self.get_left_loading()]
-                low_left_loading_threshold = math.sqrt(1.0/len(self.get_left_loading())) - np.std(left_loading_values)
-                up_left_loading_threshold = math.sqrt(1.0/len(self.get_left_loading())) + np.std(left_loading_values)
-                for i in range(len(self.get_left_loading())):
-                    #print "left:", self.get_left_loading()[i]
-                    if self.get_left_loading()[i] < low_left_loading_threshold:# or\
-                    #math.fabs(self.get_left_loading()[i]) > up_left_loading_threshold:# or math.fabs(max(self.get_left_loading()) - min(self.get_left_loading())) > .5:
-                        
-                        #print "before:", temp_left_loading
-                        temp_left_loading.append(i)
-                        #print "after:", temp_left_loading
-                        counter += 1
-                        if counter >= (number_left_features/(math.log(number_left_features,2))): # (number_left_features/2):#math.log(number_left_features,2)):
-                            #print "#2:",counter
-                            return False
-                #print "Left Exp. Var.: ", self.left_first_rep_variance
-                #print "Left before: ", self.m_pData[0]
-                #print "after left:", [self.m_pData[0][i] for i in temp_left_loading]
-                #print "after left features:", [self.left_loading[i] for i in temp_left_loading]
-                self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
-                self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
-                #print self.left_loading
-                #print "Left after: ", self.m_pData[0]
-            return True
-        elif approach != 'effect_size':
-            counter = 0
-            temp_right_loading = list()
-            for i in range(len(self.m_pData[1])):
-                if stats.permutation_test_pvalue(X=config.meta_feature[1][self.m_pData[1][i]], Y=self.right_rep, metric= config.distance, seed = config.seed, iIter = config.iterations) >.05:
-                #scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep)[1] >.05:# 
-                    counter += 1
-                    temp_right_loading.append(i)
-                    #print "right:", self.get_right_loading()
-                    if counter >= (number_right_features/(math.log(number_right_features,2))):#math.log(number_right_features,2)):
-                        if config.verbose == 'DEBUG':
-                            print "#Outlier right cluster:",counter
-                        return False
-            
-            #self.right_loading = [i for j, i in enumerate(self.right_loading) if j not in temp_right_loading]
-            self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
-            #print temp_right_loading
-            #print "Right after: ", self.m_pData[1]
-            counter = 0
-            temp_left_loading = list()
-            for i in range(len(self.m_pData[0])):
-                if stats.permutation_test_pvalue(X=config.meta_feature[0][self.m_pData[0][i]], Y=self.right_rep, metric= config.distance, seed = config.seed, iIter = config.iterations) >.05:
-                    #scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.right_rep)[1] >.05:
-                    temp_left_loading.append(i)
-                    #print "after:", temp_left_loading
-                    counter += 1
-                    if counter >= (number_left_features/(math.log(number_left_features,2))): # (number_left_features/2):#math.log(number_left_features,2)):
-                        if config.verbose == 'DEBUG':
-                            print "#Outlier left cluster:",counter
-                        return False
+        return True
 
-            self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
-            self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
-            #print temp_left_loading
-            return True
-        '''
     def stop_and_reject(self):
 
         number_left_features = len(self.get_data()[0])
@@ -468,55 +310,16 @@ class Hypothesis_Node():
             print "dime_A_r: ", diam_A_r,"  ", "dime_B_r: ", diam_B_r, "diam_Ar_Br: ", diam_Ar_Br
         if diam_A_r + diam_B_r == 0:
             return True
-        #stop_threshold = (2.0 * diam_Ar_Br)/(diam_A_r + diam_B_r)
         if diam_Ar_Br > diam_A_r + diam_B_r:
             return True
         else:
             return False
-        '''
-        left_rep_similarity_to_right_cluster = np.median([pMe(self.left_rep, config.meta_feature[1][i]) for i in self.m_pData[1]])
-        right_rep_similarity_to_left_cluster = np.median([pMe(self.right_rep, config.meta_feature[0][i]) for i in self.m_pData[0]])
-        for i in range(len(self.m_pData[1])):
-            if right_threshold[i]< (right_rep_similarity_to_left_cluster):# - np.std(right_threshold)):#scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep)[1] >.05:# 
-                counter += 1
-                temp_right_loading.append(i)
-                #print "right:", self.get_right_loading()
-                if counter >= (number_right_features/(math.log(number_right_features,2))+1):#math.log(number_right_features,2)):
-                    if config.verbose == 'DEBUG':
-                        print "#Outlier right cluster:",counter
-                    return False
-        #self.m_pData[1] = [i for j, i in enumerate(self.m_pData[1]) if j not in temp_right_loading]
-        #print temp_right_loading
-        #print "Right after: ", self.m_pData[1]
-        counter = 0
-        temp_left_loading = list()
-        for i in range(len(self.m_pData[0])):
-            if left_threshold[i]< (left_rep_similarity_to_right_cluster):# - np.std(left_threshold)): 
-            #scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.right_rep)[1] >.05:
-                temp_left_loading.append(i)
-                #print "after:", temp_left_loading
-                counter += 1
-                if counter >= (number_left_features/(math.log(number_left_features,2))+1): # (number_left_features/2):#math.log(number_left_features,2)):
-                    if config.verbose == 'DEBUG':
-                        print "#Outlier left cluster:",counter
-                    return False
 
-        #self.left_loading = [i for j, i in enumerate(self.left_loading) if j not in temp_left_loading]
-        #self.m_pData[0] = [i for j, i in enumerate(self.m_pData[0]) if j not in temp_left_loading]
-        #print temp_left_loading
-        return True
-        '''
     def is_bypass(self ):#
         if config.apply_stop_condition:
-            if self.stop_and_reject():# or\  # the same as 1-p<q ~ p>1-q
-                #self.get_qvalue() > (1.0 - self.get_pvalue()) and self.is_representative(pvalue_threshold = config.q, decomp = config.decomposition)
+            if self.stop_and_reject():
                 if config.verbose == 'DEBUG':
                     print "q: ", self.get_qvalue(), " p: ", self.get_pvalue()
-            #(self.get_left_first_rep_variance() > .9 and \
-            #self.get_right_first_rep_variance()> .9):
-                #print self.get_left_loading(), self.get_data()[0]
-                #print self.get_right_loading(), self.get_data()[1]
-                #print "bypass q and p values:", self.get_qvalue(), self.get_pvalue() 
                 return True
             else:
                 return False
@@ -540,13 +343,7 @@ class Hypothesis_Node():
         
     def get_rank(self):
         return self.rank
-    
-    #def is_representative(self):
-    #    return self.significance
-    
-    #def set_significance_status(self):
-    #    self.significance = True
-        
+ 
     def set_level_number(self, level_number):
         self.level_number = level_number
         
@@ -613,22 +410,7 @@ class Gardener():
             self = pSelf 
         return pTmp 
 
-    def prune(self,):
-        """
-        Return a pruned version of the tree, with new starting node(s) 
-
-        """
-        pass
-
-    def slice(self,):
-        """
-        Slice tree, giving arise to thinner cross sections of the tree, still put together by hierarchy 
-        """
-        pass 
-
-
-    # ##NOTE: I think doing the modification at run-time makes a lot more sense, and is a lot less complicated 
-
+ 
 #==========================================================================#
 # FUNCTORS   
 #==========================================================================#
@@ -656,13 +438,6 @@ def tree2clust(pTree, exact=True):
 
     pass 
 
-def clust2tree(pTree):
-    """
-    Functor converting from a scipy ClusterNode to a py Hypothesis_Node object; 
-    can always be done 
-    """
-
-    pass 
 
 #==========================================================================#
 # METHODS  
@@ -684,181 +459,6 @@ def is_tree(pObj):
 def hclust(pArray, labels):
     bTree=True
     """
-    Performs hierarchical clustering on an numpy array 
-
-    Parameters
-    ------------
-        pArray : numpy array 
-        pdist_metric : str 
-        cluster_method : str
-        bTree : boolean 
-
-    Returns
-    -------------
-
-        Z : numpy array or ClusterNode object 
-
-    Examples
-    ---------------
-
-    * Pearson correlation 1::
-
-        from numpy import array 
-        from scipy.cluster.hierarchy import dendrogram, linkage
-        import scipy.cluster.hierarchy 
-        import py
-
-        x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-
-        lxpearson = py.hierarchy.hclust( x, pdist_metric = py.distance.cord )
-
-        dendrogram(lxpearson)    
-
-    .. plot::
-
-        from numpy import array 
-        from scipy.cluster.hierarchy import dendrogram, linkage
-        import scipy.cluster.hierarchy 
-        import py
-
-        x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-
-        lxpearson = py.hierarchy.hclust( x, pdist_metric = py.distance.cord )
-
-        dendrogram(lxpearson)    
-
-    * Pearson correlation 2::
-
-        from numpy import array 
-        from scipy.cluster.hierarchy import dendrogram, linkage
-        import scipy.cluster.hierarchy 
-        import py
-
-        y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
-
-        lypearson = py.hierarchy.hclust( y, pdist_metric = py.distance.cord )
-
-        dendrogram(lypearson)
-    
-    .. plot::
-
-        from numpy import array 
-        from scipy.cluster.hierarchy import dendrogram, linkage
-        import scipy.cluster.hierarchy 
-        import py
-
-        y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
-
-        lypearson = py.hierarchy.hclust( y, pdist_metric = py.distance.cord )
-
-        dendrogram(lypearson)
-
-    * Spearman correlation 1::
-
-        from numpy import array 
-        from scipy.cluster.hierarchy import dendrogram, linkage
-        import scipy.cluster.hierarchy 
-        import py
-
-        x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-
-        lxspearman = py.hierarchy.hclust( x, pdist_metric = lambda u,v: py.distance.cord(u,v,method="spearman") )
-
-        dendrogram(lxspearman)
-
-    .. plot::
-
-        from numpy import array 
-        from scipy.cluster.hierarchy import dendrogram, linkage
-        import scipy.cluster.hierarchy 
-        import py
-
-        x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-
-        lxspearman = py.hierarchy.hclust( x, pdist_metric = lambda u,v: py.distance.cord(u,v,method="spearman") )
-
-        dendrogram(lxspearman)
-
-    * Spearman correlation 2::
-
-        from numpy import array 
-        from scipy.cluster.hierarchy import dendrogram, linkage
-        import scipy.cluster.hierarchy 
-        import py
-
-        y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
-
-        lyspearman = py.hierarchy.hclust( y, pdist_metric = lambda u,v: py.distance.cord(u,v,method="spearman") )
-
-        dendrogram(lyspearman)
-
-    .. plot::
-        
-        from numpy import array 
-        from scipy.cluster.hierarchy import dendrogram, linkage
-        import scipy.cluster.hierarchy 
-        import py
-
-        y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
-
-        lyspearman = py.hierarchy.hclust( y, pdist_metric = lambda u,v: py.distance.cord(u,v,method="spearman") )
-
-        dendrogram(lyspearman)
-    
-    * Mutual Information 1::
-
-        from numpy import array 
-        from scipy.cluster.hierarchy import dendrogram, linkage
-        import scipy.cluster.hierarchy 
-        import py
-
-        x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-        dx = halla.discretize( x, iN = None, method = None, aiSkip = [1,3] )
-
-        lxmi = py.hierarchy.hclust( dx, pdist_metric = py.distance.nmid )
-
-        dendrogram(lxmi)
-
-    .. plot::
-
-        from numpy import array 
-        from scipy.cluster.hierarchy import dendrogram, linkage
-        import scipy.cluster.hierarchy 
-        import py
-
-        x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-        dx = py.discretize( x, iN = None, method = None, aiSkip = [1,3] )
-
-        lxmi = py.hierarchy.hclust( dx, pdist_metric = py.distance.nmid )
-
-        dendrogram(lxmi)
-
-    * Mutual Information 2::
-
-        from numpy import array 
-        from scipy.cluster.hierarchy import dendrogram 
-        import py
-
-        y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
-        dy = halla.discretize( y, iN = None, method = None, aiSkip = [1] )        
-
-        lymi = py.hierarchy.hclust( dy, pdist_metric = py.distance.nmid )
-
-        dendrogram( lymi )    
-
-    .. plot::
-
-        from numpy import array 
-        from scipy.cluster.hierarchy import dendrogram 
-        import py
-
-        y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0], [0.015625,0.125,0.421875,1.0]])
-        dy = py.discretize( y, iN = None, method = None, aiSkip = [1] )        
-
-        lymi = py.hierarchy.hclust( dy, pdist_metric = py.distance.nmid )
-
-        dendrogram( lymi )    
-
     Notes 
     -----------
 
@@ -866,14 +466,10 @@ def hclust(pArray, labels):
         Use the "grouping property" as discussed by Kraskov paper. 
     """
     pMetric = distance.c_hash_metric[config.distance] 
-    # # Remember, pMetric is a notion of _strength_, not _distance_ 
-    # print str(pMetric)
     def pDistance(x, y):
         dist = math.fabs(1.0 - math.fabs(pMetric(x, y)))
         return  dist
     
-    # print "Distance",D
-    #plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
     '''
     D = np.zeros(shape=(len(pArray), len(pArray)))  
     for i in range(len(pArray)):
@@ -885,49 +481,25 @@ def hclust(pArray, labels):
             D[j][i] = D[i][j]
     #print pArray.shape  
     #D = squareform(D)
-     ''' 
+    #print D
+    '''
     D = pdist(pArray, metric=pDistance) 
-    if config.D[0] is None:
-        config.D[0] = D
+    #D = squareform(D)
+    #print D
+    if config.Distance[0] is None:
+        config.Distance[0] = squareform(D)
     else:
-        config.D[1] = D
+        config.Distance[1] = squareform(D)
     #print D.shape,  D
     if config.plotting_results:
         global fig_num
         print "--- plotting heatmap for Dataset", str(fig_num)," ... "
-        #plt.figure("Hierarcichal clusters of Dataset "+ str(fig_num),  dpi=300)
-        #if labels:
-        #    scipy.cluster.hierarchy.dendrogram(Z, labels=labels, leaf_rotation=90)
-        #else:
-        #    scipy.cluster.hierarchy.dendrogram(Z)
-        #plt.gcf()
-        #global fig_num
         Z = plot.heatmap(Data = pArray , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/hierarchical_heatmap_" + str(fig_num))
-        #plt.savefig(output_dir+"/Dendrogram1_" + str(fig_num) + ".pdf")
-        '''except:
-            Z = linkage(D, metric=pDistance, method= "single")
-            print ("Issue with heatmap categorical data")
-            '''
         fig_num += 1
     else:
-        
         Z = linkage(D, metric=pDistance, method= "single")
-        #plt.close("all")
-    # print "Linkage Matrix:", Z
-    # print fcluster(Z, .75 )
-    # print fcluster(Z, .9 )
-    # print fcluster(Z, .3 )
-    
-    # cutted_Z = np.where(Z[:,2]<.7)
-    # print  cutted_Z 
-    #print  Z
-    # scipy.all( (Z[:,3] >= .4, Z[:,3] <= .6), axis=0 ).nonzero()
-    # print pos.distance()
     import scipy.cluster.hierarchy as sch
-    
-    #print sch.dendrogram(Z, orientation='right')['leaves']
     return to_tree(Z) if (bTree and len(pArray)>1) else Z, sch.dendrogram(Z, orientation='right')['leaves'] if len(pArray)>1 else sch.dendrogram(Z)['leaves']
-
 
 def dendrogram(Z):
     return scipy.cluster.hierarchy.dendrogram(Z)
@@ -949,12 +521,6 @@ def truncate_tree(apClusterNode, level=0, skip=0):
         lC = list of ClusterNode objects 
 
     """
-
-    # if isinstance( list_clusternode, scipy.cluster.hierarchy.ClusterNode ):
-    #     apClusterNode = [list_clusternode]
-    # else:
-    #     apClusterNode = list_clusternode
-
     iSkip = skip 
     iLevel = level 
 
@@ -1341,19 +907,6 @@ def _mean_tau(X, func):
     else:
         return numpy.mean(A)
 
-    # print "X:"
-    # print X
-
-    # print "D:"
-    # print D
-
-    # print "Mean Tau:"
-    # print A 
-    
-    # assert(numpy.any(A))
-
-
-
 #-------------------------------------#
 # Decider Functions                   #
 #-------------------------------------#
@@ -1510,15 +1063,15 @@ def descending_silhouette_coefficient(cluster, dataset_number):
     from copy import deepcopy
     for a_cluster in all_a_clusters:
         if len(all_a_clusters) ==1:
-            
-            a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([a_cluster], all_a_clusters)])
+            # math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])
+            a = np.mean([1.0 - config.Distance[dataset_number][config.Features_order[dataset_number][i]][config.Features_order[dataset_number][j]] for i,j in product([a_cluster], all_a_clusters)])
         else:
             temp_all_a_clusters = all_a_clusters[:]#deepcopy(all_a_clusters)
             #print 'before', all_a_clusters
             temp_all_a_clusters.remove(a_cluster)
             #print 'after', all_a_clusters
-            a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([a_cluster], temp_all_a_clusters)])            
-        b = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([a_cluster], all_b_clusters)])
+            a = np.mean([1.0 - config.Distance[dataset_number][config.Features_order[dataset_number][i]][config.Features_order[dataset_number][j]] for i,j in product([a_cluster], temp_all_a_clusters)])            
+        b = np.mean([1.0 - config.Distance[dataset_number][config.Features_order[dataset_number][i]][config.Features_order[dataset_number][j]] for i,j in product([a_cluster], all_b_clusters)])
         s = (b-a)/max([a,b])
         #print 's a', s, a, b
         s_all_a.append(s)
@@ -1567,8 +1120,12 @@ def silhouette_coefficient(clusters, dataset_number):
                 #print 'before', all_a_clusters
                 temp_a_features.remove(a_feature)
                 #print 'a feature ', a_feature, temp_a_features
-                a = np.mean([1.0 -  math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([a_feature], temp_a_features)])            
-            b = np.mean([ 1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([a_feature], cluster_b)])
+                #a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j]))
+                #             for i,j in product([a_feature], temp_a_features)])
+                a = np.mean([config.Distance[dataset_number][i][j] for i,j in product([a_feature], temp_a_features)])            
+            #b = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) 
+             #            for i,j in product([a_feature], cluster_b)])
+            b = np.mean([ config.Distance[dataset_number][i][j] for i,j in product([a_feature], cluster_b)])
             s = (b-a)/max([a,b])
             #print 's a', s, a, b
             s_all_a.append(s)
@@ -2451,7 +2008,7 @@ def hypotheses_testing():
                         #print i, range(len(current_level_tests)), current_level_tests[i]
                         aOut.append(all_performed_tests[i])
                         #if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-                        if all_performed_tests[i].is_bypass() and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition) :
+                        if all_performed_tests[i].is_bypass():
                             if config.verbose == 'INFO':
                                 print "Bypass, no hope to find an association in the branch with p-value: ", \
                         aP[i], " and ", len(all_performed_tests[i].get_children()), \
@@ -2604,25 +2161,7 @@ def hypotheses_testing():
             #q = fQ - fQ*max_r_t/100.0 
 
         print "--- number of performed tests:", number_performed_tests
-        print "--- number of passed tests after FDR controlling:", number_passed_tests 
-        '''aFinal1= []
-        aOut1=[]
-        aP = [ last_current_level_tests[i].get_pvalue() for i in range(len(last_current_level_tests)) ]
-                # claculate adjusted p-value
-        aP_adjusted, pRank, q = stats.p_adjust(aP, fQ)
-        max_r_t = 0
-        for i in range(len(last_current_level_tests)):
-            if last_current_level_tests[i].get_pvalue() <= aP_adjusted[i] and\
-             max_r_t <= pRank[i]:
-                max_r_t = pRank[i]
-                #print "max_r_t", max_r_t
-        for i in range(len(last_current_level_tests)):
-            if pRank[i] <= max_r_t:
-                aOut1.append(last_current_level_tests[i])
-                aFinal1.append(last_current_level_tests[i])
-            else:
-                aOut1.append(last_current_level_tests[i])
-        '''                                  
+        print "--- number of passed tests after FDR controlling:", number_passed_tests                                  
         return aFinal, aOut
         
     def _rh_hypothesis_testing():

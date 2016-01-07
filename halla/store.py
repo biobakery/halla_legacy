@@ -124,10 +124,10 @@ def _featurize(strMethod="_discretize"):
 def _hclust():
     # print config.meta_feature
     config.meta_data_tree = [] 
-    tree1, config.X_features_cluster_order = hierarchy.hclust(config.meta_feature[0], labels=config.aOutName1)
+    tree1, config.Features_order[0] = hierarchy.hclust(config.meta_feature[0], labels=config.aOutName1)
     config.meta_data_tree.append(tree1)
-    #print config.X_features_cluster_order
-    tree2, config.Y_features_order= hierarchy.hclust(config.meta_feature[1] , labels=config.aOutName2)
+    #print config.Features_order[0]
+    tree2, config.Features_order[1]= hierarchy.hclust(config.meta_feature[1] , labels=config.aOutName2)
     config.meta_data_tree.append(tree2)
     # config.meta_data_tree = config.m( config.meta_feature, lambda x: hclust(x , bTree=True) )
     #print config.meta_data_tree
@@ -373,8 +373,8 @@ def _report():
         
     sorted_associations = sorted(config.meta_alla[0], key=lambda x: x.pvalue)
     if config.descending == "AllA":
-        config.X_features_cluster_order  = [i for i in range(len(config.meta_array[0]))]   
-        config.Y_features_order = [i for i in range(len(config.meta_array[1]))]         
+        config.Features_order[0]  = [i for i in range(len(config.meta_array[0]))]   
+        config.Features_order[1] = [i for i in range(len(config.meta_array[1]))]         
     def _plot_associations():
         import pandas as pd    
         association_number = 0
@@ -583,25 +583,25 @@ def _report():
         global associated_feature_Y_indecies
         Ys = list(set(associated_feature_Y_indecies))
         
-        config.X_features_cluster_order = [config.X_features_cluster_order[i] for i in range (len(config.X_features_cluster_order))  if config.X_features_cluster_order[i] in Xs ] 
-        config.Y_features_order= [config.Y_features_order[i] for i in range (len(config.Y_features_order))  if config.Y_features_order[i] in Ys ] 
+        config.Features_order[0] = [config.Features_order[0][i] for i in range (len(config.Features_order[0]))  if config.Features_order[0][i] in Xs ] 
+        config.Features_order[1]= [config.Features_order[1][i] for i in range (len(config.Features_order[1]))  if config.Features_order[1][i] in Ys ] 
         
-        X_labels = np.array([config.aOutName1[i] for i in config.X_features_cluster_order])
-        Y_labels = np.array([config.aOutName2[i] for i in config.Y_features_order])
+        X_labels = np.array([config.aOutName1[i] for i in config.Features_order[0]])
+        Y_labels = np.array([config.aOutName2[i] for i in config.Features_order[1]])
         
         import re
-        X_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', config.aOutName1[i]).replace(' ','_') for i in config.X_features_cluster_order])
-        Y_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', config.aOutName2[i]).replace(' ','_') for i in config.Y_features_order])
+        X_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', config.aOutName1[i]).replace(' ','_') for i in config.Features_order[0]])
+        Y_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', config.aOutName2[i]).replace(' ','_') for i in config.Features_order[1]])
         
-        similarity_score = np.zeros(shape=(len(config.X_features_cluster_order), len(config.Y_features_order)))  
-        for i in range(len(config.X_features_cluster_order)):
-            for j in range(len(config.Y_features_order)):
-                similarity_score[i][j] = distance.c_hash_metric[config.distance](config.meta_feature[0][config.X_features_cluster_order[i]], config.meta_feature[1][config.Y_features_order[j]])
+        similarity_score = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))  
+        for i in range(len(config.Features_order[0])):
+            for j in range(len(config.Features_order[1])):
+                similarity_score[i][j] = distance.c_hash_metric[config.distance](config.meta_feature[0][config.Features_order[0][i]], config.meta_feature[1][config.Features_order[1][j]])
                 
-        ''''p = np.zeros(shape=(len(config.X_features_cluster_order), len(config.Y_features_order))) 
-        for i in range(len(config.X_features_cluster_order)):
-            for j in range(len(config.Y_features_order)):
-                p[i][j] = pearsonr(np.array(config.meta_array[0][config.X_features_cluster_order[i]], dtype=float), np.array(config.meta_array[1][config.Y_features_order[j]], dtype=float))[0]
+        ''''p = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1]))) 
+        for i in range(len(config.Features_order[0])):
+            for j in range(len(config.Features_order[1])):
+                p[i][j] = pearsonr(np.array(config.meta_array[0][config.Features_order[0][i]], dtype=float), np.array(config.meta_array[1][config.Features_order[1][j]], dtype=float))[0]
         '''
         def _is_in_an_assciostions(i,j):
             for association in sorted_associations:
@@ -616,16 +616,16 @@ def _report():
             [writer.writerow(r) for r in similarity_score] 
         '''
         
-        anottation_cell = np.zeros(shape=(len(config.X_features_cluster_order), len(config.Y_features_order)))                
-        for i in range(len(config.X_features_cluster_order)):
-            for j in range(len(config.Y_features_order)):
-                if _is_in_an_assciostions(config.X_features_cluster_order[i],config.Y_features_order[j]): #for association in sorted_associations:
+        anottation_cell = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))                
+        for i in range(len(config.Features_order[0])):
+            for j in range(len(config.Features_order[1])):
+                if _is_in_an_assciostions(config.Features_order[0][i],config.Features_order[1][j]): #for association in sorted_associations:
                     anottation_cell[i][j] = 1
                     
-        circos_tabel = np.zeros(shape=(len(config.X_features_cluster_order), len(config.Y_features_order)))
-        for i in range(len(config.X_features_cluster_order)):
-            for j in range(len(config.Y_features_order)):
-                if _is_in_an_assciostions(config.X_features_cluster_order[i],config.Y_features_order[j]): #for association in sorted_associations:
+        circos_tabel = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))
+        for i in range(len(config.Features_order[0])):
+            for j in range(len(config.Features_order[1])):
+                if _is_in_an_assciostions(config.Features_order[0][i],config.Features_order[1][j]): #for association in sorted_associations:
                     try:
                         circos_tabel[i][j] = math.fabs(int(similarity_score[i][j]*100))
                     except:
@@ -633,8 +633,8 @@ def _report():
         logger.write_circos_table(circos_tabel, str(config.output_dir)+"/" +"circos_table_"+ config.distance+".txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
         logger.write_table(similarity_score,str(config.output_dir)+"/" + config.distance+"_similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
         logger.write_table(anottation_cell,str(config.output_dir)+"/" + config.distance+"_asscoaitaion_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
-        #anottation_cell = [config.X_features_cluster_order]
-        #anottation_cell = [ anottation_cell[:][j] for j in config.Y_features_order]
+        #anottation_cell = [config.Features_order[0]]
+        #anottation_cell = [ anottation_cell[:][j] for j in config.Features_order[1]]
         #print anottation_cell
         if config.plotting_results:
             print "--- plotting heatmap associations using R ..."
