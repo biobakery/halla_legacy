@@ -378,11 +378,6 @@ def _report():
     def _plot_associations():
         import pandas as pd    
         association_number = 0
-        #output_file_associations  = open(str(config.output_dir)+'/associations.txt', 'w')
-        #bcsvw = csv.writer(output_file_associations, csv.excel_tab)
-        #bcsvw.writerow(["Method: " + config.decomposition +"-"+ config.distance , "q value: " + str(config.q), "metric " + config.distance])
-        #bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", "Explained Variance by the First PC of the cluster"," ", "Clusters Second Dataset", "Cluster Similarity Score (NMI)", "Explained Variance by the First PC of the cluster"," ", "p-value", "q-value", "Similarity score between Clusters"])
-
         
         for association in sorted_associations:
             association_number += 1
@@ -391,29 +386,6 @@ def _report():
             associated_feature_X_indecies += iX
             global associated_feature_Y_indecies
             associated_feature_Y_indecies += iY
-            #fP = association.get_pvalue()
-            #fP_adjust = association.get_qvalue()
-            #clusterX_similarity = 1.0 - association.get_left_distance()
-            #clusterX_first_rep = association.get_left_first_rep()
-            #clusterY_similarity = 1.0 - association.get_right_distance()
-           # clusterY_first_rep = association.get_right_first_rep()
-          #  association_similarity = association.get_similarity_score()
-            
-            ''' 
-            aLineOut = map(str, [association_number,
-                                 str(';'.join(config.aOutName1[i] for i in iX)),
-                                 clusterX_similarity,
-                                 clusterX_first_rep,
-                                 " ", 
-                                 str(';'.join(config.aOutName2[i] for i in iY)),
-                                 clusterY_similarity,
-                                 clusterY_first_rep,
-                                 " ",
-                                 fP,
-                                 fP_adjust,
-                                 association_similarity])
-            bcsvw.writerow(aLineOut)
-           '''
             if config.plotting_results:
                 print "--- plotting associations ",association_number," ..."
                 cluster1 = [config.meta_array[0][i] for i in iX]
@@ -597,12 +569,13 @@ def _report():
         for i in range(len(config.Features_order[0])):
             for j in range(len(config.Features_order[1])):
                 similarity_score[i][j] = distance.c_hash_metric[config.distance](config.meta_feature[0][config.Features_order[0][i]], config.meta_feature[1][config.Features_order[1][j]])
-                
-        ''''p = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1]))) 
-        for i in range(len(config.Features_order[0])):
-            for j in range(len(config.Features_order[1])):
-                p[i][j] = pearsonr(np.array(config.meta_array[0][config.Features_order[0][i]], dtype=float), np.array(config.meta_array[1][config.Features_order[1][j]], dtype=float))[0]
-        '''
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: x.pvalue)
+        for association in sorted_associations:
+            iX, iY = association.get_data()
+            for i, j in itertools.product(iX, iY):
+                #similarity_score[i][j] = similarity_score[i][j]*2
+                pass         
+       
         def _is_in_an_assciostions(i,j):
             for association in sorted_associations:
                 iX, iY = association.get_data()

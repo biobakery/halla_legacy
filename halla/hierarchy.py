@@ -488,7 +488,7 @@ def hclust(pArray, labels):
     #print D
     if config.Distance[0] is None:
         config.Distance[0] = squareform(D)
-    else:
+    elif config.Distance[1] is None:
         config.Distance[1] = squareform(D)
     #print D.shape,  D
     if config.plotting_results:
@@ -1138,6 +1138,7 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
     #number_of_sub_cluters_threshold = round(math.log(n, 2)) 
     sub_clusters = cutree_to_get_number_of_clusters([cluster])#truncate_tree([cluster], level=0, skip=1)truncate_tree([cluster], level=0, skip=1)#
     sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, dataset_number) 
+    #print sub_silhouette_coefficient
     while not all(val ==1 for val in sub_silhouette_coefficient):#len(sub_clusters) < number_of_sub_cluters_threshold and
         min_silhouette_node = sub_clusters[0]
         min_silhouette_node_index = 0
@@ -1145,6 +1146,9 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
         # [cluster.pre_order(lambda x: x.id) for cluster in sub_clusters]
         for i in range(len(sub_clusters)):
             #print sub_silhouette_coefficient[min_silhouette_node_index] , sub_silhouette_coefficient[i]
+            if math.isnan(sub_silhouette_coefficient[min_silhouette_node_index]):
+                break
+                #sys.exit()
             if sub_silhouette_coefficient[min_silhouette_node_index] >= sub_silhouette_coefficient[i]:
                 min_silhouette_node = sub_clusters[i]
                 min_silhouette_node_index = i
@@ -1153,7 +1157,7 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
             sub_clusters_to_add = truncate_tree([min_silhouette_node], level=0, skip=1)#cutree_to_get_number_of_clusters([min_silhouette_node])##
             sub_silhouette_coefficient_to_add = silhouette_coefficient(sub_clusters_to_add, dataset_number)
         else:
-            continue
+            break
         temp_sub_silhouette_coefficient_to_add = sub_silhouette_coefficient_to_add[:]
         '''
         try:
@@ -1175,6 +1179,7 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
             sub_clusters.insert(min_silhouette_node_index+1,sub_clusters_to_add[1])
             sub_silhouette_coefficient.insert(min_silhouette_node_index+1,sub_silhouette_coefficient_to_add[1])
         '''
+    #print sub_clusters
     return sub_clusters
 def get_homogenous_clusters(cluster, dataset_number, prev_silhouette_coefficient):
     

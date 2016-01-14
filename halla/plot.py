@@ -280,7 +280,7 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarch
     # # Remember, pMetric is a notion of _strength_, not _distance_ 
     # print str(pMetric)
     def pDistance(x, y):
-        return  1.0 - pMetric(x, y)
+        return  math.fabs(1.0 -math.fabs(pMetric(x, y)))
 
     #D = pdist(pArray, metric=pDistance)
     # print "Distance",D

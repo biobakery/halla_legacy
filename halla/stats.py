@@ -694,10 +694,10 @@ def permutation_test_pvalue(X, Y):
 	fP = 1.0 
 	# print left_rep_variance, right_rep_variance, fAssociation
 	#### Perform Permutation
-	'''if len(config.null_dist) == 0:
+	if len(config.null_dist) == 0:
 		generate_null_dist(X,Y)
 	aDist = config.null_dist
-	'''
+	
 	def _calculate_num_exceedances(observed_value, random_distribution):
 	    """Determines the number of values from a random distribution which
 	    exceed or equal the observed value.
@@ -727,7 +727,7 @@ def permutation_test_pvalue(X, Y):
 	#new_fP2 = 0.0
 	#new_fP =0.0
 	iter = iIter
-	for i in xrange(iIter):
+	'''for i in xrange(iIter):
 		numpy.random.seed(i+seed)
 
 		#XP = array([numpy.random.permutation(x) for x in X])
@@ -754,6 +754,7 @@ def permutation_test_pvalue(X, Y):
 				fP = new_fP2
 		
 		# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
+	'''
 	fP = _calculate_pvalue(iter)
 	
 	def null_fun():
