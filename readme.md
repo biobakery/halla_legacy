@@ -58,9 +58,7 @@ Its advantages include:
 
 
 ## Overview ##
-
-![](http://huttenhower.sph.harvard.edu/sites/default/files/public/Figure1.png)
-
+![Figure1.png](https://bitbucket.org/repo/K688na/images/1080692052-Figure1.png)
 
 ## Requirements ##
 
@@ -101,7 +99,7 @@ Option 2: Development Version
 	Note: Creating a clone of the repository requires [Mercurial](http://mercurial.selenic.com/) to be installed. 
 
 ### Installing HAllA  ###
-1. unpack the HAllA software: ``tar -ztvf halla.tar.gz``
+1. Unpack the HAllA software: ``tar -ztvf halla.tar.gz``
 2. Move to the HAllA directory : ``$ cd halla ``
 3. Install HAllA: ``$ python setup.py install``
 
