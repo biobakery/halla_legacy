@@ -90,7 +90,7 @@ You can download the latest HAllA release or the development version.
 
 Option 1: Latest Release (Recommended)
 
-* [Download](https://bitbucket.org/biobakery/halla/downloads/biobakery-halla-0.5.6.tar) and unpack the latest release of HAllA.
+* [Download](https://bitbucket.org/biobakery/halla/downloads/biobakery-halla-0.6.0.tar.gz) and unpack the latest release of HAllA.
 
 Option 2: Development Version
 
@@ -101,9 +101,9 @@ Option 2: Development Version
 	Note: Creating a clone of the repository requires [Mercurial](http://mercurial.selenic.com/) to be installed. 
 
 ### Installing HAllA  ###
-
-1. Move to the HAllA directory : ``$ cd HAllA_PATH ``
-1. Install HAllA: ``$ python setup.py install``
+1. unpack the HAllA software: ``tar -ztvf halla.tar.gz``
+2. Move to the HAllA directory : ``$ cd halla ``
+3. Install HAllA: ``$ python setup.py install``
 
 Note: If you do not have write permissions to '/usr/lib/', then add the option "--user" to the install command. This will install the python package into subdirectories of '~/.local'.
 
