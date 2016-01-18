@@ -442,7 +442,7 @@ c_hash_decomposition = {"none":	"none",
 #=========================================================
 # Multiple comparison adjustment 
 #=========================================================
-def by(afPVAL, q):
+def bhy(afPVAL, q):
 	"""
 	Implement the benjamini-Yekutieli hierarchical hypothesis testing criterion 
 	In practice, used for implementing Yekutieli criterion *per layer*.  
@@ -468,19 +468,20 @@ def by(afPVAL, q):
 	pRank = rankdata(afPVAL, method= 'ordinal')
 
 	aAjusted = [] 
-	aQvalue = []
+	#aQvalue = []
 	iLen = len(afPVAL)
+	q_bar = q/math.log(iLen)#q / harmonic_number(iLen)
 	for i, fP in enumerate(afPVAL):
 		# fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
-		q_bar = q / harmonic_number(iLen)
+		
 		fAdjusted = q_bar * 1.0 * pRank[i] / iLen  # iLenReduced
-		qvalue = fP * iLen / pRank[i] 
+		#qvalue = fP * iLen / pRank[i] 
 		aAjusted.append(fAdjusted)
-		aQvalue.append(qvalue)
+		#aQvalue.append(qvalue)
 	# print aOut
 	# assert( all(map(lambda x: x <= 1.0, aOut)) ) ##sanity check 
 
-	return aAjusted, pRank, aQvalue
+	return aAjusted, pRank
 
 def bh(afPVAL, q):
 	"""
@@ -534,16 +535,57 @@ def bh(afPVAL, q):
 	aQvalue = []
 	iLen = len(afPVAL)
 	for i, fP in enumerate(afPVAL):
-		# fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
 		fAdjusted = q * 1.0 * pRank[i] / iLen  # iLenReduced
-		qvalue = fP * iLen / pRank[i]
+		
+		#qvalue = fP * iLen / pRank[i]
 		aAjusted.append(fAdjusted)
-		aQvalue.append(qvalue)
+		#aQvalue.append(qvalue)
 	# print aOut
 	# assert( all(map(lambda x: x <= 1.0, aOut)) ) ##sanity check 
 
-	return aAjusted, pRank, aQvalue
+	return aAjusted, pRank
+def bonferroni(afPVAL, q):
+	"""
+	Implement the Bonferroni for FDR correction
 
+
+	Parameters
+	-------------
+
+		afPVAL : list 
+		 	list of p-values 
+
+
+	Returns 
+	--------------
+
+		abOUT : list 
+			boolean vector corresponding to which hypothesis test rejected, corresponding to p-value 
+
+
+	Notes
+	---------
+
+	"""
+	pRank = rankdata(afPVAL, method= 'ordinal')
+
+	aAjusted = [] 
+	aQvalue = []
+	iLen = len(afPVAL)
+	for i, fP in enumerate(afPVAL):
+		# fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
+		fAdjusted = q / iLen  # iLenReduced
+		aAjusted.append(fAdjusted)
+	return aAjusted, pRank
+def simple_no_adusting(afPVAL, q):
+	"""
+	No adusting
+	Notes
+	---------
+
+	"""
+	pRank = rankdata(afPVAL, method= 'ordinal')
+	return afPVAL, pRank
 def p_adjust(pval, q, method="BH"):
 	"""
 	
@@ -566,8 +608,15 @@ def p_adjust(pval, q, method="BH"):
 		pval[0]
 	except (TypeError, IndexError):
 		pval = [pval]
-
-	return bh(pval, q) 
+	if config.p_adjust_method == "bhy":
+			return bhy(pval, q) 
+			#fAdjusted = q * 1.0 * pRank[i] / (iLen*math.log(iLen))  # iLenReduced
+	elif config.p_adjust_method == "bh":
+		return bh(pval, q) 
+	elif config.p_adjust_method == "bonferroni":
+		return bonferroni(pval, q)
+	elif config.p_adjust_method == "no_adjusting":
+		return simple_no_adusting(pval, q)
 
 #=========================================================
 # Statistical test 
@@ -694,9 +743,6 @@ def permutation_test_pvalue(X, Y):
 	fP = 1.0 
 	# print left_rep_variance, right_rep_variance, fAssociation
 	#### Perform Permutation
-	if len(config.null_dist) == 0:
-		generate_null_dist(X,Y)
-	aDist = config.null_dist
 	
 	def _calculate_num_exceedances(observed_value, random_distribution):
 	    """Determines the number of values from a random distribution which
@@ -727,34 +773,38 @@ def permutation_test_pvalue(X, Y):
 	#new_fP2 = 0.0
 	#new_fP =0.0
 	iter = iIter
-	'''for i in xrange(iIter):
-		numpy.random.seed(i+seed)
-
-		#XP = array([numpy.random.permutation(x) for x in X])
-		#YP = array([numpy.random.permutation(y) for y in Y])
-		#pRep1_, _, _ = mca_method(XP) #mean(pArray1)#[len(pArray1)/2]
-		#pRep2_, _, _ = mca_method(YP)#
-		#pRep1_, pRep2_ = [ discretize(pDe(pA))[0] for pA in [XP, YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
-		iter = i
-		permuted_Y = numpy.random.permutation(Y)
-		# Similarity score between representatives  
-		#fAssociation_permuted = pMe(pRep1_, pRep2_)  
-		fAssociation_permuted = math.fabs(pMe(X, permuted_Y))  
-		aDist.append(fAssociation_permuted)
-		if i % 50 == 0:
-			new_fP2 = _calculate_pvalue(i) #estimate_pvalue(sim_score, aDist) #
-			#num_exceedances = _calculate_num_exceedances(fAssociation_permuted, aDist)
-			#new_fP = _estimate_p_value(num_exceedances, len(aDist))
-			
-			if new_fP2 > fP:
+	if config.use_one_null_dist:
+		if len(config.null_dist) == 0:
+			generate_null_dist(X,Y)
+		aDist = config.null_dist
+	else:
+		for i in xrange(iIter):
+			numpy.random.seed(i+seed)
+	
+			#XP = array([numpy.random.permutation(x) for x in X])
+			#YP = array([numpy.random.permutation(y) for y in Y])
+			#pRep1_, _, _ = mca_method(XP) #mean(pArray1)#[len(pArray1)/2]
+			#pRep2_, _, _ = mca_method(YP)#
+			#pRep1_, pRep2_ = [ discretize(pDe(pA))[0] for pA in [XP, YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
+			iter = i
+			permuted_Y = numpy.random.permutation(Y)
+			# Similarity score between representatives  
+			#fAssociation_permuted = pMe(pRep1_, pRep2_)  
+			fAssociation_permuted = math.fabs(pMe(X, permuted_Y))  
+			aDist.append(fAssociation_permuted)
+			if i % 50 == 0:
+				new_fP2 = _calculate_pvalue(i) #estimate_pvalue(sim_score, aDist) #
+				#num_exceedances = _calculate_num_exceedances(fAssociation_permuted, aDist)
+				#new_fP = _estimate_p_value(num_exceedances, len(aDist))
 				
-				#print "Break before the end of permutation iterations"
-				break
-			else: 
-				fP = new_fP2
-		
-		# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
-	'''
+				if new_fP2 > fP:
+					
+					#print "Break before the end of permutation iterations"
+					break
+				else: 
+					fP = new_fP2
+			
+			# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 	fP = _calculate_pvalue(iter)
 	
 	def null_fun():

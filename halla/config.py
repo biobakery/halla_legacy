@@ -25,10 +25,10 @@ NPROC = 1 # number of threads to use
 
 distance = "nmi"
 decomposition = "medoid" 
-fdr_function = "BHL"
+fdr_function = "level"
 q = .2  
 iterations = 1000
-p_adjust_method = "BHL"
+p_adjust_method = "bh"
 randomization_method = "permutation"  # method to generate error bars 
 sstrStep = "uniform"
 verbose = 'CRITICAL' #"DEBUG","INFO","WARNING","ERROR","CRITICAL"
@@ -45,6 +45,7 @@ missing_char =" "
 missing_method = None
 seed = 0 #random.randint(1,10000)
 K = 1.5 # constant for homogeneity 
+use_one_null_dist = False
 null_dist = []
 #==================================================================#
 # Mutable Meta Objects  

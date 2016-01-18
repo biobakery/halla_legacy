@@ -1030,7 +1030,7 @@ def cutree_to_get_number_of_clusters (cluster):
     n = cluster[0].get_count()
     if n==1:
         return cluster
-    number_of_sub_cluters_threshold = round(math.log(n, 2)) #if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
+    number_of_sub_cluters_threshold = round(math.log(n, 2)+.5) #if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
     sub_clusters = []
     sub_clusters = truncate_tree(cluster, level=0, skip=1)
     while len(sub_clusters) < number_of_sub_cluters_threshold:
@@ -1137,49 +1137,55 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
         return cluster
     #number_of_sub_cluters_threshold = round(math.log(n, 2)) 
     sub_clusters = cutree_to_get_number_of_clusters([cluster])#truncate_tree([cluster], level=0, skip=1)truncate_tree([cluster], level=0, skip=1)#
+    #print "Len sub:", len(sub_clusters), "Cluster: ", sub_clusters
     sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, dataset_number) 
     #print sub_silhouette_coefficient
-    while not all(val ==1 for val in sub_silhouette_coefficient):#len(sub_clusters) < number_of_sub_cluters_threshold and
+    while True:#len(sub_clusters) < number_of_sub_cluters_threshold and
         min_silhouette_node = sub_clusters[0]
         min_silhouette_node_index = 0
-        #print 'level: ',sub_silhouette_coefficient[min_silhouette_node_index] , sub_silhouette_coefficient,\
-        # [cluster.pre_order(lambda x: x.id) for cluster in sub_clusters]
+        #print sum(sub_silhouette_coefficient), len(sub_silhouette_coefficient)
+        #if sum(sub_silhouette_coefficient) == float(len(sub_silhouette_coefficient)):
+        #    print sum(sub_silhouette_coefficient), len(sub_silhouette_coefficient)
+        #    break
         for i in range(len(sub_clusters)):
-            #print sub_silhouette_coefficient[min_silhouette_node_index] , sub_silhouette_coefficient[i]
-            if math.isnan(sub_silhouette_coefficient[min_silhouette_node_index]):
-                break
-                #sys.exit()
-            if sub_silhouette_coefficient[min_silhouette_node_index] >= sub_silhouette_coefficient[i]:
+            #if math.isnan(sub_silhouette_coefficient[min_silhouette_node_index]):
+            #    print min_silhouette_node_index, min_silhouette_node, sub_silhouette_coefficient[min_silhouette_node_index]
+            #    sys.exit()
+            if sub_silhouette_coefficient[min_silhouette_node_index] > sub_silhouette_coefficient[i]:
                 min_silhouette_node = sub_clusters[i]
                 min_silhouette_node_index = i
-        # print "Max Distance in this level", _percentage(min_silhouette_node.dist)
-        if not min_silhouette_node.is_leaf():
-            sub_clusters_to_add = truncate_tree([min_silhouette_node], level=0, skip=1)#cutree_to_get_number_of_clusters([min_silhouette_node])##
-            sub_silhouette_coefficient_to_add = silhouette_coefficient(sub_clusters_to_add, dataset_number)
-        else:
+        if sub_silhouette_coefficient[min_silhouette_node_index] == 1.0:
             break
-        temp_sub_silhouette_coefficient_to_add = sub_silhouette_coefficient_to_add[:]
+        sub_clusters_to_add = truncate_tree([min_silhouette_node], level=0, skip=1)#cutree_to_get_number_of_clusters([min_silhouette_node])##
+        
+        sub_silhouette_coefficient_to_add = silhouette_coefficient(sub_clusters_to_add, dataset_number)
+        #temp_sub_silhouette_coefficient_to_add = sub_silhouette_coefficient_to_add[:]
         '''
         try:
             temp_sub_silhouette_coefficient_to_add.remove(1.0)
         except:
             pass
             '''
-        if sub_silhouette_coefficient[min_silhouette_node_index] >= np.min(temp_sub_silhouette_coefficient_to_add):
-            sub_silhouette_coefficient.insert(min_silhouette_node_index, 1.0)
-            del sub_silhouette_coefficient[min_silhouette_node_index+1]
-            continue
-        #sub_clusters.insert(min_silhouette_node_index,sub_clusters_to_add[0])
-        sub_clusters.remove(min_silhouette_node)
-        #sub_silhouette_coefficient.insert(min_silhouette_node_index,sub_silhouette_coefficient_to_add[0])
-        del sub_silhouette_coefficient[min_silhouette_node_index]
-        sub_silhouette_coefficient.extend(sub_silhouette_coefficient_to_add)
-        sub_clusters.extend(sub_clusters_to_add)
-        '''if len(sub_clusters_to_add) == 2:
-            sub_clusters.insert(min_silhouette_node_index+1,sub_clusters_to_add[1])
-            sub_silhouette_coefficient.insert(min_silhouette_node_index+1,sub_silhouette_coefficient_to_add[1])
-        '''
-    #print sub_clusters
+        if len(sub_clusters_to_add) ==0:
+            sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
+            
+        elif sub_silhouette_coefficient[min_silhouette_node_index] >= np.min(sub_silhouette_coefficient_to_add) :
+            sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
+        else:
+            sub_clusters.remove(min_silhouette_node)
+            sub_silhouette_coefficient.remove(sub_silhouette_coefficient[min_silhouette_node_index])
+            #sub_silhouette_coefficient=[sub_silhouette_coefficient != "nan"]
+            #sub_clusters = [sub_clusters != "nan"]
+            sub_silhouette_coefficient.extend(sub_silhouette_coefficient_to_add)
+            sub_clusters.extend(sub_clusters_to_add)
+            '''if len(sub_clusters_to_add) == 2:
+                sub_clusters.insert(min_silhouette_node_index,sub_clusters_to_add[0])
+                sub_silhouette_coefficient.insert(min_silhouette_node_index,sub_silhouette_coefficient_to_add[0])
+            elif len(sub_clusters_to_add) == 1:
+                sub_clusters.insert(min_silhouette_node_index+1,sub_clusters_to_add[1])
+                sub_silhouette_coefficient.insert(min_silhouette_node_index+1,sub_silhouette_coefficient_to_add[1])
+            '''  
+    #print  sub_clusters 
     return sub_clusters
 def get_homogenous_clusters(cluster, dataset_number, prev_silhouette_coefficient):
     
@@ -1496,7 +1502,7 @@ def naive_all_against_all():
     pArray1 = config.meta_feature[0]
     pArray2 = config.meta_feature[1]
     seed = config.seed
-    fdr = config.fdr_function
+    p_adjusting_method = config.p_adjust_method
     decomposition = config.decomposition
     method = config.randomization_method
     metric = config.distance
@@ -1530,85 +1536,56 @@ def naive_all_against_all():
         aP.append(fP)
         '''
         tests.append(test)
+    
     p_values = multiprocessing_actor(_actor, tests, pMethod, pArray1, pArray2)
+    aP_adjusted, pRank = stats.p_adjust(p_values, config.q)
     for i in range(len(tests)):
         tests[i].set_pvalue(p_values[i])
-    if fdr == "simple":
-        for i in range(len(test)):
-            if tests[t].get_pvalue() <= fQ:
-                print "-- association after simple test"
-                if config.verbose == 'INFO':
-                    tests[t].report()
-                aOut.append(tests[t])
-                #aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-                aFinal.append(tests[t])
-            else :
-                #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-                aOut.append(tests[t])
-    print "number of tetsts", len(tests)
-    m = len(tests)   
-    if fdr  in ["BH", "BHF", "BHL", "BHY"]:    
-        aP_adjusted, pRank, q= stats.p_adjust(p_values, fQ)
-        for i in range(len(tests)):
-            tests[i].set_qvalue(aP_adjusted[i])
-            tests[i].set_rank(pRank[i])
-        max_r_t = 0
-        for i in range(len(tests)):
-            if p_values[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
-                max_r_t = pRank[i]
-                #print "max_r_t", max_r_t
-        for i in range(len(p_values)):
-            if pRank[i] <= max_r_t:
-                passed_tests.append(tests[i])
+        tests[i].set_qvalue(aP_adjusted[i])
+        tests[i].set_rank(pRank[i])
+    def _get_passed_fdr_tests():
+        if p_adjusting_method in ["bh", "bhy"]:
+            max_r_t = 0
+            for i in range(len(tests)):
+                if tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= tests[i].get_rank():
+                    max_r_t = tests[i].get_rank()
+            for i in range(len(tests)):
+                if tests[i].get_rank() <= max_r_t:
+                    passed_tests.append(tests[i])
+                    aOut.append(tests[i])
+                    aFinal.append(tests[i])
+                    tests[i].set_significance_status(True)
+                    print ("-- associations after %s fdr correction" % p_adjusting_method)
+                else:
+                    tests[i].set_significance_status(False)
+                    aOut.append(tests[i])
+        elif p_adjusting_method == "bonferroni":
+            for i in range(len(tests)):
+                if tests[i].get_pvalue() <= tests[i].set_qvalue(aP_adjusted[i]):
+                    passed_tests.append(tests[i])
+                    aOut.append(tests[i])
+                    aFinal.append(tests[i])
+                    tests[i].set_significance_status(True)
+                    print ("-- associations after %s fdr correction" % p_adjusting_method)
+                else:
+                    tests[i].set_significance_status(False)
+                    aOut.append(tests[i])
+        elif p_adjusting_method == "no_adjusting":
+            for i in range(len(tests)):
+                if tests[i].get_pvalue() <= fQ:
+                    passed_tests.append(tests[i])
+                    aOut.append(tests[i])
+                    aFinal.append(tests[i])
+                    tests[i].set_significance_status(True)
+                    print ("-- associations after %s fdr correction" % p_adjusting_method)
+                else:
+                    tests[i].set_significance_status(False)
+                    aOut.append(tests[i])
+        
         q_values = stats.pvalues2qvalues ([passed_tests[i].get_pvalue() for i in range(len(passed_tests))], adjusted=True)
         for i in range(len(passed_tests)): 
             passed_tests[i].set_qvalue(q_values[i])
-        for i in range(len(p_values)):
-            if pRank[i] <= max_r_t:
-                print "-- association after BH fdr controlling"
-                if config.verbose == 'INFO':
-                    tests[i].report()
-                aOut.append(tests[i])
-                #aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-                aFinal.append(tests[i])
-            else :
-                #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-                aOut.append(tests[i])
-    elif fdr == 'RH':
-        aP_adjusted, pRank, q= stats.p_adjust(p_values, fQ)
-        for i in range(len(tests)):
-            tests[i].set_qvalue(aP_adjusted[i])
-            tests[i].set_rank(pRank[i])
-        max_r_t = 0
-                #print "aP", aP
-                #print "aP_adjusted: ", aP_adjusted
-        number_end_right_pvalues = 0
-        for i in range(len(tests)):
-            if aP[i] >= 1.0 - aP_adjusted[i] or p_values[i] <= aP_adjusted[i]:
-                number_end_right_pvalues +=1 
-        print  "number_end_right_pvalues: ", number_end_right_pvalues
-        for i in range(len(tests)):
-            if aP[i] <= (aP_adjusted[i]*len(tests)/(len(tests)- number_end_right_pvalues)) and max_r_t <= pRank[i]:
-                max_r_t = pRank[i]
-                #print "max_r_t", max_r_t
-        for i in range(len(p_values)):
-            if pRank[i] <= max_r_t:
-                print "-- association after RH fdr controlling"
-                if config.verbose == 'INFO':
-                    tests[i].report()
-                aOut.append(tests[i])
-                #aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-                aFinal.append(tests[i])
-            else :
-                #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-                aOut.append(tests[i])
-    
-    
-    #aOut_header = zip(*aOut)[0]
-    #aOut_adjusted = stats.p_adjust(zip(*aOut)[1])
-
-    #return zip(aOut_header, aOut_adjusted)
-    # return numpy.reshape( aOut, (iRow,iCol) )
+    _get_passed_fdr_tests()
     print "--- number of performed tests:", len(aOut)
     print "--- number of passed tests after FDR controlling:", len(aFinal) 
     return aFinal, aOut
@@ -2043,7 +2020,7 @@ def hypotheses_testing():
         print "--- number of passed tests after FDR controlling:", number_passed_tests                                        
         return aFinal, aOut
 
-    def _bh_level_testing():
+    def _level_testing():
         apChildren = [pTree]
         level = 1
         number_performed_tests = 0 
@@ -2052,13 +2029,21 @@ def hypotheses_testing():
         current_level_tests = []
         #temp_current_level_tests = []
         leaves_hypotheses = []
+        from_prev_hypotheses = []
         #previous_unqualified_hypotheses = []
         while apChildren:
+            temp_sub_hypotheses = []
+            
             temp_hypothesis = apChildren.pop(0)
-            #if temp_hypothesis.get_children():
-            temp_sub_hypotheses = temp_hypothesis.get_children()
-            if len(temp_sub_hypotheses) == 0:
-                leaves_hypotheses.append(temp_hypothesis)
+            if config.p_adjust_method != "bhy":
+                if temp_hypothesis.get_significance_status() == True or temp_hypothesis.get_significance_status() == False:
+                    from_prev_hypotheses.append(temp_hypothesis)
+                else:
+                    temp_sub_hypotheses = temp_hypothesis.get_children()
+            else:
+                temp_sub_hypotheses = temp_hypothesis.get_children()
+                if len(temp_sub_hypotheses) == 0:
+                    leaves_hypotheses.append(temp_hypothesis)
             if temp_hypothesis.get_significance_status() != None:
                 for i in range(len(temp_sub_hypotheses)):
                     temp_sub_hypotheses[i].set_significance_status(temp_hypothesis.get_significance_status())
@@ -2068,9 +2053,14 @@ def hypotheses_testing():
                 number_performed_tests += len(temp_sub_hypotheses)
                 #temp_current_level_tests.extend(temp_sub_hypotheses)
             current_level_tests.extend(temp_sub_hypotheses)
+            
             if len (apChildren) > 0:
                 continue
             if len(current_level_tests) > 0 :
+                #if config.p_adjust_method != "bhy":
+                if len(from_prev_hypotheses) > 0 :
+                    current_level_tests.extend(from_prev_hypotheses)
+                    from_prev_hypotheses = []
                 #number_performed_tests += len(current_level_tests)
                 #if n1 < 2 and n2 < 2:
                 current_level_tests.extend(leaves_hypotheses)
@@ -2085,66 +2075,81 @@ def hypotheses_testing():
                     
                 #aP = [ current_level_tests[i].get_pvalue() for i in range(len(current_level_tests)) ]
                 # claculate adjusted p-value
-                aP_adjusted, pRank, q = stats.p_adjust(p_values, config.q)
+                q = config.q
+                aP_adjusted, pRank = stats.p_adjust(p_values, config.q)
                 for i in range(len(current_level_tests)):
-                    if current_level_tests[i].get_qvalue() == None:
-                        current_level_tests[i].set_qvalue(aP_adjusted[i])
                     current_level_tests[i].set_rank(pRank[i])
-
+                '''
                 max_r_t = 0
                 for i in range(len(current_level_tests)):
                     if current_level_tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank():
                         max_r_t = current_level_tests[i].get_rank()
                         #print "max_r_t", max_r_t
+                '''
                 passed_tests = []
-                for i in range(len(current_level_tests)):
-                    if current_level_tests[i].get_rank() <= max_r_t:
-                        passed_tests.append(current_level_tests[i])
-                q_values = stats.pvalues2qvalues ([passed_tests[i].get_pvalue() for i in range(len(passed_tests))], adjusted=True)
-                for i in range(len(passed_tests)): 
-                    passed_tests[i].set_qvalue(q_values[i])
-                for i in range(len(current_level_tests)):
-                    if current_level_tests[i].get_significance_status() == None and\
-                    current_level_tests[i].get_rank() <= max_r_t and\
-                    current_level_tests[i].is_representative(pvalue_threshold = config.q, decomp = config.decomposition):
-                        number_passed_tests += 1
-                        if config.verbose == 'DEBUG':
-                            print "Left after: ", current_level_tests[i].m_pData[0]
-                            print "Right after: ", current_level_tests[i].m_pData[1]
-                        if config.verbose == 'INFO':
-                            current_level_tests[i].report()
-                        print "-- associations after fdr correction"
-                        current_level_tests[i].set_significance_status(True)
-                        aOut.append(current_level_tests[i])
-                        aFinal.append(current_level_tests[i])
-                        #next_level_apChildren.append(current_level_tests[i])
-                    else:
-                        if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():# and current_level_tests[i].get_significance_status() == None:
-                            current_level_tests[i].set_significance_status(False)
-                            aOut.append(current_level_tests[i])
-                            if config.verbose == 'DEBUG':
-                                print "Stop testing!!!"
-                            if config.verbose == 'INFO':
-                                print "Bypass, no hope to find an association in the branch with p-value: ", \
-                                aP[i], " and ", len(current_level_tests[i].get_children()), \
-                                " sub-hypotheses.", current_level_tests[i].get_data()[0], \
-                                "   ", current_level_tests[i].get_data()[1]
-                            #next_level_apChildren.append(current_level_tests[i])
-                            
-                        elif current_level_tests[i].is_leaf():
-                            if config.verbose == 'INFO':
-                                print "End of branch, leaf!"
-                            if current_level_tests[i].get_significance_status() == None:
-                                current_level_tests[i].set_significance_status(False)
-                                aOut.append(current_level_tests[i])
-                            #next_level_apChildren.append(current_level_tests[i])
-                        #else:
-                            #if config.verbose == 'INFO':
-                                #print "Gray area with p-value:", aP[i]
-                            #next_level_apChildren.append(current_level_tests[i])
-                        
-                        if config.verbose == 'INFO':
-                            print "Hypotheses testing level ", level, " is finished."                        
+                def _get_passed_fdr_tests():
+                    if config.p_adjust_method in ["bh", "bhy"]:
+                        max_r_t = 0
+                        for i in range(len(current_level_tests)):
+                            if current_level_tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank():
+                                max_r_t = current_level_tests[i].get_rank()
+                        for i in range(len(current_level_tests)):
+                            if current_level_tests[i].get_rank() <= max_r_t:
+                                passed_tests.append(current_level_tests[i])
+                                if current_level_tests[i].get_significance_status() == None:
+                                    aOut.append(current_level_tests[i])
+                                    aFinal.append(current_level_tests[i])
+                                    current_level_tests[i].set_significance_status(True)
+                                    print ("-- associations after %s fdr correction" % config.p_adjust_method)
+                            else:
+                                if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
+                                    current_level_tests[i].set_significance_status(False)
+                                    aOut.append(current_level_tests[i])
+                                elif current_level_tests[i].is_leaf():
+                                    if current_level_tests[i].get_significance_status() == None:
+                                        current_level_tests[i].set_significance_status(False)
+                                        aOut.append(current_level_tests[i])
+                    elif config.p_adjust_method == "bonferroni":
+                        print len(current_level_tests)
+                        for i in range(len(current_level_tests)):
+                            if current_level_tests[i].get_pvalue() <= aP_adjusted[i]:
+                                passed_tests.append(current_level_tests[i])
+                                if current_level_tests[i].get_significance_status() == None:
+                                    aOut.append(current_level_tests[i])
+                                    aFinal.append(current_level_tests[i])
+                                    current_level_tests[i].set_significance_status(True)
+                                    print ("-- associations after %s fdr correction" % config.p_adjust_method)
+                            else:
+                                if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
+                                    current_level_tests[i].set_significance_status(False)
+                                    aOut.append(current_level_tests[i])
+                                elif current_level_tests[i].is_leaf():
+                                    if current_level_tests[i].get_significance_status() == None:
+                                        current_level_tests[i].set_significance_status(False)
+                                        aOut.append(current_level_tests[i])
+                    elif config.p_adjust_method == "no_adjusting":
+                        for i in range(len(current_level_tests)):
+                            if current_level_tests[i].get_pvalue() <= q:
+                                passed_tests.append(current_level_tests[i])
+                                if current_level_tests[i].get_significance_status() == None:
+                                    aOut.append(current_level_tests[i])
+                                    aFinal.append(current_level_tests[i])
+                                    current_level_tests[i].set_significance_status(True)
+                                    print ("-- associations after %s fdr correction" % config.p_adjust_method)
+                            else:
+                                if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
+                                    current_level_tests[i].set_significance_status(False)
+                                    aOut.append(current_level_tests[i])
+                                elif current_level_tests[i].is_leaf():
+                                    if current_level_tests[i].get_significance_status() == None:
+                                        current_level_tests[i].set_significance_status(False)
+                                        aOut.append(current_level_tests[i])
+                    
+                    q_values = stats.pvalues2qvalues ([passed_tests[i].get_pvalue() for i in range(len(passed_tests))], adjusted=True)
+                    for i in range(len(passed_tests)): 
+                        passed_tests[i].set_qvalue(q_values[i])
+                _get_passed_fdr_tests()
+                
             #return aFinal, aOut                
             apChildren = current_level_tests #next_level_apChildren #
             print "Hypotheses testing level", level, "with ",len(current_level_tests), "hypotheses is finished."
@@ -2165,8 +2170,8 @@ def hypotheses_testing():
             #n2 = n2 /math.log(n2, 2) if n2 > 2 else 1
             #q = fQ - fQ*max_r_t/100.0 
 
-        print "--- number of performed tests:", number_performed_tests
-        print "--- number of passed tests after FDR controlling:", number_passed_tests                                  
+        print "--- number of performed tests:", len(aOut)#number_performed_tests
+        print "--- number of passed tests after FDR controlling:", len(aFinal)#number_passed_tests                                  
         return aFinal, aOut
         
     def _rh_hypothesis_testing():
@@ -2224,7 +2229,7 @@ def hypotheses_testing():
         end_level_tests = array(end_level_tests)
         performed_tests = array(performed_tests)
         print "Nominal p-values", end_level_tests[:, 1]
-        aP_adjusted, pRank, q = stats.p_adjust(end_level_tests[:, 1], fQ)
+        aP_adjusted, pRank = stats.p_adjust(end_level_tests[:, 1], fQ)
         print "ajusted pvalue: ", aP_adjusted
         for i in range(len(end_level_tests)):
             if end_level_tests[i][1] <= aP_adjusted[i] and max_r_t <= pRank[i]:
@@ -2243,10 +2248,10 @@ def hypotheses_testing():
 
     
 
-    fdr_function = {"default": _bh_level_testing,
-                            "BHF": _bh_family_testing,
-                            "BHL":_bh_level_testing,
-                            "BHA":_bh_all_testing,
+    fdr_function = {"default": _level_testing,
+                            "family": _bh_family_testing,
+                            "level":_level_testing,
+                            "all":_bh_all_testing,
                             "RH": _rh_hypothesis_testing,
                             "simple":_simple_hypothesis_testing}
     #======================================#

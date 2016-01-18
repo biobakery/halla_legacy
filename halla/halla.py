@@ -160,14 +160,14 @@ def parse_arguments (args):
         default = "HAllA",
         choices=["HAllA","AllA"],
         help="descending approach\n[default = HAllA for hierarchical all-against-all]")
-    '''
+    
     argp.add_argument(
         "-f","--fdr",
         dest="strFDR",
-        default = "BHL",
-        choices=["BHL","BHF","BHA"],
-        help="function to maximize statistical power and control false discovery rate\n[default = BHL]")
-    '''
+        default = "level",
+        choices=["level","simple","all"],
+        help="hypothesis function to  maximize statistical power and control false discovery rate\n[default = level]")
+    
     argp.add_argument(
         "-i","--iterations", metavar="<1000>",
         dest="iIter",
@@ -189,13 +189,13 @@ def parse_arguments (args):
         choices=["none", "mca", "pca", "ica", "cca","kpca","pls","medoid", "mean"],
         help="approach for reducing dimensions (or decomposition)\n[default = medoid]")    
     
-    '''argp.add_argument(
-        "-a","--adjusting",
+    argp.add_argument(
+        "--adjusting",
         dest="strAdjust",    
         default="BH",
-        choices=["BH", "FDR", "Bonferroni", "BHY"],
+        choices=["BH", "Bonferroni", "BHY", "no_adjusting"],
         help="approach for calculating adjusted p-value\n[default = BH]")
-    
+    '''
     argp.add_argument(
         "-t","--test",
         dest="strRandomization",
@@ -227,7 +227,7 @@ def parse_arguments (args):
     argp.add_argument(
         "--apply-stop-condition",
         dest ="apply_stop_condition", 
-        help="stops when q > 1 - p", 
+        #help="stops when q > 1 - p", 
         action="store_true")
     
     argp.add_argument(
@@ -262,11 +262,10 @@ def parse_arguments (args):
         choices=["mean", "median", "most_frequent"],
         default=None,
         help="defines missing strategy to fill missing data.\n for categorical data puts all missing data in one new category \n")
-    argp.add_argument(
-        "-k",  
-        type=float,
-        default= 1.5,
-        help="a constant value for homogeneity of clusters [default = 1.5]")
+    #argp.add_argument(
+    #   type=float,
+    #    default= 1.5,
+    #    help="a constant value for homogeneity of clusters [default = 1.5]")
     return argp.parse_args()
 
 def set_parameters(args):
@@ -295,7 +294,9 @@ def set_parameters(args):
     config.NBIN = args.nbin
     config.missing_char = args.missing_char
     config.missing_method = args.missing_method
-    config.K = args.k
+    #config.K = args.k
+    config.p_adjust_method = args.strAdjust.lower()
+    config.fdr_function = args.strFDR.lower()
     # If Y was not set - we use X
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  

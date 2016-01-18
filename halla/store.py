@@ -765,6 +765,8 @@ def run():
     csvw.writerow(["Decomposition method: ", config.decomposition])
     csvw.writerow(["Similarity method: ", config.distance]) 
     csvw.writerow(["q: FDR cut-off : ", config.q]) 
+    csvw.writerow(["FDR adjusting method : ", config.p_adjust_method]) 
+    csvw.writerow(["FDR using : ", config.fdr_function])
     #csvw.writerow(["r: effect size for robustness : ", config.robustness]) 
     csvw.writerow(["Applied stop condition : ", config.apply_stop_condition]) 
     csvw.writerow(["Discretizing method : ", config.strDiscretizing])
