@@ -669,15 +669,19 @@ def _report():
                 df2 = np.array(config.meta_feature[1], dtype=float)
                 drows1 = np.zeros(shape=(X_indecies, X_indecies))
                 drows2 = np.zeros(shape=(Y_indecies, Y_indecies))
-                
-                for i in range(X_indecies):
-                    for j in range(X_indecies):
-                        drows1[i][j] = distance.c_hash_metric[config.distance](df1[i], df1[j]) 
-                
-                for i in range(Y_indecies):
-                    for j in range(Y_indecies):
-                        drows2[i][j] = distance.c_hash_metric[config.distance](df2[i], df2[j])    
-                
+                if config.Distance[0] ==None:
+                    for i in range(X_indecies):
+                        for j in range(X_indecies):
+                            drows1[i][j] = distance.c_hash_metric[config.distance](df1[i], df1[j]) 
+                    
+                    for i in range(Y_indecies):
+                        for j in range(Y_indecies):
+                            drows2[i][j] = distance.c_hash_metric[config.distance](df2[i], df2[j])    
+                else:
+                   drows1 =  config.Distance[0]
+                   drows2 =  config.Distance[1]
+                   
+                    
                 import rpy2.robjects as ro
                 #import pandas.rpy.common as com
                 import rpy2.robjects.numpy2ri
@@ -821,6 +825,7 @@ def run():
         start_time = time.time()
         _hypotheses_testing()
         excution_time_temp = time.time() - start_time
+        csvw.writerow(["number of performed permutation tests: ", config.number_of_performed_tests])
         csvw.writerow(["Hypotheses testing time", str(datetime.timedelta(seconds=excution_time_temp)) ])
         print("--- %s h:m:s hypotheses testing time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
     

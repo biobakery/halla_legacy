@@ -27,7 +27,7 @@ distance = "nmi"
 decomposition = "medoid" 
 fdr_function = "level"
 q = .2  
-iterations = 1000
+iterations = 10000
 p_adjust_method = "bh"
 randomization_method = "permutation"  # method to generate error bars 
 sstrStep = "uniform"
@@ -45,8 +45,10 @@ missing_char =" "
 missing_method = None
 seed = 0 #random.randint(1,10000)
 K = 1.5 # constant for homogeneity 
+cut_distance_thrd = .5
 use_one_null_dist = False
 null_dist = []
+number_of_performed_tests = 0
 #==================================================================#
 # Mutable Meta Objects  
 #==================================================================#

@@ -1022,15 +1022,71 @@ def _cutree_overall (clusterNodelist, X, func, distance):
             sub_clusters.remove(max_dist_node)
         else:
             break
-    if     aDist:
+    if aDist:
         next_dist = _percentage(numpy.min(aDist))
     # print len(sub_clusters), n            
     return sub_clusters , next_dist
-def cutree_to_get_number_of_clusters (cluster):
-    n = cluster[0].get_count()
-    if n==1:
+def cutree_to_get_below_threshold_number_of_features (cluster, t = None):
+    n_features = cluster.get_count()
+
+    if t == None:
+        t = math.log(n_features, 2)
+    if n_features==1:# or cluster.dist <= t:
+        return [cluster]
+    sub_clusters = []
+    #sub_clusters = cutree_to_get_number_of_clusters ([cluster])
+    sub_clusters = truncate_tree([cluster], level=0, skip=1)
+    distances = [sub_clusters[i].dist for i in range(len(sub_clusters))]
+    #print distances
+    while True:# not all(val <= t for val in distances):
+        max_dist_node = sub_clusters[0]
+        for i in range(len(sub_clusters)):
+            #if sub_clusters[i].dist > 0.0:
+                #aDist += [sub_clusters[i].dist]
+            if max_dist_node.get_count() < sub_clusters[i].get_count():
+                max_dist_node = sub_clusters[i]
+        # print "Max Distance in this level", _percentage(max_dist_node.dist)
+        if max_dist_node.get_count() > n_features/math.log(n_features,2):#max_dist_node.dist > t:
+            sub_clusters += truncate_tree([max_dist_node], level=0, skip=1)
+            sub_clusters.remove(max_dist_node)
+        else:
+            break
+    return sub_clusters
+
+def cutree_to_get_below_threshold_distance_of_clusters (cluster, t = None):
+    n_features = cluster.get_count()
+
+    if t == None:
+        t = config.cut_distance_thrd
+    if n_features==1:# or cluster.dist <= t:
+        return [cluster]
+    sub_clusters = []
+    #sub_clusters = cutree_to_get_number_of_clusters ([cluster])
+    sub_clusters = truncate_tree([cluster], level=0, skip=1)
+    #distances = [sub_clusters[i].dist for i in range(len(sub_clusters))]
+    #print distances
+    while True:# not all(val <= t for val in distances):
+        max_dist_node = sub_clusters[0]
+        for i in range(len(sub_clusters)):
+            #if sub_clusters[i].dist > 0.0:
+                #aDist += [sub_clusters[i].dist]
+            if max_dist_node.dist < sub_clusters[i].dist:
+                max_dist_node = sub_clusters[i]
+        # print "Max Distance in this level", _percentage(max_dist_node.dist)
+        if max_dist_node.dist > t:
+            sub_clusters += truncate_tree([max_dist_node], level=0, skip=1)
+            sub_clusters.remove(max_dist_node)
+        else:
+            break
+    return sub_clusters
+def cutree_to_get_number_of_clusters (cluster, n = None):
+    n_features = cluster[0].get_count()
+    if n_features==1:
         return cluster
-    number_of_sub_cluters_threshold = round(math.log(n, 2)+.5) #if first else round(math.log(n, 2)) # round(math.log(n, 2)) # round(2*math.log(n, 2))#min(round(2*math.log(n, 2)), round(math.sqrt(n)))#
+    if n ==None:
+        number_of_sub_cluters_threshold = round(math.log(n_features, 2)+.5)
+    else:
+        number_of_sub_cluters_threshold = n
     sub_clusters = []
     sub_clusters = truncate_tree(cluster, level=0, skip=1)
     while len(sub_clusters) < number_of_sub_cluters_threshold:
@@ -1099,10 +1155,11 @@ def descending_silhouette_coefficient(cluster, dataset_number):
 def silhouette_coefficient(clusters, dataset_number):
     #====check within class homogeniety
     #Ref: http://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
-    pMe = distance.c_hash_metric[config.distance]
+    #pMe = distance.c_hash_metric[config.distance]
+    
     silhouette_scores = []
-    if len(clusters) == 1:
-        return [1.0]
+    if len(clusters) <= 1:
+        sys.exit("silhouette method needs at least two clusters!")
     for i in range(len(clusters)):
         if i%2 == 0 and i<len(clusters)-1:
             cluster_a = clusters[i].pre_order(lambda x: x.id)
@@ -1136,8 +1193,15 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
     if n==1:
         return cluster
     #number_of_sub_cluters_threshold = round(math.log(n, 2)) 
-    sub_clusters = cutree_to_get_number_of_clusters([cluster])#truncate_tree([cluster], level=0, skip=1)truncate_tree([cluster], level=0, skip=1)#
-    #print "Len sub:", len(sub_clusters), "Cluster: ", sub_clusters
+    #t = 1.0 - np.percentile(config.Distance[dataset_number].flatten(), config.q*100 - 1.0/len(config.Distance[dataset_number])*100) #config.cut_distance_thrd
+    #print "t",t
+    
+    sub_clusters = cutree_to_get_below_threshold_number_of_features(cluster)#cutree_to_get_below_threshold_number_of_features(cluster, t)#cutree_to_get_below_threshold_distance_of_clusters(cluster, t)
+    
+    
+    #print "first cut", [a.pre_order(lambda x: x.id) for a in apChildren1]
+   # sub_clusters = cutree_to_get_number_of_clusters([cluster])#truncate_tree([cluster], level=0, skip=1)truncate_tree([cluster], level=0, skip=1)#
+    #print "before sil sub:", len(sub_clusters)
     sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, dataset_number) 
     #print sub_silhouette_coefficient
     while True:#len(sub_clusters) < number_of_sub_cluters_threshold and
@@ -1159,17 +1223,17 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
         sub_clusters_to_add = truncate_tree([min_silhouette_node], level=0, skip=1)#cutree_to_get_number_of_clusters([min_silhouette_node])##
         
         sub_silhouette_coefficient_to_add = silhouette_coefficient(sub_clusters_to_add, dataset_number)
-        #temp_sub_silhouette_coefficient_to_add = sub_silhouette_coefficient_to_add[:]
-        '''
+        temp_sub_silhouette_coefficient_to_add = sub_silhouette_coefficient_to_add[:]
+        
         try:
             temp_sub_silhouette_coefficient_to_add.remove(1.0)
         except:
             pass
-            '''
+            
         if len(sub_clusters_to_add) ==0:
             sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
             
-        elif sub_silhouette_coefficient[min_silhouette_node_index] >= np.min(sub_silhouette_coefficient_to_add) :
+        elif sub_silhouette_coefficient[min_silhouette_node_index] >= np.mean(temp_sub_silhouette_coefficient_to_add) :
             sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
         else:
             sub_clusters.remove(min_silhouette_node)
@@ -1185,7 +1249,7 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
                 sub_clusters.insert(min_silhouette_node_index+1,sub_clusters_to_add[1])
                 sub_silhouette_coefficient.insert(min_silhouette_node_index+1,sub_silhouette_coefficient_to_add[1])
             '''  
-    #print  sub_clusters 
+    #print "After sil sub:", len(sub_clusters)
     return sub_clusters
 def get_homogenous_clusters(cluster, dataset_number, prev_silhouette_coefficient):
     
@@ -1369,10 +1433,36 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     pStump.set_level_number(0)
     aOut.append(pStump)
     
-    apChildren1 = get_homogenous_clusters_silhouette_log (apClusterNode1[0], dataset_number = 0)
+    apChildren1 = cutree_to_get_below_threshold_number_of_features(apClusterNode1[0])
+    #get_homogenous_clusters_silhouette_log (apClusterNode1[0], dataset_number = 0)
     apChildren2 = get_homogenous_clusters_silhouette_log (apClusterNode2[0], dataset_number = 1)
-    #print apChildren1
-    #print apChildren2
+    #cutree_to_get_below_threshold_number_of_features(apClusterNode1[0])
+    #
+    '''
+    apChildren1 = []
+    apChildren2 = []
+    #print 1.0/len(config.Distance[0][0]), 1.0/len(config.Distance[1][0])
+    t1 = 1.0 - np.percentile(config.Distance[0].flatten(), config.q*100 - 1.0/len(config.Distance[0])*100) #config.cut_distance_thrd
+    print "t1",t1
+    t2 = 1.0 - np.percentile(config.Distance[1].flatten(), config.q*100 - 1.0/len(config.Distance[1])*100) #config.cut_distance_thrd
+    print "t2",t2
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(1, 1)
+    ax.hist(config.Distance[0].flatten(), normed=True, histtype='stepfilled', alpha=0.2)
+    ax.legend(loc='best', frameon=False)
+    #plt.show()
+    plt.savefig("/Users/rah/Documents/Hutlab/halla_test/dist1_hist"+".pdf")
+    
+    #t2 = config.cut_distance_thrd
+    for c in apClusterNode1:
+        apChildren1.extend(cutree_to_get_below_threshold_distance_of_clusters(c, t1))
+    for c in apClusterNode2:
+        apChildren2.extend(cutree_to_get_below_threshold_distance_of_clusters(c, t2))
+    
+    
+    print "first cut", [a.pre_order(lambda x: x.id) for a in apChildren1]
+    print "first cut", [a.pre_order(lambda x: x.id) for a in apChildren2]
+    '''
     childList = []
     L = []    
     for a, b in itertools.product(apChildren1, apChildren2):
@@ -1415,11 +1505,14 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
                     #print "******************len: ",len(L)
                 continue
         if not bTauX:
-            apChildren1 = get_homogenous_clusters_silhouette_log(a,0)  
+            apChildren1 = get_homogenous_clusters_silhouette_log(a,0)#cutree_to_get_number_of_clusters([a])
+            #cutree_to_get_below_threshold_number_of_features(a)
+            #
         else:
             apChildren1 = [a]
         if not bTauY:
-            apChildren2 = get_homogenous_clusters_silhouette_log(b,1)
+            apChildren2 = get_homogenous_clusters_silhouette_log(b,1)#cutree_to_get_below_threshold_number_of_features(b)
+            ##cutree_to_get_number_of_clusters([b])
         else:
             apChildren2 = [b]
 
@@ -1539,9 +1632,11 @@ def naive_all_against_all():
     
     p_values = multiprocessing_actor(_actor, tests, pMethod, pArray1, pArray2)
     aP_adjusted, pRank = stats.p_adjust(p_values, config.q)
+    #print aP_adjusted, pRank
+    q_values = stats.pvalues2qvalues (p_values, adjusted=True)
     for i in range(len(tests)):
         tests[i].set_pvalue(p_values[i])
-        tests[i].set_qvalue(aP_adjusted[i])
+        tests[i].set_qvalue(q_values[i])
         tests[i].set_rank(pRank[i])
     def _get_passed_fdr_tests():
         if p_adjusting_method in ["bh", "bhy"]:
@@ -1549,6 +1644,7 @@ def naive_all_against_all():
             for i in range(len(tests)):
                 if tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= tests[i].get_rank():
                     max_r_t = tests[i].get_rank()
+                    #print tests[i].get_rank()
             for i in range(len(tests)):
                 if tests[i].get_rank() <= max_r_t:
                     passed_tests.append(tests[i])
@@ -1561,7 +1657,7 @@ def naive_all_against_all():
                     aOut.append(tests[i])
         elif p_adjusting_method == "bonferroni":
             for i in range(len(tests)):
-                if tests[i].get_pvalue() <= tests[i].set_qvalue(aP_adjusted[i]):
+                if tests[i].get_pvalue() <= aP_adjusted(aP_adjusted[i]):
                     passed_tests.append(tests[i])
                     aOut.append(tests[i])
                     aFinal.append(tests[i])
@@ -1581,12 +1677,9 @@ def naive_all_against_all():
                 else:
                     tests[i].set_significance_status(False)
                     aOut.append(tests[i])
-        
-        q_values = stats.pvalues2qvalues ([passed_tests[i].get_pvalue() for i in range(len(passed_tests))], adjusted=True)
-        for i in range(len(passed_tests)): 
-            passed_tests[i].set_qvalue(q_values[i])
     _get_passed_fdr_tests()
-    print "--- number of performed tests:", len(aOut)
+    config.number_of_performed_tests =len(aOut)
+    print "--- number of performed tests:", config.number_of_performed_tests
     print "--- number of passed tests after FDR controlling:", len(aFinal) 
     return aFinal, aOut
 
@@ -2145,9 +2238,10 @@ def hypotheses_testing():
                                         current_level_tests[i].set_significance_status(False)
                                         aOut.append(current_level_tests[i])
                     
-                    q_values = stats.pvalues2qvalues ([passed_tests[i].get_pvalue() for i in range(len(passed_tests))], adjusted=True)
-                    for i in range(len(passed_tests)): 
-                        passed_tests[i].set_qvalue(q_values[i])
+                    q_values = stats.pvalues2qvalues ([current_level_tests[i].get_pvalue() for i in range(len(current_level_tests))], adjusted=True)
+                    for i in range(len(current_level_tests)):
+                        if current_level_tests[i].get_qvalue() == None and current_level_tests[i] in passed_tests: 
+                            current_level_tests[i].set_qvalue(q_values[i])
                 _get_passed_fdr_tests()
                 
             #return aFinal, aOut                
@@ -2169,8 +2263,8 @@ def hypotheses_testing():
             #n1 = n1 /math.log(n1,2) if n1 > 2 else 1
             #n2 = n2 /math.log(n2, 2) if n2 > 2 else 1
             #q = fQ - fQ*max_r_t/100.0 
-
-        print "--- number of performed tests:", len(aOut)#number_performed_tests
+        config.number_of_performed_tests = len(aOut)
+        print "--- number of performed tests:", config.number_of_performed_tests #len(aOut)#number_performed_tests
         print "--- number of passed tests after FDR controlling:", len(aFinal)#number_passed_tests                                  
         return aFinal, aOut
         

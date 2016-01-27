@@ -273,7 +273,6 @@ def set_parameters(args):
     config.decomposition = args.strDecomposition 
     #config.fdr_function = args.strFDR
     config.q = args.dQ  
-    config.iterations = args.iIter
     #config.p_adjust_method = args.strAdjust
     #config.randomization_method = args.strRandomization  # method to generate error bars 
     config.strStep = "uniform"
@@ -313,6 +312,10 @@ def set_parameters(args):
     config.plotting_results = args.plotting_results
     (config.meta_array[0], config.aOutName1, config.aOutType1, config.aOutHead1) = aOut1 
     (config.meta_array[1], config.aOutName2, config.aOutType2, config.aOutHead2) = aOut2 
+    if args.strAdjust.lower() == "bhy":
+        config.iterations = max([args.iIter, 10*len(config.aOutName1)*len(config.aOutName2)])
+    else:
+        config.iterations = args.iIter 
     
 def _main():
     
