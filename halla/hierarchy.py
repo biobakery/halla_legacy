@@ -1221,7 +1221,8 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
         if sub_silhouette_coefficient[min_silhouette_node_index] == 1.0:
             break
         sub_clusters_to_add = truncate_tree([min_silhouette_node], level=0, skip=1)#cutree_to_get_number_of_clusters([min_silhouette_node])##
-        
+        if len(sub_clusters_to_add) < 2:
+            break
         sub_silhouette_coefficient_to_add = silhouette_coefficient(sub_clusters_to_add, dataset_number)
         temp_sub_silhouette_coefficient_to_add = sub_silhouette_coefficient_to_add[:]
         
