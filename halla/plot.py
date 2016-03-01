@@ -157,20 +157,25 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
         roc_name += '_' + roc_info[i][0] 
         
     # Plot ROC curve
-    plt.figure(dpi= 300, figsize=(4, 4))
+    fig, axe = plt.subplots(figsize=(5, 5 ), dpi=300)#, sharex=False, sharey=False)
+    #fig.set_size_inches(1, 10)
+    #plt.figure(dpi= 300, figsize=(4, 4))
     for i in range(len(roc_info)):
         params = {'legend.fontsize': 6,
         'legend.linewidth': 2}
         plt.rcParams.update(params)
-        plt.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='{0} (area = {1:0.2f})'
+        axe.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='{0} (area = {1:0.2f})'
                                        ''.format(str(roc_info[i][0]), roc_auc[roc_info[i][0]]))   
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic')
-    plt.legend(loc="lower right")
+    axe.plot([0, 1], [0, 1], 'k--')
+    axe.set_xlim([0.0, 1.0])
+    axe.set_ylim([0.0, 1.05])
+    axe.legend(loc="lower right")
+    axe.set_ylabel('True Positive Rate', fontsize = 10)
+    axe.set_xlabel('False Positive Rate', fontsize = 10)
+    axe.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+    axe.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+    axe.yaxis.set_label_position('left') 
+    axe.set_title('Receiver operating characteristic', fontsize=12, fontweight='bold')
     # plt.savefig('./test/'+roc_name+'foo.pdf')
     plt.tight_layout()
     plt.savefig(figure_name + '.pdf')

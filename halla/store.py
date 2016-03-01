@@ -577,11 +577,11 @@ def _report():
                 pass         
        
         def _is_in_an_assciostions(i,j):
-            for association in sorted_associations:
+            for num, association in enumerate(sorted_associations):
                 iX, iY = association.get_data()
                 if i in iX and j in iY:
-                    return True
-            return False
+                    return num+1
+            return 0
          
         '''with open('similarity_score.csv', 'w') as csvfile:
             writer = csv.writer(csvfile)
@@ -592,13 +592,15 @@ def _report():
         anottation_cell = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))                
         for i in range(len(config.Features_order[0])):
             for j in range(len(config.Features_order[1])):
-                if _is_in_an_assciostions(config.Features_order[0][i],config.Features_order[1][j]): #for association in sorted_associations:
-                    anottation_cell[i][j] = 1
+                association_num = _is_in_an_assciostions(config.Features_order[0][i],config.Features_order[1][j])
+                #print association_num
+                if association_num > 0: #for association in sorted_associations:
+                    anottation_cell[i][j] = association_num
                     
         circos_tabel = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))
         for i in range(len(config.Features_order[0])):
             for j in range(len(config.Features_order[1])):
-                if _is_in_an_assciostions(config.Features_order[0][i],config.Features_order[1][j]): #for association in sorted_associations:
+                if _is_in_an_assciostions(config.Features_order[0][i],config.Features_order[1][j])>0: #for association in sorted_associations:
                     try:
                         circos_tabel[i][j] = math.fabs(int(similarity_score[i][j]*100))
                     except:
@@ -641,9 +643,9 @@ def _report():
                 ro.globalenv['output_heatmap_similarity_score'] = str(config.output_dir)+"/" + "results_heatmap.pdf"
                 #ro.globalenv['output_file_Pearson'] = str(config.output_dir)+"/Pearson_heatmap.pdf"
                 if distance.c_hash_association_method_discretize[config.distance]:
-                    ro.r('pheatmap(similarity_score, color = brewer.pal(100,"Reds"),labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                    ro.r('pheatmap(similarity_score, color = brewer.pal(100,"Reds"),labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 8, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, sig_matrix, ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                 else:
-                    ro.r('pheatmap(similarity_score,labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                    ro.r('pheatmap(similarity_score,labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 8, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, sig_matrix, ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                 ro.r('dev.off()')
                 '''if config.distance != "pearson":
                     ro.globalenv['p'] = p
