@@ -386,7 +386,7 @@ def _report():
             associated_feature_X_indecies += iX
             global associated_feature_Y_indecies
             associated_feature_Y_indecies += iY
-            if config.plotting_results:
+            if config.hallagram:
                 print "--- plotting associations ",association_number," ..."
                 cluster1 = [config.meta_array[0][i] for i in iX]
                 discretized_cluster1 = [config.meta_feature[0][i] for i in iX]
@@ -521,6 +521,7 @@ def _report():
         output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
         csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
         csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
+        
         for line in hierarchy.reduce_tree_by_layer([config.meta_hypothesis_tree]):
             (level, clusters) = line
             iX, iY = clusters[0], clusters[1]
@@ -529,7 +530,7 @@ def _report():
             aLineOut = map(str, [str(level), str(';'.join(config.aOutName1[i] for i in iX)), str(';'.join(config.aOutName2[i] for i in iY))])
             csvwc.writerow(aLineOut)
     def _heatmap_associations():
-        if config.plotting_results:
+        if config.hallagram:
             print "--- plotting heatmap of associations  ..."
             global associated_feature_X_indecies
             Xs = list(set(associated_feature_X_indecies))
@@ -545,6 +546,70 @@ def _report():
                 p = np.zeros(shape=(len(Xs), len(Ys)))
                 #nmi = np.zeros(shape=(len(Xs), len(Ys)))
                 plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename = str(config.output_dir)+'/all_nmi_heatmap' )
+    def _write_hallagram_info():
+        if len(associated_feature_X_indecies) == 0 or len(associated_feature_Y_indecies) == 0 :
+            return
+        from scipy.stats.stats import pearsonr
+        global associated_feature_X_indecies
+        Xs = list(set(associated_feature_X_indecies)) 
+        
+        global associated_feature_Y_indecies
+        Ys = list(set(associated_feature_Y_indecies))
+        
+        config.Features_order[0] = [config.Features_order[0][i] for i in range (len(config.Features_order[0]))  if config.Features_order[0][i] in Xs ] 
+        config.Features_order[1]= [config.Features_order[1][i] for i in range (len(config.Features_order[1]))  if config.Features_order[1][i] in Ys ] 
+        
+        X_labels = np.array([config.aOutName1[i] for i in config.Features_order[0]])
+        Y_labels = np.array([config.aOutName2[i] for i in config.Features_order[1]])
+        
+        import re
+        X_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', config.aOutName1[i]).replace(' ','_') for i in config.Features_order[0]])
+        Y_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', config.aOutName2[i]).replace(' ','_') for i in config.Features_order[1]])
+        
+        similarity_score = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))  
+        for i in range(len(config.Features_order[0])):
+            for j in range(len(config.Features_order[1])):
+                similarity_score[i][j] = distance.c_hash_metric[config.distance](config.meta_feature[0][config.Features_order[0][i]], config.meta_feature[1][config.Features_order[1][j]])
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: x.pvalue)
+        for association in sorted_associations:
+            iX, iY = association.get_data()
+            for i, j in itertools.product(iX, iY):
+                #similarity_score[i][j] = similarity_score[i][j]*2
+                pass         
+       
+        def _is_in_an_assciostions(i,j):
+            for num, association in enumerate(sorted_associations):
+                iX, iY = association.get_data()
+                if i in iX and j in iY:
+                    return num+1
+            return 0
+         
+        '''with open('similarity_score.csv', 'w') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(Y_labels)
+            [writer.writerow(r) for r in similarity_score] 
+        '''
+        
+        anottation_cell = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))                
+        for i in range(len(config.Features_order[0])):
+            for j in range(len(config.Features_order[1])):
+                association_num = _is_in_an_assciostions(config.Features_order[0][i],config.Features_order[1][j])
+                #print association_num
+                if association_num > 0: #for association in sorted_associations:
+                    anottation_cell[i][j] = association_num
+                    
+        circos_tabel = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))
+        for i in range(len(config.Features_order[0])):
+            for j in range(len(config.Features_order[1])):
+                if _is_in_an_assciostions(config.Features_order[0][i],config.Features_order[1][j])>0: #for association in sorted_associations:
+                    try:
+                        circos_tabel[i][j] = math.fabs(int(similarity_score[i][j]*100))
+                    except:
+                        circos_tabel[i][j] = 0
+        logger.write_circos_table(circos_tabel, str(config.output_dir)+"/" +"circos_table_"+ config.distance+".txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
+        logger.write_table(similarity_score,str(config.output_dir)+"/" + "similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
+        logger.write_table(anottation_cell,str(config.output_dir)+"/" + "asscoaitaion_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
+        
     def _heatmap_associations_R():
         if len(associated_feature_X_indecies) == 0 or len(associated_feature_Y_indecies) == 0 :
             return
@@ -606,12 +671,12 @@ def _report():
                     except:
                         circos_tabel[i][j] = 0
         logger.write_circos_table(circos_tabel, str(config.output_dir)+"/" +"circos_table_"+ config.distance+".txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
-        logger.write_table(similarity_score,str(config.output_dir)+"/" + config.distance+"_similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
-        logger.write_table(anottation_cell,str(config.output_dir)+"/" + config.distance+"_asscoaitaion_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
+        logger.write_table(similarity_score,str(config.output_dir)+"/" + "similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
+        logger.write_table(anottation_cell,str(config.output_dir)+"/" + "asscoaitaion_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
         #anottation_cell = [config.Features_order[0]]
         #anottation_cell = [ anottation_cell[:][j] for j in config.Features_order[1]]
         #print anottation_cell
-        if config.plotting_results:
+        if config.hallagram:
             print "--- plotting heatmap associations using R ..."
             import rpy2.robjects as ro
             #import pandas.rpy.common as com
@@ -659,7 +724,7 @@ def _report():
                     ro.r('dev.off()')
                     '''
     def _heatmap_datasets_R():
-        if config.plotting_results:          
+        if config.hallagram:          
             print "--- plotting heatmap datasets using R ..."
             from scipy.stats.stats import pearsonr
             X_indecies = len(config.aOutName1)
@@ -706,18 +771,31 @@ def _report():
     _report_all_tests()
     _report_associations()
     _report_compared_clusters()
-    if config.plotting_results:
+    if config.hallagram:
         #_heatmap_associations()
-        from rpy2.rinterface import RRuntimeError
+        #from rpy2.rinterface import RRuntimeError
         try:
-            _heatmap_associations_R()
-            _heatmap_datasets_R()
+            import os
+            _write_hallagram_info()
+            output_path = str(config.output_dir).replace("(","\(").replace(")","\)").replace(" ","\ ")
+            hallagram_command= "hallagram "+ output_path+"/similarity_table.txt "+\
+                      output_path+"/hypotheses_tree.txt "+\
+                      output_path+"/associations.txt "+\
+                      "--outfile="+output_path+"/hallagram.pdf"
+            os.system(hallagram_command)
+            hallagram_command_mask = "hallagram "+ output_path+"/similarity_table.txt "+\
+                      output_path+"/hypotheses_tree.txt "+\
+                      output_path+"/associations.txt "+\
+                      "--outfile="+output_path+"/hallagram_mask.pdf --mask"
+            os.system(hallagram_command_mask)
+            #_heatmap_associations_R()
+            #_heatmap_datasets_R()
             #_plot_associations()
         except RRuntimeError:
             print"exception with plotting in R "
     if config.diagnostics_plot:
         #_heatmap_associations()
-        from rpy2.rinterface import RRuntimeError
+        #from rpy2.rinterface import RRuntimeError
         try:
             _plot_associations()
         except RRuntimeError:

@@ -38,6 +38,7 @@ setup(
     entry_points={
         'console_scripts': [
             'halla = halla.halla:_main',
+            'hallagram = halla.hallagram:main'
         ]},
     test_suite= 'halla.tests.halla_test.main',
     zip_safe = False

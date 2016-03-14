@@ -72,7 +72,7 @@ def check_requirements(args):
     Check requirements (file format, dependencies, permissions)
     """
     # check the third party softwares for plotting the results
-    if args.plotting_results:
+    if args.hallagram:
         try: 
             import pandas as pd
         except ImportError: 
@@ -210,7 +210,7 @@ def parse_arguments (args):
         help="additional output is printed")
     
     argp.add_argument(
-        "--plotting-results", 
+        "--hallagram", 
         help="plot the results", 
         action="store_true")
     '''argp.add_argument(
@@ -279,7 +279,7 @@ def set_parameters(args):
     config.verbose = args.verbose
     #config.robustness = float(args.robustness)
     config.output_dir = args.output_dir
-    config.plotting_results = args.plotting_results
+    config.hallagram = args.hallagram
     #config.heatmap_all = args.heatmap_all
     config.descending = args.strDescending
     istm = list()  # X and Y are used to store datasets
@@ -309,7 +309,7 @@ def set_parameters(args):
         config.strFile1, config.strFile2 = istm[0], istm[0]
         
     aOut1, aOut2 = parser.Input (config.strFile1.name, config.strFile2.name, headers=args.header).get()
-    config.plotting_results = args.plotting_results
+    config.hallagram = args.hallagram
     (config.meta_array[0], config.aOutName1, config.aOutType1, config.aOutHead1) = aOut1 
     (config.meta_array[1], config.aOutName2, config.aOutType2, config.aOutHead2) = aOut2 
     if args.strAdjust.lower() == "bhy":

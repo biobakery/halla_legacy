@@ -491,7 +491,7 @@ def hclust(pArray, labels):
     elif config.Distance[1] is None:
         config.Distance[1] = squareform(D)
     #print D.shape,  D
-    if config.plotting_results:
+    if config.hallagram:
         global fig_num
         print "--- plotting heatmap for Dataset", str(fig_num)," ... "
         Z = plot.heatmap(Data = pArray , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/hierarchical_heatmap_" + str(fig_num))
