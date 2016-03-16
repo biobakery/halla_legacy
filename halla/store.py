@@ -774,25 +774,27 @@ def _report():
     if config.hallagram:
         #_heatmap_associations()
         #from rpy2.rinterface import RRuntimeError
-        try:
-            import os
-            _write_hallagram_info()
-            output_path = str(config.output_dir).replace("(","\(").replace(")","\)").replace(" ","\ ")
-            hallagram_command= "hallagram "+ output_path+"/similarity_table.txt "+\
-                      output_path+"/hypotheses_tree.txt "+\
-                      output_path+"/associations.txt "+\
-                      "--outfile="+output_path+"/hallagram.pdf"
-            os.system(hallagram_command)
-            hallagram_command_mask = "hallagram "+ output_path+"/similarity_table.txt "+\
-                      output_path+"/hypotheses_tree.txt "+\
-                      output_path+"/associations.txt "+\
-                      "--outfile="+output_path+"/hallagram_mask.pdf --mask"
-            os.system(hallagram_command_mask)
-            #_heatmap_associations_R()
-            #_heatmap_datasets_R()
-            #_plot_associations()
-        except RRuntimeError:
-            print"exception with plotting in R "
+        if os.path.isfile(output_path+"/similarity_table.txt"):
+            try:
+                import os
+                 
+                _write_hallagram_info()
+                output_path = str(config.output_dir).replace("(","\(").replace(")","\)").replace(" ","\ ")
+                hallagram_command= "hallagram "+ output_path+"/similarity_table.txt "+\
+                          output_path+"/hypotheses_tree.txt "+\
+                          output_path+"/associations.txt "+\
+                          "--outfile="+output_path+"/hallagram.pdf"
+                os.system(hallagram_command)
+                hallagram_command_mask = "hallagram "+ output_path+"/similarity_table.txt "+\
+                          output_path+"/hypotheses_tree.txt "+\
+                          output_path+"/associations.txt "+\
+                          "--outfile="+output_path+"/hallagram_mask.pdf --mask"
+                os.system(hallagram_command_mask)
+                #_heatmap_associations_R()
+                #_heatmap_datasets_R()
+                #_plot_associations()
+            except RRuntimeError:
+                print"exception with plotting the final results "
     if config.diagnostics_plot:
         #_heatmap_associations()
         #from rpy2.rinterface import RRuntimeError
