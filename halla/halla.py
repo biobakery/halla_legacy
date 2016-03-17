@@ -110,15 +110,19 @@ def check_requirements(args):
         
     print("Output files will be written to: " + output_dir) 
   
-
+VERSION="0.6.1"
 def parse_arguments (args):
     """ 
     Parse the arguments from the user
     """
     argp = argparse.ArgumentParser(
         description="Hierarchical All-against-All significance association testing",
-        formatter_class=argparse.RawTextHelpFormatter)
-            
+        formatter_class=argparse.RawTextHelpFormatter,
+        prog="halla")
+    argp.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s "+VERSION)        
     argp.add_argument(
         "-X", metavar="<input_dataset_1.txt>",
         type=argparse.FileType("r"), default=sys.stdin,
@@ -195,14 +199,6 @@ def parse_arguments (args):
         default="BH",
         choices=["BH", "Bonferroni", "BHY", "no_adjusting"],
         help="approach for calculating adjusted p-value\n[default = BH]")
-    '''
-    argp.add_argument(
-        "-t","--test",
-        dest="strRandomization",
-        default="permutation",
-        choices=["permutation","g-test"],
-        help="approach for association test\n[default = permutation]")  
-    '''
     argp.add_argument(
         "-v", "--verbose",
         dest="verbose",
@@ -213,11 +209,6 @@ def parse_arguments (args):
         "--hallagram", 
         help="plot the results", 
         action="store_true")
-    '''argp.add_argument(
-        "--heatmap-all", 
-        help="plot a heatmap for all participated features in at least one association", 
-        action="store_true")
-    '''
     argp.add_argument(
         "--discretizing", 
         dest="strDiscretizing",
@@ -227,7 +218,7 @@ def parse_arguments (args):
     argp.add_argument(
         "--apply-stop-condition",
         dest ="apply_stop_condition", 
-        #help="stops when q > 1 - p", 
+        help="stops when two clusters are two far from each other", 
         action="store_true")
     
     argp.add_argument(
@@ -262,10 +253,6 @@ def parse_arguments (args):
         choices=["mean", "median", "most_frequent"],
         default=None,
         help="defines missing strategy to fill missing data.\n for categorical data puts all missing data in one new category \n")
-    #argp.add_argument(
-    #   type=float,
-    #    default= 1.5,
-    #    help="a constant value for homogeneity of clusters [default = 1.5]")
     return argp.parse_args()
 
 def set_parameters(args):

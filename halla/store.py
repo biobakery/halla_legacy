@@ -828,21 +828,21 @@ def run():
     """
     if config.output_dir == "./":
         config.output_dir = "./"+config.descending+'_'+config.distance+'_'+config.decomposition +'_'+ str(len(config.meta_array[0]))+'_'+str(len(config.meta_array[0][1]))
-        if not os.path.isdir(config.output_dir):
-            try:
-                print("Creating output directory: " + config.output_dir)
-                os.mkdir(config.output_dir)
-            except EnvironmentError:
-                sys.exit("CRITICAL ERROR: Unable to create output directory.")
-        else:
-            try:
-                print("Removing the old output directory: " + config.output_dir)
-                shutil.rmtree(config.output_dir)
-                print("Creating output directory: " + config.output_dir)
-                os.mkdir(config.output_dir)
-            except EnvironmentError:
-                sys.exit("CRITICAL ERROR: Unable to create output directory.")
-    
+    if not os.path.isdir(config.output_dir):
+        try:
+            print("Creating output directory: " + config.output_dir)
+            os.mkdir(config.output_dir)
+        except EnvironmentError:
+            sys.exit("CRITICAL ERROR: Unable to create output directory.")
+    else:
+        try:
+            print("Removing the old output directory: " + config.output_dir)
+            shutil.rmtree(config.output_dir)
+            print("Creating output directory: " + config.output_dir)
+            os.mkdir(config.output_dir)
+        except EnvironmentError:
+            sys.exit("CRITICAL ERROR: Unable to create output directory.")
+
     try:    
         performance_file  = open(str(config.output_dir)+'/performance.txt', 'a')
     except IOError:
