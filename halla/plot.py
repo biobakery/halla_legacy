@@ -18,7 +18,12 @@ from matplotlib.pyplot import xlabel
 # import pydot
 import math
 import pandas as pd
-
+import numpy as np
+import matplotlib.pyplot as plt
+from . import config
+import matplotlib
+matplotlib.style.use('ggplot')
+matplotlib.use( "Agg" )
 def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods', ylabel=None, labels=None):
     
     import pylab as pl
@@ -32,6 +37,8 @@ def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods'
         pl.title("Statistical Power")
         
     ax = pl.axes()
+    ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+    ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
     pl.hold(True)
     if len(labels) > 0:
         ax.set_xticklabels(labels)
@@ -68,6 +75,8 @@ def scatter_plot(x=None, y=None, alpha=.1, file_name='Figure2', xlabel="Recall",
     pl.figure("Recall vs. FDR", dpi= 300)
     pl.title("Recall vs. FDR")
     ax = pl.axes()
+    ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+    ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
     pl.hold(True)
     # if len(labels) > 0:
     #    ax.set_xticklabels(labels)
@@ -77,7 +86,7 @@ def scatter_plot(x=None, y=None, alpha=.1, file_name='Figure2', xlabel="Recall",
     pl.xlim([-0.05, 1.15])
     pl.ylim([-0.05, 1.3])
     pl.tight_layout()
-    pl.scatter(x, y , marker='o', alpha=.5)
+    ax.scatter(x, y , marker='o', alpha=.5)
     loc = True
     for i, txt in enumerate(labels):
         '''if loc :
@@ -87,7 +96,7 @@ def scatter_plot(x=None, y=None, alpha=.1, file_name='Figure2', xlabel="Recall",
             pos = "left"
             loc = True
         '''
-        pl.annotate(txt, xy=(x[i], y[i]), xytext=(10, 10),
+        ax.annotate(txt, xy=(x[i], y[i]), xytext=(10, 10),
             textcoords='offset points', ha="right", va="bottom",
             bbox=dict(boxstyle='round,pad=0.2', fc='yellow', alpha=0.5),
             arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0.8', color='green'))
@@ -177,7 +186,7 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
     axe.yaxis.set_label_position('left') 
     axe.set_title('Receiver operating characteristic', fontsize=12, fontweight='bold')
     # plt.savefig('./test/'+roc_name+'foo.pdf')
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.savefig(figure_name + '.pdf')
     #plt.show()
     # return plt
@@ -203,6 +212,8 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     # Compute and plot first dendrogram.
     fig = pylab.figure(dpi = 300,figsize=(math.ceil(len(pArray2)/5.0)+2, math.ceil(len(pArray1)/5.0)+2))
     ax1 = fig.add_axes([0.09,0.1,0.2,0.6])
+    ax1.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+    ax1.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
     Y1 = sch.linkage(D, method = "single")
     if len(Y1) > 1:
         Z1 = sch.dendrogram(Y1, orientation='right')
@@ -211,6 +222,8 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     
     # Compute and plot second dendrogram.
     ax2 = fig.add_axes([0.3,0.71,0.6,0.2])
+    ax2.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+    ax2.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
     Y2 = sch.linkage(D.T, method = "single")
     if len(Y2) > 1:
         Z2 = sch.dendrogram(Y2)
@@ -243,6 +256,8 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
         axmatrix.set_xticklabels(label2, minor=False)
         axmatrix.xaxis.set_label_position('bottom')
         axmatrix.xaxis.tick_bottom()
+        axmatrix.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+        axmatrix.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
         pylab.xticks(rotation=-90, fontsize=6)
     if rowLabel:
         if len(xlabels) == len(idx1):
@@ -253,16 +268,19 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
         axmatrix.set_yticklabels(label1, minor=False)
         axmatrix.yaxis.set_label_position('right')
         axmatrix.yaxis.tick_right()
+        axmatrix.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+        axmatrix.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
         pylab.yticks(rotation=0, fontsize=6)
    
     # Plot colorbar.
     if color_bar:
         axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
         pylab.colorbar(im, cax=axcolor)
+    #plt.tight_layout()
     fig.savefig(filename + '.pdf')
     pylab.close()
         
-def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True, color_bar = False, sortCol = True):
+def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True):
     import scipy
     import pylab
     # import dot_parser
@@ -282,18 +300,13 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarch
                 D[j, i] = D[i, j]
      '''      
     pMetric = distance.c_hash_metric[metric] 
-    # # Remember, pMetric is a notion of _strength_, not _distance_ 
-    # print str(pMetric)
     def pDistance(x, y):
         return  math.fabs(1.0 -math.fabs(pMetric(x, y)))
-
-    #D = pdist(pArray, metric=pDistance)
-    # print "Distance",D
-    #plt.figure(figsize=(len(labels)/10.0 + 5.0, 5.0))
-    #Z = linkage(D, metric=pDistance)
-    # Compute and plot first dendrogram.
+    
     fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(pArray[0])/5.0)),(math.ceil(len(pArray)/5.0))))
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)
+    ax1.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+    ax1.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
     if len(D) > 0:
         Y1 = sch.linkage(D, metric=pDistance, method=method)
     else:
@@ -306,23 +319,15 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarch
     # Compute and plot second dendrogram.
     if len(xlabels_order) == 0:
         ax2 = fig.add_axes([0.3, 0.71, 0.6, 0.2], frame_on=True)
-        #tpArray = pArray.T 
-        '''D2 = np.zeros(shape=(len(tpArray), len(tpArray))) 
-        for i in range(len(tpArray)):
-            for j in range(i,len(tpArray)):
-                if i == j:
-                    D2[i][j] = 0
-                    continue
-                D2[i][j] = pDistance(tpArray[i], tpArray[j])
-                D2[j][i] = D2[i][j]
-        #print pArray.shape  
-        D2 = squareform(D2)
-        '''
+        ax2.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+        ax2.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
         Y2 = sch.linkage(pArray.T, metric=pDistance, method=method)
         if len(Y2) > 1:
             Z2 = sch.dendrogram(Y2)
         ax2.set_xticks([])
         ax2.set_yticks([])
+        ax2.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+        ax2.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
     else:
         Y2 = []
     
@@ -345,8 +350,13 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarch
             xlabels_order.extend(idx2)
         else:
             #pass
-            pArray = pArray[:, xlabels_order]    
-    im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)#YlGnBu
+            pArray = pArray[:, xlabels_order]
+    myColor =  pylab.cm.YlOrBr
+    if config.distance in ["spearman", "pearson"]:
+        myColor = pylab.cm.RdBu_r   
+    else:
+        myColor = pylab.cm.YlGnBu
+    im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=myColor)#YlGnBu
     if colLable:
         if len(ylabels) == len(idx2):
             label2 = [ylabels[i] for i in idx2]
@@ -356,7 +366,19 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarch
         axmatrix.set_xticklabels(label2, minor=False)
         axmatrix.xaxis.set_label_position('bottom')
         axmatrix.xaxis.tick_bottom()
-        pylab.xticks(rotation=90, fontsize=6)
+        axmatrix.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+        axmatrix.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+    else:
+        axmatrix.set_xticks([])
+        axmatrix.set_xticklabels([])
+        axmatrix.get_xaxis().set_tick_params(which='both', top='off')
+        axmatrix.get_xaxis().set_tick_params(which='both', bottom='off')
+        axmatrix.get_yaxis().set_tick_params(which='both', right='off')
+        axmatrix.xaxis.set_label_position('bottom')
+        axmatrix.xaxis.tick_bottom()
+        
+        
+        #pylab.xticks(rotation=90, fontsize=6)
     if rowLabel:
         if len(xlabels) == len(idx1):
             label1 = [xlabels[i] for i in idx1]
@@ -365,18 +387,22 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, filename='./hierarch
         axmatrix.set_yticks(range(len(idx1)))
         axmatrix.set_yticklabels(label1, minor=False)
         axmatrix.yaxis.set_label_position('right')
+        axmatrix.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+        axmatrix.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
         axmatrix.yaxis.tick_right()
-        pylab.yticks(rotation=0, fontsize=6)
+        #pylab.yticks(rotation=0, fontsize=6)
     if color_bar:   
         axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
-        pylab.colorbar(im, cax=axcolor)
+        fig.colorbar(im, cax=axcolor)
+        #pylab.colorbar(ax=axmatrix) 
+        #axmatrix.get_figure().colorbar(im, ax=axmatrix)
+    #plt.tight_layout()
+        
     fig.savefig(filename + '.pdf')
     #heatmap2(pArray, xlabels = xlabels, filename=filename+"_distance", metric = "nmi", method = "single", )
     pylab.close()
     return Y1
 
-import numpy as np
-import matplotlib.pyplot as plt
 
 def grouped_boxplots2(data, xlabels, file_name ="Grouped_Recall_FDR"):
     '''data = [[np.random.normal(i, 1, 30) for i in range(2)],
@@ -398,6 +424,8 @@ def grouped_boxplots2(data, xlabels, file_name ="Grouped_Recall_FDR"):
 
     proxy_artists = groups[-1]['boxes']
     ax.legend(proxy_artists, ['Recall', 'FDR'], loc='best')
+    ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+    ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
     pylab.xticks(rotation=90, fontsize=10)
     #ax.xticks(range(len(labels)), labels, rotation=90, ha='right')
     #ax.tight_layout()
@@ -446,6 +474,8 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
         #artist.patch.set(facecolor='0.1')
         else:
            ax.bar( np.mean(pos)-(width+2*pad), 1 , zorder=0, color="0.955", width=(width+2*pad)*2, edgecolor="none" ) 
+        ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+        ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
            
         artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
         #artist.patch.set(facecolor='0.95')
@@ -454,48 +484,68 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
 
     ax.margins(0.05)
     ax.set(xticks=np.arange(len(data_groups)) + 1)
+    
     ax.autoscale()
     return artists
 
 def scatter_matrix(df, filename = None):
     plt.figure()
-    axs = pd.tools.plotting.scatter_matrix(df, alpha = .5, range_padding = 0.2, figsize=(len(df.columns)*.6+3.5, len(df.columns)*.6+3.5))
-
-    def wrap(txt, width=8):
+    axs = pd.tools.plotting.scatter_matrix(df, alpha = .5, s =120, c ='blue', range_padding = .2, grid=False,figsize=(len(df.columns)*.65+5, len(df.columns)*.65+5)) # diagonal='kde', grid=False,
+    plt.subplots_adjust(wspace=.005, hspace=.005)
+    def wrap(txt, width=20):
         '''helper function to wrap text for long labels'''
         import textwrap
         return '\n'.join(textwrap.wrap(txt, width))
     
     for ax in axs[:,0]: # the left boundary
-        #ax.grid('off', axis='both')
-        ax.set_ylabel(wrap(ax.get_ylabel()), rotation=0, va='center', labelpad=20)
+        ax.grid('off', axis='both')
+        ax.set_ylabel(wrap(ax.get_ylabel()), rotation=0, va='center', ha = 'right', labelpad=23, fontsize = 10, fontweight='bold')
+        ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+        ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
         #ax.set_yticks([])
     
     for ax in axs[-1,:]: # the lower boundary
-        #ax.grid('off', axis='both')
-        ax.set_xlabel(wrap(ax.get_xlabel()), rotation=90)
+        ax.grid('off', axis='both')
+        ax.set_xlabel(wrap(ax.get_xlabel()), fontsize = 10, fontweight='bold', rotation=90, labelpad=23 )
         #ax.set_xticks([])
+        ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+        ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+
     plt.tight_layout()
+    plt.subplots_adjust(wspace=.02, hspace=.02)
     plt.savefig(filename)
 
 def confusion_matrix(X, Y, filename):
     from sklearn.metrics import confusion_matrix
     # Compute confusion matrix
+    ig, ax = plt.subplots(figsize=(6,6))
     cm = confusion_matrix(y_true= Y, y_pred=X)
-    
-    #print(cm)
-    
+  
     # Show confusion matrix in a separate window
-    plt.matshow(cm, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)
-    plt.title('Association between the representatives')
-    cb = plt.colorbar()
-    plt.xlabel('First representative from the first cluster')
-    plt.ylabel('First representative from the second cluster')
+    pcm = ax.matshow(cm, aspect='auto', origin='lower', cmap=pylab.cm.YlOrBr)#YlGnBu
     
-    #plt.show()(y_test, y_pred)
-    #labels = np.arange(0,len(X),1)
-    #loc    = labels 
-    #cb.set_ticks(loc)
-    #cb.set_ticklabels(labels)
+    #pylab.colorbar(ax=ax) 
+    ax.set_xlabel('First representative from the first cluster', fontsize = 8)
+    ax.set_ylabel('First representative from the second cluster', fontsize = 8)
+    ax.set_title('Association between the representatives', fontsize=10, fontweight='bold')
+    ax.get_figure().colorbar(pcm, ax=ax) 
+    ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+    ax.get_xaxis().set_ticks_position('bottom')
+    ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+    
     plt.savefig(filename)
+def scatter_plot(X, Y, filename = 'scatter'):
+    fig = plt.figure(figsize=(4.5, 4.5))
+    # Create an Axes object.
+    ax = fig.add_subplot(1,1,1) # one row, one column, first plot
+    plt.rc('xtick', labelsize=6) 
+    plt.rc('ytick', labelsize=6) 
+    ax.set_xlabel("Representative of the First Cluster", fontsize = 8)
+    ax.set_ylabel("Representative of the Second Cluster", fontsize = 8)
+    ax.set_title('Association between the representatives', fontsize=10, fontweight='bold')
+    ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+    ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+    ax.scatter( X, Y, alpha=0.5, s =50)
+    fig.tight_layout()
+    fig.savefig(filename + '.pdf')
 

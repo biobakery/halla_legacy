@@ -108,7 +108,7 @@ class Input:
 			aOut = [] 
 			aNames = []
 			aTypes = []
-			aHeaders = []
+			aHeaders = None
 			
 			# Parse header if indicated by user or "#"
 			if bHeaders or re.match("#",pArray[0,0]):
@@ -178,7 +178,7 @@ class Input:
 		"""
 		Make sure that the data are well-formed
 		"""
-		assert(len(self.outData1[0]) == len(self.outData2[0]))
+		
 		assert(len(self.outData1) == len(self.outType1))
 		assert(len(self.outData2) == len(self.outType2))
 
@@ -221,15 +221,16 @@ class Input:
 				self.outData2 = df2.values 
 				#print self.outData1
 				self.outName1 = list(df1.index.values) 
-				self.outName2 = list(df2.index.values) 
+				self.outName2 = list(df2.index) 
 				#print self.outName1
 				#self.outType1 = int
 				#self.outType2 = int 
 		
-				self.outHead1 = df1.columns.values
-				self.outHead2 = df2.columns.values 
-				#print df1
+				self.outHead1 = df1.columns
+				self.outHead2 = df2.columns 
+				#print self.outHead1
 				#print df2
+		assert(len(self.outData1[0]) == len(self.outData2[0]))
 		
 
 	

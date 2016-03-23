@@ -67,12 +67,12 @@ def get_halla_base_directory():
     
     return halla_base_directory
 
-def check_requirements(args):
+def check_requirements():
     """
     Check requirements (file format, dependencies, permissions)
     """
     # check the third party softwares for plotting the results
-    if args.hallagram:
+    if config.hallagram:
         try: 
             import pandas as pd
         except ImportError: 
@@ -85,8 +85,7 @@ def check_requirements(args):
         
     
     # Check that the output directory is writeable
-    output_dir = os.path.abspath(args.output_dir)
-    args.output_dir = output_dir
+    output_dir = os.path.abspath(config.output_dir)
     if not os.path.isdir(output_dir):
         try:
             print("Creating output directory: " + output_dir)
@@ -210,6 +209,11 @@ def parse_arguments (args):
         help="plot the results", 
         action="store_true")
     argp.add_argument(
+        "--diagnostics-plot", 
+        dest="diagnostics_plot",
+        help="plot the results", 
+        action="store_true")
+    argp.add_argument(
         "--discretizing", 
         dest="strDiscretizing",
         default="equal-area",
@@ -267,6 +271,7 @@ def set_parameters(args):
     #config.robustness = float(args.robustness)
     config.output_dir = args.output_dir
     config.hallagram = args.hallagram
+    config.diagnostics_plot = args.diagnostics_plot
     #config.heatmap_all = args.heatmap_all
     config.descending = args.strDescending
     istm = list()  # X and Y are used to store datasets
@@ -297,8 +302,8 @@ def set_parameters(args):
         
     aOut1, aOut2 = parser.Input (config.strFile1.name, config.strFile2.name, headers=args.header).get()
     config.hallagram = args.hallagram
-    (config.meta_array[0], config.aOutName1, config.aOutType1, config.aOutHead1) = aOut1 
-    (config.meta_array[1], config.aOutName2, config.aOutType2, config.aOutHead2) = aOut2 
+    (config.meta_array[0], config.aFeatureNames1, config.aOutType1, config.aSampleNames1) = aOut1 
+    (config.meta_array[1], config.aFeatureNames2, config.aOutType2, config.aSampleNames2) = aOut2 
     if args.strAdjust.lower() == "bhy":
         config.iterations = max([args.iIter, 10*len(config.aOutName1)*len(config.aOutName2)])
     else:
@@ -308,12 +313,13 @@ def _main():
     
     # Parse arguments from command line
     args=parse_arguments(sys.argv)
-    check_requirements(args)
+    set_parameters(args) 
+    check_requirements()
     
     # Set the number of processing units available
     
     #H = store.HAllA(X = None, Y = None)
-    set_parameters(args)         
+            
     aaOut = store.run()	
     
 if __name__ == '__main__':
