@@ -10,8 +10,14 @@ import os
 import sys
 import argparse
 import csv
+
+import matplotlib.pyplot as plt
 import matplotlib as mpl
+#mpl.style.use('ggplot')
 mpl.use( "Agg" )
+import matplotlib.pyplot as plt
+#import matplotlib as mpl
+#mpl.use( "Agg" )
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects

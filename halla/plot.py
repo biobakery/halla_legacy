@@ -280,7 +280,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     fig.savefig(filename + '.pdf')
     pylab.close()
         
-def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = "nmi", method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True):
+def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.distance, method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True):
     import scipy
     import pylab
     # import dot_parser
@@ -490,11 +490,13 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
 
 def scatter_matrix(df, filename = None):
     plt.figure()
-    axs = pd.tools.plotting.scatter_matrix(df, alpha = .5, s =120, c ='blue', range_padding = .2, grid=False,figsize=(len(df.columns)*.65+5, len(df.columns)*.65+5)) # diagonal='kde', grid=False,
+    axs = pd.tools.plotting.scatter_matrix(df, alpha = .5, s =120, c ='blue', range_padding = .2, figsize=(len(df.columns)*.7+5, len(df.columns)*.7+5)) # diagonal='kde', grid=False,
     plt.subplots_adjust(wspace=.005, hspace=.005)
     def wrap(txt, width=20):
         '''helper function to wrap text for long labels'''
         import textwrap
+        #txt = txt.split("|")
+        #txt = txt[len(txt)-2]+"_"+txt[len(txt)-1]
         return '\n'.join(textwrap.wrap(txt, width))
     
     for ax in axs[:,0]: # the left boundary
@@ -512,7 +514,7 @@ def scatter_matrix(df, filename = None):
         ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
 
     plt.tight_layout()
-    plt.subplots_adjust(wspace=.02, hspace=.02)
+    plt.subplots_adjust(wspace=.01, hspace=.01)
     plt.savefig(filename)
 
 def confusion_matrix(X, Y, filename):
@@ -545,7 +547,7 @@ def scatter_plot(X, Y, filename = 'scatter'):
     ax.set_title('Association between the representatives', fontsize=10, fontweight='bold')
     ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
     ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-    ax.scatter( X, Y, alpha=0.5, s =50)
+    ax.scatter( X, Y, alpha=0.5, s =120, c='blue')
     fig.tight_layout()
     fig.savefig(filename + '.pdf')
 

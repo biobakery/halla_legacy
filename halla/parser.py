@@ -13,6 +13,16 @@ import numpy as np
 import pandas as pd
 from . import config
 
+def wrap_features(txt, width=40):
+		'''helper function to wrap text for long labels'''
+		import textwrap
+		txt = str(txt).split("|")
+		if len(txt)>1:
+			txt = txt[len(txt)-2]+"_"+txt[len(txt)-1]
+		else:
+			txt = txt[0]
+		return txt #'\n'.join(textwrap.wrap(txt, width))
+
 class Input:
 	"""
 	
@@ -117,7 +127,9 @@ class Input:
 
 			# Parse variable names
 			if bVar: 
-				aNames = list(pArray[:, 0])
+				aNames =  list(pArray[:, 0])
+				aNames = map(str, aNames)
+				aNames = map(wrap_features, aNames)
 				pArray = pArray[:, 1:]
 
 			# # Parse data types, missing values, and whitespace
