@@ -265,7 +265,7 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile ):
         size /= 1 if len( text ) == 1 else c_label_aspect * len( text )
         size = int( size )
         text = ax.text(
-            np.mean( [x1, x2] )+0.5+c_label_shift*size,
+            np.mean( [x1, x2] )+1.0+c_label_shift*size if len(row_items) >1 else np.mean( [x1, x2] )+0.5+c_label_shift*size ,
             np.mean( [y1, y2] )+0.5+c_label_shift*size,
             text,
             size=size,

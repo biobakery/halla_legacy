@@ -108,6 +108,22 @@ def check_requirements():
             "Please select another directory.")
         
     print("Output files will be written to: " + output_dir) 
+    if config.distance =='mic':
+        try: 
+            import minepy
+        except ImportError: 
+            sys.exit("--- Please check minepy installation for MIC library")
+    if config.decomposition == 'mca':
+        try: 
+            from rpy2 import robjects as ro
+            from rpy2.robjects import r
+            from rpy2.robjects.packages import importr
+            import rpy2.robjects.numpy2ri
+            rpy2.robjects.numpy2ri.activate()
+            ro.r('library(FactoMineR)')
+        except ImportError: 
+            sys.exit("--- Please check R, rpy2,  and  FactoMineR installation for MCA library")
+        
   
 VERSION="0.6.1"
 def parse_arguments (args):

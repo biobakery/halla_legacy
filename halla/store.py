@@ -337,7 +337,7 @@ def _report():
                         "p-value", "q-value", "Similarity score between Clusters"])
 
         sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
-        sorted_associations = sorted(sorted_associations, key=lambda x: x.qvalue)
+        sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
         for association in sorted_associations:
             number_of_association += 1
             iX, iY = association.get_data()
@@ -373,7 +373,7 @@ def _report():
         performance_file.close()
         
     sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
-    sorted_associations = sorted(sorted_associations, key=lambda x: x.qvalue)
+    sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
     if config.descending == "AllA":
         config.Features_order[0]  = [i for i in range(len(config.meta_array[0]))]   
         config.Features_order[1] = [i for i in range(len(config.meta_array[1]))]         
@@ -419,14 +419,10 @@ def _report():
                     if len(discretized_cluster1) < 40:
                         #print len(discretized_cluster1)
                         df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
-                        axes = plot.scatter_matrix(df1, filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                        ax1 = plot.scatter_matrix(df1, filename = filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                 except:
                     pass
-                if len(discretized_cluster1) < 40:
-                    discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
-                    
-                    discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-
+                
                 cluster2 = [config.meta_array[1][i] for i in iY]
                 discretized_cluster2 = [config.meta_feature[1][i] for i in iY]
                 Y_labels = np.array([config.aFeatureNames2[i] for i in iY])
@@ -434,21 +430,30 @@ def _report():
                 try:
                     if len(discretized_cluster2) < 40:
                         df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-                        axes = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                        ax2 = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
                 except:
                     pass
-                two_clusters = cluster1
-                two_clusters.extend(cluster2)
-                two_labels = [config.aFeatureNames1[i] for i in iX]
-                two_labels.extend([config.aFeatureNames2[i] for i in iY])
-                #print two_clusters 
-                #print cluster1
-                #print two_labels, X_labels
-                df_all = pd.DataFrame(np.array(two_clusters, dtype= float).T ,columns=np.array(two_labels) )
-                axes = plot.scatter_matrix(df_all, filename =filename + 'Scatter_' + str(association_number) + '_scatter_matrix_all.pdf')
+                if len (iX) + len(iY) <40:
+                    two_clusters = cluster1
+                    two_clusters.extend(cluster2)
+                    two_labels = [config.aFeatureNames1[i] for i in iX]
+                    two_labels.extend([config.aFeatureNames2[i] for i in iY])
+                    #print two_clusters 
+                    #print cluster1
+                    #print two_labels, X_labels
+                    df_all = pd.DataFrame(np.array(two_clusters, dtype= float).T ,columns=np.array(two_labels) )
+                    axes = plot.scatter_matrix(df_all, x_size = len(iX),filename =filename + 'Scatter_association' + str(association_number) + '.pdf')
+                # plot discritized data
+                '''
+                if len(discretized_cluster1) < 40:
+                    discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
+                    
+                    discretized_axes1 = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+
                 if len(discretized_cluster2) < 40:
                     discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
-                    discretized_axes = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                    discretized_axes2 = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+                '''
                 #concatenated_df = pd.concat([df1, df2],axis=1)
                 #axes = plot.scatter_matrix(concatenated_df, filename =filename + 'Concatenated_' + str(association_number) + '_scatter_matrix.pdf')
                 # heatmap cluster in an association
@@ -561,7 +566,7 @@ def _report():
             for j in range(len(config.Features_order[1])):
                 similarity_score[i][j] = distance.c_hash_metric[config.distance](config.meta_feature[0][config.Features_order[0][i]], config.meta_feature[1][config.Features_order[1][j]])
         sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
-        sorted_associations = sorted(sorted_associations, key=lambda x: x.qvalue)
+        sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
         for association in sorted_associations:
             iX, iY = association.get_data()
             for i, j in itertools.product(iX, iY):
@@ -626,7 +631,7 @@ def _report():
             for j in range(len(config.Features_order[1])):
                 similarity_score[i][j] = distance.c_hash_metric[config.distance](config.meta_feature[0][config.Features_order[0][i]], config.meta_feature[1][config.Features_order[1][j]])
         sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
-        sorted_associations = sorted(sorted_associations, key=lambda x: x.qvalue)
+        sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
         for association in sorted_associations:
             iX, iY = association.get_data()
             for i, j in itertools.product(iX, iY):
@@ -763,10 +768,10 @@ def _report():
     _report_all_tests()
     _report_associations()
     _report_compared_clusters()
+    _write_hallagram_info()
     if config.hallagram:
         #_heatmap_associations()
         #from rpy2.rinterface import RRuntimeError
-        _write_hallagram_info()
         output_path = config.output_dir# str(config.output_dir).replace("(","\(").replace(")","\)").replace(" ","\ ")
         print "Writing plotting outputs ...", output_path 
         if os.path.isfile(output_path+"/similarity_table.txt"):

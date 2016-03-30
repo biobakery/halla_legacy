@@ -22,6 +22,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from . import config
 import matplotlib
+from itertools import product
 matplotlib.style.use('ggplot')
 matplotlib.use( "Agg" )
 def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods', ylabel=None, labels=None):
@@ -488,9 +489,29 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
     ax.autoscale()
     return artists
 
-def scatter_matrix(df, filename = None):
-    plt.figure()
-    axs = pd.tools.plotting.scatter_matrix(df, alpha = .5, s =120, c ='blue', range_padding = .2, figsize=(len(df.columns)*.7+5, len(df.columns)*.7+5)) # diagonal='kde', grid=False,
+def scatter_matrix(df, x_size = 0, filename = None, ):
+    plt.figure(figsize=(len(df.columns)*.8+5, len(df.columns)*.8+5))
+    color = 'darkgreen'
+    #if x_size>0:
+    #    colors = ['green'  if i< x_size and j < x_size else \
+    #              'yellow' if i >= x_size and j >= x_size else 'black' for i,j in product(range(len(df.columns)),range(len(df.columns)))]
+    #    
+    axs = pd.tools.plotting.scatter_matrix(df, alpha = .1, s =50, c = 'white',\
+                                           hist_kwds={'color':['white']},\
+                                           range_padding = .2, grid=False, figsize=(len(df.columns)*.7+5, len(df.columns)*.7+5)) # diagonal='kde', grid=False,
+    for i in range(len(axs[:,0])):
+        for j in range(len(axs[-1,:])):
+            if x_size>0:
+                color = 'maroon'  if i< x_size and j < x_size else \
+                      'cornflowerblue' if i >= x_size and j >= x_size else 'purple'
+            if i!= j:
+                axs[i,j].scatter(df[df.columns[j]], df[df.columns[i]], c = color, s =50, alpha = .6)
+            else:
+                axs[i,j].hist(df[df.columns[j]], color = 'darkslategrey')
+            #if i>j:
+            #     axs[i,j].visible(False)
+                
+        
     plt.subplots_adjust(wspace=.005, hspace=.005)
     def wrap(txt, width=20):
         '''helper function to wrap text for long labels'''
@@ -501,18 +522,29 @@ def scatter_matrix(df, filename = None):
     
     for ax in axs[:,0]: # the left boundary
         ax.grid('off', axis='both')
-        ax.set_ylabel(wrap(ax.get_ylabel()), rotation=0, va='center', ha = 'right', labelpad=23, fontsize = 10, fontweight='bold')
+        ax.set_ylabel(wrap(ax.get_ylabel()), rotation=0, va='center', ha = 'left', labelpad=23, fontsize = 10)#, fontweight='bold')
         ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
         ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
         #ax.set_yticks([])
+        #ax.set_color("gray")
     
     for ax in axs[-1,:]: # the lower boundary
         ax.grid('off', axis='both')
-        ax.set_xlabel(wrap(ax.get_xlabel()), fontsize = 10, fontweight='bold', rotation=90, labelpad=23 )
+        ax.set_xlabel(wrap(ax.get_xlabel()), fontsize = 10, rotation=45, va='center', ha = 'left',labelpad=23 )#, fontweight='bold'
         #ax.set_xticks([])
         ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
         ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-
+        #ax.set_color('yellow')
+    #Change label rotation
+    #[s.xaxis.label.set_rotation(45) for s in axs.reshape(-1)]
+    #[s.yaxis.label.set_rotation(0) for s in axs.reshape(-1)]
+    
+    #May need to offset label when rotating to prevent overlap of figure
+    #[s.get_yaxis().set_label_coords(-0.3,0.5) for s in axs.reshape(-1)]
+    
+    #Hide all ticks
+    #[s.set_xticks(()) for s in axs.reshape(-1)]
+    #[s.set_yticks(()) for s in axs.reshape(-1)]
     plt.tight_layout()
     plt.subplots_adjust(wspace=.01, hspace=.01)
     plt.savefig(filename)
@@ -547,7 +579,7 @@ def scatter_plot(X, Y, filename = 'scatter'):
     ax.set_title('Association between the representatives', fontsize=10, fontweight='bold')
     ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
     ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-    ax.scatter( X, Y, alpha=0.5, s =120, c='blue')
+    ax.scatter( X, Y, alpha=0.5, s =120, c='darkgreen')
     fig.tight_layout()
     fig.savefig(filename + '.pdf')
 
