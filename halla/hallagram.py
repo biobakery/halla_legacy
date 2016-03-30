@@ -29,6 +29,8 @@ import numpy as np
 
 c_unit_h        = 0.35
 c_unit_w        = 0.35
+c_min_height    = 10 * c_unit_h
+c_min_width     = 20 * c_unit_w
 c_label_scale   = 18
 c_label_shift   = -0.005
 c_line_width    = 1.5
@@ -92,6 +94,10 @@ def get_args( ):
                          help="hypothesis tree (for getting feature order)" )
     parser.add_argument( "associations",
                          help="HAllA associations" )
+    parser.add_argument( "--strongest",
+                         default=None, type=int, help="isolate the N strongest associations" )
+    parser.add_argument( "--largest",
+                         default=None, type=int, help="isolate the N largest associations" )
     parser.add_argument( "--mask",
                          action="store_true", help="mask feature pairs not in associations" )
     parser.add_argument( "--cmap",
@@ -111,32 +117,43 @@ def get_order( path ):
                 break
     return [row_order, col_order]
 
-def load_order_table( p_table, p_tree ):
+def load_order_table( p_table, p_tree, associations ):
+    allowed_rowheads = {k for items in associations for k in items[1]}
+    allowed_colheads = {k for items in associations for k in items[2]}
     simtable = Table( p_table )
     row_order, col_order = get_order( p_tree )
     # reorder the rows
-    row_order = [simtable.rowmap[k] for k in row_order if k in simtable.rowmap]
+    row_order = [simtable.rowmap[k] for k in row_order if k in simtable.rowmap and k in allowed_rowheads]
     simtable.rowheads = reorder( simtable.rowheads, row_order )
     simtable.data = simtable.data[row_order, :]
     simtable.update( )
     # reorder the cols
-    col_order = [simtable.colmap[k] for k in col_order if k in simtable.colmap]
+    col_order = [simtable.colmap[k] for k in col_order if k in simtable.colmap and k in allowed_colheads]
     simtable.colheads = reorder( simtable.colheads, col_order )
     simtable.data = simtable.data[:, col_order]
     simtable.update( )
     return simtable
 
-def load_associations( path ):
+def load_associations( path, largest=None, strongest=None ):
     pairs = []
     with open( path ) as fh:
         for row in csv.reader( fh, dialect="excel-tab" ):
             if "Association" not in row[0]:
-                pairs.append( [row[0], row[1].split( ";" ), row[4].split( ";" )] )
+                pairs.append( [row[0], row[1].split( ";" ), row[4].split( ";" ), float( row[7] )] )
+    if largest is not None and strongest is not None:
+        sys.exit( "Can only specify one of LARGEST and STRONGEST" )
+    elif largest is not None:
+        pairs = sorted( pairs, key=lambda row: len( row[1] ) * len( row[2] ), reverse=True )
+        pairs = pairs[0:min( len( pairs ), largest )]
+    elif strongest is not None:
+        # not reversed, smaller p = stronger assoc
+        pairs = sorted( pairs, key=lambda row: row[3] )
+        pairs = pairs[0:min( len( pairs ), strongest )]
     return pairs
 
 def mask_table( simtable, associations ):
     allowed = {}
-    for number, row_items, col_items in associations:
+    for number, row_items, col_items, sig in associations:
         for r in row_items:
             for c in col_items:
                 ri = simtable.rowmap[r]
@@ -171,9 +188,9 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile ):
         mask_table( simtable, associations )
     # begin plotting
     fig = plt.figure()
-    width = c_unit_w * simtable.ncols
+    width = max( c_unit_w * simtable.ncols, c_min_width )
     width += c_char_pad * max( map( len, simtable.rowheads ) )
-    height = c_unit_h * simtable.nrows
+    height = max( c_unit_h * simtable.nrows, c_min_height )
     height += c_char_pad * max( map( len, simtable.colheads ) )
     fig.set_size_inches( width, height )
     span = simtable.ncols
@@ -223,7 +240,7 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile ):
         ticks.append( ticks[-1] + c_simstep )
     twin_ax.set_yticks( ticks )
     # add associations
-    for number, row_items, col_items in associations:
+    for number, row_items, col_items, sig in associations:
         row_items = row_items[::-1]
         y1 = simtable.rowmap[row_items[0]]
         y2 = simtable.rowmap[row_items[-1]]
@@ -272,8 +289,11 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile ):
     
 def main( ):
     args = get_args( )
-    simtable = load_order_table( args.simtable, args.tree )
-    associations = load_associations( args.associations )
+    associations = load_associations(
+        args.associations,
+        largest=args.largest,
+        strongest=args.strongest, )
+    simtable = load_order_table( args.simtable, args.tree, associations )
     plot(
         simtable,
         associations,
