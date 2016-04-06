@@ -106,6 +106,10 @@ def get_args( ):
                          default=["1st dataset", "2nd dataset"], help="axis labels" )
     parser.add_argument( "--outfile",
                          default="hallagram.pdf", help="output file name" )
+    parser.add_argument( "--similarity",
+                         default="Pairwise Similarity", \
+                         help="Similarity metric has been used for similarity measurement" )
+    
     return parser.parse_args()
 
 def get_order( path ):
@@ -169,7 +173,7 @@ def mask_table( simtable, associations ):
 # main plotting function
 # ---------------------------------------------------------------
     
-def plot( simtable, associations, cmap, mask, axlabels, outfile ):
+def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
     # reverse roworder of simtable to match plotting
     order = range( simtable.nrows )[::-1]
     simtable.rowheads = reorder( simtable.rowheads, order )
@@ -234,7 +238,7 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile ):
     twin_ax.yaxis.tick_left()
     [tick.set_size( c_large_text ) for tick in twin_ax.get_yticklabels()]
     twin_ax.set_ylim( vmin, vmax )
-    twin_ax.set_ylabel( "pairwise similarity", size=c_giant_text )
+    twin_ax.set_ylabel( similarity, size=c_giant_text, fontsize=10 )
     ticks = [vmin]
     while ticks[-1] < vmax:
         ticks.append( ticks[-1] + c_simstep )
@@ -265,7 +269,8 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile ):
         size /= 1 if len( text ) == 1 else c_label_aspect * len( text )
         size = int( size )
         text = ax.text(
-            np.mean( [x1, x2] )+1.0+c_label_shift*size if len(row_items) >1 and len(col_items)>1 else np.mean( [x1, x2] )+0.5+c_label_shift*size ,
+            np.mean( [x1, x2] )+.75+c_label_shift*size if (len(row_items)%2 != 0 and len(row_items)>1 and len(col_items) >1)  \
+            else np.mean( [x1, x2] )+0.5+c_label_shift*size ,
             np.mean( [y1, y2] )+0.5+c_label_shift*size,
             text,
             size=size,
@@ -301,6 +306,7 @@ def main( ):
         mask=args.mask,
         axlabels=args.axlabels,
         outfile=args.outfile,
+        similarity=args.similarity
     )
 
 if __name__ == "__main__":
