@@ -388,126 +388,125 @@ def _report():
             associated_feature_X_indecies += iX
             global associated_feature_Y_indecies
             associated_feature_Y_indecies += iY
-            if config.hallagram:
-                print "--- plotting associations ",association_number," ..."
-                cluster1 = [config.meta_array[0][i] for i in iX]
-                discretized_cluster1 = [config.meta_feature[0][i] for i in iX]
-                X_labels = np.array([config.aFeatureNames1[i] for i in iX])
-                association_dir = config.output_dir + "/association_"+ str(association_number) + '/'
-                filename = association_dir +"original_data" + '/'
-                discretized_filename = association_dir+"discretized_data" + '/'
-                dir = os.path.dirname(filename)
-                discretized_dir = os.path.dirname(discretized_filename)
-                # remove the directory if it exists
-                if os.path.isdir(dir):
-                    try:
-                        shutil.rmtree(association_dir)
-                        #shutil.rmtree(dir)
-                        #shutil.rmtree(discretized_dir)
-                    except EnvironmentError:
-                        sys.exit("Unable to remove directory: "+dir)
-                
-                # create new directory
+            print "--- plotting associations ",association_number," ..."
+            cluster1 = [config.meta_array[0][i] for i in iX]
+            discretized_cluster1 = [config.meta_feature[0][i] for i in iX]
+            X_labels = np.array([config.aFeatureNames1[i] for i in iX])
+            association_dir = config.output_dir + "/association_"+ str(association_number) + '/'
+            filename = association_dir +"original_data" + '/'
+            discretized_filename = association_dir+"discretized_data" + '/'
+            dir = os.path.dirname(filename)
+            discretized_dir = os.path.dirname(discretized_filename)
+            # remove the directory if it exists
+            if os.path.isdir(dir):
                 try:
-                    os.mkdir(association_dir)
-                    os.mkdir(dir)
-                    os.mkdir(discretized_dir)
+                    shutil.rmtree(association_dir)
+                    #shutil.rmtree(dir)
+                    #shutil.rmtree(discretized_dir)
                 except EnvironmentError:
-                    sys.exit("Unable to create directory: "+dir)
-                plt.figure()  
-                try: 
-                    if len(discretized_cluster1) < 40:
-                        #print len(discretized_cluster1)
-                        df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
-                        ax1 = plot.scatter_matrix(df1, filename = filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                except:
-                    pass
-                
-                cluster2 = [config.meta_array[1][i] for i in iY]
-                discretized_cluster2 = [config.meta_feature[1][i] for i in iY]
-                Y_labels = np.array([config.aFeatureNames2[i] for i in iY])
-                
-                try:
-                    if len(discretized_cluster2) < 40:
-                        df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-                        ax2 = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                except:
-                    pass
-                if len (iX) + len(iY) <40:
-                    two_clusters = cluster1
-                    two_clusters.extend(cluster2)
-                    two_labels = [config.aFeatureNames1[i] for i in iX]
-                    two_labels.extend([config.aFeatureNames2[i] for i in iY])
-                    #print two_clusters 
-                    #print cluster1
-                    #print two_labels, X_labels
-                    df_all = pd.DataFrame(np.array(two_clusters, dtype= float).T ,columns=np.array(two_labels) )
-                    axes = plot.scatter_matrix(df_all, x_size = len(iX),filename =filename + 'Scatter_association' + str(association_number) + '.pdf')
-                # plot discritized data
-                '''
+                    sys.exit("Unable to remove directory: "+dir)
+            
+            # create new directory
+            try:
+                os.mkdir(association_dir)
+                os.mkdir(dir)
+                os.mkdir(discretized_dir)
+            except EnvironmentError:
+                sys.exit("Unable to create directory: "+dir)
+            plt.figure()  
+            try: 
                 if len(discretized_cluster1) < 40:
-                    discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
-                    
-                    discretized_axes1 = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-
+                    #print len(discretized_cluster1)
+                    df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
+                    ax1 = plot.scatter_matrix(df1, filename = filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+            except:
+                pass
+            
+            cluster2 = [config.meta_array[1][i] for i in iY]
+            discretized_cluster2 = [config.meta_feature[1][i] for i in iY]
+            Y_labels = np.array([config.aFeatureNames2[i] for i in iY])
+            
+            try:
                 if len(discretized_cluster2) < 40:
-                    discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
-                    discretized_axes2 = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-                '''
-                #concatenated_df = pd.concat([df1, df2],axis=1)
-                #axes = plot.scatter_matrix(concatenated_df, filename =filename + 'Concatenated_' + str(association_number) + '_scatter_matrix.pdf')
-                # heatmap cluster in an association
-                x_label_order = []
-                if len(discretized_cluster1) >= len(discretized_cluster2):
-                    #print len(discretized_cluster1), ">=", len(discretized_cluster2)
-                    #print "Before1: ",len(x_label_order)     
-                    plot.heatmap(np.array(discretized_cluster1), x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap', )
-                    #x_label_order =  x_label_order1
-                    #print "after1", x_label_order
-                    #print "After1: ",len(x_label_order)
-                    plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
-                else:
-                    #print len(discretized_cluster2), ">=", len(discretized_cluster1)
-                    #print "Before2: ",len(x_label_order) 
-                    plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap'  ) 
-                    #x_label_order =  x_label_order
-                    #print "after2", x_label_order 
-                    #print "After2: ",len(x_label_order)
-                    plot.heatmap(np.array(discretized_cluster1), xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap' )
-                x_label_order = []
-                #plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'AllA_association_' + str(association_number) + '_heatmap' )
-                #Heatmap on continue datasets
-                #plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename =filename + 'AllA_association_' + str(association_number) + '_heatmap' )  
-                #plt.figure()
-                fig = plt.figure(figsize=(5, 4))
-                # Create an Axes object.
-                ax = fig.add_subplot(1,1,1) # one row, one column, first plot
-                plt.rc('xtick', labelsize=6) 
-                plt.rc('ytick', labelsize=6) 
-                #df1 = np.array(cluster1, dtype=float)
-                #df2 = np.array(cluster2, dtype=float)
+                    df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
+                    ax2 = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+            except:
+                pass
+            if len (iX) + len(iY) <40:
+                two_clusters = cluster1
+                two_clusters.extend(cluster2)
+                two_labels = [config.aFeatureNames1[i] for i in iX]
+                two_labels.extend([config.aFeatureNames2[i] for i in iY])
+                #print two_clusters 
+                #print cluster1
+                #print two_labels, X_labels
+                df_all = pd.DataFrame(np.array(two_clusters, dtype= float).T ,columns=np.array(two_labels) )
+                axes = plot.scatter_matrix(df_all, x_size = len(iX),filename =filename + 'Scatter_association' + str(association_number) + '.pdf')
+            # plot discritized data
+            '''
+            if len(discretized_cluster1) < 40:
+                discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
                 
-                decomposition_method = stats.c_hash_decomposition[config.decomposition]
-                
-                discretized_df1 = np.array(discretized_cluster1, dtype=float)
-                discretized_df2 = np.array(discretized_cluster2, dtype=float)
-               
+                discretized_axes1 = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+
+            if len(discretized_cluster2) < 40:
+                discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
+                discretized_axes2 = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+            '''
+            #concatenated_df = pd.concat([df1, df2],axis=1)
+            #axes = plot.scatter_matrix(concatenated_df, filename =filename + 'Concatenated_' + str(association_number) + '_scatter_matrix.pdf')
+            # heatmap cluster in an association
+            x_label_order = []
+            if len(discretized_cluster1) >= len(discretized_cluster2):
+                #print len(discretized_cluster1), ">=", len(discretized_cluster2)
+                #print "Before1: ",len(x_label_order)     
+                plot.heatmap(np.array(discretized_cluster1), x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap', )
+                #x_label_order =  x_label_order1
+                #print "after1", x_label_order
+                #print "After1: ",len(x_label_order)
+                plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
+            else:
+                #print len(discretized_cluster2), ">=", len(discretized_cluster1)
+                #print "Before2: ",len(x_label_order) 
+                plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap'  ) 
+                #x_label_order =  x_label_order
+                #print "after2", x_label_order 
+                #print "After2: ",len(x_label_order)
+                plot.heatmap(np.array(discretized_cluster1), xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap' )
+            x_label_order = []
+            #plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'AllA_association_' + str(association_number) + '_heatmap' )
+            #Heatmap on continue datasets
+            #plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename =filename + 'AllA_association_' + str(association_number) + '_heatmap' )  
+            #plt.figure()
+            fig = plt.figure(figsize=(5, 4))
+            # Create an Axes object.
+            ax = fig.add_subplot(1,1,1) # one row, one column, first plot
+            plt.rc('xtick', labelsize=6) 
+            plt.rc('ytick', labelsize=6) 
+            #df1 = np.array(cluster1, dtype=float)
+            #df2 = np.array(cluster2, dtype=float)
+            
+            decomposition_method = stats.c_hash_decomposition[config.decomposition]
+            
+            discretized_df1 = np.array(discretized_cluster1, dtype=float)
+            discretized_df2 = np.array(discretized_cluster2, dtype=float)
+           
+            d_x_d_rep = association.get_left_rep()#stats.discretize(decomposition_method(discretized_df1))
+            d_y_d_rep = association.get_right_rep()#stats.discretize(decomposition_method(discretized_df2))
+            plot.scatter_plot(association.get_left_rep(),association.get_right_rep(), filename = discretized_filename + '/association_' + str(association_number))
+            
+            if _bypass_discretizing():
+                d_x_d_rep = stats.discretize(association.get_left_rep())#stats.discretize(decomposition_method(discretized_df1))
+                d_y_d_rep = stats.discretize(association.get_right_rep())#stats.discretize(decomposition_method(discretized_df2))
+            else:
                 d_x_d_rep = association.get_left_rep()#stats.discretize(decomposition_method(discretized_df1))
                 d_y_d_rep = association.get_right_rep()#stats.discretize(decomposition_method(discretized_df2))
-                plot.scatter_plot(association.get_left_rep(),association.get_right_rep(), filename = discretized_filename + '/association_' + str(association_number))
-                
-                if _bypass_discretizing():
-                    d_x_d_rep = stats.discretize(association.get_left_rep())#stats.discretize(decomposition_method(discretized_df1))
-                    d_y_d_rep = stats.discretize(association.get_right_rep())#stats.discretize(decomposition_method(discretized_df2))
-                else:
-                    d_x_d_rep = association.get_left_rep()#stats.discretize(decomposition_method(discretized_df1))
-                    d_y_d_rep = association.get_right_rep()#stats.discretize(decomposition_method(discretized_df2))
-                d_x_d_rep, d_y_d_rep = zip(*sorted(zip(d_x_d_rep, d_y_d_rep)))
-                plot.confusion_matrix(d_x_d_rep, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
-                #plot.confusion_matrix(x_d_pc1, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix_pc_orginal_data.pdf' )
-                plot.heatmap(array([d_x_d_rep]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Rep1_' + str(association_number) + '_heatmap', sortCol = False)
-                plot.heatmap(array([d_y_d_rep]), xlabels_order= x_label_order,  xlabels =X_labels, filename =discretized_filename + 'Rep2_' + str(association_number) + '_heatmap', sortCol = False)
-                plt.close("all")
+            d_x_d_rep, d_y_d_rep = zip(*sorted(zip(d_x_d_rep, d_y_d_rep)))
+            plot.confusion_matrix(d_x_d_rep, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
+            #plot.confusion_matrix(x_d_pc1, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix_pc_orginal_data.pdf' )
+            plot.heatmap(array([d_x_d_rep]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Rep1_' + str(association_number) + '_heatmap', sortCol = False)
+            plot.heatmap(array([d_y_d_rep]), xlabels_order= x_label_order,  xlabels =X_labels, filename =discretized_filename + 'Rep2_' + str(association_number) + '_heatmap', sortCol = False)
+            plt.close("all")
             
     def _report_compared_clusters():
         output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')

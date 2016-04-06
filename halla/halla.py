@@ -211,9 +211,9 @@ def parse_arguments (args):
     argp.add_argument(
         "--adjusting",
         dest="strAdjust",    
-        default="BH",
-        choices=["BH", "Bonferroni", "BHY", "no_adjusting"],
-        help="approach for calculating adjusted p-value\n[default = BH]")
+        default="bh",
+        choices=["bh", "bonferroni", "bhy", "no_adjusting"],
+        help="approach for calculating adjusted p-value\n[default = bh]")
     argp.add_argument(
         "-v", "--verbose",
         dest="verbose",
@@ -276,8 +276,8 @@ def parse_arguments (args):
     return argp.parse_args()
 
 def set_parameters(args):
-    config.distance = args.strMetric 
-    config.decomposition = args.strDecomposition 
+    config.distance = args.strMetric.lower() 
+    config.decomposition = args.strDecomposition.lower()
     #config.fdr_function = args.strFDR
     config.q = args.dQ  
     #config.p_adjust_method = args.strAdjust

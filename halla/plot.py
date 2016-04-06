@@ -499,13 +499,14 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     axs = pd.tools.plotting.scatter_matrix(df, alpha = .1, s =50, c = 'white',\
                                            hist_kwds={'color':['white']},\
                                            range_padding = .2, grid=False, figsize=(len(df.columns)*.7+5, len(df.columns)*.7+5)) # diagonal='kde', grid=False,
+    #color scatters
     for i in range(len(axs[:,0])):
         for j in range(len(axs[-1,:])):
             if x_size>0:
                 color = 'maroon'  if i< x_size and j < x_size else \
-                      'cornflowerblue' if i >= x_size and j >= x_size else 'purple'
+                      'darkblue' if i >= x_size and j >= x_size else 'black'
             if i!= j:
-                axs[i,j].scatter(df[df.columns[j]], df[df.columns[i]], c = color, s =50, alpha = .6)
+                axs[i,j].scatter(df[df.columns[j]], df[df.columns[i]], c = color, s =50, alpha = .5)
             else:
                 axs[i,j].hist(df[df.columns[j]], color = 'darkslategrey')
             #if i>j:
@@ -522,7 +523,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     
     for ax in axs[:,0]: # the left boundary
         ax.grid('off', axis='both')
-        ax.set_ylabel(wrap(ax.get_ylabel()), rotation=0, va='center', ha = 'left', labelpad=23, fontsize = 10)#, fontweight='bold')
+        ax.set_ylabel(wrap(ax.get_ylabel()), rotation=0, va='center', ha = 'right', labelpad=30, fontsize = 10)#, fontweight='bold')
         ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
         ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
         #ax.set_yticks([])
@@ -530,7 +531,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     
     for ax in axs[-1,:]: # the lower boundary
         ax.grid('off', axis='both')
-        ax.set_xlabel(wrap(ax.get_xlabel()), fontsize = 10, rotation=45, va='center', ha = 'left',labelpad=23 )#, fontweight='bold'
+        ax.set_xlabel(wrap(ax.get_xlabel()), fontsize = 10, rotation=45, va='center', ha = 'left',labelpad=30 )#, fontweight='bold'
         #ax.set_xticks([])
         ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
         ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
