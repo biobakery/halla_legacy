@@ -3,7 +3,7 @@ try:
     from setuptools import setup, find_packages
 except ImportError:
     sys.exit("Please install setuptools.")
-VERSION = "0.6.0"
+VERSION = "0.6.1"
 AUTHOR = "Gholamali Rahnavard, Curtis Huttenhower, Huttenhower Lab"
 AUTHOR_EMAIL = "halla-users@googlegroups.com"
 MAINTAINER = "Gholamali Rahnavard"
@@ -26,6 +26,7 @@ setup(
         "Environment :: Console",
         "Operating System :: MacOS",
         "Operating System :: Unix",
+        "Operating System :: Windows",
         "Programming Language :: Python :: 2.7",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
         ],

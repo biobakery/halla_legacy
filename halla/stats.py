@@ -1775,6 +1775,7 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 		astrRet = [None] * len(astrValues)
 		for i in range(len(astrValues)):
 			astrRet[i] = int(numpy.ceil(order[i]/iN))
+		astrRet = rankdata(astrRet, method= 'dense')
 		return astrRet
 
 	def _discretize_continuous_orginal(astrValues, iN=iN): 
