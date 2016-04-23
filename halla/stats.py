@@ -483,7 +483,7 @@ def bhy(afPVAL, q):
 
 	return aAjusted, pRank
 
-def bh(afPVAL, q):
+def bh(afPVAL, q, cluster_size):
 	"""
 	Implement the benjamini-hochberg hierarchical hypothesis testing criterion 
 	In practice, used for implementing Yekutieli criterion *per layer*.  
@@ -529,7 +529,8 @@ def bh(afPVAL, q):
 	# iLenReduced = len(afPVAL_reduced)
 	# pRank = scipy.stats.rankdata( afPVAL) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	# # source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
-	pRank = rankdata(afPVAL, method= 'ordinal')
+	weighted_p = [afPVAL[i]*cluster_size[i] for i in range(len(cluster_size)) ]
+	pRank = rankdata(weighted_p, method= 'ordinal')
 
 	aAjusted = [] 
 	aQvalue = []
@@ -586,7 +587,7 @@ def simple_no_adusting(afPVAL, q):
 	"""
 	pRank = rankdata(afPVAL, method= 'ordinal')
 	return afPVAL, pRank
-def p_adjust(pval, q, method="BH"):
+def p_adjust(pval, q, cluster_size, method="BH"):
 	"""
 	
 	Parameters
@@ -612,7 +613,7 @@ def p_adjust(pval, q, method="BH"):
 			return bhy(pval, q) 
 			#fAdjusted = q * 1.0 * pRank[i] / (iLen*math.log(iLen))  # iLenReduced
 	elif config.p_adjust_method == "bh":
-		return bh(pval, q) 
+		return bh(pval, q, cluster_size) 
 	elif config.p_adjust_method == "bonferroni":
 		return bonferroni(pval, q)
 	elif config.p_adjust_method == "no_adjusting":
@@ -772,49 +773,48 @@ def permutation_test_pvalue(X, Y):
 		return pval
 	#new_fP2 = 0.0
 	#new_fP =0.0
-	iter = iIter
-	if config.use_one_null_dist:
-		if len(config.null_dist) == 0:
-			generate_null_dist(X,Y)
-		aDist = config.null_dist
-	else:
-		for i in xrange(iIter):
-			numpy.random.seed(i+seed)
-	
-			#XP = array([numpy.random.permutation(x) for x in X])
-			#YP = array([numpy.random.permutation(y) for y in Y])
-			#pRep1_, _, _ = mca_method(XP) #mean(pArray1)#[len(pArray1)/2]
-			#pRep2_, _, _ = mca_method(YP)#
-			#pRep1_, pRep2_ = [ discretize(pDe(pA))[0] for pA in [XP, YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
-			iter = i
-			permuted_Y = numpy.random.permutation(Y)
-			# Similarity score between representatives  
-			#fAssociation_permuted = pMe(pRep1_, pRep2_)  
-			fAssociation_permuted = math.fabs(pMe(X, permuted_Y))  
-			aDist.append(fAssociation_permuted)
-			if i % 50 == 0:
-				new_fP2 = _calculate_pvalue(i) #estimate_pvalue(sim_score, aDist) #
-				#num_exceedances = _calculate_num_exceedances(fAssociation_permuted, aDist)
-				#new_fP = _estimate_p_value(num_exceedances, len(aDist))
-				
-				if new_fP2 > fP:
-					
-					#print "Break before the end of permutation iterations"
-					break
-				else: 
-					fP = new_fP2
-			
-			# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
-	fP = _calculate_pvalue(iter)
-	
 	def null_fun():
 		return math.fabs(pMe(X, numpy.random.permutation(Y)))
-	#fp = nonparametric_test_pvalue(fAssociation, null_fun)
-
+	few_permutation = False
+	if not few_permutation:
+		iter = iIter
+		if config.use_one_null_dist:
+			if len(config.null_dist) == 0:
+				generate_null_dist(X,Y)
+			aDist = config.null_dist
+		else:
+			for i in xrange(iIter):
+				numpy.random.seed(i+seed)
+		
+				#XP = array([numpy.random.permutation(x) for x in X])
+				#YP = array([numpy.random.permutation(y) for y in Y])
+				#pRep1_, _, _ = mca_method(XP) #mean(pArray1)#[len(pArray1)/2]
+				#pRep2_, _, _ = mca_method(YP)#
+				#pRep1_, pRep2_ = [ discretize(pDe(pA))[0] for pA in [XP, YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
+				iter = i
+				permuted_Y = numpy.random.permutation(Y)
+				# Similarity score between representatives  
+				#fAssociation_permuted = pMe(pRep1_, pRep2_)  
+				fAssociation_permuted = math.fabs(pMe(X, permuted_Y))  
+				aDist.append(fAssociation_permuted)
+				if i % 50 == 0:
+					new_fP2 = _calculate_pvalue(i) #estimate_pvalue(sim_score, aDist) #
+					#num_exceedances = _calculate_num_exceedances(fAssociation_permuted, aDist)
+					#new_fP = _estimate_p_value(num_exceedances, len(aDist))
+					
+					if new_fP2 > fP:
+						
+						#print "Break before the end of permutation iterations"
+						break
+					else: 
+						fP = new_fP2
+				
+				# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
+		fP = _calculate_pvalue(iter)
 	
-	#num_exceedances = _calculate_num_exceedances(fAssociation, aDist)
-	#new_fP = _estimate_p_value(num_exceedances, len(aDist))
-	#print "Estimated PValue:",new_fP, "Pvalue_perm:", fP
+	else:
+		fP = nonparametric_test_pvalue(fAssociation, null_fun)
+	#print "Estimated P-value:",fP
 	'''import matplotlib.pyplot as plt
 	print sim_score, fP 
 	fig, ax = plt.subplots(1, 1)
@@ -2059,19 +2059,21 @@ def estimate_pvalue(x, null_samples):
 	
 	# Algorithm proposed in Knijnenburg2009
 	
+	if x == 0:
+		return 1.0
 	# Get M, the number of null samples greater than x
 	M = len([1 for v in null_samples if v > x])
 	N = len(null_samples)
 	
 	# Use the ECDF to approximate p-values if M > 10
 	if M > 10 or N < 100:
-		return M / N
+		return (M*1.0)/N
 
 	# Estimate the generalized pareto distribtion from tail samples
 	(gp, Nexc) = estimate_tail_gpd(null_samples)
-
 	# GPD estimate of the actual p-value
-	return (Nexc / N) * gp.sf(x)
+	
+	return (Nexc*1.0 / N) * gp.sf(x)
 
 def prob_pvalue_lt(alpha, nexc, ntotal):
 	"""
@@ -2105,7 +2107,6 @@ def nonparametric_test_pvalue(x, null_fun, alpha_cutoff = 0.05):
 	be greater than alpha_cutoff. In this case, the current approximation
 	of the p-value is returned.
 	"""
-
 	# The number of null samples to start with
 	start_samples = 50
 	# Number of null samples to gather in each round
@@ -2116,10 +2117,10 @@ def nonparametric_test_pvalue(x, null_fun, alpha_cutoff = 0.05):
 	
 	# Sample the null distribution until we've got enough to estimate the tail
 	# or if we're sure that the actual p-value is greater than the alpha cutoff
-	nullsamples = [null_fun() for x in range(0,start_samples)]
-	while len(nullsamples) < max_samples and prob_pvalue_lt_samples(alpha_cutoff, x, nullsamples) > 0.01:
+	nullsamples = [null_fun() for val in range(0,start_samples)]
+	while len(nullsamples) < max_samples and prob_pvalue_lt_samples(alpha_cutoff, val, nullsamples) > 0.01:
 		#print("Gathering more.. N = %d; P(p<%f) = %.2f" % (len(nullsamples), alpha_cutoff, prob_pvalue_lt_samples(alpha_cutoff, x, nullsamples)))
-		nullsamples = [null_fun() for x in range(0,sample_increments)] + nullsamples
+		nullsamples = [null_fun() for val in range(0,sample_increments)] + nullsamples
 	
 	#print("Finished gathering: N = %d; P(p<%f) = %f" % (len(nullsamples), alpha_cutoff, prob_pvalue_lt_samples(alpha_cutoff, x, nullsamples)))
 	# Estimate the p-value from the current set of samples

@@ -210,7 +210,7 @@ class Input:
 			header2="\t".join(self.outHead2)
 			if not (header1.lower() == header2.lower()):
 				print("Warning: The samples are not in the same order " + 
-				    "in the two files. The program use the common samples between the two dataset based on headers")#+
+				    "in the two files. The program uses the common samples between the two data sets based on headers")#+
 				    #"." + " \n File1 header: " + header1 + "\n" +
 				    #" File2 header: " + header2)
 				try:

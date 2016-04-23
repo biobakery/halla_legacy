@@ -499,6 +499,7 @@ def hclust(pArray, labels):
     else:
         Z = linkage(D, metric=pDistance, method= "single")
     import scipy.cluster.hierarchy as sch
+    #print  squareform(sch.cophenet(Z))
     return to_tree(Z) if (bTree and len(pArray)>1) else Z, sch.dendrogram(Z, orientation='right')['leaves'] if len(pArray)>1 else sch.dendrogram(Z)['leaves']
 
 def dendrogram(Z):
@@ -1276,7 +1277,7 @@ def get_homogenous_clusters(cluster, dataset_number, prev_silhouette_coefficient
         pass
         '''
         
-    if prev_silhouette_coefficient >= np.mean(temp_sub_silhouette_coefficient):
+    if prev_silhouette_coefficient >= np.max(temp_sub_silhouette_coefficient):
         return [cluster]
     else:
         for i in range(len(sub_clusters)):
@@ -2167,10 +2168,10 @@ def hypotheses_testing():
                     current_level_tests[i].set_pvalue(p_values[i])
                     #print "Pvalue", i, " :", p_values[i]
                     
-                #aP = [ current_level_tests[i].get_pvalue() for i in range(len(current_level_tests)) ]
+                cluster_size = [ len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]) if current_level_tests[i].get_significance_status() == None else 1  for i in range(len(current_level_tests)) ]
                 # claculate adjusted p-value
-                q = config.q
-                aP_adjusted, pRank = stats.p_adjust(p_values, config.q)
+                q = config.q#/2 + config.q/2 * len(current_level_tests)/(len(config.meta_array[0]) * len(config.meta_array[1]))
+                aP_adjusted, pRank = stats.p_adjust(p_values, q, cluster_size)#config.q)
                 for i in range(len(current_level_tests)):
                     current_level_tests[i].set_rank(pRank[i])
                 '''
@@ -2184,11 +2185,14 @@ def hypotheses_testing():
                 def _get_passed_fdr_tests():
                     if config.p_adjust_method in ["bh", "bhy"]:
                         max_r_t = 0
+                        estimated_fdr = 0.0 
                         for i in range(len(current_level_tests)):
-                            if current_level_tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank():
+                            if current_level_tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank() and\
+                            estimated_fdr + current_level_tests[i].get_pvalue()/cluster_size[i] < q:
+                                estimated_fdr += current_level_tests[i].get_pvalue()/cluster_size[i] 
                                 max_r_t = current_level_tests[i].get_rank()
                         for i in range(len(current_level_tests)):
-                            if current_level_tests[i].get_rank() <= max_r_t:
+                            if current_level_tests[i].get_rank() <= max_r_t: #and current_level_tests[i].get_pvalue()+ current_level_tests[i].get_pvalue()*.5*(len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]))  <= aP_adjusted[i]:
                                 passed_tests.append(current_level_tests[i])
                                 if current_level_tests[i].get_significance_status() == None:
                                     aOut.append(current_level_tests[i])

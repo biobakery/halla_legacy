@@ -33,7 +33,7 @@ setup(
     #long_description=open('readme.md').read(),
     install_requires=[  
         "Numpy >= 1.9.2",
-        "Scipy >= 0.13.0",
+        "Scipy >= 0.15.1",
         "Matplotlib >= 1.5.1",
         "Scikit-learn >= 0.14.1",
         #"minepy >= 1.0.0", #for MIC in evaluation package 

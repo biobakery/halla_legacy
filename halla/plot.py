@@ -523,7 +523,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     
     for ax in axs[:,0]: # the left boundary
         ax.grid('off', axis='both')
-        ax.set_ylabel(wrap(ax.get_ylabel()), rotation=0, va='center', ha = 'right', labelpad=30, fontsize = 10)#, fontweight='bold')
+        ax.set_ylabel(wrap(ax.get_ylabel()), rotation=0, va='center', ha = 'center', labelpad=30, fontsize = 10)#, fontweight='bold')
         ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
         ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
         #ax.set_yticks([])
