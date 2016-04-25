@@ -529,14 +529,20 @@ def bh(afPVAL, q, cluster_size):
 	# iLenReduced = len(afPVAL_reduced)
 	# pRank = scipy.stats.rankdata( afPVAL) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	# # source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
-	weighted_p = [afPVAL[i]*cluster_size[i] for i in range(len(cluster_size)) ]
-	pRank = rankdata(weighted_p, method= 'ordinal')
-
+	#weighted_p = [afPVAL[i]*math.log(cluster_size[i],2) for i in range(len(cluster_size)) ]
+	totla_cluster_size = numpy.sum(cluster_size)
+	pRank = rankdata(afPVAL, method= 'ordinal')
 	aAjusted = [] 
 	aQvalue = []
+	size_effect = numpy.mean(cluster_size)
 	iLen = len(afPVAL)
+	if size_effect >=5:
+		q_bar = q*2/math.log1p(size_effect/+1)
+	else:
+		q_bar = q
+	
 	for i, fP in enumerate(afPVAL):
-		fAdjusted = q * 1.0 * pRank[i] / iLen  # iLenReduced
+		fAdjusted = q_bar * pRank[i] / iLen  # iLenReduced
 		
 		#qvalue = fP * iLen / pRank[i]
 		aAjusted.append(fAdjusted)
@@ -1973,6 +1979,7 @@ def estimate_gpd_params_ML(samples):
 		scale = math.exp(lnscale)
 
 		n = len(data)
+		#print scale
 		Z = [x / scale for x in data]
 		
 		if abs(shape) > EPS:

@@ -278,9 +278,55 @@ class Hypothesis_Node():
                     return False
 
         return True
-
+    def stop_decesnding_silhouette_coefficient(self):
+       
+        pMe = distance.c_hash_metric[config.distance]
+        silhouette_scores = []
+     
+        cluster_a = self.get_data()[0]
+        cluster_b = self.get_data()[1]
+        silhouette_coefficient_A = []
+        silhouette_coefficient_B = []
+        for a_feature in cluster_a:
+            if len(cluster_a) ==1:
+                a = 0.0
+            else:
+                temp_a_features = cluster_a[:]
+                temp_a_features.remove(a_feature)
+                a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[0][i], config.meta_feature[0][j]))
+                             for i,j in product([a_feature], temp_a_features)])
+            b = np.mean([1.0 - math.fabs(pMe(config.meta_feature[0][i], config.meta_feature[1][j])) 
+                        for i,j in product([a_feature], cluster_b)])
+            s = (b-a)/max([a,b])
+            silhouette_coefficient_A.append(s)
+        for a_feature in cluster_b:
+            if len(cluster_b) ==1:
+                a = 0.0
+            else:
+                temp_a_features = cluster_b[:]
+                temp_a_features.remove(a_feature)
+                a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[1][i], config.meta_feature[1][j]))
+                             for i,j in product([a_feature], temp_a_features)])
+                   
+            b = np.mean([1.0 - math.fabs(pMe(config.meta_feature[1][i], config.meta_feature[0][j])) 
+                        for i,j in product([a_feature], cluster_a)])
+            s = (b-a)/max([a,b])
+            #print 's a', s, a, b
+            silhouette_coefficient_B.append(s)
+        #print "Silhouette coefficient A", silhouette_coefficient_A
+        #print "Silhouette coefficient B", silhouette_coefficient_B
+        silhouette_scores = silhouette_coefficient_A
+        silhouette_scores.extend(silhouette_coefficient_B)
+        
+        if numpy.min(silhouette_scores)  <= 0.0:
+            #print "Silhouette coefficient all", silhouette_scores
+            #print cluster_a
+            #print cluster_b
+            return False
+        else: 
+            return True
     def stop_and_reject(self):
-
+        
         number_left_features = len(self.get_data()[0])
         number_right_features = len(self.get_data()[1])
 
@@ -315,8 +361,9 @@ class Hypothesis_Node():
         else:
             return False
 
-    def is_bypass(self ):#
+    def is_bypass(self ):
         if config.apply_stop_condition:
+            return self.stop_decesnding_silhouette_coefficient()
             if self.stop_and_reject():
                 if config.verbose == 'DEBUG':
                     print "q: ", self.get_qvalue(), " p: ", self.get_pvalue()
@@ -1235,7 +1282,7 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
         if len(sub_clusters_to_add) ==0:
             sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
             
-        elif sub_silhouette_coefficient[min_silhouette_node_index] >= np.mean(temp_sub_silhouette_coefficient_to_add) :
+        elif sub_silhouette_coefficient[min_silhouette_node_index] >= np.max(temp_sub_silhouette_coefficient_to_add) :
             sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
         else:
             sub_clusters.remove(min_silhouette_node)
@@ -1559,7 +1606,6 @@ pHashMethods = {"permutation" : stats.permutation_test,
 strMethod = config.randomization_method
 pMethod = pHashMethods[strMethod]
 def _actor(pNode):
-    
     pArray1 = config.meta_feature[0]
     pArray2 = config.meta_feature[1]
     """
@@ -2168,9 +2214,11 @@ def hypotheses_testing():
                     current_level_tests[i].set_pvalue(p_values[i])
                     #print "Pvalue", i, " :", p_values[i]
                     
-                cluster_size = [ len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]) if current_level_tests[i].get_significance_status() == None else 1  for i in range(len(current_level_tests)) ]
+                cluster_size = [ len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]) for i in range(len(current_level_tests)) ]
+                #if current_level_tests[i].get_significance_status() == None else 1 
+                total_cluster_size = numpy.sum(cluster_size)
                 # claculate adjusted p-value
-                q = config.q#/2 + config.q/2 * len(current_level_tests)/(len(config.meta_array[0]) * len(config.meta_array[1]))
+                q = config.q 
                 aP_adjusted, pRank = stats.p_adjust(p_values, q, cluster_size)#config.q)
                 for i in range(len(current_level_tests)):
                     current_level_tests[i].set_rank(pRank[i])
@@ -2182,17 +2230,30 @@ def hypotheses_testing():
                         #print "max_r_t", max_r_t
                 '''
                 passed_tests = []
+                zipped =  zip(pRank, aP_adjusted, cluster_size)
+                
+                zipped = sorted(zipped, key=lambda x: x[0])
+                #print zipped
                 def _get_passed_fdr_tests():
                     if config.p_adjust_method in ["bh", "bhy"]:
                         max_r_t = 0
                         estimated_fdr = 0.0 
                         for i in range(len(current_level_tests)):
-                            if current_level_tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank() and\
-                            estimated_fdr + current_level_tests[i].get_pvalue()/cluster_size[i] < q:
-                                estimated_fdr += current_level_tests[i].get_pvalue()/cluster_size[i] 
+                            if current_level_tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank():
                                 max_r_t = current_level_tests[i].get_rank()
+                        '''print "befor adjusting", max_r_t
+                        for i in range(0, int(max_r_t)):
+                            #print zipped[i]
+                            #print zipped[i][0], zipped[i][1]
+                            estimated_fdr += (zipped[i][1] * zipped[i][2]/total_cluster_size)
+                            print estimated_fdr
+                            if estimated_fdr > q:
+                                max_r_t = i
+                                break
+                        print "after adjusting", max_r_t'''
                         for i in range(len(current_level_tests)):
-                            if current_level_tests[i].get_rank() <= max_r_t: #and current_level_tests[i].get_pvalue()+ current_level_tests[i].get_pvalue()*.5*(len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]))  <= aP_adjusted[i]:
+                            if current_level_tests[i].get_rank() <= max_r_t: 
+                                #and current_level_tests[i].get_pvalue()+ current_level_tests[i].get_pvalue()*.5*(len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]))  <= aP_adjusted[i]:
                                 passed_tests.append(current_level_tests[i])
                                 if current_level_tests[i].get_significance_status() == None:
                                     aOut.append(current_level_tests[i])

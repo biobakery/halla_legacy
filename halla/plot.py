@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 from . import config
 import matplotlib
 from itertools import product
-matplotlib.style.use('ggplot')
+#matplotlib.style.use('ggplot')
 matplotlib.use( "Agg" )
 def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods', ylabel=None, labels=None):
     

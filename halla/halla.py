@@ -321,7 +321,7 @@ def set_parameters(args):
     (config.meta_array[0], config.aFeatureNames1, config.aOutType1, config.aSampleNames1) = aOut1 
     (config.meta_array[1], config.aFeatureNames2, config.aOutType2, config.aSampleNames2) = aOut2 
     if args.strAdjust.lower() == "bhy":
-        config.iterations = max([args.iIter, 10*len(config.aOutName1)*len(config.aOutName2)])
+        config.iterations = max([args.iIter, 10*len(config.aFeatureNames1)*len(config.aFeatureNames2)])
     else:
         config.iterations = args.iIter 
     
