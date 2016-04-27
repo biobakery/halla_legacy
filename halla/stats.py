@@ -536,8 +536,8 @@ def bh(afPVAL, q, cluster_size):
 	aQvalue = []
 	size_effect = numpy.mean(cluster_size)
 	iLen = len(afPVAL)
-	if size_effect >=5:
-		q_bar = q*2/math.log1p(size_effect/+1)
+	if size_effect >= 4:
+		q_bar = q*2/math.log(totla_cluster_size/size_effect,2) #q*2/math.log1p(size_effect+1)
 	else:
 		q_bar = q
 	
@@ -781,7 +781,7 @@ def permutation_test_pvalue(X, Y):
 	#new_fP =0.0
 	def null_fun():
 		return math.fabs(pMe(X, numpy.random.permutation(Y)))
-	few_permutation = False
+	few_permutation = True
 	if not few_permutation:
 		iter = iIter
 		if config.use_one_null_dist:
