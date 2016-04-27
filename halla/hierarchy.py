@@ -318,7 +318,7 @@ class Hypothesis_Node():
         silhouette_scores = silhouette_coefficient_A
         silhouette_scores.extend(silhouette_coefficient_B)
         
-        if numpy.min(silhouette_scores)  < 0.2:
+        if numpy.min(silhouette_scores)  < 0.25:
             #print "Silhouette coefficient all", silhouette_scores
             #print cluster_a
             #print cluster_b
