@@ -483,7 +483,7 @@ def bhy(afPVAL, q):
 
 	return aAjusted, pRank
 
-def bh(afPVAL, q, cluster_size):
+def bh(afPVAL, q, cluster_size =None):
 	"""
 	Implement the benjamini-hochberg hierarchical hypothesis testing criterion 
 	In practice, used for implementing Yekutieli criterion *per layer*.  
@@ -530,26 +530,32 @@ def bh(afPVAL, q, cluster_size):
 	# pRank = scipy.stats.rankdata( afPVAL) ##the "dense" method ranks ties as if the list did not contain any redundancies 
 	# # source: http://docs.scipy.org/doc/scipy-dev/reference/generated/scipy.stats.rankdata.html
 	#weighted_p = [afPVAL[i]*math.log(cluster_size[i],2) for i in range(len(cluster_size)) ]
-	totla_cluster_size = numpy.sum(cluster_size)
+	total_cluster_size = numpy.sum(cluster_size)
 	pRank = rankdata(afPVAL, method= 'ordinal')
+	pRank = [int(i) for i in pRank]
 	aAjusted = [] 
 	aQvalue = []
-	size_effect = totla_cluster_size/numpy.mean(cluster_size)
+	m = len(afPVAL)
+	q_bar=q#0.0
 	iLen = len(afPVAL)
-	if size_effect >= 7:
-		q_bar = q*2/math.log1p(size_effect) #q*2/math.log1p(size_effect+1)
-	else:
-		q_bar = q
 	
+	q_bar = q#/math.log(total_cluster_size/m) #q*2/math.log1p(size_effect+1)
+	#print q_bar
 	for i, fP in enumerate(afPVAL):
-		fAdjusted = q_bar * pRank[i] / iLen  # iLenReduced
-		
-		#qvalue = fP * iLen / pRank[i]
+		fAdjusted = q_bar * pRank[i] / iLen  # iLenReduce
 		aAjusted.append(fAdjusted)
-		#aQvalue.append(qvalue)
+	'''zipped =  zip(pRank, cluster_size)
+	zipped = sorted(zipped, key=lambda x: x[0])
+	weight = [0 for i in range(len(afPVAL))]
+	for i in range(len(afPVAL)):
+		weight[i] = sum([zipped[i][1] for i in range(pRank[i]-1)])
+	for i, fP in enumerate(afPVAL):
+		fAdjusted = q_bar * (weight[pRank[i]-1])/(total_cluster_size)#pRank[i] / iLen#q_bar * ((1.0 + ((weight[pRank[i]-1])-1.0)/(total_cluster_size-1.0)*(m-1.0))  /  m)#q_bar * pRank[i] / iLen  # iLenReduce
+		#(weight[pRank[i]-1])/(total_cluster_size)
+		aAjusted.append(fAdjusted)'''
 	# print aOut
 	# assert( all(map(lambda x: x <= 1.0, aOut)) ) ##sanity check 
-
+	#print aAjusted
 	return aAjusted, pRank
 def bonferroni(afPVAL, q):
 	"""
@@ -781,7 +787,7 @@ def permutation_test_pvalue(X, Y):
 	#new_fP =0.0
 	def null_fun():
 		return math.fabs(pMe(X, numpy.random.permutation(Y)))
-	few_permutation = False
+	few_permutation = True
 	if not few_permutation:
 		iter = iIter
 		if config.use_one_null_dist:

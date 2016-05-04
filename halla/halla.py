@@ -211,7 +211,7 @@ def parse_arguments (args):
     argp.add_argument(
         "--adjusting",
         dest="strAdjust",    
-        default="bh",
+        default="bhy",
         choices=["bh", "bonferroni", "bhy", "no_adjusting"],
         help="approach for calculating adjusted p-value\n[default = bh]")
     argp.add_argument(

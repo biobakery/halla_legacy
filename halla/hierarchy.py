@@ -24,6 +24,7 @@ from matplotlib.sankey import RIGHT
 from itertools import product, combinations
 from unicodedata import decomposition
 from math import fabs
+from profile import Stats
 sys.setrecursionlimit(20000)
 
 # Multi-threading section
@@ -1679,7 +1680,8 @@ def naive_all_against_all():
         tests.append(test)
     
     p_values = multiprocessing_actor(_actor, tests, pMethod, pArray1, pArray2)
-    aP_adjusted, pRank = stats.p_adjust(p_values, config.q)
+    cluster_size = [1 for i in range(len(p_values))]
+    aP_adjusted, pRank = stats.p_adjust(p_values, config.q, cluster_size )
     #print aP_adjusted, pRank
     q_values = stats.pvalues2qvalues (p_values, adjusted=True)
     for i in range(len(tests)):
@@ -2176,15 +2178,15 @@ def hypotheses_testing():
             temp_sub_hypotheses = []
             
             temp_hypothesis = apChildren.pop(0)
-            if config.p_adjust_method != "bhy":
+            '''if config.p_adjust_method != "bh2y":
                 if temp_hypothesis.get_significance_status() == True or temp_hypothesis.get_significance_status() == False:
                     from_prev_hypotheses.append(temp_hypothesis)
                 else:
                     temp_sub_hypotheses = temp_hypothesis.get_children()
-            else:
-                temp_sub_hypotheses = temp_hypothesis.get_children()
-                if len(temp_sub_hypotheses) == 0:
-                    leaves_hypotheses.append(temp_hypothesis)
+            else:'''
+            temp_sub_hypotheses = temp_hypothesis.get_children()
+            if len(temp_sub_hypotheses) == 0:
+                leaves_hypotheses.append(temp_hypothesis)
             if temp_hypothesis.get_significance_status() != None:
                 for i in range(len(temp_sub_hypotheses)):
                     temp_sub_hypotheses[i].set_significance_status(temp_hypothesis.get_significance_status())
@@ -2197,119 +2199,147 @@ def hypotheses_testing():
             
             if len (apChildren) > 0:
                 continue
-            if len(current_level_tests) > 0 :
-                #if config.p_adjust_method != "bhy":
-                if len(from_prev_hypotheses) > 0 :
-                    current_level_tests.extend(from_prev_hypotheses)
-                    from_prev_hypotheses = []
-                #number_performed_tests += len(current_level_tests)
-                #if n1 < 2 and n2 < 2:
-                current_level_tests.extend(leaves_hypotheses)
-                print "number of hypotheses in level %s: %s" % (level, len(current_level_tests))
-                #if not len(current_level_tests):
-                #    continue
-                p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2)
+            if len(current_level_tests) == 0 :
+                break
+            #if config.p_adjust_method != "bhy":
+            if len(from_prev_hypotheses) > 0 :
+                current_level_tests.extend(from_prev_hypotheses)
+                from_prev_hypotheses = []
+            #number_performed_tests += len(current_level_tests)
+            #if n1 < 2 and n2 < 2:
+            current_level_tests.extend(leaves_hypotheses)
+            print "number of hypotheses in level %s: %s" % (level, len(current_level_tests))
+            #if not len(current_level_tests):
+            #    continue
+            p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2)
+            
+            for i in range(len(current_level_tests)):
+                current_level_tests[i].set_pvalue(p_values[i])
+                #print "Pvalue", i, " :", p_values[i]
                 
-                for i in range(len(current_level_tests)):
-                    current_level_tests[i].set_pvalue(p_values[i])
-                    #print "Pvalue", i, " :", p_values[i]
+            cluster_size = [ len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]) for i in range(len(current_level_tests)) ]
+            #if current_level_tests[i].get_significance_status() == None else 1 
+            total_cluster_size = numpy.sum(cluster_size)
+            # claculate adjusted p-value
+            q = config.q 
+            aP_adjusted, pRank = stats.p_adjust(p_values, q, cluster_size)#config.q)
+            for i in range(len(current_level_tests)):
+                current_level_tests[i].set_rank(pRank[i])
+            
+            max_r_t = 0
+            for i in range(len(current_level_tests)):
+                if current_level_tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank():
+                    max_r_t = current_level_tests[i].get_rank()
+                    #print "max_r_t", max_r_t
+            '''
+            
+            list_p_trshld =[]
+            number_of_bootstrap = 100
+            
+            if level == 1000:
+                for j in range(number_of_bootstrap):
+                    pvalues_bootsrap = p_values
+                    from sklearn.utils import resample
+                    resamples_pvalues = [resample(p_values, n_samples=1, random_state=0) for i in range(total_cluster_size - len(p_values))] 
+                    pvalues_bootsrap.extend(resamples_pvalues)#numpy.random.normal(numpy.mean(p_values), numpy.std(p_values),size=total_cluster_size)
                     
-                cluster_size = [ len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]) for i in range(len(current_level_tests)) ]
-                #if current_level_tests[i].get_significance_status() == None else 1 
-                total_cluster_size = numpy.sum(cluster_size)
-                # claculate adjusted p-value
-                q = config.q 
-                aP_adjusted, pRank = stats.p_adjust(p_values, q, cluster_size)#config.q)
-                for i in range(len(current_level_tests)):
-                    current_level_tests[i].set_rank(pRank[i])
-                '''
-                max_r_t = 0
-                for i in range(len(current_level_tests)):
-                    if current_level_tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank():
-                        max_r_t = current_level_tests[i].get_rank()
-                        #print "max_r_t", max_r_t
-                '''
-                passed_tests = []
-                zipped =  zip(pRank, aP_adjusted, cluster_size)
+                    aP_adjusted, pRank = stats.p_adjust(pvalues_bootsrap, q, cluster_size)
+                    max_r_t = 0
+                    p_trshld = pvalues_bootsrap[0]
+                    for i in range(len(pvalues_bootsrap)):
+                        if pvalues_bootsrap[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
+                            max_r_t = pRank[i]
+                            p_trshld = pvalues_bootsrap[i]
+                    list_p_trshld.append(p_trshld)
+            else:
+                aP_adjusted, pRank = stats.p_adjust(p_values, q, cluster_size)
+            '''            
                 
-                zipped = sorted(zipped, key=lambda x: x[0])
-                #print zipped
-                def _get_passed_fdr_tests():
-                    if config.p_adjust_method in ["bh", "bhy"]:
-                        max_r_t = 0
-                        estimated_fdr = 0.0 
+                
+            passed_tests = []
+            #zipped =  zip(pRank, aP_adjusted, cluster_size)
+            
+            #zipped = sorted(zipped, key=lambda x: x[0])
+            #print zipped
+            def _get_passed_fdr_tests():
+                if config.p_adjust_method in ["bh", "bhy"]:
+                    #max_r_t = 0
+                    #estimated_fdr = 0.0 
+                    '''if level >=1:
                         for i in range(len(current_level_tests)):
                             if current_level_tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank():
-                                max_r_t = current_level_tests[i].get_rank()
-                        '''print "befor adjusting", max_r_t
-                        for i in range(0, int(max_r_t)):
-                            #print zipped[i]
-                            #print zipped[i][0], zipped[i][1]
-                            estimated_fdr += (zipped[i][1] * zipped[i][2]/total_cluster_size)
-                            print estimated_fdr
-                            if estimated_fdr > q:
-                                max_r_t = i
-                                break
-                        print "after adjusting", max_r_t'''
-                        for i in range(len(current_level_tests)):
-                            if current_level_tests[i].get_rank() <= max_r_t: 
-                                #and current_level_tests[i].get_pvalue()+ current_level_tests[i].get_pvalue()*.5*(len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]))  <= aP_adjusted[i]:
-                                passed_tests.append(current_level_tests[i])
-                                if current_level_tests[i].get_significance_status() == None:
-                                    aOut.append(current_level_tests[i])
-                                    aFinal.append(current_level_tests[i])
-                                    current_level_tests[i].set_significance_status(True)
-                                    print ("-- associations after %s fdr correction" % config.p_adjust_method)
-                            else:
-                                if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
-                                    current_level_tests[i].set_significance_status(False)
-                                    aOut.append(current_level_tests[i])
-                                elif current_level_tests[i].is_leaf():
-                                    if current_level_tests[i].get_significance_status() == None:
-                                        current_level_tests[i].set_significance_status(False)
-                                        aOut.append(current_level_tests[i])
-                    elif config.p_adjust_method == "bonferroni":
-                        print len(current_level_tests)
-                        for i in range(len(current_level_tests)):
-                            if current_level_tests[i].get_pvalue() <= aP_adjusted[i]:
-                                passed_tests.append(current_level_tests[i])
-                                if current_level_tests[i].get_significance_status() == None:
-                                    aOut.append(current_level_tests[i])
-                                    aFinal.append(current_level_tests[i])
-                                    current_level_tests[i].set_significance_status(True)
-                                    print ("-- associations after %s fdr correction" % config.p_adjust_method)
-                            else:
-                                if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
-                                    current_level_tests[i].set_significance_status(False)
-                                    aOut.append(current_level_tests[i])
-                                elif current_level_tests[i].is_leaf():
-                                    if current_level_tests[i].get_significance_status() == None:
-                                        current_level_tests[i].set_significance_status(False)
-                                        aOut.append(current_level_tests[i])
-                    elif config.p_adjust_method == "no_adjusting":
-                        for i in range(len(current_level_tests)):
-                            if current_level_tests[i].get_pvalue() <= q:
-                                passed_tests.append(current_level_tests[i])
-                                if current_level_tests[i].get_significance_status() == None:
-                                    aOut.append(current_level_tests[i])
-                                    aFinal.append(current_level_tests[i])
-                                    current_level_tests[i].set_significance_status(True)
-                                    print ("-- associations after %s fdr correction" % config.p_adjust_method)
-                            else:
-                                if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
-                                    current_level_tests[i].set_significance_status(False)
-                                    aOut.append(current_level_tests[i])
-                                elif current_level_tests[i].is_leaf():
-                                    if current_level_tests[i].get_significance_status() == None:
-                                        current_level_tests[i].set_significance_status(False)
-                                        aOut.append(current_level_tests[i])
-                    
-                    q_values = stats.pvalues2qvalues ([current_level_tests[i].get_pvalue() for i in range(len(current_level_tests))], adjusted=True)
+                                max_r_t = current_level_tests[i].get_rank()'''
+                    '''print "befor adjusting", max_r_t
+                    for i in range(0, int(max_r_t)):
+                        #print zipped[i]
+                        #print zipped[i][0], zipped[i][1]
+                        estimated_fdr += (zipped[i][1] * zipped[i][2]/total_cluster_size)
+                        print estimated_fdr
+                        if estimated_fdr > q:
+                            max_r_t = i
+                            break
+                    print "after adjusting", max_r_t'''
                     for i in range(len(current_level_tests)):
-                        if current_level_tests[i].get_qvalue() == None and current_level_tests[i] in passed_tests: 
-                            current_level_tests[i].set_qvalue(q_values[i])
-                _get_passed_fdr_tests()
+                        #if current_level_tests[i].get_rank() <= max_r_t:
+                        if current_level_tests[i].get_rank() <= max_r_t:#(level ==1000 and sum([1 if current_level_tests[i].get_pvalue()<= val else 0 for val  in list_p_trshld])>= (1.0-config.q)*number_of_bootstrap)\
+                            #or (level>=1 and current_level_tests[i].get_rank() <= max_r_t):
+                            #and current_level_tests[i].get_pvalue()+ current_level_tests[i].get_pvalue()*.5*(len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]))  <= aP_adjusted[i]:
+                            passed_tests.append(current_level_tests[i])
+                            if current_level_tests[i].get_significance_status() == None:
+                                aOut.append(current_level_tests[i])
+                                aFinal.append(current_level_tests[i])
+                                current_level_tests[i].set_significance_status(True)
+                                print ("-- associations after %s fdr correction" % config.p_adjust_method)
+                        else:
+                            if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
+                                current_level_tests[i].set_significance_status(False)
+                                aOut.append(current_level_tests[i])
+                            elif current_level_tests[i].is_leaf():
+                                if current_level_tests[i].get_significance_status() == None:
+                                    current_level_tests[i].set_significance_status(False)
+                                    aOut.append(current_level_tests[i])
+                elif config.p_adjust_method == "bonferroni":
+                    print len(current_level_tests)
+                    for i in range(len(current_level_tests)):
+                        if current_level_tests[i].get_pvalue() <= aP_adjusted[i]:
+                            passed_tests.append(current_level_tests[i])
+                            if current_level_tests[i].get_significance_status() == None:
+                                aOut.append(current_level_tests[i])
+                                aFinal.append(current_level_tests[i])
+                                current_level_tests[i].set_significance_status(True)
+                                print ("-- associations after %s fdr correction" % config.p_adjust_method)
+                        else:
+                            if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
+                                current_level_tests[i].set_significance_status(False)
+                                aOut.append(current_level_tests[i])
+                            elif current_level_tests[i].is_leaf():
+                                if current_level_tests[i].get_significance_status() == None:
+                                    current_level_tests[i].set_significance_status(False)
+                                    aOut.append(current_level_tests[i])
+                elif config.p_adjust_method == "no_adjusting":
+                    for i in range(len(current_level_tests)):
+                        if current_level_tests[i].get_pvalue() <= q:
+                            passed_tests.append(current_level_tests[i])
+                            if current_level_tests[i].get_significance_status() == None:
+                                aOut.append(current_level_tests[i])
+                                aFinal.append(current_level_tests[i])
+                                current_level_tests[i].set_significance_status(True)
+                                print ("-- associations after %s fdr correction" % config.p_adjust_method)
+                        else:
+                            if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
+                                current_level_tests[i].set_significance_status(False)
+                                aOut.append(current_level_tests[i])
+                            elif current_level_tests[i].is_leaf():
+                                if current_level_tests[i].get_significance_status() == None:
+                                    current_level_tests[i].set_significance_status(False)
+                                    aOut.append(current_level_tests[i])
                 
+                q_values = stats.pvalues2qvalues ([current_level_tests[i].get_pvalue() for i in range(len(current_level_tests))], adjusted=True)
+                for i in range(len(current_level_tests)):
+                    if current_level_tests[i].get_qvalue() == None and current_level_tests[i] in passed_tests: 
+                        current_level_tests[i].set_qvalue(q_values[i])
+            _get_passed_fdr_tests()
+            
             #return aFinal, aOut                
             apChildren = current_level_tests #next_level_apChildren #
             print "Hypotheses testing level", level, "with ",len(current_level_tests), "hypotheses is finished."
