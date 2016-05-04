@@ -787,7 +787,7 @@ def permutation_test_pvalue(X, Y):
 	#new_fP =0.0
 	def null_fun():
 		return math.fabs(pMe(X, numpy.random.permutation(Y)))
-	few_permutation = True
+	few_permutation = False
 	if not few_permutation:
 		iter = iIter
 		if config.use_one_null_dist:
