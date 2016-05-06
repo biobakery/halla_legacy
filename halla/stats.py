@@ -787,7 +787,7 @@ def permutation_test_pvalue(X, Y):
 	#new_fP =0.0
 	def null_fun():
 		return math.fabs(pMe(X, numpy.random.permutation(Y)))
-	few_permutation = False
+	few_permutation = True
 	if not few_permutation:
 		iter = iIter
 		if config.use_one_null_dist:
@@ -2121,7 +2121,7 @@ def nonparametric_test_pvalue(x, null_fun, alpha_cutoff = 0.05):
 	of the p-value is returned.
 	"""
 	# The number of null samples to start with
-	start_samples = 50
+	start_samples = 200
 	# Number of null samples to gather in each round
 	sample_increments = 50
 	# Maximum number of null samples, at which point the GPD approximation
