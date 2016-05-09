@@ -2121,23 +2121,26 @@ def nonparametric_test_pvalue(x, null_fun, alpha_cutoff = 0.05):
 	of the p-value is returned.
 	"""
 	# The number of null samples to start with
-	start_samples = 50
+	start_samples = 100
 	# Number of null samples to gather in each round
-	sample_increments = 50
+	sample_increments = 100
 	# Maximum number of null samples, at which point the GPD approximation
 	# is used
 	max_samples = 1000
 	
 	# Sample the null distribution until we've got enough to estimate the tail
 	# or if we're sure that the actual p-value is greater than the alpha cutoff
-	if config.use_one_null_dist and len(config.null_dist) == 0:
+	if config.use_one_null_dist and len(config.nullsamples) == 0:
 		nullsamples = [null_fun() for val in range(0,start_samples)]
-		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(alpha_cutoff, val, nullsamples) > config.q:
-			#print("Gathering more.. N = %d; P(p<%f) = %.2f" % (len(nullsamples), alpha_cutoff, prob_pvalue_lt_samples(alpha_cutoff, x, nullsamples)))
+		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(config.q, x, nullsamples) > config.q:
+			#print("Gathering more.. N = %d; P(p<%f) = %.2f" % (len(nullsamples), config.q, prob_pvalue_lt_samples(config.q, x, nullsamples)))
 			nullsamples = [null_fun() for val in range(0,sample_increments)] + nullsamples
+			#print  len(nullsamples), 'in loop'
+		#print len(nullsamples), 'after looop'
+		if len(nullsamples) == max_samples:
 			config.nullsamples = nullsamples
 	else:
-		nullsamples = config.null_dist
+		nullsamples = config.nullsamples
 		
 		
 	#print("Finished gathering: N = %d; P(p<%f) = %f" % (len(nullsamples), alpha_cutoff, prob_pvalue_lt_samples(alpha_cutoff, x, nullsamples)))
