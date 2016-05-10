@@ -2123,7 +2123,7 @@ def nonparametric_test_pvalue(x, null_fun, alpha_cutoff = 0.05):
 	# The number of null samples to start with
 	start_samples = 100
 	# Number of null samples to gather in each round
-	sample_increments = 100
+	sample_increments = 50
 	# Maximum number of null samples, at which point the GPD approximation
 	# is used
 	max_samples = 1000
@@ -2132,7 +2132,7 @@ def nonparametric_test_pvalue(x, null_fun, alpha_cutoff = 0.05):
 	# or if we're sure that the actual p-value is greater than the alpha cutoff
 	if config.use_one_null_dist and len(config.nullsamples) == 0:
 		nullsamples = [null_fun() for val in range(0,start_samples)]
-		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(config.q, x, nullsamples) > config.q:
+		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(config.q, x, nullsamples) > .01:
 			#print("Gathering more.. N = %d; P(p<%f) = %.2f" % (len(nullsamples), config.q, prob_pvalue_lt_samples(config.q, x, nullsamples)))
 			nullsamples = [null_fun() for val in range(0,sample_increments)] + nullsamples
 			#print  len(nullsamples), 'in loop'
