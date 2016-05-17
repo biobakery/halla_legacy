@@ -2040,7 +2040,7 @@ def estimate_tail_gpd(samples):
 	# Try to make Nexc at most half of the samples, but at least minNexc,
 	# but definitely no more than N-1
 	# This is only problematic if N is < Nexc*2, which should never be the case
-	Nexc = min(len(samples)-1, max(minNexc, min(Nexc, math.floor(len(samples)/2))))
+	Nexc = min(len(samples)-1, max(minNexc, min(Nexc, int(math.floor(len(samples)/2)))))
 	
 	while True:
 		# Fit the GPD to the samples
