@@ -191,7 +191,7 @@ def parse_arguments (args):
         "-i","--iterations", metavar="<1000>",
         dest="iIter",
         type=int,
-        default=1000,
+        default=500,
         help="iterations for nonparametric significance testing (permutation test)\n[default = 1000]")
 
     argp.add_argument(
@@ -320,10 +320,11 @@ def set_parameters(args):
     config.hallagram = args.hallagram
     (config.meta_array[0], config.aFeatureNames1, config.aOutType1, config.aSampleNames1) = aOut1 
     (config.meta_array[1], config.aFeatureNames2, config.aOutType2, config.aSampleNames2) = aOut2 
-    if args.strAdjust.lower() == "bhy":
+    config.iterations = args.iIter
+    '''if args.strAdjust.lower() == "bhy":
         config.iterations = max([args.iIter, 10*len(config.aFeatureNames1)*len(config.aFeatureNames2)])
     else:
-        config.iterations = args.iIter 
+        config.iterations = args.iIter '''
     
 def _main():
     

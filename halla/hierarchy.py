@@ -1701,7 +1701,7 @@ def naive_all_against_all():
                     aOut.append(tests[i])
                     aFinal.append(tests[i])
                     tests[i].set_significance_status(True)
-                    print ("-- associations after %s fdr correction" % p_adjusting_method)
+                    print ("-- association after %s fdr correction" % p_adjusting_method)
                 else:
                     tests[i].set_significance_status(False)
                     aOut.append(tests[i])
@@ -1712,7 +1712,7 @@ def naive_all_against_all():
                     aOut.append(tests[i])
                     aFinal.append(tests[i])
                     tests[i].set_significance_status(True)
-                    print ("-- associations after %s fdr correction" % p_adjusting_method)
+                    print ("-- association after %s fdr correction" % p_adjusting_method)
                 else:
                     tests[i].set_significance_status(False)
                     aOut.append(tests[i])
@@ -1723,7 +1723,7 @@ def naive_all_against_all():
                     aOut.append(tests[i])
                     aFinal.append(tests[i])
                     tests[i].set_significance_status(True)
-                    print ("-- associations after %s fdr correction" % p_adjusting_method)
+                    print ("-- association after %s fdr correction" % p_adjusting_method)
                 else:
                     tests[i].set_significance_status(False)
                     aOut.append(tests[i])
@@ -2045,7 +2045,7 @@ def hypotheses_testing():
             for i in range(len(aP)):
                 if pRank[i] <= max_r_t and Current_Family_Children[i].is_representative(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
                     number_passed_tests += 1
-                    print "-- associations after fdr correction"
+                    print "-- association after fdr correction"
                     if config.verbose == 'INFO':
                         Current_Family_Children[i].report()
                     #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
@@ -2120,7 +2120,7 @@ def hypotheses_testing():
                         number_passed_tests += 1
                         all_performed_tests[i].already_passed = True
                         all_performed_tests[i].already_tested = True
-                        print "-- associations after fdr correction"
+                        print "-- association after fdr correction"
                         if config.verbose == 'INFO':
                             all_performed_tests[i].report()
                         #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
@@ -2289,7 +2289,7 @@ def hypotheses_testing():
                                 aOut.append(current_level_tests[i])
                                 aFinal.append(current_level_tests[i])
                                 current_level_tests[i].set_significance_status(True)
-                                print ("-- associations after %s fdr correction" % config.p_adjust_method)
+                                print ("-- association after %s fdr correction" % config.p_adjust_method)
                         else:
                             if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
                                 current_level_tests[i].set_significance_status(False)
@@ -2307,7 +2307,7 @@ def hypotheses_testing():
                                 aOut.append(current_level_tests[i])
                                 aFinal.append(current_level_tests[i])
                                 current_level_tests[i].set_significance_status(True)
-                                print ("-- associations after %s fdr correction" % config.p_adjust_method)
+                                print ("-- association after %s fdr correction" % config.p_adjust_method)
                         else:
                             if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
                                 current_level_tests[i].set_significance_status(False)
@@ -2324,7 +2324,7 @@ def hypotheses_testing():
                                 aOut.append(current_level_tests[i])
                                 aFinal.append(current_level_tests[i])
                                 current_level_tests[i].set_significance_status(True)
-                                print ("-- associations after %s fdr correction" % config.p_adjust_method)
+                                print ("-- association after %s fdr correction" % config.p_adjust_method)
                         else:
                             if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
                                 current_level_tests[i].set_significance_status(False)

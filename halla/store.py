@@ -566,17 +566,17 @@ def _report():
                 similarity_score[i][j] = distance.c_hash_metric[config.distance](config.meta_feature[0][config.Features_order[0][i]], config.meta_feature[1][config.Features_order[1][j]])
         sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
         sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
-        for association in sorted_associations:
+        '''for association in sorted_associations:
             iX, iY = association.get_data()
             for i, j in itertools.product(iX, iY):
                 #similarity_score[i][j] = similarity_score[i][j]*2
                 pass         
-       
+       '''
         def _is_in_an_assciostions(i,j):
-            for num, association in enumerate(sorted_associations):
-                iX, iY = association.get_data()
+            for n in range(len(sorted_associations)):
+                iX, iY = sorted_associations[n].get_data()
                 if i in iX and j in iY:
-                    return num+1
+                    return n+1
             return 0
          
         '''with open('similarity_score.csv', 'w') as csvfile:
