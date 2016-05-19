@@ -767,7 +767,7 @@ def _report():
     _report_all_tests()
     _report_associations()
     _report_compared_clusters()
-    _write_hallagram_info()
+    #_write_hallagram_info()
     if config.hallagram:
         #_heatmap_associations()
         #from rpy2.rinterface import RRuntimeError

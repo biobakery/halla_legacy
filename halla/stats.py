@@ -2083,7 +2083,13 @@ def estimate_pvalue(x, null_samples):
 		return (M*1.0)/N
 
 	# Estimate the generalized pareto distribtion from tail samples
-	(gp, Nexc) = estimate_tail_gpd(null_samples)
+	if not config.use_one_null_dist or config.gp == None:
+		(gp, Nexc) = estimate_tail_gpd(null_samples)
+		config.gp  = gp
+		config.Nexc = Nexc
+		
+	else:
+		(gp, Nexc) = (config.gp, config.Nexc)
 	# GPD estimate of the actual p-value
 	
 	return (Nexc*1.0 / N) * gp.sf(x)
@@ -2135,7 +2141,6 @@ def nonparametric_test_pvalue(x, null_fun, alpha_cutoff = 0.05):
 		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(config.q, x, nullsamples) > .01:
 			#print("Gathering more.. N = %d; P(p<%f) = %.2f" % (len(nullsamples), config.q, prob_pvalue_lt_samples(config.q, x, nullsamples)))
 			nullsamples = [null_fun() for val in range(0,sample_increments)] + nullsamples
-		if len(nullsamples) == max_samples:
 			config.nullsamples = nullsamples
 	else:
 		nullsamples = config.nullsamples

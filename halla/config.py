@@ -46,7 +46,9 @@ missing_method = None
 seed = 0 #random.randint(1,10000)
 K = 1.5 # constant for homogeneity 
 cut_distance_thrd = .5
-use_one_null_dist = True
+use_one_null_dist = False
+gp = None
+Nexc = None
 nullsamples = []
 number_of_performed_tests = 0
 #==================================================================#

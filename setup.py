@@ -26,7 +26,7 @@ setup(
         "Environment :: Console",
         "Operating System :: MacOS",
         "Operating System :: Unix",
-        "Operating System :: Windows",
+        "Operating System :: Microsoft :: Windows",
         "Programming Language :: Python :: 2.7",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
         ],
