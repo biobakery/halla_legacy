@@ -2092,7 +2092,15 @@ def estimate_pvalue(x, null_samples):
 		(gp, Nexc) = (config.gp, config.Nexc)
 	# GPD estimate of the actual p-value
 	
-	return (Nexc*1.0 / N) * gp.sf(x)
+	# Check if the result of the survival function is na then genrate more null samples
+	sf_result =  gp.sf(x)
+	if math.isnan(float(sf_result)):
+		print "WARNING: the number of permutation for null samples wasn't enough and it's doubled!"
+		sample_increments = 50
+		config.nullsamples = [null_fun() for val in range(0,sample_increments)] + config.nullsamples
+		estimate_pvalue(x, config.nullsamples)
+	else:	
+		return (Nexc*1.0 / N) * sf_result
 
 def prob_pvalue_lt(alpha, nexc, ntotal):
 	"""
