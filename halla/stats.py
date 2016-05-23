@@ -2064,7 +2064,7 @@ def estimate_tail_gpd(samples):
 
 	return (scipy.stats.genpareto(shape, loc=t, scale=scale), Nexc)
 
-def estimate_pvalue(x, null_samples):
+def estimate_pvalue(x, null_samples, regenrate_GPD_flag = False):
 	"""
 	Estimates the p-value, given the observed test statistic x and a set of
 	samples from the null distribution.
@@ -2083,23 +2083,24 @@ def estimate_pvalue(x, null_samples):
 		return (M*1.0)/N
 
 	# Estimate the generalized pareto distribtion from tail samples
-	if not config.use_one_null_dist or config.gp == None:
+	if not config.use_one_null_dist or config.gp == None or regenrate_GPD_flag:
 		(gp, Nexc) = estimate_tail_gpd(null_samples)
 		config.gp  = gp
 		config.Nexc = Nexc
-		
 	else:
 		(gp, Nexc) = (config.gp, config.Nexc)
 	# GPD estimate of the actual p-value
 	
 	# Check if the result of the survival function is na then genrate more null samples
 	sf_result =  gp.sf(x)
+	#print sf_result, N, Nexc
 	if math.isnan(float(sf_result)):
 		print "WARNING: the number of permutation for null samples wasn't enough and it's doubled!"
 		sample_increments = 50
 		config.nullsamples = [null_fun() for val in range(0,sample_increments)] + config.nullsamples
-		estimate_pvalue(x, config.nullsamples)
+		return estimate_pvalue(x, config.nullsamples, regenrate_GPD_flag = True)
 	else:	
+		#print "final pvalue", (Nexc*1.0 / N) * sf_result
 		return (Nexc*1.0 / N) * sf_result
 
 def prob_pvalue_lt(alpha, nexc, ntotal):

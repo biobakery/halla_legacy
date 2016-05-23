@@ -233,38 +233,39 @@ def nmi(pData1, pData2):
 	return normalized_mutual_info_score(pData1, pData2) #return NormalizedMutualInformation(pData1, pData2).get_distance() 
 
 def ami(pData1, pData2):
-	""" 
-	Static implementation of adjusted distance 
-
-	Examples
-	-----------
-
-	>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-	>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
-	>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
-	>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
-	>>> p = itertools.product( range(len(x)), range(len(y)) )
-	>>> for item in p: i,j = item; print (i,j), ami( dx[i], dy[j] )
-	(0, 0) 1.0
-	(0, 1) 1.0
-	(0, 2) 1.0
-	(0, 3) 1.0
-	(1, 0) 2.51758394487e-08
-	(1, 1) 2.51758394487e-08
-	(1, 2) 2.51758394487e-08
-	(1, 3) 2.51758394487e-08
-	(2, 0) 1.0
-	(2, 1) 1.0
-	(2, 2) 1.0
-	(2, 3) 1.0
-	(3, 0) -3.72523550982e-08
-	(3, 1) -3.72523550982e-08
-	(3, 2) -3.72523550982e-08
-	(3, 3) -3.72523550982e-08
-
-	"""
-
-	return adjusted_mutual_info_score(pData1, pData2) #return AdjustedMutualInformation(pData1, pData2).get_distance()
+    """ 
+    Static implementation of adjusted distance 
+    
+    Examples
+    -----------
+    
+    >>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+    >>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
+    >>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
+    >>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
+    >>> p = itertools.product( range(len(x)), range(len(y)) )
+    >>> for item in p: i,j = item; print (i,j), ami( dx[i], dy[j] )
+    (0, 0) 1.0
+    (0, 1) 1.0
+    (0, 2) 1.0
+    (0, 3) 1.0
+    (1, 0) 2.51758394487e-08
+    (1, 1) 2.51758394487e-08
+    (1, 2) 2.51758394487e-08
+    (1, 3) 2.51758394487e-08
+    (2, 0) 1.0
+    (2, 1) 1.0
+    (2, 2) 1.0
+    (2, 3) 1.0
+    (3, 0) -3.72523550982e-08
+    (3, 1) -3.72523550982e-08
+    (3, 2) -3.72523550982e-08
+    (3, 3) -3.72523550982e-08
+    
+    """
+    result = math.fabs(adjusted_mutual_info_score(pData1, pData2))
+    #print "AMI:  ", result
+    return result #return AdjustedMutualInformation(pData1, pData2).get_distance()
 
 # ## Changeset March 11, 2014
 # ## NB: As a general rule, always use notion of "strength" of association; i.e. 0 for non-associated and 1 for strongly associated 
