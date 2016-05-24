@@ -736,6 +736,12 @@ def estimate_p_value(observed_value, random_distribution):
     	#from scipy.stats import genpareto
     	#genpareto.cdf(random_distribution, observed_value)
         return float(num_exceedances) / num_permutations
+def null_fun(X, Y):
+	strMetric = config.distance
+	pHashDecomposition = c_hash_decomposition
+	pHashMetric = distance.c_hash_metric 
+	pMe = pHashMetric[strMetric]
+	return math.fabs(pMe(X, numpy.random.permutation(Y)))
 def permutation_test_pvalue(X, Y):
 	 
 	strMetric = config.distance 
@@ -785,8 +791,7 @@ def permutation_test_pvalue(X, Y):
 		return pval
 	#new_fP2 = 0.0
 	#new_fP =0.0
-	def null_fun():
-		return math.fabs(pMe(X, numpy.random.permutation(Y)))
+	
 	few_permutation = True
 	if not few_permutation:
 		iter = iIter
@@ -825,7 +830,7 @@ def permutation_test_pvalue(X, Y):
 		fP = _calculate_pvalue(iter)
 	
 	else:
-		fP = nonparametric_test_pvalue(fAssociation, null_fun)
+		fP = nonparametric_test_pvalue(fAssociation, X, Y)
 	#print "Estimated P-value:",fP
 	'''import matplotlib.pyplot as plt
 	print sim_score, fP 
@@ -2064,7 +2069,7 @@ def estimate_tail_gpd(samples):
 
 	return (scipy.stats.genpareto(shape, loc=t, scale=scale), Nexc)
 
-def estimate_pvalue(x, null_samples, regenrate_GPD_flag = False):
+def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 	"""
 	Estimates the p-value, given the observed test statistic x and a set of
 	samples from the null distribution.
@@ -2072,7 +2077,7 @@ def estimate_pvalue(x, null_samples, regenrate_GPD_flag = False):
 	
 	# Algorithm proposed in Knijnenburg2009
 	
-	if x == 0:
+	if x <= 0:
 		return 1.0
 	# Get M, the number of null samples greater than x
 	M = len([1 for v in null_samples if v > x])
@@ -2093,12 +2098,13 @@ def estimate_pvalue(x, null_samples, regenrate_GPD_flag = False):
 	
 	# Check if the result of the survival function is na then genrate more null samples
 	sf_result =  gp.sf(x)
-	#print sf_result, N, Nexc
-	if math.isnan(float(sf_result)):
+	if sf_result == 1:
+		print sf_result, N, Nexc
+	if math.isnan(float(sf_result)) or sf_result == 1.0:
 		print "WARNING: the number of permutation for null samples wasn't enough and it's doubled!"
 		sample_increments = 50
-		config.nullsamples = [null_fun() for val in range(0,sample_increments)] + config.nullsamples
-		return estimate_pvalue(x, config.nullsamples, regenrate_GPD_flag = True)
+		config.nullsamples = [null_fun(X, Y) for val in range(0,sample_increments)] + config.nullsamples
+		return estimate_pvalue(x, config.nullsamples, X=X, Y=Y, regenrate_GPD_flag = True)
 	else:	
 		#print "final pvalue", (Nexc*1.0 / N) * sf_result
 		return (Nexc*1.0 / N) * sf_result
@@ -2127,7 +2133,7 @@ def prob_pvalue_lt_samples(alpha, x, null_samples):
 	"""
 	return prob_pvalue_lt(alpha, len([1 for v in null_samples if v > x]), len(null_samples))
 
-def nonparametric_test_pvalue(x, null_fun, alpha_cutoff = 0.05):
+def nonparametric_test_pvalue(x, X, Y, alpha_cutoff = 0.05):
 	"""
 	Performs a permutation test of the significance of x, given the function
 	to sample the null distribution null_fun.
@@ -2146,10 +2152,10 @@ def nonparametric_test_pvalue(x, null_fun, alpha_cutoff = 0.05):
 	# Sample the null distribution until we've got enough to estimate the tail
 	# or if we're sure that the actual p-value is greater than the alpha cutoff
 	if not config.use_one_null_dist or len(config.nullsamples) == 0:
-		nullsamples = [null_fun() for val in range(0,start_samples)]
+		nullsamples = [null_fun(X, Y) for val in range(0,start_samples)]
 		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(config.q, x, nullsamples) > .01:
 			#print("Gathering more.. N = %d; P(p<%f) = %.2f" % (len(nullsamples), config.q, prob_pvalue_lt_samples(config.q, x, nullsamples)))
-			nullsamples = [null_fun() for val in range(0,sample_increments)] + nullsamples
+			nullsamples = [null_fun(X, Y) for val in range(0,sample_increments)] + nullsamples
 			config.nullsamples = nullsamples
 	else:
 		nullsamples = config.nullsamples
@@ -2157,7 +2163,7 @@ def nonparametric_test_pvalue(x, null_fun, alpha_cutoff = 0.05):
 		
 	#print("Finished gathering: N = %d; P(p<%f) = %f" % (len(nullsamples), alpha_cutoff, prob_pvalue_lt_samples(alpha_cutoff, x, nullsamples)))
 	# Estimate the p-value from the current set of samples
-	return estimate_pvalue(x, nullsamples)
+	return estimate_pvalue(x, nullsamples, X=X, Y=Y)
 
 
 	

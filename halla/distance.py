@@ -263,7 +263,7 @@ def ami(pData1, pData2):
     (3, 3) -3.72523550982e-08
     
     """
-    result = math.fabs(adjusted_mutual_info_score(pData1, pData2))
+    result = adjusted_mutual_info_score(pData1, pData2)
     #print "AMI:  ", result
     return result #return AdjustedMutualInformation(pData1, pData2).get_distance()
 

@@ -78,3 +78,19 @@ strFile1 = None
 strFile2 = None
 outcome = None
 pvalues = None
+def reset_default():
+    print "reset to default parameters!"
+    use_one_null_dist = False
+    gp = None
+    Nexc = None
+    nullsamples = []
+    number_of_performed_tests = 0
+    outcome = None
+    pvalues = None
+    meta_summary = None  # summary statistics 
+    meta_report = None  # summary report 
+    meta_array = array([None, None])
+    meta_data_tree = [] 
+    meta_hypothesis_tree = None 
+    meta_alla = None  # results of all-against-all
+    meta_out = None  # final output array; some methods (e.g. hypotheses_testing) have multiple outputs piped to both meta_alla and meta_out 
