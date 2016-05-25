@@ -227,7 +227,7 @@ def parse_arguments (args):
     argp.add_argument(
         "--diagnostics-plot", 
         dest="diagnostics_plot",
-        help="plot the results", 
+        help="Diagnostics plot for associations ", 
         action="store_true")
     argp.add_argument(
         "--discretizing", 

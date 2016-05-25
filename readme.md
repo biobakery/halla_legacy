@@ -241,18 +241,22 @@ $OUTPUT_DIR is the output directory
 
 ## Complete option list ##
 ```
-usage: halla [-h] -X <input_dataset_1.txt> [-Y <input_dataset_2.txt>] -o
-             <output> [-q <0.2>] [-a {HAllA,AllA}] [-i <1000>]
-             [-m {nmi,ami,mic,pearson,spearman}]
-             [-d {none,mca,pca,ica,cca,kpca,pls,medoid,mean}] [-v]
-             [--plotting-results] [-k {equal-area,jenks,hclust,kmeans,none}]
+usage: halla [-h] [--version] -X <input_dataset_1.txt>
+             [-Y <input_dataset_2.txt>] -o <output> [-q <0.2>]
+             [-a {HAllA,AllA}] [-f {level,simple,all}] [-i <1000>]
+             [-m {nmi,ami,mic,dmic,dcor,pearson,spearman}]
+             [-d {none,mca,pca,ica,cca,kpca,pls,medoid,mean}]
+             [--adjusting {bh,bonferroni,bhy,no_adjusting}] [-v VERBOSE]
+             [--hallagram] [--diagnostics-plot]
+             [--discretizing {equal-area,jenks,hclust,kmeans,none}]
              [--apply-stop-condition] [--header] [--nproc <1>] [--nbin <None>]
-             [-s <random>]
+             [-s <random>] [--missing-char <None>] [--missing-method <None>]
 
 Hierarchical All-against-All significance association testing
 
 optional arguments:
   -h, --help            show this help message and exit
+  --version             show program's version number and exit
   -X <input_dataset_1.txt>
                         first file: Tab-delimited text input file, one row per feature, one column per measurement
                         [REQUIRED]
@@ -268,22 +272,30 @@ optional arguments:
   -a {HAllA,AllA}, --descending {HAllA,AllA}
                         descending approach
                         [default = HAllA for hierarchical all-against-all]
+  -f {level,simple,all}, --fdr {level,simple,all}
+                        hypothesis function to  maximize statistical power and control false discovery rate
+                        [default = level]
   -i <1000>, --iterations <1000>
                         iterations for nonparametric significance testing (permutation test)
                         [default = 1000]
-  -m {nmi,ami,mic,pearson,spearman}, --metric {nmi,ami,mic,pearson,spearman}
+  -m {nmi,ami,mic,dmic,dcor,pearson,spearman}, --metric {nmi,ami,mic,dmic,dcor,pearson,spearman}
                         metric to be used for similarity measurement
                         [default = nmi]
   -d {none,mca,pca,ica,cca,kpca,pls,medoid,mean}, --decomposition {none,mca,pca,ica,cca,kpca,pls,medoid,mean}
                         approach for reducing dimensions (or decomposition)
-                        [default = mca]
-  -v, --verbose         additional output is printed
-  --plotting-results    plot the results
-  -k {equal-area,jenks,hclust,kmeans,none}, --discretizing {equal-area,jenks,hclust,kmeans,none}
+                        [default = medoid]
+  --adjusting {bh,bonferroni,bhy,no_adjusting}
+                        approach for calculating adjusted p-value
+                        [default = bhy]
+  -v VERBOSE, --verbose VERBOSE
+                        additional output is printed
+  --hallagram           plot the results
+  --diagnostics-plot    Diagnostics plot for associations 
+  --discretizing {equal-area,jenks,hclust,kmeans,none}
                         approach for discretizing continuous data
                         [default = equal-area]
   --apply-stop-condition
-                        stops when q > 1 - p
+                        stops when two clusters are two far from each other
   --header              the input files contain a header line
   --nproc <1>           the number of processing units available
                         [default = 1]
@@ -291,7 +303,13 @@ optional arguments:
                         [default = None]
   -s <random>, --seed <random>
                         a seed number to make the random permutation reproducible
-                        [default = random]
+                        [default = 0,and -1 for random number]
+  --missing-char <None>
+                        defines missing characters
+                        [default = ]
+  --missing-method <None>
+                        defines missing strategy to fill missing data.
+                         for categorical data puts all missing data in one new category
 ```
 ## Frequently Asked Questions ##
 
