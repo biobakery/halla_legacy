@@ -5,6 +5,7 @@ Handles clustering and other organization schemes.
 '''
 # # structural packages 
 import itertools
+import copy
 import math 
 from numpy import array , rank, median
 import numpy 
@@ -293,9 +294,12 @@ class Hypothesis_Node():
                 a = 0.0
             else:
                 temp_a_features = cluster_a[:]
+                #print config.Features_order[0]
+                #print temp_a_features#, [config.Features_order[0][i] for i in temp_a_features]
                 temp_a_features.remove(a_feature)
-                a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[0][i], config.meta_feature[0][j]))
-                             for i,j in product([a_feature], temp_a_features)])
+                a = np.mean([1.0 - config.Distance[0][i][j] for i,j in product([a_feature], temp_a_features)])
+                #a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[0][i], config.meta_feature[0][j]))
+                #             for i,j in product([a_feature], temp_a_features)])
             b = np.mean([1.0 - math.fabs(pMe(config.meta_feature[0][i], config.meta_feature[1][j])) 
                         for i,j in product([a_feature], cluster_b)])
             s = (b-a)/max([a,b])
@@ -306,8 +310,9 @@ class Hypothesis_Node():
             else:
                 temp_a_features = cluster_b[:]
                 temp_a_features.remove(a_feature)
-                a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[1][i], config.meta_feature[1][j]))
-                             for i,j in product([a_feature], temp_a_features)])
+                a = np.mean([1.0 - config.Distance[1][i][j] for i,j in product([a_feature], temp_a_features)])
+                #a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[1][i], config.meta_feature[1][j]))
+                #             for i,j in product([a_feature], temp_a_features)])
                    
             b = np.mean([1.0 - math.fabs(pMe(config.meta_feature[1][i], config.meta_feature[0][j])) 
                         for i,j in product([a_feature], cluster_a)])
@@ -324,7 +329,8 @@ class Hypothesis_Node():
             #print cluster_a
             #print cluster_b
             return False
-        else: 
+        else:
+            #print "Silhouette coefficient all", silhouette_scores 
             return True
     def stop_and_reject(self):
         
@@ -535,9 +541,9 @@ def hclust(pArray, labels):
     #D = squareform(D)
     #print D
     if config.Distance[0] is None:
-        config.Distance[0] = squareform(D)
+        config.Distance[0] =  copy.deepcopy(squareform(D))
     elif config.Distance[1] is None:
-        config.Distance[1] = squareform(D)
+        config.Distance[1] = copy.deepcopy(squareform(D))
     #print D.shape,  D
     if config.hallagram:
         global fig_num
@@ -548,6 +554,8 @@ def hclust(pArray, labels):
         Z = linkage(D, metric=pDistance, method= "single")
     import scipy.cluster.hierarchy as sch
     #print  squareform(sch.cophenet(Z))
+    #print sch.dendrogram(Z, orientation='right')['leaves']
+    #print D.shape,  D
     return to_tree(Z) if (bTree and len(pArray)>1) else Z, sch.dendrogram(Z, orientation='right')['leaves'] if len(pArray)>1 else sch.dendrogram(Z)['leaves']
 
 def dendrogram(Z):
@@ -744,7 +752,7 @@ def fix_clusternode(pClusterNode, iExtend=0):
     Note: should NOT alter original ClusterNode object; make a deep copy of it instead 
     """
 
-    import copy 
+     
 
     def _fix_clusternode(pChild):
         # pChildUpdate = copy.deepcopy( pChild )
@@ -1175,14 +1183,14 @@ def descending_silhouette_coefficient(cluster, dataset_number):
     for a_cluster in all_a_clusters:
         if len(all_a_clusters) ==1:
             # math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])
-            a = np.mean([1.0 - config.Distance[dataset_number][config.Features_order[dataset_number][i]][config.Features_order[dataset_number][j]] for i,j in product([a_cluster], all_a_clusters)])
+            a = np.mean([1.0 - config.Distance[dataset_number][i][j] for i,j in product([a_cluster], all_a_clusters)])
         else:
             temp_all_a_clusters = all_a_clusters[:]#deepcopy(all_a_clusters)
             #print 'before', all_a_clusters
             temp_all_a_clusters.remove(a_cluster)
             #print 'after', all_a_clusters
-            a = np.mean([1.0 - config.Distance[dataset_number][config.Features_order[dataset_number][i]][config.Features_order[dataset_number][j]] for i,j in product([a_cluster], temp_all_a_clusters)])            
-        b = np.mean([1.0 - config.Distance[dataset_number][config.Features_order[dataset_number][i]][config.Features_order[dataset_number][j]] for i,j in product([a_cluster], all_b_clusters)])
+            a = np.mean([1.0 - config.Distance[dataset_number][i][j] for i,j in product([a_cluster], temp_all_a_clusters)])            
+        b = np.mean([1.0 - config.Distance[dataset_number][i][j] for i,j in product([a_cluster], all_b_clusters)])
         s = (b-a)/max([a,b])
         #print 's a', s, a, b
         s_all_a.append(s)
