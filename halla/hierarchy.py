@@ -1093,7 +1093,7 @@ def cutree_to_get_below_threshold_number_of_features (cluster, t = None):
             if largest_node.get_count() < sub_clusters[i].get_count():
                 largest_node = sub_clusters[i]
         # print "Max Distance in this level", _percentage(max_dist_node.dist)
-        if largest_node.get_count() > n_features/math.log(n_features,2):#max_dist_node.dist > t:
+        if largest_node.get_count() > n_features/math.log(n_features,2) or len(sub_clusters) < t:
             sub_clusters += truncate_tree([largest_node], level=0, skip=1)
             sub_clusters.remove(largest_node)
         else:

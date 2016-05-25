@@ -1983,7 +1983,7 @@ def estimate_gpd_params_ML(samples):
 		scale0 = xmean
 		
 	# Negative log-like function
-	EPS = 7./3 - 4./3 - 1 # Machine epsilon
+	EPS = 7./3. - 4./3. - 1. # Machine epsilon
 	def negloglike(parms, data):
 		shape = parms[0]
 		lnscale = parms[1]
@@ -1991,7 +1991,7 @@ def estimate_gpd_params_ML(samples):
 
 		n = len(data)
 		#print scale
-		Z = [x / scale for x in data]
+		Z = [0 if scale == 0.0 else x / scale for x in data]
 		
 		if abs(shape) > EPS:
 			# Non-exponential
