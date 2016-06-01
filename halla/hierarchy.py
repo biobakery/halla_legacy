@@ -548,7 +548,7 @@ def hclust(pArray, labels):
     if config.hallagram:
         global fig_num
         print "--- plotting heatmap for Dataset", str(fig_num)," ... "
-        Z = plot.heatmap(Data = pArray , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/hierarchical_heatmap_" + str(fig_num))
+        Z = plot.heatmap(Data = pArray , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.distance)+"_" + str(fig_num))
         fig_num += 1
     else:
         Z = linkage(D, metric=pDistance, method= "single")
@@ -1284,13 +1284,17 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
         if sub_silhouette_coefficient[min_silhouette_node_index] == 1.0:
             break
         sub_clusters_to_add = truncate_tree([min_silhouette_node], level=0, skip=1)#cutree_to_get_number_of_clusters([min_silhouette_node])##
+        #sub_clusters_to_check = cutree_to_get_below_threshold_number_of_features(min_silhouette_node)
         if len(sub_clusters_to_add) < 2:
             break
         sub_silhouette_coefficient_to_add = silhouette_coefficient(sub_clusters_to_add, dataset_number)
+        #sub_silhouette_coefficient_to_check = silhouette_coefficient(sub_clusters_to_check, dataset_number)
         temp_sub_silhouette_coefficient_to_add = sub_silhouette_coefficient_to_add[:]
+        #temp_sub_silhouette_coefficient_to_check = sub_silhouette_coefficient_to_check[:]
         
         try:
             temp_sub_silhouette_coefficient_to_add.remove(1.0)
+            #temp_sub_silhouette_coefficient_to_check.remove(1.0)
         except:
             pass
             
@@ -1497,7 +1501,8 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     pStump.set_level_number(0)
     aOut.append(pStump)
     
-    apChildren1 = cutree_to_get_below_threshold_number_of_features(apClusterNode1[0])
+    apChildren1 = get_homogenous_clusters_silhouette_log (apClusterNode1[0], dataset_number = 0)
+    #cutree_to_get_below_threshold_number_of_features(apClusterNode1[0])
     #get_homogenous_clusters_silhouette_log (apClusterNode1[0], dataset_number = 0)
     apChildren2 = get_homogenous_clusters_silhouette_log (apClusterNode2[0], dataset_number = 1)
     #cutree_to_get_below_threshold_number_of_features(apClusterNode1[0])

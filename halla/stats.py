@@ -1991,7 +1991,8 @@ def estimate_gpd_params_ML(samples):
 
 		n = len(data)
 		#print scale
-		Z = [0 if scale == 0.0 else x / scale for x in data]
+		#0 if scale == 0.0 else 
+		Z = [x / scale for x in data]
 		
 		if abs(shape) > EPS:
 			# Non-exponential
@@ -2080,11 +2081,11 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 	if x <= 0:
 		return 1.0
 	# Get M, the number of null samples greater than x
-	M = len([1 for v in null_samples if v > x])
+	M = len([1 for v in null_samples if v >= x])
 	N = len(null_samples)
 	
 	# Use the ECDF to approximate p-values if M > 10
-	if M > 10 or N < 100:
+	if M > 10 or len(set(null_samples)) < 100:#N < 100:
 		return (M*1.0)/N
 
 	# Estimate the generalized pareto distribtion from tail samples
@@ -2102,8 +2103,10 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 		print sf_result, N, Nexc
 	if math.isnan(float(sf_result)) or sf_result == 1.0:
 		print "WARNING: the number of permutation for null samples wasn't enough and it's doubled!"
-		sample_increments = 50
-		config.nullsamples = [null_fun(X, Y) for val in range(0,sample_increments)] + config.nullsamples
+		#sample_increments = 50
+		if regenrate_GPD_flag:
+			return (M*1.0)/N
+		config.nullsamples = [null_fun(X, Y) for val in range(0,len(config.nullsamples))] + config.nullsamples
 		return estimate_pvalue(x, config.nullsamples, X=X, Y=Y, regenrate_GPD_flag = True)
 	else:	
 		#print "final pvalue", (Nexc*1.0 / N) * sf_result
