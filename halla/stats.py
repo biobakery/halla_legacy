@@ -4,6 +4,8 @@ unified statistics module
 """
 
 # native python 
+import exceptions 
+from exceptions import ArithmeticError, ValueError 	
 from itertools import compress
 from itertools import product
 import itertools
@@ -1992,15 +1994,15 @@ def estimate_gpd_params_ML(samples):
 		n = len(data)
 		#print scale
 		
-		try:	 
-			Z = [x / scale for x in data]
-		except ZeroDivisonError:
-			Z = [float('inf') for x in data]
+		Z = [x / scale for x in data]
 		
 		if abs(shape) > EPS:
 			# Non-exponential
 			if shape > 0 or max(Z) < -1/shape:
-				sumln1pkz = sum([math.log1p(shape*z) for z in Z])
+				try:
+					sumln1pkz = sum([math.log1p(shape*z) for z in Z])
+				except ValueError:
+					sumln1pkz = None
 				return n * lnscale + (1 + 1/shape) * sumln1pkz
 			else:
 				return float('inf')#math.inf
@@ -2093,9 +2095,13 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 
 	# Estimate the generalized pareto distribtion from tail samples
 	if not config.use_one_null_dist or config.gp == None or regenrate_GPD_flag:
-		(gp, Nexc) = estimate_tail_gpd(null_samples)
-		config.gp  = gp
-		config.Nexc = Nexc
+		
+		try:
+			(gp, Nexc) = estimate_tail_gpd(null_samples)
+			config.gp  = gp
+			config.Nexc = Nexc
+		except ArithmeticError, ValueError:
+			return (M*1.0)/N
 	else:
 		(gp, Nexc) = (config.gp, config.Nexc)
 	# GPD estimate of the actual p-value
@@ -2109,8 +2115,12 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 		#sample_increments = 50
 		if regenrate_GPD_flag:
 			return (M*1.0)/N
+		# Double the number of null samples for statistic if the intintazted number of samples wasn't enough.
 		config.nullsamples = [null_fun(X, Y) for val in range(0,len(config.nullsamples))] + config.nullsamples
-		return estimate_pvalue(x, config.nullsamples, X=X, Y=Y, regenrate_GPD_flag = True)
+		try:
+			return estimate_pvalue(x, config.nullsamples, X=X, Y=Y, regenrate_GPD_flag = True)
+		except ArithmeticError, ValueError:
+			return (M*1.0)/N
 	else:	
 		#print "final pvalue", (Nexc*1.0 / N) * sf_result
 		return (Nexc*1.0 / N) * sf_result
