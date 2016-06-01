@@ -1991,8 +1991,7 @@ def estimate_gpd_params_ML(samples):
 
 		n = len(data)
 		#print scale
-		if scale == 0.0:
-			return (shapehat, scalehat)
+		
 		try:	 
 			Z = [x / scale for x in data]
 		except ZeroDivisonError:
