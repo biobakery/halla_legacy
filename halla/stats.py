@@ -1991,8 +1991,12 @@ def estimate_gpd_params_ML(samples):
 
 		n = len(data)
 		#print scale
-		#0 if scale == 0.0 else 
-		Z = [x / scale for x in data]
+		if scale == 0.0:
+			return (shapehat, scalehat)
+		try:	 
+			Z = [x / scale for x in data]
+		except ZeroDivisonError:
+			Z = [float('inf') for x in data]
 		
 		if abs(shape) > EPS:
 			# Non-exponential
