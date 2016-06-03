@@ -2002,7 +2002,7 @@ def estimate_gpd_params_ML(samples):
 				try:
 					sumln1pkz = sum([math.log1p(shape*z) for z in Z])
 				except ValueError:
-					sumln1pkz = None
+					return None
 				return n * lnscale + (1 + 1/shape) * sumln1pkz
 			else:
 				return float('inf')#math.inf
@@ -2097,6 +2097,7 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 	if not config.use_one_null_dist or config.gp == None or regenrate_GPD_flag:
 		
 		try:
+			null_samples = list(set(null_samples))
 			(gp, Nexc) = estimate_tail_gpd(null_samples)
 			config.gp  = gp
 			config.Nexc = Nexc
@@ -2116,7 +2117,7 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 		if regenrate_GPD_flag:
 			return (M*1.0)/N
 		# Double the number of null samples for statistic if the intintazted number of samples wasn't enough.
-		config.nullsamples = [null_fun(X, Y) for val in range(0,len(config.nullsamples))] + config.nullsamples
+		config.nullsamples = list(set([null_fun(X, Y) for val in range(0,len(config.nullsamples))] + config.nullsamples))
 		try:
 			return estimate_pvalue(x, config.nullsamples, X=X, Y=Y, regenrate_GPD_flag = True)
 		except ArithmeticError, ValueError:
