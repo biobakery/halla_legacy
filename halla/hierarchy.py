@@ -1147,7 +1147,7 @@ def cutree_to_get_number_of_clusters (cluster, n = None):
     if n_features==1:
         return cluster
     if n ==None:
-        number_of_sub_cluters_threshold = round(math.log(n_features, 2)+.5)
+        number_of_sub_cluters_threshold = round(math.log(n_features, 2))
     else:
         number_of_sub_cluters_threshold = n
     sub_clusters = []
@@ -1475,11 +1475,11 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     
     # # Unalias data structure so this does not alter the original data type
     # # Fix for depth 
-    aiGlobalDepth1 = [get_depth(ap) for ap in apClusterNode1]
-    aiGlobalDepth2 = [get_depth(ap) for ap in apClusterNode2]
+    #aiGlobalDepth1 = [get_depth(ap) for ap in apClusterNode1]
+    #aiGlobalDepth2 = [get_depth(ap) for ap in apClusterNode2]
     
-    iMaxDepth = max(max(aiGlobalDepth1), max(aiGlobalDepth2))
-    iMinDepth = min(min(aiGlobalDepth1), min(aiGlobalDepth2))
+    #iMaxDepth = max(max(aiGlobalDepth1), max(aiGlobalDepth2))
+    #iMinDepth = min(min(aiGlobalDepth1), min(aiGlobalDepth2))
     
     # apClusterNode1 = [fix_clusternode(apClusterNode1[i], iExtend = iMaxDepth - aiGlobalDepth1[i]) for i in range(len(apClusterNode1))]
     # apClusterNode2 = [fix_clusternode(apClusterNode2[i], iExtend = iMaxDepth - aiGlobalDepth2[i]) for i in range(len(apClusterNode2))]
@@ -1574,14 +1574,16 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
                     #print "******************len: ",len(L)
                 continue
         if not bTauX:
-            apChildren1 = get_homogenous_clusters_silhouette_log(a,0)#cutree_to_get_number_of_clusters([a])
+            apChildren1 = cutree_to_get_number_of_clusters([a])
             #cutree_to_get_below_threshold_number_of_features(a)
-            #
+            #get_homogenous_clusters_silhouette_log(a,0)
         else:
             apChildren1 = [a]
         if not bTauY:
-            apChildren2 = get_homogenous_clusters_silhouette_log(b,1)#cutree_to_get_below_threshold_number_of_features(b)
-            ##cutree_to_get_number_of_clusters([b])
+            apChildren2 = cutree_to_get_number_of_clusters([b])
+            #cutree_to_get_below_threshold_number_of_features(b)
+            ##
+            #get_homogenous_clusters_silhouette_log(b,1)#
         else:
             apChildren2 = [b]
 
