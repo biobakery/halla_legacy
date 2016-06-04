@@ -2083,21 +2083,21 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 	
 	# Algorithm proposed in Knijnenburg2009
 	
-	if x <= 0:
+	if x == 0:
 		return 1.0
 	# Get M, the number of null samples greater than x
-	M = len([1 for v in null_samples if v >= x])
+	M = len([1 for v in null_samples if v >= x])  # or v >= x 
 	N = len(null_samples)
 	
 	# Use the ECDF to approximate p-values if M > 10
-	if M > 10 or len(set(null_samples)) < 100:#N < 100:
+	if M > 10 or N < 100: #len(set(null_samples)) < 100:
 		return (M*1.0)/N
 
 	# Estimate the generalized pareto distribtion from tail samples
 	if not config.use_one_null_dist or config.gp == None or regenrate_GPD_flag:
 		
 		try:
-			null_samples = list(set(null_samples))
+			#null_samples = list(set(null_samples))
 			(gp, Nexc) = estimate_tail_gpd(null_samples)
 			config.gp  = gp
 			config.Nexc = Nexc
@@ -2113,6 +2113,7 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 		print sf_result, N, Nexc
 	if math.isnan(float(sf_result)) or sf_result == 1.0:
 		print "WARNING: the number of permutation for null samples wasn't enough and it's doubled!"
+		print "This could happen when you have features with low variation or zero variation!"
 		#sample_increments = 50
 		if regenrate_GPD_flag:
 			return (M*1.0)/N

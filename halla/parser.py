@@ -11,6 +11,7 @@ from numpy import array
 
 import numpy as np
 import pandas as pd
+from pandas import *
 from . import config
 
 def wrap_features(txt, width=40):
@@ -66,7 +67,11 @@ class Input:
 		
 		self._load()
 		self._parse()
-		self._check()
+		self._filter_to_common_columns()
+		try: 
+			self._remove_low_variant_features()
+		except:
+			pass
 
 	def get(self):
 		return [(self.outData1, self.outName1, self.outType1, self.outHead1), (self.outData2, self.outName2, self.outType2, self.outHead2)] 
@@ -186,7 +191,7 @@ class Input:
 		self.outData1, self.outName1, self.outType1, self.outHead1 = __parse(self.outData1, self.varNames, self.headers)
 		self.outData2, self.outName2, self.outType2, self.outHead2 = __parse(self.outData2, self.varNames, self.headers)
 
-	def _check(self):
+	def _filter_to_common_columns(self):
 		"""
 		Make sure that the data are well-formed
 		"""
@@ -232,9 +237,10 @@ class Input:
 				self.outData1 = df1.values
 				self.outData2 = df2.values 
 				#print self.outData1
-				self.outName1 = list(df1.index.values) 
+				self.outName1 = list(df1.index) 
 				self.outName2 = list(df2.index) 
 				#print self.outName1
+				#print self.outName2
 				#self.outType1 = int
 				#self.outType2 = int 
 		
@@ -243,7 +249,47 @@ class Input:
 				#print self.outHead1
 				#print df2
 		assert(len(self.outData1[0]) == len(self.outData2[0]))
+	def _remove_low_variant_features(self):
+		try:
+			df1 = pd.DataFrame(self.outData1, index = self.outName1, columns = self.outHead1, dtype=float)
+		except:
+			df1 = pd.DataFrame(self.outData1, index = self.outName1, columns = self.outHead1, dtype=float)
+		try:
+			df2 = pd.DataFrame(self.outData2, index = self.outName2, columns = self.outHead2, dtype=float)
+		except:
+			df2 = pd.DataFrame(self.outData2, index = self.outName2, columns = self.outHead2, dtype=float)
+		#print df1.columns.isin(df2.columns)
+		#print df2.columns.isin(df1.columns)
+		#print df1.var(), np.var(df2, axis=1)
+		l1_before =  len(df1.index)
+		l2_before =  len(df2.index)
+		df1 = df1[df1.var(axis=1) > config.min_var]
+		df2 = df2[df2.var(axis=1) > config.min_var]
 		
+		l1_after = len(df1.index)
+		l2_after = len(df2.index)
+		if l1_before > l1_after:
+			print "WARNING! %d features with variation less than %d have been removed from the first dataset " % ((l1_before- l1_after), config.min_var)
+			
+		if l2_before > l2_after:
+			print "WARNING! %d features with variation less than %d have been removed from the second dataset " % ((l2_before- l2_after), config.min_var)
+		# reorder df1 columns as the columns order of df2
+		#df1 = df1.loc[:, df2.columns]
+		
+		self.outData1 = df1.values
+		self.outData2 = df2.values 
+		#print self.outData1
+		self.outName1 = list(df1.index) 
+		self.outName2 = list(df2.index) 
+		#print self.outName1
+		#self.outType1 = int
+		#self.outType2 = int 
+
+		#self.outHead1 = df1.columns
+		#self.outHead2 = df2.columns 
+		#print self.outHead1
+		#print df2
+		assert(len(self.outData1[0]) == len(self.outData2[0]))	
 
 	
 class Output:

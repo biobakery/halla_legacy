@@ -37,7 +37,7 @@ setup(
         "Matplotlib >= 1.5.1",
         "Scikit-learn >= 0.14.1",
         #"minepy >= 1.0.0", #for MIC in evaluation package 
-        "pandas >= 0.15.2",
+        "pandas >= 0.18.1",
         #"R >= 3.1.0",
         #"rpy2 >= 0.0.0"
     ],
