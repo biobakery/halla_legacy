@@ -269,10 +269,10 @@ class Input:
 		l1_after = len(df1.index)
 		l2_after = len(df2.index)
 		if l1_before > l1_after:
-			print "WARNING! %d features with variation less than %d have been removed from the first dataset " % ((l1_before- l1_after), config.min_var)
+			print "WARNING! %d features with variation equal or less than %d have been removed from the first dataset " % ((l1_before- l1_after), config.min_var)
 			
 		if l2_before > l2_after:
-			print "WARNING! %d features with variation less than %d have been removed from the second dataset " % ((l2_before- l2_after), config.min_var)
+			print "WARNING! %d features with variation equal or less than %d have been removed from the second dataset " % ((l2_before- l2_after), config.min_var)
 		# reorder df1 columns as the columns order of df2
 		#df1 = df1.loc[:, df2.columns]
 		
