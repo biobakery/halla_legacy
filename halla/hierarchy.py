@@ -1223,13 +1223,22 @@ def silhouette_coefficient(clusters, dataset_number):
     silhouette_scores = []
     if len(clusters) <= 1:
         sys.exit("silhouette method needs at least two clusters!")
+        
     for i in range(len(clusters)):
+        cluster_a = clusters[i].pre_order(lambda x: x.id)
+        #cluster_b = [val for val in range(len(config.Distance[dataset_number])) if val not in cluster_a]
+        #print cluster_a, cluster_b
         if i%2 == 0 and i<len(clusters)-1:
-            cluster_a = clusters[i].pre_order(lambda x: x.id)
             cluster_b = clusters[i+1].pre_order(lambda x: x.id)
         else:
-            cluster_a = clusters[i].pre_order(lambda x: x.id)
             cluster_b = clusters[i-1].pre_order(lambda x: x.id)
+            
+        if i%2 != 0 and i> 0:
+            cluster_b_2 = clusters[i-1].pre_order(lambda x: x.id)
+        elif i < len((clusters))-1:
+            cluster_b_2 = clusters[i+1].pre_order(lambda x: x.id)
+        else: 
+            cluster_b_2 = clusters[i-1].pre_order(lambda x: x.id)
         #silhouette_score.append(silhouette_coefficient(cluster))
         s_all_a = []
         for a_feature in cluster_a:
@@ -1245,7 +1254,9 @@ def silhouette_coefficient(clusters, dataset_number):
                 a = np.mean([config.Distance[dataset_number][i][j] for i,j in product([a_feature], temp_a_features)])            
             #b = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) 
              #            for i,j in product([a_feature], cluster_b)])
-            b = np.mean([ config.Distance[dataset_number][i][j] for i,j in product([a_feature], cluster_b)])
+            b1 = np.mean([ config.Distance[dataset_number][i][j] for i,j in product([a_feature], cluster_b)])
+            b2 = np.mean([ config.Distance[dataset_number][i][j] for i,j in product([a_feature], cluster_b_2)])
+            b = min(b1,b2)
             s = (b-a)/max([a,b])
             #print 's a', s, a, b
             s_all_a.append(s)
