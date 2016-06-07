@@ -24,7 +24,7 @@ from sklearn import manifold
 from . import distance, config
 from scipy.spatial.distance import pdist, squareform
 import pandas as pd
-from sklearn.metrics.metrics import explained_variance_score
+from sklearn.metrics import explained_variance_score
 '''try:
 	from mca import mca
 except ImportError:
