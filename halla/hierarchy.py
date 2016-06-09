@@ -2013,7 +2013,7 @@ def hypotheses_testing():
             
             temp_hypothesis = apChildren.pop(0)
             #use the signifantly rejected or accepte dhypotheses from previouse level 
-            if config.p_adjust_method != "bhy":
+            if config.p_adjust_method != "bhy2":
                 if temp_hypothesis.get_significance_status() != None:
                     from_prev_hypotheses.append(temp_hypothesis)
                 else:
