@@ -37,7 +37,7 @@ from . import config
 import random
 
 
-def _bypass_discretizing():
+def bypass_discretizing():
     if not distance.c_hash_association_method_discretize[config.distance] or  config.strDiscretizing == "none" or\
         config.distance in ["pearson"] or config.decomposition in ["pca", "ica"] :
         return True
@@ -47,97 +47,83 @@ def _bypass_discretizing():
 # Static Methods 
 #==========================================================# 
 
-def m(pArray, pFunc, strDiscretizing, axis=0,):
+def m(dataset, pFunc, strDiscretizing, axis=0,):
     """ 
-    Maps pFunc over the array pArray 
+    Maps pFunc over the array dataset 
     """
 
     if bool(axis): 
-        pArray = pArray.T
+        dataset = dataset.T
         # Set the axis as per numpy convention 
     if isinstance(pFunc , np.ndarray):
-        return pArray[pFunc]
+        return dataset[pFunc]
     else:  # generic function type
-        # print pArray.shape
-        return array([pFunc(item, strDiscretizing) for item in pArray]) 
+        # print dataset.shape
+        return array([pFunc(item, strDiscretizing) for item in dataset]) 
 
-def bp(pArray, pFunc, axis=0):
+def bp(dataset, pFunc, axis=0):
     """
-    Map _by pairs_ ; i.e. apply pFunc over all possible pairs in pArray 
+    Map _by pairs_ ; i.e. apply pFunc over all possible pairs in dataset 
     """
 
     if bool(axis): 
-        pArray = pArray.T
+        dataset = dataset.T
 
-    pIndices = itertools.combinations(range(pArray.shape[0]), 2)
+    pIndices = itertools.combinations(range(dataset.shape[0]), 2)
 
-    return array([pFunc(pArray[i], pArray[j]) for i, j in pIndices])
+    return array([pFunc(dataset[i], dataset[j]) for i, j in pIndices])
 
  
-def bc(pArray1, pArray2, pFunc, axis=0):
+def bc(dataset1, dataset2, pFunc, axis=0):
     """
-    Map _by cross product_ for ; i.e. apply pFunc over all possible pairs in pArray1 X pArray2 
+    Map _by cross product_ for ; i.e. apply pFunc over all possible pairs in dataset1 X dataset2 
     """
 
     if bool(axis): 
-        pArray1, pArray2 = pArray1.T, pArray2.T
+        dataset1, dataset2 = dataset1.T, dataset2.T
 
-    pIndices = itertools.product(range(pArray1.shape[0]), range(pArray2.shape[0]))
+    pIndices = itertools.product(range(dataset1.shape[0]), range(dataset2.shape[0]))
 
-    return array([pFunc(pArray1[i], pArray2[j]) for i, j in pIndices])
+    return array([pFunc(dataset1[i], dataset2[j]) for i, j in pIndices])
 
 @staticmethod 
-def r(pArray, pFunc, axis=0):
+def r(dataset, pFunc, axis=0):
     """
     Reduce over array 
     pFunc is X x Y -> R 
 
     """
     if bool(axis):
-        pArray = pArray.T
+        dataset = dataset.T
 
-    return reduce(pFunc, pArray)
+    return reduce(pFunc, dataset)
 
 #==========================================================#
 # Helper Functions 
 #==========================================================# 
 def name_features():
     #if not config.aFeatureNames1:
-    config.aFeatureNames1 = [str(i) for i in range(len(config.meta_array[0])) ]
+    config.aFeatureNames1 = [str(i) for i in range(len(config.original_dataset[0])) ]
     #if not config.aFeatureNames2:
-    config.aFeatureNames2 = [str(i) for i in range(len(config.meta_array[1])) ]
-def _discretize():
-    config.meta_feature = m(config.meta_array, stats.discretize, config.strDiscretizing)
-    #config.meta_feature = array([stats.discretize(config.meta_array[0], config.strDiscretizing), stats.discretize(config.meta_array[1], config.strDiscretizing)])
-    return config.meta_feature
-
-def _featurize(strMethod="_discretize"):
-    pMethod = None 
-    try:
-        pMethod = _discretize#getattr(strMethod)
-    except AttributeError:
-        raise Exception("Invalid Method.")
-
-    if pMethod:
-        return pMethod()
+    config.aFeatureNames2 = [str(i) for i in range(len(config.original_dataset[1])) ]
 
 def _hclust():
-    # print config.meta_feature
+    # print config.discretized_dataset
     config.meta_data_tree = [] 
-    tree1, config.Features_order[0] = hierarchy.hclust(config.meta_feature[0], labels=config.aFeatureNames1)
+    tree1, config.Features_order[0] = hierarchy.hclust(config.discretized_dataset[0], labels=config.aFeatureNames1)
     config.meta_data_tree.append(tree1)
     #print config.Features_order[0]
-    tree2, config.Features_order[1]= hierarchy.hclust(config.meta_feature[1] , labels=config.aFeatureNames2)
+    tree2, config.Features_order[1]= hierarchy.hclust(config.discretized_dataset[1] , labels=config.aFeatureNames2)
     config.meta_data_tree.append(tree2)
-    # config.meta_data_tree = config.m( config.meta_feature, lambda x: hclust(x , bTree=True) )
+    # config.meta_data_tree = config.m( config.discretized_dataset, lambda x: hclust(x , bTree=True) )
     #print config.meta_data_tree
     return config.meta_data_tree 
 
 def _couple():
     config.meta_hypothesis_tree = None        
-    config.meta_hypothesis_tree = hierarchy.couple_tree(apClusterNode1=[config.meta_data_tree[0]],
-            apClusterNode2=[config.meta_data_tree[1]],
-            pArray1=config.meta_feature[0], pArray2=config.meta_feature[1])[0]
+    config.meta_hypothesis_tree = hierarchy.couple_tree(apClusterNode0=[config.meta_data_tree[0]],
+            apClusterNode1=[config.meta_data_tree[1]],
+            dataset1=config.discretized_dataset[0], dataset2=config.discretized_dataset[1])[0]
     
     # # remember, `couple_tree` returns object wrapped in list 
     #return config.meta_hypothesis_tree 
@@ -172,10 +158,10 @@ def _summary_statistics(strMethod=None):
     if not strMethod:
         strMethod = config.summary_method
     # print('meta array:')
-    #print(config.meta_array[0])
-    #print(config.meta_array[1])    
-    X = config.meta_array[0]
-    Y = config.meta_array[1]
+    #print(config.original_dataset[0])
+    #print(config.original_dataset[1])    
+    X = config.original_dataset[0]
+    Y = config.original_dataset[1]
     iX, iY = len(X), len(Y)
     S = -1 * np.ones((iX, iY , 2))  # # matrix of all associations; symmetric if using a symmetric measure of association  
     
@@ -194,7 +180,7 @@ def _summary_statistics(strMethod=None):
     def __set_outcome(Z_final):
         #all_associations = 0.0
         #intersection_1_2_count = 0.0
-        config.outcome = np.zeros((len(config.meta_feature[0]),len(config.meta_feature[1])))
+        config.outcome = np.zeros((len(config.discretized_dataset[0]),len(config.discretized_dataset[1])))
         
         for aLine in Z_final:
             if config.verbose == 'INFO':
@@ -210,7 +196,7 @@ def _summary_statistics(strMethod=None):
                 config.outcome[i][j] = 1.0
         #print "FDR= ", intersection_1_2_count/all_associations 
     def __set_pvalues(Z_all):
-        config.pvalues = np.zeros((len(config.meta_feature[0]),len(config.meta_feature[1])))
+        config.pvalues = np.zeros((len(config.discretized_dataset[0]),len(config.discretized_dataset[1])))
         
         for aLine in Z_all:
             if config.verbose == 'INFO':
@@ -294,8 +280,8 @@ def _report():
     # config.meta_report = [] 
 
     aP = config.meta_summary
-    iRow1 = len(config.meta_array[0])
-    iRow2 = len(config.meta_array[1])
+    iRow1 = len(config.original_dataset[0])
+    iRow2 = len(config.original_dataset[1])
 
     for i, j in itertools.product(range(iRow1), range(iRow2)):
         # ## i <= j 
@@ -375,8 +361,8 @@ def _report():
     sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
     sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
     if config.descending == "AllA":
-        config.Features_order[0]  = [i for i in range(len(config.meta_array[0]))]   
-        config.Features_order[1] = [i for i in range(len(config.meta_array[1]))]         
+        config.Features_order[0]  = [i for i in range(len(config.original_dataset[0]))]   
+        config.Features_order[1] = [i for i in range(len(config.original_dataset[1]))]         
     def _plot_associations():
         import pandas as pd    
         association_number = 0
@@ -389,8 +375,8 @@ def _report():
             global associated_feature_Y_indecies
             associated_feature_Y_indecies += iY
             print "--- plotting associations ",association_number," ..."
-            cluster1 = [config.meta_array[0][i] for i in iX]
-            discretized_cluster1 = [config.meta_feature[0][i] for i in iX]
+            cluster1 = [config.original_dataset[0][i] for i in iX]
+            discretized_cluster1 = [config.discretized_dataset[0][i] for i in iX]
             X_labels = np.array([config.aFeatureNames1[i] for i in iX])
             association_dir = config.output_dir + "/association_"+ str(association_number) + '/'
             filename = association_dir +"original_data" + '/'
@@ -422,8 +408,8 @@ def _report():
             except:
                 pass
             
-            cluster2 = [config.meta_array[1][i] for i in iY]
-            discretized_cluster2 = [config.meta_feature[1][i] for i in iY]
+            cluster2 = [config.original_dataset[1][i] for i in iY]
+            discretized_cluster2 = [config.discretized_dataset[1][i] for i in iY]
             Y_labels = np.array([config.aFeatureNames2[i] for i in iY])
             
             try:
@@ -474,9 +460,9 @@ def _report():
                 #print "After2: ",len(x_label_order)
                 plot.heatmap(np.array(discretized_cluster1), xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap' )
             x_label_order = []
-            #plot.heatmap2(pArray1=discretized_cluster1, pArray2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'AllA_association_' + str(association_number) + '_heatmap' )
+            #plot.heatmap2(dataset1=discretized_cluster1, dataset2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'AllA_association_' + str(association_number) + '_heatmap' )
             #Heatmap on continue datasets
-            #plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename =filename + 'AllA_association_' + str(association_number) + '_heatmap' )  
+            #plot.heatmap2(dataset1=cluster1, dataset2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename =filename + 'AllA_association_' + str(association_number) + '_heatmap' )  
             #plt.figure()
             fig = plt.figure(figsize=(5, 4))
             # Create an Axes object.
@@ -495,7 +481,7 @@ def _report():
             d_y_d_rep = association.get_right_rep()#stats.discretize(decomposition_method(discretized_df2))
             plot.scatter_plot(association.get_left_rep(),association.get_right_rep(), filename = discretized_filename + '/association_' + str(association_number))
             
-            if _bypass_discretizing():
+            if bypass_discretizing():
                 d_x_d_rep = stats.discretize(association.get_left_rep())#stats.discretize(decomposition_method(discretized_df1))
                 d_y_d_rep = stats.discretize(association.get_right_rep())#stats.discretize(decomposition_method(discretized_df2))
             else:
@@ -533,13 +519,13 @@ def _report():
             Ys = list(set(associated_feature_Y_indecies))
             Y_labels = np.array([config.aFeatureNames2[i] for i in Ys])
             if len(Xs) > 1 and len(Ys) > 1: 
-                cluster1 = [config.meta_feature[0][i] for i in Xs]    
-                cluster2 = [config.meta_feature[1][i] for i in Ys]
+                cluster1 = [config.discretized_dataset[0][i] for i in Xs]    
+                cluster2 = [config.discretized_dataset[1][i] for i in Ys]
                 df1 = np.array(cluster1, dtype=float)
                 df2 = np.array(cluster2, dtype=float)
                 p = np.zeros(shape=(len(Xs), len(Ys)))
                 #nmi = np.zeros(shape=(len(Xs), len(Ys)))
-                plot.heatmap2(pArray1=cluster1, pArray2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename = str(config.output_dir)+'/all_nmi_heatmap' )
+                plot.heatmap2(dataset1=cluster1, dataset2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename = str(config.output_dir)+'/all_nmi_heatmap' )
     def _write_hallagram_info():
         if len(associated_feature_X_indecies) == 0 or len(associated_feature_Y_indecies) == 0 :
             return
@@ -563,7 +549,7 @@ def _report():
         similarity_score = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))  
         for i in range(len(config.Features_order[0])):
             for j in range(len(config.Features_order[1])):
-                similarity_score[i][j] = distance.c_hash_metric[config.distance](config.meta_feature[0][config.Features_order[0][i]], config.meta_feature[1][config.Features_order[1][j]])
+                similarity_score[i][j] = distance.c_hash_metric[config.distance](config.discretized_dataset[0][config.Features_order[0][i]], config.discretized_dataset[1][config.Features_order[1][j]])
         sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
         sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
         '''for association in sorted_associations:
@@ -628,7 +614,7 @@ def _report():
         similarity_score = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))  
         for i in range(len(config.Features_order[0])):
             for j in range(len(config.Features_order[1])):
-                similarity_score[i][j] = distance.c_hash_metric[config.distance](config.meta_feature[0][config.Features_order[0][i]], config.meta_feature[1][config.Features_order[1][j]])
+                similarity_score[i][j] = distance.c_hash_metric[config.distance](config.discretized_dataset[0][config.Features_order[0][i]], config.discretized_dataset[1][config.Features_order[1][j]])
         sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
         sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
         for association in sorted_associations:
@@ -728,8 +714,8 @@ def _report():
             Y_indecies = len(config.aFeatureNames2)
             Y_labels = np.array([config.aFeatureNames2[i] for i in range(Y_indecies)])
             if len(X_labels) > 1 and len(Y_labels) > 1: 
-                df1 = np.array(config.meta_feature[0], dtype=float)
-                df2 = np.array(config.meta_feature[1], dtype=float)
+                df1 = np.array(config.discretized_dataset[0], dtype=float)
+                df2 = np.array(config.discretized_dataset[1], dtype=float)
                 drows1 = np.zeros(shape=(X_indecies, X_indecies))
                 drows2 = np.zeros(shape=(Y_indecies, Y_indecies))
                 if config.Distance[0] ==None:
@@ -769,6 +755,10 @@ def _report():
     _report_compared_clusters()
     _write_hallagram_info()
     if config.hallagram:
+        if config.distance=="NMI":
+            sim_color = ' --similarity=NMI --cmap=Oranges'
+        else:
+            sim_color =''
         #_heatmap_associations()
         #from rpy2.rinterface import RRuntimeError
         output_path = config.output_dir# str(config.output_dir).replace("(","\(").replace(")","\)").replace(" ","\ ")
@@ -778,12 +768,12 @@ def _report():
                 hallagram_command= "hallagram "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
                           output_path+"/associations.txt "+\
-                          "--outfile="+output_path+"/hallagram.pdf"
+                          "--outfile="+output_path+"/hallagram.pdf" + sim_color
                 os.system(hallagram_command)
                 hallagram_command_mask = "hallagram "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
                           output_path+"/associations.txt "+\
-                          "--outfile="+output_path+"/hallagram_mask.pdf --mask"
+                          "--outfile="+output_path+"/hallagram_mask.pdf --mask" + sim_color
                 os.system(hallagram_command_mask)
                 #_heatmap_associations_R()
                 #_heatmap_datasets_R()
@@ -822,7 +812,7 @@ def run():
 
     """
     '''if config.output_dir == "./":
-        config.output_dir = "./"+config.descending+'_'+config.distance+'_'+config.decomposition +'_'+ str(len(config.meta_array[0]))+'_'+str(len(config.meta_array[0][1]))
+        config.output_dir = "./"+config.descending+'_'+config.distance+'_'+config.decomposition +'_'+ str(len(config.original_dataset[0]))+'_'+str(len(config.original_dataset[0][1]))
     if not os.path.isdir( config.output_dir):
         try:
             print("Creating output directory: " + config.output_dir)
@@ -858,25 +848,11 @@ def run():
     if not is_correct_submethods_combination():
         sys.exit("Please ckeck the combination of your options!!!!")
     execution_time = time.time()
-    if _bypass_discretizing():
-        try:
-            config.meta_feature = array([np.asarray(config.meta_array[0], dtype = float), np.asarray(config.meta_array[1], dtype = float)])
-        except:
-            sys.exit("--- Please check your data types and your similarity metric!")
-        #print config.meta_feature
-    else:
-        print "Featurize is started using: ", config.strDiscretizing, " style!"
-        # featurize 
-        start_time = time.time()
-        _featurize()
-        excution_time_temp = time.time() - start_time
-        csvw.writerow(["featurize time", str(datetime.timedelta(seconds=excution_time_temp)) ])
-        print("--- %s h:m:s featurize data time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
-        #print config.meta_feature
-    #plot.heatmap2(pArray1=config.meta_feature[0], pArray2=config.meta_feature[1], xlabels =config.aFeatureNames1, ylabels = config.aFeatureNames2, filename = str(config.output_dir)+'/heatmap2_all' )
+    
+    #plot.heatmap2(dataset1=config.discretized_dataset[0], dataset2=config.discretized_dataset[1], xlabels =config.aFeatureNames1, ylabels = config.aFeatureNames2, filename = str(config.output_dir)+'/heatmap2_all' )
     if config.log_input:
-        logger.write_table(data=config.meta_feature[0], name=config.output_dir+"/X_dataset.txt", rowheader=config.aFeatureNames1 , colheader=config.aSampleNames1, prefix = "label",  corner = '#', delimiter= '\t')
-        logger.write_table(data=config.meta_feature[1], name=config.output_dir+"/Y_dataset.txt", rowheader=config.aFeatureNames2 , colheader=config.aSampleNames2, prefix = "label",  corner = '#', delimiter= '\t')
+        logger.write_table(data=config.discretized_dataset[0], name=config.output_dir+"/X_dataset.txt", rowheader=config.aFeatureNames1 , colheader=config.aSampleNames1, prefix = "label",  corner = '#', delimiter= '\t')
+        logger.write_table(data=config.discretized_dataset[1], name=config.output_dir+"/Y_dataset.txt", rowheader=config.aFeatureNames2 , colheader=config.aSampleNames2, prefix = "label",  corner = '#', delimiter= '\t')
     if config.descending == "AllA":
         print("--- association hypotheses testing is started, this task may take longer ...")
         start_time = time.time()

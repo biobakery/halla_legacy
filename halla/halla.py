@@ -180,13 +180,13 @@ def parse_arguments (args):
         choices=["HAllA","AllA"],
         help="descending approach\n[default = HAllA for hierarchical all-against-all]")
     
-    argp.add_argument(
+    '''argp.add_argument(
         "-f","--fdr",
         dest="strFDR",
         default = "level",
         choices=["level","simple","all"],
         help="hypothesis function to  maximize statistical power and control false discovery rate\n[default = level]")
-    
+    '''
     argp.add_argument(
         "-i","--iterations", metavar="<1000>",
         dest="iIter",
@@ -303,7 +303,7 @@ def set_parameters(args):
     config.missing_method = args.missing_method
     #config.K = args.k
     config.p_adjust_method = args.strAdjust.lower()
-    config.fdr_function = args.strFDR.lower()
+    #config.fdr_function = args.strFDR.lower()
     # If Y was not set - we use X
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  
@@ -318,8 +318,10 @@ def set_parameters(args):
         
     aOut1, aOut2 = parser.Input (config.strFile1.name, config.strFile2.name, headers=args.header).get()
     config.hallagram = args.hallagram
-    (config.meta_array[0], config.aFeatureNames1, config.aOutType1, config.aSampleNames1) = aOut1 
-    (config.meta_array[1], config.aFeatureNames2, config.aOutType2, config.aSampleNames2) = aOut2 
+    (config.discretized_dataset[0], config.original_dataset[0], config.aFeatureNames1, config.aOutType1, config.aSampleNames1) = aOut1 
+    (config.discretized_dataset[1], config.original_dataset[1], config.aFeatureNames2, config.aOutType2, config.aSampleNames2) = aOut2 
+    #config.meta_feature = array([config.original_dataset[0], config.original_dataset[1]])
+    
     config.iterations = args.iIter
     '''if args.strAdjust.lower() == "bhy":
         config.iterations = max([args.iIter, 10*len(config.aFeatureNames1)*len(config.aFeatureNames2)])

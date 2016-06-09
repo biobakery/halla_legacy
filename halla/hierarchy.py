@@ -34,22 +34,22 @@ def multi_pMethod(args):
     Runs the pMethod function and returns the results plus the id of the node
     """
     
-    id, pMethod, pArray1, pArray2 = args
-    dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(pArray1, pArray2)
-    #dP, similarity, left_first_rep_variance, right_first_rep_variance = pMethod(pArray1, pArray2,  metric = metric, decomposition = decomposition, iIter=iIter)
+    id, pMethod, dataset1, dataset2 = args
+    dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(dataset1, dataset2)
+    #dP, similarity, left_first_rep_variance, right_first_rep_variance = pMethod(dataset1, dataset2,  metric = metric, decomposition = decomposition, iIter=iIter)
 
     return id, dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep
 
-def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2):
+def multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, dataset2):
     """
     Return the results from applying the data to the actor function
     """
     
-    def _multi_pMethod_args(current_level_tests, pMethod, pArray1, pArray2, ids_to_process):
+    def _multi_pMethod_args(current_level_tests, pMethod, dataset1, dataset2, ids_to_process):
         for id in ids_to_process:
             aIndicies = current_level_tests[id].get_data()
             aIndiciesMapped = map(array, aIndicies)
-            yield [id, pMethod, pArray1[aIndiciesMapped[0]], pArray2[aIndiciesMapped[1]]]
+            yield [id, pMethod, dataset1[aIndiciesMapped[0]], dataset2[aIndiciesMapped[1]]]
     
     if config.NPROC > 1:
         import multiprocessing
@@ -66,7 +66,7 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2
         
         
         results_by_id = pool.map(multi_pMethod, _multi_pMethod_args(current_level_tests, 
-            pMethod, pArray1, pArray2, ids_to_process))
+            pMethod, dataset1, dataset2, ids_to_process))
         pool.close()
         pool.join()
        
@@ -253,12 +253,12 @@ class Hypothesis_Node():
         temp_right_loading = list()
         reps_similarity = self.get_similarity_score()
         pMe = distance.c_hash_metric[config.distance] 
-        left_threshold = [pMe(config.meta_feature[0][self.m_pData[0][i]], self.left_rep) for i in range(len(self.m_pData[0]))]
-        right_threshold = [pMe(config.meta_feature[1][self.m_pData[1][i]], self.right_rep) for i in range(len( self.m_pData[1]))]
-        left_rep_similarity_to_right_cluster = np.median([pMe(self.left_rep, config.meta_feature[1][self.m_pData[1][i]]) for i in range(len(self.m_pData[1]))])
-        right_rep_similarity_to_left_cluster = np.median([pMe(self.right_rep, config.meta_feature[0][self.m_pData[0][i]]) for i in range(len(self.m_pData[0]))])
+        left_threshold = [pMe(config.discretized_dataset[0][self.m_pData[0][i]], self.left_rep) for i in range(len(self.m_pData[0]))]
+        right_threshold = [pMe(config.discretized_dataset[1][self.m_pData[1][i]], self.right_rep) for i in range(len( self.m_pData[1]))]
+        left_rep_similarity_to_right_cluster = np.median([pMe(self.left_rep, config.discretized_dataset[1][self.m_pData[1][i]]) for i in range(len(self.m_pData[1]))])
+        right_rep_similarity_to_left_cluster = np.median([pMe(self.right_rep, config.discretized_dataset[0][self.m_pData[0][i]]) for i in range(len(self.m_pData[0]))])
         for i in range(len(self.m_pData[1])):
-            if right_threshold[i]< (right_rep_similarity_to_left_cluster):# - np.std(right_threshold)):#scipy.stats.spearmanr(config.meta_feature[1][self.m_pData[1][i]], self.right_rep)[1] >.05:# 
+            if right_threshold[i]< (right_rep_similarity_to_left_cluster):# - np.std(right_threshold)):#scipy.stats.spearmanr(config.discretized_dataset[1][self.m_pData[1][i]], self.right_rep)[1] >.05:# 
                 counter += 1
                 temp_right_loading.append(i)
                 #print "right:", self.get_right_loading()
@@ -270,7 +270,7 @@ class Hypothesis_Node():
         temp_left_loading = list()
         for i in range(len(self.m_pData[0])):
             if left_threshold[i]< (left_rep_similarity_to_right_cluster):# - np.std(left_threshold)): 
-            #scipy.stats.spearmanr(config.meta_feature[0][self.m_pData[0][i]], self.right_rep)[1] >.05:
+            #scipy.stats.spearmanr(config.discretized_dataset[0][self.m_pData[0][i]], self.right_rep)[1] >.05:
                 temp_left_loading.append(i)
                 #print "after:", temp_left_loading
                 counter += 1
@@ -298,9 +298,9 @@ class Hypothesis_Node():
                 #print temp_a_features#, [config.Features_order[0][i] for i in temp_a_features]
                 temp_a_features.remove(a_feature)
                 a = np.mean([1.0 - config.Distance[0][i][j] for i,j in product([a_feature], temp_a_features)])
-                #a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[0][i], config.meta_feature[0][j]))
+                #a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[0][i], config.discretized_dataset[0][j]))
                 #             for i,j in product([a_feature], temp_a_features)])
-            b = np.mean([1.0 - math.fabs(pMe(config.meta_feature[0][i], config.meta_feature[1][j])) 
+            b = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[0][i], config.discretized_dataset[1][j])) 
                         for i,j in product([a_feature], cluster_b)])
             s = (b-a)/max([a,b])
             silhouette_coefficient_A.append(s)
@@ -311,10 +311,10 @@ class Hypothesis_Node():
                 temp_a_features = cluster_b[:]
                 temp_a_features.remove(a_feature)
                 a = np.mean([1.0 - config.Distance[1][i][j] for i,j in product([a_feature], temp_a_features)])
-                #a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[1][i], config.meta_feature[1][j]))
+                #a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[1][i], config.discretized_dataset[1][j]))
                 #             for i,j in product([a_feature], temp_a_features)])
                    
-            b = np.mean([1.0 - math.fabs(pMe(config.meta_feature[1][i], config.meta_feature[0][j])) 
+            b = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[1][i], config.discretized_dataset[0][j])) 
                         for i,j in product([a_feature], cluster_a)])
             s = (b-a)/max([a,b])
             #print 's a', s, a, b
@@ -347,11 +347,11 @@ class Hypothesis_Node():
         if len(self.m_pData[0]) == 1:
             left_all_sim = [1.0]
         else:
-            left_all_sim = [pMe(config.meta_feature[0][i], config.meta_feature[0][j]) for i,j in combinations(self.m_pData[0], 2)]
+            left_all_sim = [pMe(config.discretized_dataset[0][i], config.discretized_dataset[0][j]) for i,j in combinations(self.m_pData[0], 2)]
         if len(self.m_pData[1]) == 1:
             right_all_sim = [1.0]
         else:
-            right_all_sim = [pMe(config.meta_feature[1][i], config.meta_feature[1][j]) for i,j in combinations(self.m_pData[1],2)]
+            right_all_sim = [pMe(config.discretized_dataset[1][i], config.discretized_dataset[1][j]) for i,j in combinations(self.m_pData[1],2)]
         diam_A_r = ((1.0 - math.fabs(min(left_all_sim))))# - math.fabs((1.0 - max(left_all_sim))))
         diam_B_r = ((1.0 - math.fabs(min(right_all_sim))))# - math.fabs((1.0 - max(right_all_sim))))
         if config.verbose == 'DEBUG':
@@ -510,7 +510,7 @@ def is_tree(pObj):
         return False 
 
 
-def hclust(pArray, labels):
+def hclust(dataset, labels):
     bTree=True
     """
     Notes 
@@ -525,19 +525,19 @@ def hclust(pArray, labels):
         return  dist
     
     '''
-    D = np.zeros(shape=(len(pArray), len(pArray)))  
-    for i in range(len(pArray)):
-        for j in range(i,len(pArray)):
+    D = np.zeros(shape=(len(dataset), len(dataset)))  
+    for i in range(len(dataset)):
+        for j in range(i,len(dataset)):
             if i == j:
                 D[i][j] = 0
                 continue
-            D[i][j] = pDistance(pArray[i], pArray[j])
+            D[i][j] = pDistance(dataset[i], dataset[j])
             D[j][i] = D[i][j]
-    #print pArray.shape  
+    #print dataset.shape  
     #D = squareform(D)
     #print D
     '''
-    D = pdist(pArray, metric=pDistance) 
+    D = pdist(dataset, metric=pDistance) 
     #D = squareform(D)
     #print D
     if config.Distance[0] is None:
@@ -548,7 +548,7 @@ def hclust(pArray, labels):
     if config.hallagram:
         global fig_num
         print "--- plotting heatmap for Dataset", str(fig_num)," ... "
-        Z = plot.heatmap(Data = pArray , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.distance)+"_" + str(fig_num))
+        Z = plot.heatmap(Data = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.distance)+"_" + str(fig_num))
         fig_num += 1
     else:
         Z = linkage(D, metric=pDistance, method= "single")
@@ -556,7 +556,7 @@ def hclust(pArray, labels):
     #print  squareform(sch.cophenet(Z))
     #print sch.dendrogram(Z, orientation='right')['leaves']
     #print D.shape,  D
-    return to_tree(Z) if (bTree and len(pArray)>1) else Z, sch.dendrogram(Z, orientation='right')['leaves'] if len(pArray)>1 else sch.dendrogram(Z)['leaves']
+    return to_tree(Z) if (bTree and len(dataset)>1) else Z, sch.dendrogram(Z, orientation='right')['leaves'] if len(dataset)>1 else sch.dendrogram(Z)['leaves']
 
 def dendrogram(Z):
     return scipy.cluster.hierarchy.dendrogram(Z)
@@ -1068,15 +1068,18 @@ def _cutree_overall (clusterNodelist, X, func, distance):
     while len(sub_clusters) < round(math.sqrt(n)):
         aDist = []
         max_dist_node = sub_clusters[0]
+        index = 0 
         for i in range(len(sub_clusters)):
             if sub_clusters[i].dist > 0.0:
                 aDist += [sub_clusters[i].dist]
             if max_dist_node.dist < sub_clusters[i].dist:
                 max_dist_node = sub_clusters[i]
+                index = i
         # print "Max Distance in this level", _percentage(max_dist_node.dist)
         if not max_dist_node.is_leaf():
+            del sub_clusters[index]
             sub_clusters += truncate_tree([max_dist_node], level=0, skip=1)
-            sub_clusters.remove(max_dist_node)
+            
         else:
             break
     if aDist:
@@ -1093,27 +1096,30 @@ def cutree_to_get_below_threshold_number_of_features (cluster, t = None):
     sub_clusters = []
     #sub_clusters = cutree_to_get_number_of_clusters ([cluster])
     sub_clusters = truncate_tree([cluster], level=0, skip=1)
-    distances = [sub_clusters[i].dist for i in range(len(sub_clusters))]
-    #print distances
+    
     while True:# not all(val <= t for val in distances):
         largest_node = sub_clusters[0]
+        index = 0
         for i in range(len(sub_clusters)):
             if largest_node.get_count() < sub_clusters[i].get_count():
                 largest_node = sub_clusters[i]
-        # print "Max Distance in this level", _percentage(max_dist_node.dist)
-        if largest_node.get_count() > n_features/math.log(n_features,2) or len(sub_clusters) < t:
+                index = i
+        if largest_node.get_count() > n_features/math.log(n_features,2):
+            #sub_clusters.remove(largest_node)
+            #sub_clusters = sub_clusters[:index] + sub_clusters[index+1 :]
+            del sub_clusters[index]
             sub_clusters += truncate_tree([largest_node], level=0, skip=1)
-            sub_clusters.remove(largest_node)
-        elif len(sub_clusters) < t:
+            #print "first cut", [a.pre_order(lambda x: x.id) for a in sub_clusters ]
+        else:
+            break
+        '''elif len(sub_clusters) < t:
             max_dist_node = sub_clusters[0]
             for i in range(len(sub_clusters)):
                 if max_dist_node.dist < sub_clusters[i].dist:
                     max_dist_node = sub_clusters[i]
             sub_clusters += truncate_tree([max_dist_node], level=0, skip=1)
             sub_clusters.remove(max_dist_node)
-            # print "Max Distance in this level", _percentage(max_dist_node.dist)
-        else:
-            break
+            # print "Max Distance in this level", _percentage(max_dist_node.dist)'''
     return sub_clusters
 
 def cutree_to_get_below_threshold_distance_of_clusters (cluster, t = None):
@@ -1130,15 +1136,17 @@ def cutree_to_get_below_threshold_distance_of_clusters (cluster, t = None):
     #print distances
     while True:# not all(val <= t for val in distances):
         max_dist_node = sub_clusters[0]
+        index = 0
         for i in range(len(sub_clusters)):
             #if sub_clusters[i].dist > 0.0:
                 #aDist += [sub_clusters[i].dist]
             if max_dist_node.dist < sub_clusters[i].dist:
                 max_dist_node = sub_clusters[i]
+                index = i
         # print "Max Distance in this level", _percentage(max_dist_node.dist)
         if max_dist_node.dist > t:
+            del sub_clusters[index]
             sub_clusters += truncate_tree([max_dist_node], level=0, skip=1)
-            sub_clusters.remove(max_dist_node)
         else:
             break
     return sub_clusters
@@ -1162,7 +1170,7 @@ def cutree_to_get_number_of_clusters (cluster, n = None):
         # print "Max Distance in this level", _percentage(max_dist_node.dist)
         if not max_dist_node.is_leaf():
             sub_clusters_to_add = truncate_tree([max_dist_node], level=0, skip=1)
-            sub_clusters.remove(max_dist_node)
+            del sub_clusters[max_dist_node_index]
             sub_clusters.insert(max_dist_node_index,sub_clusters_to_add[0])
             if len(sub_clusters_to_add) ==2:
                 sub_clusters.insert(max_dist_node_index+1,sub_clusters_to_add[1])
@@ -1182,7 +1190,7 @@ def descending_silhouette_coefficient(cluster, dataset_number):
     from copy import deepcopy
     for a_cluster in all_a_clusters:
         if len(all_a_clusters) ==1:
-            # math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])
+            # math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j])
             a = np.mean([1.0 - config.Distance[dataset_number][i][j] for i,j in product([a_cluster], all_a_clusters)])
         else:
             temp_all_a_clusters = all_a_clusters[:]#deepcopy(all_a_clusters)
@@ -1201,14 +1209,14 @@ def descending_silhouette_coefficient(cluster, dataset_number):
     for b_cluster in all_b_clusters:
         if len(all_b_clusters) ==1:
             
-            a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([b_cluster], all_b_clusters)])
+            a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j])) for i,j in product([b_cluster], all_b_clusters)])
         else:
             temp_all_b_clusters = all_b_clusters[:]#deepcopy(all_a_clusters)
             #print 'before', all_a_clusters
             temp_all_b_clusters.remove(b_cluster)
             #print 'after', all_a_clusters
-            a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([b_cluster], temp_all_b_clusters)])            
-        b = np.mean([1.0 -  math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in product([b_cluster], all_a_clusters)])
+            a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j])) for i,j in product([b_cluster], temp_all_b_clusters)])            
+        b = np.mean([1.0 -  math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j])) for i,j in product([b_cluster], all_a_clusters)])
         s = (b-a)/max([a,b])
         #print 's b', s
         s_all_b.append(s)
@@ -1249,10 +1257,10 @@ def silhouette_coefficient(clusters, dataset_number):
                 #print 'before', all_a_clusters
                 temp_a_features.remove(a_feature)
                 #print 'a feature ', a_feature, temp_a_features
-                #a = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j]))
+                #a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j]))
                 #             for i,j in product([a_feature], temp_a_features)])
                 a = np.mean([config.Distance[dataset_number][i][j] for i,j in product([a_feature], temp_a_features)])            
-            #b = np.mean([1.0 - math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) 
+            #b = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j])) 
              #            for i,j in product([a_feature], cluster_b)])
             b1 = np.mean([ config.Distance[dataset_number][i][j] for i,j in product([a_feature], cluster_b)])
             b2 = np.mean([ config.Distance[dataset_number][i][j] for i,j in product([a_feature], cluster_b_2)])
@@ -1262,6 +1270,21 @@ def silhouette_coefficient(clusters, dataset_number):
             s_all_a.append(s)
         silhouette_scores.append(np.mean(s_all_a))
     return silhouette_scores
+def wss_heirarchy(clusters, dataset_number):
+    wss = []
+    for i in range(len(clusters)):
+        cluster_a = clusters[i].pre_order(lambda x: x.id)
+        
+        temp_a_features = cluster_a[:]
+        medoid_feature = temp_a_features[len(temp_a_features)-1]
+        # remove medoid
+        temp_a_features.remove(medoid_feature)
+        
+        wss.append(sum([config.Distance[dataset_number][i][j]* config.Distance[dataset_number][i][j] 
+                        for i,j in product([medoid_feature], temp_a_features)]))
+    
+    avgWithinSS = np.sum(wss)#[sum(d)/X.shape[0] for d in dist]
+    return avgWithinSS
 def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
     n = cluster.get_count()
     if n==1:
@@ -1269,11 +1292,13 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
     #number_of_sub_cluters_threshold = round(math.log(n, 2)) 
     #t = 1.0 - np.percentile(config.Distance[dataset_number].flatten(), config.q*100 - 1.0/len(config.Distance[dataset_number])*100) #config.cut_distance_thrd
     #print "t",t
+    #print "first cut", [cluster.pre_order(lambda x: x.id)]
+    sub_clusters = cutree_to_get_below_threshold_number_of_features(cluster)
+    #cutree_to_get_below_threshold_number_of_features(cluster, t)
+    #cutree_to_get_below_threshold_distance_of_clusters(cluster, t)
     
-    sub_clusters = cutree_to_get_below_threshold_number_of_features(cluster)#cutree_to_get_below_threshold_number_of_features(cluster, t)#cutree_to_get_below_threshold_distance_of_clusters(cluster, t)
     
-    
-    #print "first cut", [a.pre_order(lambda x: x.id) for a in apChildren1]
+    #print "first cut", [a.pre_order(lambda x: x.id) for a in sub_clusters]
    # sub_clusters = cutree_to_get_number_of_clusters([cluster])#truncate_tree([cluster], level=0, skip=1)truncate_tree([cluster], level=0, skip=1)#
     #print "before sil sub:", len(sub_clusters)
     sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, dataset_number) 
@@ -1302,21 +1327,21 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
         #sub_silhouette_coefficient_to_check = silhouette_coefficient(sub_clusters_to_check, dataset_number)
         temp_sub_silhouette_coefficient_to_add = sub_silhouette_coefficient_to_add[:]
         #temp_sub_silhouette_coefficient_to_check = sub_silhouette_coefficient_to_check[:]
-        
-        try:
-            temp_sub_silhouette_coefficient_to_add.remove(1.0)
-            #temp_sub_silhouette_coefficient_to_check.remove(1.0)
-        except:
-            pass
+        temp_sub_silhouette_coefficient_to_add = [value for value in temp_sub_silhouette_coefficient_to_add if value != 1.0]
             
         if len(sub_clusters_to_add) ==0:
             sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
             
-        elif sub_silhouette_coefficient[min_silhouette_node_index] >= np.max(temp_sub_silhouette_coefficient_to_add) :
+        elif len(temp_sub_silhouette_coefficient_to_add) == 0 or sub_silhouette_coefficient[min_silhouette_node_index] >= np.max(temp_sub_silhouette_coefficient_to_add) :
             sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
         else:
+            #print temp_sub_silhouette_coefficient_to_add
+            #print np.max(temp_sub_silhouette_coefficient_to_add)
+            #print "first cut", [min_silhouette_node.pre_order(lambda x: x.id)]
+            #print "befor", [a.pre_order(lambda x: x.id) for a in sub_clusters ]
             sub_clusters.remove(min_silhouette_node)
-            sub_silhouette_coefficient.remove(sub_silhouette_coefficient[min_silhouette_node_index])
+            #print "after", [a.pre_order(lambda x: x.id) for a in sub_clusters ]
+            del sub_silhouette_coefficient[min_silhouette_node_index]
             #sub_silhouette_coefficient=[sub_silhouette_coefficient != "nan"]
             #sub_clusters = [sub_clusters != "nan"]
             sub_silhouette_coefficient.extend(sub_silhouette_coefficient_to_add)
@@ -1359,11 +1384,11 @@ def get_homogenous_clusters(cluster, dataset_number, prev_silhouette_coefficient
     else:
         for i in range(len(sub_clusters)):
             sub_homogenous_clusters.extend(get_homogenous_clusters(sub_clusters[i], dataset_number, sub_silhouette_coefficient[i]))
-    print [cluster.pre_order(lambda x: x.id) for cluster in sub_homogenous_clusters]
+    #print [cluster.pre_order(lambda x: x.id) for cluster in sub_homogenous_clusters]
     return sub_homogenous_clusters
     
-    #cluster_medoid = config.meta_feature[dataset_number][cluster_features[len(cluster_features)-1]]
-    all_sim = [math.fabs(pMe(config.meta_feature[dataset_number][i], config.meta_feature[dataset_number][j])) for i,j in combinations(cluster_features, 2)]
+    #cluster_medoid = config.discretized_dataset[dataset_number][cluster_features[len(cluster_features)-1]]
+    all_sim = [math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j])) for i,j in combinations(cluster_features, 2)]
     #print "all_sim ", all_sim
     #all_sim = [1.0 - config.D[dataset_number][i][j] for i,j in combinations(cluster_features, 2)]
     #print "all_sim ",all_sim
@@ -1379,7 +1404,7 @@ def get_homogenous_clusters(cluster, dataset_number, prev_silhouette_coefficient
     except:
         pass
         '''
-    #all_dist = [math.fabs(pMe(config.meta_feature[dataset_number][i], cluster_medoid)) for i in cluster_features[0: len(cluster_features)-1]]
+    #all_dist = [math.fabs(pMe(config.discretized_dataset[dataset_number][i], cluster_medoid)) for i in cluster_features[0: len(cluster_features)-1]]
     #clutser_95_percentile = np.percentile(dist_to_medoid,50)
     #print math.sqrt(len(A))
     #print "A ",A
@@ -1434,7 +1459,7 @@ def cutree_to_get_homogenous_clusters (clusterNodelist, dataset_number):
     return homogenous_clusters
 
     
-def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uniform", strLinkage="min", robustness = None):
+def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="uniform", strLinkage="min", robustness = None):
     
     func = config.distance
     """
@@ -1456,52 +1481,17 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     ----------------
     """
     
-    X, Y = pArray1, pArray2
+    X, Y = dataset1, dataset2
     global max_dist_cluster1 
-    max_dist_cluster1 = max (node.dist for node in apClusterNode1)
+    max_dist_cluster1 = max (node.dist for node in apClusterNode0)
     
     global max_dist_cluster2 
-    max_dist_cluster2 = max (node.dist for node in apClusterNode2)
-    # print "Max distance:", max_dist
-    # if not afThreshold:    
-    #     afThreshold = [stats.alpha_threshold(a, fAlpha, func ) for a in [pArray1,pArray2]]
-    
-    # x_threshold, y_threshold = afThreshold[0], afThreshold[1]
-    # print "x_threshold, y_threshold:", x_threshold, y_threshold
-    # aTau = [] ### Did the child meet the intra-dataset confidence cut-off? If not, its children will continue to be itself. 
-        #### tau_hat <= tau 
-        #### e.g.[(True,False),(True,True),]
-
-    # # hash containing string mappings for deciders 
-
-    hashMethod = {"min": _decider_min,
-                "max": _decider_max,
-                }
-
-    pMethod = hashMethod[strLinkage]  # #returns 'aNode x aNode -> bool' object 
-
-    #-------------------------------------#
-    # Parsing Steps                       #
-    #-------------------------------------#
-    
-    # # Unalias data structure so this does not alter the original data type
-    # # Fix for depth 
-    #aiGlobalDepth1 = [get_depth(ap) for ap in apClusterNode1]
-    #aiGlobalDepth2 = [get_depth(ap) for ap in apClusterNode2]
-    
-    #iMaxDepth = max(max(aiGlobalDepth1), max(aiGlobalDepth2))
-    #iMinDepth = min(min(aiGlobalDepth1), min(aiGlobalDepth2))
-    
-    # apClusterNode1 = [fix_clusternode(apClusterNode1[i], iExtend = iMaxDepth - aiGlobalDepth1[i]) for i in range(len(apClusterNode1))]
-    # apClusterNode2 = [fix_clusternode(apClusterNode2[i], iExtend = iMaxDepth - aiGlobalDepth2[i]) for i in range(len(apClusterNode2))]
-
-    # print "Hierarchical TREE 1 ", reduce_tree_by_layer(apClusterNode1)
-    # print "Hierarchical TREE 2 ", reduce_tree_by_layer(apClusterNode2)
-
+    max_dist_cluster2 = max (node.dist for node in apClusterNode1)
+   
     aOut = []
 
     # Create the root of the coupling tree
-    for a, b in itertools.product(apClusterNode1, apClusterNode2):
+    for a, b in itertools.product(apClusterNode0, apClusterNode1):
         try:
             data1 = a.pre_order(lambda x: x.id)
             data2 = b.pre_order(lambda x: x.id)
@@ -1511,41 +1501,19 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
     pStump = Hypothesis_Node([data1, data2])
     pStump.set_level_number(0)
     aOut.append(pStump)
-    
-    apChildren1 = get_homogenous_clusters_silhouette_log (apClusterNode1[0], dataset_number = 0)
-    #cutree_to_get_below_threshold_number_of_features(apClusterNode1[0])
-    #get_homogenous_clusters_silhouette_log (apClusterNode1[0], dataset_number = 0)
-    apChildren2 = get_homogenous_clusters_silhouette_log (apClusterNode2[0], dataset_number = 1)
-    #cutree_to_get_below_threshold_number_of_features(apClusterNode1[0])
+    # Get the first level homogeneous clusters
+    apChildren0 = get_homogenous_clusters_silhouette_log (apClusterNode0[0], dataset_number = 0)
+    #cutree_to_get_below_threshold_number_of_features(apClusterNode0[0])
+    #get_homogenous_clusters_silhouette_log (apClusterNode0[0], dataset_number = 0)
+    apChildren1 = get_homogenous_clusters_silhouette_log (apClusterNode1[0], dataset_number = 1)
+    #cutree_to_get_below_threshold_number_of_features(apClusterNode[0])
     #
-    '''
-    apChildren1 = []
-    apChildren2 = []
-    #print 1.0/len(config.Distance[0][0]), 1.0/len(config.Distance[1][0])
-    t1 = 1.0 - np.percentile(config.Distance[0].flatten(), config.q*100 - 1.0/len(config.Distance[0])*100) #config.cut_distance_thrd
-    print "t1",t1
-    t2 = 1.0 - np.percentile(config.Distance[1].flatten(), config.q*100 - 1.0/len(config.Distance[1])*100) #config.cut_distance_thrd
-    print "t2",t2
-    import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(1, 1)
-    ax.hist(config.Distance[0].flatten(), normed=True, histtype='stepfilled', alpha=0.2)
-    ax.legend(loc='best', frameon=False)
-    #plt.show()
-    plt.savefig("/Users/rah/Documents/Hutlab/halla_test/dist1_hist"+".pdf")
+    #print "first cut", [a.pre_order(lambda x: x.id) for a in apChildren0]
+    #print "first cut", [a.pre_order(lambda x: x.id) for a in apChildren1]
     
-    #t2 = config.cut_distance_thrd
-    for c in apClusterNode1:
-        apChildren1.extend(cutree_to_get_below_threshold_distance_of_clusters(c, t1))
-    for c in apClusterNode2:
-        apChildren2.extend(cutree_to_get_below_threshold_distance_of_clusters(c, t2))
-    
-    
-    print "first cut", [a.pre_order(lambda x: x.id) for a in apChildren1]
-    print "first cut", [a.pre_order(lambda x: x.id) for a in apChildren2]
-    '''
     childList = []
     L = []    
-    for a, b in itertools.product(apChildren1, apChildren2):
+    for a, b in itertools.product(apChildren0, apChildren1):
         try:
             data1 = a.pre_order(lambda x: x.id)
             data2 = b.pre_order(lambda x: x.id)
@@ -1585,20 +1553,20 @@ def couple_tree(apClusterNode1, apClusterNode2, pArray1, pArray2, strMethod="uni
                     #print "******************len: ",len(L)
                 continue
         if not bTauX:
-            apChildren1 = cutree_to_get_number_of_clusters([a])
+            apChildren0 = cutree_to_get_number_of_clusters([a])
             #cutree_to_get_below_threshold_number_of_features(a)
             #get_homogenous_clusters_silhouette_log(a,0)
         else:
-            apChildren1 = [a]
+            apChildren0 = [a]
         if not bTauY:
-            apChildren2 = cutree_to_get_number_of_clusters([b])
+            apChildren1 = cutree_to_get_number_of_clusters([b])
             #cutree_to_get_below_threshold_number_of_features(b)
             ##
             #get_homogenous_clusters_silhouette_log(b,1)#
         else:
-            apChildren2 = [b]
+            apChildren1 = [b]
 
-        LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren1, apChildren2)] 
+        LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren0, apChildren1)] 
         childList = []
         while LChild:
             (a1, b1) = LChild.pop(0)
@@ -1639,8 +1607,8 @@ pHashMethods = {"permutation" : stats.permutation_test,
 strMethod = config.randomization_method
 pMethod = pHashMethods[strMethod]
 def _actor(pNode):
-    pArray1 = config.meta_feature[0]
-    pArray2 = config.meta_feature[1]
+    dataset1 = config.discretized_dataset[0]
+    dataset2 = config.discretized_dataset[1]
     """
     Performs a certain action at the node
     
@@ -1649,16 +1617,16 @@ def _actor(pNode):
     aIndicies = pNode.get_data() 
     aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays
     '''if decomposition not in ["pca", "ica"]:
-        X = pArray1[aIndiciesMapped[0]]
-        Y = pArray2[aIndiciesMapped[1]]
+        X = dataset1[aIndiciesMapped[0]]
+        Y = dataset2[aIndiciesMapped[1]]
     else:
         orginal_data_0 = array(orginal_data[0])
         orginal_data_1 = array(orginal_data[1])
         X = orginal_data_0[aIndiciesMapped[0]]
         Y = orginal_data_1[aIndiciesMapped[1]]
     '''
-    X = pArray1[aIndiciesMapped[0]]
-    Y = pArray2[aIndiciesMapped[1]]
+    X = dataset1[aIndiciesMapped[0]]
+    Y = dataset2[aIndiciesMapped[1]]
     dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y)
     pNode.set_similarity_score(similarity)
     pNode.set_left_first_rep_variance(left_first_rep_variance)
@@ -1673,8 +1641,8 @@ def _actor(pNode):
     
     return dP        
 def naive_all_against_all():
-    pArray1 = config.meta_feature[0]
-    pArray2 = config.meta_feature[1]
+    dataset1 = config.discretized_dataset[0]
+    dataset2 = config.discretized_dataset[1]
     seed = config.seed
     p_adjusting_method = config.p_adjust_method
     decomposition = config.decomposition
@@ -1684,8 +1652,8 @@ def naive_all_against_all():
     iIter= config.iterations
     discretize_style = config.strDiscretizing
     
-    iRow = len(pArray1)
-    iCol = len(pArray2)
+    iRow = len(dataset1)
+    iCol = len(dataset2)
     
     aOut = [] 
     aFinal = []
@@ -1697,21 +1665,9 @@ def naive_all_against_all():
         test =  Hypothesis_Node(left_distance=0.0, right_distance=0.0)
         data = [[i], [j]]
         test.add_data(data)
-        #print i, j
-        '''
-        fP, similarity, left_rep, right_rep, loading_left, loading_right, left_rep, right_rep = pMethod(array([pArray1[i]]), array([pArray2[j]]))
-        test.set_pvalue(fP)
-        test.set_similarity_score(similarity)
-        test.set_left_first_rep_variance(1.0)
-        test.set_right_first_rep_variance(1.0)
-        test.set_qvalue(fP)
-        test.set_left_rep(left_rep)
-        test.set_right_rep(right_rep)
-        aP.append(fP)
-        '''
         tests.append(test)
     
-    p_values = multiprocessing_actor(_actor, tests, pMethod, pArray1, pArray2)
+    p_values = multiprocessing_actor(_actor, tests, pMethod, dataset1, dataset2)
     cluster_size = [1 for i in range(len(p_values))]
     aP_adjusted, pRank = stats.p_adjust(p_values, config.q, cluster_size )
     #print aP_adjusted, pRank
@@ -1765,7 +1721,7 @@ def naive_all_against_all():
     print "--- number of passed tests after FDR controlling:", len(aFinal) 
     return aFinal, aOut
 
-def traverse_by_layer(pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction=None):
+def traverse_by_layer(pClusterNode1, pClusterNode2, dataset1, dataset2, pFunction=None):
     """
 
     Useful function for doing all-against-all comparison between nodes in each layer 
@@ -1776,7 +1732,7 @@ def traverse_by_layer(pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction=
 
     Parameters
     ----------------
-        pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction
+        pClusterNode1, pClusterNode2, dataset1, dataset2, pFunction
     
     Returns 
     ---------
@@ -1881,14 +1837,14 @@ def traverse_by_layer(pClusterNode1, pClusterNode2, pArray1, pArray2, pFunction=
         iLayer1, iLayer2 = len(aLayer1), len(aLayer2)
 
         for i, j in itertools.product(range(iLayer1), range(iLayer2)):
-            aLayerOut.append(pFunction(aLayer1[i], aLayer2[j], pArray1, pArray2))
+            aLayerOut.append(pFunction(aLayer1[i], aLayer2[j], dataset1, dataset2))
 
         aOut.append(aLayerOut)
 
     return aOut 
 
 #### Perform all-against-all per layer, without adherence to hierarchical structure at first
-def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, adjust_method="BH"):
+def layerwise_all_against_all(pClusterNode1, pClusterNode2, dataset1, dataset2, adjust_method="BH"):
     """
     Perform layer-wise all against all 
 
@@ -1908,13 +1864,13 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 
     pPTBR = lambda ai, aj, X, Y : stats.permutation_test_by_representative(X[array(ai)], Y[array(aj)]) 
 
-    traverse_out = traverse_by_layer(pClusterNode1, pClusterNode2, pArray1, pArray2)  # #just gives me the coupled indices 
+    traverse_out = traverse_by_layer(pClusterNode1, pClusterNode2, dataset1, dataset2)  # #just gives me the coupled indices 
 
     for layer in traverse_out:
         aLayerOut = [] 
         aPval = [] 
         for item in layer:
-            fPval = stats.permutation_test_by_representative(pArray1[array(item[0])], pArray2[array(item[1])])
+            fPval = stats.permutation_test_by_representative(dataset1[array(item[0])], dataset2[array(item[1])])
             aPval.append(fPval)
         
         adjusted_pval = stats.p_adjust(aPval)
@@ -1935,10 +1891,10 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, pArray1, pArray2, ad
 
 def hypotheses_testing():
     pTree = config.meta_hypothesis_tree
-    pArray1 = config.meta_feature[0]
-    pArray2 = config.meta_feature[1]
+    dataset1 = config.discretized_dataset[0]
+    dataset2 = config.discretized_dataset[1]
     """
-    pTree, pArray1, pArray2, seed, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
+    pTree, dataset1, dataset2, seed, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
     iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness = None, fAlpha=0.05, apply_bypass = True, discretize_style= 'equal-area'
     
     Perform all-against-all on a hypothesis tree.
@@ -1951,8 +1907,8 @@ def hypotheses_testing():
     ---------------
 
         pTree 
-        pArray1
-        pArray2
+        dataset1
+        dataset2
         method 
         metric
         p_adjust
@@ -1971,7 +1927,7 @@ def hypotheses_testing():
 
         
     """
-    X, Y = pArray1, pArray2 
+    X, Y = dataset1, dataset2 
 
     if config.verbose == 'INFO':
         print reduce_tree_by_layer([pTree])
@@ -2002,10 +1958,7 @@ def hypotheses_testing():
 
     iGlobalDepth = depth_tree(pTree)
     # iSkip = _start_parameter_to_iskip( start_parameter )
-    
-        
 
-    
     def _simple_hypothesis_testing():
         apChildren = [pTree]
         number_performed_tests = 0
@@ -2044,157 +1997,6 @@ def hypotheses_testing():
         print "--- number of passed tests without FDR controlling:", number_passed_tests        
         return aFinal, aOut
     
-    def _bh_family_testing():
-        apChildren = [pTree]
-        level = 1
-        number_performed_tests = 0 
-        number_passed_tests = 0
-        next_level_apChildren = []
-        while apChildren:
-            Current_Family_Children = apChildren.pop(0).get_children()
-            number_performed_tests += len(Current_Family_Children)
-            #aP = []
-            # claculate nominal p-value
-            for i in range(len(Current_Family_Children)):
-                #print "aP", i, _actor(Current_Family_Children[i])
-                #print Current_Family_Children[i]
-                Current_Family_Children[i].set_pvalue(_actor(Current_Family_Children[i]))
-            aP = [ Current_Family_Children[i].get_pvalue() for i in range(len(Current_Family_Children)) ]
-            # claculate adjusted p-value
-            aP_adjusted, pRank, q = stats.p_adjust(aP, fQ)
-            for i in range(len(Current_Family_Children)):
-                Current_Family_Children[i].set_qvalue(aP_adjusted[i])
-                Current_Family_Children[i].set_rank(pRank[i])
-                
-                
-            max_r_t = 0
-            #print "aP", aP
-            #print "aP_adjusted: ", aP_adjusted  
-            for i in range(len(Current_Family_Children)):
-                if aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
-                    max_r_t = pRank[i]
-                    # print "max_r_t", max_r_t
-            for i in range(len(aP)):
-                if pRank[i] <= max_r_t and Current_Family_Children[i].is_representative(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
-                    number_passed_tests += 1
-                    print "-- association after fdr correction"
-                    if config.verbose == 'INFO':
-                        Current_Family_Children[i].report()
-                    #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-                    aOut.append(Current_Family_Children[i])
-                    #aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-                    aFinal.append(Current_Family_Children[i])
-                else :
-                    #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-                    aOut.append(Current_Family_Children[i])
-                    #if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-                    if Current_Family_Children[i].is_bypass() and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
-                        if config.verbose == 'INFO':
-                            print "Bypass, no hope to find an association in the branch with p-value: ", \
-                    aP[i], " and ", len(Current_Family_Children[i].get_children()), \
-                     " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
-                      "   ", Current_Family_Children[i].get_data()[1]
-                        
-                    elif Current_Family_Children[i].is_leaf():
-                        if config.verbose == 'INFO':
-                            print "End of branch, leaf!"
-                        # aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
-                    else:
-                        if config.verbose == 'INFO':
-                            print "Gray area with p-value:", aP[i]
-                        next_level_apChildren.append(Current_Family_Children[i])
-                    
-            if not apChildren:
-                if config.verbose == 'INFO':
-                    print "Family Hypotheses testing at level ", level, " is finished."
-                print "Family hypotheses testing at level ", level, " is finished."
-                # number_performed_test += len(next_level_apChildren)
-                apChildren = next_level_apChildren
-                level += 1
-                next_level_apChildren = []
-        print "--- number of performed tests:", number_performed_tests
-        print "--- number of passed tests after FDR controlling:", number_passed_tests                                        
-        return aFinal, aOut
-    def _bh_all_testing():
-        apChildren = [pTree]
-        level = 1
-        number_performed_tests = 0 
-        number_passed_tests = 0
-        next_level_apChildren = []
-        current_level_tests = []
-        all_performed_tests = []
-        all_aP = []
-        while apChildren:
-            current_level_tests.extend(apChildren.pop(0).get_children())
-            
-            if len (apChildren) != 0 :
-                continue
-            else:
-                number_performed_tests += len(current_level_tests)
-                for i in range(len(current_level_tests)):
-                    current_level_tests[i].set_pvalue(_actor(current_level_tests[i]))
-                aP = [ current_level_tests[i].get_pvalue() for i in range(len(current_level_tests)) ]
-                all_aP.extend(aP)
-                all_performed_tests.extend(current_level_tests)
-                # claculate adjusted p-value
-                aP_adjusted, pRank, q = stats.p_adjust(all_aP, fQ)
-                for i in range(len(all_performed_tests)):
-                    all_performed_tests[i].set_qvalue(aP_adjusted[i])
-                    all_performed_tests[i].set_rank(pRank[i])
-
-                max_r_t = 0
-                for i in range(len(all_performed_tests)):
-                    if all_aP[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
-                        max_r_t = pRank[i]
-                        # print "max_r_t", max_r_t
-                for i in range(len(all_aP)):
-                    if pRank[i] <= max_r_t and not all_performed_tests[i].already_passed:
-                        number_passed_tests += 1
-                        all_performed_tests[i].already_passed = True
-                        all_performed_tests[i].already_tested = True
-                        print "-- association after fdr correction"
-                        if config.verbose == 'INFO':
-                            all_performed_tests[i].report()
-                        #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-                        aOut.append(all_performed_tests[i])
-                        #aFinal.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-                        aFinal.append(all_performed_tests[i])
-                    elif not all_performed_tests[i].already_tested:
-                        all_performed_tests[i].already_tested = True
-                        #aOut.append([Current_Family_Children[i].get_data(), float(aP[i]), aP_adjusted[i]])
-                        #print i, range(len(current_level_tests)), current_level_tests[i]
-                        aOut.append(all_performed_tests[i])
-                        #if not Current_Family_Children[i].is_leaf():  # and aP[i] <= 1.0-fQ:#aP[i]/math.sqrt((len(Current_Family_Children[i].get_data()[0]) * len(Current_Family_Children[i].get_data()[1]))) <= 1.0-fQ:#
-                        if all_performed_tests[i].is_bypass():
-                            if config.verbose == 'INFO':
-                                print "Bypass, no hope to find an association in the branch with p-value: ", \
-                        aP[i], " and ", len(all_performed_tests[i].get_children()), \
-                         " sub-hypotheses.", all_performed_tests[i].get_data()[0], \
-                          "   ", all_performed_tests[i].get_data()[1]
-                            
-                        elif all_performed_tests[i].is_leaf():
-                            if config.verbose == 'INFO':
-                                print "End of branch, leaf!"
-                            # aOut.append( [Current_Family_Children[i].get_data(), float(aP[i]), float(aP[i])] )
-                        else:
-                            if config.verbose == 'INFO':
-                                print "Gray area with p-value:", aP[i]
-                            next_level_apChildren.append(all_performed_tests[i])
-                        
-                        #if config.verbose == 'INFO':
-                         #   print "Hypotheses testing level ", level, " is finished."
-                        # number_performed_test += len(next_level_apChildren)
-                apChildren = next_level_apChildren
-                #print "level: ", level, "#test: ", number_performed_tests
-                level += 1
-                next_level_apChildren = []
-                current_level_tests = []
-                aP = []
-
-        print "--- number of performed tests:", number_performed_tests
-        print "--- number of passed tests after FDR controlling:", number_passed_tests                                        
-        return aFinal, aOut
-
     def _level_testing():
         apChildren = [pTree]
         level = 1
@@ -2210,23 +2012,31 @@ def hypotheses_testing():
             temp_sub_hypotheses = []
             
             temp_hypothesis = apChildren.pop(0)
-            '''if config.p_adjust_method != "bh2y":
-                if temp_hypothesis.get_significance_status() == True or temp_hypothesis.get_significance_status() == False:
+            #use the signifantly rejected or accepte dhypotheses from previouse level 
+            if config.p_adjust_method != "bhy2":
+                if temp_hypothesis.get_significance_status() != None:
                     from_prev_hypotheses.append(temp_hypothesis)
                 else:
                     temp_sub_hypotheses = temp_hypothesis.get_children()
-            else:'''
-            temp_sub_hypotheses = temp_hypothesis.get_children()
-            if len(temp_sub_hypotheses) == 0:
-                leaves_hypotheses.append(temp_hypothesis)
-            if temp_hypothesis.get_significance_status() != None:
-                for i in range(len(temp_sub_hypotheses)):
-                    temp_sub_hypotheses[i].set_significance_status(temp_hypothesis.get_significance_status())
-                    temp_sub_hypotheses[i].set_pvalue(temp_hypothesis.get_pvalue()) 
-                    temp_sub_hypotheses[i].set_qvalue(temp_hypothesis.get_qvalue())
+                    if len(temp_sub_hypotheses) == 0:
+                        leaves_hypotheses.append(temp_hypothesis)
             else:
-                number_performed_tests += len(temp_sub_hypotheses)
-                #temp_current_level_tests.extend(temp_sub_hypotheses)
+                temp_sub_hypotheses = temp_hypothesis.get_children()
+                # Repeat leaves in the next levels  
+                if len(temp_sub_hypotheses) == 0:
+                    leaves_hypotheses.append(temp_hypothesis)
+                else:
+                    #for i in range(len(temp_sub_hypotheses)):
+                    #    print(temp_sub_hypotheses[i].get_data())
+                    if temp_hypothesis.get_significance_status() != None:
+                        for i in range(len(temp_sub_hypotheses)):
+                            temp_sub_hypotheses[i].set_significance_status(temp_hypothesis.get_significance_status())
+                            temp_sub_hypotheses[i].set_pvalue(temp_hypothesis.get_pvalue()) 
+                            temp_sub_hypotheses[i].set_qvalue(temp_hypothesis.get_qvalue())
+                            
+                    #else:
+                        #number_performed_tests += len(temp_sub_hypotheses)
+                    #temp_current_level_tests.extend(temp_sub_hypotheses)
             current_level_tests.extend(temp_sub_hypotheses)
             
             if len (apChildren) > 0:
@@ -2243,7 +2053,8 @@ def hypotheses_testing():
             print "number of hypotheses in level %s: %s" % (level, len(current_level_tests))
             #if not len(current_level_tests):
             #    continue
-            p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, pArray1, pArray2)
+         
+            p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, dataset2)
             
             for i in range(len(current_level_tests)):
                 current_level_tests[i].set_pvalue(p_values[i])
@@ -2263,65 +2074,20 @@ def hypotheses_testing():
                 if current_level_tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank():
                     max_r_t = current_level_tests[i].get_rank()
                     #print "max_r_t", max_r_t
-            '''
-            
-            list_p_trshld =[]
-            number_of_bootstrap = 100
-            
-            if level == 1000:
-                for j in range(number_of_bootstrap):
-                    pvalues_bootsrap = p_values
-                    from sklearn.utils import resample
-                    resamples_pvalues = [resample(p_values, n_samples=1, random_state=0) for i in range(total_cluster_size - len(p_values))] 
-                    pvalues_bootsrap.extend(resamples_pvalues)#numpy.random.normal(numpy.mean(p_values), numpy.std(p_values),size=total_cluster_size)
-                    
-                    aP_adjusted, pRank = stats.p_adjust(pvalues_bootsrap, q, cluster_size)
-                    max_r_t = 0
-                    p_trshld = pvalues_bootsrap[0]
-                    for i in range(len(pvalues_bootsrap)):
-                        if pvalues_bootsrap[i] <= aP_adjusted[i] and max_r_t <= pRank[i]:
-                            max_r_t = pRank[i]
-                            p_trshld = pvalues_bootsrap[i]
-                    list_p_trshld.append(p_trshld)
-            else:
-                aP_adjusted, pRank = stats.p_adjust(p_values, q, cluster_size)
-            '''            
-                
-                
+                       
             passed_tests = []
-            #zipped =  zip(pRank, aP_adjusted, cluster_size)
-            
-            #zipped = sorted(zipped, key=lambda x: x[0])
-            #print zipped
             def _get_passed_fdr_tests():
                 if config.p_adjust_method in ["bh", "bhy"]:
-                    #max_r_t = 0
-                    #estimated_fdr = 0.0 
-                    '''if level >=1:
-                        for i in range(len(current_level_tests)):
-                            if current_level_tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank():
-                                max_r_t = current_level_tests[i].get_rank()'''
-                    '''print "befor adjusting", max_r_t
-                    for i in range(0, int(max_r_t)):
-                        #print zipped[i]
-                        #print zipped[i][0], zipped[i][1]
-                        estimated_fdr += (zipped[i][1] * zipped[i][2]/total_cluster_size)
-                        print estimated_fdr
-                        if estimated_fdr > q:
-                            max_r_t = i
-                            break
-                    print "after adjusting", max_r_t'''
+                  
                     for i in range(len(current_level_tests)):
-                        #if current_level_tests[i].get_rank() <= max_r_t:
                         if current_level_tests[i].get_rank() <= max_r_t:#(level ==1000 and sum([1 if current_level_tests[i].get_pvalue()<= val else 0 for val  in list_p_trshld])>= (1.0-config.q)*number_of_bootstrap)\
-                            #or (level>=1 and current_level_tests[i].get_rank() <= max_r_t):
-                            #and current_level_tests[i].get_pvalue()+ current_level_tests[i].get_pvalue()*.5*(len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]))  <= aP_adjusted[i]:
                             passed_tests.append(current_level_tests[i])
                             if current_level_tests[i].get_significance_status() == None:
+                                current_level_tests[i].set_significance_status(True)
                                 aOut.append(current_level_tests[i])
                                 aFinal.append(current_level_tests[i])
-                                current_level_tests[i].set_significance_status(True)
                                 print ("-- association after %s fdr correction" % config.p_adjust_method)
+                                #print (current_level_tests[i].get_data())
                         else:
                             if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
                                 current_level_tests[i].set_significance_status(False)
@@ -2377,104 +2143,26 @@ def hypotheses_testing():
             print "Hypotheses testing level", level, "with ",len(current_level_tests), "hypotheses is finished."
             level += 1
             #q = fQ - fQ*max_r_t/100.0
-            if len(current_level_tests)>0:
+            #if len(current_level_tests)>0:
                 #q = fQ - fQ*max_r_t/len(current_level_tests)
                 #print "Next level q:", q
-                last_current_level_tests = current_level_tests
+            #    last_current_level_tests = current_level_tests
+            #else:
+            #    last_current_level_tests = leaves_hypotheses
             next_level_apChildren = []
             current_level_tests = []
-            #temp_current_level_tests = []
-            last_current_level_tests = leaves_hypotheses
+            temp_current_level_tests = []
+            from_prev_hypotheses = []
             leaves_hypotheses = []
             aP = []
-            #return aFinal, aOut
-            #n1 = n1 /math.log(n1,2) if n1 > 2 else 1
-            #n2 = n2 /math.log(n2, 2) if n2 > 2 else 1
-            #q = fQ - fQ*max_r_t/100.0 
+  
         config.number_of_performed_tests = len(aOut)
         print "--- number of performed tests:", config.number_of_performed_tests #len(aOut)#number_performed_tests
         print "--- number of passed tests after FDR controlling:", len(aFinal)#number_passed_tests                                  
         return aFinal, aOut
-        
-    def _rh_hypothesis_testing():
-        apChildren = [pTree]
-        level = 1
-        end_level_tests = []
-        performed_tests = []
-        round1_passed_tests = []
-        global number_performed_test
-        next_level_apChildren = []
-        number_performed_test = 0
-        while apChildren:
-            Current_Family_Children = apChildren.pop(0).get_children()
-            
-            # print "Number of children:", len(Current_Family_Children)
-            number_performed_test += len(Current_Family_Children)
-            
-            # claculate nominal p-value
-            for i in range(len(Current_Family_Children)):
-                Current_Family_Children[i].set_pvalue(_actor(Current_Family_Children[i]))
-            aP = [ Current_Family_Children[i].get_pvalue() for i in range(len(Current_Family_Children)) ]
-            
-            for i in range(len(aP)):
-                # print "NMI", Current_Family_Children[i].get_similarity_score()
-                performed_tests.append([Current_Family_Children[i], float(aP[i])])    
-                if Current_Family_Children[i].is_representative(pc_threshold = robustness, robustness = robustness, pvalue_threshold = fQ, decomp = decomposition):
-                    Current_Family_Children[i].report()
-                    end_level_tests.append([Current_Family_Children[i], float(aP[i])])
-                    round1_passed_tests.append([Current_Family_Children[i], float(aP[i])])
-                elif Current_Family_Children[i].is_leaf():
-                    end_level_tests.append([Current_Family_Children[i], float(aP[i])])
-                    if config.verbose == 'INFO':
-                        print "End of branch, leaf!"
-                elif Current_Family_Children[i].is_bypass() and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
-                    if config.verbose == 'INFO':
-                        print "Bypass, no hope to find an association in the branch with p-value: ", \
-                    aP[i], " and ", len(Current_Family_Children[i].get_children()), \
-                     " sub-hypotheses.", Current_Family_Children[i].get_data()[0], \
-                      "   ", Current_Family_Children[i].get_data()[1]
-                else:
-                    if config.verbose == 'INFO':
-                        print "Gray area with p-value:", aP[i]
-                    next_level_apChildren.append(Current_Family_Children[i])
-                
-            if not apChildren:
-                if config.verbose == 'INFO':
-                    print "Hypotheses testing level %s is finished. Number of hypotheses in the next level: %s" %(level, len(next_level_apChildren))
-                apChildren = next_level_apChildren
-                level += 1
-                next_level_apChildren = []
-        max_r_t = 0
-        print "--- number of performed tests:", len(performed_tests)
-        print "--- number of passed from nominal tests:", len(round1_passed_tests)
-        print "--- number of tests in the end of branches:", len(end_level_tests)
-        end_level_tests = array(end_level_tests)
-        performed_tests = array(performed_tests)
-        print "Nominal p-values", end_level_tests[:, 1]
-        aP_adjusted, pRank = stats.p_adjust(end_level_tests[:, 1], fQ)
-        print "ajusted pvalue: ", aP_adjusted
-        for i in range(len(end_level_tests)):
-            if end_level_tests[i][1] <= aP_adjusted[i] and max_r_t <= pRank[i]:
-                max_r_t = pRank[i]
-                #print "max_r_t", max_r_t
-        for i in range(len(end_level_tests[:, 1])):
-            if pRank[i] <= max_r_t:
-                print "--- Pass with p-value:", end_level_tests[i][1], " q value: ", q[i], end_level_tests[i][0].get_data()[0], end_level_tests[i][0].get_data()[1]
-                aOut.append([end_level_tests[i][0].get_data(), float(end_level_tests[i][1]) , q[i]])
-                aFinal.append([end_level_tests[i][0].get_data(), float(end_level_tests[i][1]) , q[i]])
-            else :
-                aOut.append([end_level_tests[i][0].get_data(), float(end_level_tests[i][1]) , q[i]])
-        print "--- number of passed tests after FDR controllin:", len(aFinal)                                        
-        return aFinal, aOut
-    
-
-    
 
     fdr_function = {"default": _level_testing,
-                            "family": _bh_family_testing,
                             "level":_level_testing,
-                            "all":_bh_all_testing,
-                            "RH": _rh_hypothesis_testing,
                             "simple":_simple_hypothesis_testing}
     #======================================#
     # Execute 

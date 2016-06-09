@@ -24,7 +24,7 @@ from . import config
 import matplotlib
 from itertools import product
 #matplotlib.style.use('ggplot')
-matplotlib.use( "Agg" )
+#matplotlib.use( "Agg" )
 def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods', ylabel=None, labels=None):
     
     import pylab as pl
@@ -215,7 +215,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     ax1 = fig.add_axes([0.09,0.1,0.2,0.6])
     ax1.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
     ax1.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-    Y1 = sch.linkage(D, method = "single")
+    Y1 = sch.linkage(D, method = method)
     if len(Y1) > 1:
         Z1 = sch.dendrogram(Y1, orientation='right')
     ax1.set_xticks([])
@@ -225,7 +225,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     ax2 = fig.add_axes([0.3,0.71,0.6,0.2])
     ax2.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
     ax2.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-    Y2 = sch.linkage(D.T, method = "single")
+    Y2 = sch.linkage(D.T, method = method)
     if len(Y2) > 1:
         Z2 = sch.dendrogram(Y2)
     ax2.set_xticks([])
@@ -313,7 +313,7 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
     else:
         Y1 = sch.linkage(pArray, metric=pDistance, method=method)
     if len(Y1) > 1:
-        Z1 = sch.dendrogram(Y1, orientation='right')#, labels= xlabels)
+        Z1 = sch.dendrogram(Y1, orientation='left')#, labels= xlabels)
     ax1.set_xticks([])
     ax1.set_yticks([])
     

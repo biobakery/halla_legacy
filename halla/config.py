@@ -55,10 +55,8 @@ min_var = 0.0
 #==================================================================#
 # Mutable Meta Objects  
 #==================================================================#
-meta_array = array([None, None])
-#meta_array[0] = X  # .append(X)
-#meta_array[1] = Y  # .append(Y)
-meta_feature = None
+original_dataset = array([None, None])
+discretized_dataset = array([None, None])
 meta_threshold = None 
 Features_order = array([None, None])
 #X_features_cluster_order  = []
@@ -90,7 +88,7 @@ def reset_default():
     pvalues = None
     meta_summary = None  # summary statistics 
     meta_report = None  # summary report 
-    meta_array = array([None, None])
+    original_dataset = array([None, None])
     meta_data_tree = [] 
     meta_hypothesis_tree = None 
     meta_alla = None  # results of all-against-all
