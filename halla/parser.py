@@ -72,6 +72,16 @@ class Input:
 		self._load()
 		self._parse()
 		self._filter_to_common_columns()
+		if distance.c_hash_association_method_discretize[config.distance]:
+			try: 
+				self._remove_low_entropy_features()
+			except:
+				pass
+		else:
+			try: 
+				self._remove_low_variant_features()
+			except:
+				pass
 		if store.bypass_discretizing():
 			try:
 				self.orginal_dataset1= np.asarray(self.orginal_dataset1, dtype = float)
@@ -83,17 +93,8 @@ class Input:
 		else:
 		    print "Discretizing is started using: ", config.strDiscretizing, " style!"
 		    self._discretize()
-		'''if distance.c_hash_association_method_discretize[config.distance]:
-			try: 
-				self._remove_low_entropy_features()
-			except:
-				pass
-		else:
-			try: 
-				self._remove_low_variant_features()
-			except:
-				pass
-		'''
+		
+		
 	def get(self):
 		return [(self.discretized_dataset1, self.orginal_dataset1, self.outName1, self.outType1, self.outHead1), 
 			(self.discretized_dataset2, self.orginal_dataset2, self.outName2, self.outType2, self.outHead2)] 
