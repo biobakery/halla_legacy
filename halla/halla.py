@@ -125,7 +125,7 @@ def check_requirements():
             sys.exit("--- Please check R, rpy2,  and  FactoMineR installation for MCA library")
         
   
-VERSION="0.6.1"
+VERSION=config.version
 def parse_arguments (args):
     """ 
     Parse the arguments from the user
