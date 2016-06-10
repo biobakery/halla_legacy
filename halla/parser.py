@@ -180,17 +180,18 @@ class Input:
 				# *   Modification by George Weingart  2014/03/20 # changed by Ali 2015/11/06                                                    *
 				# *   If the line is not full,  replace the Nones with nans                                           *
 				#***************************************************************************************************** 
-				if config.missing_method is  None:
+				if config.missing_method is  None and not distance.c_hash_association_method_discretize[config.distance]:
 					warn_message ="There is missing data in feature "+  aNames[i]+"!!! " + "Try --missing-method=method to choose your filling strategy. "
 					line = map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) 
 										else sys.exit(warn_message )), line)  ###### np.nan Convert missings to nans
 				else:
 					line = map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else np.nan ), line)  ###### np.nan Convert missings to nans
 					#line = df1 = pd.DataFrame(line)
-					try:
-						line = imp.transform(line)[0]
-					except:
-						print "there is an issue with filling missed data!"
+					if not distance.c_hash_association_method_discretize[config.distance]:
+						try:
+							line = imp.transform(line)[0]
+						except:
+							print "there is an issue with filling missed data!"
 					#print line 
 				if all(val != config.missing_char for val in line):
 					aOut.append(line)
