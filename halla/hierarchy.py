@@ -1553,13 +1553,14 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
                     #print "******************len: ",len(L)
                 continue
         if not bTauX:
-            apChildren0 = cutree_to_get_number_of_clusters([a])
+            apChildren0 = get_homogenous_clusters_silhouette_log(a,0)
+            #cutree_to_get_number_of_clusters([a])
             #cutree_to_get_below_threshold_number_of_features(a)
             #get_homogenous_clusters_silhouette_log(a,0)
         else:
             apChildren0 = [a]
         if not bTauY:
-            apChildren1 = cutree_to_get_number_of_clusters([b])
+            apChildren1 = get_homogenous_clusters_silhouette_log(b,1)#cutree_to_get_number_of_clusters([b])
             #cutree_to_get_below_threshold_number_of_features(b)
             ##
             #get_homogenous_clusters_silhouette_log(b,1)#
