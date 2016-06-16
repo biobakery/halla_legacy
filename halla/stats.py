@@ -39,7 +39,7 @@ def get_enropy(x):
 	d=x-1
 	#print d
 	P=numpy.bincount(d)/float(len(d))
-	entropy_result = -sum([p * math.log(p, 2) for p in list(P)])
+	entropy_result = -sum([p * math.log(p, 2) for p in P])
 	#print entropy_result
 	return entropy_result 
 def pvalues2qvalues ( pvalues, adjusted=False ):

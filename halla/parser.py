@@ -312,18 +312,12 @@ class Input:
 		#print df2
 		assert(len(self.orginal_dataset1[0]) == len(self.orginal_dataset2[0]))
 	def _remove_low_entropy_features(self):
-		try:
-			df1 = pd.DataFrame(self.discretized_dataset1, index = self.outName1, columns = self.outHead1)
-			df1_org = pd.DataFrame(self.orginal_dataset1, index = self.outName1, columns = self.outHead1)
-		except:
-			df1 = pd.DataFrame(self.discretized_dataset1, index = self.outName1, columns = self.outHead1, dtype=float)
-			df1_org = pd.DataFrame(self.orginal_dataset1, index = self.outName1, columns = self.outHead1)
-		try:
-			df2 = pd.DataFrame(self.discretized_dataset2, index = self.outName2, columns = self.outHead2)
-			df2_org = pd.DataFrame(self.orginal_dataset2, index = self.outName2, columns = self.outHead2)
-		except:
-			df2 = pd.DataFrame(self.discretized_dataset2, index = self.outName2, columns = self.outHead2, dtype=float)
-			df2_org = pd.DataFrame(self.orginal_dataset2, index = self.outName2, columns = self.outHead2)
+		df1 = pd.DataFrame(self.discretized_dataset1, index = self.outName1, columns = self.outHead1)
+		df1_org = pd.DataFrame(self.orginal_dataset1, index = self.outName1, columns = self.outHead1)
+		
+		df2 = pd.DataFrame(self.discretized_dataset2, index = self.outName2, columns = self.outHead2)
+		df2_org = pd.DataFrame(self.orginal_dataset2, index = self.outName2, columns = self.outHead2)
+		
 		#print df1.columns.isin(df2.columns)
 		#print df2.columns.isin(df1.columns)
 		#print df1.var(), np.var(df2, axis=1)
