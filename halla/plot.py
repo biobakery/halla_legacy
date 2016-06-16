@@ -300,18 +300,15 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
                 D[i, j] = abs(x[i] - x[j])
                 D[j, i] = D[i, j]
      '''      
-    pMetric = distance.c_hash_metric[metric] 
-    def pDistance(x, y):
-        return  math.fabs(1.0 -math.fabs(pMetric(x, y)))
-    
+       
     fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(pArray[0])/5.0)),(math.ceil(len(pArray)/5.0))))
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)
     ax1.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
     ax1.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
     if len(D) > 0:
-        Y1 = sch.linkage(D, metric=pDistance, method=method)
+        Y1 = sch.linkage(D, method=method)
     else:
-        Y1 = sch.linkage(pArray, metric=pDistance, method=method)
+        Y1 = sch.linkage(pArray, metric=distance.pDistance, method=method)
     if len(Y1) > 1:
         Z1 = sch.dendrogram(Y1, orientation='left')#, labels= xlabels)
     ax1.set_xticks([])
@@ -322,7 +319,7 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
         ax2 = fig.add_axes([0.3, 0.71, 0.6, 0.2], frame_on=True)
         ax2.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
         ax2.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-        Y2 = sch.linkage(pArray.T, metric=pDistance, method=method)
+        Y2 = sch.linkage(pArray.T, metric=distance.pDistance, method=method)
         if len(Y2) > 1:
             Z2 = sch.dendrogram(Y2)
         ax2.set_xticks([])
@@ -353,10 +350,11 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
             #pass
             pArray = pArray[:, xlabels_order]
     myColor =  pylab.cm.YlOrBr
-    if config.distance in ["spearman", "pearson"]:
-        myColor = pylab.cm.RdBu_r   
+    if distance.c_hash_association_method_discretize[config.distance]:
+        myColor = pylab.cm.YlGnBu   
     else:
-        myColor = pylab.cm.YlGnBu
+        myColor = pylab.cm.RdBu_r
+        
     im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=myColor)#YlGnBu
     if colLable:
         if len(ylabels) == len(idx2):

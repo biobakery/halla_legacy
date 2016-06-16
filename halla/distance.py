@@ -18,6 +18,7 @@ from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, \
     adjusted_mutual_info_score, make_scorer
 from scipy.spatial.distance import pdist, squareform
 import numpy as np
+from . import config
 
 #from numbapro import jit, float32
 
@@ -403,4 +404,7 @@ def pdist(pArray, metric="euclidean"):
 	""" 
 	pMetric = metric 
 	return scipy.cluster.hierarchy.distance.pdist(pArray, pMetric)
-
+def pDistance(x, y):
+    pMetric = c_hash_metric[config.distance]
+    dist = math.fabs(1.0 - math.fabs(pMetric(x, y)))
+    return  dist

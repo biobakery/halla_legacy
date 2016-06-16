@@ -34,6 +34,14 @@ except ImportError:
 # from scipy.stats import percentileofscore
 # ML plug-in 
 # Internal dependencies
+def get_enropy(x):
+	#print x
+	d=x-1
+	#print d
+	P=numpy.bincount(d)/float(len(d))
+	entropy_result = -sum([p * math.log(p, 2) for p in list(P)])
+	#print entropy_result
+	return entropy_result 
 def pvalues2qvalues ( pvalues, adjusted=False ):
     n = len( pvalues )
     # after sorting, index[i] is the original index of the ith-ranked value

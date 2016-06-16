@@ -519,10 +519,7 @@ def hclust(dataset, labels):
         This hclust function is not quite right for the MI case. Need a generic MI function that can take in clusters of RV's, not just single ones 
         Use the "grouping property" as discussed by Kraskov paper. 
     """
-    pMetric = distance.c_hash_metric[config.distance] 
-    def pDistance(x, y):
-        dist = math.fabs(1.0 - math.fabs(pMetric(x, y)))
-        return  dist
+    
     
     '''
     D = np.zeros(shape=(len(dataset), len(dataset)))  
@@ -537,7 +534,8 @@ def hclust(dataset, labels):
     #D = squareform(D)
     #print D
     '''
-    D = pdist(dataset, metric=pDistance) 
+    linkage_method = 'single'
+    D = pdist(dataset, metric=distance.pDistance) 
     #D = squareform(D)
     #print D
     if config.Distance[0] is None:
@@ -548,10 +546,10 @@ def hclust(dataset, labels):
     if config.hallagram:
         global fig_num
         print "--- plotting heatmap for Dataset", str(fig_num)," ... "
-        Z = plot.heatmap(Data = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.distance)+"_" + str(fig_num))
+        Z = plot.heatmap(Data = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.distance)+"_" + str(fig_num), method =linkage_method)
         fig_num += 1
     else:
-        Z = linkage(D, metric=pDistance, method= "single")
+        Z = linkage(D, metric=pDistance, method= linkage_method)
     import scipy.cluster.hierarchy as sch
     #print  squareform(sch.cophenet(Z))
     #print sch.dendrogram(Z, orientation='right')['leaves']

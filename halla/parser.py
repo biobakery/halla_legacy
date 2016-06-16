@@ -72,16 +72,8 @@ class Input:
 		self._load()
 		self._parse()
 		self._filter_to_common_columns()
-		if distance.c_hash_association_method_discretize[config.distance]:
-			try: 
-				self._remove_low_entropy_features()
-			except:
-				pass
-		else:
-			try: 
-				self._remove_low_variant_features()
-			except:
-				pass
+		self._discretize()
+		self._remove_low_entropy_features()
 		if store.bypass_discretizing():
 			try:
 				self.orginal_dataset1= np.asarray(self.orginal_dataset1, dtype = float)
@@ -92,7 +84,7 @@ class Input:
 				sys.exit("--- Please check your data types and your similarity metric!")
 		else:
 		    print "Discretizing is started using: ", config.strDiscretizing, " style!"
-		    self._discretize()
+		    
 		
 		
 	def get(self):
@@ -243,7 +235,7 @@ class Input:
 			header1="\t".join(self.outHead1)
 			header2="\t".join(self.outHead2)
 			if not (header1.lower() == header2.lower()):
-				print("Warning: The samples are not in the same order " + 
+				print("WARNING: The samples are not in the same order " + 
 				    "in the two files. The program uses the common samples between the two data sets based on headers")#+
 				    #"." + " \n File1 header: " + header1 + "\n" +
 				    #" File2 header: " + header2)
@@ -298,10 +290,10 @@ class Input:
 		l1_after = len(df1.index)
 		l2_after = len(df2.index)
 		if l1_before > l1_after:
-			print "WARNING! %d features with variation equal or less than %d have been removed from the first dataset " % ((l1_before- l1_after), config.min_var)
+			print "WARNING! %d features with variation equal or less than %.3f have been removed from the first dataset " % (l1_before- l1_after, config.min_var)
 			
 		if l2_before > l2_after:
-			print "WARNING! %d features with variation equal or less than %d have been removed from the second dataset " % ((l2_before- l2_after), config.min_var)
+			print "WARNING! %d features with variation equal or less than %.3f have been removed from the second dataset " % (l2_before- l2_after, config.min_var)
 		# reorder df1 columns as the columns order of df2
 		#df1 = df1.loc[:, df2.columns]
 		
@@ -327,7 +319,7 @@ class Input:
 			df1 = pd.DataFrame(self.discretized_dataset1, index = self.outName1, columns = self.outHead1, dtype=float)
 			df1_org = pd.DataFrame(self.orginal_dataset1, index = self.outName1, columns = self.outHead1)
 		try:
-			df2 = pd.DataFrame(self.discretized_dataset2, index = self.outName2, columns = self.outHead2, dtype=float)
+			df2 = pd.DataFrame(self.discretized_dataset2, index = self.outName2, columns = self.outHead2)
 			df2_org = pd.DataFrame(self.orginal_dataset2, index = self.outName2, columns = self.outHead2)
 		except:
 			df2 = pd.DataFrame(self.discretized_dataset2, index = self.outName2, columns = self.outHead2, dtype=float)
@@ -337,8 +329,13 @@ class Input:
 		#print df1.var(), np.var(df2, axis=1)
 		l1_before =  len(df1.index)
 		l2_before =  len(df2.index)
-		df1 = df1[len(set(df1)) > 0]
-		df2 = df2[len(set(df2))> 0]
+		temp_df1 = df1 
+		df1 = df1[df1.apply(stats.get_enropy, 1) > config.entropy_threshold]
+		df1_org = df1_org[temp_df1.apply(stats.get_enropy, 1) > config.entropy_threshold]
+		
+		temp_df2 = df2 
+		df2 = df2[df2.apply(stats.get_enropy, 1) > config.entropy_threshold]
+		df2_org = df2_org[temp_df2.apply(stats.get_enropy, 1) > config.entropy_threshold]
 		
 		l1_after = len(df1.index)
 		l2_after = len(df2.index)
@@ -351,7 +348,8 @@ class Input:
 		#df1 = df1.loc[:, df2.columns]
 		
 		self.discretized_dataset1 = df1.values
-		self.discretized_dataset2 = df2.values 
+		self.orginal_dataset1 = df1_org.values
+		self.orginal_dataset2 = df2_org.values 
 		#print self.discretized_dataset1
 		self.outName1 = list(df1.index) 
 		self.outName2 = list(df2.index) 

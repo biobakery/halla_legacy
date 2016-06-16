@@ -263,6 +263,13 @@ def parse_arguments (args):
         default= 0,#random.randint(1,10000),
         help="a seed number to make the random permutation reproducible\n[default = 0,and -1 for random number]")
     argp.add_argument(
+        "-e", "--entropy",
+        metavar="<0.5>",
+        dest="dEntropy",
+        type=float,
+        default=0.5,
+        help="Minimum entropy threshold to filter features with low information\n[default = 0.5]")
+    argp.add_argument(
         "--missing-char", metavar="<None>",
         dest ="missing_char",
         default=None,
@@ -280,6 +287,7 @@ def set_parameters(args):
     config.decomposition = args.strDecomposition.lower()
     #config.fdr_function = args.strFDR
     config.q = args.dQ  
+    config.entropy_threshold = args.dEntropy
     #config.p_adjust_method = args.strAdjust
     #config.randomization_method = args.strRandomization  # method to generate error bars 
     config.strStep = "uniform"
