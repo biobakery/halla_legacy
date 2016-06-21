@@ -167,9 +167,6 @@ class Input:
 			#print imp 
  
 			for i, line in enumerate(pArray):
-				###########line = map( lambda x: ( x.strip() if bool(x.strip()) else None ), line )
-				#*****************************************************************************************************
-				# *   Modification by George Weingart  2014/03/20 # changed by Ali 2015/11/06                                                    *
 				# *   If the line is not full,  replace the Nones with nans                                           *
 				#***************************************************************************************************** 
 				if config.missing_method is  None and not distance.c_hash_association_method_discretize[config.distance]:
@@ -334,10 +331,10 @@ class Input:
 		l1_after = len(df1.index)
 		l2_after = len(df2.index)
 		if l1_before > l1_after:
-			print "WARNING! %d features with variation equal or less than %d have been removed from the first dataset " % ((l1_before- l1_after), config.min_var)
+			print "WARNING! %d features with entropy equal or less than %d have been removed from the first dataset " % ((l1_before- l1_after), config.entropy_threshold)
 			
 		if l2_before > l2_after:
-			print "WARNING! %d features with variation equal or less than %d have been removed from the second dataset " % ((l2_before- l2_after), config.min_var)
+			print "WARNING! %d features with entropy equal or less than %d have been removed from the second dataset " % ((l2_before- l2_after), config.entropy_threshold)
 		# reorder df1 columns as the columns order of df2
 		#df1 = df1.loc[:, df2.columns]
 		

@@ -36,9 +36,10 @@ except ImportError:
 # Internal dependencies
 def get_enropy(x):
 	#print x
-	d=x-1
+	d = x-1
+	d = [float(val) for val in d]
 	#print d
-	P=numpy.bincount(d)/float(len(d))
+	P = numpy.bincount(d)/float(len(d))
 	entropy_result = -sum([p * math.log(p, 2) for p in P])
 	#print entropy_result
 	return entropy_result 

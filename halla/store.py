@@ -843,6 +843,7 @@ def run():
     csvw.writerow(["Applied stop condition : ", config.apply_stop_condition]) 
     csvw.writerow(["Discretizing method : ", config.strDiscretizing])
     csvw.writerow(["Seed number: ", config.seed]) 
+    csvw.writerow(["Minimum enropy for filterng threshold : ", config.entropy_threshold])
     csvw.writerow([])
     #name_features()
     if not is_correct_submethods_combination():
