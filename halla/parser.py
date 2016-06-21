@@ -352,11 +352,15 @@ class Input:
 		#self.outHead2 = df2.columns 
 		#print self.outHead1
 		#print df2
-		if len(self.discretized_dataset1[0]) == 0:
+		try:
+			print "WARNING! %d features and %d samples are used from first dataset" % (l1_after, len(self.discretized_dataset1[0]))
+		except IndexError:
+			sys.exit("WARNING! No feature in the first dataset after filtering.")
+		try:
+			print "WARNING! %d features and %d samples are used from second dataset" % (l2_after, len(self.discretized_dataset2[0]))
+		except IndexError:
 			sys.exit("WARNING! No feature in the first dataset after filtering.")
 			
-		if len(self.discretized_dataset2[0]) == 0:
-			sys.exit("WARNING! No feature in the second dataset after filtering.")
 		assert(len(self.discretized_dataset1[0]) == len(self.discretized_dataset2[0]))	
 
 	
