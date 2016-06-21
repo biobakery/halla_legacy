@@ -2099,8 +2099,8 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 	N = len(null_samples)
 	
 	# Use the ECDF to approximate p-values if M > 10
-	if M > 10 or N < 100: #len(set(null_samples)) < 100:
-		return (M*1.0)/N
+	if M >= 10 or N < 250:
+		return float(M)/float(N)
 
 	# Estimate the generalized pareto distribtion from tail samples
 	if not config.use_one_null_dist or config.gp == None or regenrate_GPD_flag:
@@ -2111,7 +2111,7 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 			config.gp  = gp
 			config.Nexc = Nexc
 		except ArithmeticError, ValueError:
-			return (M*1.0)/N
+			return float(M)/float(N)
 	else:
 		(gp, Nexc) = (config.gp, config.Nexc)
 	# GPD estimate of the actual p-value
@@ -2125,16 +2125,16 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 		print "This could happen when you have features with low variation or zero variation!"
 		#sample_increments = 50
 		if regenrate_GPD_flag:
-			return (M*1.0)/N
+			return float(M)/float(N)
 		# Double the number of null samples for statistic if the intintazted number of samples wasn't enough.
 		config.nullsamples = list(set([null_fun(X, Y) for val in range(0,len(config.nullsamples))] + config.nullsamples))
 		try:
 			return estimate_pvalue(x, config.nullsamples, X=X, Y=Y, regenrate_GPD_flag = True)
 		except ArithmeticError, ValueError:
-			return (M*1.0)/N
+			return float(M)/float(N)
 	else:	
 		#print "final pvalue", (Nexc*1.0 / N) * sf_result
-		return (Nexc*1.0 / N) * sf_result
+		return (float(Nexc) / float(N)) * sf_result
 
 def prob_pvalue_lt(alpha, nexc, ntotal):
 	"""

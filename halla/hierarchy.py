@@ -1327,17 +1327,17 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
         #temp_sub_silhouette_coefficient_to_check = sub_silhouette_coefficient_to_check[:]
         temp_sub_silhouette_coefficient_to_add = [value for value in temp_sub_silhouette_coefficient_to_add if value != 1.0]
             
-        if len(sub_clusters_to_add) ==0:
-            sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
+        #if len(sub_clusters_to_add) ==0:
+        #    sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
             
-        elif len(temp_sub_silhouette_coefficient_to_add) == 0 or sub_silhouette_coefficient[min_silhouette_node_index] >= np.max(temp_sub_silhouette_coefficient_to_add) :
+        if len(temp_sub_silhouette_coefficient_to_add) == 0 or sub_silhouette_coefficient[min_silhouette_node_index] >= np.max(temp_sub_silhouette_coefficient_to_add) :
             sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
         else:
             #print temp_sub_silhouette_coefficient_to_add
             #print np.max(temp_sub_silhouette_coefficient_to_add)
             #print "first cut", [min_silhouette_node.pre_order(lambda x: x.id)]
             #print "befor", [a.pre_order(lambda x: x.id) for a in sub_clusters ]
-            sub_clusters.remove(min_silhouette_node)
+            del sub_clusters[min_silhouette_node_index]#min_silhouette_node)
             #print "after", [a.pre_order(lambda x: x.id) for a in sub_clusters ]
             del sub_silhouette_coefficient[min_silhouette_node_index]
             #sub_silhouette_coefficient=[sub_silhouette_coefficient != "nan"]
