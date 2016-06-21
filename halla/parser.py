@@ -72,6 +72,7 @@ class Input:
 		self._load()
 		self._parse()
 		self._filter_to_common_columns()
+		print "Discretizing is started using: ", config.strDiscretizing, " style!"
 		self._discretize()
 		self._remove_low_entropy_features()
 		if store.bypass_discretizing():
@@ -82,8 +83,9 @@ class Input:
 				self.discretized_dataset2 = self.orginal_dataset2
 			except:
 				sys.exit("--- Please check your data types and your similarity metric!")
-		else:
-		    print "Discretizing is started using: ", config.strDiscretizing, " style!"
+		#else:
+		#	self.discretized_dataset1 = np.asarray(self.discretized_dataset1)
+		#	self.discretized_dataset2 = np.asarray(self.discretized_dataset2)
 		    
 		
 		
@@ -340,6 +342,8 @@ class Input:
 		
 		self.discretized_dataset1 = df1.values
 		self.orginal_dataset1 = df1_org.values
+		
+		self.discretized_dataset2 = df2.values
 		self.orginal_dataset2 = df2_org.values 
 		#print self.discretized_dataset1
 		self.outName1 = list(df1.index) 
