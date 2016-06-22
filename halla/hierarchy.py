@@ -543,13 +543,13 @@ def hclust(dataset, labels):
     elif config.Distance[1] is None:
         config.Distance[1] = copy.deepcopy(squareform(D))
     #print D.shape,  D
-    if config.hallagram:
+    if config.diagnostics_plot:
         global fig_num
         print "--- plotting heatmap for Dataset", str(fig_num)," ... "
         Z = plot.heatmap(Data = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.distance)+"_" + str(fig_num), method =linkage_method)
         fig_num += 1
     else:
-        Z = linkage(D, metric=pDistance, method= linkage_method)
+        Z = linkage(D, method= linkage_method)
     import scipy.cluster.hierarchy as sch
     #print  squareform(sch.cophenet(Z))
     #print sch.dendrogram(Z, orientation='right')['leaves']
