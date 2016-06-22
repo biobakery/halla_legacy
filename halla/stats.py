@@ -10,7 +10,7 @@ from itertools import compress
 from itertools import product
 import itertools
 import math
-from numpy import array , std
+from numpy import array , std, log2
 import numpy 
 from numpy.random import shuffle, binomial, normal, multinomial 
 import scipy
@@ -40,9 +40,9 @@ def get_enropy(x):
 	d = [float(val) for val in d]
 	#print d
 	P = numpy.bincount(d)/float(len(d))
-	entropy_result = -sum([p * math.log(p, 2) for p in P])
-	#print entropy_result
-	return entropy_result 
+	observed_entropy = -sum([p * numpy.log2(p) for p in P])
+	max_entropy =numpy.log2(len(P))
+	return observed_entropy/max_entropy 
 def pvalues2qvalues ( pvalues, adjusted=False ):
     n = len( pvalues )
     # after sorting, index[i] is the original index of the ith-ranked value
