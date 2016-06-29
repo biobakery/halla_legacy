@@ -106,16 +106,21 @@ def name_features():
     config.aFeatureNames1 = [str(i) for i in range(len(config.original_dataset[0])) ]
     #if not config.aFeatureNames2:
     config.aFeatureNames2 = [str(i) for i in range(len(config.original_dataset[1])) ]
+def set_parsed_data():
+    if bypass_discretizing():
+        config.parsed_dataset = config.original_dataset
+    else:
+        config.parsed_dataset = config.discretized_dataset
 
 def _hclust():
     # print config.discretized_dataset
-    config.meta_data_tree = [] 
-    tree1, config.Features_order[0] = hierarchy.hclust(config.discretized_dataset[0], labels=config.aFeatureNames1)
+    config.meta_data_tree = []
+    tree1, config.Features_order[0] = hierarchy.hclust(config.parsed_dataset[0], labels=config.aFeatureNames1,  dataset_number = 0)
     config.meta_data_tree.append(tree1)
     #print config.Features_order[0]
-    tree2, config.Features_order[1]= hierarchy.hclust(config.discretized_dataset[1] , labels=config.aFeatureNames2)
+    tree2, config.Features_order[1]= hierarchy.hclust(config.parsed_dataset[1] , labels=config.aFeatureNames2, dataset_number = 1)
     config.meta_data_tree.append(tree2)
-    # config.meta_data_tree = config.m( config.discretized_dataset, lambda x: hclust(x , bTree=True) )
+    # config.meta_data_tree = config.m( config.parsed_dataset, lambda x: hclust(x , bTree=True) )
     #print config.meta_data_tree
     return config.meta_data_tree 
 
@@ -123,7 +128,7 @@ def _couple():
     config.meta_hypothesis_tree = None        
     config.meta_hypothesis_tree = hierarchy.couple_tree(apClusterNode0=[config.meta_data_tree[0]],
             apClusterNode1=[config.meta_data_tree[1]],
-            dataset1=config.discretized_dataset[0], dataset2=config.discretized_dataset[1])[0]
+            dataset1=config.parsed_dataset[0], dataset2=config.parsed_dataset[1])[0]
     
     # # remember, `couple_tree` returns object wrapped in list 
     #return config.meta_hypothesis_tree 
@@ -180,7 +185,7 @@ def _summary_statistics(strMethod=None):
     def __set_outcome(Z_final):
         #all_associations = 0.0
         #intersection_1_2_count = 0.0
-        config.outcome = np.zeros((len(config.discretized_dataset[0]),len(config.discretized_dataset[1])))
+        config.outcome = np.zeros((len(config.parsed_dataset[0]),len(config.parsed_dataset[1])))
         
         for aLine in Z_final:
             if config.verbose == 'INFO':
@@ -196,7 +201,7 @@ def _summary_statistics(strMethod=None):
                 config.outcome[i][j] = 1.0
         #print "FDR= ", intersection_1_2_count/all_associations 
     def __set_pvalues(Z_all):
-        config.pvalues = np.zeros((len(config.discretized_dataset[0]),len(config.discretized_dataset[1])))
+        config.pvalues = np.zeros((len(config.parsed_dataset[0]),len(config.parsed_dataset[1])))
         
         for aLine in Z_all:
             if config.verbose == 'INFO':
@@ -322,8 +327,10 @@ def _report():
                         "Cluster Similarity Score", "Explained Variance by the first representative of the cluster", \
                         "p-value", "q-value", "Similarity score between Clusters"])
 
-        sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
-        sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
+        #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
+        #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (x.pvalue, x.qvalue, - math.fabs(x.similarity_score)))
+
         for association in sorted_associations:
             number_of_association += 1
             iX, iY = association.get_data()
@@ -358,8 +365,10 @@ def _report():
         csvw.writerow([])
         performance_file.close()
         
-    sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
-    sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
+    #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
+    #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
+    sorted_associations = sorted(config.meta_alla[0], key=lambda x: (x.pvalue, x.qvalue, - math.fabs(x.similarity_score)))
+
     if config.descending == "AllA":
         config.Features_order[0]  = [i for i in range(len(config.original_dataset[0]))]   
         config.Features_order[1] = [i for i in range(len(config.original_dataset[1]))]         
@@ -376,7 +385,7 @@ def _report():
             associated_feature_Y_indecies += iY
             print "--- plotting associations ",association_number," ..."
             cluster1 = [config.original_dataset[0][i] for i in iX]
-            discretized_cluster1 = [config.discretized_dataset[0][i] for i in iX]
+            discretized_cluster1 = [config.parsed_dataset[0][i] for i in iX]
             X_labels = np.array([config.aFeatureNames1[i] for i in iX])
             association_dir = config.output_dir + "/association_"+ str(association_number) + '/'
             filename = association_dir +"original_data" + '/'
@@ -409,7 +418,7 @@ def _report():
                 pass
             
             cluster2 = [config.original_dataset[1][i] for i in iY]
-            discretized_cluster2 = [config.discretized_dataset[1][i] for i in iY]
+            discretized_cluster2 = [config.parsed_dataset[1][i] for i in iY]
             Y_labels = np.array([config.aFeatureNames2[i] for i in iY])
             
             try:
@@ -519,8 +528,8 @@ def _report():
             Ys = list(set(associated_feature_Y_indecies))
             Y_labels = np.array([config.aFeatureNames2[i] for i in Ys])
             if len(Xs) > 1 and len(Ys) > 1: 
-                cluster1 = [config.discretized_dataset[0][i] for i in Xs]    
-                cluster2 = [config.discretized_dataset[1][i] for i in Ys]
+                cluster1 = [config.parsed_dataset[0][i] for i in Xs]    
+                cluster2 = [config.parsed_dataset[1][i] for i in Ys]
                 df1 = np.array(cluster1, dtype=float)
                 df2 = np.array(cluster2, dtype=float)
                 p = np.zeros(shape=(len(Xs), len(Ys)))
@@ -549,9 +558,11 @@ def _report():
         similarity_score = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))  
         for i in range(len(config.Features_order[0])):
             for j in range(len(config.Features_order[1])):
-                similarity_score[i][j] = distance.c_hash_metric[config.distance](config.discretized_dataset[0][config.Features_order[0][i]], config.discretized_dataset[1][config.Features_order[1][j]])
-        sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
-        sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
+                similarity_score[i][j] = distance.c_hash_metric[config.distance](config.parsed_dataset[0][config.Features_order[0][i]], config.parsed_dataset[1][config.Features_order[1][j]])
+        #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
+        #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (x.pvalue, x.qvalue, - math.fabs(x.similarity_score)))
+
         '''for association in sorted_associations:
             iX, iY = association.get_data()
             for i, j in itertools.product(iX, iY):
@@ -614,9 +625,9 @@ def _report():
         similarity_score = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))  
         for i in range(len(config.Features_order[0])):
             for j in range(len(config.Features_order[1])):
-                similarity_score[i][j] = distance.c_hash_metric[config.distance](config.discretized_dataset[0][config.Features_order[0][i]], config.discretized_dataset[1][config.Features_order[1][j]])
-        sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
-        sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
+                similarity_score[i][j] = distance.c_hash_metric[config.distance](config.parsed_dataset[0][config.Features_order[0][i]], config.parsed_dataset[1][config.Features_order[1][j]])
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (x.pvalue, x.qvalue, - math.fabs(x.similarity_score)))
+        #sorted_associations = sorted(sorted_associations, key=lambda x: ( x.s)
         for association in sorted_associations:
             iX, iY = association.get_data()
             for i, j in itertools.product(iX, iY):
@@ -714,8 +725,8 @@ def _report():
             Y_indecies = len(config.aFeatureNames2)
             Y_labels = np.array([config.aFeatureNames2[i] for i in range(Y_indecies)])
             if len(X_labels) > 1 and len(Y_labels) > 1: 
-                df1 = np.array(config.discretized_dataset[0], dtype=float)
-                df2 = np.array(config.discretized_dataset[1], dtype=float)
+                df1 = np.array(config.parsed_dataset[0], dtype=float)
+                df2 = np.array(config.parsed_dataset[1], dtype=float)
                 drows1 = np.zeros(shape=(X_indecies, X_indecies))
                 drows2 = np.zeros(shape=(Y_indecies, Y_indecies))
                 if config.Distance[0] ==None:
@@ -755,8 +766,8 @@ def _report():
     _report_compared_clusters()
     _write_hallagram_info()
     if config.hallagram:
-        if config.distance=="NMI":
-            sim_color = ' --similarity=NMI --cmap=Oranges'
+        if config.distance=="nmi":
+            sim_color = ' --similarity="Pairwise similarity" --cmap=Reds'
         else:
             sim_color =''
         #_heatmap_associations()
@@ -828,7 +839,8 @@ def run():
         except EnvironmentError:
             sys.exit("CRITICAL ERROR: Unable to create output directory.")
 
-    '''    
+    '''  
+    set_parsed_data()  
     try:    
         performance_file  = open(str(config.output_dir)+'/performance.txt', 'a')
     except IOError:
@@ -850,10 +862,10 @@ def run():
         sys.exit("Please ckeck the combination of your options!!!!")
     execution_time = time.time()
     
-    #plot.heatmap2(dataset1=config.discretized_dataset[0], dataset2=config.discretized_dataset[1], xlabels =config.aFeatureNames1, ylabels = config.aFeatureNames2, filename = str(config.output_dir)+'/heatmap2_all' )
+    #plot.heatmap2(dataset1=config.parsed_dataset[0], dataset2=config.parsed_dataset[1], xlabels =config.aFeatureNames1, ylabels = config.aFeatureNames2, filename = str(config.output_dir)+'/heatmap2_all' )
     if config.log_input:
-        logger.write_table(data=config.discretized_dataset[0], name=config.output_dir+"/X_dataset.txt", rowheader=config.aFeatureNames1 , colheader=config.aSampleNames1, prefix = "label",  corner = '#', delimiter= '\t')
-        logger.write_table(data=config.discretized_dataset[1], name=config.output_dir+"/Y_dataset.txt", rowheader=config.aFeatureNames2 , colheader=config.aSampleNames2, prefix = "label",  corner = '#', delimiter= '\t')
+        logger.write_table(data=config.parsed_dataset[0], name=config.output_dir+"/X_dataset.txt", rowheader=config.aFeatureNames1 , colheader=config.aSampleNames1, prefix = "label",  corner = '#', delimiter= '\t')
+        logger.write_table(data=config.parsed_dataset[1], name=config.output_dir+"/Y_dataset.txt", rowheader=config.aFeatureNames2 , colheader=config.aSampleNames2, prefix = "label",  corner = '#', delimiter= '\t')
     if config.descending == "AllA":
         print("--- association hypotheses testing is started, this task may take longer ...")
         start_time = time.time()

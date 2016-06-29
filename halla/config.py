@@ -59,6 +59,7 @@ entropy_threshold = .5
 #==================================================================#
 original_dataset = array([None, None])
 discretized_dataset = array([None, None])
+parsed_dataset = array([None, None])
 meta_threshold = None 
 Features_order = array([None, None])
 #X_features_cluster_order  = []

@@ -79,10 +79,11 @@ class Input:
 			try:
 				self.orginal_dataset1= np.asarray(self.orginal_dataset1, dtype = float)
 				self.orginal_dataset2= np.asarray(self.orginal_dataset2, dtype = float)
-				self.discretized_dataset1 = self.orginal_dataset1
-				self.discretized_dataset2 = self.orginal_dataset2
+				#self.discretized_dataset1 = self.orginal_dataset1
+				#self.discretized_dataset2 = self.orginal_dataset2
 			except:
 				sys.exit("--- Please check your data types and your similarity metric!")
+			
 		#else:
 		#	self.discretized_dataset1 = np.asarray(self.discretized_dataset1)
 		#	self.discretized_dataset2 = np.asarray(self.discretized_dataset2)
@@ -90,6 +91,7 @@ class Input:
 		
 		
 	def get(self):
+		
 		return [(self.discretized_dataset1, self.orginal_dataset1, self.outName1, self.outType1, self.outHead1), 
 			(self.discretized_dataset2, self.orginal_dataset2, self.outName2, self.outType2, self.outHead2)] 
 		

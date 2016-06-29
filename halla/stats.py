@@ -41,7 +41,7 @@ def get_enropy(x):
 	#print d
 	P = numpy.bincount(d)/float(len(d))
 	observed_entropy = -sum([p * numpy.log2(p) for p in P])
-	max_entropy =numpy.log2(len(P))
+	max_entropy = numpy.log2(len(P))
 	return observed_entropy/max_entropy 
 def pvalues2qvalues ( pvalues, adjusted=False ):
     n = len( pvalues )

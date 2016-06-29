@@ -39,7 +39,6 @@ except ImportError:
 # Test if matplotlib is installed
 try:
     import matplotlib
-    matplotlib.use('Agg')
     import matplotlib.pyplot as plt
 except ImportError:
     sys.exit("Please install matplotlib")
@@ -54,7 +53,7 @@ except ImportError:
 from . import parser
 from . import hierarchy
 from . import config
-
+matplotlib.use('Agg')
 def get_halla_base_directory():
     """ 
     Return the location of the halla base directory

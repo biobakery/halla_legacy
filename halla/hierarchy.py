@@ -510,7 +510,7 @@ def is_tree(pObj):
         return False 
 
 
-def hclust(dataset, labels):
+def hclust(dataset, labels, dataset_number):
     bTree=True
     """
     Notes 
@@ -538,15 +538,14 @@ def hclust(dataset, labels):
     D = pdist(dataset, metric=distance.pDistance) 
     #D = squareform(D)
     #print D
-    if config.Distance[0] is None:
-        config.Distance[0] =  copy.deepcopy(squareform(D))
-    elif config.Distance[1] is None:
-        config.Distance[1] = copy.deepcopy(squareform(D))
+    
+    config.Distance[dataset_number] =  copy.deepcopy(squareform(D))
+    
     #print D.shape,  D
     if config.diagnostics_plot:
         global fig_num
         print "--- plotting heatmap for Dataset", str(fig_num)," ... "
-        Z = plot.heatmap(Data = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.distance)+"_" + str(fig_num), method =linkage_method)
+        Z = plot.heatmap(Data = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.distance)+"_" + str(fig_num), method =linkage_method, dataset_number= None)
         fig_num += 1
     else:
         Z = linkage(D, method= linkage_method)
@@ -1485,8 +1484,6 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
     
     global max_dist_cluster2 
     max_dist_cluster2 = max (node.dist for node in apClusterNode1)
-   
-    aOut = []
 
     # Create the root of the coupling tree
     for a, b in itertools.product(apClusterNode0, apClusterNode1):
@@ -1496,9 +1493,8 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
         except:
             data1 = reduce_tree(a)
             data2 = reduce_tree(b)
-    pStump = Hypothesis_Node([data1, data2])
-    pStump.set_level_number(0)
-    aOut.append(pStump)
+    Hypothesis_Tree_Root = Hypothesis_Node([data1, data2])
+    Hypothesis_Tree_Root.set_level_number(0)
     # Get the first level homogeneous clusters
     apChildren0 = get_homogenous_clusters_silhouette_log (apClusterNode0[0], dataset_number = 0)
     #cutree_to_get_below_threshold_number_of_features(apClusterNode0[0])
@@ -1522,7 +1518,7 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
         tempTree.set_level_number(1)
         childList.append(tempTree)
         L.append((tempTree, (a, b)))
-    pStump.add_children(childList)
+    Hypothesis_Tree_Root.add_children(childList)
     #print "child list:", childList
     next_L = []
     level_number = 2
@@ -1590,7 +1586,7 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
                 #print "******************len: ",len(L)
     #print "Coupled Hypothesis_Node", reduce_tree_by_la
     #print "Number of levels after coupling", level_number-1
-    return aOut
+    return [Hypothesis_Tree_Root]
 pHashMethods = {"permutation" : stats.permutation_test,
                         "permutation_test_by_medoid": stats.permutation_test_by_medoid,
                         
@@ -1996,7 +1992,7 @@ def hypotheses_testing():
         print "--- number of passed tests without FDR controlling:", number_passed_tests        
         return aFinal, aOut
     
-    def _level_testing():
+    def _level_by_level_testing():
         apChildren = [pTree]
         level = 1
         number_performed_tests = 0 
@@ -2160,8 +2156,8 @@ def hypotheses_testing():
         print "--- number of passed tests after FDR controlling:", len(aFinal)#number_passed_tests                                  
         return aFinal, aOut
 
-    fdr_function = {"default": _level_testing,
-                            "level":_level_testing,
+    fdr_function = {"default": _level_by_level_testing,
+                            "level":_level_by_level_testing,
                             "simple":_simple_hypothesis_testing}
     #======================================#
     # Execute 

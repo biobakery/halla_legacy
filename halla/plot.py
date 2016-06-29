@@ -281,7 +281,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     fig.savefig(filename + '.pdf')
     pylab.close()
         
-def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.distance, method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True):
+def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.distance, method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True, dataset_number = None):
     import scipy
     import pylab
     # import dot_parser
@@ -354,8 +354,11 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
         myColor = pylab.cm.YlGnBu   
     else:
         myColor = pylab.cm.RdBu_r
-        
-    im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=myColor)#YlGnBu
+    
+    if dataset_number !=None:
+        im = axmatrix.matshow(config.discretized_dataset[dataset_number], aspect='auto', origin='lower', cmap=myColor)
+    else:
+        im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=myColor)#YlGnBu
     if colLable:
         if len(ylabels) == len(idx2):
             label2 = [ylabels[i] for i in idx2]
