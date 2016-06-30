@@ -161,7 +161,7 @@ def parse_arguments (args):
         metavar="<0.2>",
         dest="dQ",
         type=float,
-        default=0.2,
+        default=0.1,
         help="q-value for overall significance tests (cut-off for false discovery rate)\n[default = 0.1]")
     '''
     argp.add_argument(
@@ -190,7 +190,7 @@ def parse_arguments (args):
         "-i","--iterations", metavar="<1000>",
         dest="iIter",
         type=int,
-        default=500,
+        default=1000,
         help="iterations for nonparametric significance testing (permutation test)\n[default = 1000]")
 
     argp.add_argument(

@@ -385,8 +385,13 @@ def _report():
             associated_feature_Y_indecies += iY
             print "--- plotting associations ",association_number," ..."
             cluster1 = [config.original_dataset[0][i] for i in iX]
-            discretized_cluster1 = [config.parsed_dataset[0][i] for i in iX]
+            discretized_cluster1 = [config.discretized_dataset[0][i] for i in iX]
             X_labels = np.array([config.aFeatureNames1[i] for i in iX])
+            
+            cluster2 = [config.original_dataset[1][i] for i in iY]
+            discretized_cluster2 = [config.discretized_dataset[1][i] for i in iY]
+            Y_labels = np.array([config.aFeatureNames2[i] for i in iY])
+            
             association_dir = config.output_dir + "/association_"+ str(association_number) + '/'
             filename = association_dir +"original_data" + '/'
             discretized_filename = association_dir+"discretized_data" + '/'
@@ -405,7 +410,8 @@ def _report():
             try:
                 os.mkdir(association_dir)
                 os.mkdir(dir)
-                os.mkdir(discretized_dir)
+                if not bypass_discretizing():
+                    os.mkdir(discretized_dir)
             except EnvironmentError:
                 sys.exit("Unable to create directory: "+dir)
             plt.figure()  
@@ -416,10 +422,6 @@ def _report():
                     ax1 = plot.scatter_matrix(df1, filename = filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
             except:
                 pass
-            
-            cluster2 = [config.original_dataset[1][i] for i in iY]
-            discretized_cluster2 = [config.parsed_dataset[1][i] for i in iY]
-            Y_labels = np.array([config.aFeatureNames2[i] for i in iY])
             
             try:
                 if len(discretized_cluster2) < 40:
@@ -451,7 +453,7 @@ def _report():
             #concatenated_df = pd.concat([df1, df2],axis=1)
             #axes = plot.scatter_matrix(concatenated_df, filename =filename + 'Concatenated_' + str(association_number) + '_scatter_matrix.pdf')
             # heatmap cluster in an association
-            x_label_order = []
+            '''x_label_order = []
             if len(discretized_cluster1) >= len(discretized_cluster2):
                 #print len(discretized_cluster1), ">=", len(discretized_cluster2)
                 #print "Before1: ",len(x_label_order)     
@@ -468,6 +470,7 @@ def _report():
                 #print "after2", x_label_order 
                 #print "After2: ",len(x_label_order)
                 plot.heatmap(np.array(discretized_cluster1), xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap' )
+            '''
             x_label_order = []
             #plot.heatmap2(dataset1=discretized_cluster1, dataset2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'AllA_association_' + str(association_number) + '_heatmap' )
             #Heatmap on continue datasets
@@ -491,8 +494,8 @@ def _report():
                 plot.scatter_plot(d_x_d_rep, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number))
                 
             
-                d_x_d_rep = stats.discretize(decomposition_method(discretized_df1))
-                d_y_d_rep = stats.discretize(decomposition_method(discretized_df2))
+                #d_x_d_rep = decomposition_method(discretized_df1)
+                #d_y_d_rep = decomposition_method(discretized_df2)
                 #else:
                 #    d_x_d_rep = association.get_left_rep()#stats.discretize(decomposition_method(discretized_df1))
                 #    d_y_d_rep = association.get_right_rep()#stats.discretize(decomposition_method(discretized_df2))
