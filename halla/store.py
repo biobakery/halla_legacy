@@ -172,8 +172,8 @@ def _summary_statistics(strMethod=None):
     
     Z = config.meta_alla 
     _final, _all = map(array, Z)  # # Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree
-    Z_final = array([[_final[i].get_data(), _final[i].get_pvalue(), _final[i].get_qvalue()] for i in range(len(_final))])
-    Z_all = array([[_all[i].get_data(), _all[i].get_pvalue(), _all[i].get_qvalue()] for i in range(len(_all))])    
+    Z_final = array([[_final[i].get_data(), _final[i].pvalue, _final[i].qvalue] for i in range(len(_final))])
+    Z_all = array([[_all[i].get_data(), _all[i].pvalue, _all[i].qvalue] for i in range(len(_all))])    
         
     # ## Sort the final Z to make sure p-value consolidation happens correctly 
     Z_final_dummy = [-1.0 * (len(line[0][0]) + len(line[0][1])) for line in Z_final]
@@ -323,8 +323,8 @@ def _report():
         bcsvw = csv.writer(output_file_associations, csv.excel_tab, delimiter='\t')
         #bcsvw.writerow(["Method: " + config.decomposition +"-"+ config.distance , "q value: " + str(config.q), "metric " + config.distance])
         bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", \
-                        "Explained Variance by the first representative of the cluster", "Clusters Second Dataset", \
-                        "Cluster Similarity Score", "Explained Variance by the first representative of the cluster", \
+                        "Clusters Second Dataset", \
+                        "Cluster Similarity Score", \
                         "p-value", "q-value", "Similarity score between Clusters"])
 
         #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
@@ -339,21 +339,21 @@ def _report():
             associated_feature_X_indecies += iX
             global associated_feature_Y_indecies
             associated_feature_Y_indecies += iY
-            fP = association.get_pvalue()
-            fP_adjust = association.get_qvalue()
+            fP = association.pvalue
+            fP_adjust = association.qvalue
             clusterX_similarity = 1.0 - association.get_left_distance()
-            clusterX_first_rep = association.get_left_first_rep_variance()
+            #clusterX_first_rep = association.get_left_first_rep_variance()
             clusterY_similarity = 1.0 - association.get_right_distance()
-            clusterY_first_rep = association.get_right_first_rep_variance()
+            #clusterY_first_rep = association.get_right_first_rep_variance()
             association_similarity = association.get_similarity_score()
             
             aLineOut = [number_of_association,
                                  str(';'.join(config.aFeatureNames1[i] for i in iX)),
                                  clusterX_similarity,
-                                 clusterX_first_rep,
+                                 #clusterX_first_rep,
                                  str(';'.join(config.aFeatureNames2[i] for i in iY)),
                                  clusterY_similarity,
-                                 clusterY_first_rep,
+                                 #clusterY_first_rep,
                                  fP,
                                  fP_adjust,
                                  association_similarity]
@@ -485,22 +485,22 @@ def _report():
             
             discretized_df1 = np.array(discretized_cluster1, dtype=float)
             discretized_df2 = np.array(discretized_cluster2, dtype=float)
-           
-            d_x_d_rep = association.get_left_rep()#stats.discretize(decomposition_method(discretized_df1))
-            d_y_d_rep = association.get_right_rep()#stats.discretize(decomposition_method(discretized_df2))
-            plot.scatter_plot(association.get_left_rep(),association.get_right_rep(), filename = discretized_filename + '/association_' + str(association_number))
+            if not bypass_discretizing():
+                d_x_d_rep = stats.discretize(decomposition_method(discretized_df1))
+                d_y_d_rep = stats.discretize(decomposition_method(discretized_df2))
+                plot.scatter_plot(d_x_d_rep, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number))
+                
             
-            if bypass_discretizing():
-                d_x_d_rep = stats.discretize(association.get_left_rep())#stats.discretize(decomposition_method(discretized_df1))
-                d_y_d_rep = stats.discretize(association.get_right_rep())#stats.discretize(decomposition_method(discretized_df2))
-            else:
-                d_x_d_rep = association.get_left_rep()#stats.discretize(decomposition_method(discretized_df1))
-                d_y_d_rep = association.get_right_rep()#stats.discretize(decomposition_method(discretized_df2))
-            d_x_d_rep, d_y_d_rep = zip(*sorted(zip(d_x_d_rep, d_y_d_rep)))
-            plot.confusion_matrix(d_x_d_rep, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
-            #plot.confusion_matrix(x_d_pc1, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix_pc_orginal_data.pdf' )
-            plot.heatmap(array([d_x_d_rep]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Rep1_' + str(association_number) + '_heatmap', sortCol = False)
-            plot.heatmap(array([d_y_d_rep]), xlabels_order= x_label_order,  xlabels =X_labels, filename =discretized_filename + 'Rep2_' + str(association_number) + '_heatmap', sortCol = False)
+                d_x_d_rep = stats.discretize(decomposition_method(discretized_df1))
+                d_y_d_rep = stats.discretize(decomposition_method(discretized_df2))
+                #else:
+                #    d_x_d_rep = association.get_left_rep()#stats.discretize(decomposition_method(discretized_df1))
+                #    d_y_d_rep = association.get_right_rep()#stats.discretize(decomposition_method(discretized_df2))
+                d_x_d_rep, d_y_d_rep = zip(*sorted(zip(d_x_d_rep, d_y_d_rep)))
+                plot.confusion_matrix(d_x_d_rep, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
+                #plot.confusion_matrix(x_d_pc1, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix_pc_orginal_data.pdf' )
+                plot.heatmap(array([d_x_d_rep]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Rep1_' + str(association_number) + '_heatmap', sortCol = False)
+                plot.heatmap(array([d_y_d_rep]), xlabels_order= x_label_order,  xlabels =X_labels, filename =discretized_filename + 'Rep2_' + str(association_number) + '_heatmap', sortCol = False)
             plt.close("all")
             
     def _report_compared_clusters():

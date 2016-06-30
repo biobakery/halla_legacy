@@ -74,17 +74,17 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, datase
         for id, dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep in results_by_id:
             result[id]=dP
             current_level_tests[id].set_similarity_score(similarity)
-            current_level_tests[id].set_left_first_rep_variance(left_first_rep_variance)
-            current_level_tests[id].set_right_first_rep_variance(right_first_rep_variance)
-            current_level_tests[id].set_right_loading(right_loading)
-            current_level_tests[id].set_left_loading(left_loading)
-            current_level_tests[id].set_left_rep(left_rep)
-            current_level_tests[id].set_right_rep(right_rep)
+            #current_level_tests[id].set_left_first_rep_variance(left_first_rep_variance)
+            #current_level_tests[id].set_right_first_rep_variance(right_first_rep_variance)
+            #current_level_tests[id].set_right_loading(right_loading)
+            #current_level_tests[id].set_left_loading(left_loading)
+            #current_level_tests[id].set_left_rep(left_rep)
+            #current_level_tests[id].set_right_rep(right_rep)
     else:
         result=[]
         for i in xrange(len(current_level_tests)):
             if current_level_tests[i].get_significance_status() != None:
-                result.append(current_level_tests[i].get_pvalue())
+                result.append(current_level_tests[i].pvalue)
             else: 
                 result.append(_actor(current_level_tests[i]))
 
@@ -102,13 +102,15 @@ global fig_num
 fig_num = 1
 
 # class ClusterNode #scipy.cluster.hierarchy.ClusterNode
-class Hypothesis_Node():
+class Hypothesis_Node(object):
     ''' 
     A hierarchically nested structure containing nodes as
     a basic core unit    
 
     A general object, tree need not be 2-tree 
     '''    
+    __slots__ = ['m_pData', 'm_arrayChildren', 'left_distance', 'right_distance',
+                 'pvalue', 'qvalue', 'similarity_score','level_number' , 'significance', 'rank' ]
     def __init__(self, data=None, left_distance=None, right_distance=None, similarity=None):
         self.m_pData = data 
         self.m_arrayChildren = []
@@ -117,21 +119,21 @@ class Hypothesis_Node():
         self.pvalue = None
         self.qvalue = None
         self.similarity_score = None
-        self.left_first_rep_variance = None
-        self.right_first_rep_variance = None
-        self.already_tested = False
-        self.already_passed = False
+        #self.left_first_rep_variance = None
+        #self.right_first_rep_variance = None
+        #self.already_tested = False
+        #self.already_passed = False
         self.level_number = 1
         self.significance =  None
         self.rank = None
-        self.left_loading= None
-        self.right_loading = None
-        self.right_rep = None
-        self.left_rep = None
-     
+        #self.left_loading= None
+        #self.right_loading = None
+        #self.right_rep = None
+        #self.left_rep = None
+    ''' 
     def set_right_loading(self, right_loading):
          self.right_loading = right_loading
-
+    '''
     def pop(self):
         # pop one of the children, else return none, since this amounts to killing the singleton 
         if self.m_arrayChildren:
@@ -195,7 +197,7 @@ class Hypothesis_Node():
     def set_similarity_score(self, similarity_score=None):
         self.similarity_score = similarity_score
         
-    def set_left_first_rep_variance(self, pc):
+    '''def set_left_first_rep_variance(self, pc):
         self.left_first_rep_variance = pc
     
     def set_right_first_rep_variance(self, pc):
@@ -212,14 +214,14 @@ class Hypothesis_Node():
      
     def set_right_loading(self, right_loading):
          self.right_loading = right_loading
-    
-    def get_left_loading(self):
-        return self.left_loading 
+    '''
+    #def get_left_loading(self):
+    #    return self.left_loading 
      
-    def get_right_loading(self):
-        return self.right_loading 
+    #def get_right_loading(self):
+    #    return self.right_loading 
     
-    def set_pvalue(self, pvalue):
+    '''def set_pvalue(self, pvalue):
         self.pvalue = pvalue
     
     def get_pvalue(self):
@@ -230,7 +232,7 @@ class Hypothesis_Node():
     
     def get_qvalue(self):
         return self.qvalue
-    
+   
     def set_left_rep(self, left_rep):
         self.left_rep = left_rep
     
@@ -242,7 +244,7 @@ class Hypothesis_Node():
     
     def get_right_rep(self):
         return self.right_rep
-    
+    '''
     def is_representative(self, pvalue_threshold, decomp):
         return True
         number_left_features = len(self.get_data()[0])
@@ -381,7 +383,7 @@ class Hypothesis_Node():
 
     def report(self):
         print "\n--- hypothesis test based on permutation test"        
-        print "---- pvalue                        :", self.get_pvalue()
+        print "---- pvalue                        :", self.pvalue
         #if self.get_qvalue() <> 0.0:
         #    print "--- adjusted pvalue     :", self.get_qvalue()
         print "---- similarity_score score              :", self.get_similarity_score()
@@ -1624,12 +1626,12 @@ def _actor(pNode):
     Y = dataset2[aIndiciesMapped[1]]
     dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y)
     pNode.set_similarity_score(similarity)
-    pNode.set_left_first_rep_variance(left_first_rep_variance)
-    pNode.set_right_first_rep_variance(right_first_rep_variance)
-    pNode.set_left_loading(left_loading)
-    pNode.set_right_loading(right_loading)
-    pNode.set_left_rep(left_rep)
-    pNode.set_right_rep(right_rep)
+    #pNode.set_left_first_rep_variance(left_first_rep_variance)
+    #pNode.set_right_first_rep_variance(right_first_rep_variance)
+    #pNode.set_left_loading(left_loading)
+    #pNode.set_right_loading(right_loading)
+    #pNode.set_left_rep(left_rep)
+    #pNode.set_right_rep(right_rep)
     
         
     # aOut.append( [aIndicies, dP] ) #### dP needs to appended AFTER multiple hypothesis correction
@@ -1668,8 +1670,8 @@ def naive_all_against_all():
     #print aP_adjusted, pRank
     q_values = stats.pvalues2qvalues (p_values, adjusted=True)
     for i in range(len(tests)):
-        tests[i].set_pvalue(p_values[i])
-        tests[i].set_qvalue(q_values[i])
+        tests[i].pvalue = p_values[i]
+        tests[i].qvalue = q_values[i]
         tests[i].set_rank(pRank[i])
     def _get_passed_fdr_tests():
         if p_adjusting_method in ["bh", "bhy"]:
@@ -2052,7 +2054,7 @@ def hypotheses_testing():
             p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, dataset2)
             
             for i in range(len(current_level_tests)):
-                current_level_tests[i].set_pvalue(p_values[i])
+                current_level_tests[i].pvalue = p_values[i]
                 #print "Pvalue", i, " :", p_values[i]
                 
             cluster_size = [ len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]) for i in range(len(current_level_tests)) ]
@@ -2066,7 +2068,7 @@ def hypotheses_testing():
             
             max_r_t = 0
             for i in range(len(current_level_tests)):
-                if current_level_tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank():
+                if current_level_tests[i].pvalue <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank():
                     max_r_t = current_level_tests[i].get_rank()
                     #print "max_r_t", max_r_t
                        
@@ -2127,10 +2129,10 @@ def hypotheses_testing():
                                     current_level_tests[i].set_significance_status(False)
                                     aOut.append(current_level_tests[i])
                 
-                q_values = stats.pvalues2qvalues ([current_level_tests[i].get_pvalue() for i in range(len(current_level_tests))], adjusted=True)
+                q_values = stats.pvalues2qvalues ([current_level_tests[i].pvalue for i in range(len(current_level_tests))], adjusted=True)
                 for i in range(len(current_level_tests)):
-                    if current_level_tests[i].get_qvalue() == None and current_level_tests[i] in passed_tests: 
-                        current_level_tests[i].set_qvalue(q_values[i])
+                    if current_level_tests[i].qvalue == None and current_level_tests[i] in passed_tests: 
+                        current_level_tests[i].qvalue = q_values[i]
             _get_passed_fdr_tests()
             
             #return aFinal, aOut                
