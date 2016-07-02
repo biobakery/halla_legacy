@@ -53,7 +53,7 @@ Nexc = None
 nullsamples = []
 number_of_performed_tests = 0
 min_var = 0.0
-entropy_threshold = .25
+entropy_threshold = 0.0
 #==================================================================#
 # Mutable Meta Objects  
 #==================================================================#
