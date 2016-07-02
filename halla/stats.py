@@ -400,16 +400,17 @@ def medoid(pArray, iAxis=0, pMetric=distance.nmi):
 	Input: numpy array 
 	Output: float
 	"""
-	#return pArray[len(pArray)-1, :]
 	#X = pArray
+    #return X[len(X)/2]
+	#return pArray[len(pArray) -1, :]
 	D = squareform(pdist(pArray, metric=distance.pDistance))
 	#print D
 	medoid_index = 0
 	med = 1.0 
-	i = 0
+	#i = 0
 	for i in range(len(D)):
 		temp_mean = numpy.mean(D[i])
-		if med >= temp_mean:
+		if temp_mean <= med:
 			med = temp_mean
 			medoid_index = i
 	#print "medoid index :", medoid_index, len(pArray)-1
@@ -471,7 +472,7 @@ def bhy(afPVAL, q):
 	for i, fP in enumerate(afPVAL):
 		# fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
 		
-		fAdjusted = float(q_bar * pRank[i]) / float(iLen)  # iLenReduced
+		fAdjusted = q_bar * 1.0* pRank[i] / iLen  # iLenReduced
 		#qvalue = fP * iLen / pRank[i] 
 		aAjusted.append(fAdjusted)
 		#aQvalue.append(qvalue)
@@ -738,7 +739,7 @@ def null_fun(X, Y):
 	pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
 	pMe = pHashMetric[strMetric]
-	return math.fabs(pMe(numpy.random.permutation(X), numpy.random.permutation(Y)))
+	return math.fabs(pMe(X, numpy.random.permutation(Y)))
 def permutation_test_pvalue(X, Y):
 	 
 	strMetric = config.distance 

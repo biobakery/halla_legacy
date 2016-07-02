@@ -59,7 +59,7 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, datase
         ids_to_process=[]
         result = [0] * len(current_level_tests)
         for id in xrange(len(current_level_tests)):
-            if not current_level_tests[id].significance is None:
+            if current_level_tests[id].significance != None:
                 result[id]=current_level_tests[id].pvalue
             else:
                 ids_to_process.append(id)
@@ -109,8 +109,9 @@ class Hypothesis_Node():
 
     A general object, tree need not be 2-tree 
     '''    
-    #__slots__ = ['m_pData', 'm_arrayChildren', 'left_distance', 'right_distance',
-    #             'pvalue', 'qvalue', 'similarity_score','level_number' , 'significance', 'rank' ]
+    __slots__ = ['m_pData', 'm_arrayChildren', 'left_distance', 'right_distance',
+                 'pvalue', 'qvalue', 'similarity_score','level_number' , 'significance', 'rank', 
+                  'already_passed', 'already_tested' ]
     def __init__(self, data=None, left_distance=None, right_distance=None, similarity=None):
         self.m_pData = data 
         self.m_arrayChildren = []
@@ -121,8 +122,8 @@ class Hypothesis_Node():
         self.similarity_score = None
         #self.left_first_rep_variance = None
         #self.right_first_rep_variance = None
-        #self.already_tested = False
-        #self.already_passed = False
+        self.already_tested = False
+        self.already_passed = False
         self.level_number = 1
         self.significance =  None
         self.rank = None
@@ -420,7 +421,7 @@ class Gardener():
 
      
 
-    def __init__(Node, apTree=None):
+    def __init__(self, apTree=None):
         import copy
         self.delta = 1.0  # #step parameter 
         self.sigma = 0.5  # #start parameter 
@@ -504,7 +505,7 @@ def is_tree(pObj):
     """
 
     try:
-        pObj.get_data 
+        pObj.get_data ()
         return True 
     except Exception:
         return False 
@@ -1690,7 +1691,7 @@ def naive_all_against_all():
                     aOut.append(tests[i])
         elif p_adjusting_method == "bonferroni":
             for i in range(len(tests)):
-                if tests[i].pvalue <= aP_adjusted(aP_adjusted[i]):
+                if tests[i].pvalue <= aP_adjusted[i]:
                     passed_tests.append(tests[i])
                     aOut.append(tests[i])
                     aFinal.append(tests[i])
@@ -2081,7 +2082,7 @@ def hypotheses_testing():
                                 current_level_tests[i].significance = True
                                 print ("-- association after %s fdr correction" % config.p_adjust_method)
                         else:
-                            if current_level_tests[i].significance == None and current_level_tests[i].is_bypass():
+                            if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
                                 current_level_tests[i].significance = False
                                 aOut.append(current_level_tests[i])
                             elif current_level_tests[i].is_leaf():
