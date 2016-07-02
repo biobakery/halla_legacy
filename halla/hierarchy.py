@@ -47,7 +47,7 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, datase
     
     def _multi_pMethod_args(current_level_tests, pMethod, dataset1, dataset2, ids_to_process):
         for id in ids_to_process:
-            aIndicies = current_level_tests[id].get_data()
+            aIndicies = current_level_tests[id].m_pData
             aIndiciesMapped = map(array, aIndicies)
             yield [id, pMethod, dataset1[aIndiciesMapped[0]], dataset2[aIndiciesMapped[1]]]
     
@@ -59,8 +59,8 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, datase
         ids_to_process=[]
         result = [0] * len(current_level_tests)
         for id in xrange(len(current_level_tests)):
-            if not current_level_tests[id].get_significance_status() is None:
-                result[id]=current_level_tests[id].get_pvalue()
+            if not current_level_tests[id].significance is None:
+                result[id]=current_level_tests[id].pvalue
             else:
                 ids_to_process.append(id)
         
@@ -73,7 +73,7 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, datase
         # order the results by id and apply results to nodes
         for id, dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep in results_by_id:
             result[id]=dP
-            current_level_tests[id].set_similarity_score(similarity)
+            current_level_tests[id].similarity_score = similarity
             #current_level_tests[id].set_left_first_rep_variance(left_first_rep_variance)
             #current_level_tests[id].set_right_first_rep_variance(right_first_rep_variance)
             #current_level_tests[id].set_right_loading(right_loading)
@@ -83,7 +83,7 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, datase
     else:
         result=[]
         for i in xrange(len(current_level_tests)):
-            if current_level_tests[i].get_significance_status() != None:
+            if current_level_tests[i].significance != None:
                 result.append(current_level_tests[i].pvalue)
             else: 
                 result.append(_actor(current_level_tests[i]))
@@ -102,15 +102,15 @@ global fig_num
 fig_num = 1
 
 # class ClusterNode #scipy.cluster.hierarchy.ClusterNode
-class Hypothesis_Node(object):
+class Hypothesis_Node():
     ''' 
     A hierarchically nested structure containing nodes as
     a basic core unit    
 
     A general object, tree need not be 2-tree 
     '''    
-    __slots__ = ['m_pData', 'm_arrayChildren', 'left_distance', 'right_distance',
-                 'pvalue', 'qvalue', 'similarity_score','level_number' , 'significance', 'rank' ]
+    #__slots__ = ['m_pData', 'm_arrayChildren', 'left_distance', 'right_distance',
+    #             'pvalue', 'qvalue', 'similarity_score','level_number' , 'significance', 'rank' ]
     def __init__(self, data=None, left_distance=None, right_distance=None, similarity=None):
         self.m_pData = data 
         self.m_arrayChildren = []
@@ -188,40 +188,40 @@ class Hypothesis_Node(object):
     def get_right_distance(self):
         return self.right_distance
     
-    def get_left_distance(self):
-        return self.left_distance
+    #def get_left_distance(self):
+     #   return self.left_distance
     
-    def get_similarity_score(self):
-        return self.similarity_score
+    #def get_similarity_score(self):
+    #    return self.similarity_score
     
-    def set_similarity_score(self, similarity_score=None):
-        self.similarity_score = similarity_score
+    #def set_similarity_score(self, similarity_score=None):
+    #    self.similarity_score = similarity_score
         
-    '''def set_left_first_rep_variance(self, pc):
-        self.left_first_rep_variance = pc
+    #def set_left_first_rep_variance(self, pc):
+    #    self.left_first_rep_variance = pc
     
-    def set_right_first_rep_variance(self, pc):
-        self.right_first_rep_variance = pc
+    #def set_right_first_rep_variance(self, pc):
+    #    self.right_first_rep_variance = pc
         
-    def get_left_first_rep_variance(self):
-        return self.left_first_rep_variance
+    #def get_left_first_rep_variance(self):
+    #    return self.left_first_rep_variance
     
-    def get_right_first_rep_variance(self):
-        return self.right_first_rep_variance
+    #def get_right_first_rep_variance(self):
+    #    return self.right_first_rep_variance
     
-    def set_left_loading(self, left_loading):
-        self.left_loading = left_loading
+    #def set_left_loading(self, left_loading):
+     #   self.left_loading = left_loading
      
-    def set_right_loading(self, right_loading):
-         self.right_loading = right_loading
-    '''
+    #def set_right_loading(self, right_loading):
+    #     self.right_loading = right_loading
     #def get_left_loading(self):
     #    return self.left_loading 
      
     #def get_right_loading(self):
     #    return self.right_loading 
     
-    '''def set_pvalue(self, pvalue):
+    '''
+    def set_pvalue(self, pvalue):
         self.pvalue = pvalue
     
     def get_pvalue(self):
@@ -245,172 +245,170 @@ class Hypothesis_Node(object):
     def get_right_rep(self):
         return self.right_rep
     '''
-    def is_representative(self, pvalue_threshold, decomp):
+def is_representative(Node, pvalue_threshold, decomp):
+    return True
+    number_left_features = len(Node.m_pData[0])
+    number_right_features = len(Node.m_pData[1])
+    if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
         return True
-        number_left_features = len(self.get_data()[0])
-        number_right_features = len(self.get_data()[1])
-        if len(self.get_data()[0]) <= 1 and len(self.get_data()[1]) <= 1:
-            return True
-        counter = 0
-        temp_right_loading = list()
-        reps_similarity = self.get_similarity_score()
-        pMe = distance.c_hash_metric[config.distance] 
-        left_threshold = [pMe(config.discretized_dataset[0][self.m_pData[0][i]], self.left_rep) for i in range(len(self.m_pData[0]))]
-        right_threshold = [pMe(config.discretized_dataset[1][self.m_pData[1][i]], self.right_rep) for i in range(len( self.m_pData[1]))]
-        left_rep_similarity_to_right_cluster = np.median([pMe(self.left_rep, config.discretized_dataset[1][self.m_pData[1][i]]) for i in range(len(self.m_pData[1]))])
-        right_rep_similarity_to_left_cluster = np.median([pMe(self.right_rep, config.discretized_dataset[0][self.m_pData[0][i]]) for i in range(len(self.m_pData[0]))])
-        for i in range(len(self.m_pData[1])):
-            if right_threshold[i]< (right_rep_similarity_to_left_cluster):# - np.std(right_threshold)):#scipy.stats.spearmanr(config.discretized_dataset[1][self.m_pData[1][i]], self.right_rep)[1] >.05:# 
-                counter += 1
-                temp_right_loading.append(i)
-                #print "right:", self.get_right_loading()
-                if (counter >= number_right_features) or counter > (number_right_features/(math.log(number_right_features,2))):#math.log(number_right_features,2)):
-                    if config.verbose == 'DEBUG':
-                        print "#Outlier right cluster:",counter
-                    return False
-        counter = 0
-        temp_left_loading = list()
-        for i in range(len(self.m_pData[0])):
-            if left_threshold[i]< (left_rep_similarity_to_right_cluster):# - np.std(left_threshold)): 
-            #scipy.stats.spearmanr(config.discretized_dataset[0][self.m_pData[0][i]], self.right_rep)[1] >.05:
-                temp_left_loading.append(i)
-                #print "after:", temp_left_loading
-                counter += 1
-                if (counter >= number_left_features) or counter > (number_left_features/(math.log(number_left_features,2))): # (number_left_features/2):#math.log(number_left_features,2)):
-                    if config.verbose == 'DEBUG':
-                        print "#Outlier left cluster:",counter
-                    return False
-
-        return True
-    def stop_decesnding_silhouette_coefficient(self):
-       
-        pMe = distance.c_hash_metric[config.distance]
-        silhouette_scores = []
-     
-        cluster_a = self.get_data()[0]
-        cluster_b = self.get_data()[1]
-        silhouette_coefficient_A = []
-        silhouette_coefficient_B = []
-        for a_feature in cluster_a:
-            if len(cluster_a) ==1:
-                a = 0.0
-            else:
-                temp_a_features = cluster_a[:]
-                #print config.Features_order[0]
-                #print temp_a_features#, [config.Features_order[0][i] for i in temp_a_features]
-                temp_a_features.remove(a_feature)
-                a = np.mean([1.0 - config.Distance[0][i][j] for i,j in product([a_feature], temp_a_features)])
-                #a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[0][i], config.discretized_dataset[0][j]))
-                #             for i,j in product([a_feature], temp_a_features)])
-            b = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[0][i], config.discretized_dataset[1][j])) 
-                        for i,j in product([a_feature], cluster_b)])
-            s = (b-a)/max([a,b])
-            silhouette_coefficient_A.append(s)
-        for a_feature in cluster_b:
-            if len(cluster_b) ==1:
-                a = 0.0
-            else:
-                temp_a_features = cluster_b[:]
-                temp_a_features.remove(a_feature)
-                a = np.mean([1.0 - config.Distance[1][i][j] for i,j in product([a_feature], temp_a_features)])
-                #a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[1][i], config.discretized_dataset[1][j]))
-                #             for i,j in product([a_feature], temp_a_features)])
-                   
-            b = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[1][i], config.discretized_dataset[0][j])) 
-                        for i,j in product([a_feature], cluster_a)])
-            s = (b-a)/max([a,b])
-            #print 's a', s, a, b
-            silhouette_coefficient_B.append(s)
-        #print "Silhouette coefficient A", silhouette_coefficient_A
-        #print "Silhouette coefficient B", silhouette_coefficient_B
-        silhouette_scores = silhouette_coefficient_A
-        silhouette_scores.extend(silhouette_coefficient_B)
-        
-        if numpy.min(silhouette_scores)  < 0.25:
-            #print "Silhouette coefficient all", silhouette_scores
-            #print cluster_a
-            #print cluster_b
-            return False
-        else:
-            #print "Silhouette coefficient all", silhouette_scores 
-            return True
-    def stop_and_reject(self):
-        
-        number_left_features = len(self.get_data()[0])
-        number_right_features = len(self.get_data()[1])
-
-        if len(self.get_data()[0]) <= 1 and len(self.get_data()[1]) <= 1:
-            return True
-        counter = 0
-        temp_right_loading = list()
-        reps_similarity = self.get_similarity_score()
-        pMe = distance.c_hash_metric[config.distance] 
-        diam_Ar_Br = (1.0 - math.fabs(pMe(self.left_rep, self.right_rep)))
-        if len(self.m_pData[0]) == 1:
-            left_all_sim = [1.0]
-        else:
-            left_all_sim = [pMe(config.discretized_dataset[0][i], config.discretized_dataset[0][j]) for i,j in combinations(self.m_pData[0], 2)]
-        if len(self.m_pData[1]) == 1:
-            right_all_sim = [1.0]
-        else:
-            right_all_sim = [pMe(config.discretized_dataset[1][i], config.discretized_dataset[1][j]) for i,j in combinations(self.m_pData[1],2)]
-        diam_A_r = ((1.0 - math.fabs(min(left_all_sim))))# - math.fabs((1.0 - max(left_all_sim))))
-        diam_B_r = ((1.0 - math.fabs(min(right_all_sim))))# - math.fabs((1.0 - max(right_all_sim))))
-        if config.verbose == 'DEBUG':
-            print "===================stop and reject check========================"
-            #print "Left Exp. Var.: ", self.left_first_rep_variance
-            print "Left before: ", self.m_pData[0]
-            #print "Right Exp. Var.: ", self.right_first_rep_variance
-            print "Right before: ", self.m_pData[1]
-            print "dime_A_r: ", diam_A_r,"  ", "dime_B_r: ", diam_B_r, "diam_Ar_Br: ", diam_Ar_Br
-        if diam_A_r + diam_B_r == 0:
-            return True
-        if diam_Ar_Br > diam_A_r + diam_B_r:
-            return True
-        else:
-            return False
-
-    def is_bypass(self ):
-        if config.apply_stop_condition:
-            return self.stop_decesnding_silhouette_coefficient()
-            if self.stop_and_reject():
+    counter = 0
+    temp_right_loading = list()
+    reps_similarity = Node.similarity_score
+    pMe = distance.c_hash_metric[config.distance] 
+    left_threshold = [pMe(config.discretized_dataset[0][Node.m_pData[0][i]], Node.left_rep) for i in range(len(Node.m_pData[0]))]
+    right_threshold = [pMe(config.discretized_dataset[1][Node.m_pData[1][i]], Node.right_rep) for i in range(len( Node.m_pData[1]))]
+    left_rep_similarity_to_right_cluster = np.median([pMe(Node.left_rep, config.discretized_dataset[1][Node.m_pData[1][i]]) for i in range(len(Node.m_pData[1]))])
+    right_rep_similarity_to_left_cluster = np.median([pMe(Node.right_rep, config.discretized_dataset[0][Node.m_pData[0][i]]) for i in range(len(Node.m_pData[0]))])
+    for i in range(len(Node.m_pData[1])):
+        if right_threshold[i]< (right_rep_similarity_to_left_cluster):# - np.std(right_threshold)):#scipy.stats.spearmanr(config.discretized_dataset[1][Node.m_pData[1][i]], Node.right_rep)[1] >.05:# 
+            counter += 1
+            temp_right_loading.append(i)
+            #print "right:", Node.get_right_loading()
+            if (counter >= number_right_features) or counter > (number_right_features/(math.log(number_right_features,2))):#math.log(number_right_features,2)):
                 if config.verbose == 'DEBUG':
-                    print "q: ", self.get_qvalue(), " p: ", self.get_pvalue()
-                return True
-            else:
+                    print "#Outlier right cluster:",counter
                 return False
+    counter = 0
+    temp_left_loading = list()
+    for i in range(len(Node.m_pData[0])):
+        if left_threshold[i]< (left_rep_similarity_to_right_cluster):# - np.std(left_threshold)): 
+        #scipy.stats.spearmanr(config.discretized_dataset[0][Node.m_pData[0][i]], Node.right_rep)[1] >.05:
+            temp_left_loading.append(i)
+            #print "after:", temp_left_loading
+            counter += 1
+            if (counter >= number_left_features) or counter > (number_left_features/(math.log(number_left_features,2))): # (number_left_features/2):#math.log(number_left_features,2)):
+                if config.verbose == 'DEBUG':
+                    print "#Outlier left cluster:",counter
+                return False
+
+    return True
+def stop_decesnding_silhouette_coefficient(Node):
+   
+    pMe = distance.c_hash_metric[config.distance]
+    silhouette_scores = []
+ 
+    cluster_a = Node.m_pData[0]
+    cluster_b = Node.m_pData[1]
+    silhouette_coefficient_A = []
+    silhouette_coefficient_B = []
+    for a_feature in cluster_a:
+        if len(cluster_a) ==1:
+            a = 0.0
+        else:
+            temp_a_features = cluster_a[:]
+            #print config.Features_order[0]
+            #print temp_a_features#, [config.Features_order[0][i] for i in temp_a_features]
+            temp_a_features.remove(a_feature)
+            a = np.mean([1.0 - config.Distance[0][i][j] for i,j in product([a_feature], temp_a_features)])
+            #a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[0][i], config.discretized_dataset[0][j]))
+            #             for i,j in product([a_feature], temp_a_features)])
+        b = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[0][i], config.discretized_dataset[1][j])) 
+                    for i,j in product([a_feature], cluster_b)])
+        s = (b-a)/max([a,b])
+        silhouette_coefficient_A.append(s)
+    for a_feature in cluster_b:
+        if len(cluster_b) ==1:
+            a = 0.0
+        else:
+            temp_a_features = cluster_b[:]
+            temp_a_features.remove(a_feature)
+            a = np.mean([1.0 - config.Distance[1][i][j] for i,j in product([a_feature], temp_a_features)])
+            #a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[1][i], config.discretized_dataset[1][j]))
+            #             for i,j in product([a_feature], temp_a_features)])
+               
+        b = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[1][i], config.discretized_dataset[0][j])) 
+                    for i,j in product([a_feature], cluster_a)])
+        s = (b-a)/max([a,b])
+        #print 's a', s, a, b
+        silhouette_coefficient_B.append(s)
+    #print "Silhouette coefficient A", silhouette_coefficient_A
+    #print "Silhouette coefficient B", silhouette_coefficient_B
+    silhouette_scores = silhouette_coefficient_A
+    silhouette_scores.extend(silhouette_coefficient_B)
+    
+    if numpy.min(silhouette_scores)  < 0.25:
+        #print "Silhouette coefficient all", silhouette_scores
+        #print cluster_a
+        #print cluster_b
+        return False
+    else:
+        #print "Silhouette coefficient all", silhouette_scores 
+        return True
+def stop_and_reject(Node):
+    
+    number_left_features = len(Node.m_pData[0])
+    number_right_features = len(Node.m_pData[1])
+
+    if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
+        return True
+    counter = 0
+    temp_right_loading = list()
+    reps_similarity = Node.similarity_score
+    pMe = distance.c_hash_metric[config.distance] 
+    diam_Ar_Br = (1.0 - math.fabs(pMe(Node.left_rep, Node.right_rep)))
+    if len(Node.m_pData[0]) == 1:
+        left_all_sim = [1.0]
+    else:
+        left_all_sim = [pMe(config.discretized_dataset[0][i], config.discretized_dataset[0][j]) for i,j in combinations(Node.m_pData[0], 2)]
+    if len(Node.m_pData[1]) == 1:
+        right_all_sim = [1.0]
+    else:
+        right_all_sim = [pMe(config.discretized_dataset[1][i], config.discretized_dataset[1][j]) for i,j in combinations(Node.m_pData[1],2)]
+    diam_A_r = ((1.0 - math.fabs(min(left_all_sim))))# - math.fabs((1.0 - max(left_all_sim))))
+    diam_B_r = ((1.0 - math.fabs(min(right_all_sim))))# - math.fabs((1.0 - max(right_all_sim))))
+    if config.verbose == 'DEBUG':
+        print "===================stop and reject check========================"
+        #print "Left Exp. Var.: ", Node.left_first_rep_variance
+        print "Left before: ", Node.m_pData[0]
+        #print "Right Exp. Var.: ", Node.right_first_rep_variance
+        print "Right before: ", Node.m_pData[1]
+        print "dime_A_r: ", diam_A_r,"  ", "dime_B_r: ", diam_B_r, "diam_Ar_Br: ", diam_Ar_Br
+    if diam_A_r + diam_B_r == 0:
+        return True
+    if diam_Ar_Br > diam_A_r + diam_B_r:
+        return True
+    else:
         return False
 
-    def report(self):
-        print "\n--- hypothesis test based on permutation test"        
-        print "---- pvalue                        :", self.pvalue
-        #if self.get_qvalue() <> 0.0:
-        #    print "--- adjusted pvalue     :", self.get_qvalue()
-        print "---- similarity_score score              :", self.get_similarity_score()
-        print "---- first cluster's features      :", self.get_data()[0]
-        print "---- first cluster similarity_score      :", 1.0 - self.get_left_distance()
-        print "---- first pc of the first cluster :", self.get_left_first_rep_variance()
-        print "---- second cluster's features     :", self.get_data()[1]
-        print "---- second cluster similarity_score     :", 1.0 - self.get_right_distance()
-        print "---- first pc of the second cluster:", self.get_right_first_rep_variance(), "\n"
-    
-    def set_rank(self, rank= None):
-        self.rank = rank
+def is_bypass(Node ):
+    if config.apply_stop_condition:
+        return stop_decesnding_silhouette_coefficient(Node)
+        if stop_and_reject(Node):
+            if config.verbose == 'DEBUG':
+                print "q: ", Node.qvalue, " p: ", Node.pvalue
+            return True
+        else:
+            return False
+    return False
+
+def report(Node):
+    print "\n--- hypothesis test based on permutation test"        
+    print "---- pvalue                        :", Node.pvalue
+    #if Node.qvalue <> 0.0:
+    #    print "--- adjusted pvalue     :", Node.qvalue
+    print "---- similarity_score score              :", self.similarity_score
+    print "---- first cluster's features      :", Node.m_pData[0]
+    print "---- first cluster similarity_score      :", 1.0 - Node.left_distance
+    print "---- second cluster's features     :", Node.m_pData[1]
+    print "---- second cluster similarity_score     :", 1.0 - Node.right_distance
+
+    #def set_rank(Node, rank= None):
+    #    Node.rank = rank
         
-    def get_rank(self):
-        return self.rank
+    #def get_rank(Node):
+    #    return Node.rank
  
-    def set_level_number(self, level_number):
-        self.level_number = level_number
+    #def set_level_number(Node, level_number):
+    #    Node.level_number = level_number
         
-    def get_level_number(self):
-        return self.level_number
+    #def get_level_number(Node):
+    #    return Node.level_number
     
-    def set_significance_status(self, significance):
-        self.significance = significance
+    #def significance = Node, significance):
+    #    Node.significance = significance
     
-    def get_significance_status(self):
-        return self.significance
+    #def get_significance(Node):
+    #    return Node.significance
     
 class Gardener():
     """
@@ -422,7 +420,7 @@ class Gardener():
 
      
 
-    def __init__(self, apTree=None):
+    def __init__(Node, apTree=None):
         import copy
         self.delta = 1.0  # #step parameter 
         self.sigma = 0.5  # #start parameter 
@@ -456,7 +454,7 @@ class Gardener():
             aOut = [] 
     
             for pTree in self.m_queue:
-                aOut.append(pTree.get_data())
+                aOut.append(pTree.m_pData)
 
         if self.m_queue:
             self = self.m_queue.pop()
@@ -606,7 +604,7 @@ def reduce_tree(pClusterNode, pFunction=lambda x: x.id, aOut=[]):
 
     bTree = is_tree(pClusterNode)
 
-    func = pFunction if not bTree else lambda x: x.get_data() 
+    func = pFunction if not bTree else lambda x: x.m_pData 
 
     if pClusterNode:
 
@@ -686,7 +684,7 @@ def reduce_tree_by_layer(apParents, iLevel=0, iStop=None):
         if not bTree:
             return [(iLevel, reduce_tree(p)) for p in apParents ] + reduce_tree_by_layer(new_apParents, iLevel=iLevel + 1)
         else:
-            return [(iLevel, p.get_data()) for p in apParents ] + reduce_tree_by_layer(new_apParents, iLevel=iLevel + 1)
+            return [(iLevel, p.m_pData) for p in apParents ] + reduce_tree_by_layer(new_apParents, iLevel=iLevel + 1)
 
 def tree2lf(apParents, iLevel=0, iStop=None):
     """
@@ -1496,7 +1494,7 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
             data1 = reduce_tree(a)
             data2 = reduce_tree(b)
     Hypothesis_Tree_Root = Hypothesis_Node([data1, data2])
-    Hypothesis_Tree_Root.set_level_number(0)
+    Hypothesis_Tree_Root.level_number = 0
     # Get the first level homogeneous clusters
     apChildren0 = get_homogenous_clusters_silhouette_log (apClusterNode0[0], dataset_number = 0)
     #cutree_to_get_below_threshold_number_of_features(apClusterNode0[0])
@@ -1517,7 +1515,7 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
             data1 = reduce_tree(a)
             data2 = reduce_tree(b)
         tempTree = Hypothesis_Node(data=[data1, data2], left_distance=a.dist, right_distance=b.dist)
-        tempTree.set_level_number(1)
+        tempTree.level_number = 1
         childList.append(tempTree)
         L.append((tempTree, (a, b)))
     Hypothesis_Tree_Root.add_children(childList)
@@ -1575,7 +1573,7 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
                 data2 = reduce_tree(b1)
             
             tempTree = Hypothesis_Node(data=[data1, data2], left_distance=a1.dist, right_distance=b1.dist)
-            tempTree.set_level_number(level_number)
+            tempTree.level_number = level_number
             childList.append(tempTree)
             next_L.append((tempTree, (a1, b1)))
         pStump.add_children(childList)
@@ -1611,7 +1609,7 @@ def _actor(pNode):
     
         * E.g. compares two bags, reports distance and p-values 
     """
-    aIndicies = pNode.get_data() 
+    aIndicies = pNode.m_pData 
     aIndiciesMapped = map(array, aIndicies)  # # So we can vectorize over numpy arrays
     '''if decomposition not in ["pca", "ica"]:
         X = dataset1[aIndiciesMapped[0]]
@@ -1625,7 +1623,7 @@ def _actor(pNode):
     X = dataset1[aIndiciesMapped[0]]
     Y = dataset2[aIndiciesMapped[1]]
     dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y)
-    pNode.set_similarity_score(similarity)
+    pNode.similarity_score = similarity
     #pNode.set_left_first_rep_variance(left_first_rep_variance)
     #pNode.set_right_first_rep_variance(right_first_rep_variance)
     #pNode.set_left_loading(left_loading)
@@ -1672,45 +1670,45 @@ def naive_all_against_all():
     for i in range(len(tests)):
         tests[i].pvalue = p_values[i]
         tests[i].qvalue = q_values[i]
-        tests[i].set_rank(pRank[i])
+        tests[i].rank = pRank[i]
     def _get_passed_fdr_tests():
         if p_adjusting_method in ["bh", "bhy"]:
             max_r_t = 0
             for i in range(len(tests)):
-                if tests[i].get_pvalue() <= aP_adjusted[i] and max_r_t <= tests[i].get_rank():
-                    max_r_t = tests[i].get_rank()
-                    #print tests[i].get_rank()
+                if tests[i].pvalue <= aP_adjusted[i] and max_r_t <= tests[i].rank:
+                    max_r_t = tests[i].rank
+                    #print tests[i].rank
             for i in range(len(tests)):
-                if tests[i].get_rank() <= max_r_t:
+                if tests[i].rank <= max_r_t:
                     passed_tests.append(tests[i])
                     aOut.append(tests[i])
                     aFinal.append(tests[i])
-                    tests[i].set_significance_status(True)
+                    tests[i].significance = True
                     print ("-- association after %s fdr correction" % p_adjusting_method)
                 else:
-                    tests[i].set_significance_status(False)
+                    tests[i].significance = False
                     aOut.append(tests[i])
         elif p_adjusting_method == "bonferroni":
             for i in range(len(tests)):
-                if tests[i].get_pvalue() <= aP_adjusted(aP_adjusted[i]):
+                if tests[i].pvalue <= aP_adjusted(aP_adjusted[i]):
                     passed_tests.append(tests[i])
                     aOut.append(tests[i])
                     aFinal.append(tests[i])
-                    tests[i].set_significance_status(True)
+                    tests[i].significance = True
                     print ("-- association after %s fdr correction" % p_adjusting_method)
                 else:
-                    tests[i].set_significance_status(False)
+                    tests[i].significance = False
                     aOut.append(tests[i])
         elif p_adjusting_method == "no_adjusting":
             for i in range(len(tests)):
-                if tests[i].get_pvalue() <= fQ:
+                if tests[i].pvalue <= fQ:
                     passed_tests.append(tests[i])
                     aOut.append(tests[i])
                     aFinal.append(tests[i])
-                    tests[i].set_significance_status(True)
+                    tests[i].significance = True
                     print ("-- association after %s fdr correction" % p_adjusting_method)
                 else:
-                    tests[i].set_significance_status(False)
+                    tests[i].significance = False
                     aOut.append(tests[i])
     _get_passed_fdr_tests()
     config.number_of_performed_tests =len(aOut)
@@ -1955,44 +1953,6 @@ def hypotheses_testing():
 
     iGlobalDepth = depth_tree(pTree)
     # iSkip = _start_parameter_to_iskip( start_parameter )
-
-    def _simple_hypothesis_testing():
-        apChildren = [pTree]
-        number_performed_tests = 0
-        number_passed_tests = 0
-        next_level_apChildren = []
-        level = 1
-        while apChildren:
-            Current_Family_Children = apChildren.pop(0).get_children()
-            number_performed_tests += len(Current_Family_Children)
-            
-            # claculate nominal p-value
-            for i in range(len(Current_Family_Children)):
-                Current_Family_Children[i].set_pvalue(_actor(Current_Family_Children[i]))
-            
-                aOut.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_pvalue(), Current_Family_Children[i].get_pvalue()])
-                if Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
-                    Current_Family_Children[i].report()
-                    number_passed_tests += 1
-                    aFinal.append([Current_Family_Children[i].get_data(), Current_Family_Children[i].get_pvalue(), Current_Family_Children[i].get_pvalue()])
-                elif Current_Family_Children[i].get_pvalue() > fQ and Current_Family_Children[i].get_pvalue() <= 1.0 - fQ:
-                    next_level_apChildren.append(Current_Family_Children[i])
-                    if config.verbose == 'INFO': 
-                        print "Conitinue, gray area with p-value:", Current_Family_Children[i].get_pvalue()
-                elif Current_Family_Children[i].is_bypass() and Current_Family_Children[i].is_representative(pvalue_threshold = fQ, pc_threshold = robustness , robustness = robustness, decomp = decomposition):
-                    if config.verbose == 'INFO':
-                        print "Stop: no chance of association by descending", Current_Family_Children[i].get_pvalue()
-            if not apChildren:
-                #if config.verbose == 'INFO':
-                #    print "Hypotheses testing level ", level, " is finished."
-                # number_performed_test += len(next_level_apChildren)
-                apChildren = next_level_apChildren
-                level += 1
-                next_level_apChildren = []
-            
-        print "--- number of performed tests:", number_performed_tests
-        print "--- number of passed tests without FDR controlling:", number_passed_tests        
-        return aFinal, aOut
     
     def _level_by_level_testing():
         apChildren = [pTree]
@@ -2011,7 +1971,7 @@ def hypotheses_testing():
             temp_hypothesis = apChildren.pop(0)
             #use the signifantly rejected or accepte dhypotheses from previouse level 
             if config.p_adjust_method != "bhy2":
-                if temp_hypothesis.get_significance_status() != None:
+                if temp_hypothesis.significance != None:
                     from_prev_hypotheses.append(temp_hypothesis)
                 else:
                     temp_sub_hypotheses = temp_hypothesis.get_children()
@@ -2024,12 +1984,12 @@ def hypotheses_testing():
                     leaves_hypotheses.append(temp_hypothesis)
                 else:
                     #for i in range(len(temp_sub_hypotheses)):
-                    #    print(temp_sub_hypotheses[i].get_data())
-                    if temp_hypothesis.get_significance_status() != None:
+                    #    print(temp_sub_hypotheses[i].m_pData)
+                    if temp_hypothesis.significance != None:
                         for i in range(len(temp_sub_hypotheses)):
-                            temp_sub_hypotheses[i].set_significance_status(temp_hypothesis.get_significance_status())
-                            temp_sub_hypotheses[i].set_pvalue(temp_hypothesis.get_pvalue()) 
-                            temp_sub_hypotheses[i].set_qvalue(temp_hypothesis.get_qvalue())
+                            temp_sub_hypotheses[i].significance = temp_hypothesis.significance
+                            temp_sub_hypotheses[i].pvalue = temp_hypothesis.pvalue 
+                            temp_sub_hypotheses[i].qvalue = temp_hypothesis.qvalue
                             
                     #else:
                         #number_performed_tests += len(temp_sub_hypotheses)
@@ -2058,18 +2018,18 @@ def hypotheses_testing():
                 #print "Pvalue", i, " :", p_values[i]
                 
             cluster_size = [ len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]) for i in range(len(current_level_tests)) ]
-            #if current_level_tests[i].get_significance_status() == None else 1 
+            #if current_level_tests[i].significance == None else 1 
             total_cluster_size = numpy.sum(cluster_size)
             # claculate adjusted p-value
             q = config.q 
             aP_adjusted, pRank = stats.p_adjust(p_values, q, cluster_size)#config.q)
             for i in range(len(current_level_tests)):
-                current_level_tests[i].set_rank(pRank[i])
+                current_level_tests[i].rank = pRank[i]
             
             max_r_t = 0
             for i in range(len(current_level_tests)):
-                if current_level_tests[i].pvalue <= aP_adjusted[i] and max_r_t <= current_level_tests[i].get_rank():
-                    max_r_t = current_level_tests[i].get_rank()
+                if current_level_tests[i].pvalue <= aP_adjusted[i] and max_r_t <= current_level_tests[i].rank:
+                    max_r_t = current_level_tests[i].rank
                     #print "max_r_t", max_r_t
                        
             passed_tests = []
@@ -2077,56 +2037,56 @@ def hypotheses_testing():
                 if config.p_adjust_method in ["bh", "bhy"]:
                   
                     for i in range(len(current_level_tests)):
-                        if current_level_tests[i].get_rank() <= max_r_t:#(level ==1000 and sum([1 if current_level_tests[i].get_pvalue()<= val else 0 for val  in list_p_trshld])>= (1.0-config.q)*number_of_bootstrap)\
+                        if current_level_tests[i].rank <= max_r_t:#(level ==1000 and sum([1 if current_level_tests[i].pvalue<= val else 0 for val  in list_p_trshld])>= (1.0-config.q)*number_of_bootstrap)\
                             passed_tests.append(current_level_tests[i])
-                            if current_level_tests[i].get_significance_status() == None:
-                                current_level_tests[i].set_significance_status(True)
+                            if current_level_tests[i].significance == None:
+                                current_level_tests[i].significance = True
                                 aOut.append(current_level_tests[i])
                                 aFinal.append(current_level_tests[i])
                                 print ("-- association after %s fdr correction" % config.p_adjust_method)
-                                #print (current_level_tests[i].get_data())
+                                #print (current_level_tests[i].m_pData)
                         else:
-                            if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
-                                current_level_tests[i].set_significance_status(False)
+                            if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
+                                current_level_tests[i].significance = False
                                 aOut.append(current_level_tests[i])
                             elif current_level_tests[i].is_leaf():
-                                if current_level_tests[i].get_significance_status() == None:
-                                    current_level_tests[i].set_significance_status(False)
+                                if current_level_tests[i].significance == None:
+                                    current_level_tests[i].significance = False
                                     aOut.append(current_level_tests[i])
                 elif config.p_adjust_method == "bonferroni":
                     print len(current_level_tests)
                     for i in range(len(current_level_tests)):
-                        if current_level_tests[i].get_pvalue() <= aP_adjusted[i]:
+                        if current_level_tests[i].pvalue <= aP_adjusted[i]:
                             passed_tests.append(current_level_tests[i])
-                            if current_level_tests[i].get_significance_status() == None:
+                            if current_level_tests[i].significance == None:
                                 aOut.append(current_level_tests[i])
                                 aFinal.append(current_level_tests[i])
-                                current_level_tests[i].set_significance_status(True)
+                                current_level_tests[i].significance = True
                                 print ("-- association after %s fdr correction" % config.p_adjust_method)
                         else:
-                            if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
-                                current_level_tests[i].set_significance_status(False)
+                            if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
+                                current_level_tests[i].significance = False
                                 aOut.append(current_level_tests[i])
                             elif current_level_tests[i].is_leaf():
-                                if current_level_tests[i].get_significance_status() == None:
-                                    current_level_tests[i].set_significance_status(False)
+                                if current_level_tests[i].significance == None:
+                                    current_level_tests[i].significance = False
                                     aOut.append(current_level_tests[i])
                 elif config.p_adjust_method == "no_adjusting":
                     for i in range(len(current_level_tests)):
-                        if current_level_tests[i].get_pvalue() <= q:
+                        if current_level_tests[i].pvalue <= q:
                             passed_tests.append(current_level_tests[i])
-                            if current_level_tests[i].get_significance_status() == None:
+                            if current_level_tests[i].significance == None:
                                 aOut.append(current_level_tests[i])
                                 aFinal.append(current_level_tests[i])
-                                current_level_tests[i].set_significance_status(True)
+                                current_level_tests[i].significance = True
                                 print ("-- association after %s fdr correction" % config.p_adjust_method)
                         else:
-                            if current_level_tests[i].get_significance_status() == None and current_level_tests[i].is_bypass():
-                                current_level_tests[i].set_significance_status(False)
+                            if current_level_tests[i].significance == None and current_level_tests[i].is_bypass():
+                                current_level_tests[i].significance = False
                                 aOut.append(current_level_tests[i])
                             elif current_level_tests[i].is_leaf():
-                                if current_level_tests[i].get_significance_status() == None:
-                                    current_level_tests[i].set_significance_status(False)
+                                if current_level_tests[i].significance == None:
+                                    current_level_tests[i].significance = False
                                     aOut.append(current_level_tests[i])
                 
                 q_values = stats.pvalues2qvalues ([current_level_tests[i].pvalue for i in range(len(current_level_tests))], adjusted=True)
@@ -2159,8 +2119,7 @@ def hypotheses_testing():
         return aFinal, aOut
 
     fdr_function = {"default": _level_by_level_testing,
-                            "level":_level_by_level_testing,
-                            "simple":_simple_hypothesis_testing}
+                            "level":_level_by_level_testing}
     #======================================#
     # Execute 
     #======================================#

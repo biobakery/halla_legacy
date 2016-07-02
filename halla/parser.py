@@ -359,11 +359,11 @@ class Input:
 		#print self.outHead1
 		#print df2
 		try:
-			print "WARNING! %d features and %d samples are used from first dataset" % (l1_after, len(self.discretized_dataset1[0]))
+			print "--- %d features and %d samples are used from first dataset" % (l1_after, len(self.discretized_dataset1[0]))
 		except IndexError:
 			sys.exit("WARNING! No feature in the first dataset after filtering.")
 		try:
-			print "WARNING! %d features and %d samples are used from second dataset" % (l2_after, len(self.discretized_dataset2[0]))
+			print "--- %d features and %d samples are used from second dataset" % (l2_after, len(self.discretized_dataset2[0]))
 		except IndexError:
 			sys.exit("WARNING! No feature in the first dataset after filtering.")
 			

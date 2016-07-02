@@ -341,11 +341,11 @@ def _report():
             associated_feature_Y_indecies += iY
             fP = association.pvalue
             fP_adjust = association.qvalue
-            clusterX_similarity = 1.0 - association.get_left_distance()
+            clusterX_similarity = 1.0 - association.left_distance
             #clusterX_first_rep = association.get_left_first_rep_variance()
-            clusterY_similarity = 1.0 - association.get_right_distance()
+            clusterY_similarity = 1.0 - association.right_distance
             #clusterY_first_rep = association.get_right_first_rep_variance()
-            association_similarity = association.get_similarity_score()
+            association_similarity = association.similarity_score
             
             aLineOut = [number_of_association,
                                  str(';'.join(config.aFeatureNames1[i] for i in iX)),
@@ -770,7 +770,7 @@ def _report():
     _write_hallagram_info()
     if config.hallagram:
         if config.distance=="nmi":
-            sim_color = ' --similarity="Pairwise similarity" --cmap=Reds'
+            sim_color = ' --similarity="Pairwise similarity" --cmap=YlGnBu'
         else:
             sim_color =''
         #_heatmap_associations()

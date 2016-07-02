@@ -374,16 +374,6 @@ def similarity_score(X, Y, strMetric="nmi", bPval=1, bParam=False):
 	pMethd = hash_metric[strMetric]
 	return pMethd(X_c, Y_c)
 
-
-def plsc():
-	pass 
-
-def kernel_cca():
-	pass
-
-def kernel_cca_score():
-	pass 
-
 def get_medoid_centroid(pArray, iAxis=0, pMetric=distance.l2):
 	"""
 	Input: numpy array 
@@ -410,24 +400,20 @@ def medoid(pArray, iAxis=0, pMetric=distance.nmi):
 	Input: numpy array 
 	Output: float
 	"""
-	X = pArray
-	#return X[len(X)/2]
-	return pArray[len(pArray) -1, :]
-	d = pMetric 
-	def pDistance(x, y):
-		return  1.0 - pMetric(x, y)
-	D = squareform(pdist(pArray, metric=pDistance))
+	#return pArray[len(pArray)-1, :]
+	#X = pArray
+	D = squareform(pdist(pArray, metric=distance.pDistance))
 	#print D
-	mean_index = 0
+	medoid_index = 0
 	med = 1.0 
 	i = 0
 	for i in range(len(D)):
 		temp_mean = numpy.mean(D[i])
 		if med >= temp_mean:
 			med = temp_mean
-			mean_index = i
-	print "medoid index :", mean_index, len(pArray)
-	return pArray[mean_index, :]
+			medoid_index = i
+	#print "medoid index :", medoid_index, len(pArray)-1
+	return pArray[medoid_index, :]
 def concat(pArray, iAxis=0, pMetric=distance.nmi):
 	"""
 	Input: numpy array 
@@ -473,8 +459,8 @@ def bhy(afPVAL, q):
 			boolean vector corresponding to which hypothesis test rejected, corresponding to p-value 
 
 	"""
-	from fractions import Fraction
-	harmonic_number = lambda n: sum(Fraction(1, d) for d in xrange(1, n+1))
+	#from fractions import Fraction
+	#harmonic_number = lambda n: sum(Fraction(1, d) for d in xrange(1, n+1))
 	
 	pRank = rankdata(afPVAL, method= 'ordinal')
 
@@ -485,7 +471,7 @@ def bhy(afPVAL, q):
 	for i, fP in enumerate(afPVAL):
 		# fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
 		
-		fAdjusted = q_bar * 1.0 * pRank[i] / iLen  # iLenReduced
+		fAdjusted = float(q_bar * pRank[i]) / float(iLen)  # iLenReduced
 		#qvalue = fP * iLen / pRank[i] 
 		aAjusted.append(fAdjusted)
 		#aQvalue.append(qvalue)
@@ -689,13 +675,13 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 	def _permutation(pVec):
 		return numpy.random.permutation(pVec)
 
-	pDe = get_medoid_centroid
+	pDe = medoid
 	pMe = pHashMetric[strMetric] 
 
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	
-	pRep1 = get_medoid_centroid(discretize(pArray1), 0, pMe)
-	pRep2 = get_medoid_centroid(discretize(pArray1), 0, pMe)
+	pRep1 = medoid(discretize(pArray1), 0, pMe)
+	pRep2 = medoid(discretize(pArray1), 0, pMe)
 
 	# pRep1, pRep2 = [ discretize( pDe( pA ) )[0] for pA in [pArray1,pArray2] ] 
 
@@ -752,7 +738,7 @@ def null_fun(X, Y):
 	pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
 	pMe = pHashMetric[strMetric]
-	return math.fabs(pMe(X, numpy.random.permutation(Y)))
+	return math.fabs(pMe(numpy.random.permutation(X), numpy.random.permutation(Y)))
 def permutation_test_pvalue(X, Y):
 	 
 	strMetric = config.distance 
@@ -880,7 +866,7 @@ def permutation_test_by_representative(pArray1, pArray2):
 	iIter=config.iterations
 	seed = config.seed
 	discretize_style = config.strDiscretizing
-	X, Y = pArray1, pArray2 
+	#X, Y = pArray1, pArray2 
 	strMetric = metric 
 	# step 5 in a case of new decomposition method
 	pHashDecomposition = c_hash_decomposition

@@ -27,7 +27,7 @@ NPROC = 1 # number of threads to use
 distance = "nmi"
 decomposition = "medoid" 
 fdr_function = "level"
-q = .2  
+q = .1  
 iterations = 1000
 p_adjust_method = "bhy"
 randomization_method = "permutation"  # method to generate error bars 
@@ -53,7 +53,7 @@ Nexc = None
 nullsamples = []
 number_of_performed_tests = 0
 min_var = 0.0
-entropy_threshold = .5
+entropy_threshold = .25
 #==================================================================#
 # Mutable Meta Objects  
 #==================================================================#
