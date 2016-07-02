@@ -42,7 +42,13 @@ def get_enropy(x):
 	P = numpy.bincount(d)/float(len(d))
 	observed_entropy = -sum([p * numpy.log2(p) for p in P])
 	max_entropy = numpy.log2(len(P))
-	return observed_entropy/max_entropy 
+	return observed_entropy/max_entropy
+def scale_data(X, scale = 'log'):
+	if scale == 'sqrt':
+		y = numpy.sqrt(numpy.abs(X)) * numpy.sign(X)
+	elif scale =='log':
+		y = numpy.log(numpy.abs(X)) * numpy.sign(X)
+	return y 
 def pvalues2qvalues ( pvalues, adjusted=False ):
     n = len( pvalues )
     # after sorting, index[i] is the original index of the ith-ranked value
@@ -472,7 +478,7 @@ def bhy(afPVAL, q):
 	for i, fP in enumerate(afPVAL):
 		# fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
 		
-		fAdjusted = q_bar * 1.0* pRank[i] / iLen  # iLenReduced
+		fAdjusted = float(q_bar *  pRank[i]) / float(iLen)  # iLenReduced
 		#qvalue = fP * iLen / pRank[i] 
 		aAjusted.append(fAdjusted)
 		#aQvalue.append(qvalue)
@@ -2082,11 +2088,11 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 	if x == 0:
 		return 1.0
 	# Get M, the number of null samples greater than x
-	M = len([1 for v in null_samples if v >= x])  # or v >= x 
+	M = len([1 for v in null_samples if v > x])  # or v >= x 
 	N = len(null_samples)
 	
 	# Use the ECDF to approximate p-values if M > 10
-	if M >= 10 or N < 250:
+	if M >= 10:# or N < 100:
 		return float(M)/float(N)
 
 	# Estimate the generalized pareto distribtion from tail samples
@@ -2105,8 +2111,8 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 	
 	# Check if the result of the survival function is na then genrate more null samples
 	sf_result =  gp.sf(x)
-	if sf_result == 1:
-		print sf_result, N, Nexc
+	#if sf_result == 1:
+		#print sf_result, N, Nexc
 	if math.isnan(float(sf_result)) or sf_result == 1.0:
 		print "WARNING: the number of permutation for null samples wasn't enough and it's doubled!"
 		print "This could happen when you have features with low variation or zero variation!"

@@ -110,8 +110,8 @@ class Hypothesis_Node():
     A general object, tree need not be 2-tree 
     '''    
     __slots__ = ['m_pData', 'm_arrayChildren', 'left_distance', 'right_distance',
-                 'pvalue', 'qvalue', 'similarity_score','level_number' , 'significance', 'rank', 
-                  'already_passed', 'already_tested' ]
+                'pvalue', 'qvalue', 'similarity_score','level_number' , 'significance', 'rank', 
+                'already_passed', 'already_tested' ]
     def __init__(self, data=None, left_distance=None, right_distance=None, similarity=None):
         self.m_pData = data 
         self.m_arrayChildren = []
@@ -256,12 +256,12 @@ def is_representative(Node, pvalue_threshold, decomp):
     temp_right_loading = list()
     reps_similarity = Node.similarity_score
     pMe = distance.c_hash_metric[config.distance] 
-    left_threshold = [pMe(config.discretized_dataset[0][Node.m_pData[0][i]], Node.left_rep) for i in range(len(Node.m_pData[0]))]
-    right_threshold = [pMe(config.discretized_dataset[1][Node.m_pData[1][i]], Node.right_rep) for i in range(len( Node.m_pData[1]))]
-    left_rep_similarity_to_right_cluster = np.median([pMe(Node.left_rep, config.discretized_dataset[1][Node.m_pData[1][i]]) for i in range(len(Node.m_pData[1]))])
-    right_rep_similarity_to_left_cluster = np.median([pMe(Node.right_rep, config.discretized_dataset[0][Node.m_pData[0][i]]) for i in range(len(Node.m_pData[0]))])
+    left_threshold = [pMe(config.parsed_dataset[0][Node.m_pData[0][i]], Node.left_rep) for i in range(len(Node.m_pData[0]))]
+    right_threshold = [pMe(config.parsed_dataset[1][Node.m_pData[1][i]], Node.right_rep) for i in range(len( Node.m_pData[1]))]
+    left_rep_similarity_to_right_cluster = np.median([pMe(Node.left_rep, config.parsed_dataset[1][Node.m_pData[1][i]]) for i in range(len(Node.m_pData[1]))])
+    right_rep_similarity_to_left_cluster = np.median([pMe(Node.right_rep, config.parsed_dataset[0][Node.m_pData[0][i]]) for i in range(len(Node.m_pData[0]))])
     for i in range(len(Node.m_pData[1])):
-        if right_threshold[i]< (right_rep_similarity_to_left_cluster):# - np.std(right_threshold)):#scipy.stats.spearmanr(config.discretized_dataset[1][Node.m_pData[1][i]], Node.right_rep)[1] >.05:# 
+        if right_threshold[i]< (right_rep_similarity_to_left_cluster):# - np.std(right_threshold)):#scipy.stats.spearmanr(config.parsed_dataset[1][Node.m_pData[1][i]], Node.right_rep)[1] >.05:# 
             counter += 1
             temp_right_loading.append(i)
             #print "right:", Node.get_right_loading()
@@ -273,7 +273,7 @@ def is_representative(Node, pvalue_threshold, decomp):
     temp_left_loading = list()
     for i in range(len(Node.m_pData[0])):
         if left_threshold[i]< (left_rep_similarity_to_right_cluster):# - np.std(left_threshold)): 
-        #scipy.stats.spearmanr(config.discretized_dataset[0][Node.m_pData[0][i]], Node.right_rep)[1] >.05:
+        #scipy.stats.spearmanr(config.parsed_dataset[0][Node.m_pData[0][i]], Node.right_rep)[1] >.05:
             temp_left_loading.append(i)
             #print "after:", temp_left_loading
             counter += 1
@@ -301,9 +301,9 @@ def stop_decesnding_silhouette_coefficient(Node):
             #print temp_a_features#, [config.Features_order[0][i] for i in temp_a_features]
             temp_a_features.remove(a_feature)
             a = np.mean([1.0 - config.Distance[0][i][j] for i,j in product([a_feature], temp_a_features)])
-            #a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[0][i], config.discretized_dataset[0][j]))
+            #a = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[0][i], config.parsed_dataset[0][j]))
             #             for i,j in product([a_feature], temp_a_features)])
-        b = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[0][i], config.discretized_dataset[1][j])) 
+        b = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[0][i], config.parsed_dataset[1][j])) 
                     for i,j in product([a_feature], cluster_b)])
         s = (b-a)/max([a,b])
         silhouette_coefficient_A.append(s)
@@ -314,10 +314,10 @@ def stop_decesnding_silhouette_coefficient(Node):
             temp_a_features = cluster_b[:]
             temp_a_features.remove(a_feature)
             a = np.mean([1.0 - config.Distance[1][i][j] for i,j in product([a_feature], temp_a_features)])
-            #a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[1][i], config.discretized_dataset[1][j]))
+            #a = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[1][i], config.parsed_dataset[1][j]))
             #             for i,j in product([a_feature], temp_a_features)])
                
-        b = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[1][i], config.discretized_dataset[0][j])) 
+        b = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[1][i], config.parsed_dataset[0][j])) 
                     for i,j in product([a_feature], cluster_a)])
         s = (b-a)/max([a,b])
         #print 's a', s, a, b
@@ -350,11 +350,11 @@ def stop_and_reject(Node):
     if len(Node.m_pData[0]) == 1:
         left_all_sim = [1.0]
     else:
-        left_all_sim = [pMe(config.discretized_dataset[0][i], config.discretized_dataset[0][j]) for i,j in combinations(Node.m_pData[0], 2)]
+        left_all_sim = [pMe(config.parsed_dataset[0][i], config.parsed_dataset[0][j]) for i,j in combinations(Node.m_pData[0], 2)]
     if len(Node.m_pData[1]) == 1:
         right_all_sim = [1.0]
     else:
-        right_all_sim = [pMe(config.discretized_dataset[1][i], config.discretized_dataset[1][j]) for i,j in combinations(Node.m_pData[1],2)]
+        right_all_sim = [pMe(config.parsed_dataset[1][i], config.parsed_dataset[1][j]) for i,j in combinations(Node.m_pData[1],2)]
     diam_A_r = ((1.0 - math.fabs(min(left_all_sim))))# - math.fabs((1.0 - max(left_all_sim))))
     diam_B_r = ((1.0 - math.fabs(min(right_all_sim))))# - math.fabs((1.0 - max(right_all_sim))))
     if config.verbose == 'DEBUG':
@@ -1188,7 +1188,7 @@ def descending_silhouette_coefficient(cluster, dataset_number):
     from copy import deepcopy
     for a_cluster in all_a_clusters:
         if len(all_a_clusters) ==1:
-            # math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j])
+            # math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j])
             a = np.mean([1.0 - config.Distance[dataset_number][i][j] for i,j in product([a_cluster], all_a_clusters)])
         else:
             temp_all_a_clusters = all_a_clusters[:]#deepcopy(all_a_clusters)
@@ -1207,14 +1207,14 @@ def descending_silhouette_coefficient(cluster, dataset_number):
     for b_cluster in all_b_clusters:
         if len(all_b_clusters) ==1:
             
-            a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j])) for i,j in product([b_cluster], all_b_clusters)])
+            a = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j])) for i,j in product([b_cluster], all_b_clusters)])
         else:
             temp_all_b_clusters = all_b_clusters[:]#deepcopy(all_a_clusters)
             #print 'before', all_a_clusters
             temp_all_b_clusters.remove(b_cluster)
             #print 'after', all_a_clusters
-            a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j])) for i,j in product([b_cluster], temp_all_b_clusters)])            
-        b = np.mean([1.0 -  math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j])) for i,j in product([b_cluster], all_a_clusters)])
+            a = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j])) for i,j in product([b_cluster], temp_all_b_clusters)])            
+        b = np.mean([1.0 -  math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j])) for i,j in product([b_cluster], all_a_clusters)])
         s = (b-a)/max([a,b])
         #print 's b', s
         s_all_b.append(s)
@@ -1255,10 +1255,10 @@ def silhouette_coefficient(clusters, dataset_number):
                 #print 'before', all_a_clusters
                 temp_a_features.remove(a_feature)
                 #print 'a feature ', a_feature, temp_a_features
-                #a = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j]))
+                #a = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j]))
                 #             for i,j in product([a_feature], temp_a_features)])
                 a = np.mean([config.Distance[dataset_number][i][j] for i,j in product([a_feature], temp_a_features)])            
-            #b = np.mean([1.0 - math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j])) 
+            #b = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j])) 
              #            for i,j in product([a_feature], cluster_b)])
             b1 = np.mean([ config.Distance[dataset_number][i][j] for i,j in product([a_feature], cluster_b)])
             b2 = np.mean([ config.Distance[dataset_number][i][j] for i,j in product([a_feature], cluster_b_2)])
@@ -1385,8 +1385,8 @@ def get_homogenous_clusters(cluster, dataset_number, prev_silhouette_coefficient
     #print [cluster.pre_order(lambda x: x.id) for cluster in sub_homogenous_clusters]
     return sub_homogenous_clusters
     
-    #cluster_medoid = config.discretized_dataset[dataset_number][cluster_features[len(cluster_features)-1]]
-    all_sim = [math.fabs(pMe(config.discretized_dataset[dataset_number][i], config.discretized_dataset[dataset_number][j])) for i,j in combinations(cluster_features, 2)]
+    #cluster_medoid = config.parsed_dataset[dataset_number][cluster_features[len(cluster_features)-1]]
+    all_sim = [math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j])) for i,j in combinations(cluster_features, 2)]
     #print "all_sim ", all_sim
     #all_sim = [1.0 - config.D[dataset_number][i][j] for i,j in combinations(cluster_features, 2)]
     #print "all_sim ",all_sim
@@ -1402,7 +1402,7 @@ def get_homogenous_clusters(cluster, dataset_number, prev_silhouette_coefficient
     except:
         pass
         '''
-    #all_dist = [math.fabs(pMe(config.discretized_dataset[dataset_number][i], cluster_medoid)) for i in cluster_features[0: len(cluster_features)-1]]
+    #all_dist = [math.fabs(pMe(config.parsed_dataset[dataset_number][i], cluster_medoid)) for i in cluster_features[0: len(cluster_features)-1]]
     #clutser_95_percentile = np.percentile(dist_to_medoid,50)
     #print math.sqrt(len(A))
     #print "A ",A
@@ -1603,8 +1603,8 @@ pHashMethods = {"permutation" : stats.permutation_test,
 strMethod = config.randomization_method
 pMethod = pHashMethods[strMethod]
 def _actor(pNode):
-    dataset1 = config.discretized_dataset[0]
-    dataset2 = config.discretized_dataset[1]
+    dataset1 = config.parsed_dataset[0]
+    dataset2 = config.parsed_dataset[1]
     """
     Performs a certain action at the node
     
@@ -1637,8 +1637,8 @@ def _actor(pNode):
     
     return dP        
 def naive_all_against_all():
-    dataset1 = config.discretized_dataset[0]
-    dataset2 = config.discretized_dataset[1]
+    dataset1 = config.parsed_dataset[0]
+    dataset2 = config.parsed_dataset[1]
     seed = config.seed
     p_adjusting_method = config.p_adjust_method
     decomposition = config.decomposition
@@ -1887,8 +1887,8 @@ def layerwise_all_against_all(pClusterNode1, pClusterNode2, dataset1, dataset2, 
 
 def hypotheses_testing():
     pTree = config.meta_hypothesis_tree
-    dataset1 = config.discretized_dataset[0]
-    dataset2 = config.discretized_dataset[1]
+    dataset1 = config.parsed_dataset[0]
+    dataset2 = config.parsed_dataset[1]
     """
     pTree, dataset1, dataset2, seed, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
     iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness = None, fAlpha=0.05, apply_bypass = True, discretize_style= 'equal-area'

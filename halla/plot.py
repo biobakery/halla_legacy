@@ -7,22 +7,27 @@ including all graphics and 'data object to plot' transformations.
 
 
 
-# import dot_parser
-import pylab
 import sys
-from . import distance
-import scipy.cluster 
-from scipy.cluster.hierarchy import linkage, to_tree
-from scipy.spatial.distance import pdist, squareform
-from matplotlib.pyplot import xlabel
-# import pydot
+import scipy
+import pylab
+from array import array
 import math
 import pandas as pd
 import numpy as np
+from numpy.matlib import rand
 import matplotlib.pyplot as plt
-from . import config
+import scipy.cluster 
+from scipy.cluster.hierarchy import linkage, to_tree
+from scipy.spatial.distance import pdist, squareform
+import scipy.cluster.hierarchy as sch
 import matplotlib
+from matplotlib.pyplot import xlabel
 from itertools import product
+
+from . import config
+from . import distance
+from . import stats
+
 #matplotlib.style.use('ggplot')
 #matplotlib.use( "Agg" )
 def plot_box(data, alpha=.1 , figure_name='HAllA_Evaluation', xlabel = 'Methods', ylabel=None, labels=None):
@@ -192,9 +197,7 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
     #plt.show()
     # return plt
 def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='./hierarchical_heatmap2', metric = "nmi", method = "single", colLable = True, rowLabel = True, color_bar = False):
-    import scipy
-    import pylab
-    import scipy.cluster.hierarchy as sch
+    
     if len(pArray2) == 0:
         pArray2 = pArray1
         ylabels = xlabels
@@ -282,25 +285,9 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     pylab.close()
         
 def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.distance, method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True, dataset_number = None):
-    import scipy
-    import pylab
-    # import dot_parser
-    import scipy.cluster.hierarchy as sch
-    from numpy.matlib import rand
-    from array import array
-    pArray =  Data
     # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
-    '''if len(D) == 0: 
-        # Generate random features and distance matrix.
-        print "The distance matrix is empty. The function generates a random matrix."
-        x = scipy.rand(4)
-        D = scipy.zeros([4, 4])
-        for i in range(4):
-            for j in range(i, 4):
-                D[i, j] = abs(x[i] - x[j])
-                D[j, i] = D[i, j]
-     '''      
-       
+
+    pArray =  Data
     fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(pArray[0])/5.0)),(math.ceil(len(pArray)/5.0))))
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)
     ax1.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
@@ -355,10 +342,8 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
     else:
         myColor = pylab.cm.RdBu_r
     
-    if dataset_number !=None:
-        im = axmatrix.matshow(config.discretized_dataset[dataset_number], aspect='auto', origin='lower', cmap=myColor)
-    else:
-        im = axmatrix.matshow(pArray, aspect='auto', origin='lower', cmap=myColor)#YlGnBu
+    scaled_values = stats.scale_data(pArray, scale = 'sqrt')
+    im = axmatrix.matshow(scaled_values, aspect='auto', origin='lower', cmap=myColor)#YlGnBu
     if colLable:
         if len(ylabels) == len(idx2):
             label2 = [ylabels[i] for i in idx2]
@@ -386,15 +371,21 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
             label1 = [xlabels[i] for i in idx1]
         else:
             label1 = idx1
-        axmatrix.set_yticks(range(len(idx1)))
-        axmatrix.set_yticklabels(label1, minor=False)
         axmatrix.yaxis.set_label_position('right')
+        axmatrix.set_yticklabels(label1, minor=False)
+        axmatrix.set_yticks(range(len(idx1)))
         axmatrix.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
         axmatrix.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
         axmatrix.yaxis.tick_right()
         #pylab.yticks(rotation=0, fontsize=6)
-    if color_bar:   
-        axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
+    if color_bar:
+        l = 0.91
+        b = 0.71
+        w = 0.02
+        h = 0.2
+        rect = l,b,w,h
+        axcolor = fig.add_axes(rect)
+        #axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
         fig.colorbar(im, cax=axcolor)
         #pylab.colorbar(ax=axmatrix) 
         #axmatrix.get_figure().colorbar(im, ax=axmatrix)
