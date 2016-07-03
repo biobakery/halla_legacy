@@ -47,7 +47,7 @@ def scale_data(X, scale = 'log'):
 	if scale == 'sqrt':
 		y = numpy.sqrt(numpy.abs(X)) * numpy.sign(X)
 	elif scale =='log':
-		y = numpy.log(numpy.abs(X)) * numpy.sign(X)
+		y = numpy.abs(numpy.log(numpy.abs(X))) * numpy.sign(X) 
 	return y 
 def pvalues2qvalues ( pvalues, adjusted=False ):
     n = len( pvalues )

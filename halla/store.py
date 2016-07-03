@@ -585,13 +585,13 @@ def _report():
             [writer.writerow(r) for r in similarity_score] 
         '''
         
-        anottation_cell = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))                
-        for i in range(len(config.Features_order[0])):
-            for j in range(len(config.Features_order[1])):
-                association_num = _is_in_an_assciostions(config.Features_order[0][i],config.Features_order[1][j])
-                #print association_num
-                if association_num > 0: #for association in sorted_associations:
-                    anottation_cell[i][j] = association_num
+        #anottation_cell = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))                
+        #for i in range(len(config.Features_order[0])):
+        #    for j in range(len(config.Features_order[1])):
+        #        association_num = _is_in_an_assciostions(config.Features_order[0][i],config.Features_order[1][j])
+        #        #print association_num
+        #        if association_num > 0: #for association in sorted_associations:
+        #            anottation_cell[i][j] = association_num
                     
         circos_tabel = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))
         for i in range(len(config.Features_order[0])):
@@ -603,7 +603,7 @@ def _report():
                         circos_tabel[i][j] = 0
         logger.write_circos_table(circos_tabel, str(config.output_dir)+"/" +"circos_table_"+ config.distance+".txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
         logger.write_table(similarity_score,str(config.output_dir)+"/" + "similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
-        logger.write_table(anottation_cell,str(config.output_dir)+"/" + "association_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
+        #logger.write_table(anottation_cell,str(config.output_dir)+"/" + "association_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
         return
     def _heatmap_associations_R():
         if len(associated_feature_X_indecies) == 0 or len(associated_feature_Y_indecies) == 0 :
