@@ -858,6 +858,7 @@ def run():
     csvw.writerow(["Applied stop condition : ", config.apply_stop_condition]) 
     csvw.writerow(["Discretizing method : ", config.strDiscretizing])
     csvw.writerow(["Seed number: ", config.seed]) 
+    csvw.writerow(["Number of permutations iterations for estamting pvalues: ", config.iterations]) 
     csvw.writerow(["Minimum enropy for filterng threshold : ", config.entropy_threshold])
     csvw.writerow([])
     #name_features()
