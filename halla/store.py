@@ -541,7 +541,6 @@ def _report():
     def _write_hallagram_info():
         if len(associated_feature_X_indecies) == 0 or len(associated_feature_Y_indecies) == 0 :
             return
-        from scipy.stats.stats import pearsonr
         global associated_feature_X_indecies
         Xs = list(set(associated_feature_X_indecies)) 
         
@@ -608,7 +607,6 @@ def _report():
     def _heatmap_associations_R():
         if len(associated_feature_X_indecies) == 0 or len(associated_feature_Y_indecies) == 0 :
             return
-        from scipy.stats.stats import pearsonr
         global associated_feature_X_indecies
         Xs = list(set(associated_feature_X_indecies)) 
         
@@ -722,7 +720,6 @@ def _report():
     def _heatmap_datasets_R():
         if config.hallagram:          
             print "--- plotting heatmap datasets using R ..."
-            from scipy.stats.stats import pearsonr
             X_indecies = len(config.aFeatureNames1)
             X_labels = np.array([config.aFeatureNames1[i] for i in range(X_indecies)])
             Y_indecies = len(config.aFeatureNames2)

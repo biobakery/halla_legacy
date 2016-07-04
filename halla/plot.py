@@ -341,8 +341,8 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
         myColor = pylab.cm.YlGnBu   
     else:
         myColor = pylab.cm.RdBu_r
-    
-    scaled_values = stats.scale_data(pArray, scale = 'sqrt')
+    scale = 'sqrt'
+    scaled_values = stats.scale_data(pArray, scale = scale)
     im = axmatrix.matshow(scaled_values, aspect='auto', origin='lower', cmap=myColor)#YlGnBu
     if colLable:
         if len(ylabels) == len(idx2):
@@ -379,14 +379,14 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
         axmatrix.yaxis.tick_right()
         #pylab.yticks(rotation=0, fontsize=6)
     if color_bar:
-        l = 0.91
+        l = 0.2
         b = 0.71
         w = 0.02
         h = 0.2
         rect = l,b,w,h
         axcolor = fig.add_axes(rect)
         #axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
-        fig.colorbar(im, cax=axcolor)
+        fig.colorbar(im, cax=axcolor, label=str(config.distance).upper()+" ("+scale+")" )
         #pylab.colorbar(ax=axmatrix) 
         #axmatrix.get_figure().colorbar(im, ax=axmatrix)
     #plt.tight_layout()
