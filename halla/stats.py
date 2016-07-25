@@ -741,14 +741,14 @@ def estimate_p_value(observed_value, random_distribution):
     	#genpareto.cdf(random_distribution, observed_value)
         return float(num_exceedances) / num_permutations
 def null_fun(X, Y):
-	strMetric = config.distance
+	strMetric = config.similarity_method
 	pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
 	pMe = pHashMetric[strMetric]
 	return math.fabs(pMe(X, numpy.random.permutation(Y)))
 def permutation_test_pvalue(X, Y):
 	 
-	strMetric = config.distance 
+	strMetric = config.similarity_method 
 	seed = config.seed
 	iIter = config.iterations
 	# step 5 in a case of new decomposition method
@@ -834,7 +834,7 @@ def permutation_test_pvalue(X, Y):
 		fP = _calculate_pvalue(iter)
 	
 	else:
-		fP = nonparametric_test_pvalue(fAssociation, X, Y)
+		fP = nonparametric_test_pvalue(X, Y)
 	#print "Estimated P-value:",fP
 	'''import matplotlib.pyplot as plt
 	print sim_score, fP 
@@ -853,7 +853,7 @@ def generate_null_dist(X, Y):
 	def _permutation(pVec):
 		return numpy.random.permutation(pVec)
 
-	pMe = pHashMetric[config.distance]
+	pMe = pHashMetric[config.similarity_method]
 	aDist = []
 	for i in xrange(config.iterations):
 		numpy.random.seed(i+config.seed)
@@ -868,7 +868,7 @@ def permutation_test_by_representative(pArray1, pArray2):
 	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 1000
 
 	"""
-	metric = config.distance
+	metric = config.similarity_method
 	decomposition = config.decomposition
 	iIter=config.iterations
 	seed = config.seed
@@ -881,7 +881,7 @@ def permutation_test_by_representative(pArray1, pArray2):
 	
 
 	pDe = pHashDecomposition[config.decomposition]
-	pMe = pHashMetric[config.distance] 
+	pMe = pHashMetric[config.similarity_method] 
 	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	#aDist = [] 
 	left_rep_variance = 1.0
@@ -2054,7 +2054,6 @@ def estimate_tail_gpd(samples):
 	# but definitely no more than N-1
 	# This is only problematic if N is < Nexc*2, which should never be the case
 	Nexc = min(len(samples)-1, max(minNexc, min(Nexc, int(math.floor(len(samples)/2)))))
-	
 	while True:
 		# Fit the GPD to the samples
 		subsamples = sorted_samples[-Nexc:]
@@ -2090,14 +2089,12 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 	# Get M, the number of null samples greater than x
 	M = len([1 for v in null_samples if v > x])  # or v >= x 
 	N = len(null_samples)
-	
 	# Use the ECDF to approximate p-values if M > 10
-	if M >= 10:# or N < 100:
+	if M >= 10 :#or N < 100:
 		return float(M)/float(N)
 
 	# Estimate the generalized pareto distribtion from tail samples
 	if not config.use_one_null_dist or config.gp == None or regenrate_GPD_flag:
-		
 		try:
 			#null_samples = list(set(null_samples))
 			(gp, Nexc) = estimate_tail_gpd(null_samples)
@@ -2114,17 +2111,7 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 	#if sf_result == 1:
 		#print sf_result, N, Nexc
 	if math.isnan(float(sf_result)) or sf_result == 1.0:
-		print "WARNING: the number of permutation for null samples wasn't enough and it's doubled!"
-		print "This could happen when you have features with low variation or zero variation!"
-		#sample_increments = 50
-		if regenrate_GPD_flag:
-			return float(M)/float(N)
-		# Double the number of null samples for statistic if the intintazted number of samples wasn't enough.
-		config.nullsamples = list(set([null_fun(X, Y) for val in range(0,len(config.nullsamples))] + config.nullsamples))
-		try:
-			return estimate_pvalue(x, config.nullsamples, X=X, Y=Y, regenrate_GPD_flag = True)
-		except ArithmeticError, ValueError:
-			return float(M)/float(N)
+		return float(M)/float(N)
 	else:	
 		#print "final pvalue", (Nexc*1.0 / N) * sf_result
 		return (float(Nexc) / float(N)) * sf_result
@@ -2153,14 +2140,26 @@ def prob_pvalue_lt_samples(alpha, x, null_samples):
 	"""
 	return prob_pvalue_lt(alpha, len([1 for v in null_samples if v > x]), len(null_samples))
 
-def nonparametric_test_pvalue(x, X, Y, alpha_cutoff = 0.05):
+def nonparametric_test_pvalue(X, Y, similarity_method = None,  alpha_cutoff = 0.05):
 	"""
 	Performs a permutation test of the significance of x, given the function
 	to sample the null distribution null_fun.
 	This function will exit early if it becomes clear that the p-value will
 	be greater than alpha_cutoff. In this case, the current approximation
 	of the p-value is returned.
+	input:
+	 X: first vector
+	 Y: second vector
+	 similarity_method: the similarity method to be used
 	"""
+	
+	# calculate imilarity between to orginal features
+	if similarity_method == None:
+		similarity_method = config.similarity_method
+		
+	pMe = distance.c_hash_metric[similarity_method]
+	sim_score = pMe(X, Y)
+	sim_score = math.fabs(sim_score)
 	# The number of null samples to start with
 	start_samples = 100
 	# Number of null samples to gather in each round
@@ -2171,19 +2170,18 @@ def nonparametric_test_pvalue(x, X, Y, alpha_cutoff = 0.05):
 	
 	# Sample the null distribution until we've got enough to estimate the tail
 	# or if we're sure that the actual p-value is greater than the alpha cutoff
-	if not config.use_one_null_dist or len(config.nullsamples) == 0:
+	if len(config.nullsamples) == 0 or not config.use_one_null_dist:
 		nullsamples = [null_fun(X, Y) for val in range(0,start_samples)]
-		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(config.q, x, nullsamples) > .01:
+		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(config.q, sim_score, nullsamples) > .01:
 			#print("Gathering more.. N = %d; P(p<%f) = %.2f" % (len(nullsamples), config.q, prob_pvalue_lt_samples(config.q, x, nullsamples)))
 			nullsamples = [null_fun(X, Y) for val in range(0,sample_increments)] + nullsamples
-			config.nullsamples = nullsamples
+		config.nullsamples = nullsamples
 	else:
 		nullsamples = config.nullsamples
 		
-		
 	#print("Finished gathering: N = %d; P(p<%f) = %f" % (len(nullsamples), alpha_cutoff, prob_pvalue_lt_samples(alpha_cutoff, x, nullsamples)))
 	# Estimate the p-value from the current set of samples
-	return estimate_pvalue(x, nullsamples, X=X, Y=Y)
+	return estimate_pvalue(x = sim_score, null_samples = config.nullsamples, X=X, Y=Y)
 
 
 	

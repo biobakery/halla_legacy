@@ -26,7 +26,42 @@ def wrap_features(txt, width=40):
 		else:
 			txt = txt[0]
 		return txt #'\n'.join(textwrap.wrap(txt, width))
-
+def load(file):
+	# Read in the file
+	try:
+		file_handle=open(file)
+	except EnvironmentError:
+		sys.exit("Error: Unable to read file: " + file)
+		
+	csvr = csv.reader(file_handle, csv.excel_tab)
+	
+	# Ignore comment lines in input file
+	data=[]
+	comments=[]
+	for line in csvr:
+		# Add comment to list
+		if re.match("#",line[0]):
+			comments.append(line)
+		else:
+			# First data line found
+			data=[line]
+			break
+		
+	# Check if last comment is header
+	if comments:
+		header=comments[-1]
+		# if the same number of columns then last comment is header
+		if len(header) == len(data[0]):
+			data=[header,data[0]]
+			
+	# finish processing csv
+	for line in csvr:
+		data.append(line)
+		
+	# close csv file
+	file_handle.close()
+		
+	return np.array(data)
 class Input:
 	"""
 	
@@ -96,45 +131,8 @@ class Input:
 			(self.discretized_dataset2, self.orginal_dataset2, self.outName2, self.outType2, self.outHead2)] 
 		
 	def _load(self):
-		def __load(file):
-			# Read in the file
-			try:
-				file_handle=open(file)
-			except EnvironmentError:
-				sys.exit("Error: Unable to read file: " + file)
-				
-			csvr = csv.reader(file_handle, csv.excel_tab)
-			
-			# Ignore comment lines in input file
-			data=[]
-			comments=[]
-			for line in csvr:
-				# Add comment to list
-				if re.match("#",line[0]):
-					comments.append(line)
-				else:
-					# First data line found
-					data=[line]
-					break
-				
-			# Check if last comment is header
-			if comments:
-				header=comments[-1]
-				# if the same number of columns then last comment is header
-				if len(header) == len(data[0]):
-					data=[header,data[0]]
-					
-			# finish processing csv
-			for line in csvr:
-				data.append(line)
-				
-			# close csv file
-			file_handle.close()
-				
-			return np.array(data)
-		
-		self.orginal_dataset1 = __load(self.strFileName1)
-		self.orginal_dataset2 = __load(self.strFileName2)
+		self.orginal_dataset1 = load(self.strFileName1)
+		self.orginal_dataset2 = load(self.strFileName2)
 		
 	
 	def _discretize(self):
@@ -173,14 +171,14 @@ class Input:
 			for i, line in enumerate(pArray):
 				# *   If the line is not full,  replace the Nones with nans                                           *
 				#***************************************************************************************************** 
-				if config.missing_method is  None and not distance.c_hash_association_method_discretize[config.distance]:
+				if config.missing_method is  None and not distance.c_hash_association_method_discretize[config.similarity_method]:
 					warn_message ="There is missing data in feature "+  aNames[i]+"!!! " + "Try --missing-method=method to choose your filling strategy. "
 					line = map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) 
 										else sys.exit(warn_message )), line)  ###### np.nan Convert missings to nans
 				else:
 					line = map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else np.nan ), line)  ###### np.nan Convert missings to nans
 					#line = df1 = pd.DataFrame(line)
-					if not distance.c_hash_association_method_discretize[config.distance]:
+					if not distance.c_hash_association_method_discretize[config.similarity_method]:
 						try:
 							line = imp.transform(line)[0]
 						except:

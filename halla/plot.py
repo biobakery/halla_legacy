@@ -284,7 +284,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     fig.savefig(filename + '.pdf')
     pylab.close()
         
-def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.distance, method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True, dataset_number = None):
+def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.similarity_method, method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True, dataset_number = None):
     # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
 
     pArray =  Data
@@ -337,7 +337,7 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
             #pass
             pArray = pArray[:, xlabels_order]
     myColor =  pylab.cm.YlOrBr
-    if distance.c_hash_association_method_discretize[config.distance]:
+    if distance.c_hash_association_method_discretize[config.similarity_method]:
         myColor = pylab.cm.YlGnBu   
     else:
         myColor = pylab.cm.RdBu_r
@@ -386,7 +386,7 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
         rect = l,b,w,h
         axcolor = fig.add_axes(rect)
         #axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
-        fig.colorbar(im, cax=axcolor, label=str(config.distance).upper()+" ("+scale+")" )
+        fig.colorbar(im, cax=axcolor, label=str(config.similarity_method).upper()+" ("+scale+")" )
         #pylab.colorbar(ax=axmatrix) 
         #axmatrix.get_figure().colorbar(im, ax=axmatrix)
     #plt.tight_layout()

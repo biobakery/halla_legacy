@@ -108,7 +108,7 @@ def check_requirements():
             "Please select another directory.")
         
     print("Output files will be written to: " + output_dir) 
-    if config.distance =='mic':
+    if config.similarity_method =='mic':
         try: 
             import minepy
         except ImportError: 
@@ -131,7 +131,7 @@ def parse_arguments (args):
     Parse the arguments from the user
     """
     argp = argparse.ArgumentParser(
-        description="Hierarchical All-against-All significance association testing",
+        description="HAllA: Hierarchical All-against-All significance association testing",
         formatter_class=argparse.RawTextHelpFormatter,
         prog="halla")
     argp.add_argument(
@@ -159,7 +159,7 @@ def parse_arguments (args):
 
     argp.add_argument(
         "-q", "--q-value",
-        metavar="<0.2>",
+        metavar="<.1>",
         dest="dQ",
         type=float,
         default=0.1,
@@ -197,7 +197,7 @@ def parse_arguments (args):
     argp.add_argument(
         "-m","--metric",
         dest="strMetric",
-        default="nmi",
+        default="spearman",
         choices=["nmi","ami","mic","dmic","dcor","pearson", "spearman"],
         help="metric to be used for similarity measurement\n[default = nmi]")
     
@@ -257,33 +257,32 @@ def parse_arguments (args):
         default=None,
         help="the number of bins\n[default = None]")
     argp.add_argument(
-        "-s", "--seed",  
-        metavar="<random>",
+        "-s", "--seed",
         type=int,
         default= 0,#random.randint(1,10000),
         help="a seed number to make the random permutation reproducible\n[default = 0,and -1 for random number]")
     argp.add_argument(
         "-e", "--entropy",
-        metavar="<0.0>",
         dest="dEntropy",
         type=float,
         default=0.0,
         help="Minimum entropy threshold to filter features with low information\n[default = 0.5]")
     argp.add_argument(
-        "--missing-char", metavar="<None>",
+        "--missing-char",
         dest ="missing_char",
         default=None,
         help="defines missing characters\n[default = " "]")
     argp.add_argument(
-        "--missing-method", metavar="<None>",
+        "--missing-method",
         dest ="missing_method",
-        choices=["mean", "median", "most_frequent"],
         default=None,
-        help="defines missing strategy to fill missing data.\n for categorical data puts all missing data in one new category \n")
+        choices=["mean", "median", "most_frequent"],
+        help="defines missing strategy to fill missing data.\nFor categorical data puts all missing data in one new category.")
     return argp.parse_args()
 
 def set_parameters(args):
-    config.distance = args.strMetric.lower() 
+    config.similarity_method = args.strMetric.lower()
+    print  config.similarity_method 
     config.decomposition = args.strDecomposition.lower()
     #config.fdr_function = args.strFDR
     config.q = args.dQ  
@@ -326,17 +325,17 @@ def set_parameters(args):
         
     aOut1, aOut2 = parser.Input (config.strFile1.name, config.strFile2.name, headers=args.header).get()
     config.hallagram = args.hallagram
-    (config.discretized_dataset[0], config.original_dataset[0], config.aFeatureNames1, config.aOutType1, config.aSampleNames1) = aOut1 
-    (config.discretized_dataset[1], config.original_dataset[1], config.aFeatureNames2, config.aOutType2, config.aSampleNames2) = aOut2 
+    (config.discretized_dataset[0], config.original_dataset[0], config.FeatureNames[0], config.aOutType1, config.SampleNames[0]) = aOut1 
+    (config.discretized_dataset[1], config.original_dataset[1], config.FeatureNames[1], config.aOutType2, config.SampleNames[1]) = aOut2 
     #config.meta_feature = array([config.original_dataset[0], config.original_dataset[1]])
     
     config.iterations = args.iIter
     '''if args.strAdjust.lower() == "bhy":
-        config.iterations = max([args.iIter, 10*len(config.aFeatureNames1)*len(config.aFeatureNames2)])
+        config.iterations = max([args.iIter, 10*len(config.FeatureNames[0])*len(config.FeatureNames[1])])
     else:
         config.iterations = args.iIter '''
     
-def _main():
+def main():
     
     # Parse arguments from command line
     args=parse_arguments(sys.argv)
@@ -350,5 +349,5 @@ def _main():
     aaOut = store.run()	
     
 if __name__ == '__main__':
-	_main()
+	main()
 

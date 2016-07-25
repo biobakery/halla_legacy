@@ -20,6 +20,7 @@ from . import distance
 from . import stats
 from . import plot
 from . import config
+from . import logger
 from __builtin__ import True
 from matplotlib.sankey import RIGHT
 from itertools import product, combinations
@@ -255,7 +256,7 @@ def is_representative(Node, pvalue_threshold, decomp):
     counter = 0
     temp_right_loading = list()
     reps_similarity = Node.similarity_score
-    pMe = distance.c_hash_metric[config.distance] 
+    pMe = distance.c_hash_metric[config.similarity_method] 
     left_threshold = [pMe(config.parsed_dataset[0][Node.m_pData[0][i]], Node.left_rep) for i in range(len(Node.m_pData[0]))]
     right_threshold = [pMe(config.parsed_dataset[1][Node.m_pData[1][i]], Node.right_rep) for i in range(len( Node.m_pData[1]))]
     left_rep_similarity_to_right_cluster = np.median([pMe(Node.left_rep, config.parsed_dataset[1][Node.m_pData[1][i]]) for i in range(len(Node.m_pData[1]))])
@@ -285,7 +286,7 @@ def is_representative(Node, pvalue_threshold, decomp):
     return True
 def stop_decesnding_silhouette_coefficient(Node):
    
-    pMe = distance.c_hash_metric[config.distance]
+    pMe = distance.c_hash_metric[config.similarity_method]
     silhouette_scores = []
  
     cluster_a = Node.m_pData[0]
@@ -345,7 +346,7 @@ def stop_and_reject(Node):
     counter = 0
     temp_right_loading = list()
     reps_similarity = Node.similarity_score
-    pMe = distance.c_hash_metric[config.distance] 
+    pMe = distance.c_hash_metric[config.similarity_method] 
     diam_Ar_Br = (1.0 - math.fabs(pMe(Node.left_rep, Node.right_rep)))
     if len(Node.m_pData[0]) == 1:
         left_all_sim = [1.0]
@@ -544,18 +545,32 @@ def hclust(dataset, labels, dataset_number):
     
     #print D.shape,  D
     if config.diagnostics_plot:
-        global fig_num
-        print "--- plotting heatmap for Dataset", str(fig_num)," ... "
-        Z = plot.heatmap(Data = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.distance)+"_" + str(fig_num), method =linkage_method, dataset_number= None)
-        fig_num += 1
+        print "--- plotting heatmap for Dataset", str(dataset_number)," ... "
+        Z = plot.heatmap(Data = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.similarity_method)+"_" + str(dataset_number), method =linkage_method, dataset_number= None)
+        
     else:
         Z = linkage(D, method= linkage_method)
     import scipy.cluster.hierarchy as sch
-    #print  squareform(sch.cophenet(Z))
-    #print sch.dendrogram(Z, orientation='right')['leaves']
-    #print D.shape,  D
+    logger.write_table(data=config.Distance[dataset_number], name=config.output_dir+'/Distance_matrix'+str(dataset_number)+'.tsv', rowheader=config.FeatureNames[dataset_number], colheader=config.FeatureNames[dataset_number])
+    
+    #resoltion_hclust(distance_matrix= D)
     return to_tree(Z) if (bTree and len(dataset)>1) else Z, sch.dendrogram(Z, orientation='right')['leaves'] if len(dataset)>1 else sch.dendrogram(Z)['leaves']
-
+def resoltion_hclust(data=None, distance_matrix=None, number_of_estimated_clusters = None , linkage_method = 'single'):
+    bTree=True
+    if len(distance_matrix) > 0:
+        D = distance_matrix
+    elif  len(data) > 0 :
+        D = pdist(data, metric=distance.pDistance)
+    else:
+        sys.exit("Warning! dataset or distance matrix must be provides!")
+  
+    Z = Z = linkage(D, method= linkage_method) 
+    import scipy.cluster.hierarchy as sch
+    hclust_tree = to_tree(Z) 
+    #clusters = cutree_to_get_below_threshold_number_of_features (hclust_tree, t = estimated_num_clust)
+    clusters = get_homogenous_clusters_silhouette_log(hclust_tree, array(D), number_of_estimated_clusters= number_of_estimated_clusters)
+    #print [cluster.pre_order(lambda x: x.id) for cluster in clusters]
+    return clusters
 def dendrogram(Z):
     return scipy.cluster.hierarchy.dendrogram(Z)
 
@@ -1084,14 +1099,15 @@ def _cutree_overall (clusterNodelist, X, func, distance):
         next_dist = _percentage(numpy.min(aDist))
     # print len(sub_clusters), n            
     return sub_clusters , next_dist
-def cutree_to_get_below_threshold_number_of_features (cluster, t = None):
+def cutree_to_get_below_threshold_number_of_features (cluster, number_of_estimated_clusters = None):
     n_features = cluster.get_count()
 
-    if t == None:
-        t = math.log(n_features, 2)
+    if number_of_estimated_clusters == None:
+        number_of_estimated_clusters = math.log(n_features, 2)
     if n_features==1:# or cluster.dist <= t:
         return [cluster]
     sub_clusters = []
+    #print n_features, t
     #sub_clusters = cutree_to_get_number_of_clusters ([cluster])
     sub_clusters = truncate_tree([cluster], level=0, skip=1)
     
@@ -1100,9 +1116,10 @@ def cutree_to_get_below_threshold_number_of_features (cluster, t = None):
         index = 0
         for i in range(len(sub_clusters)):
             if largest_node.get_count() < sub_clusters[i].get_count():
+                #print largest_node.get_count()
                 largest_node = sub_clusters[i]
                 index = i
-        if largest_node.get_count() > n_features/math.log(n_features,2):
+        if largest_node.get_count() > n_features/number_of_estimated_clusters:
             #sub_clusters.remove(largest_node)
             #sub_clusters = sub_clusters[:index] + sub_clusters[index+1 :]
             del sub_clusters[index]
@@ -1178,7 +1195,7 @@ def cutree_to_get_number_of_clusters (cluster, n = None):
 def descending_silhouette_coefficient(cluster, dataset_number):
     #====check within class homogeniety
     #Ref: http://scikit-learn.org/stable/modules/clustering.html#homogeneity-completeness-and-v-measure
-    pMe = distance.c_hash_metric[config.distance]
+    pMe = distance.c_hash_metric[config.similarity_method]
     sub_cluster = truncate_tree([cluster], level=0, skip=1)
     all_a_clusters = sub_cluster[0].pre_order(lambda x: x.id)
     all_b_clusters = sub_cluster[1].pre_order(lambda x: x.id)
@@ -1221,11 +1238,10 @@ def descending_silhouette_coefficient(cluster, dataset_number):
     if any(val <= 0.0 for val in s_all_b) and not len(s_all_b) == 1:
         return True
     return False
-def silhouette_coefficient(clusters, dataset_number):
+def silhouette_coefficient(clusters, distance_matrix):
     #====check within class homogeniety
     #Ref: http://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
-    #pMe = distance.c_hash_metric[config.distance]
-    
+    #pMe = distance.c_hash_metric[config.Distance]
     silhouette_scores = []
     if len(clusters) <= 1:
         sys.exit("silhouette method needs at least two clusters!")
@@ -1257,11 +1273,11 @@ def silhouette_coefficient(clusters, dataset_number):
                 #print 'a feature ', a_feature, temp_a_features
                 #a = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j]))
                 #             for i,j in product([a_feature], temp_a_features)])
-                a = np.mean([config.Distance[dataset_number][i][j] for i,j in product([a_feature], temp_a_features)])            
+                a = np.mean([distance_matrix[i][j] for i,j in product([a_feature], temp_a_features)])            
             #b = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j])) 
              #            for i,j in product([a_feature], cluster_b)])
-            b1 = np.mean([ config.Distance[dataset_number][i][j] for i,j in product([a_feature], cluster_b)])
-            b2 = np.mean([ config.Distance[dataset_number][i][j] for i,j in product([a_feature], cluster_b_2)])
+            b1 = np.mean([ distance_matrix[i][j] for i,j in product([a_feature], cluster_b)])
+            b2 = np.mean([ distance_matrix[i][j] for i,j in product([a_feature], cluster_b_2)])
             b = min(b1,b2)
             s = (b-a)/max([a,b])
             #print 's a', s, a, b
@@ -1283,7 +1299,7 @@ def wss_heirarchy(clusters, dataset_number):
     
     avgWithinSS = np.sum(wss)#[sum(d)/X.shape[0] for d in dist]
     return avgWithinSS
-def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
+def get_homogenous_clusters_silhouette_log(cluster, distance_matrix, number_of_estimated_clusters=None):
     n = cluster.get_count()
     if n==1:
         return cluster
@@ -1291,7 +1307,7 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
     #t = 1.0 - np.percentile(config.Distance[dataset_number].flatten(), config.q*100 - 1.0/len(config.Distance[dataset_number])*100) #config.cut_distance_thrd
     #print "t",t
     #print "first cut", [cluster.pre_order(lambda x: x.id)]
-    sub_clusters = cutree_to_get_below_threshold_number_of_features(cluster)
+    sub_clusters = cutree_to_get_below_threshold_number_of_features(cluster, number_of_estimated_clusters)
     #cutree_to_get_below_threshold_number_of_features(cluster, t)
     #cutree_to_get_below_threshold_distance_of_clusters(cluster, t)
     
@@ -1299,7 +1315,7 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
     #print "first cut", [a.pre_order(lambda x: x.id) for a in sub_clusters]
    # sub_clusters = cutree_to_get_number_of_clusters([cluster])#truncate_tree([cluster], level=0, skip=1)truncate_tree([cluster], level=0, skip=1)#
     #print "before sil sub:", len(sub_clusters)
-    sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, dataset_number) 
+    sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, distance_matrix) 
     #print sub_silhouette_coefficient
     while True:#len(sub_clusters) < number_of_sub_cluters_threshold and
         min_silhouette_node = sub_clusters[0]
@@ -1321,7 +1337,7 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
         #sub_clusters_to_check = cutree_to_get_below_threshold_number_of_features(min_silhouette_node)
         if len(sub_clusters_to_add) < 2:
             break
-        sub_silhouette_coefficient_to_add = silhouette_coefficient(sub_clusters_to_add, dataset_number)
+        sub_silhouette_coefficient_to_add = silhouette_coefficient(sub_clusters_to_add, distance_matrix)
         #sub_silhouette_coefficient_to_check = silhouette_coefficient(sub_clusters_to_check, dataset_number)
         temp_sub_silhouette_coefficient_to_add = sub_silhouette_coefficient_to_add[:]
         #temp_sub_silhouette_coefficient_to_check = sub_silhouette_coefficient_to_check[:]
@@ -1355,7 +1371,7 @@ def get_homogenous_clusters_silhouette_log(cluster, dataset_number):
     return sub_clusters
 def get_homogenous_clusters(cluster, dataset_number, prev_silhouette_coefficient):
     
-    #pMe = distance.c_hash_metric[config.distance]
+    #pMe = distance.c_hash_metric[config.similarity_method]
     
     cluster_features = cluster.pre_order(lambda x: x.id)
     if len(cluster_features) == 1:
@@ -1366,7 +1382,7 @@ def get_homogenous_clusters(cluster, dataset_number, prev_silhouette_coefficient
         if sub_cluster.get_count() == 1:
             sub_homogenous_clusters.append(sub_cluster)
             sub_clusters.remove(sub_cluster)
-    sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, dataset_number) 
+    sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, distance_matrix) 
     #print sub_silhouette_coefficient
     temp_sub_silhouette_coefficient= sub_silhouette_coefficient[:]
     '''
@@ -1448,7 +1464,7 @@ def cutree_to_get_homogenous_clusters (clusterNodelist, dataset_number):
     #sub_clusters = truncate_tree(clusterNodelist, level=0, skip=1)
     #homogenous_clusters = []
     #for sub_cluster in sub_clusters:
-    homogenous_clusters = get_homogenous_clusters_silhouette_log(clusterNodelist[0], dataset_number)
+    homogenous_clusters = get_homogenous_clusters_silhouette_log(clusterNodelist[0], config.Distance[dataset_number])
     #homogenous_clusters.extend(get_homogenous_clusters(clusterNodelist[0], dataset_number, prev_silhouette_coefficient = -1))
 
     for cluster in homogenous_clusters:
@@ -1459,7 +1475,7 @@ def cutree_to_get_homogenous_clusters (clusterNodelist, dataset_number):
     
 def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="uniform", strLinkage="min", robustness = None):
     
-    func = config.distance
+    func = config.similarity_method
     """
     Couples two data trees to produce a hypothesis tree 
 
@@ -1497,10 +1513,10 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
     Hypothesis_Tree_Root = Hypothesis_Node([data1, data2])
     Hypothesis_Tree_Root.level_number = 0
     # Get the first level homogeneous clusters
-    apChildren0 = get_homogenous_clusters_silhouette_log (apClusterNode0[0], dataset_number = 0)
+    apChildren0 = get_homogenous_clusters_silhouette_log (apClusterNode0[0], config.Distance[0])
     #cutree_to_get_below_threshold_number_of_features(apClusterNode0[0])
     #get_homogenous_clusters_silhouette_log (apClusterNode0[0], dataset_number = 0)
-    apChildren1 = get_homogenous_clusters_silhouette_log (apClusterNode1[0], dataset_number = 1)
+    apChildren1 = get_homogenous_clusters_silhouette_log (apClusterNode1[0], config.Distance[1])
     #cutree_to_get_below_threshold_number_of_features(apClusterNode[0])
     #
     #print "first cut", [a.pre_order(lambda x: x.id) for a in apChildren0]
@@ -1548,14 +1564,14 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
                     #print "******************len: ",len(L)
                 continue
         if not bTauX:
-            apChildren0 = get_homogenous_clusters_silhouette_log(a,0)
+            apChildren0 = get_homogenous_clusters_silhouette_log(a,config.Distance[0])
             #cutree_to_get_number_of_clusters([a])
             #cutree_to_get_below_threshold_number_of_features(a)
             #get_homogenous_clusters_silhouette_log(a,0)
         else:
             apChildren0 = [a]
         if not bTauY:
-            apChildren1 = get_homogenous_clusters_silhouette_log(b,1)#cutree_to_get_number_of_clusters([b])
+            apChildren1 = get_homogenous_clusters_silhouette_log(b,config.Distance[1])#cutree_to_get_number_of_clusters([b])
             #cutree_to_get_below_threshold_number_of_features(b)
             ##
             #get_homogenous_clusters_silhouette_log(b,1)#
@@ -1643,7 +1659,7 @@ def naive_all_against_all():
     p_adjusting_method = config.p_adjust_method
     decomposition = config.decomposition
     method = config.randomization_method
-    metric = config.distance
+    metric = config.similarity_method
     fQ = config.q
     iIter= config.iterations
     discretize_style = config.strDiscretizing

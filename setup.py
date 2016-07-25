@@ -3,7 +3,7 @@ try:
     from setuptools import setup, find_packages
 except ImportError:
     sys.exit("Please install setuptools.")
-VERSION = "0.6.7"
+VERSION = "0.6.8_devel"
 AUTHOR = "Gholamali Rahnavard, Curtis Huttenhower, Huttenhower Lab"
 AUTHOR_EMAIL = "halla-users@googlegroups.com"
 MAINTAINER = "Gholamali Rahnavard"
@@ -44,8 +44,9 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'halla = halla.halla:_main',
-            'hallagram = halla.hallagram:main'
+            'halla = halla.halla:main',
+            'hallagram = halla.hallagram:main',
+            'hallaclust = halla.hallaclust:main'
         ]},
     test_suite= 'halla.tests.halla_test.main',
     zip_safe = False

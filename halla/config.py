@@ -1,6 +1,6 @@
 import random
 from numpy import array
-version = '0.6.7'
+version = '0.6.8_devel'
 __description__      = """
   _    _          _ _          
  | |  | |   /\   | | |   /\    
@@ -24,7 +24,7 @@ keys_attribute = ["__description__", "__version__", "__author__", "__contact__",
 NBIN = None # number of bins specified by user
 NPROC = 1 # number of threads to use 
 
-distance = "nmi"
+similarity_method = "spearman"
 decomposition = "medoid" 
 fdr_function = "level"
 q = .1  
@@ -71,10 +71,8 @@ meta_out = None  # final output array; some methods (e.g. hypotheses_testing) ha
 meta_summary = None  # summary statistics 
 meta_report = None  # summary report 
 aOut = None  # summary output for naive approaches_
-aFeatureNames1 = None 
-aFeatureNames2 = None 
-aSampleNames1 = None
-aSampleNames2 = None
+FeatureNames = array([None, None])
+SampleNames = array([None, None])
 robustness = .5
 strFile1 = None
 strFile2 = None
