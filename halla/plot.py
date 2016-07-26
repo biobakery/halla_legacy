@@ -284,18 +284,22 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     fig.savefig(filename + '.pdf')
     pylab.close()
         
-def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.similarity_method, method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True, dataset_number = None):
+def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.similarity_method, method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True, dataset_number = None):
     # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
 
-    pArray =  Data
-    fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(pArray[0])/5.0)),(math.ceil(len(pArray)/5.0))))
+    if not data_table is None:
+        fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(data_table[0])/5.0)),(math.ceil(len(data_table)/5.0))))
+    else:
+        fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(D)/5.0)+5.0),(math.ceil(len(D)/5.0))+5.0))
+
+        
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)
     ax1.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
     ax1.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
     if len(D) > 0:
         Y1 = sch.linkage(D, method=method)
     else:
-        Y1 = sch.linkage(pArray, metric=distance.pDistance, method=method)
+        Y1 = sch.linkage(data_table, metric=distance.pDistance, method=method)
     if len(Y1) > 1:
         Z1 = sch.dendrogram(Y1, orientation='left')#, labels= xlabels)
     ax1.set_xticks([])
@@ -306,7 +310,9 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
         ax2 = fig.add_axes([0.3, 0.71, 0.6, 0.2], frame_on=True)
         ax2.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
         ax2.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-        Y2 = sch.linkage(pArray.T, metric=distance.pDistance, method=method)
+        Y2 = []
+        if not data_table is None:
+            Y2 = sch.linkage(data_table.T, metric=distance.pDistance, method=method)
         if len(Y2) > 1:
             Z2 = sch.dendrogram(Y2)
         ax2.set_xticks([])
@@ -326,23 +332,30 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
     if len(Y2) > 1:
         idx2 = Z2['leaves']
     else:
-        idx2 = [0]
-    
-    pArray = pArray[idx1, :]
-    if sortCol:
-        if len(xlabels_order) == 0 :
-            pArray = pArray[:, idx2]
-            xlabels_order.extend(idx2)
-        else:
-            #pass
-            pArray = pArray[:, xlabels_order]
+        if len(D) > 0:
+            idx2 = idx1
+        else:            
+            idx2 = [0]
+    if not data_table is None:
+        data_table = data_table[idx1, :]
+        if sortCol:
+            if len(xlabels_order) == 0 :
+                data_table = data_table[:, idx2]
+                xlabels_order.extend(idx2)
+            else:
+                #pass
+                data_table = data_table[:, xlabels_order]
     myColor =  pylab.cm.YlOrBr
     if distance.c_hash_association_method_discretize[config.similarity_method]:
         myColor = pylab.cm.YlGnBu   
     else:
         myColor = pylab.cm.RdBu_r
-    scale = 'sqrt'
-    scaled_values = stats.scale_data(pArray, scale = scale)
+    if not data_table is None:
+        scale = 'sqrt'
+        scaled_values = stats.scale_data(data_table, scale = scale)
+    else:
+        scale = 'sqrt'
+        scaled_values = stats.scale_data(D, scale = scale)
     im = axmatrix.matshow(scaled_values, aspect='auto', origin='lower', cmap=myColor)#YlGnBu
     if colLable:
         if len(ylabels) == len(idx2):
@@ -392,7 +405,7 @@ def heatmap(Data, D=[], xlabels_order = [], xlabels = None, ylabels = [], filena
     #plt.tight_layout()
         
     fig.savefig(filename + '.pdf')
-    #heatmap2(pArray, xlabels = xlabels, filename=filename+"_distance", metric = "nmi", method = "single", )
+    #heatmap2(data_table, xlabels = xlabels, filename=filename+"_distance", metric = "nmi", method = "single", )
     pylab.close()
     return Y1
 

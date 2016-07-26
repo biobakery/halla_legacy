@@ -546,7 +546,7 @@ def hclust(dataset, labels, dataset_number):
     #print D.shape,  D
     if config.diagnostics_plot:
         print "--- plotting heatmap for Dataset", str(dataset_number)," ... "
-        Z = plot.heatmap(Data = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.similarity_method)+"_" + str(dataset_number), method =linkage_method, dataset_number= None)
+        Z = plot.heatmap(data_table = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.similarity_method)+"_" + str(dataset_number), method =linkage_method, dataset_number= None)
         
     else:
         Z = linkage(D, method= linkage_method)
@@ -555,22 +555,7 @@ def hclust(dataset, labels, dataset_number):
     
     #resoltion_hclust(distance_matrix= D)
     return to_tree(Z) if (bTree and len(dataset)>1) else Z, sch.dendrogram(Z, orientation='right')['leaves'] if len(dataset)>1 else sch.dendrogram(Z)['leaves']
-def resoltion_hclust(data=None, distance_matrix=None, number_of_estimated_clusters = None , linkage_method = 'single'):
-    bTree=True
-    if len(distance_matrix) > 0:
-        D = distance_matrix
-    elif  len(data) > 0 :
-        D = pdist(data, metric=distance.pDistance)
-    else:
-        sys.exit("Warning! dataset or distance matrix must be provides!")
-  
-    Z = Z = linkage(D, method= linkage_method) 
-    import scipy.cluster.hierarchy as sch
-    hclust_tree = to_tree(Z) 
-    #clusters = cutree_to_get_below_threshold_number_of_features (hclust_tree, t = estimated_num_clust)
-    clusters = get_homogenous_clusters_silhouette_log(hclust_tree, array(D), number_of_estimated_clusters= number_of_estimated_clusters)
-    #print [cluster.pre_order(lambda x: x.id) for cluster in clusters]
-    return clusters
+
 def dendrogram(Z):
     return scipy.cluster.hierarchy.dendrogram(Z)
 

@@ -14,13 +14,36 @@ import os
 import shutil
 import re
 import pandas as pd
+from scipy.cluster.hierarchy import to_tree, linkage
+from numpy import array
 try:
-    from . import hierarchy
+    from . import plot, hierarchy
 except ImportError:
     sys.exit("CRITICAL ERROR: Unable to find the hierarchy module." + 
         " Please check your halla install.")
 from . import config
 from . import parser
+
+def resoltion_hclust(data=None, distance_matrix=None,
+                      number_of_estimated_clusters = None ,
+                      linkage_method = 'single', output_dir=None):
+    bTree=True
+    if len(distance_matrix) > 0:
+        D = distance_matrix
+    elif  len(data) > 0 :
+        D = pdist(data, metric=distance.pDistance)
+    else:
+        sys.exit("Warning! dataset or distance matrix must be provides!")
+  
+    Z = Z = linkage(D, method= linkage_method)
+    #Z = plot.heatmap(data_table = None , D = D, xlabels_order = [], xlabels = labels, 
+    #                 filename= output_dir+"/hierarchical_heatmap", method =linkage_method) 
+    import scipy.cluster.hierarchy as sch
+    hclust_tree = to_tree(Z) 
+    #clusters = cutree_to_get_below_threshold_number_of_features (hclust_tree, t = estimated_num_clust)
+    clusters = hierarchy.get_homogenous_clusters_silhouette_log(hclust_tree, array(D), number_of_estimated_clusters= number_of_estimated_clusters)
+    #print [cluster.pre_order(lambda x: x.id) for cluster in clusters]
+    return clusters
 
 def parse_arguments(args):
     """ 
@@ -49,6 +72,7 @@ def parse_arguments(args):
         required=True)
     parser.add_argument(
         "-m", "--similarity_method",
+        default= 'spearman',
         help="similarity measurement {default spearman, options: spearman, nmi, ami, dmic, mic, pearson, dcor}")
     parser.add_argument(
         "-n", "--estimated_number_of_clusters",
@@ -67,12 +91,9 @@ def main( ):
     args=parse_arguments(sys.argv)
     config.similarity_method = args.similarity_method
     output_dir= args.output+"/"
-    #os.path.dirname(args.output)+"/"
-    
+    config.similarity_method = args.similarity_method
     df_distance = pd.read_table(args.distance_matrix, header=0, index_col =0)
-    
-    clusters = hierarchy.resoltion_hclust(distance_matrix=df_distance, number_of_estimated_clusters = args.estimated_number_of_clusters , linkage_method = args.linkage_method)
-    #args.output+"hallaclust.txt", 'w'
+
     
     # write the results into outpute
     if os.path.isdir(output_dir):
@@ -86,13 +107,18 @@ def main( ):
         os.mkdir(output_dir)
     except EnvironmentError:
         sys.exit("Unable to create directory: "+output_dir)
+    
+    clusters = resoltion_hclust(distance_matrix=df_distance, 
+                                number_of_estimated_clusters = args.estimated_number_of_clusters ,
+                                linkage_method = args.linkage_method,
+                                output_dir = output_dir)
+    
     f = open(output_dir+"/hallaclust.txt", 'w')
     print "There are %s clusters" %(len(clusters))
     for i in range(len(clusters)):
         f.write("cluster"+str(i+1)+"\t")
         features = clusters[i].pre_order(lambda x: x.id)
         feature_names = [df_distance.index[val] for val in features]
-        print feature_names
         for item in feature_names:
             f.write("%s " % item)
         

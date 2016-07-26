@@ -282,7 +282,6 @@ def parse_arguments (args):
 
 def set_parameters(args):
     config.similarity_method = args.strMetric.lower()
-    print  config.similarity_method 
     config.decomposition = args.strDecomposition.lower()
     #config.fdr_function = args.strFDR
     config.q = args.dQ  

@@ -41,8 +41,8 @@ def get_enropy(x):
 	#print d
 	P = numpy.bincount(d)/float(len(d))
 	observed_entropy = -sum([p * numpy.log2(p) for p in P])
-	max_entropy = numpy.log2(len(P))
-	return observed_entropy/max_entropy
+	#max_entropy = numpy.log2(len(P))
+	return observed_entropy#/max_entropy
 def scale_data(X, scale = 'log'):
 	if scale == 'sqrt':
 		y = numpy.sqrt(numpy.abs(X)) * numpy.sign(X)
@@ -1733,11 +1733,13 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
 			iN = min(len(set(astrValues)), round(math.sqrt(len(set(astrValues))))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
+			if config.similarity_method == 'dmic':
+				iN = iN*2
 		elif iN == 0:
 			iN = len(set(astrValues))
 		else:
 			iN = min(iN, len(set(astrValues)))
-			
+	
 		if len(set(astrValues)) <= iN:
 			try:
 				return rankdata(astrValues, method= 'dense')
@@ -1774,7 +1776,9 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 				try:
 					order = rankdata(astrValues, method= 'min')# ordinal
 				except: 
-					#print "Categorical data descritizing 2!"
+					#print "Categorical data descritizing !"
+					if config.similarity_method in ['mic', 'dmic']:
+						system.exit('No categorical data is allowed with mic or dmic!')
 					setastrValues = list(set(astrValues))
 					dictA ={}
 					for i, item in enumerate(setastrValues):
@@ -1794,8 +1798,10 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 			#aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
 			#print "aiIndices", aiIndices
 		astrRet = [None] * len(astrValues)
+		bins_size = numpy.ceil(len(astrValues)/float(iN))
+		#print "bin szie: ", bins_size, "len", len(astrValues)
 		for i in range(len(astrValues)):
-			astrRet[i] = int(numpy.ceil(order[i]/iN))
+			astrRet[i] = int((order[i]-1) / bins_size)#int(numpy.ceil(order[i]/(len(order)/iN)))
 		astrRet = rankdata(astrRet, method= 'dense')
 		return astrRet
 
