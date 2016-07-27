@@ -107,7 +107,6 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
         else:
             f.write(rowheader[i])
             f.write(delimiter)
-        
         for j in range(len(data[i])):
                 f.write(str(data[i][j]))
                 if j < len(data[i]) - 1:
