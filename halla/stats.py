@@ -1733,8 +1733,8 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
 			iN = min(len(set(astrValues)), round(math.sqrt(len(set(astrValues))))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
-			if config.similarity_method == 'dmic':
-				iN = iN*2
+			#if config.similarity_method == 'dmic':
+			#	iN = iN*2
 		elif iN == 0:
 			iN = len(set(astrValues))
 		else:

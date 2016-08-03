@@ -15,6 +15,7 @@ from scipy.spatial.distance import pdist, squareform
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas
 
 from . import distance
 from . import stats
@@ -1084,11 +1085,12 @@ def _cutree_overall (clusterNodelist, X, func, distance):
         next_dist = _percentage(numpy.min(aDist))
     # print len(sub_clusters), n            
     return sub_clusters , next_dist
-def cutree_to_get_below_threshold_number_of_features (cluster, number_of_estimated_clusters = None):
+def cutree_to_get_below_threshold_number_of_features (cluster, distance_matrix, number_of_estimated_clusters = None):
     n_features = cluster.get_count()
 
     if number_of_estimated_clusters == None:
-        number_of_estimated_clusters = math.log(n_features, 2)
+        number_of_estimated_clusters = predict_best_number_of_clusters(hierarchy_tree, distance_matrix)
+        # math.log(n_features, 2)
     if n_features==1:# or cluster.dist <= t:
         return [cluster]
     sub_clusters = []
@@ -1150,16 +1152,17 @@ def cutree_to_get_below_threshold_distance_of_clusters (cluster, t = None):
         else:
             break
     return sub_clusters
-def cutree_to_get_number_of_clusters (cluster, n = None):
-    n_features = cluster[0].get_count()
+def cutree_to_get_number_of_clusters (cluster, distance_matrix, number_of_estimated_clusters = None):
+    n_features = cluster.get_count()
     if n_features==1:
         return cluster
-    if n ==None:
-        number_of_sub_cluters_threshold = round(math.log(n_features, 2))
+    if number_of_estimated_clusters ==None:
+        number_of_sub_cluters_threshold = predict_best_number_of_clusters(cluster, distance_matrix)
+        #round(math.log(n_features, 2))
     else:
-        number_of_sub_cluters_threshold = n
+        number_of_sub_cluters_threshold = number_of_estimated_clusters
     sub_clusters = []
-    sub_clusters = truncate_tree(cluster, level=0, skip=1)
+    sub_clusters = truncate_tree([cluster], level=0, skip=1)
     while len(sub_clusters) < number_of_sub_cluters_threshold:
         max_dist_node = sub_clusters[0]
         max_dist_node_index = 0
@@ -1236,16 +1239,21 @@ def silhouette_coefficient(clusters, distance_matrix):
         #cluster_b = [val for val in range(len(config.Distance[dataset_number])) if val not in cluster_a]
         #print cluster_a, cluster_b
         if i%2 == 0 and i<len(clusters)-1:
-            cluster_b = clusters[i+1].pre_order(lambda x: x.id)
+            next_cluster = clusters[i+1].pre_order(lambda x: x.id)
         else:
-            cluster_b = clusters[i-1].pre_order(lambda x: x.id)
-            
+            next_cluster = clusters[i-1].pre_order(lambda x: x.id)
+        #all_features = [a for a in range(len(distance_matrix))] 
+        #cluster_b = [item for item in all_features if item not in cluster_a]  
+         
         if i%2 != 0 and i> 0:
-            cluster_b_2 = clusters[i-1].pre_order(lambda x: x.id)
+            prev_cluster = clusters[i-1].pre_order(lambda x: x.id)
         elif i < len((clusters))-1:
-            cluster_b_2 = clusters[i+1].pre_order(lambda x: x.id)
+            prev_cluster = clusters[i+1].pre_order(lambda x: x.id)
         else: 
-            cluster_b_2 = clusters[i-1].pre_order(lambda x: x.id)
+            prev_cluster = clusters[i-1].pre_order(lambda x: x.id)
+        #next_cluster = [clusters[num].pre_order(lambda x: x.id) for num in range(i+1, len(clusters)) if clusters[num].pre_order(lambda x: x.id)>1 ]
+        #prev_cluster = [clusters[num].pre_order(lambda x: x.id) for num in range(0, i-1) if clusters[num].pre_order(lambda x: x.id)>1 and i>0  ]
+        #print next_cluster, cluster_a
         #silhouette_score.append(silhouette_coefficient(cluster))
         s_all_a = []
         for a_feature in cluster_a:
@@ -1260,99 +1268,96 @@ def silhouette_coefficient(clusters, distance_matrix):
                 #             for i,j in product([a_feature], temp_a_features)])
                 a = np.mean([distance_matrix[i][j] for i,j in product([a_feature], temp_a_features)])            
             #b = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j])) 
-             #            for i,j in product([a_feature], cluster_b)])
-            b1 = np.mean([ distance_matrix[i][j] for i,j in product([a_feature], cluster_b)])
-            b2 = np.mean([ distance_matrix[i][j] for i,j in product([a_feature], cluster_b_2)])
+             #            for i,j in product([a_feature], next_cluster)])
+            b1 = np.mean([ distance_matrix[i][j] for i,j in product([a_feature], next_cluster)])
+            b2 = np.mean([ distance_matrix[i][j] for i,j in product([a_feature], prev_cluster)])
             b = min(b1,b2)
             s = (b-a)/max([a,b])
             #print 's a', s, a, b
             s_all_a.append(s)
         silhouette_scores.append(np.mean(s_all_a))
     return silhouette_scores
-def wss_heirarchy(clusters, dataset_number):
+
+def get_medoid(distance_matrix):
+    for i in range(len(distance_matrix)):
+        temp_mean = numpy.mean(distance_matrix[i])
+        if temp_mean <= med:
+            med = temp_mean
+            medoid_index = i
+    return medoid_index
+def wss_heirarchy(clusters, distance_matrix):
     wss = []
     for i in range(len(clusters)):
-        cluster_a = clusters[i].pre_order(lambda x: x.id)
-        
-        temp_a_features = cluster_a[:]
-        medoid_feature = temp_a_features[len(temp_a_features)-1]
-        # remove medoid
-        temp_a_features.remove(medoid_feature)
-        
-        wss.append(sum([config.Distance[dataset_number][i][j]* config.Distance[dataset_number][i][j] 
-                        for i,j in product([medoid_feature], temp_a_features)]))
+        if clusters[i].get_count == 1:
+            return wss.append(0.0)
+        else:
+            cluster_a = clusters[i].pre_order(lambda x: x.id)
+            
+            temp_a_features = cluster_a[:]
+            medoid_feature = temp_a_features[len(temp_a_features)-1]
+            # remove medoid
+            temp_a_features.remove(medoid_feature)
+            
+            wss.append(sum([distance_matrix.iloc[i,j]* distance_matrix.iloc[i,j] 
+                            for i,j in product([medoid_feature], temp_a_features)]))
     
     avgWithinSS = np.sum(wss)#[sum(d)/X.shape[0] for d in dist]
     return avgWithinSS
+def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
+    distance_matrix = pandas.DataFrame(distance_matrix)
+    min_num_cluster = 2  
+    max_num_cluster = int(math.sqrt(len(distance_matrix)))
+    wss = numpy.zeros(max_num_cluster+1)
+    best_clust_size = 1
+    best_wss = 0.0
+    wss[1] = math.sqrt((len(distance_matrix)-1)*sum(distance_matrix.var(axis=1)))#apply(distance_matrix,2,var)))
+    best_wss = wss[1]
+    best_drop = .8
+    
+    for i in range(min_num_cluster,max_num_cluster):
+        clusters = cutree_to_get_number_of_clusters(hierarchy_tree, distance_matrix, number_of_estimated_clusters= i)
+        wss[i] = wss_heirarchy(clusters, distance_matrix)
+        #print (wss[i]/wss[i-1])
+        if wss[i]/wss[i-1] < best_drop :
+            #print i
+            best_clust_size = i
+            best_wss = wss[i]
+            best_drop = wss[i]/wss[i-1]
+    #print "The best guess for the number of clusters is: ", best_clust_size
+    return  best_clust_size       
 def get_homogenous_clusters_silhouette_log(cluster, distance_matrix, number_of_estimated_clusters=None):
     n = cluster.get_count()
     if n==1:
         return cluster
-    #number_of_sub_cluters_threshold = round(math.log(n, 2)) 
-    #t = 1.0 - np.percentile(config.Distance[dataset_number].flatten(), config.q*100 - 1.0/len(config.Distance[dataset_number])*100) #config.cut_distance_thrd
-    #print "t",t
-    #print "first cut", [cluster.pre_order(lambda x: x.id)]
-    sub_clusters = cutree_to_get_below_threshold_number_of_features(cluster, number_of_estimated_clusters)
-    #cutree_to_get_below_threshold_number_of_features(cluster, t)
-    #cutree_to_get_below_threshold_distance_of_clusters(cluster, t)
-    
-    
-    #print "first cut", [a.pre_order(lambda x: x.id) for a in sub_clusters]
-   # sub_clusters = cutree_to_get_number_of_clusters([cluster])#truncate_tree([cluster], level=0, skip=1)truncate_tree([cluster], level=0, skip=1)#
-    #print "before sil sub:", len(sub_clusters)
+
+    sub_clusters = cutree_to_get_number_of_clusters(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)
+    # cutree_to_get_below_threshold_number_of_features
     sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, distance_matrix) 
-    #print sub_silhouette_coefficient
     while True:#len(sub_clusters) < number_of_sub_cluters_threshold and
         min_silhouette_node = sub_clusters[0]
         min_silhouette_node_index = 0
-        #print sum(sub_silhouette_coefficient), len(sub_silhouette_coefficient)
-        #if sum(sub_silhouette_coefficient) == float(len(sub_silhouette_coefficient)):
-        #    print sum(sub_silhouette_coefficient), len(sub_silhouette_coefficient)
-        #    break
+
         for i in range(len(sub_clusters)):
-            #if math.isnan(sub_silhouette_coefficient[min_silhouette_node_index]):
-            #    print min_silhouette_node_index, min_silhouette_node, sub_silhouette_coefficient[min_silhouette_node_index]
-            #    sys.exit()
             if sub_silhouette_coefficient[min_silhouette_node_index] > sub_silhouette_coefficient[i]:
                 min_silhouette_node = sub_clusters[i]
                 min_silhouette_node_index = i
         if sub_silhouette_coefficient[min_silhouette_node_index] == 1.0:
             break
         sub_clusters_to_add = truncate_tree([min_silhouette_node], level=0, skip=1)#cutree_to_get_number_of_clusters([min_silhouette_node])##
-        #sub_clusters_to_check = cutree_to_get_below_threshold_number_of_features(min_silhouette_node)
         if len(sub_clusters_to_add) < 2:
             break
         sub_silhouette_coefficient_to_add = silhouette_coefficient(sub_clusters_to_add, distance_matrix)
-        #sub_silhouette_coefficient_to_check = silhouette_coefficient(sub_clusters_to_check, dataset_number)
         temp_sub_silhouette_coefficient_to_add = sub_silhouette_coefficient_to_add[:]
-        #temp_sub_silhouette_coefficient_to_check = sub_silhouette_coefficient_to_check[:]
         temp_sub_silhouette_coefficient_to_add = [value for value in temp_sub_silhouette_coefficient_to_add if value != 1.0]
-            
-        #if len(sub_clusters_to_add) ==0:
-        #    sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
-            
+
         if len(temp_sub_silhouette_coefficient_to_add) == 0 or sub_silhouette_coefficient[min_silhouette_node_index] >= np.max(temp_sub_silhouette_coefficient_to_add) :
             sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
         else:
-            #print temp_sub_silhouette_coefficient_to_add
-            #print np.max(temp_sub_silhouette_coefficient_to_add)
-            #print "first cut", [min_silhouette_node.pre_order(lambda x: x.id)]
-            #print "befor", [a.pre_order(lambda x: x.id) for a in sub_clusters ]
             del sub_clusters[min_silhouette_node_index]#min_silhouette_node)
-            #print "after", [a.pre_order(lambda x: x.id) for a in sub_clusters ]
             del sub_silhouette_coefficient[min_silhouette_node_index]
-            #sub_silhouette_coefficient=[sub_silhouette_coefficient != "nan"]
-            #sub_clusters = [sub_clusters != "nan"]
             sub_silhouette_coefficient.extend(sub_silhouette_coefficient_to_add)
             sub_clusters.extend(sub_clusters_to_add)
-            '''if len(sub_clusters_to_add) == 2:
-                sub_clusters.insert(min_silhouette_node_index,sub_clusters_to_add[0])
-                sub_silhouette_coefficient.insert(min_silhouette_node_index,sub_silhouette_coefficient_to_add[0])
-            elif len(sub_clusters_to_add) == 1:
-                sub_clusters.insert(min_silhouette_node_index+1,sub_clusters_to_add[1])
-                sub_silhouette_coefficient.insert(min_silhouette_node_index+1,sub_silhouette_coefficient_to_add[1])
-            '''  
-    #print "After sil sub:", len(sub_clusters)
+   
     return sub_clusters
 def get_homogenous_clusters(cluster, dataset_number, prev_silhouette_coefficient):
     

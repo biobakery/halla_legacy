@@ -41,6 +41,8 @@ def resoltion_hclust(data=None, distance_matrix=None,
     import scipy.cluster.hierarchy as sch
     hclust_tree = to_tree(Z) 
     #clusters = cutree_to_get_below_threshold_number_of_features (hclust_tree, t = estimated_num_clust)
+    if number_of_estimated_clusters == None:
+        number_of_estimated_clusters = hierarchy.predict_best_number_of_clusters(hclust_tree, distance_matrix)
     clusters = hierarchy.get_homogenous_clusters_silhouette_log(hclust_tree, array(D), number_of_estimated_clusters= number_of_estimated_clusters)
     #print [cluster.pre_order(lambda x: x.id) for cluster in clusters]
     return clusters
@@ -93,7 +95,7 @@ def main( ):
     output_dir= args.output+"/"
     config.similarity_method = args.similarity_method
     df_distance = pd.read_table(args.distance_matrix, header=0, index_col =0)
-
+    #df_distance = stats.scale_data(df_distance, scale = 'log')
     
     # write the results into outpute
     if os.path.isdir(output_dir):
