@@ -24,7 +24,7 @@ keys_attribute = ["__description__", "__version__", "__author__", "__contact__",
 NBIN = None # number of bins specified by user
 NPROC = 1 # number of threads to use 
 
-similarity_method = "spearman"
+similarity_method = "nmi"
 decomposition = "medoid" 
 fdr_function = "level"
 q = .1  
@@ -54,6 +54,7 @@ nullsamples = []
 number_of_performed_tests = 0
 min_var = 0.0
 entropy_threshold = 0.0
+
 #==================================================================#
 # Mutable Meta Objects  
 #==================================================================#
@@ -62,6 +63,7 @@ discretized_dataset = array([None, None])
 parsed_dataset = array([None, None])
 meta_threshold = None 
 Features_order = array([None, None])
+data_type = array([None, None])
 #X_features_cluster_order  = []
 #Y_features_cluster_order  = []
 meta_data_tree = [] 

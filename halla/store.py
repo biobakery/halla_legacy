@@ -263,7 +263,8 @@ def _summary_statistics(strMethod=None):
         if config.verbose == 'INFO':
             print ("Using only final p-values")
         __get_conditional_pval_from_bags(Z_final)
-        assert(S.any())
+
+        #assert(S.any())
         config.meta_summary = S
         return config.meta_summary
 
@@ -271,7 +272,7 @@ def _summary_statistics(strMethod=None):
         if config.verbose == 'INFO':
             print ("Using all p-values")
         __get_conditional_pval_from_bags(Z_all)
-        assert(S.any())
+        #assert(S.any())
         config.meta_summary = S
         return config.meta_summary
 
@@ -429,16 +430,19 @@ def _report():
                     ax2 = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
             except:
                 pass
-            if len (iX) + len(iY) <40:
-                two_clusters = cluster1
-                two_clusters.extend(cluster2)
-                two_labels = [config.FeatureNames[0][i] for i in iX]
-                two_labels.extend([config.FeatureNames[1][i] for i in iY])
-                #print two_clusters 
-                #print cluster1
-                #print two_labels, X_labels
-                df_all = pd.DataFrame(np.array(two_clusters, dtype= float).T ,columns=np.array(two_labels) )
-                axes = plot.scatter_matrix(df_all, x_size = len(iX),filename =filename + 'Scatter_association' + str(association_number) + '.pdf')
+            try:
+                if len (iX) + len(iY) <40:
+                    two_clusters = cluster1
+                    two_clusters.extend(cluster2)
+                    two_labels = [config.FeatureNames[0][i] for i in iX]
+                    two_labels.extend([config.FeatureNames[1][i] for i in iY])
+                    #print two_clusters 
+                    #print cluster1
+                    #print two_labels, X_labels
+                    df_all = pd.DataFrame(np.array(two_clusters, dtype= float).T ,columns=np.array(two_labels) )
+                    axes = plot.scatter_matrix(df_all, x_size = len(iX),filename =filename + 'Scatter_association' + str(association_number) + '.pdf')
+            except:
+                pass
             # plot discritized data
             '''
             if len(discretized_cluster1) < 40:

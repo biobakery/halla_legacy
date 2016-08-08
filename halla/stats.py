@@ -1615,7 +1615,7 @@ def step_function():
 
 # ## This is a very simple linear cutting method, with \sqrt{N} bins 
 # ## To be tested with other estimators, like kernel density estimators for improved performance 
-def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
+def discretize(pArray, style = "equal-area", data_type = None, iN=None, method=None, aiSkip=[]):
 	if iN == None:
 		iN= config.NBIN
 	"""
@@ -1728,31 +1728,36 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 			ro.globalenv['style'] =  style
 		except ImportError:
 			sys.exit("Please install R package classInt")
-		
+	def _discretize_categorical(astrValues, iN=iN):
+		#print "Categorical data descritizing !"
+		setastrValues = list(set(astrValues))
+		dictA ={}
+		for i, item in enumerate(setastrValues):
+			dictA[item] = i+1
+		order = []
+		for i, item in enumerate(astrValues):
+			order.append(dictA[item])
+		#print order
+		return order	
 	def _discretize_continuous(astrValues, iN=iN):
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
-			iN = min(len(set(astrValues)), round(math.sqrt(len(set(astrValues))))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
+			#print round(math.sqrt(len(astrValues)))
+			iN = min(len(set(astrValues)), round(math.sqrt(len(astrValues)))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
 			#if config.similarity_method == 'dmic':
 			#	iN = iN*2
 		elif iN == 0:
 			iN = len(set(astrValues))
 		else:
 			iN = min(iN, len(set(astrValues)))
-	
+		 
+		#if distance.c_hash_association_method_discretize[config.similarity_method]:
+			
 		if len(set(astrValues)) <= iN:
 			try:
 				return rankdata(astrValues, method= 'dense')
 			except:
-				setastrValues = list(set(astrValues))
-				dictA ={}
-				for i, item in enumerate(setastrValues):
-					dictA[item] = i
-				order = []
-				for i, item in enumerate(astrValues):
-					order.append(dictA[item])
-				return order
-				#print "Discretizing categorical data!!!"
+				_discretize_categorical(astrValues, iN=iN)
 		else:							
 			if style in ['jenks', 'kmeans', 'hclust']:
 				try:
@@ -1782,7 +1787,7 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 					setastrValues = list(set(astrValues))
 					dictA ={}
 					for i, item in enumerate(setastrValues):
-						dictA[item] = i
+						dictA[item] = i+1
 					order = []
 					for i, item in enumerate(astrValues):
 						order.append(dictA[item])
@@ -1803,6 +1808,7 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 		for i in range(len(astrValues)):
 			astrRet[i] = int((order[i]-1) / bins_size)#int(numpy.ceil(order[i]/(len(order)/iN)))
 		astrRet = rankdata(astrRet, method= 'dense')
+		#print astrRet
 		return astrRet
 
 	def _discretize_continuous_orginal(astrValues, iN=iN): 
@@ -1831,13 +1837,16 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 
 	try:
 		# iRow1, iCol = pArray.shape
-		
 		aOut = [] 
 		# iN= len(pArray)
 		# print iN
 		for i, line in enumerate(pArray):
 			if i in aiSkip:
+				#print "SKIPE LINE!"
 				aOut.append(line)
+			elif data_type[i] == 'LEX':
+				#print "LEX", line
+				aOut.append(_discretize_categorical(line, iN))
 			else:
 				aOut.append(_discretize_continuous(line, iN))
 		#print aOut
@@ -1846,7 +1855,7 @@ def discretize(pArray, style = "equal-area", iN=None, method=None, aiSkip=[]):
 	except Exception:
 		iN = len(pArray)
 		#print "in discritizing exception!!!!"
-		return _discretize_continuous(pArray)
+		return _discretize_categorical(pArray)
 
 def discretize2d(pX, pY, method=None):
 	pass 

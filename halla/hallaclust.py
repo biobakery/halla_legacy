@@ -36,8 +36,8 @@ def resoltion_hclust(data=None, distance_matrix=None,
         sys.exit("Warning! dataset or distance matrix must be provides!")
   
     Z = Z = linkage(D, method= linkage_method)
-    #Z = plot.heatmap(data_table = None , D = D, xlabels_order = [], xlabels = labels, 
-    #                 filename= output_dir+"/hierarchical_heatmap", method =linkage_method) 
+    Z = plot.heatmap(data_table = None , D = D, xlabels_order = [], xlabels = distance_matrix.index, 
+                     filename= output_dir+"/hierarchical_heatmap", method =linkage_method) 
     import scipy.cluster.hierarchy as sch
     hclust_tree = to_tree(Z) 
     #clusters = cutree_to_get_below_threshold_number_of_features (hclust_tree, t = estimated_num_clust)

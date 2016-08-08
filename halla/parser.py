@@ -136,8 +136,8 @@ class Input:
 		
 	
 	def _discretize(self):
-	    self.discretized_dataset1 = stats.discretize(self.orginal_dataset1, style = config.strDiscretizing)
-	    self.discretized_dataset2 = stats.discretize(self.orginal_dataset2, style = config.strDiscretizing)
+	    self.discretized_dataset1 = stats.discretize(self.orginal_dataset1, style = config.strDiscretizing, data_type = config.data_type[0])
+	    self.discretized_dataset2 = stats.discretize(self.orginal_dataset2, style = config.strDiscretizing, data_type = config.data_type[1])
 	   
 	def _parse(self):
 		def __parse(pArray, bVar, bHeaders):
@@ -197,6 +197,7 @@ class Input:
 							line = map(float, line)  # is it continuous? 
 							aTypes.append("CON")
 						except ValueError:
+							#print "Categorical data !"
 							line = line  # we are forced to conclude that it is implicitly categorical, with some lexical ordering 
 							aTypes.append("LEX")
 				else:  # delete corresponding name from namespace 
@@ -205,12 +206,12 @@ class Input:
 						#aNames.remove(aNames[i])
 					except Exception:
 						pass  
-
 			return aOut, aNames, aTypes, aHeaders 
 
 		self.orginal_dataset1, self.outName1, self.outType1, self.outHead1 = __parse(self.orginal_dataset1, self.varNames, self.headers)
 		self.orginal_dataset2, self.outName2, self.outType2, self.outHead2 = __parse(self.orginal_dataset2, self.varNames, self.headers)
-
+		config.data_type[0] = self.outType1
+		config.data_type[1] = self.outType2
 	def _filter_to_common_columns(self):
 		"""
 		Make sure that the data are well-formed
@@ -267,7 +268,6 @@ class Input:
 				self.outHead1 = df1.columns
 				self.outHead2 = df2.columns 
 				#print self.outHead1
-				#print df2
 		assert(len(self.orginal_dataset1[0]) == len(self.orginal_dataset2[0]))
 	def _remove_low_variant_features(self):
 		try:
