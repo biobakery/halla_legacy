@@ -1713,8 +1713,64 @@ def discretize(pArray, style = "equal-area", data_type = None, iN=None, method=N
 	       [ 0.,  0.,  1.,  1.]])
 
 	"""
-	#from sklearn.cluster.spectral import discretize
-	#y_pred = discretize(y_true_noisy)
+	def _discretize_categorical(astrValues, iN=iN):
+		if config.similarity_method in ['mic', 'dmic']:
+					system.exit('No categorical data is allowed with mic or dmic!')
+		setastrValues = list(set(astrValues))
+		dictA ={}
+		for i, item in enumerate(setastrValues):
+			dictA[item] = i+1
+		order = []
+		for i, item in enumerate(astrValues):
+			order.append(dictA[item])
+		return order	
+	def _discretize_continuous(astrValues, iN=iN):
+		if iN == None:
+			# Default to rounded sqrt(n) if no bin count requested
+			iN = min(len(set(astrValues)), round(math.sqrt(len(astrValues)))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
+			if config.similarity_method == 'dmic':
+				iN = iN*2
+		elif iN == 0:
+			iN = len(set(astrValues))
+		else:
+			iN = min(iN, len(set(astrValues)))
+		 			
+		if len(set(astrValues)) <= iN:
+			try:
+				return rankdata(astrValues, method= 'dense')
+			except:
+				_discretize_categorical(astrValues, iN=iN)
+		else:							
+			try:
+				order = rankdata(astrValues, method= 'min')# ordinal
+			except: 
+				_discretize_categorical(astrValues, iN=iN)
+
+		discretized_result = [None] * len(astrValues)
+		bins_size = numpy.ceil(len(astrValues)/float(iN))
+		#print "bin szie: ", bins_size, "len", len(astrValues)
+		for i in range(len(astrValues)):
+			discretized_result[i] = int((order[i]-1) / bins_size)
+		discretized_result = rankdata(discretized_result, method= 'dense')
+		#print astrRet
+		return discretized_result
+
+	# iRow1, iCol = pArray.shape
+	discretized_data = [] 
+
+	for i, line in enumerate(pArray):
+		if i in aiSkip:
+			#print "SKIPE LINE!"
+			discretized_data.append(line)
+		elif data_type!= None and data_type[i] == 'LEX':
+			#print "LEX", line
+			discretized_data.append(_discretize_categorical(line, iN))
+		else:
+			discretized_data.append(_discretize_continuous(line, iN))
+
+	return array(discretized_data)
+
+def _discretize_continuous_old_R(astrValues, iN=None, style =None):
 	if style in ['jenks', 'kmeans', 'hclust']:
 		try:
 			from rpy2 import robjects as ro
@@ -1728,134 +1784,47 @@ def discretize(pArray, style = "equal-area", data_type = None, iN=None, method=N
 			ro.globalenv['style'] =  style
 		except ImportError:
 			sys.exit("Please install R package classInt")
-	def _discretize_categorical(astrValues, iN=iN):
-		#print "Categorical data descritizing !"
-		setastrValues = list(set(astrValues))
-		dictA ={}
-		for i, item in enumerate(setastrValues):
-			dictA[item] = i+1
-		order = []
-		for i, item in enumerate(astrValues):
-			order.append(dictA[item])
-		#print order
-		return order	
-	def _discretize_continuous(astrValues, iN=iN):
-		if iN == None:
-			# Default to rounded sqrt(n) if no bin count requested
-			#print round(math.sqrt(len(astrValues)))
-			iN = min(len(set(astrValues)), round(math.sqrt(len(astrValues)))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
-			#if config.similarity_method == 'dmic':
-			#	iN = iN*2
-		elif iN == 0:
-			iN = len(set(astrValues))
-		else:
-			iN = min(iN, len(set(astrValues)))
-		 
-		#if distance.c_hash_association_method_discretize[config.similarity_method]:
+	if style in ['jenks', 'kmeans', 'hclust']:
+		try:
+			dataFrame1 = pd.DataFrame(astrValues, dtype= float)
+			#print dataFrame1[0]
+			ro.globalenv['number_of_bins'] = iN 
+			ro.globalenv['v'] =  com.convert_to_r_dataframe(dataFrame1)[0]
+			ro.r('clI <- classIntervals(v, n = number_of_bins, style = style)')
+			ro.r(' descretized_v <- findCols(clI)')
+			astrRet = ro.globalenv['descretized_v']
+			return astrRet
+		except Exception, err:
+			print(traceback.format_exc())
 			
-		if len(set(astrValues)) <= iN:
+			print "Discretizing as exeception in ClassInt happend!!!"
 			try:
-				return rankdata(astrValues, method= 'dense')
+				order = rankdata(astrValues, method= 'min')
 			except:
-				_discretize_categorical(astrValues, iN=iN)
-		else:							
-			if style in ['jenks', 'kmeans', 'hclust']:
-				try:
-					dataFrame1 = pd.DataFrame(astrValues, dtype= float)
-					#print dataFrame1[0]
-					ro.globalenv['number_of_bins'] = iN 
-					ro.globalenv['v'] =  com.convert_to_r_dataframe(dataFrame1)[0]
-					ro.r('clI <- classIntervals(v, n = number_of_bins, style = style)')
-					ro.r(' descretized_v <- findCols(clI)')
-					astrRet = ro.globalenv['descretized_v']
-					return astrRet
-				except Exception, err:
-					print(traceback.format_exc())
-					
-					print "Discretizing as exeception in ClassInt happend!!!"
-					try:
-						order = rankdata(astrValues, method= 'min')
-					except:
-						return astrValues
-			else:
-				try:
-					order = rankdata(astrValues, method= 'min')# ordinal
-				except: 
-					#print "Categorical data descritizing !"
-					if config.similarity_method in ['mic', 'dmic']:
-						system.exit('No categorical data is allowed with mic or dmic!')
-					setastrValues = list(set(astrValues))
-					dictA ={}
-					for i, item in enumerate(setastrValues):
-						dictA[item] = i+1
-					order = []
-					for i, item in enumerate(astrValues):
-						order.append(dictA[item])
-					return order
-					'''
-					temp = numpy.array(astrValues).argsort()
-					order = numpy.arange(len(astrValues))[temp.argsort()]#array(astrValues).argsort().argsort()
-					order = rankdata(order, method= 'min') # ordinal #array([order[i]+1.0 for i in range(len(order))])
-					'''
-			#elif type(astrValues[0]) == float or type(astrValues[0]) == int:
-	
-			#print "prank",order
-			#aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
-			#print "aiIndices", aiIndices
-		astrRet = [None] * len(astrValues)
-		bins_size = numpy.ceil(len(astrValues)/float(iN))
-		#print "bin szie: ", bins_size, "len", len(astrValues)
-		for i in range(len(astrValues)):
-			astrRet[i] = int((order[i]-1) / bins_size)#int(numpy.ceil(order[i]/(len(order)/iN)))
-		astrRet = rankdata(astrRet, method= 'dense')
-		#print astrRet
-		return astrRet
+				return astrValues
 
-	def _discretize_continuous_orginal(astrValues, iN=iN): 
+def _discretize_continuous_old(astrValues, iN=None): 
 		
-		if iN == None:
-			# Default to rounded sqrt(n) if no bin count requested
-			iN = round(math.sqrt(len(astrValues)))  # **0.5 + 0.5)
-		elif iN == 0:
-			iN = len(astrValues)
-		else:
-			iN = min(iN, len(set(astrValues)))
-		#print iN	
-		# This is still a bit buggy since ( [0, 0, 0, 1, 2, 2, 2, 2], 3 ) will exhibit suboptimal behavior
-		aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
-		astrRet = [None] * len(astrValues)
-		#print "aiIndices:", aiIndices
-		#print "astrRet:", astrRet
-		iPrev = 0
-		for i, iIndex in enumerate(aiIndices):
-			# If you're on a tie, you can't increase the bin number
-			# Otherwise, increase by at most one
-			iPrev = astrRet[iIndex] = iPrev if (i and (astrValues[iIndex] == astrValues[aiIndices[i - 1]])) else \
-				min(iPrev + 1, int(iN * i / float(len(astrValues))))
-			#print "astrRet:", astrRet
-		return astrRet
-
-	try:
-		# iRow1, iCol = pArray.shape
-		aOut = [] 
-		# iN= len(pArray)
-		# print iN
-		for i, line in enumerate(pArray):
-			if i in aiSkip:
-				#print "SKIPE LINE!"
-				aOut.append(line)
-			elif data_type[i] == 'LEX':
-				#print "LEX", line
-				aOut.append(_discretize_categorical(line, iN))
-			else:
-				aOut.append(_discretize_continuous(line, iN))
-		#print aOut
-		return array(aOut)
-
-	except Exception:
-		iN = len(pArray)
-		#print "in discritizing exception!!!!"
-		return _discretize_categorical(pArray)
+	if iN == None:
+		# Default to rounded sqrt(n) if no bin count requested
+		iN = round(math.sqrt(len(astrValues)))  # **0.5 + 0.5)
+	elif iN == 0:
+		iN = len(astrValues)
+	else:
+		iN = min(iN, len(set(astrValues)))
+	#print iN	
+	# This is still a bit buggy since ( [0, 0, 0, 1, 2, 2, 2, 2], 3 ) will exhibit suboptimal behavior
+	aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
+	astrRet = [None] * len(astrValues)
+	#print "aiIndices:", aiIndices
+	#print "astrRet:", astrRet
+	iPrev = 0
+	for i, iIndex in enumerate(aiIndices):
+		# If you're on a tie, you can't increase the bin number
+		# Otherwise, increase by at most one
+		iPrev = astrRet[iIndex] = iPrev if (i and (astrValues[iIndex] == astrValues[aiIndices[i - 1]])) else \
+			min(iPrev + 1, int(iN * i / float(len(astrValues))))
+	return astrRet	
 
 def discretize2d(pX, pY, method=None):
 	pass 

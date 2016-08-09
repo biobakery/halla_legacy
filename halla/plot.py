@@ -288,9 +288,9 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
     # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
 
     if not data_table is None:
-        fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(data_table[0])/5.0)),(math.ceil(len(data_table)/5.0))))
+        fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(data_table[0])/5.0)+6),(math.ceil(len(data_table)/5.0)+6)))
     else:
-        fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(D)/5.0)+5.0),(math.ceil(len(D)/5.0))+5.0))
+        fig = pylab.figure(dpi= 300, figsize=((math.ceil(len(D)/5.0)+6.0),(math.ceil(len(D)/5.0))+6.0))
 
         
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)

@@ -485,29 +485,16 @@ def _report():
             ax = fig.add_subplot(1,1,1) # one row, one column, first plot
             plt.rc('xtick', labelsize=6) 
             plt.rc('ytick', labelsize=6) 
-            #df1 = np.array(cluster1, dtype=float)
-            #df2 = np.array(cluster2, dtype=float)
-            
+          
             decomposition_method = stats.c_hash_decomposition[config.decomposition]
             
             discretized_df1 = np.array(discretized_cluster1, dtype=float)
             discretized_df2 = np.array(discretized_cluster2, dtype=float)
             if not bypass_discretizing():
-                d_x_d_rep = stats.discretize(decomposition_method(discretized_df1))
-                d_y_d_rep = stats.discretize(decomposition_method(discretized_df2))
-                plot.scatter_plot(d_x_d_rep, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number))
-                
-            
-                #d_x_d_rep = decomposition_method(discretized_df1)
-                #d_y_d_rep = decomposition_method(discretized_df2)
-                #else:
-                #    d_x_d_rep = association.get_left_rep()#stats.discretize(decomposition_method(discretized_df1))
-                #    d_y_d_rep = association.get_right_rep()#stats.discretize(decomposition_method(discretized_df2))
+                d_x_d_rep = decomposition_method(discretized_df1)
+                d_y_d_rep = decomposition_method(discretized_df2)
                 d_x_d_rep, d_y_d_rep = zip(*sorted(zip(d_x_d_rep, d_y_d_rep)))
                 plot.confusion_matrix(d_x_d_rep, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
-                #plot.confusion_matrix(x_d_pc1, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix_pc_orginal_data.pdf' )
-                plot.heatmap(array([d_x_d_rep]),  xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Rep1_' + str(association_number) + '_heatmap', sortCol = False)
-                plot.heatmap(array([d_y_d_rep]), xlabels_order= x_label_order,  xlabels =X_labels, filename =discretized_filename + 'Rep2_' + str(association_number) + '_heatmap', sortCol = False)
             plt.close("all")
             
     def _report_compared_clusters():

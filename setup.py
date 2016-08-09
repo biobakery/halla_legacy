@@ -7,7 +7,7 @@ except ImportError:
 import os
 import urllib
 
-VERSION = "0.6.9"
+VERSION = "0.6.10"
 AUTHOR = "Gholamali Rahnavard, Curtis Huttenhower, Huttenhower Lab"
 AUTHOR_EMAIL = "halla-users@googlegroups.com"
 MAINTAINER = "Gholamali Rahnavard"

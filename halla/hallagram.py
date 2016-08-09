@@ -13,7 +13,7 @@ import csv
 import getpass
 csv.field_size_limit(sys.maxsize)
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import matplotlib as mpl
 #mpl.style.use('ggplot')
 mpl.use( "Agg" )
