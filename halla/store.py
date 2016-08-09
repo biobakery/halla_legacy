@@ -758,7 +758,7 @@ def _report():
     _write_hallagram_info()
     if config.hallagram:
         if config.similarity_method=="nmi":
-            sim_color = ' --similarity="Pairwise similarity" --cmap=YlGnBu'
+            sim_color = ' --similarity=\"Pairwise similarity\" --cmap=YlGnBu'
         else:
             sim_color =''
         #_heatmap_associations()
