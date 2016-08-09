@@ -1033,64 +1033,14 @@ def _cutree_to_log2 (apNode, X, func, distance, cluster_threshold):
         temp_apChildren += sub_apChildren
     # print "Number of sub-clusters: ", len(set(temp_apChildren))
     return set(temp_apChildren)
-def _cutree_overall (clusterNodelist, X, func, distance):
-    clusterNode = clusterNodelist
-    n = clusterNode[0].get_count()
-    sub_clusters = []
-    while clusterNode :
-        temp_apChildren = []
-        sub_clusterNode = truncate_tree(clusterNode, level=0, skip=1)
-        for node in clusterNode:
-            if node.is_leaf():
-                sub_clusterNode += [node]
-        if sub_clusterNode:
-            for node in sub_clusterNode:
-                if _is_start(node , X, func, distance):
-                    sub_clusters.append(node)
-                else:
-                    if not node.is_leaf():
-                        truncated_result = truncate_tree([node], level=0, skip=1)    
-                    if truncated_result:
-                        temp_apChildren += truncated_result
-    
-        clusterNode = temp_apChildren
-    if distance > .1:
-        next_dist = distance - 0.1 
-    elif distance > .01:
-        next_dist = distance - 0.01
-    else:
-        next_dist = 0.0
-    aDist = []
-    for i in range(len(sub_clusters)):
-        if sub_clusters[i].dist > 0.0:
-            aDist += [sub_clusters[i].dist]
-    while len(sub_clusters) < round(math.sqrt(n)):
-        aDist = []
-        max_dist_node = sub_clusters[0]
-        index = 0 
-        for i in range(len(sub_clusters)):
-            if sub_clusters[i].dist > 0.0:
-                aDist += [sub_clusters[i].dist]
-            if max_dist_node.dist < sub_clusters[i].dist:
-                max_dist_node = sub_clusters[i]
-                index = i
-        # print "Max Distance in this level", _percentage(max_dist_node.dist)
-        if not max_dist_node.is_leaf():
-            del sub_clusters[index]
-            sub_clusters += truncate_tree([max_dist_node], level=0, skip=1)
-            
-        else:
-            break
-    if aDist:
-        next_dist = _percentage(numpy.min(aDist))
-    # print len(sub_clusters), n            
-    return sub_clusters , next_dist
+
 def cutree_to_get_below_threshold_number_of_features (cluster, distance_matrix, number_of_estimated_clusters = None):
     n_features = cluster.get_count()
 
     if number_of_estimated_clusters == None:
-        number_of_estimated_clusters = math.log(n_features, 2)#predict_best_number_of_clusters(cluster, distance_matrix)
-        # math.log(n_features, 2)
+        number_of_estimated_clusters = math.log(n_features, 2)
+        #math.log(n_features, 2)
+        #predict_best_number_of_clusters(cluster, distance_matrix)
     if n_features==1:# or cluster.dist <= t:
         return [cluster]
     sub_clusters = []
@@ -1106,7 +1056,7 @@ def cutree_to_get_below_threshold_number_of_features (cluster, distance_matrix, 
                 #print largest_node.get_count()
                 largest_node = sub_clusters[i]
                 index = i
-        if largest_node.get_count() > n_features/number_of_estimated_clusters:
+        if largest_node.get_count() > (n_features/number_of_estimated_clusters):
             #sub_clusters.remove(largest_node)
             #sub_clusters = sub_clusters[:index] + sub_clusters[index+1 :]
             del sub_clusters[index]
@@ -1158,7 +1108,7 @@ def cutree_to_get_number_of_clusters (cluster, distance_matrix, number_of_estima
         return cluster
     if number_of_estimated_clusters ==None:
         number_of_sub_cluters_threshold = predict_best_number_of_clusters(cluster, distance_matrix)
-        #round(math.log(n_features, 2))
+        #round(math.log(n_features, 2))        
     else:
         number_of_sub_cluters_threshold = number_of_estimated_clusters
     sub_clusters = []
@@ -1230,6 +1180,7 @@ def silhouette_coefficient(clusters, distance_matrix):
     #====check within class homogeniety
     #Ref: http://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
     #pMe = distance.c_hash_metric[config.Distance]
+    distance_matrix = pandas.DataFrame(distance_matrix)
     silhouette_scores = []
     if len(clusters) <= 1:
         sys.exit("silhouette method needs at least two clusters!")
@@ -1261,16 +1212,11 @@ def silhouette_coefficient(clusters, distance_matrix):
                 a = 0.0
             else:
                 temp_a_features = cluster_a[:]#deepcopy(all_a_clusters)
-                #print 'before', all_a_clusters
+                #print 'before', temp_a_features
                 temp_a_features.remove(a_feature)
-                #print 'a feature ', a_feature, temp_a_features
-                #a = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j]))
-                #             for i,j in product([a_feature], temp_a_features)])
-                a = np.mean([distance_matrix[i][j] for i,j in product([a_feature], temp_a_features)])            
-            #b = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j])) 
-             #            for i,j in product([a_feature], next_cluster)])
-            b1 = np.mean([ distance_matrix[i][j] for i,j in product([a_feature], next_cluster)])
-            b2 = np.mean([ distance_matrix[i][j] for i,j in product([a_feature], prev_cluster)])
+                a = np.mean([distance_matrix.iloc[i, j] for i,j in product([a_feature], temp_a_features)])            
+            b1 = np.mean([ distance_matrix.iloc[i, j] for i,j in product([a_feature], next_cluster)])
+            b2 = np.mean([ distance_matrix.iloc[i, j] for i,j in product([a_feature], prev_cluster)])
             b = min(b1,b2)
             s = (b-a)/max([a,b])
             #print 's a', s, a, b
@@ -1309,13 +1255,12 @@ def wss_heirarchy(clusters, distance_matrix):
     avgWithinSS = np.sum(wss) #[sum(d)/X.shape[0] for d in dist]
     #print avgWithinSS 
     return avgWithinSS
-def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
+
+def predict_best_number_of_clusters_wss(hierarchy_tree, distance_matrix):
     distance_matrix = pandas.DataFrame(distance_matrix)
     min_num_cluster = 2  
     max_num_cluster = int(math.floor((math.log(len(distance_matrix),2))))
-    #print max_num_cluster
     wss = numpy.zeros(max_num_cluster+1)
-    #print wss
     best_clust_size = 1
     best_wss = 0.0
     wss[1] = math.sqrt((len(distance_matrix)-1)*sum(distance_matrix.var(axis=1)))#apply(distance_matrix,2,var)))
@@ -1327,7 +1272,7 @@ def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
     #R=0.0
     #best_drop = R
     for i in range(min_num_cluster,max_num_cluster):
-        clusters = cutree_to_get_below_threshold_number_of_features(hierarchy_tree, distance_matrix, number_of_estimated_clusters= i)
+        clusters = cutree_to_get_number_of_clusters(hierarchy_tree, distance_matrix, number_of_estimated_clusters= i)
         #print len(clusters)
         wss[i] = wss_heirarchy(clusters, distance_matrix)
 #print wss[i]
@@ -1343,13 +1288,35 @@ def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
             best_wss = wss[i]
             best_drop = wss[i]/wss[i-1]
     print "The best guess for the number of clusters is: ", best_clust_size
+    return  best_clust_size 
+def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
+    #distance_matrix = pandas.DataFrame(distance_matrix)
+    features = get_leaves(hierarchy_tree)
+    min_num_cluster = 2  
+    max_num_cluster = int(math.log(len(features), 2))
+    best_sil_score = 0.0
+    best_clust_size = 1
+    for i in range(min_num_cluster,max_num_cluster):
+        clusters = cutree_to_get_number_of_clusters(hierarchy_tree, distance_matrix, number_of_estimated_clusters= i)
+        clusters = [cluster for cluster in clusters if get_leaves(cluster)>2]
+        sil_scores = [sil for sil in silhouette_coefficient(clusters, distance_matrix) if sil < 1.0 ]
+        #print sil_scores
+        sil_score = numpy.mean(sil_scores)
+        if best_sil_score < sil_score:
+            best_sil_score = sil_score
+            best_clust_size = i
+        #print best_sil_score, i
+                
+    #print "The best guess for the number of clusters is: ", best_clust_size
     return  best_clust_size       
+def get_leaves(cluster):
+    return cluster.pre_order(lambda x: x.id)      
 def get_homogenous_clusters_silhouette_log(cluster, distance_matrix, number_of_estimated_clusters=None):
     n = cluster.get_count()
     if n==1:
         return cluster
 
-    sub_clusters = cutree_to_get_below_threshold_number_of_features(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)
+    sub_clusters = cutree_to_get_number_of_clusters(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)
     # cutree_to_get_below_threshold_number_of_features
     sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, distance_matrix) 
     while True:#len(sub_clusters) < number_of_sub_cluters_threshold and
