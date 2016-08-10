@@ -121,9 +121,8 @@ def check_requirements():
             import rpy2.robjects.numpy2ri
             rpy2.robjects.numpy2ri.activate()
             ro.r('library(FactoMineR)')
-        except ImportError: 
+        except : 
             sys.exit("--- Please check R, rpy2,  and  FactoMineR installation for MCA library")
-        
   
 VERSION=config.version
 def parse_arguments (args):

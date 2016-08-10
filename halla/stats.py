@@ -142,7 +142,6 @@ def mca_method(pArray, discretize_style, iComponents=1):
 	from rpy2 import robjects as ro
 	from rpy2.robjects import r
 	from rpy2.robjects.packages import importr
-	#import rpy2.robjects as ro
 	import pandas.rpy.common as com
 	import rpy2.robjects.numpy2ri
 	rpy2.robjects.numpy2ri.activate()
@@ -172,7 +171,7 @@ def mca_method(pArray, discretize_style, iComponents=1):
 	#print list(rep)
 	#print rep
 	#print (discretize(list(rep)), explained_variance_1, loading)   #[float("{0:.1f}".format(a)) for a in list(rep)]
-	return (discretize(list(rep)), list(explained_variance_1)[0], list(loading))
+	return (discretize(rep), list(explained_variance_1)[0], loading)
 	'''
 	if len(pArray) < 2:
 		print "len A:", len(pArray)
@@ -919,21 +918,9 @@ def permutation_test_by_representative(pArray1, pArray2):
 		[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA)[0] for pA in [pArray1, pArray2]]
 	elif decomposition in ['pls', 'cca']:
 		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
-		#print "1:", pRep1
-		#print "2:", pRep2
 	else:
 		[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
-		#print "1:", pRep1
-		#print "2:", pRep2
-		#if decomposition == 'nlpca':
-		#	left_rep_variance = first_rep(pArray1, decomposition)
-		#	right_rep_variance = first_rep(pArray2, decomposition)
-	#print left_rep_variance
-	#print "left loading: ", left_loading
-	#print "right loading: ", right_loading
-	#if decomposition != "pca":
-	#	fAssociation = numpy.mean(numpy.array([pMe(pArray1[i], pArray2[j]) for i, j in itertools.product(range(len(pArray1)), range(len(pArray2)))]))
-	#else:
+
 	sim_score= pMe(pRep1, pRep2)
 	fP = permutation_test_pvalue(X=pRep1, Y=pRep2)
 	assert(fP <= 1.0)
@@ -1727,7 +1714,7 @@ def discretize(pArray, style = "equal-area", data_type = None, iN=None, method=N
 	def _discretize_continuous(astrValues, iN=iN):
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
-			iN = min(len(set(astrValues)), round(math.sqrt(len(astrValues)))) #max(round(math.sqrt(len(astrValues))), round(math.log(len(astrValues), 2)))#round(len(astrValues)/math.log(len(astrValues), 2)))#math.sqrt(len(astrValues)))  # **0.5 + 0.5)
+			iN = min(len(set(astrValues)), round(math.sqrt(len(astrValues)))) 
 			if config.similarity_method == 'dmic':
 				iN = iN*2
 		elif iN == 0:
@@ -1757,18 +1744,23 @@ def discretize(pArray, style = "equal-area", data_type = None, iN=None, method=N
 
 	# iRow1, iCol = pArray.shape
 	discretized_data = [] 
+	if isinstance(pArray[0], list):
+		for i, line in enumerate(pArray):
+			if i in aiSkip:
+				#print "SKIPE LINE!"
+				discretized_data.append(line)
+			elif data_type!= None and data_type[i] == 'LEX':
+				#print "LEX", line
+				discretized_data.append(_discretize_categorical(line, iN))
+			else:
+				discretized_data.append(_discretize_continuous(line, iN))
+	else:
+		try:
+			discretized_data = _discretize_continuous(pArray, iN)
+		except:
+			discretized_data = _discretize_categorical(pArray, iN)
 
-	for i, line in enumerate(pArray):
-		if i in aiSkip:
-			#print "SKIPE LINE!"
-			discretized_data.append(line)
-		elif data_type!= None and data_type[i] == 'LEX':
-			#print "LEX", line
-			discretized_data.append(_discretize_categorical(line, iN))
-		else:
-			discretized_data.append(_discretize_continuous(line, iN))
-
-	return array(discretized_data)
+	return discretized_data
 
 def _discretize_continuous_old_R(astrValues, iN=None, style =None):
 	if style in ['jenks', 'kmeans', 'hclust']:

@@ -999,7 +999,7 @@ def _is_start(ClusterNode, X, func, distance):
 def _is_stop(ClusterNode, dataSet, max_dist_cluster):
         #node_indeces = reduce_tree(ClusterNode)
         #first_PC = stats.pca_explained_variance_ratio_(dataSet[array(node_indeces)])[0]
-        if ClusterNode.is_leaf():# or _percentage(ClusterNode.dist, max_dist_cluster) < .1:# or first_PC > .9:
+        if ClusterNode.is_leaf() or ClusterNode.get_count() == 1:# or _percentage(ClusterNode.dist, max_dist_cluster) < .1:# or first_PC > .9:
             #print "Node: ",node_indeces
             #print "dist:", ClusterNode.dist, " first_PC:", first_PC,"\n"
             return True
@@ -1034,15 +1034,15 @@ def _cutree_to_log2 (apNode, X, func, distance, cluster_threshold):
     # print "Number of sub-clusters: ", len(set(temp_apChildren))
     return set(temp_apChildren)
 
-def cutree_to_get_below_threshold_number_of_features (cluster, distance_matrix, number_of_estimated_clusters = None):
+def cutree_to_get_number_of_features (cluster, distance_matrix, number_of_estimated_clusters = None):
     n_features = cluster.get_count()
-
+    if n_features==1:
+        return [cluster]
     if number_of_estimated_clusters == None:
         number_of_estimated_clusters = math.log(n_features, 2)
         #math.log(n_features, 2)
         #predict_best_number_of_clusters(cluster, distance_matrix)
-    if n_features==1:# or cluster.dist <= t:
-        return [cluster]
+    
     sub_clusters = []
     #print n_features, t
     #sub_clusters = cutree_to_get_number_of_clusters ([cluster])
@@ -1105,7 +1105,7 @@ def cutree_to_get_below_threshold_distance_of_clusters (cluster, t = None):
 def cutree_to_get_number_of_clusters (cluster, distance_matrix, number_of_estimated_clusters = None):
     n_features = cluster.get_count()
     if n_features==1:
-        return cluster
+        return [cluster]
     if number_of_estimated_clusters ==None:
         number_of_sub_cluters_threshold = predict_best_number_of_clusters(cluster, distance_matrix)
         #round(math.log(n_features, 2))        
@@ -1292,32 +1292,41 @@ def predict_best_number_of_clusters_wss(hierarchy_tree, distance_matrix):
 def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
     #distance_matrix = pandas.DataFrame(distance_matrix)
     features = get_leaves(hierarchy_tree)
+    clusters= [] #[hierarchy_tree]
     min_num_cluster = 2  
-    max_num_cluster = int(math.log(len(features), 2))
+    max_num_cluster = int(math.ceil(math.log(len(features), 2)))
     best_sil_score = 0.0
     best_clust_size = 1
     for i in range(min_num_cluster,max_num_cluster):
         clusters = cutree_to_get_number_of_clusters(hierarchy_tree, distance_matrix, number_of_estimated_clusters= i)
-        clusters = [cluster for cluster in clusters if get_leaves(cluster)>2]
-        sil_scores = [sil for sil in silhouette_coefficient(clusters, distance_matrix) if sil < 1.0 ]
-        #print sil_scores
+        removed_singlton_clusters = [cluster for cluster in clusters if cluster.get_count()>1]
+        if len(removed_singlton_clusters) < 2:
+            removed_singlton_clusters = clusters
+
+        sil_scores = [sil for sil in silhouette_coefficient(removed_singlton_clusters, distance_matrix) if sil < 1.0 ]
+        #print clusters
         sil_score = numpy.mean(sil_scores)
         if best_sil_score < sil_score:
             best_sil_score = sil_score
-            best_clust_size = i
-        #print best_sil_score, i
+            best_clust_size = len(clusters)
+            result_sub_clusters = clusters
+        #print best_sil_score, best_clust_size
                 
-    #print "The best guess for the number of clusters is: ", best_clust_size
-    return  best_clust_size       
+    print "The best guess for the number of clusters is: ", best_clust_size
+    return clusters       
 def get_leaves(cluster):
-    return cluster.pre_order(lambda x: x.id)      
-def get_homogenous_clusters_silhouette_log(cluster, distance_matrix, number_of_estimated_clusters=None):
+    return cluster.pre_order(lambda x: x.id)  
+    
+def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters=None):
     n = cluster.get_count()
     if n==1:
-        return cluster
+        return [cluster]
 
-    sub_clusters = cutree_to_get_number_of_clusters(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)
-    # cutree_to_get_below_threshold_number_of_features
+    sub_clusters = cutree_to_get_number_of_features(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)
+    # cutree_to_get_number_of_features
+    #sub_clusters = predict_best_number_of_clusters(cluster, distance_matrix)
+    #if len(sub_clusters)< 2:
+    #    return sub_clusters
     sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, distance_matrix) 
     while True:#len(sub_clusters) < number_of_sub_cluters_threshold and
         min_silhouette_node = sub_clusters[0]
@@ -1345,109 +1354,6 @@ def get_homogenous_clusters_silhouette_log(cluster, distance_matrix, number_of_e
             sub_clusters.extend(sub_clusters_to_add)
    
     return sub_clusters
-def get_homogenous_clusters(cluster, dataset_number, prev_silhouette_coefficient):
-    
-    #pMe = distance.c_hash_metric[config.similarity_method]
-    
-    cluster_features = cluster.pre_order(lambda x: x.id)
-    if len(cluster_features) == 1:
-        return [cluster]
-    sub_homogenous_clusters = []
-    sub_clusters = truncate_tree([cluster], level=0, skip=1)#cutree_to_get_number_of_clusters([cluster])#cutree_to_get_number_of_clusters([cluster])#
-    for sub_cluster in sub_clusters:
-        if sub_cluster.get_count() == 1:
-            sub_homogenous_clusters.append(sub_cluster)
-            sub_clusters.remove(sub_cluster)
-    sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, distance_matrix) 
-    #print sub_silhouette_coefficient
-    temp_sub_silhouette_coefficient= sub_silhouette_coefficient[:]
-    '''
-    try:
-        temp_sub_silhouette_coefficient.remove(1.0)
-        #temp_sub_silhouette_coefficient= [.5 if x == 1.0 else x for x in temp_sub_silhouette_coefficient]
-    except:
-        pass
-        '''
-        
-    if prev_silhouette_coefficient >= np.max(temp_sub_silhouette_coefficient):
-        return [cluster]
-    else:
-        for i in range(len(sub_clusters)):
-            sub_homogenous_clusters.extend(get_homogenous_clusters(sub_clusters[i], dataset_number, sub_silhouette_coefficient[i]))
-    #print [cluster.pre_order(lambda x: x.id) for cluster in sub_homogenous_clusters]
-    return sub_homogenous_clusters
-    
-    #cluster_medoid = config.parsed_dataset[dataset_number][cluster_features[len(cluster_features)-1]]
-    all_sim = [math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j])) for i,j in combinations(cluster_features, 2)]
-    #print "all_sim ", all_sim
-    #all_sim = [1.0 - config.D[dataset_number][i][j] for i,j in combinations(cluster_features, 2)]
-    #print "all_sim ",all_sim
-    #S = squareform([math.exp((all_sim[i]*all_sim[i])/(2*np.std(all_sim))) for i in range(len(all_sim))])
-    #print "S ",S
-    '''A = numpy.zeros((len(S), len(S)))
-    for i in range(len(S)):
-        for j in range(len(S)):
-            A[i][j] = S[i][j] if i != j else S[i][j] - sum(S[:][j])
-    try:        
-        eigen_values, _ = numpy.linalg.eig(A)
-        print eigen_values
-    except:
-        pass
-        '''
-    #all_dist = [math.fabs(pMe(config.parsed_dataset[dataset_number][i], cluster_medoid)) for i in cluster_features[0: len(cluster_features)-1]]
-    #clutser_95_percentile = np.percentile(dist_to_medoid,50)
-    #print math.sqrt(len(A))
-    #print "A ",A
-    
-    k = config.K
-    Q1 = np.percentile(all_sim, 25)
-    Q3 = np.percentile(all_sim, 75)
-    IQR = Q3 - Q1
-    upper_fence = Q3 + k * IQR
-    lower_fence = Q1 - k * IQR
-    #====check within class homogeniety
-    coefficient_of_variation = np.std(all_sim)/np.mean(all_sim)
-    if descending_silhouette_coefficient(cluster, dataset_number):
-    #if all (val<= upper_fence and val >= lower_fence for val in all_sim) and coefficient_of_variation < .5:
-        print "coefficient_of_variation:", coefficient_of_variation , cluster_features
-        #descending_silhouette_coefficient(cluster, dataset_number):
-        #not (max(all_dist)-median(all_dist)> k * math.fabs(median(all_dist)-min(all_dist))):
-        #descending_silhouette_coefficient(cluster, dataset_number):
-        #stats.kstest(all_dist, 'norm', mode='asymp')[1] < .05:
-    
-        # Homogeneous
-        sub_homogenous_clusters.extend([cluster])
-        if config.verbose == 'DEBUG':
-            print "Homogenous cluster!!!"
-            print "cluster:", cluster_features, all_sim
-            print "Q1: ",Q1
-            print "Q3: ",Q3
-            print "========================"
-            #import matplotlib.pyplot as plt
-            #fig, ax = plt.subplots(1, 1)
-            #ax.hist(all_dist, normed=True, histtype='stepfilled', alpha=0.2)
-            #ax.legend(loc='best', frameon=False)
-            #plt.savefig("/Users/rah/Documents/Hutlab/halla/hist"+str(stats.kstest(all_dist, 'norm')[1])+".pdf")
-        
-    else:
-        # Too heterogeneous 
-        print "heterogeneous coefficient_of_variation:", coefficient_of_variation, cluster_features
-        for sub_cluster in truncate_tree([cluster], level=0, skip=1):
-           sub_homogenous_clusters.extend(get_homogenous_clusters(sub_cluster, dataset_number)) 
-    return sub_homogenous_clusters
-def cutree_to_get_homogenous_clusters (clusterNodelist, dataset_number):
-    #clusterNode = clusterNodelist
-    #sub_clusters = truncate_tree(clusterNodelist, level=0, skip=1)
-    #homogenous_clusters = []
-    #for sub_cluster in sub_clusters:
-    homogenous_clusters = get_homogenous_clusters_silhouette_log(clusterNodelist[0], config.Distance[dataset_number])
-    #homogenous_clusters.extend(get_homogenous_clusters(clusterNodelist[0], dataset_number, prev_silhouette_coefficient = -1))
-
-    for cluster in homogenous_clusters:
-        print cluster.pre_order(lambda x: x.id) 
-    print '====================================='
-    return homogenous_clusters
-
     
 def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="uniform", strLinkage="min", robustness = None):
     
@@ -1489,11 +1395,11 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
     Hypothesis_Tree_Root = Hypothesis_Node([data1, data2])
     Hypothesis_Tree_Root.level_number = 0
     # Get the first level homogeneous clusters
-    apChildren0 = get_homogenous_clusters_silhouette_log (apClusterNode0[0], config.Distance[0])
-    #cutree_to_get_below_threshold_number_of_features(apClusterNode0[0])
-    #get_homogenous_clusters_silhouette_log (apClusterNode0[0], dataset_number = 0)
-    apChildren1 = get_homogenous_clusters_silhouette_log (apClusterNode1[0], config.Distance[1])
-    #cutree_to_get_below_threshold_number_of_features(apClusterNode[0])
+    apChildren0 = get_homogenous_clusters_silhouette (apClusterNode0[0], config.Distance[0])
+    #cutree_to_get_number_of_features(apClusterNode0[0])
+    #get_homogenous_clusters_silhouette (apClusterNode0[0], dataset_number = 0)
+    apChildren1 = get_homogenous_clusters_silhouette (apClusterNode1[0], config.Distance[1])
+    #cutree_to_get_number_of_features(apClusterNode[0])
     #
     #print "first cut", [a.pre_order(lambda x: x.id) for a in apChildren0]
     #print "first cut", [a.pre_order(lambda x: x.id) for a in apChildren1]
@@ -1540,17 +1446,17 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
                     #print "******************len: ",len(L)
                 continue
         if not bTauX:
-            apChildren0 = get_homogenous_clusters_silhouette_log(a,config.Distance[0])
+            apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
             #cutree_to_get_number_of_clusters([a])
-            #cutree_to_get_below_threshold_number_of_features(a)
-            #get_homogenous_clusters_silhouette_log(a,0)
+            #cutree_to_get_number_of_features(a)
+            #get_homogenous_clusters_silhouette(a,0)
         else:
             apChildren0 = [a]
         if not bTauY:
-            apChildren1 = get_homogenous_clusters_silhouette_log(b,config.Distance[1])#cutree_to_get_number_of_clusters([b])
-            #cutree_to_get_below_threshold_number_of_features(b)
+            apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])#cutree_to_get_number_of_clusters([b])
+            #cutree_to_get_number_of_features(b)
             ##
-            #get_homogenous_clusters_silhouette_log(b,1)#
+            #get_homogenous_clusters_silhouette(b,1)#
         else:
             apChildren1 = [b]
 
