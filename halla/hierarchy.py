@@ -1107,7 +1107,7 @@ def cutree_to_get_number_of_clusters (cluster, distance_matrix, number_of_estima
     if n_features==1:
         return [cluster]
     if number_of_estimated_clusters ==None:
-        number_of_sub_cluters_threshold = predict_best_number_of_clusters(cluster, distance_matrix)
+        number_of_sub_cluters_threshold, _ = predict_best_number_of_clusters(cluster, distance_matrix)
         #round(math.log(n_features, 2))        
     else:
         number_of_sub_cluters_threshold = number_of_estimated_clusters
@@ -1313,16 +1313,18 @@ def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
         #print best_sil_score, best_clust_size
                 
     print "The best guess for the number of clusters is: ", best_clust_size
-    return clusters       
+    return best_clust_size, clusters       
 def get_leaves(cluster):
     return cluster.pre_order(lambda x: x.id)  
     
-def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters=None):
+def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters=None, resolution= 'high'):
     n = cluster.get_count()
     if n==1:
         return [cluster]
-
-    sub_clusters = cutree_to_get_number_of_features(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)
+    if resolution == 'low' :
+        sub_clusters = cutree_to_get_number_of_clusters(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)    
+    else:
+        sub_clusters = cutree_to_get_number_of_features(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)
     # cutree_to_get_number_of_features
     #sub_clusters = predict_best_number_of_clusters(cluster, distance_matrix)
     #if len(sub_clusters)< 2:

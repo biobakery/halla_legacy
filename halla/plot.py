@@ -196,7 +196,7 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
     plt.savefig(figure_name + '.pdf')
     #plt.show()
     # return plt
-def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='./hierarchical_heatmap2', metric = "nmi", method = "single", colLable = True, rowLabel = True, color_bar = False):
+def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='./hierarchical_heatmap2', metric = "nmi", method = "single", colLable = True, rowLabel = True, color_bar = False, scale ='sqrt'):
     
     if len(pArray2) == 0:
         pArray2 = pArray1
@@ -284,7 +284,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     fig.savefig(filename + '.pdf')
     pylab.close()
         
-def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.similarity_method, method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True, dataset_number = None):
+def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.similarity_method, method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True, dataset_number = None, scale  ='sqrt'):
     # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
 
     if not data_table is None:
@@ -341,20 +341,24 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
         if sortCol:
             if len(xlabels_order) == 0 :
                 data_table = data_table[:, idx2]
+                print "1"
                 xlabels_order.extend(idx2)
             else:
                 #pass
+                
                 data_table = data_table[:, xlabels_order]
+                
+    else:
+        D = D.iloc[idx1, idx1]
     myColor =  pylab.cm.YlOrBr
     if distance.c_hash_association_method_discretize[config.similarity_method]:
         myColor = pylab.cm.YlGnBu   
     else:
         myColor = pylab.cm.RdBu_r
     if not data_table is None:
-        scale = 'sqrt'
         scaled_values = stats.scale_data(data_table, scale = scale)
     else:
-        scale = 'sqrt'
+        myColor = pylab.cm.Blues
         scaled_values = stats.scale_data(D, scale = scale)
     im = axmatrix.matshow(scaled_values, aspect='auto', origin='lower', cmap=myColor)#YlGnBu
     if colLable:

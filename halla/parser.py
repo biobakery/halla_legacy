@@ -26,6 +26,9 @@ def wrap_features(txt, width=40):
 		else:
 			txt = txt[0]
 		return txt #'\n'.join(textwrap.wrap(txt, width))
+def substitute_special_characters(txt):
+    txt = re.sub('[^a-zA-Z0-9  \n\.]', '_', txt).replace(' ','_').replace('.','_').replace('__','_').replace('__','_')  
+    return txt
 def load(file):
 	# Read in the file
 	try:
@@ -157,6 +160,7 @@ class Input:
 				aNames =  list(pArray[:, 0])
 				aNames = map(str, aNames)
 				aNames = map(wrap_features, aNames)
+				aNames = map(substitute_special_characters, aNames)
 				pArray = pArray[:, 1:]
 
 			# # Parse data types, missing values, and whitespace
