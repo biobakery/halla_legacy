@@ -204,7 +204,7 @@ def parse_arguments (args):
         "-d","--decomposition",
         dest="strDecomposition",
         default=config.decomposition,
-        choices=["none", "mca", "pca", "ica", "cca","kpca","pls","medoid", "mean"],
+        choices=["none", "mca", "pca", "ica", "cca","kpca","pls","medoid"], #mean
         help="approach for reducing dimensions (or decomposition)\n[default = medoid]")    
     
     argp.add_argument(
@@ -232,7 +232,7 @@ def parse_arguments (args):
         "--discretizing", 
         dest="strDiscretizing",
         default="equal-area",
-        choices=["equal-area", "jenks", "hclust", "kmeans", "none"],
+        choices=["equal-area", "none"], #"jenks", "hclust", "kmeans", 
         help="approach for discretizing continuous data\n[default = equal-area]")
     argp.add_argument(
         "--apply-stop-condition",

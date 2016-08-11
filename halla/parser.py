@@ -311,6 +311,8 @@ class Input:
 		#print df2
 		assert(len(self.orginal_dataset1[0]) == len(self.orginal_dataset2[0]))
 	def _remove_low_entropy_features(self):
+		#print self.discretized_dataset1
+		#print self.orginal_dataset1
 		df1 = pd.DataFrame(self.discretized_dataset1, index = self.outName1, columns = self.outHead1)
 		df1_org = pd.DataFrame(self.orginal_dataset1, index = self.outName1, columns = self.outHead1)
 		

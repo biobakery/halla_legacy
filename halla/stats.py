@@ -14,6 +14,7 @@ from numpy import array , std, log2
 import numpy 
 from numpy.random import shuffle, binomial, normal, multinomial 
 import scipy
+import scipy.stats
 import sys
 import random
 from scipy.stats import scoreatpercentile, pearsonr, rankdata, percentileofscore, spearmanr
@@ -35,12 +36,17 @@ except ImportError:
 # ML plug-in 
 # Internal dependencies
 def get_enropy(x):
-	#print x
-	d = x-1
-	d = [float(val) for val in d]
-	#print d
-	P = numpy.bincount(d)/float(len(d))
-	observed_entropy = -sum([p * numpy.log2(p) for p in P])
+	try:
+		d = x-1
+		d = [float(val) for val in d]
+		#print d
+		P = numpy.bincount(d)/float(len(d))
+		observed_entropy = -sum([p * numpy.log2(p) for p in P])
+	except:
+		P = scipy.stats.itemfreq(x)[:,1]
+		P = map(float, P)
+		P = [ val/len(x) for val in P]
+		observed_entropy = -sum([p * numpy.log2(p) for p in P])
 	#max_entropy = numpy.log2(len(P))
 	return observed_entropy#/max_entropy
 def scale_data(X, scale = 'log'):
@@ -1746,14 +1752,14 @@ def discretize(pArray, style = "equal-area", data_type = None, iN=None, method=N
 
 	# iRow1, iCol = pArray.shape
 	discretized_data = [] 
-	if isinstance(pArray[0], list):
+	if isinstance(pArray[0], list) or (hasattr(pArray[0], "__len__") and (not isinstance(pArray[0], str))):
 		for i, line in enumerate(pArray):
 			if i in aiSkip:
 				#print "SKIPE LINE!"
 				discretized_data.append(line)
 			elif data_type!= None and data_type[i] == 'LEX':
 				#print "LEX", line
-				discretized_data.append(_discretize_categorical(line, iN))
+				discretized_data.append(array(_discretize_categorical(line, iN)))
 			else:
 				discretized_data.append(_discretize_continuous(line, iN))
 	else:
