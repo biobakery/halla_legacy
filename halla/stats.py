@@ -902,8 +902,8 @@ def permutation_test_by_representative(pArray1, pArray2):
 		#	pRep1 = discretize(pArray1[0, :])
 		#	pRep2 = discretize(pArray2[0, :])
 		#else:
-		pRep1 = pArray1[0, :]
-		pRep2 = pArray2[0, :]
+		pRep1 = pArray1#[0, :]
+		pRep2 = pArray2#[0, :]
 		#left_rep_variance = 1.0
 		#right_rep_variance = 1.0
 		left_loading = [1.0]

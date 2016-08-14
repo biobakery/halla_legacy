@@ -341,7 +341,6 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
         if sortCol:
             if len(xlabels_order) == 0 :
                 data_table = data_table[:, idx2]
-                print "1"
                 xlabels_order.extend(idx2)
             else:
                 #pass
@@ -358,8 +357,8 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
     if not data_table is None:
         scaled_values = stats.scale_data(data_table, scale = scale)
     else:
-        myColor = pylab.cm.Blues
-        scaled_values = stats.scale_data(D, scale = scale)
+        myColor = pylab.cm.pink
+        scaled_values = D#stats.scale_data(D, scale = scale)
     im = axmatrix.matshow(scaled_values, aspect='auto', origin='lower', cmap=myColor)#YlGnBu
     if colLable:
         if len(ylabels) == len(idx2):
