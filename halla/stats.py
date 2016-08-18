@@ -37,12 +37,27 @@ except ImportError:
 # Internal dependencies
 def get_enropy(x):
 	try:
-		d = x-1
+		'''
+		if len(labels) == 0:
+			return 1.0
+		label_idx = unique(labels, return_inverse=True)[1]
+		pi = np.bincount(label_idx).astype(np.float)
+		pi = pi[pi > 0]
+		pi_sum = np.sum(pi)
+		# log(a / b) should be calculated as log(a) - log(b) for
+		# possible loss of precision
+		return -np.sum((pi / pi_sum) * (np.log(pi) - log(pi_sum)))
+		'''
+		if min(x)==1:
+			d = x-1
+		elif min(x) == 0:
+			d = x
 		d = [float(val) for val in d]
 		#print d
 		P = numpy.bincount(d)/float(len(d))
 		observed_entropy = -sum([p * numpy.log2(p) for p in P])
 	except:
+		sys.exit("entropy error")
 		P = scipy.stats.itemfreq(x)[:,1]
 		P = map(float, P)
 		P = [ val/len(x) for val in P]
@@ -1714,11 +1729,17 @@ def discretize(pArray, style = "equal-area", data_type = None, iN=None, method=N
 		setastrValues = list(set(astrValues))
 		dictA ={}
 		for i, item in enumerate(setastrValues):
-			dictA[item] = i+1
-		order = []
+			if str(astrValues[i]) != 'nan':
+				dictA[item] = i+1
+			else:
+				#if str(astrValues[i]) == 'nan':
+				#print  astrValues[i] 
+				dictA[item]=  0
+		#dictA[numpy.nan] = numpy.nan 
+		result_discretized_data = []
 		for i, item in enumerate(astrValues):
-			order.append(dictA[item])
-		return order	
+			result_discretized_data.append(dictA[item])
+		return result_discretized_data	
 	def _discretize_continuous(astrValues, iN=iN):
 		if iN == None:
 			# Default to rounded sqrt(n) if no bin count requested
@@ -1747,6 +1768,10 @@ def discretize(pArray, style = "equal-area", data_type = None, iN=None, method=N
 		for i in range(len(astrValues)):
 			discretized_result[i] = int((order[i]-1) / bins_size)
 		discretized_result = rankdata(discretized_result, method= 'dense')
+		for i in range(len(astrValues)):
+			if str(astrValues[i]) == 'nan':
+				#print  astrValues[i] 
+				discretized_result[i]= 0
 		#print astrRet
 		return discretized_result
 

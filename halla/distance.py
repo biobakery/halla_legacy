@@ -199,39 +199,55 @@ def mi(pData1, pData2):
 
 	return math.log(math.e, 2) * mutual_info_score(pData1, pData2)#return MutualInformation(pData1, pData2).get_distance()
 
-def nmi(pData1, pData2):
-	"""
-	Static implementation of normalized mutual information 
-
-	Examples
-	---------------
-
-	>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-	>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
-	>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
-	>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
-	>>> p = itertools.product( range(len(x)), range(len(y)) )
-	>>> for item in p: i,j = item; print (i,j), nmi( dx[i], dy[j] )
-	(0, 0) 1.0
-	(0, 1) 1.0
-	(0, 2) 1.0
-	(0, 3) 1.0
-	(1, 0) 0.345592029944
-	(1, 1) 0.345592029944
-	(1, 2) 0.345592029944
-	(1, 3) 0.345592029944
-	(2, 0) 1.0
-	(2, 1) 1.0
-	(2, 2) 1.0
-	(2, 3) 1.0
-	(3, 0) 0.345592029944
-	(3, 1) 0.345592029944
-	(3, 2) 0.345592029944
-	(3, 3) 0.345592029944
-
-	"""
-
-	return normalized_mutual_info_score(pData1, pData2) #return NormalizedMutualInformation(pData1, pData2).get_distance() 
+def nmi(X, Y):
+    """
+    Static implementation of normalized mutual information 
+    
+    Examples
+    ---------------
+    
+    >>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
+    >>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
+    >>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
+    >>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
+    >>> p = itertools.product( range(len(x)), range(len(y)) )
+    >>> for item in p: i,j = item; print (i,j), nmi( dx[i], dy[j] )
+    (0, 0) 1.0
+    (0, 1) 1.0
+    (0, 2) 1.0
+    (0, 3) 1.0
+    (1, 0) 0.345592029944
+    (1, 1) 0.345592029944
+    (1, 2) 0.345592029944
+    (1, 3) 0.345592029944
+    (2, 0) 1.0
+    (2, 1) 1.0
+    (2, 2) 1.0
+    (2, 3) 1.0
+    (3, 0) 0.345592029944
+    (3, 1) 0.345592029944
+    (3, 2) 0.345592029944
+    (3, 3) 0.345592029944
+    
+    """
+    if  not config.missing_char_category:
+        test = [0 in [a, b] for a,b in zip(X,Y)]
+        new_X= [a for a,b in zip (X,test) if ~b]
+        new_Y= [a for a,b in zip (Y,test) if ~b]
+        #print test
+        #print new_X, new_Y
+    else:
+        new_X = X
+        new_Y = Y
+        #print new_X, new_Y
+    #temp_X = X
+    #for i in range(len(X)):
+    #    if X[i] == 'nan':
+     #       print X[i]    
+    #X = [X[i] for i in range(len(X)) if X[i] != 'nan' and Y[i] != 'nan']
+    #Y = [Y[i] for i in range(len(Y)) if temp_X[i] != 'nan' and Y[i] != 'nan']#Y = [Y[i] for i in range(len(Y)) if temp_X[i] != numpy.nan and Y[i] != numpy.nan]
+    
+    return normalized_mutual_info_score(new_X, new_Y) #return NormalizedMutualInformation(pData1, pData2).get_distance() 
 
 def ami(pData1, pData2):
     """ 
@@ -295,7 +311,7 @@ def spearman(X, Y):
     #X = [float(x) for x in X]
     #Y = [float(y) for y in Y]
     #print "pearson:", scipy.stats.pearsonr(X, Y)[0]
-    return scipy.stats.spearmanr(X, Y)[0]
+    return scipy.stats.spearmanr(X, Y, nan_policy='omit')[0]
 def mic (X, Y):
     try:
         import minepy

@@ -1,6 +1,6 @@
 import random
 from numpy import array
-version = '0.6.12'
+version = '0.6.13'
 __description__      = """
   _    _          _ _          
  | |  | |   /\   | | |   /\    
@@ -54,6 +54,7 @@ nullsamples = []
 number_of_performed_tests = 0
 min_var = 0.0
 entropy_threshold = 0.0
+missing_char_category = False
 
 #==================================================================#
 # Mutable Meta Objects  

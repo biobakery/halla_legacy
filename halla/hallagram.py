@@ -241,7 +241,7 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
     [tick.set_size( c_large_text ) for tick in twin_ax.get_yticklabels()]
     twin_ax.set_ylim( vmin, vmax )
     if similarity != "Pairwise Similarity":
-        similarity = "Pairwise Similarity("+similarity+")"
+        similarity = "Pairwise "+similarity
     twin_ax.set_ylabel( similarity, size=c_giant_text, fontsize=10 )
     ticks = [vmin]
     while ticks[-1] < vmax:

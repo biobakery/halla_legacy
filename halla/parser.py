@@ -175,10 +175,10 @@ class Input:
 			for i, line in enumerate(pArray):
 				# *   If the line is not full,  replace the Nones with nans                                           *
 				#***************************************************************************************************** 
-				if config.missing_method is  None and not distance.c_hash_association_method_discretize[config.similarity_method]:
-					warn_message ="There is missing data in feature "+  aNames[i]+"!!! " + "Try --missing-method=method to choose your filling strategy. "
+				if config.missing_method is  None: #and not distance.c_hash_association_method_discretize[config.similarity_method]:
+					#warn_message ="There is missing data in feature "+  aNames[i]+"!!! " + "Try --missing-method=method to fill missing data. "
 					line = map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) 
-										else sys.exit(warn_message )), line)  ###### np.nan Convert missings to nans
+										else np.nan), line)  ###### np.nan Convert missings to nans
 				else:
 					line = map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else np.nan ), line)  ###### np.nan Convert missings to nans
 					#line = df1 = pd.DataFrame(line)
@@ -193,17 +193,18 @@ class Input:
 					if not aNames:
 						aNames.append(i)
 
-					try: 
-						line = map(int, line)  # is it explicitly categorical?  
-						aTypes.append("CAT")
+					#try: 
+						#line = map(int, line)  # is it explicitly categorical?  
+						#aTypes.append("CAT")
+					#except ValueError:
+					try:
+						line = map(float, line)  # is it continuous? 
+						aTypes.append("CON")
+						#print "Continues data !"
 					except ValueError:
-						try:
-							line = map(float, line)  # is it continuous? 
-							aTypes.append("CON")
-						except ValueError:
-							#print "Categorical data !"
-							line = line  # we are forced to conclude that it is implicitly categorical, with some lexical ordering 
-							aTypes.append("LEX")
+						#print "Categorical data !"
+						line = line  # we are forced to conclude that it is implicitly categorical, with some lexical ordering 
+						aTypes.append("LEX")
 				else:  # delete corresponding name from namespace 
 					try:
 						print aNames[i], " has an issue with filling missed data!"

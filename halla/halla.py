@@ -262,7 +262,7 @@ def parse_arguments (args):
         help="a seed number to make the random permutation reproducible\n[default = 0,and -1 for random number]")
     argp.add_argument(
         "-e", "--entropy",
-        dest="dEntropy",
+        dest="entropy_threshold",
         type=float,
         default=0.0,
         help="Minimum entropy threshold to filter features with low information\n[default = 0.5]")
@@ -277,6 +277,12 @@ def parse_arguments (args):
         default=None,
         choices=["mean", "median", "most_frequent"],
         help="defines missing strategy to fill missing data.\nFor categorical data puts all missing data in one new category.")
+    argp.add_argument(
+        "--missing-char-category",
+        dest = "missing_char_category",
+        #default = False,
+        action="store_true",
+        help="the input files contain a header line")
     return argp.parse_args()
 
 def set_parameters(args):
@@ -284,7 +290,7 @@ def set_parameters(args):
     config.decomposition = args.strDecomposition.lower()
     #config.fdr_function = args.strFDR
     config.q = args.dQ  
-    config.entropy_threshold = args.dEntropy
+    config.entropy_threshold = args.entropy_threshold
     #config.p_adjust_method = args.strAdjust
     #config.randomization_method = args.strRandomization  # method to generate error bars 
     config.strStep = "uniform"
@@ -306,6 +312,7 @@ def set_parameters(args):
     config.NBIN = args.nbin
     config.missing_char = args.missing_char
     config.missing_method = args.missing_method
+    config.missing_char_category = args.missing_char_category
     #config.K = args.k
     config.p_adjust_method = args.strAdjust.lower()
     #config.fdr_function = args.strFDR.lower()
