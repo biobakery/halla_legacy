@@ -330,7 +330,7 @@ def _report():
 
         #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
         #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
-        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (x.pvalue, x.qvalue, - math.fabs(x.similarity_score)))
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.pvalue, x.qvalue ))
 
         for association in sorted_associations:
             number_of_association += 1
@@ -368,7 +368,7 @@ def _report():
         
     #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
     #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
-    sorted_associations = sorted(config.meta_alla[0], key=lambda x: (x.pvalue, x.qvalue, - math.fabs(x.similarity_score)))
+    sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.pvalue, x.qvalue ))
 
     if config.descending == "AllA":
         config.Features_order[0]  = [i for i in range(len(config.original_dataset[0]))]   
@@ -554,7 +554,7 @@ def _report():
                 similarity_score[i][j] = distance.c_hash_metric[config.similarity_method](config.parsed_dataset[0][config.Features_order[0][i]], config.parsed_dataset[1][config.Features_order[1][j]])
         #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
         #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
-        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (x.pvalue, x.qvalue, - math.fabs(x.similarity_score)))
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.pvalue, x.qvalue ))
 
         '''for association in sorted_associations:
             iX, iY = association.get_data()
@@ -618,7 +618,7 @@ def _report():
         for i in range(len(config.Features_order[0])):
             for j in range(len(config.Features_order[1])):
                 similarity_score[i][j] = distance.c_hash_metric[config.similarity_method](config.parsed_dataset[0][config.Features_order[0][i]], config.parsed_dataset[1][config.Features_order[1][j]])
-        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (x.pvalue, x.qvalue, - math.fabs(x.similarity_score)))
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.pvalue, x.qvalue ))
         #sorted_associations = sorted(sorted_associations, key=lambda x: ( x.s)
         for association in sorted_associations:
             iX, iY = association.get_data()

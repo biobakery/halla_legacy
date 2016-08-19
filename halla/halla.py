@@ -264,7 +264,7 @@ def parse_arguments (args):
         "-e", "--entropy",
         dest="entropy_threshold",
         type=float,
-        default=0.0,
+        default=0.5,
         help="Minimum entropy threshold to filter features with low information\n[default = 0.5]")
     argp.add_argument(
         "--missing-char",
