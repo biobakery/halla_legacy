@@ -111,6 +111,9 @@ def get_args( ):
     parser.add_argument( "--similarity",
                          default="Pairwise Similarity", \
                          help="Similarity metric has been used for similarity measurement" )
+    parser.add_argument( "--orderby",
+                         default="similarity", \
+                         help="Order the significant association by similarity, pvalue, or qvalue" )
     
     return parser.parse_args()
 
@@ -140,12 +143,13 @@ def load_order_table( p_table, p_tree, associations ):
     simtable.update( )
     return simtable
 
-def load_associations( path, largest=None, strongest=None ):
+def load_associations( path, largest=None, strongest=None, orderby = 'similarity' ):
     pairs = []
+    dic_order = {'p-value':3, 'q-value':4, 'similarity':5}
     with open( path ) as fh:
         for row in csv.reader( fh, dialect="excel-tab" ):
             if "Association" not in row[0]:
-                pairs.append( [row[0], row[1].split( ";" ), row[3].split( ";" ), float( row[5] )] )
+                pairs.append( [row[0], row[1].split( ";" ), row[3].split( ";" ), float( row[5] ), float( row[6] ),  float( row[7] )] )
     if largest is not None and strongest is not None:
         sys.exit( "Can only specify one of LARGEST and STRONGEST" )
     elif largest is not None:
@@ -153,13 +157,13 @@ def load_associations( path, largest=None, strongest=None ):
         pairs = pairs[0:min( len( pairs ), largest )]
     elif strongest is not None:
         # not reversed, smaller p = stronger assoc
-        pairs = sorted( pairs, key=lambda row: row[3] )
+        pairs = sorted( pairs, key=lambda row: row[dic_order[orderby]], reverse=True )
         pairs = pairs[0:min( len( pairs ), strongest )]
     return pairs
 
 def mask_table( simtable, associations ):
     allowed = {}
-    for number, row_items, col_items, sig in associations:
+    for number, row_items, col_items, sig, _, _ in associations:
         for r in row_items:
             for c in col_items:
                 ri = simtable.rowmap[r]
@@ -248,7 +252,7 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
         ticks.append( ticks[-1] + c_simstep )
     twin_ax.set_yticks( ticks )
     # add associations
-    for number, row_items, col_items, sig in associations:
+    for number, row_items, col_items, sig, _, _ in associations:
         row_items = row_items[::-1]
         y1 = simtable.rowmap[row_items[0]]
         y2 = simtable.rowmap[row_items[-1]]
@@ -301,7 +305,7 @@ def main( ):
     associations = load_associations(
         args.associations,
         largest=args.largest,
-        strongest=args.strongest, )
+        strongest=args.strongest, orderby = args.orderby)
     simtable = load_order_table( args.simtable, args.tree, associations )
     plot(
         simtable,

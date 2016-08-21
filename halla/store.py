@@ -376,7 +376,16 @@ def _report():
     def _plot_associations():
         import pandas as pd    
         association_number = 0
-        
+        diagnostics_plot_dir = config.output_dir + '/diagnostics_plot'
+        if os.path.isdir(diagnostics_plot_dir):
+            try:
+                shutil.rmtree(diagnostics_plot_dir)
+            except EnvironmentError:
+                sys.exit("Unable to remove directory: "+dir)
+        try:
+            os.mkdir(diagnostics_plot_dir)
+        except EnvironmentError:
+                sys.exit("Unable to create directory: "+dir)
         for association in sorted_associations:
             association_number += 1
             iX, iY = association.get_data()
@@ -393,28 +402,28 @@ def _report():
             discretized_cluster2 = [config.discretized_dataset[1][i] for i in iY]
             Y_labels = np.array([config.FeatureNames[1][i] for i in iY])
             
-            association_dir = config.output_dir + "/association_"+ str(association_number) + '/'
-            filename = association_dir +"original_data" + '/'
-            discretized_filename = association_dir+"discretized_data" + '/'
-            dir = os.path.dirname(filename)
-            discretized_dir = os.path.dirname(discretized_filename)
+            association_dir = str(diagnostics_plot_dir) + "/association_"+ str(association_number)
+            filename = association_dir +"/"
+            #discretized_filename = association_dir+"/discretized_data/"
+            #dir = os.path.dirname(filename)
+            #discretized_dir = os.path.dirname(discretized_filename)
             # remove the directory if it exists
-            if os.path.isdir(dir):
+            if os.path.isdir(association_dir):
                 try:
                     shutil.rmtree(association_dir)
                     #shutil.rmtree(dir)
                     #shutil.rmtree(discretized_dir)
                 except EnvironmentError:
-                    sys.exit("Unable to remove directory: "+dir)
+                    sys.exit("Unable to remove directory: "+association_dir)
             
             # create new directory
             try:
                 os.mkdir(association_dir)
-                os.mkdir(dir)
-                if not bypass_discretizing():
-                    os.mkdir(discretized_dir)
+                #os.mkdir(dir)
+                #if not bypass_discretizing():
+                    #os.mkdir(discretized_dir)
             except EnvironmentError:
-                sys.exit("Unable to create directory: "+dir)
+                sys.exit("Unable to create directory: "+association_dir)
             plt.figure()  
             try: 
                 if len(discretized_cluster1) < 40:
@@ -494,7 +503,7 @@ def _report():
                 d_x_d_rep = decomposition_method(discretized_df1)
                 d_y_d_rep = decomposition_method(discretized_df2)
                 d_x_d_rep, d_y_d_rep = zip(*sorted(zip(d_x_d_rep, d_y_d_rep)))
-                plot.confusion_matrix(d_x_d_rep, d_y_d_rep, filename = discretized_filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
+                plot.confusion_matrix(d_x_d_rep, d_y_d_rep, filename = filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
             plt.close("all")
             
     def _report_compared_clusters():
