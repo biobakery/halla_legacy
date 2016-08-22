@@ -38,7 +38,6 @@ Distance = [None, None] # Distance Matrices
 summary_method = "final"
 output_dir = "./"
 log_input = True
-hallagram = False
 diagnostics_plot = False
 strDiscretizing = 'equal-area'
 apply_stop_condition = False

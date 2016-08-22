@@ -157,7 +157,7 @@ def load_associations( path, largest=None, strongest=None, orderby = 'similarity
         pairs = pairs[0:min( len( pairs ), largest )]
     elif strongest is not None:
         # not reversed, smaller p = stronger assoc
-        pairs = sorted( pairs, key=lambda row: row[dic_order[orderby]], reverse=True )
+        pairs = sorted( pairs, key=lambda row: abs(row[dic_order[orderby]]), reverse=True )
         pairs = pairs[0:min( len( pairs ), strongest )]
     return pairs
 

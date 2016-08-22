@@ -522,22 +522,21 @@ def _report():
                 aLineOut = map(str, [str(level), str(';'.join(config.FeatureNames[0][i] for i in iX)), str(';'.join(config.FeatureNames[1][i] for i in iY))])
                 csvwc.writerow(aLineOut)
     def _heatmap_associations():
-        if config.hallagram:
-            print "--- plotting heatmap of associations  ..."
-            global associated_feature_X_indecies
-            Xs = list(set(associated_feature_X_indecies))
-            X_labels = np.array([config.FeatureNames[0][i] for i in Xs])
-            global associated_feature_Y_indecies
-            Ys = list(set(associated_feature_Y_indecies))
-            Y_labels = np.array([config.FeatureNames[1][i] for i in Ys])
-            if len(Xs) > 1 and len(Ys) > 1: 
-                cluster1 = [config.parsed_dataset[0][i] for i in Xs]    
-                cluster2 = [config.parsed_dataset[1][i] for i in Ys]
-                df1 = np.array(cluster1, dtype=float)
-                df2 = np.array(cluster2, dtype=float)
-                p = np.zeros(shape=(len(Xs), len(Ys)))
-                #nmi = np.zeros(shape=(len(Xs), len(Ys)))
-                plot.heatmap2(dataset1=cluster1, dataset2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename = str(config.output_dir)+'/all_nmi_heatmap' )
+        print "--- plotting heatmap of associations  ..."
+        global associated_feature_X_indecies
+        Xs = list(set(associated_feature_X_indecies))
+        X_labels = np.array([config.FeatureNames[0][i] for i in Xs])
+        global associated_feature_Y_indecies
+        Ys = list(set(associated_feature_Y_indecies))
+        Y_labels = np.array([config.FeatureNames[1][i] for i in Ys])
+        if len(Xs) > 1 and len(Ys) > 1: 
+            cluster1 = [config.parsed_dataset[0][i] for i in Xs]    
+            cluster2 = [config.parsed_dataset[1][i] for i in Ys]
+            df1 = np.array(cluster1, dtype=float)
+            df2 = np.array(cluster2, dtype=float)
+            p = np.zeros(shape=(len(Xs), len(Ys)))
+            #nmi = np.zeros(shape=(len(Xs), len(Ys)))
+            plot.heatmap2(dataset1=cluster1, dataset2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename = str(config.output_dir)+'/all_nmi_heatmap' )
     def _write_hallagram_info():
         if len(associated_feature_X_indecies) == 0 or len(associated_feature_Y_indecies) == 0 :
             return
@@ -670,53 +669,52 @@ def _report():
         #anottation_cell = [config.Features_order[0]]
         #anottation_cell = [ anottation_cell[:][j] for j in config.Features_order[1]]
         #print anottation_cell
-        if config.hallagram:
-            print "--- plotting heatmap associations using R ..."
-            import rpy2.robjects as ro
-            #import pandas.rpy.common as com
-            import rpy2.robjects.numpy2ri
-            rpy2.robjects.numpy2ri.activate()
-            ro.globalenv['similarity_score'] = similarity_score
-            ro.globalenv['labRow'] = X_labels 
-            ro.globalenv['labCol'] = Y_labels
-            ro.globalenv['sig_matrix'] = anottation_cell
-            #ro.globalenv['circos_table'] = circos_tabel
-            #Ext_Y_labels = ["labels"] + list(Y_labels)
-            #ro.globalenv['Ext_labCol'] = Ext_Y_labels
-            ro.r('rownames(similarity_score) = labRow')
-            ro.r('colnames(similarity_score) = labCol')
-            ro.r('rownames(sig_matrix) = labRow')
-            ro.r('colnames(sig_matrix) = labCol')
-            #ro.r('rownames(circos_table) = labRow')
-            #ro.r('colnames(circos_table) = labCol')
-           # ro.globalenv['output_table_similarity_score'] = str(config.output_dir)+"/" + config.similarity_method+"_similarity_table.txt"
-            ro.globalenv['output_asscoaiation_table'] = str(config.output_dir)+"/" + config.similarity_method+"_asscoaitaion_table.txt"
-            ro.globalenv['output_circus_table'] = str(config.output_dir)+"/" + config.similarity_method+"_circos_table.txt"
-            #ro.r('write.table(similarity_score , output_table_similarity_score, sep = "\t", eol = "\n", quote = F, col.names = NA, row.names = labRow)')
-            #ro.r('write.table(sig_matrix , output_asscoaiation_table, sep = "\t", eol = "\n", quote = F, col.names =NA , row.names = labRow)')
-            #ro.r('write.table(circos_table , output_circus_table, sep = "\t", eol = "\n", quote = F, col.names =NA , row.names = labRow)')
-            #rev(heat.colors(100))
-            if len(Xs) > 1 and len(Ys) > 1: 
-                ro.r('library("RColorBrewer")')
-                ro.r('library("pheatmap")')
-                ro.globalenv['output_heatmap_similarity_score'] = str(config.output_dir)+"/" + "results_heatmap.pdf"
-                #ro.globalenv['output_file_Pearson'] = str(config.output_dir)+"/Pearson_heatmap.pdf"
-                if distance.c_hash_association_method_discretize[config.similarity_method]:
-                    ro.r('pheatmap(similarity_score, color = brewer.pal(100,"Reds"),labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 8, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, sig_matrix, ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-                else:
-                    ro.r('pheatmap(similarity_score,labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 8, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, sig_matrix, ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+        print "--- plotting heatmap associations using R ..."
+        import rpy2.robjects as ro
+        #import pandas.rpy.common as com
+        import rpy2.robjects.numpy2ri
+        rpy2.robjects.numpy2ri.activate()
+        ro.globalenv['similarity_score'] = similarity_score
+        ro.globalenv['labRow'] = X_labels 
+        ro.globalenv['labCol'] = Y_labels
+        ro.globalenv['sig_matrix'] = anottation_cell
+        #ro.globalenv['circos_table'] = circos_tabel
+        #Ext_Y_labels = ["labels"] + list(Y_labels)
+        #ro.globalenv['Ext_labCol'] = Ext_Y_labels
+        ro.r('rownames(similarity_score) = labRow')
+        ro.r('colnames(similarity_score) = labCol')
+        ro.r('rownames(sig_matrix) = labRow')
+        ro.r('colnames(sig_matrix) = labCol')
+        #ro.r('rownames(circos_table) = labRow')
+        #ro.r('colnames(circos_table) = labCol')
+       # ro.globalenv['output_table_similarity_score'] = str(config.output_dir)+"/" + config.similarity_method+"_similarity_table.txt"
+        ro.globalenv['output_asscoaiation_table'] = str(config.output_dir)+"/" + config.similarity_method+"_asscoaitaion_table.txt"
+        ro.globalenv['output_circus_table'] = str(config.output_dir)+"/" + config.similarity_method+"_circos_table.txt"
+        #ro.r('write.table(similarity_score , output_table_similarity_score, sep = "\t", eol = "\n", quote = F, col.names = NA, row.names = labRow)')
+        #ro.r('write.table(sig_matrix , output_asscoaiation_table, sep = "\t", eol = "\n", quote = F, col.names =NA , row.names = labRow)')
+        #ro.r('write.table(circos_table , output_circus_table, sep = "\t", eol = "\n", quote = F, col.names =NA , row.names = labRow)')
+        #rev(heat.colors(100))
+        if len(Xs) > 1 and len(Ys) > 1: 
+            ro.r('library("RColorBrewer")')
+            ro.r('library("pheatmap")')
+            ro.globalenv['output_heatmap_similarity_score'] = str(config.output_dir)+"/" + "results_heatmap.pdf"
+            #ro.globalenv['output_file_Pearson'] = str(config.output_dir)+"/Pearson_heatmap.pdf"
+            if distance.c_hash_association_method_discretize[config.similarity_method]:
+                ro.r('pheatmap(similarity_score, color = brewer.pal(100,"Reds"),labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 8, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, sig_matrix, ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+            else:
+                ro.r('pheatmap(similarity_score,labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 8, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, sig_matrix, ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+            ro.r('dev.off()')
+            '''if config.similarity_method != "pearson":
+                ro.globalenv['p'] = p
+                #ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
+                ro.r('rownames(p) = labRow')
+                ro.r('colnames(p) = labCol')
+                #if distance.c_hash_association_method_discretize[config.similarity_method]:
+                ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
+                #else:
+                #ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                 ro.r('dev.off()')
-                '''if config.similarity_method != "pearson":
-                    ro.globalenv['p'] = p
-                    #ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
-                    ro.r('rownames(p) = labRow')
-                    ro.r('colnames(p) = labCol')
-                    #if distance.c_hash_association_method_discretize[config.similarity_method]:
-                    ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-                    #else:
-                    #ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-                    ro.r('dev.off()')
-                    '''
+                '''
     def _heatmap_datasets_R():
         if config.hallagram:          
             print "--- plotting heatmap datasets using R ..."
@@ -759,13 +757,7 @@ def _report():
                 ro.r('rownames(drows2) = labRow')
                 ro.r('pheatmap(drows2, filename =D2, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T,  show_colnames = F, cluster_cols=T, dendrogram="row")')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                 ro.r('dev.off()')
-            
-    # Execute report functions
-    _report_all_tests()
-    _report_associations()
-    _report_compared_clusters()
-    _write_hallagram_info()
-    if config.hallagram:
+    def _hallagram_strongest(n):
         if config.similarity_method=="nmi":
             sim_color = ' --similarity=\"Pairwise similarity\" --cmap=YlGnBu'
         else:
@@ -779,18 +771,25 @@ def _report():
                 hallagram_command= "hallagram "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
                           output_path+"/associations.txt "+\
-                          "--outfile="+output_path+"/hallagram.pdf" + sim_color
+                          "--outfile="+output_path+"/hallagram.pdf" + " --strongest " + str(n) + sim_color
                 os.system(hallagram_command)
                 hallagram_command_mask = "hallagram "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
                           output_path+"/associations.txt "+\
-                          "--outfile="+output_path+"/hallagram_mask.pdf --mask" + sim_color
+                          "--outfile="+output_path+"/hallagram_mask.pdf --mask" + " --strongest " + str(n) + sim_color
                 os.system(hallagram_command_mask)
                 #_heatmap_associations_R()
                 #_heatmap_datasets_R()
                 #_plot_associations()
             except IOError:
-                print"exception with plotting the final results "
+                print"exception with plotting the final results "       
+    # Execute report functions
+    _report_all_tests()
+    _report_associations()
+    _report_compared_clusters()
+    _write_hallagram_info()
+    _hallagram_strongest(100)
+        
     if config.diagnostics_plot:
         #_heatmap_associations()
         #from rpy2.rinterface import RRuntimeError
