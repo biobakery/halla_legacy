@@ -172,8 +172,8 @@ def _summary_statistics(strMethod=None):
     
     Z = config.meta_alla 
     _final, _all = map(array, Z)  # # Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree
-    Z_final = array([[_final[i].get_data(), _final[i].pvalue, _final[i].qvalue] for i in range(len(_final))])
-    Z_all = array([[_all[i].get_data(), _all[i].pvalue, _all[i].qvalue] for i in range(len(_all))])    
+    Z_final = array([[_final[i].m_pData, _final[i].pvalue, _final[i].qvalue] for i in range(len(_final))])
+    Z_all = array([[_all[i].m_pData, _all[i].pvalue, _all[i].qvalue] for i in range(len(_all))])    
         
     # ## Sort the final Z to make sure p-value consolidation happens correctly 
     Z_final_dummy = [-1.0 * (len(line[0][0]) + len(line[0][1])) for line in Z_final]
@@ -334,7 +334,7 @@ def _report():
 
         for association in sorted_associations:
             number_of_association += 1
-            iX, iY = association.get_data()
+            iX, iY = association.m_pData
             number_of_association_faeture += (len( iX) * len(iY))
             global associated_feature_X_indecies
             associated_feature_X_indecies += iX
@@ -388,7 +388,7 @@ def _report():
                 sys.exit("Unable to create directory: "+dir)
         for association in sorted_associations:
             association_number += 1
-            iX, iY = association.get_data()
+            iX, iY = association.m_pData
             global associated_feature_X_indecies
             associated_feature_X_indecies += iX
             global associated_feature_Y_indecies
@@ -572,7 +572,7 @@ def _report():
        '''
         def _is_in_an_assciostions(i,j):
             for n in range(len(sorted_associations)):
-                iX, iY = sorted_associations[n].get_data()
+                iX, iY = sorted_associations[n].m_pData
                 if i in iX and j in iY:
                     return n+1
             return 0
@@ -582,15 +582,6 @@ def _report():
             writer.writerow(Y_labels)
             [writer.writerow(r) for r in similarity_score] 
         '''
-        
-        #anottation_cell = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))                
-        #for i in range(len(config.Features_order[0])):
-        #    for j in range(len(config.Features_order[1])):
-        #        association_num = _is_in_an_assciostions(config.Features_order[0][i],config.Features_order[1][j])
-        #        #print association_num
-        #        if association_num > 0: #for association in sorted_associations:
-        #            anottation_cell[i][j] = association_num
-                    
         circos_tabel = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))
         for i in range(len(config.Features_order[0])):
             for j in range(len(config.Features_order[1])):
@@ -601,7 +592,6 @@ def _report():
                         circos_tabel[i][j] = 0
         logger.write_circos_table(circos_tabel, str(config.output_dir)+"/" +"circos_table_"+ config.similarity_method+".txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
         logger.write_table(similarity_score,str(config.output_dir)+"/" + "similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
-        #logger.write_table(anottation_cell,str(config.output_dir)+"/" + "association_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
         return
     def _heatmap_associations_R():
         if len(associated_feature_X_indecies) == 0 or len(associated_feature_Y_indecies) == 0 :
@@ -629,24 +619,18 @@ def _report():
         sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.pvalue, x.qvalue ))
         #sorted_associations = sorted(sorted_associations, key=lambda x: ( x.s)
         for association in sorted_associations:
-            iX, iY = association.get_data()
+            iX, iY = association.m_pData
             for i, j in itertools.product(iX, iY):
                 #similarity_score[i][j] = similarity_score[i][j]*2
                 pass         
        
         def _is_in_an_assciostions(i,j):
             for num, association in enumerate(sorted_associations):
-                iX, iY = association.get_data()
+                iX, iY = association.m_pData
                 if i in iX and j in iY:
                     return num+1
             return 0
-         
-        '''with open('similarity_score.csv', 'w') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(Y_labels)
-            [writer.writerow(r) for r in similarity_score] 
-        '''
-        
+
         anottation_cell = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))                
         for i in range(len(config.Features_order[0])):
             for j in range(len(config.Features_order[1])):
@@ -839,25 +823,7 @@ def run():
 
     * Visually, looks much nicer and is much nicely wrapped if functions are entirely self-contained and we do not have to pass around pointers 
 
-    """
-    '''if config.output_dir == "./":
-        config.output_dir = "./"+config.descending+'_'+config.similarity_method+'_'+config.decomposition +'_'+ str(len(config.original_dataset[0]))+'_'+str(len(config.original_dataset[0][1]))
-    if not os.path.isdir( config.output_dir):
-        try:
-            print("Creating output directory: " + config.output_dir)
-            os.mkdir(config.output_dir)
-        except EnvironmentError:
-            sys.exit("CRITICAL ERROR: Unable to create output directory.")
-    else:
-        try:
-            print("Removing the old output directory: " + config.output_dir)
-            shutil.rmtree(config.output_dir)
-            print("Creating output directory: " + config.output_dir)
-            os.mkdir(config.output_dir)
-        except EnvironmentError:
-            sys.exit("CRITICAL ERROR: Unable to create output directory.")
-
-    '''  
+    """ 
     set_parsed_data()  
     try:    
         performance_file  = open(str(config.output_dir)+'/performance.txt', 'a')
