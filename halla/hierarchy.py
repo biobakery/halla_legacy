@@ -986,7 +986,6 @@ def _actor(pNode):
 def naive_all_against_all():
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
-    seed = config.seed
     p_adjusting_method = config.p_adjust_method
     decomposition = config.decomposition
     method = config.randomization_method

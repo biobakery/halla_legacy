@@ -827,7 +827,7 @@ def permutation_test_pvalue(X, Y):
 			aDist = config.null_dist
 		else:
 			for i in xrange(iIter):
-				numpy.random.seed(i+seed)
+				#numpy.random.seed(i+seed)
 		
 				#XP = array([numpy.random.permutation(x) for x in X])
 				#YP = array([numpy.random.permutation(y) for y in Y])
@@ -893,7 +893,7 @@ def permutation_test_by_representative(pArray1, pArray2):
 	metric = config.similarity_method
 	decomposition = config.decomposition
 	iIter=config.iterations
-	seed = config.seed
+	#seed = config.seed
 	discretize_style = config.strDiscretizing
 	#X, Y = pArray1, pArray2 
 	strMetric = metric 

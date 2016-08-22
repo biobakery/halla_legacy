@@ -31,8 +31,8 @@ import numpy as np
 
 c_unit_h        = 0.35
 c_unit_w        = 0.35
-c_min_height    = 10 * c_unit_h + 2
-c_min_width     = 20 * c_unit_w + 2
+c_min_height    = 10 * c_unit_h + .5
+c_min_width     = 10 * c_unit_w + 1
 c_label_scale   = 18
 c_label_shift   = -0.005
 c_line_width    = 1.5
