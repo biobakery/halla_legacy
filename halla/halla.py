@@ -72,18 +72,10 @@ def check_requirements():
     Check requirements (file format, dependencies, permissions)
     """
     # check the third party softwares for plotting the results
-    if config.hallagram:
-        try: 
-            import pandas as pd
-        except ImportError: 
-            sys.exit("--- Please check your installation for pandas library")
-        '''try:
-            from rpy2.robjects.packages import importr
-        except ImportError: 
-            sys.exit("--- Please check your installation for rpy2 library")
-        '''
-        
-    
+    try: 
+        import pandas as pd
+    except ImportError: 
+        sys.exit("--- Please check your installation for pandas library")
     # Check that the output directory is writeable
     output_dir = os.path.abspath(config.output_dir)
     if not os.path.isdir(output_dir):
@@ -297,7 +289,6 @@ def set_parameters(args):
     config.verbose = args.verbose
     #config.robustness = float(args.robustness)
     config.output_dir = args.output_dir
-    config.hallagram = args.hallagram
     config.diagnostics_plot = args.diagnostics_plot
     #config.heatmap_all = args.heatmap_all
     config.descending = args.strDescending
@@ -329,7 +320,6 @@ def set_parameters(args):
         config.strFile1, config.strFile2 = istm[0], istm[0]
         
     aOut1, aOut2 = parser.Input (config.strFile1.name, config.strFile2.name, headers=args.header).get()
-    config.hallagram = args.hallagram
     (config.discretized_dataset[0], config.original_dataset[0], config.FeatureNames[0], config.aOutType1, config.SampleNames[0]) = aOut1 
     (config.discretized_dataset[1], config.original_dataset[1], config.FeatureNames[1], config.aOutType2, config.SampleNames[1]) = aOut2 
     #config.meta_feature = array([config.original_dataset[0], config.original_dataset[1]])
