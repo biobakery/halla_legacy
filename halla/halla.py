@@ -208,11 +208,11 @@ def parse_arguments (args):
         help="approach for reducing dimensions (or decomposition)\n[default = medoid]")    
     
     argp.add_argument(
-        "--adjusting",
+        "--fdr",
         dest="strAdjust",    
         default="bhy",
         choices=["bh", "bonferroni", "bhy", "no_adjusting"],
-        help="approach for calculating adjusted p-value\n[default = bhy]")
+        help="approach for FDR correction\n[default = bhy]")
     argp.add_argument(
         "-v", "--verbose",
         dest="verbose",
@@ -254,7 +254,7 @@ def parse_arguments (args):
         "--nbin", metavar="<None>",
         type=int,
         default=None,
-        help="the number of bins\n[default = None]")
+        help="the number of bins for discretizing \n[default = None]")
     argp.add_argument(
         "-s", "--seed",
         type=int,
@@ -282,7 +282,7 @@ def parse_arguments (args):
         dest = "missing_char_category",
         #default = False,
         action="store_true",
-        help="the input files contain a header line")
+        help="To count the missing data as a category")
     return argp.parse_args()
 
 def set_parameters(args):
