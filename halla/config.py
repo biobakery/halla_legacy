@@ -1,6 +1,6 @@
 import random
 from numpy import array
-version = '0.6.14'
+version = '0.6.15'
 __description__      = """
   _    _          _ _          
  | |  | |   /\   | | |   /\    
@@ -15,7 +15,7 @@ HAllA Object for hierarchical all-against-all association testing
 
 __doc__             = __doc__ 
 __version__          = version
-__author__             = ["Gholamali.Rahnavard", "YS Joseph Moon", "Curtis Huttenhower"]
+__author__             = ["Gholamali Rahnavard", "Curtis Huttenhower"]
 __contact__         = "gholamali.rahnavard@gmail.com"
 
 

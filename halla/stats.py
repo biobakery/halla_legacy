@@ -2106,7 +2106,7 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 	M = len([1 for v in null_samples if v > x])  # or v >= x 
 	N = len(null_samples)
 	# Use the ECDF to approximate p-values if M > 10
-	if M >= 10 :#or N < 100:
+	if M >= 10 or N < 100 or M >= .1 * N:
 		return float(M)/float(N)
 
 	# Estimate the generalized pareto distribtion from tail samples
