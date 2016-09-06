@@ -1747,8 +1747,8 @@ def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=No
 		if number_of_bins == None:
 			# Default to rounded sqrt(n) if no bin count requested
 			number_of_bins = min(len(set(astrValues)), round(math.sqrt(len(astrValues)))) 
-			#if config.similarity_method == 'dmic':
-				#number_of_bins = number_of_bins*2
+			if config.similarity_method == 'dmic':
+				number_of_bins = number_of_bins*2
 		elif number_of_bins == 0:
 			number_of_bins = len(set(astrValues))
 		else:
