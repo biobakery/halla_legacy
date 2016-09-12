@@ -116,7 +116,6 @@ def check_requirements():
         except : 
             sys.exit("--- Please check R, rpy2,  and  FactoMineR installation for MCA library")
   
-VERSION=config.version
 def parse_arguments (args):
     """ 
     Parse the arguments from the user
@@ -128,7 +127,7 @@ def parse_arguments (args):
     argp.add_argument(
         "--version",
         action="version",
-        version="%(prog)s "+VERSION)        
+        version="%(prog)s "+config.version)        
     argp.add_argument(
         "-X", metavar="<input_dataset_1.txt>",
         type=argparse.FileType("r"), default=sys.stdin,

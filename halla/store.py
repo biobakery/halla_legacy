@@ -760,7 +760,7 @@ def _report():
                 hallagram_command_mask = "hallagram "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
                           output_path+"/associations.txt "+\
-                          "--outfile="+output_path+"/hallagram_strongest_"+str(n)+".pdf --mask" + " --strongest " + str(n) + sim_color
+                          "--outfile="+output_path+"/hallagram_strongest_"+str(n)+"_mask.pdf --mask" + " --strongest " + str(n) + sim_color
                 os.system(hallagram_command_mask)
                 #_heatmap_associations_R()
                 #_heatmap_datasets_R()

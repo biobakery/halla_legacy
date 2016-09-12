@@ -97,7 +97,7 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
                 f.write(delimiter)
         f.write('\n')
     else:
-        sys.err("The label list in not matched with the data size")
+        print("The label list in not matched with the data size")
         sys.exit()
         
     for i in range(len(data)):

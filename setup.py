@@ -65,7 +65,8 @@ setup(
         'console_scripts': [
             'halla = halla.halla:main',
             'hallagram = halla.hallagram:main',
-            'hallaclust = halla.hallaclust:main'
+            'hallaclust = halla.hallaclust:main',
+            'halladata = halla.synthetic_data:main'
         ]},
     test_suite= 'halla.tests.halla_test.main',
     zip_safe = False
