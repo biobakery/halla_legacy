@@ -129,7 +129,7 @@ def scatter_plot(x=None, y=None, alpha=.1, file_name='Figure2', xlabel="Recall",
     # for i, txt in enumerate(n):
      #   ax.annotate(txt, (z[i],y[i]))
 
-def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
+def plot_roc(roc_info=None, figure_name='roc_plot_HAllA', fig= None):
     """
     =======================================
     Receiver Operating Characteristic (ROC)
@@ -144,7 +144,8 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
         Plots ROC curves
         save as pdf and show  
     """
-
+    
+    
     print(__doc__)
     
     import numpy as np
@@ -158,6 +159,11 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
         ['HAllA',[.005, .1,.15,.2, .21, .22, .3, .35, .4,.41, .42,97], [.005,.35,.6,.65, .8, .85, .88, .89, .90,.93, .97, .999] ],
         ['AllA', [.005, .1,.15,.2, .21, .22, .3, .35, .4,.41, .42,97], [.005,.33,.5,.6, .7, .75, .8, .85, .88,.9, .93, .95] ]
         ]'''
+    if fig is None:
+        axe = plt.gca()
+    else:
+        axe = fig.axes[2]
+    
     # Compute ROC curve and ROC area for each class
     fpr = dict()
     tpr = dict()
@@ -172,12 +178,14 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
         roc_name += '_' + roc_info[i][0] 
         
     # Plot ROC curve
-    fig, axe = plt.subplots(figsize=(5, 5 ), dpi=300)#, sharex=False, sharey=False)
-    #fig.set_size_inches(1, 10)
+    
+    #axe = plt.gca()
+    #fig, axe = plt.subplots(figsize=(5, 5 ), dpi=300)#, sharex=False, sharey=False)
+    #fig.set_size_inches(1, 1)
     #plt.figure(dpi= 300, figsize=(4, 4))
     for i in range(len(roc_info)):
         params = {'legend.fontsize': 6,
-        'legend.linewidth': 2}
+        'legend.fancybox': True}
         plt.rcParams.update(params)
         axe.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='{0} (area = {1:0.2f})'
                                        ''.format(str(roc_info[i][0]), roc_auc[roc_info[i][0]]))   
@@ -190,12 +198,14 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA'):
     axe.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
     axe.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
     axe.yaxis.set_label_position('left') 
-    axe.set_title('Receiver operating characteristic', fontsize=12, fontweight='bold')
+    axe.set_title('ROC Curve', fontsize=10, fontweight='bold')
     # plt.savefig('./test/'+roc_name+'foo.pdf')
     #plt.tight_layout()
-    plt.savefig(figure_name + '.pdf')
+    #plt.savefig(figure_name + '.pdf')
     #plt.show()
     # return plt
+    #fig.axes[1] = axe
+    return axe
 def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='./hierarchical_heatmap2', metric = "nmi", method = "single", colLable = True, rowLabel = True, color_bar = False, scale ='sqrt'):
     
     if len(pArray2) == 0:
@@ -413,14 +423,16 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
     return Y1
 
 
-def grouped_boxplots2(data, xlabels, file_name ="Grouped_Recall_FDR"):
+def grouped_boxplots2(data, xlabels, file_name ="Grouped_Recall_FDR", fig = None):
     '''data = [[np.random.normal(i, 1, 30) for i in range(2)],
             [np.random.normal(i, 1.5, 30) for i in range(3)],
             [np.random.normal(i, 2, 30) for i in range(4)]]
     '''
     #ax = plt.axes()
-    
-    fig, ax = plt.subplots(dpi= 300, figsize=( len(data)/2+5, 5))# figsize=(4, 4)) 
+    if fig != None:
+        ax = fig.axes[0]
+    else:
+        fig, ax = plt.subplots(dpi= 300, figsize=( len(data)/2+5, 5))# figsize=(4, 4)) 
     #plt.hold(True)
     #plt.xlim([-0.05, 1.15])
     #plt.ylim([-0.05, 1.15])
@@ -443,16 +455,55 @@ def grouped_boxplots2(data, xlabels, file_name ="Grouped_Recall_FDR"):
     #ax.xlabel('Method')
     #ax.xticks(range(len(xlabels)), xlabels, rotation=90, ha='right')
     
-    
+    ax.set_title('Composition of different methods', fontsize=10, fontweight='bold')
     ax.set(xlabel='Method', ylabel='Recall/FDR', axisbelow=True, xticklabels=xlabels)
     #ax.plot([-.05, 5], [alpha, alpha], 'k-', lw=1, color='red')
     plt.tight_layout()
     #ax.grid(axis='y', ls='-', color='white', lw=2)
     #ax.patch.set(facecolor='0.95')
-    plt.savefig(file_name+".pdf")
+    #plt.savefig(file_name+".pdf")
     #plt.show()
-    plt.close()
+    #plt.close()
+    return ax
+def grouped_boxplots2_2(data, xlabels, file_name ="Grouped_Recall_FDR", fig = None):
+    '''data = [[np.random.normal(i, 1, 30) for i in range(2)],
+            [np.random.normal(i, 1.5, 30) for i in range(3)],
+            [np.random.normal(i, 2, 30) for i in range(4)]]
+    '''
+    #ax = plt.axes()
+    ax = fig.axes[1]
+    #fig, ax = plt.subplots(dpi= 300, figsize=( len(data)/2+5, 5))# figsize=(4, 4)) 
+    #plt.hold(True)
+    #plt.xlim([-0.05, 1.15])
+    #plt.ylim([-0.05, 1.15])
+    groups = grouped_boxplots(data, ax, patch_artist=True, max_width=0.5, notch=0, sym='+', vert=1, whis=1.0)
 
+    colors = ['lightgreen', 'bisque']#'lavender', 'lightblue',
+    for item in groups:
+        for color, patch in zip(colors, item['boxes']):
+            patch.set(facecolor=color)
+
+    proxy_artists = groups[-1]['boxes']
+    ax.legend(proxy_artists, ['Recall', 'FDR'], loc='best')
+    ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+    ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+    pylab.xticks(rotation=90, fontsize=10)
+    #ax.xticks(range(len(labels)), labels, rotation=90, ha='right')
+    #ax.tight_layout()
+    if len(xlabels) > 0:
+        ax.set_xticklabels(xlabels)
+    #ax.xlabel('Method')
+    #ax.xticks(range(len(xlabels)), xlabels, rotation=90, ha='right')
+    ax.set_title('Controlling FDR', fontsize=10, fontweight='bold')
+    ax.set(xlabel='Target FDR', ylabel='Recall/FDR', axisbelow=True, xticklabels=xlabels)
+    #ax.plot([-.05, 5], [alpha, alpha], 'k-', lw=1, color='red')
+    plt.tight_layout()
+    #ax.grid(axis='y', ls='-', color='white', lw=2)
+    #ax.patch.set(facecolor='0.95')
+    #plt.savefig(file_name+".pdf")
+    #plt.show()
+    #plt.close()
+    return ax
 def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
     if ax is None:
         ax = plt.gca()
