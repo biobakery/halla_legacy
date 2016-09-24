@@ -184,7 +184,7 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA', fig= None):
     #fig.set_size_inches(1, 1)
     #plt.figure(dpi= 300, figsize=(4, 4))
     for i in range(len(roc_info)):
-        params = {'legend.fontsize': 6,
+        params = {'legend.fontsize': 8,
         'legend.fancybox': True}
         plt.rcParams.update(params)
         axe.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='{0} (area = {1:0.2f})'
@@ -198,7 +198,9 @@ def plot_roc(roc_info=None, figure_name='roc_plot_HAllA', fig= None):
     axe.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
     axe.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
     axe.yaxis.set_label_position('left') 
-    axe.set_title('ROC Curve', fontsize=10, fontweight='bold')
+    pylab.xticks(rotation=0)
+
+    axe.set_title('c   ROC Curve', fontsize=10, fontweight='bold', loc='left')
     # plt.savefig('./test/'+roc_name+'foo.pdf')
     #plt.tight_layout()
     #plt.savefig(figure_name + '.pdf')
@@ -444,19 +446,21 @@ def grouped_boxplots2(data, xlabels, file_name ="Grouped_Recall_FDR", fig = None
             patch.set(facecolor=color)
 
     proxy_artists = groups[-1]['boxes']
-    ax.legend(proxy_artists, ['Recall', 'FDR'], loc='best')
+    ax.legend(proxy_artists, ['Recall', 'FDR'], loc='best', fontsize = 8)
     ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
     ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-    pylab.xticks(rotation=90, fontsize=10)
     #ax.xticks(range(len(labels)), labels, rotation=90, ha='right')
     #ax.tight_layout()
     if len(xlabels) > 0:
-        ax.set_xticklabels(xlabels)
-    #ax.xlabel('Method')
-    #ax.xticks(range(len(xlabels)), xlabels, rotation=90, ha='right')
-    
-    ax.set_title('Composition of different methods', fontsize=10, fontweight='bold')
-    ax.set(xlabel='Method', ylabel='Recall/FDR', axisbelow=True, xticklabels=xlabels)
+        ax.set_xticklabels(xlabels, rotation =10, fontsize = 8)
+   
+    ax.set_title('a   Comparison of methods', fontsize=10, fontweight='bold', loc='left')
+    #ax.set(xlabel='Method', ylabel='Recall/FDR', axisbelow=True, xticklabels=xlabels)
+    ax.set(axisbelow=True)
+    ax.set_xlabel('Method', fontsize = 10)
+    ax.set_ylabel('Recall/FDR', fontsize = 10)
+    #pylab.xticks(rotation=45)
+
     #ax.plot([-.05, 5], [alpha, alpha], 'k-', lw=1, color='red')
     plt.tight_layout()
     #ax.grid(axis='y', ls='-', color='white', lw=2)
@@ -484,18 +488,20 @@ def grouped_boxplots2_2(data, xlabels, file_name ="Grouped_Recall_FDR", fig = No
             patch.set(facecolor=color)
 
     proxy_artists = groups[-1]['boxes']
-    ax.legend(proxy_artists, ['Recall', 'FDR'], loc='best')
+    ax.legend(proxy_artists, ['Recall', 'FDR'], loc='best', fontsize = 8)
     ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
     ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-    pylab.xticks(rotation=90, fontsize=10)
+    
     #ax.xticks(range(len(labels)), labels, rotation=90, ha='right')
     #ax.tight_layout()
     if len(xlabels) > 0:
         ax.set_xticklabels(xlabels)
     #ax.xlabel('Method')
     #ax.xticks(range(len(xlabels)), xlabels, rotation=90, ha='right')
-    ax.set_title('Controlling FDR', fontsize=10, fontweight='bold')
-    ax.set(xlabel='Target FDR', ylabel='Recall/FDR', axisbelow=True, xticklabels=xlabels)
+    ax.set_title('b   Controlling FDR', fontsize=10, fontweight='bold', loc='left')
+    ax.set(axisbelow=True, xticklabels=xlabels)
+    ax.set_xlabel('Targeted FDR', fontsize = 10)
+    ax.set_ylabel('Recall/FDR', fontsize = 10)
     #ax.plot([-.05, 5], [alpha, alpha], 'k-', lw=1, color='red')
     plt.tight_layout()
     #ax.grid(axis='y', ls='-', color='white', lw=2)

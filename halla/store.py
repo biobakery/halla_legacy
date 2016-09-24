@@ -772,7 +772,8 @@ def _report():
     _report_associations()
     _report_compared_clusters()
     _write_hallagram_info()
-    _hallagram_strongest(100)
+    if len(config.meta_alla[0]) > 0:
+        _hallagram_strongest(100)
         
     if config.diagnostics_plot:
         #_heatmap_associations()

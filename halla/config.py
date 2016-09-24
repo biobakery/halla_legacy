@@ -27,6 +27,7 @@ NPROC = 1 # number of threads to use
 similarity_method = "nmi"
 decomposition = "medoid" 
 fdr_function = "level"
+permutation_func = 'gpd'
 q = .1  
 iterations = 1000
 p_adjust_method = "bhy"

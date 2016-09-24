@@ -154,15 +154,13 @@ def parse_arguments (args):
         type=float,
         default=0.1,
         help="q-value for overall significance tests (cut-off for false discovery rate)\n[default = 0.1]")
-    '''
     argp.add_argument(
-        "-r", "--robustness",
-         #metavar="<0.001>",
-         dest="robustness", 
-         type=float,
-         default=0.20,
-         help="threshold for robustness\n[default = 0.20]")    
-    '''
+        "-p", "--permutation",
+        #metavar="<0.001>",
+        dest="permutation_func", 
+        choices=['ecdf', 'gpd'], 
+        default='gpd',
+        help="permutation function \n[default = gpd]")    
     argp.add_argument(
         "-a","--descending",
         dest="strDescending",
@@ -210,10 +208,10 @@ def parse_arguments (args):
         default=config.verbose,
         help="additional output is printed")
     
-    argp.add_argument(
+    '''argp.add_argument(
         "--hallagram", 
         help="plot the results", 
-        action="store_true")
+        action="store_true")'''
     argp.add_argument(
         "--diagnostics-plot", 
         dest="diagnostics_plot",
@@ -269,7 +267,7 @@ def parse_arguments (args):
         choices=["mean", "median", "most_frequent"],
         help="defines missing strategy to fill missing data.\nFor categorical data puts all missing data in one new category.")
     argp.add_argument(
-        "--missing-char-category",
+        "--missing-data-category",
         dest = "missing_char_category",
         #default = False,
         action="store_true",
@@ -282,6 +280,7 @@ def set_parameters(args):
     #config.fdr_function = args.strFDR
     config.q = args.dQ  
     config.entropy_threshold = args.entropy_threshold
+    config.permutation_func = args.permutation_func
     #config.p_adjust_method = args.strAdjust
     #config.randomization_method = args.strRandomization  # method to generate error bars 
     config.strStep = "uniform"

@@ -194,7 +194,7 @@ def mca_method(pArray, discretize_style, iComponents=1):
 	#print list(rep)
 	#print rep
 	#print (discretize(list(rep)), explained_variance_1, loading)   #[float("{0:.1f}".format(a)) for a in list(rep)]
-	return (discretize(rep), list(explained_variance_1)[0], loading)
+	return (rep, list(explained_variance_1)[0], loading)
 	'''
 	if len(pArray) < 2:
 		print "len A:", len(pArray)
@@ -773,22 +773,15 @@ def permutation_test_pvalue(X, Y):
 	strMetric = config.similarity_method 
 	seed = config.seed
 	iIter = config.iterations
-	# step 5 in a case of new decomposition method
 	pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
-	
 	def _permutation(pVec):
 		return numpy.random.permutation(pVec)
-
 	pMe = pHashMetric[strMetric] 
-	# # implicit assumption is that the arrays do not need to be discretized prior to input to the function
 	aDist = [] 
 	sim_score= pMe(X, Y)
 	fAssociation = math.fabs(sim_score)
 	fP = 1.0 
-	# print left_rep_variance, right_rep_variance, fAssociation
-	#### Perform Permutation
-	
 	def _calculate_num_exceedances(observed_value, random_distribution):
 	    """Determines the number of values from a random distribution which
 	    exceed or equal the observed value.
@@ -803,59 +796,34 @@ def permutation_test_pvalue(X, Y):
 	    num_exceedances = len([score for score in random_distribution
 	            if score >= observed_value])
 	    return num_exceedances
-
-
-	        	
+       	
 	def _calculate_pvalue(iter):
 		fPercentile = percentileofscore(aDist, fAssociation, kind = 'strict')#, kind="mean")  # #source: Good 2000  
-	# ## \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
-	# ## k number of iterations, \hat{X} is randomized version of X 
-	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
-	# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
-
 		pval = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
 		return pval
-	#new_fP2 = 0.0
-	#new_fP =0.0
-	
-	few_permutation = True
-	if not few_permutation:
+
+	few_permutation = False
+	if config.permutation_func == 'ecdf':
 		iter = iIter
 		if config.use_one_null_dist:
-			if len(config.null_dist) == 0:
-				generate_null_dist(X,Y)
-			aDist = config.null_dist
+			if len(config.nullsamples) == 0:
+				config.nullsamples = generate_null_dist(X,Y)
+			aDist = config.nullsamples
 		else:
 			for i in xrange(iIter):
-				#numpy.random.seed(i+seed)
-		
-				#XP = array([numpy.random.permutation(x) for x in X])
-				#YP = array([numpy.random.permutation(y) for y in Y])
-				#pRep1_, _, _ = mca_method(XP) #mean(pArray1)#[len(pArray1)/2]
-				#pRep2_, _, _ = mca_method(YP)#
-				#pRep1_, pRep2_ = [ discretize(pDe(pA))[0] for pA in [XP, YP] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 				iter = i
 				permuted_Y = numpy.random.permutation(Y)
-				# Similarity score between representatives  
-				#fAssociation_permuted = pMe(pRep1_, pRep2_)  
 				fAssociation_permuted = math.fabs(pMe(X, permuted_Y))  
 				aDist.append(fAssociation_permuted)
 				if i % 50 == 0:
 					new_fP2 = _calculate_pvalue(i) #estimate_pvalue(sim_score, aDist) #
-					#num_exceedances = _calculate_num_exceedances(fAssociation_permuted, aDist)
-					#new_fP = _estimate_p_value(num_exceedances, len(aDist))
-					
 					if new_fP2 > fP:
-						
-						#print "Break before the end of permutation iterations"
+						print "Break before the end of permutation iterations"
 						break
 					else: 
 						fP = new_fP2
-				
-				# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
 		fP = _calculate_pvalue(iter)
-	
-	else:
+	elif config.permutation_func == 'gpd':
 		fP = nonparametric_test_pvalue(X, Y)
 	#print "Estimated P-value:",fP
 	'''import matplotlib.pyplot as plt
@@ -876,14 +844,14 @@ def generate_null_dist(X, Y):
 		return numpy.random.permutation(pVec)
 
 	pMe = pHashMetric[config.similarity_method]
-	aDist = []
+	n_samples = []
 	for i in xrange(config.iterations):
 		numpy.random.seed(i+config.seed)
 		iter = i
 		permuted_Y = numpy.random.permutation(Y)
 		fAssociation_permuted = math.fabs(pMe(X, permuted_Y))  
-		aDist.append(fAssociation_permuted)	
-	config.null_dist = aDist[:]
+		n_samples.append(fAssociation_permuted)	
+	return n_samples
 def permutation_test_by_representative(pArray1, pArray2):
 	"""
 	Input: 
@@ -927,6 +895,8 @@ def permutation_test_by_representative(pArray1, pArray2):
 	elif decomposition == 'mca':
 		pRep1, left_rep_variance, left_loading = mca_method(pArray1, discretize_style = discretize_style) #mean(pArray1)#[len(pArray1)/2]
 		pRep2, right_rep_variance, right_loading = mca_method(pArray2, discretize_style = discretize_style)#mean(pArray2)#[len(pArray2)/2]	
+		if bool(distance.c_hash_association_method_discretize[strMetric]):
+			[pRep1, pRep2] = [discretize(aRep) for aRep in [pRep1, pRep2] ]
 		#print len(pArray1)," Rep 1: ", pRep1,
 		#print len(pArray2)," Rep 2: ", pRep2, 
 		#print "Sim: ", pMe(pRep1, pRep2)
@@ -2177,12 +2147,12 @@ def nonparametric_test_pvalue(X, Y, similarity_method = None,  alpha_cutoff = 0.
 	sim_score = pMe(X, Y)
 	sim_score = math.fabs(sim_score)
 	# The number of null samples to start with
-	start_samples = 100
+	start_samples = 1000
 	# Number of null samples to gather in each round
 	sample_increments = 50
 	# Maximum number of null samples, at which point the GPD approximation
 	# is used
-	max_samples = config.iterations
+	max_samples = config.iterations*2
 	
 	# Sample the null distribution until we've got enough to estimate the tail
 	# or if we're sure that the actual p-value is greater than the alpha cutoff
@@ -2190,7 +2160,9 @@ def nonparametric_test_pvalue(X, Y, similarity_method = None,  alpha_cutoff = 0.
 		nullsamples = [null_fun(X, Y) for val in range(0,start_samples)]
 		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(config.q, sim_score, nullsamples) > .01:
 			#print("Gathering more.. N = %d; P(p<%f) = %.2f" % (len(nullsamples), config.q, prob_pvalue_lt_samples(config.q, x, nullsamples)))
-			nullsamples = [null_fun(X, Y) for val in range(0,sample_increments)] + nullsamples
+			nullsamples = [null_fun(X, Y) for val in range(0,sample_increments)] + nullsamples 
+		#nullsamples = [null_fun(X, Y) for val in range(0,max_samples)]
+
 		config.nullsamples = nullsamples
 	else:
 		nullsamples = config.nullsamples
