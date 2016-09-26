@@ -87,6 +87,7 @@ def reset_default():
     gp = None
     Nexc = None
     nullsamples = []
+    Distance = [None, None] 
     number_of_performed_tests = 0
     outcome = None
     pvalues = None

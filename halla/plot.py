@@ -430,6 +430,7 @@ def grouped_boxplots2(data, xlabels, file_name ="Grouped_Recall_FDR", fig = None
             [np.random.normal(i, 1.5, 30) for i in range(3)],
             [np.random.normal(i, 2, 30) for i in range(4)]]
     '''
+    print data
     #ax = plt.axes()
     if fig != None:
         ax = fig.axes[0]

@@ -818,7 +818,7 @@ def permutation_test_pvalue(X, Y):
 				if i % 50 == 0:
 					new_fP2 = _calculate_pvalue(i) #estimate_pvalue(sim_score, aDist) #
 					if new_fP2 > fP:
-						print "Break before the end of permutation iterations"
+						#print "Break before the end of permutation iterations"
 						break
 					else: 
 						fP = new_fP2
@@ -2147,26 +2147,26 @@ def nonparametric_test_pvalue(X, Y, similarity_method = None,  alpha_cutoff = 0.
 	sim_score = pMe(X, Y)
 	sim_score = math.fabs(sim_score)
 	# The number of null samples to start with
-	start_samples = 1000
+	start_samples =  100
 	# Number of null samples to gather in each round
 	sample_increments = 50
 	# Maximum number of null samples, at which point the GPD approximation
 	# is used
-	max_samples = config.iterations*2
+	max_samples = 2000
 	
 	# Sample the null distribution until we've got enough to estimate the tail
 	# or if we're sure that the actual p-value is greater than the alpha cutoff
-	if len(config.nullsamples) == 0 or not config.use_one_null_dist:
-		nullsamples = [null_fun(X, Y) for val in range(0,start_samples)]
-		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(config.q, sim_score, nullsamples) > .01:
+	if config.use_one_null_dist and len(config.nullsamples) == 0:
+		nullsamples = [null_fun(X, Y) for val in range(0, max_samples)]
+		config.nullsamples = nullsamples
+	else: #or not config.use_one_null_dist:
+		nullsamples = [null_fun(X, Y) for val in range(0, start_samples)]
+		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(config.q, sim_score, nullsamples) > .05 * 1.0/(len(config.FeatureNames[0])* len(config.FeatureNames[1])):
 			#print("Gathering more.. N = %d; P(p<%f) = %.2f" % (len(nullsamples), config.q, prob_pvalue_lt_samples(config.q, x, nullsamples)))
 			nullsamples = [null_fun(X, Y) for val in range(0,sample_increments)] + nullsamples 
 		#nullsamples = [null_fun(X, Y) for val in range(0,max_samples)]
 
 		config.nullsamples = nullsamples
-	else:
-		nullsamples = config.nullsamples
-		
 	#print("Finished gathering: N = %d; P(p<%f) = %f" % (len(nullsamples), alpha_cutoff, prob_pvalue_lt_samples(alpha_cutoff, x, nullsamples)))
 	# Estimate the p-value from the current set of samples
 	return estimate_pvalue(x = sim_score, null_samples = config.nullsamples, X=X, Y=Y)
