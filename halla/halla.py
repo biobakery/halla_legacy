@@ -217,18 +217,23 @@ def parse_arguments (args):
         dest="diagnostics_plot",
         help="Diagnostics plot for associations ", 
         action="store_true")
-    argp.add_argument(
+    '''argp.add_argument(
         "--discretizing", 
         dest="strDiscretizing",
         default="equal-area",
         choices=["equal-area", "none"], #"jenks", "hclust", "kmeans", 
-        help="approach for discretizing continuous data\n[default = equal-area]")
+        help="approach for discretizing continuous data\n[default = equal-area]")'''
+    
     argp.add_argument(
         "--apply-stop-condition",
         dest ="apply_stop_condition", 
         help="stops when two clusters are two far from each other", 
         action="store_true")
-    
+    argp.add_argument(
+        "--use-one-null-distribution",
+        dest ="use_one_null_distribution", 
+        help="Use one null distribution for permutation test", 
+        action="store_true")
     argp.add_argument(
         "--header",
         action="store_true",
@@ -281,6 +286,7 @@ def set_parameters(args):
     config.q = args.dQ  
     config.entropy_threshold = args.entropy_threshold
     config.permutation_func = args.permutation_func
+    
     #config.p_adjust_method = args.strAdjust
     #config.randomization_method = args.strRandomization  # method to generate error bars 
     config.strStep = "uniform"
@@ -292,7 +298,8 @@ def set_parameters(args):
     config.descending = args.strDescending
     istm = list()  # X and Y are used to store datasets
     config.apply_stop_condition = args.apply_stop_condition
-    config.strDiscretizing = args.strDiscretizing
+    config.use_one_null_dist = args.use_one_null_distribution
+    #config.strDiscretizing = args.strDiscretizing
     if args.seed == -1:
         config.seed = random.randint(1,10000)
     else:
