@@ -200,7 +200,7 @@ def parse_arguments (args):
         "--fdr",
         dest="strAdjust",    
         default="bhy",
-        choices=["bh", "bonferroni", "bhy", "no_adjusting"],
+        choices=["bh", "bhy", "bonferroni", "no_adjusting"],
         help="approach for FDR correction\n[default = bhy]")
     argp.add_argument(
         "-v", "--verbose",
@@ -230,7 +230,7 @@ def parse_arguments (args):
         help="stops when two clusters are two far from each other", 
         action="store_true")
     argp.add_argument(
-        "--use-one-null-distribution",
+        "--generate-one-null-samples", "--fast",
         dest ="use_one_null_distribution", 
         help="Use one null distribution for permutation test", 
         action="store_true")

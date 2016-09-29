@@ -2152,7 +2152,7 @@ def nonparametric_test_pvalue(X, Y, similarity_method = None,  alpha_cutoff = 0.
 	sample_increments = 50
 	# Maximum number of null samples, at which point the GPD approximation
 	# is used
-	max_samples = max(config.iterations, 2000)
+	max_samples =  config.iterations
 	
 	# Sample the null distribution until we've got enough to estimate the tail
 	# or if we're sure that the actual p-value is greater than the alpha cutoff
