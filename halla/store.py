@@ -899,7 +899,7 @@ def view_singleton(pBags):
     return aOut 
 
 def is_correct_submethods_combination():
-    if config.descending == "AllA" and config.decomposition in ['mca']:
+    if config.descending == "AllA" and config.decomposition in ['medoid']:
         config.decomposition = "none"        
     if (config.descending == "AllA" and not config.decomposition in ['none', "pls","cca"]) or\
                         (config.descending == "HAllA" and config.decomposition =='none') or\
