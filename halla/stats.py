@@ -159,7 +159,8 @@ def mca_method(pArray, discretize_style, iComponents=1):
 	"""
 	if len(pArray) < 2:
 		return (pArray[0], 1.0, [1.0] )
-	
+	if not distance.c_hash_association_method_discretize[config.similarity_method]:
+		pArray = discretize(pArray)
 	from rpy2 import robjects as ro
 	from rpy2.robjects import r
 	from rpy2.robjects.packages import importr
