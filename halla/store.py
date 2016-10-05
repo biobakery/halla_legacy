@@ -899,11 +899,12 @@ def view_singleton(pBags):
     return aOut 
 
 def is_correct_submethods_combination():
-    if config.descending == "AllA" and config.decomposition in ['mca']:
-        config.decomposition = "none"        
+    if config.descending == "AllA" and config.decomposition in ['medoid']:
+        config.decomposition = 'none'        
     if (config.descending == "AllA" and not config.decomposition in ['none', "pls","cca"]) or\
                         (config.descending == "HAllA" and config.decomposition =='none') or\
-                        (config.decomposition in ["ica","pca",'pls', 'cca', 'kpca'] and config.similarity_method not in ["pearson", "spearman","mic","dcor"] ) or\
+                        (config.decomposition in ["ica","pca",'pls', 'cca', 'kpca'] and\
+                        config.similarity_method not in ["pearson", "spearman","mic","dcor"] ) or\
                         (config.descending == "HAllA" and config.decomposition in  ['pls', 'cca']):
             False
     else:

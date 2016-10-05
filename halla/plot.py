@@ -129,7 +129,7 @@ def scatter_plot(x=None, y=None, alpha=.1, file_name='Figure2', xlabel="Recall",
     # for i, txt in enumerate(n):
      #   ax.annotate(txt, (z[i],y[i]))
 
-def plot_roc(roc_info=None, title = None, figure_name='roc_plot_HAllA', axe= None):
+def plot_roc(roc_info=None, title = None, figure_name='roc_plot_HAllA', ax= None):
     """
     =======================================
     Receiver Operating Characteristic (ROC)
@@ -189,27 +189,27 @@ def plot_roc(roc_info=None, title = None, figure_name='roc_plot_HAllA', axe= Non
         params = {'legend.fontsize': 8,
         'legend.fancybox': True}
         plt.rcParams.update(params)
-        axe.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='{0} (area = {1:0.2f})'
+        ax.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='{0} (area = {1:0.2f})'
                                        ''.format(str(roc_info[i][0]), roc_auc[roc_info[i][0]]))   
-    axe.plot([0, 1], [0, 1], 'k--')
-    axe.set_xlim([0.0, 1.0])
-    axe.set_ylim([0.0, 1.05])
-    axe.legend(loc="lower right")
-    axe.set_ylabel('True Positive Rate', fontsize = 10)
-    axe.set_xlabel('False Positive Rate', fontsize = 10)
-    axe.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
-    axe.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-    axe.yaxis.set_label_position('left') 
+    ax.plot([0, 1], [0, 1], 'k--')
+    ax.set_xlim([0.0, 1.0])
+    ax.set_ylim([0.0, 1.05])
+    ax.legend(loc="lower right")
+    ax.set_ylabel('True Positive Rate', fontsize = 10)
+    ax.set_xlabel('False Positive Rate', fontsize = 10)
+    ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+    ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+    ax.yaxis.set_label_position('left') 
     pylab.xticks(rotation=0)
 
-    axe.set_title(title, fontsize=10, fontweight='bold', loc='left')
+    ax.set_title(title, fontsize=10, fontweight='bold', loc='left')
     # plt.savefig('./test/'+roc_name+'foo.pdf')
-    plt.tight_layout()
+    #plt.tight_layout()
     #plt.savefig(figure_name + '.pdf')
     #plt.show()
     # return plt
     #fig.axes[1] = axe
-    return axe
+    return ax
 def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='./hierarchical_heatmap2', metric = "nmi", method = "single", colLable = True, rowLabel = True, color_bar = False, scale ='sqrt'):
     
     if len(pArray2) == 0:
@@ -427,7 +427,7 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
     return Y1
 
 
-def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], file_name ="Grouped_Recall_FDR", ax = None):
+def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], ylabel = "Recall/FDR" , xlable_rotation = 10,  file_name ="Grouped_Recall_FDR", ax = None):
     '''data = [[np.random.normal(i, 1, 30) for i in range(2)],
             [np.random.normal(i, 1.5, 30) for i in range(3)],
             [np.random.normal(i, 2, 30) for i in range(4)]]
@@ -447,29 +447,34 @@ def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], file_name =
             patch.set(facecolor=color, alpha=0.5)
 
     proxy_artists = groups[-1]['boxes']
-    ax.legend(proxy_artists, ['Recall', 'FDR'], loc='best', fontsize = 8)
+    if "FPR" in ylabel:
+        ax.legend(proxy_artists, ['Recall', 'FPR'], loc='best', fontsize = 8)
+    else:
+        ax.legend(proxy_artists, ['Recall', 'FDR'], loc='best', fontsize = 8)
     ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
     ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
     #ax.xticks(range(len(labels)), labels, rotation=90, ha='right')
     #ax.tight_layout()
     if len(xlabels) > 0:
-        ax.set_xticklabels(xlabels, rotation =10, fontsize = 8)
+        ax.set_xticklabels(xlabels, rotation =xlable_rotation, fontsize = 8)
    
     ax.set_title(title, fontsize=10, fontweight='bold', loc='left')
     #ax.set(xlabel='Method', ylabel='Recall/FDR', axisbelow=True, xticklabels=xlabels)
     ax.set(axisbelow=True)
     ax.set_xlabel('Method', fontsize = 10)
-    ax.set_ylabel('Recall/FDR', fontsize = 10)
+    ax.set_ylabel(ylabel, fontsize = 10)
     #pylab.xticks(rotation=45)
 
     #ax.plot([-.05, 5], [.1, .1], 'k-', lw=1, color='red')
     if threshold_line !=0:
         ax.axhline(y = .1, linewidth=.5, color='r', alpha= 1)
-    plt.tight_layout()
+    #
     #ax.grid(axis='y', ls='-', color='white', lw=2)
     #ax.patch.set(facecolor='0.95')
     if fig:
+        plt.tight_layout()
         plt.savefig(file_name+".pdf")
+        plt.savefig(file_name+".png")
     #plt.show()
     #plt.close()
     return ax

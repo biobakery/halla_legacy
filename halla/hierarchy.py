@@ -1175,6 +1175,10 @@ def hypotheses_testing():
                                 aOut.append(current_level_tests[i])
                                 aFinal.append(current_level_tests[i])
                                 print ("-- association after %s fdr correction" % config.p_adjust_method)
+                                temp_sub_hypotheses = get_children(current_level_tests[i])
+                                if len(temp_sub_hypotheses) > 0:
+                                    for j in range(len(temp_sub_hypotheses)):
+                                        temp_sub_hypotheses[j].pvalue = current_level_tests[j].pvalue
                                 #print (current_level_tests[i].m_pData)
                         else:
                             if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
@@ -1194,6 +1198,10 @@ def hypotheses_testing():
                                 aFinal.append(current_level_tests[i])
                                 current_level_tests[i].significance = True
                                 print ("-- association after %s fdr correction" % config.p_adjust_method)
+                                temp_sub_hypotheses = get_children(current_level_tests[i])
+                                if len(temp_sub_hypotheses) > 0:
+                                    for j in range(len(temp_sub_hypotheses)):
+                                        temp_sub_hypotheses[j].pvalue = current_level_tests[j].pvalue
                         else:
                             if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
                                 current_level_tests[i].significance = False
@@ -1211,10 +1219,18 @@ def hypotheses_testing():
                                 aFinal.append(current_level_tests[i])
                                 current_level_tests[i].significance = True
                                 print ("-- association after %s fdr correction" % config.p_adjust_method)
+                                temp_sub_hypotheses = get_children(current_level_tests[i])
+                                if len(temp_sub_hypotheses) > 0:
+                                    for j in range(len(temp_sub_hypotheses)):
+                                        temp_sub_hypotheses[j].pvalue = current_level_tests[j].pvalue
                         else:
                             if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
                                 current_level_tests[i].significance = False
                                 aOut.append(current_level_tests[i])
+                                temp_sub_hypotheses = get_children(current_level_tests[i])
+                                if len(temp_sub_hypotheses) > 0:
+                                    for j in range(len(temp_sub_hypotheses)):
+                                        temp_sub_hypotheses[j].pvalue = current_level_tests[j].pvalue
                             elif is_leaf(current_level_tests[i]):
                                 if current_level_tests[i].significance == None:
                                     current_level_tests[i].significance = False
