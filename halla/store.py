@@ -825,8 +825,9 @@ def run():
     * Visually, looks much nicer and is much nicely wrapped if functions are entirely self-contained and we do not have to pass around pointers 
 
     """ 
-    random.seed(config.seed)
-    np.random.seed(config.seed)
+    if config.seed != -1:
+        random.seed(config.seed)
+        np.random.seed(config.seed)
     set_parsed_data()  
     try:    
         performance_file  = open(str(config.output_dir)+'/performance.txt', 'a')
