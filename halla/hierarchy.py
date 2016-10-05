@@ -1178,7 +1178,7 @@ def hypotheses_testing():
                                 temp_sub_hypotheses = get_children(current_level_tests[i])
                                 if len(temp_sub_hypotheses) > 0:
                                     for j in range(len(temp_sub_hypotheses)):
-                                        temp_sub_hypotheses[j].pvalue = current_level_tests[j].pvalue
+                                        temp_sub_hypotheses[j].pvalue = current_level_tests[i].pvalue
                                 #print (current_level_tests[i].m_pData)
                         else:
                             if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
@@ -1201,7 +1201,7 @@ def hypotheses_testing():
                                 temp_sub_hypotheses = get_children(current_level_tests[i])
                                 if len(temp_sub_hypotheses) > 0:
                                     for j in range(len(temp_sub_hypotheses)):
-                                        temp_sub_hypotheses[j].pvalue = current_level_tests[j].pvalue
+                                        temp_sub_hypotheses[j].pvalue = current_level_tests[i].pvalue
                         else:
                             if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
                                 current_level_tests[i].significance = False
@@ -1222,7 +1222,7 @@ def hypotheses_testing():
                                 temp_sub_hypotheses = get_children(current_level_tests[i])
                                 if len(temp_sub_hypotheses) > 0:
                                     for j in range(len(temp_sub_hypotheses)):
-                                        temp_sub_hypotheses[j].pvalue = current_level_tests[j].pvalue
+                                        temp_sub_hypotheses[j].pvalue = current_level_tests[i].pvalue
                         else:
                             if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
                                 current_level_tests[i].significance = False
@@ -1230,7 +1230,7 @@ def hypotheses_testing():
                                 temp_sub_hypotheses = get_children(current_level_tests[i])
                                 if len(temp_sub_hypotheses) > 0:
                                     for j in range(len(temp_sub_hypotheses)):
-                                        temp_sub_hypotheses[j].pvalue = current_level_tests[j].pvalue
+                                        temp_sub_hypotheses[j].pvalue = current_level_tests[i].pvalue
                             elif is_leaf(current_level_tests[i]):
                                 if current_level_tests[i].significance == None:
                                     current_level_tests[i].significance = False
