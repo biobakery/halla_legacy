@@ -1699,7 +1699,7 @@ def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=No
 	"""
 	def _discretize_categorical(astrValues, number_of_bins=number_of_bins):
 		if config.similarity_method in ['mic', 'dmic']:
-					system.exit('No categorical data is allowed with mic or dmic!')
+					sys.exit('No categorical data is allowed with mic or dmic!')
 		setastrValues = list(set(astrValues))
 		dictA ={}
 		for i, item in enumerate(setastrValues):

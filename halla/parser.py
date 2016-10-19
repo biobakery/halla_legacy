@@ -21,11 +21,13 @@ def wrap_features(txt, width=40):
 		'''helper function to wrap text for long labels'''
 		import textwrap
 		txt = str(txt).split("|")
+		txt = [val if len(val)>0 else _ for val in txt ]
 		if len(txt)>1:
 			txt = txt[len(txt)-2]+"_"+txt[len(txt)-1]
 		else:
 			txt = txt[0]
 		return txt #'\n'.join(textwrap.wrap(txt, width))
+	
 def substitute_special_characters(txt):
     txt = re.sub('[\n\;]', '_', txt).replace('__','_').replace('__','_') #replace(' ','_')  replace('.','_')
     return txt
@@ -239,6 +241,7 @@ class Input:
 		if self.outHead1 and self.outHead2:
 			header1="\t".join(self.outHead1)
 			header2="\t".join(self.outHead2)
+			#print header1, header2
 			if not (header1.lower() == header2.lower()):
 				print("WARNING: The samples are not in the same order " + 
 				    "in the two files. The program uses the common samples between the two data sets based on headers")#+
@@ -273,7 +276,9 @@ class Input:
 				self.outHead1 = df1.columns
 				self.outHead2 = df2.columns 
 				#print self.outHead1
-		assert(len(self.orginal_dataset1[0]) == len(self.orginal_dataset2[0]))
+		#print self.outHead1 ,self.outHead2  
+		if len(self.orginal_dataset1[0]) != len(self.orginal_dataset2[0]):
+			sys.exit("Have you proivded --header option to use sample/column names for shared sample/columns.")
 	def _remove_low_variant_features(self):
 		try:
 			df1 = pd.DataFrame(self.orginal_dataset1, index = self.outName1, columns = self.outHead1, dtype=float)

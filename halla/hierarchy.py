@@ -1244,13 +1244,13 @@ def hypotheses_testing():
             
             #return aFinal, aOut                
             apChildren = current_level_tests #next_level_apChildren #
-            hist_pvalues = [t.pvalue for t in current_level_tests]
+            '''hist_pvalues = [t.pvalue for t in current_level_tests]
             plt.clf()
             plt.hist(hist_pvalues, bins=20)  # plt.hist passes it's arguments to np.histogram
             plt.title("Histogram of nominal p-values in level "+ str(level))
             #plt.show()
             plt.savefig(str(level)+'_hist.pdf', pad_inches = .05, dpi=300) 
-            plt.close()
+            plt.close()'''
             print "Hypotheses testing level", level, "with ",len(current_level_tests), "hypotheses is finished."
             level += 1
             next_level_apChildren = []

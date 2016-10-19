@@ -444,17 +444,23 @@ def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], ylabel = "R
     #plt.xlim([-0.05, 1.15])
     #plt.ylim([-0.05, 1.15])
     groups = grouped_boxplots(data, ax, patch_artist=True, max_width=0.5, notch=0, sym='+', vert=1, whis=1.0)
+    if ylabel ==  "False Positive Rate":
+        colors = ['darkgoldenrod']#
+        
+    else:
+        colors = ['darkgreen', 'darkgoldenrod']#'lightgreen', 'bisque']#'lavender', 'lightblue',
 
-    colors = ['darkgreen', 'darkgoldenrod']#'lightgreen', 'bisque']#'lavender', 'lightblue',
     for item in groups:
         for color, patch in zip(colors, item['boxes']):
             patch.set(facecolor=color, alpha=0.5)
-
+    
     proxy_artists = groups[-1]['boxes']
-    if "FPR" in ylabel:
-        ax.legend(proxy_artists, ['Recall', 'FPR'], loc='best', fontsize = labels_fontsize)
+    if ylabel == "False Positive Rate":
+        ax.legend(proxy_artists, ['FPR'], loc='center', fontsize = labels_fontsize)
+        
     else:
-        ax.legend(proxy_artists, ['Recall', 'FDR'], loc='best', fontsize = labels_fontsize)
+        ax.legend(proxy_artists, ['Recall', 'FDR'], loc='center', fontsize = labels_fontsize)
+
     ax.get_xaxis().set_tick_params(which='both', labelsize=ticks_fontsize,top='off',  direction='out')
     ax.get_yaxis().set_tick_params(which='both', labelsize=ticks_fontsize, right='off', direction='out')
     #ax.xticks(range(len(labels)), labels, rotation=90, ha='right')
