@@ -34,7 +34,8 @@ def substitute_special_characters(txt):
 def load(file):
 	# Read in the file
 	try:
-		file_handle=open(file)
+		import io
+		file_handle=io.open(file, encoding='utf-8')
 	except EnvironmentError:
 		sys.exit("Error: Unable to read file: " + file)
 		
