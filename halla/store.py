@@ -754,14 +754,27 @@ def _report():
             try:                 
                 hallagram_command= "hallagram "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
-                          output_path+"/associations.txt "+\
-                          "--outfile="+output_path+"/hallagram_strongest_"+str(n)+".pdf" + " --strongest " + str(n) + sim_color
+                          output_path+"/associations.txt "+ "--similarity "+ config.similarity_method+\
+                          " --outfile="+output_path+"/hallagram_strongest_"+str(n)+".pdf" + " --strongest " + str(n) + sim_color
                 os.system(hallagram_command)
+                
+                hallagram_command_png= "hallagram "+ output_path+"/similarity_table.txt "+\
+                          output_path+"/hypotheses_tree.txt "+\
+                          output_path+"/associations.txt "+ "--similarity "+ config.similarity_method+\
+                          " --outfile="+output_path+"/hallagram_strongest_"+str(n)+".png" + " --strongest " + str(n) + sim_color
+                os.system(hallagram_command_png)
+                
                 hallagram_command_mask = "hallagram "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
-                          output_path+"/associations.txt "+\
-                          "--outfile="+output_path+"/hallagram_strongest_"+str(n)+"_mask.pdf --mask" + " --strongest " + str(n) + sim_color
+                          output_path+"/associations.txt " + "--similarity "+ config.similarity_method+\
+                          " --outfile="+output_path+"/hallagram_strongest_"+str(n)+"_mask.pdf --mask" + " --strongest " + str(n) + sim_color
                 os.system(hallagram_command_mask)
+                
+                hallagram_command_mask_png = "hallagram "+ output_path+"/similarity_table.txt "+\
+                          output_path+"/hypotheses_tree.txt "+\
+                          output_path+"/associations.txt " + "--similarity "+ config.similarity_method+\
+                          " --outfile="+output_path+"/hallagram_strongest_"+str(n)+"_mask.png --mask" + " --strongest " + str(n) + sim_color
+                os.system(hallagram_command_mask_png)
                 #_heatmap_associations_R()
                 #_heatmap_datasets_R()
                 #_plot_associations()
@@ -773,7 +786,8 @@ def _report():
     _report_compared_clusters()
     _write_hallagram_info()
     if len(config.meta_alla[0]) > 0:
-        _hallagram_strongest(100)
+        n = min(len(config.meta_alla[0]), 100)
+        _hallagram_strongest(n)
         
     if config.diagnostics_plot:
         #_heatmap_associations()
