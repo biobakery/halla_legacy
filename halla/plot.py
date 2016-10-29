@@ -23,6 +23,7 @@ import scipy.cluster.hierarchy as sch
 import matplotlib
 from matplotlib.pyplot import xlabel
 from itertools import product
+matplotlib.rcParams["pdf.fonttype"] = 42
 
 from . import config
 from . import distance
