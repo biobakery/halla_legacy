@@ -15,6 +15,7 @@ import shutil
 import re
 import pandas as pd
 from scipy.cluster.hierarchy import to_tree, linkage
+from scipy.spatial.distance import pdist, squareform
 from numpy import array
 try:
     from . import plot, hierarchy
@@ -23,29 +24,25 @@ except ImportError:
         " Please check your halla install.")
 from . import config
 from . import parser
+from . import distance
+from . import logger
 
-def resoltion_hclust(data=None, distance_matrix=None,
+def resoltion_hclust(distance_matrix=None,
                       number_of_estimated_clusters = None ,
                       linkage_method = 'single', output_dir=None, do_plot = False, resolution = 'high'):
     bTree=True
-    if len(distance_matrix) > 0:
-        D = distance_matrix
-    elif  len(data) > 0 :
-        D = pdist(data, metric=distance.pDistance)
-    else:
-        sys.exit("Warning! dataset or distance matrix must be provides!")
-  
+
     if do_plot:
-        Z = plot.heatmap(data_table = None , D = D, xlabels_order = [], xlabels = distance_matrix.index, 
+        Z = plot.heatmap(data_table = None , D = distance_matrix, xlabels_order = [], xlabels = distance_matrix.index, 
                      filename= output_dir+"/hierarchical_heatmap", colLable = False, method =linkage_method, scale ='log') 
     else:
-        Z = Z = linkage(D, method= linkage_method)
+        Z = Z = linkage(distance_matrix, method= linkage_method)
     import scipy.cluster.hierarchy as sch
     hclust_tree = to_tree(Z) 
     #clusters = cutree_to_get_below_threshold_number_of_features (hclust_tree, t = estimated_num_clust)
     if number_of_estimated_clusters == None:
         number_of_estimated_clusters,_ = hierarchy.predict_best_number_of_clusters(hclust_tree, distance_matrix)
-    clusters = hierarchy.get_homogenous_clusters_silhouette(hclust_tree, array(D),
+    clusters = hierarchy.get_homogenous_clusters_silhouette(hclust_tree, array(distance_matrix),
                                                             number_of_estimated_clusters= number_of_estimated_clusters,
                                                             resolution= resolution)
     #print [cluster.pre_order(lambda x: x.id) for cluster in clusters]
@@ -107,9 +104,20 @@ def main( ):
     config.similarity_method = args.similarity_method
     output_dir= args.output+"/"
     config.similarity_method = args.similarity_method
-    df_distance = pd.read_table(args.distance_matrix, header=0, index_col =0)
+    df_distance = pd.DataFrame()
+    df_data = pd.DataFrame()
+    if args.distance_matrix:
+        df_distance = pd.read_table(args.distance_matrix, header=0, index_col =0)
+    if df_distance.empty:
+        if args.input:
+            df_data = pd.read_table(args.input,  index_col =0, header=0)
+            #print(df_data.index, df_data.columns)
+        if not df_data.empty:
+            df_distance = pd.DataFrame(squareform(pdist(df_data, metric=distance.pDistance)), index= df_data.index, columns= df_data.index)
+        else:
+            sys.exit("Warning! dataset or distance matrix must be provides!")
     #df_distance = stats.scale_data(df_distance, scale = 'log')
-    
+    #print (df_distance)
     # write the results into outpute
     if os.path.isdir(output_dir):
         try:
@@ -130,15 +138,22 @@ def main( ):
     
     f = open(output_dir+"/hallaclust.txt", 'w')
     print "There are %s clusters" %(len(clusters))
+    c_medoids = []
     for i in range(len(clusters)):
         f.write("cluster"+str(i+1)+"\t")
         features = clusters[i].pre_order(lambda x: x.id)
         feature_names = [df_distance.index[val] for val in features]
         for item in feature_names:
             f.write("%s " % item)
-        
+        if not df_data.empty:
+            c_medoids.append(df_data.index[(hierarchy.get_medoid(features, df_distance))])
+
         f.write("\n")
-    print "Output is written in " + args.output+"/hallaclust.txt"
+    #print c_medoids
+    if not df_data.empty:
+        df_data.loc[c_medoids, :].to_csv(path_or_buf=output_dir+'/medoids.txt', sep='\t' )
+        
+    print "Output is written in " + args.output
 
         
 if __name__ == "__main__":

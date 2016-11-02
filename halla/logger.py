@@ -81,7 +81,7 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
             f.write(corner)
             f.write(delimiter)
         for i in range(len(data[0])):
-            f.write(str(i))
+            f.write("S"+str(i))
             if i < len(data[0]) - 1:
                 f.write(delimiter)
         f.write('\n')

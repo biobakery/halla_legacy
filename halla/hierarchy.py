@@ -291,8 +291,11 @@ def hclust(dataset, labels, dataset_number):
     D = pdist(dataset, metric=distance.pDistance) 
     config.Distance[dataset_number] =  copy.deepcopy(squareform(D))
     if config.diagnostics_plot:
-        print "--- plotting heatmap for Dataset", str(dataset_number)," ... "
-        Z = plot.heatmap(data_table = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.similarity_method)+"_" + str(dataset_number), method =linkage_method, dataset_number= None)
+        try:
+            print "--- plotting heatmap for Dataset", str(dataset_number)," ... "
+            Z = plot.heatmap(data_table = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.similarity_method)+"_" + str(dataset_number), method =linkage_method, dataset_number= None)
+        except :
+            Z = linkage(D, method= linkage_method)
     else:
         Z = linkage(D, method= linkage_method)
     import scipy.cluster.hierarchy as sch

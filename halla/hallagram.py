@@ -24,7 +24,7 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 import numpy as np
-matplotlib.rcParams["pdf.fonttype"] = 42
+mpl.rcParams["pdf.fonttype"] = 42
 
 # ---------------------------------------------------------------
 # constants / config
@@ -32,8 +32,8 @@ matplotlib.rcParams["pdf.fonttype"] = 42
 
 c_unit_h        = 0.35
 c_unit_w        = 0.35
-c_min_height    = 3 * c_unit_h + 3
-c_min_width     = 15 * c_unit_w + 3
+c_min_height    = 5 * c_unit_h + 3
+c_min_width     = 8 * c_unit_w + 3
 c_label_scale   = 18
 c_label_shift   = -0.005
 c_line_width    = 1.5
