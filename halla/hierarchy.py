@@ -768,7 +768,7 @@ def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
     features = get_leaves(hierarchy_tree)
     clusters= [] #[hierarchy_tree]
     min_num_cluster = 2  
-    max_num_cluster = int(math.ceil(math.log(len(features), 2)))
+    max_num_cluster = int(len(features)/math.ceil(math.log(len(features), 2)))
     best_sil_score = 0.0
     best_clust_size = 1
     for i in range(min_num_cluster,max_num_cluster):
