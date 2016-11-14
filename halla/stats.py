@@ -626,7 +626,7 @@ def simple_no_adusting(afPVAL, q):
 	"""
 	pRank = rankdata(afPVAL, method= 'ordinal')
 	return afPVAL, pRank
-def p_adjust(pval, q, cluster_size, method="BH"):
+def p_adjust(pval, q, cluster_size = None, method="BH"):
 	"""
 	
 	Parameters

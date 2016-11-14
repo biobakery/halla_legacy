@@ -137,6 +137,10 @@ def _naive_all_against_all(iIter=100):
     config.meta_alla = None
     config.meta_alla = hierarchy.naive_all_against_all()
     return config.meta_alla 
+def _test_by_level():
+    config.meta_alla = hierarchy.test_by_level(apClusterNode0=[config.meta_data_tree[0]],
+            apClusterNode1=[config.meta_data_tree[1]],
+            dataset1=config.parsed_dataset[0], dataset2=config.parsed_dataset[1])
 def _hypotheses_testing():
     config.meta_alla = None    
     fQ = config.q
@@ -513,7 +517,7 @@ def _report():
         if config.descending == "AllA":
             aLineOut = map(str, ['0', str(';'.join(config.FeatureNames[0][i] for i in range(len(config.FeatureNames[0])))), str(';'.join(config.FeatureNames[1][i] for i in range(len(config.FeatureNames[1]))))])
             csvwc.writerow(aLineOut)
-        else:
+        elif config.meta_hypothesis_tree:
             for line in hierarchy.reduce_tree_by_layer([config.meta_hypothesis_tree]):
                 (level, clusters) = line
                 iX, iY = clusters[0], clusters[1]
@@ -521,6 +525,12 @@ def _report():
                 # fP_adjust = line[2]
                 aLineOut = map(str, [str(level), str(';'.join(config.FeatureNames[0][i] for i in iX)), str(';'.join(config.FeatureNames[1][i] for i in iY))])
                 csvwc.writerow(aLineOut)
+        #else:
+            #aLineOut = map(str, ['0', str(';'.join(config.FeatureNames[0][i] for i in config.Features_order[0])), str(';'.join(config.FeatureNames[1][i] for i in config.Features_order[1]))])
+            #csvwc.writerow(aLineOut)
+            #pass
+        #output_file_compared_clusters.close()
+
     def _heatmap_associations():
         print "--- plotting heatmap of associations  ..."
         global associated_feature_X_indecies
@@ -783,7 +793,7 @@ def _report():
     # Execute report functions
     _report_all_tests()
     _report_associations()
-    _report_compared_clusters()
+    #_report_compared_clusters()
     _write_hallagram_info()
     if len(config.meta_alla[0]) > 0:
         n = min(len(config.meta_alla[0]), 100)
@@ -875,14 +885,15 @@ def run():
         
         # coupling clusters hierarchically 
         start_time = time.time()
-        _couple()
+        #_couple()
+        _test_by_level()
         excution_time_temp = time.time() - start_time
         csvw.writerow(["Coupling hypotheses tree time", str(datetime.timedelta(seconds=excution_time_temp)) ])
         print("--- %s h:m:s coupling hypotheses tree time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
         # hypotheses testing
         print("--- association hypotheses testing is started, this task may take longer ...")
         start_time = time.time()
-        _hypotheses_testing()
+        #_hypotheses_testing()
         excution_time_temp = time.time() - start_time
         csvw.writerow(["number of performed permutation tests: ", config.number_of_performed_tests])
         csvw.writerow(["Hypotheses testing time", str(datetime.timedelta(seconds=excution_time_temp)) ])

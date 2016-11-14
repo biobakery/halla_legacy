@@ -15,7 +15,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas
-
+import csv
 from . import distance
 from . import stats
 from . import plot
@@ -255,7 +255,8 @@ def is_bypass(Node ):
             return True
         else:
             return False
-    return False
+    else:
+        return False
 
 def report(Node):
     print "\n--- hypothesis test based on permutation test"        
@@ -495,7 +496,7 @@ def _is_start(ClusterNode, X, func, distance):
     else: 
         return False
 
-def _is_stop(ClusterNode, dataSet, max_dist_cluster):
+def _is_stop(ClusterNode, dataSet, max_dist_cluster =  None):
         if ClusterNode.is_leaf() or ClusterNode.get_count() == 1:
             return True
         else:
@@ -865,15 +866,10 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
             data2 = reduce_tree(b)
     Hypothesis_Tree_Root = Hypothesis_Node([data1, data2])
     Hypothesis_Tree_Root.level_number = 0
+    
     # Get the first level homogeneous clusters
     apChildren0 = get_homogenous_clusters_silhouette (apClusterNode0[0], config.Distance[0])
-    #cutree_to_get_number_of_features(apClusterNode0[0])
-    #get_homogenous_clusters_silhouette (apClusterNode0[0], dataset_number = 0)
     apChildren1 = get_homogenous_clusters_silhouette (apClusterNode1[0], config.Distance[1])
-    #cutree_to_get_number_of_features(apClusterNode[0])
-    #
-    #print "first cut", [a.pre_order(lambda x: x.id) for a in apChildren0]
-    #print "first cut", [a.pre_order(lambda x: x.id) for a in apChildren1]
     
     childList = []
     L = []    
@@ -957,6 +953,101 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
     #print "Coupled Hypothesis_Node", reduce_tree_by_la
     #print "Number of levels after coupling", level_number-1
     return [Hypothesis_Tree_Root]
+def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="uniform", strLinkage="min", robustness = None):
+    
+    func = config.similarity_method
+    
+    X, Y = dataset1, dataset2
+    aFinal = []
+    aOut = []
+    
+    # Write the hpothesis that has been tested
+    output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
+    csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
+    csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
+    data1 = apClusterNode0[0].pre_order(lambda x: x.id)
+    data2 = apClusterNode1[0].pre_order(lambda x: x.id)
+    aLineOut = map(str, [str(0), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
+    csvwc.writerow(aLineOut)
+    
+    # Get the first level homogeneous clusters
+    apChildren0 = get_homogenous_clusters_silhouette (apClusterNode0[0], config.Distance[0])
+    apChildren1 = get_homogenous_clusters_silhouette (apClusterNode1[0], config.Distance[1])
+    current_level_nodes = []
+    current_level_tests = []    
+    level_number = 1
+      
+    for a, b in itertools.product(apChildren0, apChildren1):
+        try:
+            data1 = a.pre_order(lambda x: x.id)
+            data2 = b.pre_order(lambda x: x.id)
+        except:
+            data1 = reduce_tree(a)
+            data2 = reduce_tree(b)
+        tempTree = Hypothesis_Node(data=[data1, data2], left_distance=a.dist, right_distance=b.dist)
+        tempTree.level_number = 1
+        current_level_tests.append(tempTree)
+        current_level_nodes.append((tempTree, (a, b)))
+        aLineOut = map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
+        csvwc.writerow(aLineOut)
+    do_next_level = True
+    # test first level
+    
+    while do_next_level  :
+        current_level_tests = [ hypothesis for (hypothesis, _ ) in current_level_nodes]
+        #print "--- Tesing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_tests))
+        temp_aFinal, temp_aOut = hypotheses_level_testing(current_level_tests)
+        aFinal.extend(temp_aFinal)
+        aOut.extend(temp_aOut)
+        from_prev_hypothesis =  []
+        from_prev_hypothesis_node = []
+        do_next_level = False
+        next_level = []
+        leaf_nodes = []
+        level_number += 1
+        for i in range(len(current_level_nodes)):
+            hypothesis_node= current_level_nodes[i]
+            (hypothesis, (a, b)) = hypothesis_node
+            #print(hypothesis.significance)
+            if len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[0]) == 1:
+                leaf_nodes.append(hypothesis_node)
+                continue
+            if hypothesis.significance != None:
+                from_prev_hypothesis_node.append(hypothesis_node)
+            
+            else:
+                bTauX = _is_stop(a, X)  
+                bTauY = _is_stop(b, Y)  
+                do_next_level = True
+                if not bTauX:
+                    apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
+                else:
+                    apChildren0 = [a]
+                if not bTauY:
+                    apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
+                else:
+                    apChildren1 = [b]
+                LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren0, apChildren1)] 
+                while LChild:
+                    (a1, b1) = LChild.pop(0)
+                    try:
+                        data1 = a1.pre_order(lambda x: x.id)
+                        data2 = b1.pre_order(lambda x: x.id)
+                    except:
+                        data1 = reduce_tree(a1)
+                        data2 = reduce_tree(b1)
+                    tempTree = Hypothesis_Node(data=[data1, data2], left_distance=a1.dist, right_distance=b1.dist)
+                    tempTree.level_number = level_number
+                    next_level.append((tempTree, (a1, b1)))
+                    aLineOut = map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
+                    csvwc.writerow(aLineOut)
+        current_level_nodes = next_level
+        if len(current_level_tests) > 0 :
+            current_level_nodes.extend(leaf_nodes)
+            if len(from_prev_hypothesis) > 0:
+                current_level_nodes.extend(from_prev_hypothesis_node)
+        print "--- Tesing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_nodes))
+    return aFinal, aOut
 pHashMethods = {"permutation" : stats.permutation_test,
                         "permutation_test_by_medoid": stats.permutation_test_by_medoid,
                         
@@ -1275,4 +1366,77 @@ def hypotheses_testing():
     strFDR = config.fdr_function
     pFDR = fdr_function[strFDR]
     aFinal, aOut = pFDR()
-    return aFinal, aOut 
+    return aFinal, aOut
+def hypotheses_level_testing(current_level_tests):
+    aOut = []  # # Full log 
+    aFinal = []  # # Only the final reported values 
+    dataset1 = config.parsed_dataset[0]
+    dataset2 = config.parsed_dataset[1]
+    #print "number of hypotheses in the level:  %s" % (len(current_level_tests))
+    p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, dataset2)
+    for i in range(len(current_level_tests)):
+       current_level_tests[i].pvalue = p_values[i]
+    q = config.q 
+    aP_adjusted, pRank = stats.p_adjust(p_values, q)#config.q)
+    for i in range(len(current_level_tests)):
+       current_level_tests[i].rank = pRank[i]
+   
+    max_r_t = 0
+    for i in range(len(current_level_tests)):
+        if current_level_tests[i].pvalue <= aP_adjusted[i] and max_r_t <= current_level_tests[i].rank:
+             max_r_t = current_level_tests[i].rank
+            #print "max_r_t", max_r_t
+    passed_tests = []
+    if config.p_adjust_method in ["bh", "bhy"]:
+        for i in range(len(current_level_tests)):
+            if current_level_tests[i].rank <= max_r_t:#(level ==1000 and sum([1 if current_level_tests[i].pvalue<= val else 0 for val  in list_p_trshld])>= (1.0-config.q)*number_of_bootstrap)\
+                passed_tests.append(current_level_tests[i])
+                if current_level_tests[i].significance == None:
+                    current_level_tests[i].significance = True
+                    aOut.append(current_level_tests[i])
+                    aFinal.append(current_level_tests[i])
+                    print ("-- association after %s fdr correction" % config.p_adjust_method)
+            else:
+               if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
+                   current_level_tests[i].significance = False
+                   aOut.append(current_level_tests[i])
+               
+    elif config.p_adjust_method == "bonferroni":
+        print len(current_level_tests)
+        for i in range(len(current_level_tests)):
+            if current_level_tests[i].pvalue <= aP_adjusted[i]:
+                passed_tests.append(current_level_tests[i])
+                if current_level_tests[i].significance == None:
+                    aOut.append(current_level_tests[i])
+                    aFinal.append(current_level_tests[i])
+                    current_level_tests[i].significance = True
+                    print ("-- association after %s fdr correction" % config.p_adjust_method)
+                    
+            else:
+                if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
+                    current_level_tests[i].significance = False
+                    aOut.append(current_level_tests[i])
+    elif config.p_adjust_method == "no_adjusting":
+        for i in range(len(current_level_tests)):
+            if current_level_tests[i].pvalue <= q:
+                passed_tests.append(current_level_tests[i])
+                if current_level_tests[i].significance == None:
+                    aOut.append(current_level_tests[i])
+                    aFinal.append(current_level_tests[i])
+                    current_level_tests[i].significance = True
+                    print ("-- association after %s fdr correction" % config.p_adjust_method)
+                    
+            else:
+                if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
+                    current_level_tests[i].significance = False
+                    aOut.append(current_level_tests[i])
+                    temp_sub_hypotheses = get_children(current_level_tests[i])
+                    if len(temp_sub_hypotheses) > 0:
+                        for j in range(len(temp_sub_hypotheses)):
+                            temp_sub_hypotheses[j].pvalue = current_level_tests[i].pvalue
+                
+    q_values = stats.pvalues2qvalues ([current_level_tests[i].pvalue for i in range(len(current_level_tests))], adjusted=True)
+    for i in range(len(current_level_tests)):
+        if current_level_tests[i].qvalue == None and current_level_tests[i] in passed_tests: 
+            current_level_tests[i].qvalue = q_values[i]    
+    return aFinal, aOut
