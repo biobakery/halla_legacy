@@ -199,7 +199,7 @@ def parse_arguments (args):
     argp.add_argument(
         "--fdr",
         dest="strAdjust",    
-        default="bhy",
+        default="bh",
         choices=["bh", "bhy", "bonferroni", "no_adjusting"],
         help="approach for FDR correction\n[default = bhy]")
     argp.add_argument(

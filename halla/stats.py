@@ -915,8 +915,14 @@ def permutation_test_by_representative(pArray1, pArray2):
 	else:
 		[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 
-	sim_score= pMe(pRep1, pRep2)
-	fP = permutation_test_pvalue(X=pRep1, Y=pRep2)
+	
+	if config.similarity_method == 'spearman' :# and randomization_method != "permutation" :
+		sim_score, fP = scipy.stats.spearmanr(pRep1, pRep2, nan_policy='omit')
+	elif  config.similarity_method == 'pearson':# and randomization_method != "permutation" :
+		sim_score, fP = scipy.stats.pearsonr(pRep1, pRep2)
+	else:
+		sim_score= pMe(pRep1, pRep2)
+		fP = permutation_test_pvalue(X=pRep1, Y=pRep2)
 	assert(fP <= 1.0)
 	#print fP
 	return fP, sim_score, left_rep_variance, right_rep_variance, left_loading, right_loading, pRep1, pRep2 
