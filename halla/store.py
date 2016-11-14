@@ -511,13 +511,17 @@ def _report():
             plt.close("all")
             
     def _report_compared_clusters():
-        output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
-        csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
-        csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
+        
         if config.descending == "AllA":
+            output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
+            csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
+            csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
             aLineOut = map(str, ['0', str(';'.join(config.FeatureNames[0][i] for i in range(len(config.FeatureNames[0])))), str(';'.join(config.FeatureNames[1][i] for i in range(len(config.FeatureNames[1]))))])
             csvwc.writerow(aLineOut)
         elif config.meta_hypothesis_tree:
+            output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
+            csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
+            csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
             for line in hierarchy.reduce_tree_by_layer([config.meta_hypothesis_tree]):
                 (level, clusters) = line
                 iX, iY = clusters[0], clusters[1]
@@ -793,7 +797,7 @@ def _report():
     # Execute report functions
     _report_all_tests()
     _report_associations()
-    #_report_compared_clusters()
+    _report_compared_clusters()
     _write_hallagram_info()
     if len(config.meta_alla[0]) > 0:
         n = min(len(config.meta_alla[0]), 100)
@@ -888,16 +892,16 @@ def run():
         #_couple()
         _test_by_level()
         excution_time_temp = time.time() - start_time
-        csvw.writerow(["Coupling hypotheses tree time", str(datetime.timedelta(seconds=excution_time_temp)) ])
-        print("--- %s h:m:s coupling hypotheses tree time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
+        csvw.writerow(["Level-by-level hypothesis testing", str(datetime.timedelta(seconds=excution_time_temp)) ])
+        print("--- %s h:m:s level-by-level hypothesis testing ---" % str(datetime.timedelta(seconds=excution_time_temp)))
         # hypotheses testing
-        print("--- association hypotheses testing is started, this task may take longer ...")
-        start_time = time.time()
+        
+        #start_time = time.time()
         #_hypotheses_testing()
-        excution_time_temp = time.time() - start_time
+        #excution_time_temp = time.time() - start_time
         csvw.writerow(["number of performed permutation tests: ", config.number_of_performed_tests])
-        csvw.writerow(["Hypotheses testing time", str(datetime.timedelta(seconds=excution_time_temp)) ])
-        print("--- %s h:m:s hypotheses testing time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
+        #csvw.writerow(["Hypotheses testing time", str(datetime.timedelta(seconds=excution_time_temp)) ])
+        #print("--- %s h:m:s hypotheses testing time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
     
     # Generate a report
     start_time = time.time() 
