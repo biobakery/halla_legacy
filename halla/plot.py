@@ -440,7 +440,10 @@ def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], ylabel = "R
     ticks_fontsize = 6
     fig = None
     if ax == None:
-       fig, ax = plt.subplots(dpi= 300, figsize=( len(data)/2+5, 5))# figsize=(4, 4)) 
+        xlable_rotation = 45
+        labels_fontsize = 10
+        ticks_fontsize = 10
+        fig, ax = plt.subplots(dpi= 300, figsize=( len(data)/2+2.5, 3))# figsize=(4, 4)) 
     #plt.hold(True)
     #plt.xlim([-0.05, 1.15])
     #plt.ylim([-0.05, 1.15])
@@ -467,7 +470,7 @@ def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], ylabel = "R
     #ax.xticks(range(len(labels)), labels, rotation=90, ha='right')
     #ax.tight_layout()
     if len(xlabels) > 0:
-        ax.set_xticklabels(xlabels, rotation =xlable_rotation, fontsize = 8)
+        ax.set_xticklabels(xlabels, rotation =xlable_rotation, fontsize = labels_fontsize)
    
     ax.set_title(title, fontsize=10, fontweight='bold', loc='left')
     #ax.set(xlabel='Method', ylabel='Recall/FDR', axisbelow=True, xticklabels=xlabels)

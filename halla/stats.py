@@ -10,7 +10,7 @@ from itertools import compress
 from itertools import product
 import itertools
 import math
-from numpy import array , std, log2
+from numpy import array , std, log2, dtype
 import numpy 
 from numpy.random import shuffle, binomial, normal, multinomial 
 import scipy
@@ -1721,6 +1721,7 @@ def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=No
 			result_discretized_data.append(dictA[item])
 		return result_discretized_data	
 	def _discretize_continuous(astrValues, number_of_bins=number_of_bins):
+		#decide about the number of bins
 		if number_of_bins == None:
 			# Default to rounded sqrt(n) if no bin count requested
 			number_of_bins = min(len(set(astrValues)), round(math.sqrt(len(astrValues)))) 
@@ -1730,7 +1731,8 @@ def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=No
 			number_of_bins = len(set(astrValues))
 		else:
 			number_of_bins = min(number_of_bins, len(set(astrValues)))
-		#print "number_of_bins = ",  number_of_bins			
+
+		# descritize the vector
 		if len(set(astrValues)) <= number_of_bins:
 			try:
 				return rankdata(astrValues, method= 'dense')
@@ -1739,7 +1741,15 @@ def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=No
 				_discretize_categorical(astrValues, number_of_bins=number_of_bins)
 		else:							
 			try:
-				order = rankdata(astrValues, method= 'min')# ordinal
+				if config.strDiscretizing == 'equal-area':
+					order = rankdata(astrValues, method= 'min')# ordinal
+				elif config.strDiscretizing == 'hclust':
+					from scipy.cluster.hierarchy import fcluster
+					#from scipy.spatial.distance import pdist
+					from scipy.cluster.hierarchy import linkage, dendrogram
+					distanceMatrix = abs(numpy.array([astrValues],  dtype= float).T-numpy.array([astrValues], dtype= float))
+					order = fcluster(linkage(distanceMatrix, method='complete'),number_of_bins,'distance')
+					return order
 			except:
 				print "An exception happend with discretizing continuose data!!!" 
 				_discretize_categorical(astrValues, number_of_bins=number_of_bins)
