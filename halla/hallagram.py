@@ -11,7 +11,11 @@ import sys
 import argparse
 import csv
 import getpass
-csv.field_size_limit(sys.maxsize)
+try:
+    csv.field_size_limit(sys.maxsize)
+except:
+    # for some Windows platforms
+    csv.field_size_limit(2147483647)
 
 #import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -32,7 +36,7 @@ mpl.rcParams["pdf.fonttype"] = 42
 
 c_unit_h        = 0.35
 c_unit_w        = 0.35
-c_min_height    = 2 * c_unit_h + 3
+c_min_height    = 8 * c_unit_h + 3
 c_min_width     = 14 * c_unit_w + 3
 c_label_scale   = 18
 c_label_shift   = -0.005

@@ -988,8 +988,8 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         tempTree.level_number = 1
         #current_level_tests.append(tempTree)
         current_level_nodes.append((tempTree, (a, b)))
-        aLineOut = map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
-        csvwc.writerow(aLineOut)
+        #aLineOut = map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
+        #csvwc.writerow(aLineOut)
     do_next_level = True
     # test first level
     #print "--- Tesing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_tests))
@@ -1039,14 +1039,17 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                     tempTree = Hypothesis_Node(data=[data1, data2], left_distance=a1.dist, right_distance=b1.dist)
                     tempTree.level_number = level_number
                     next_level.append((tempTree, (a1, b1)))
-                    aLineOut = map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
-                    csvwc.writerow(aLineOut)
+                    #aLineOut = map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
+                    #csvwc.writerow(aLineOut)
         current_level_nodes = next_level
         if len(current_level_nodes) > 0 :
             current_level_nodes.extend(leaf_nodes)
             #if len(from_prev_hypothesis) > 0:
             current_level_nodes.extend(from_prev_hypothesis_node)
             #print "--- Tesing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_nodes))
+    config.number_of_performed_tests = len(aOut)
+    print "--- number of performed tests:", config.number_of_performed_tests
+    print "--- number of passed tests after FDR controlling:", len(aFinal)
     return aFinal, aOut
 pHashMethods = {"permutation" : stats.permutation_test,
                         "permutation_test_by_medoid": stats.permutation_test_by_medoid,

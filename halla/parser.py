@@ -29,7 +29,7 @@ def wrap_features(txt, width=40):
 		return txt #'\n'.join(textwrap.wrap(txt, width))
 	
 def substitute_special_characters(txt):
-    txt = re.sub('[\n\;]', '_', txt).replace('__','_').replace('__','_') #replace(' ','_')  replace('.','_')
+    txt = re.sub('[\n\;]', '_', txt).replace('__','_')#.replace('__','_').replace(' ','_') # replace('.','_')
     return txt
 def load(file):
 	# Read in the file
