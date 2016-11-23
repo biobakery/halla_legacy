@@ -54,6 +54,8 @@ nullsamples = []
 number_of_performed_tests = 0
 min_var = 0.0
 entropy_threshold = 0.0
+entropy_threshold1 = 0.0
+entropy_threshold2 = 0.0
 missing_char_category = False
 
 #==================================================================#

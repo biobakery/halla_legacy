@@ -261,6 +261,18 @@ def parse_arguments (args):
         default=0.5,
         help="Minimum entropy threshold to filter features with low information\n[default = 0.5]")
     argp.add_argument(
+        "-e1", "--entropy1",
+        dest="entropy_threshold1",
+        type=float,
+        default=None,
+        help="Minimum entropy threshold for the first dataset \n[default = None]")
+    argp.add_argument(
+        "-e2", "--entropy2",
+        dest="entropy_threshold2",
+        type=float,
+        default=None,
+        help="Minimum entropy threshold for the second dataset \n[default = None]")
+    argp.add_argument(
         "--missing-char",
         dest ="missing_char",
         default=None,
@@ -285,6 +297,14 @@ def set_parameters(args):
     #config.fdr_function = args.strFDR
     config.q = args.dQ  
     config.entropy_threshold = args.entropy_threshold
+    if args.entropy_threshold1 == None:
+        config.entropy_threshold1 = args.entropy_threshold
+    else:
+        config.entropy_threshold1 = args.entropy_threshold1
+    if args.entropy_threshold2 == None:
+        config.entropy_threshold2 = args.entropy_threshold
+    else:
+        config.entropy_threshold2 = args.entropy_threshold2
     config.permutation_func = args.permutation_func
     
     #config.p_adjust_method = args.strAdjust
@@ -304,6 +324,7 @@ def set_parameters(args):
         config.seed = random.randint(1,10000)
     else:
         config.seed = args.seed
+
     config.NPROC = args.nproc
     config.NBIN = args.nbin
     config.missing_char = args.missing_char

@@ -336,20 +336,20 @@ class Input:
 		l1_before =  len(df1.index)
 		l2_before =  len(df2.index)
 		temp_df1 = df1 
-		df1 = df1[df1.apply(stats.get_enropy, 1) > config.entropy_threshold]
-		df1_org = df1_org[temp_df1.apply(stats.get_enropy, 1) > config.entropy_threshold]
+		df1 = df1[df1.apply(stats.get_enropy, 1) > config.entropy_threshold1]
+		df1_org = df1_org[temp_df1.apply(stats.get_enropy, 1) > config.entropy_threshold1]
 		
 		temp_df2 = df2 
-		df2 = df2[df2.apply(stats.get_enropy, 1) > config.entropy_threshold]
-		df2_org = df2_org[temp_df2.apply(stats.get_enropy, 1) > config.entropy_threshold]
+		df2 = df2[df2.apply(stats.get_enropy, 1) > config.entropy_threshold2]
+		df2_org = df2_org[temp_df2.apply(stats.get_enropy, 1) > config.entropy_threshold2]
 		
 		l1_after = len(df1.index)
 		l2_after = len(df2.index)
 		if l1_before > l1_after:
-			print "WARNING! %d features with entropy equal or less than %.3f have been removed from the first dataset " % ((l1_before- l1_after), config.entropy_threshold)
+			print "WARNING! %d features with entropy equal or less than %.3f have been removed from the first dataset " % ((l1_before- l1_after), config.entropy_threshold1)
 			
 		if l2_before > l2_after:
-			print "WARNING! %d features with entropy equal or less than %.3f have been removed from the second dataset " % ((l2_before- l2_after), config.entropy_threshold)
+			print "WARNING! %d features with entropy equal or less than %.3f have been removed from the second dataset " % ((l2_before- l2_after), config.entropy_threshold2)
 		# reorder df1 columns as the columns order of df2
 		#df1 = df1.loc[:, df2.columns]
 		
