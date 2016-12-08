@@ -158,7 +158,7 @@ def parse_arguments (args):
         "-p", "--permutation",
         #metavar="<0.001>",
         dest="permutation_func", 
-        choices=['ecdf', 'gpd'], 
+        choices=['ecdf', 'gpd', 'none'], 
         default='gpd',
         help="permutation function \n[default = gpd]")    
     argp.add_argument(
@@ -200,8 +200,8 @@ def parse_arguments (args):
         "--fdr",
         dest="strAdjust",    
         default="bh",
-        choices=["bh", "bhy", "bonferroni", "no_adjusting"],
-        help="approach for FDR correction\n[default = bhy]")
+        choices=["bh", "by", "bonferroni", "no_adjusting"],
+        help="approach for FDR correction\n[default = bh]")
     argp.add_argument(
         "-v", "--verbose",
         dest="verbose",
@@ -238,7 +238,11 @@ def parse_arguments (args):
         "--header",
         action="store_true",
         help="the input files contain a header line") 
-    
+    argp.add_argument(
+        "--format-feature-names",
+        dest ="format_feature_names", 
+        help="Replaces special characters and for OTUs separated  by | uses the known end of a clade", 
+        action="store_true")
     argp.add_argument(
         "--nproc", metavar="<1>",
         type=int,
@@ -311,6 +315,7 @@ def set_parameters(args):
     #config.randomization_method = args.strRandomization  # method to generate error bars 
     config.strStep = "uniform"
     config.verbose = args.verbose
+    config.format_feature_names = args.format_feature_names
     #config.robustness = float(args.robustness)
     config.output_dir = args.output_dir
     config.diagnostics_plot = args.diagnostics_plot

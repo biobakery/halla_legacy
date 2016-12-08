@@ -1116,7 +1116,7 @@ def naive_all_against_all():
         tests[i].qvalue = q_values[i]
         tests[i].rank = pRank[i]
     def _get_passed_fdr_tests():
-        if p_adjusting_method in ["bh", "bhy"]:
+        if p_adjusting_method in ["bh", "by"]:
             max_r_t = 0
             for i in range(len(tests)):
                 if tests[i].pvalue <= aP_adjusted[i] and max_r_t <= tests[i].rank:
@@ -1165,7 +1165,7 @@ def hypotheses_testing():
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
     """
-    pTree, dataset1, dataset2, seed, method="permutation", metric="nmi", fdr= "BHY", p_adjust="BH", fQ=0.1,
+    pTree, dataset1, dataset2, seed, method="permutation", metric="nmi", fdr= "by", p_adjust="BH", fQ=0.1,
     iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness = None, fAlpha=0.05, apply_bypass = True, discretize_style= 'equal-area'
     
     Perform all-against-all on a hypothesis tree.
@@ -1212,7 +1212,7 @@ def hypotheses_testing():
             
             temp_hypothesis = apChildren.pop(0)
             #use the signifantly rejected or accepte dhypotheses from previouse level 
-            if config.p_adjust_method != "bhy2":
+            if config.p_adjust_method != "by2":
                 if temp_hypothesis.significance != None:
                     from_prev_hypotheses.append(temp_hypothesis)
                 else:
@@ -1262,7 +1262,7 @@ def hypotheses_testing():
                        
             passed_tests = []
             def _get_passed_fdr_tests():
-                if config.p_adjust_method in ["bh", "bhy"]:
+                if config.p_adjust_method in ["bh", "by"]:
                   
                     for i in range(len(current_level_tests)):
                         if current_level_tests[i].rank <= max_r_t:#(level ==1000 and sum([1 if current_level_tests[i].pvalue<= val else 0 for val  in list_p_trshld])>= (1.0-config.q)*number_of_bootstrap)\
@@ -1390,7 +1390,7 @@ def hypotheses_level_testing(current_level_tests):
              max_r_t = current_level_tests[i].rank
             #print "max_r_t", max_r_t
     passed_tests = []
-    if config.p_adjust_method in ["bh", "bhy"]:
+    if config.p_adjust_method in ["bh", "by"]:
         for i in range(len(current_level_tests)):
             if current_level_tests[i].rank <= max_r_t:#(level ==1000 and sum([1 if current_level_tests[i].pvalue<= val else 0 for val  in list_p_trshld])>= (1.0-config.q)*number_of_bootstrap)\
                 passed_tests.append(current_level_tests[i])

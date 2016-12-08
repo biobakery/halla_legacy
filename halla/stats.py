@@ -57,7 +57,7 @@ def get_enropy(x):
 		P = numpy.bincount(d)/float(len(d))
 		observed_entropy = -sum([p * numpy.log2(p) for p in P])
 	except:
-		sys.exit("entropy error")
+		#sys.exit("entropy error")
 		P = scipy.stats.itemfreq(x)[:,1]
 		P = map(float, P)
 		P = [ val/len(x) for val in P]
@@ -469,7 +469,7 @@ c_hash_decomposition = {"none":	"none",
 #=========================================================
 # Multiple comparison adjustment 
 #=========================================================
-def bhy(afPVAL, q):
+def by(afPVAL, q):
 	"""
 	Implement the benjamini-Yekutieli hierarchical hypothesis testing criterion 
 	In practice, used for implementing Yekutieli criterion *per layer*.  
@@ -648,8 +648,8 @@ def p_adjust(pval, q, cluster_size = None, method="BH"):
 		pval[0]
 	except (TypeError, IndexError):
 		pval = [pval]
-	if config.p_adjust_method == "bhy":
-			return bhy(pval, q) 
+	if config.p_adjust_method == "by":
+			return by(pval, q) 
 			#fAdjusted = q * 1.0 * pRank[i] / (iLen*math.log(iLen))  # iLenReduced
 	elif config.p_adjust_method == "bh":
 		return bh(pval, q, cluster_size) 
@@ -916,9 +916,9 @@ def permutation_test_by_representative(pArray1, pArray2):
 		[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 
 	
-	if config.similarity_method == 'spearman' :# and randomization_method != "permutation" :
+	if config.similarity_method == 'spearman' :#and config.permutation_func == "none":# and randomization_method != "permutation" :
 		sim_score, fP = scipy.stats.spearmanr(pRep1, pRep2, nan_policy='omit')
-	elif  config.similarity_method == 'pearson':# and randomization_method != "permutation" :
+	elif  config.similarity_method == 'pearson':# and config.permutation_func == "none":# and randomization_method != "permutation" :
 		sim_score, fP = scipy.stats.pearsonr(pRep1, pRep2)
 	else:
 		sim_score= pMe(pRep1, pRep2)

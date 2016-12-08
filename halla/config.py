@@ -57,6 +57,7 @@ entropy_threshold = 0.0
 entropy_threshold1 = 0.0
 entropy_threshold2 = 0.0
 missing_char_category = False
+format_feature_names = False
 
 #==================================================================#
 # Mutable Meta Objects  

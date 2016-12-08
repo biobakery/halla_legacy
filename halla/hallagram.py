@@ -29,15 +29,15 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 import numpy as np
 mpl.rcParams["pdf.fonttype"] = 42
-
+mpl.rcParams["font.family"] = "Arial"
 # ---------------------------------------------------------------
 # constants / config
 # ---------------------------------------------------------------
 
-c_unit_h        = 0.35
-c_unit_w        = 0.35
-c_min_height    = 8 * c_unit_h + 3
-c_min_width     = 14 * c_unit_w + 3
+c_unit_h        = 0.3
+c_unit_w        = 0.3
+c_min_height    = 1 * c_unit_h + 1
+c_min_width     = 2 * c_unit_w + 2
 c_label_scale   = 18
 c_label_shift   = -0.005
 c_line_width    = 1.5

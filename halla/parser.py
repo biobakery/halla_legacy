@@ -20,10 +20,11 @@ from . import stats
 def wrap_features(txt, width=40):
 		'''helper function to wrap text for long labels'''
 		import textwrap
+		txt = txt.replace('g__','').replace('f__','').replace('o__','').replace('c__','').replace('p__','').replace('k__','')
 		txt = str(txt).split("|")
-		txt = [val if len(val)>0 else _ for val in txt ]
+		txt = [val for val in txt if len(val)>0 ]
 		if len(txt)>1:
-			txt = txt[len(txt)-2]+"_"+txt[len(txt)-1]
+			txt = txt[len(txt)-2]+" "+txt[len(txt)-1]
 		else:
 			txt = txt[0]
 		return txt #'\n'.join(textwrap.wrap(txt, width))
@@ -116,6 +117,8 @@ class Input:
 		print "Discretizing is started using: ", config.strDiscretizing, " style!"
 		self._discretize()
 		self._remove_low_entropy_features()
+		if len(self.outName1) <2 or len(self.outName1) <2:
+			sys.exit("--- HAllA to continue needs at lease two features in each dataset!!!\n--- Please repeat the one feature or provide the -a AllA option in the command line to do pairwise alla-against-all test!!")
 		if store.bypass_discretizing():
 			try:
 				self.orginal_dataset1= np.asarray(self.orginal_dataset1, dtype = float)
@@ -162,8 +165,9 @@ class Input:
 			if bVar: 
 				aNames =  list(pArray[:, 0])
 				aNames = map(str, aNames)
-				aNames = map(wrap_features, aNames)
-				aNames = map(substitute_special_characters, aNames)
+				if config.format_feature_names:
+					aNames = map(wrap_features, aNames)
+					aNames = map(substitute_special_characters, aNames)
 				pArray = pArray[:, 1:]
 
 			# # Parse data types, missing values, and whitespace

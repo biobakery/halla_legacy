@@ -1,4 +1,4 @@
-""" Class to store HAllA data """
+""" This file is the main files for module to invoke other modules in order and log the results and performance """
 from matplotlib.pyplot import ylabel
 
 # Test if matplotlib is installed
@@ -29,6 +29,7 @@ except ImportError:
     sys.exit("CRITICAL ERROR: Unable to find the hierarchy module." + 
         " Please check your halla install.")
 
+# import HAllA's module sthat are needed here
 from . import distance
 from . import stats
 from . import plot
@@ -38,6 +39,10 @@ import random
 
 
 def bypass_discretizing():
+    """
+    This module decide if the discretizing should by bypassed or not based on 
+    similarity metric and decomposition method
+    """
     if not distance.c_hash_association_method_discretize[config.similarity_method] or  config.strDiscretizing == "none" or\
         config.similarity_method in ["pearson"] or config.decomposition in ["pca", "ica"] :
         return True
@@ -61,10 +66,8 @@ def m(dataset, pFunc, strDiscretizing, axis=0,):
         # print dataset.shape
         return array([pFunc(item, strDiscretizing) for item in dataset]) 
 
-def bp(dataset, pFunc, axis=0):
-    """
-    Map _by pairs_ ; i.e. apply pFunc over all possible pairs in dataset 
-    """
+"""def bp(dataset, pFunc, axis=0):
+    #Map _by pairs_ ; i.e. apply pFunc over all possible pairs in dataset 
 
     if bool(axis): 
         dataset = dataset.T
@@ -75,9 +78,7 @@ def bp(dataset, pFunc, axis=0):
 
  
 def bc(dataset1, dataset2, pFunc, axis=0):
-    """
     Map _by cross product_ for ; i.e. apply pFunc over all possible pairs in dataset1 X dataset2 
-    """
 
     if bool(axis): 
         dataset1, dataset2 = dataset1.T, dataset2.T
@@ -88,16 +89,14 @@ def bc(dataset1, dataset2, pFunc, axis=0):
 
 @staticmethod 
 def r(dataset, pFunc, axis=0):
-    """
     Reduce over array 
     pFunc is X x Y -> R 
 
-    """
     if bool(axis):
         dataset = dataset.T
 
     return reduce(pFunc, dataset)
-
+"""
 #==========================================================#
 # Helper Functions 
 #==========================================================# 
@@ -456,51 +455,14 @@ def _report():
                     axes = plot.scatter_matrix(df_all, x_size = len(iX),filename =filename + 'Scatter_association' + str(association_number) + '.pdf')
             except:
                 pass
-            # plot discritized data
-            '''
-            if len(discretized_cluster1) < 40:
-                discretized_df = pd.DataFrame(np.array(discretized_cluster1, dtype= float).T ,columns=X_labels )
-                
-                discretized_axes1 = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-
-            if len(discretized_cluster2) < 40:
-                discretized_df = pd.DataFrame(np.array(discretized_cluster2, dtype= float).T ,columns=Y_labels )
-                discretized_axes2 = plot.scatter_matrix(discretized_df, filename = discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-            '''
-            #concatenated_df = pd.concat([df1, df2],axis=1)
-            #axes = plot.scatter_matrix(concatenated_df, filename =filename + 'Concatenated_' + str(association_number) + '_scatter_matrix.pdf')
-            # heatmap cluster in an association
-            '''x_label_order = []
-            if len(discretized_cluster1) >= len(discretized_cluster2):
-                #print len(discretized_cluster1), ">=", len(discretized_cluster2)
-                #print "Before1: ",len(x_label_order)     
-                plot.heatmap(np.array(discretized_cluster1), x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap', )
-                #x_label_order =  x_label_order1
-                #print "after1", x_label_order
-                #print "After1: ",len(x_label_order)
-                plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap' )
-            else:
-                #print len(discretized_cluster2), ">=", len(discretized_cluster1)
-                #print "Before2: ",len(x_label_order) 
-                plot.heatmap(np.array(discretized_cluster2), x_label_order, xlabels =Y_labels, filename =discretized_filename + 'Dataset_2_cluster_' + str(association_number) + '_heatmap'  ) 
-                #x_label_order =  x_label_order
-                #print "after2", x_label_order 
-                #print "After2: ",len(x_label_order)
-                plot.heatmap(np.array(discretized_cluster1), xlabels_order = x_label_order, xlabels =X_labels, filename =discretized_filename + 'Dataset_1_cluster_' + str(association_number) + '_heatmap' )
-            '''
+            
             x_label_order = []
-            #plot.heatmap2(dataset1=discretized_cluster1, dataset2=discretized_cluster2, xlabels =X_labels, ylabels = Y_labels, filename =discretized_filename + 'AllA_association_' + str(association_number) + '_heatmap' )
-            #Heatmap on continue datasets
-            #plot.heatmap2(dataset1=cluster1, dataset2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename =filename + 'AllA_association_' + str(association_number) + '_heatmap' )  
-            #plt.figure()
             fig = plt.figure(figsize=(5, 4))
             # Create an Axes object.
             ax = fig.add_subplot(1,1,1) # one row, one column, first plot
             plt.rc('xtick', labelsize=6) 
             plt.rc('ytick', labelsize=6) 
-          
             decomposition_method = stats.c_hash_decomposition[config.decomposition]
-            
             discretized_df1 = np.array(discretized_cluster1, dtype=float)
             discretized_df2 = np.array(discretized_cluster2, dtype=float)
             if not bypass_discretizing():
@@ -676,22 +638,14 @@ def _report():
         ro.globalenv['labRow'] = X_labels 
         ro.globalenv['labCol'] = Y_labels
         ro.globalenv['sig_matrix'] = anottation_cell
-        #ro.globalenv['circos_table'] = circos_tabel
-        #Ext_Y_labels = ["labels"] + list(Y_labels)
-        #ro.globalenv['Ext_labCol'] = Ext_Y_labels
+
         ro.r('rownames(similarity_score) = labRow')
         ro.r('colnames(similarity_score) = labCol')
         ro.r('rownames(sig_matrix) = labRow')
         ro.r('colnames(sig_matrix) = labCol')
-        #ro.r('rownames(circos_table) = labRow')
-        #ro.r('colnames(circos_table) = labCol')
-       # ro.globalenv['output_table_similarity_score'] = str(config.output_dir)+"/" + config.similarity_method+"_similarity_table.txt"
         ro.globalenv['output_asscoaiation_table'] = str(config.output_dir)+"/" + config.similarity_method+"_asscoaitaion_table.txt"
         ro.globalenv['output_circus_table'] = str(config.output_dir)+"/" + config.similarity_method+"_circos_table.txt"
-        #ro.r('write.table(similarity_score , output_table_similarity_score, sep = "\t", eol = "\n", quote = F, col.names = NA, row.names = labRow)')
-        #ro.r('write.table(sig_matrix , output_asscoaiation_table, sep = "\t", eol = "\n", quote = F, col.names =NA , row.names = labRow)')
-        #ro.r('write.table(circos_table , output_circus_table, sep = "\t", eol = "\n", quote = F, col.names =NA , row.names = labRow)')
-        #rev(heat.colors(100))
+
         if len(Xs) > 1 and len(Ys) > 1: 
             ro.r('library("RColorBrewer")')
             ro.r('library("pheatmap")')
@@ -702,17 +656,7 @@ def _report():
             else:
                 ro.r('pheatmap(similarity_score,labRow = labRow, labCol = labCol, filename =output_heatmap_similarity_score, cellwidth = 10, cellheight = 10, fontsize = 8, show_rownames = T, show_colnames = T, cluster_rows=FALSE, cluster_cols=FALSE, display_numbers = matrix(ifelse(sig_matrix > 0, sig_matrix, ""), nrow(sig_matrix)))')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
             ro.r('dev.off()')
-            '''if config.similarity_method != "pearson":
-                ro.globalenv['p'] = p
-                #ro.r('pdf(file = "./output/Pearson_heatmap.pdf")')
-                ro.r('rownames(p) = labRow')
-                ro.r('colnames(p) = labCol')
-                #if distance.c_hash_association_method_discretize[config.similarity_method]:
-                ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-                #else:
-                #ro.r('pheatmap(p, labRow = labRow, labCol = labCol, filename = output_file_Pearson, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T, show_colnames = T, cluster_rows=F, cluster_cols=F, display_numbers = matrix(ifelse(sig_matrix > 0, "*", ""), nrow(sig_matrix)))')#, scale="column",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
-                ro.r('dev.off()')
-                '''
+            
     def _heatmap_datasets_R():
         if config.hallagram:          
             print "--- plotting heatmap datasets using R ..."
@@ -757,7 +701,7 @@ def _report():
                 ro.r('dev.off()')
     def _hallagram_strongest(n):
         if config.similarity_method=="nmi":
-            sim_color = ' --similarity=\"Pairwise similarity\" --cmap=YlGnBu'
+            sim_color = ' --similarity=\"NMI\" --cmap=YlGnBu'
         else:
             sim_color =''
         #_heatmap_associations()
@@ -768,25 +712,25 @@ def _report():
             try:                 
                 hallagram_command= "hallagram "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
-                          output_path+"/associations.txt "+ "--similarity "+ config.similarity_method+\
+                          output_path+"/associations.txt "+ "--similarity "+ config.similarity_method.title()+\
                           " --outfile="+output_path+"/hallagram_strongest_"+str(n)+".pdf" + " --strongest " + str(n) + sim_color
                 os.system(hallagram_command)
                 
                 hallagram_command_png= "hallagram "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
-                          output_path+"/associations.txt "+ "--similarity "+ config.similarity_method+\
+                          output_path+"/associations.txt "+ "--similarity "+ config.similarity_method.title()+\
                           " --outfile="+output_path+"/hallagram_strongest_"+str(n)+".png" + " --strongest " + str(n) + sim_color
                 os.system(hallagram_command_png)
                 
                 hallagram_command_mask = "hallagram "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
-                          output_path+"/associations.txt " + "--similarity "+ config.similarity_method+\
+                          output_path+"/associations.txt " + "--similarity "+ config.similarity_method.title()+\
                           " --outfile="+output_path+"/hallagram_strongest_"+str(n)+"_mask.pdf --mask" + " --strongest " + str(n) + sim_color
                 os.system(hallagram_command_mask)
                 
                 hallagram_command_mask_png = "hallagram "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
-                          output_path+"/associations.txt " + "--similarity "+ config.similarity_method+\
+                          output_path+"/associations.txt " + "--similarity "+ config.similarity_method.title()+\
                           " --outfile="+output_path+"/hallagram_strongest_"+str(n)+"_mask.png --mask" + " --strongest " + str(n) + sim_color
                 os.system(hallagram_command_mask_png)
                 #_heatmap_associations_R()
