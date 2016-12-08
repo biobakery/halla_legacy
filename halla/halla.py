@@ -159,8 +159,8 @@ def parse_arguments (args):
         #metavar="<0.001>",
         dest="permutation_func", 
         choices=['ecdf', 'gpd', 'none'], 
-        default='gpd',
-        help="permutation function \n[default = gpd]")    
+        default='',
+        help="permutation function \n[default = none for Spearman and Pearson and gpd for other]")    
     argp.add_argument(
         "-a","--descending",
         dest="strDescending",
@@ -310,7 +310,11 @@ def set_parameters(args):
     else:
         config.entropy_threshold2 = args.entropy_threshold2
     config.permutation_func = args.permutation_func
-    
+    if config.permutation_func == '':
+        if args.strMetric in ['speramn', 'pearson']:
+            config.permutation_func = 'none'
+        else:
+            config.permutation_func = 'gpd'
     #config.p_adjust_method = args.strAdjust
     #config.randomization_method = args.strRandomization  # method to generate error bars 
     config.strStep = "uniform"

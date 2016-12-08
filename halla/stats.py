@@ -916,9 +916,9 @@ def permutation_test_by_representative(pArray1, pArray2):
 		[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 
 	
-	if config.similarity_method == 'spearman' :#and config.permutation_func == "none":# and randomization_method != "permutation" :
+	if config.similarity_method == 'spearman' and config.permutation_func == "none":# and randomization_method != "permutation" :
 		sim_score, fP = scipy.stats.spearmanr(pRep1, pRep2, nan_policy='omit')
-	elif  config.similarity_method == 'pearson':# and config.permutation_func == "none":# and randomization_method != "permutation" :
+	elif  config.similarity_method == 'pearson' and config.permutation_func == "none":# and randomization_method != "permutation" :
 		sim_score, fP = scipy.stats.pearsonr(pRep1, pRep2)
 	else:
 		sim_score= pMe(pRep1, pRep2)
