@@ -293,6 +293,12 @@ def parse_arguments (args):
         #default = False,
         action="store_true",
         help="To count the missing data as a category")
+    argp.add_argument(
+        "--log-hypothesis-tree",
+        dest = "log_hypothesis_tree",
+        #default = False,
+        action="store_true",
+        help="To write levels of hypothesis tree in the file")
     return argp.parse_args()
 
 def set_parameters(args):
@@ -311,10 +317,11 @@ def set_parameters(args):
         config.entropy_threshold2 = args.entropy_threshold2
     config.permutation_func = args.permutation_func
     if config.permutation_func == '':
-        if args.strMetric in ['speramn', 'pearson']:
+        if args.strMetric in ['spearman', 'pearson']:
             config.permutation_func = 'none'
         else:
             config.permutation_func = 'gpd'
+    config.log_hypothesis_tree = args.log_hypothesis_tree
     #config.p_adjust_method = args.strAdjust
     #config.randomization_method = args.strRandomization  # method to generate error bars 
     config.strStep = "uniform"

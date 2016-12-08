@@ -473,7 +473,7 @@ def _report():
             plt.close("all")
             
     def _report_compared_clusters():
-        
+
         if config.descending == "AllA":
             output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
             csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
@@ -770,6 +770,7 @@ def write_config():
     #csvw.writerow(["r: effect size for robustness : ", config.robustness]) 
     csvw.writerow(["Applied stop condition : ", config.apply_stop_condition]) 
     csvw.writerow(["Discretizing method : ", config.strDiscretizing])
+    csvw.writerow(["Permutation function: ", config.permutation_func])
     csvw.writerow(["Seed number: ", config.seed]) 
     csvw.writerow(["Number of permutations iterations for estimating pvalues: ", config.iterations]) 
     csvw.writerow(["Minimum entropy for filtering threshold : ", config.entropy_threshold])

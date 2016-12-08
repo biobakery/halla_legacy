@@ -37,7 +37,7 @@ mpl.rcParams["font.family"] = "Arial"
 c_unit_h        = 0.3
 c_unit_w        = 0.3
 c_min_height    = 1 * c_unit_h + 1
-c_min_width     = 2 * c_unit_w + 2
+c_min_width     = 3 * c_unit_w + 2
 c_label_scale   = 18
 c_label_shift   = -0.005
 c_line_width    = 1.5
@@ -287,17 +287,15 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
             np.mean( [y1, y2] )+0.5+c_label_shift*size,
             text,
             size=size,
-            color="black",
+            color="white",
             ha="center",
             va="center",
             weight="bold",
         )
-        """
         text.set_path_effects( [
             path_effects.Stroke( linewidth=c_outline_width, foreground='black'),
             path_effects.Normal(),
         ] )
-        """
     # craziness for hiding the border
     plt.setp( [child for child in ax.get_children() if isinstance( child, mpl.spines.Spine )], visible=False )
     plt.tight_layout()

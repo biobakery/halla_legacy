@@ -988,8 +988,9 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         tempTree.level_number = 1
         #current_level_tests.append(tempTree)
         current_level_nodes.append((tempTree, (a, b)))
-        #aLineOut = map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
-        #csvwc.writerow(aLineOut)
+        if config.log_hypothesis_tree:
+            aLineOut = map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
+            csvwc.writerow(aLineOut)
     do_next_level = True
     # test first level
     #print "--- Tesing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_tests))
@@ -1009,9 +1010,11 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             hypothesis_node= current_level_nodes[i]
             (hypothesis, (a, b)) = hypothesis_node
             #print(hypothesis.significance)
-            if len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[0]) == 1:
+            # Add leaves from current level to next level
+            if len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[0]) == 1 :
                 leaf_nodes.append(hypothesis_node)
                 continue
+            # Add significant or non significant hypothesis from previous level
             if hypothesis.significance != None:
                 from_prev_hypothesis_node.append(hypothesis_node)
             
@@ -1039,8 +1042,9 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                     tempTree = Hypothesis_Node(data=[data1, data2], left_distance=a1.dist, right_distance=b1.dist)
                     tempTree.level_number = level_number
                     next_level.append((tempTree, (a1, b1)))
-                    #aLineOut = map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
-                    #csvwc.writerow(aLineOut)
+                    if config.log_hypothesis_tree:
+                        aLineOut = map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
+                        csvwc.writerow(aLineOut)
         current_level_nodes = next_level
         if len(current_level_nodes) > 0 :
             current_level_nodes.extend(leaf_nodes)
@@ -1160,216 +1164,7 @@ def naive_all_against_all():
     print "--- number of passed tests after FDR controlling:", len(aFinal) 
     return aFinal, aOut
 
-def hypotheses_testing():
-    pTree = config.meta_hypothesis_tree
-    dataset1 = config.parsed_dataset[0]
-    dataset2 = config.parsed_dataset[1]
-    """
-    pTree, dataset1, dataset2, seed, method="permutation", metric="nmi", fdr= "by", p_adjust="BH", fQ=0.1,
-    iIter=1000, pursuer_method="nonparameteric", decomposition = "mca", bVerbose=False, robustness = None, fAlpha=0.05, apply_bypass = True, discretize_style= 'equal-area'
-    
-    Perform all-against-all on a hypothesis tree.
 
-    Notes:
-        Right now, return aFinal, aOut 
-
-
-    Parameters
-    ---------------
-
-        pTree 
-        dataset1
-        dataset2
-        method 
-        metric
-        p_adjust
-        pursuer_method 
-        verbose 
-
-    Returns 
-    ----------
-        Z_final, Z_all: numpy.ndarray
-            Bags of associations of _final_ associations, and _all_ associations respectively. 
-    ----------
-        
-    """
-    X, Y = dataset1, dataset2 
-    aOut = []  # # Full log 
-    aFinal = []  # # Only the final reported values 
-    def _level_by_level_testing():
-        apChildren = [pTree]
-        level = 1
-        number_performed_tests = 0 
-        number_passed_tests = 0
-        next_level_apChildren = []
-        current_level_tests = []
-        #temp_current_level_tests = []
-        leaves_hypotheses = []
-        from_prev_hypotheses = []
-        #previous_unqualified_hypotheses = []
-        while apChildren:
-            temp_sub_hypotheses = []
-            
-            temp_hypothesis = apChildren.pop(0)
-            #use the signifantly rejected or accepte dhypotheses from previouse level 
-            if config.p_adjust_method != "by2":
-                if temp_hypothesis.significance != None:
-                    from_prev_hypotheses.append(temp_hypothesis)
-                else:
-                    temp_sub_hypotheses = get_children(temp_hypothesis)
-                    if len(temp_sub_hypotheses) == 0:
-                        leaves_hypotheses.append(temp_hypothesis)
-            else:
-                temp_sub_hypotheses = temp_hypothesis.get_children()
-                # Repeat leaves in the next levels  
-                if len(temp_sub_hypotheses) == 0:
-                    leaves_hypotheses.append(temp_hypothesis)
-                else:
-                    #for i in range(len(temp_sub_hypotheses)):
-                    #    print(temp_sub_hypotheses[i].m_pData)
-                    if temp_hypothesis.significance != None:
-                        for i in range(len(temp_sub_hypotheses)):
-                            temp_sub_hypotheses[i].significance = temp_hypothesis.significance
-                            temp_sub_hypotheses[i].pvalue = temp_hypothesis.pvalue 
-                            temp_sub_hypotheses[i].qvalue = temp_hypothesis.qvalue
-                  
-            current_level_tests.extend(temp_sub_hypotheses)
-            
-            if len (apChildren) > 0:
-                continue
-            if len(current_level_tests) == 0 :
-                break
-            if len(from_prev_hypotheses) > 0 :
-                current_level_tests.extend(from_prev_hypotheses)
-                from_prev_hypotheses = []
-            current_level_tests.extend(leaves_hypotheses)
-            print "number of hypotheses in level %s: %s" % (level, len(current_level_tests))
-            p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, dataset2)
-            for i in range(len(current_level_tests)):
-                current_level_tests[i].pvalue = p_values[i]
-            cluster_size = [ len(current_level_tests[i].m_pData[0])*len(current_level_tests[i].m_pData[1]) for i in range(len(current_level_tests)) ]
-            total_cluster_size = numpy.sum(cluster_size)
-            q = config.q 
-            aP_adjusted, pRank = stats.p_adjust(p_values, q, cluster_size)#config.q)
-            for i in range(len(current_level_tests)):
-                current_level_tests[i].rank = pRank[i]
-            
-            max_r_t = 0
-            for i in range(len(current_level_tests)):
-                if current_level_tests[i].pvalue <= aP_adjusted[i] and max_r_t <= current_level_tests[i].rank:
-                    max_r_t = current_level_tests[i].rank
-                    #print "max_r_t", max_r_t
-                       
-            passed_tests = []
-            def _get_passed_fdr_tests():
-                if config.p_adjust_method in ["bh", "by"]:
-                  
-                    for i in range(len(current_level_tests)):
-                        if current_level_tests[i].rank <= max_r_t:#(level ==1000 and sum([1 if current_level_tests[i].pvalue<= val else 0 for val  in list_p_trshld])>= (1.0-config.q)*number_of_bootstrap)\
-                            passed_tests.append(current_level_tests[i])
-                            if current_level_tests[i].significance == None:
-                                current_level_tests[i].significance = True
-                                aOut.append(current_level_tests[i])
-                                aFinal.append(current_level_tests[i])
-                                print ("-- association after %s fdr correction" % config.p_adjust_method)
-                                temp_sub_hypotheses = get_children(current_level_tests[i])
-                                if len(temp_sub_hypotheses) > 0:
-                                    for j in range(len(temp_sub_hypotheses)):
-                                        temp_sub_hypotheses[j].pvalue = current_level_tests[i].pvalue
-                                #print (current_level_tests[i].m_pData)
-                        else:
-                            if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
-                                current_level_tests[i].significance = False
-                                aOut.append(current_level_tests[i])
-                            elif is_leaf(current_level_tests[i]):
-                                if current_level_tests[i].significance == None:
-                                    current_level_tests[i].significance = False
-                                    aOut.append(current_level_tests[i])
-                elif config.p_adjust_method == "bonferroni":
-                    print len(current_level_tests)
-                    for i in range(len(current_level_tests)):
-                        if current_level_tests[i].pvalue <= aP_adjusted[i]:
-                            passed_tests.append(current_level_tests[i])
-                            if current_level_tests[i].significance == None:
-                                aOut.append(current_level_tests[i])
-                                aFinal.append(current_level_tests[i])
-                                current_level_tests[i].significance = True
-                                print ("-- association after %s fdr correction" % config.p_adjust_method)
-                                temp_sub_hypotheses = get_children(current_level_tests[i])
-                                if len(temp_sub_hypotheses) > 0:
-                                    for j in range(len(temp_sub_hypotheses)):
-                                        temp_sub_hypotheses[j].pvalue = current_level_tests[i].pvalue
-                        else:
-                            if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
-                                current_level_tests[i].significance = False
-                                aOut.append(current_level_tests[i])
-                            elif is_leaf(current_level_tests[i]):
-                                if current_level_tests[i].significance == None:
-                                    current_level_tests[i].significance = False
-                                    aOut.append(current_level_tests[i])
-                elif config.p_adjust_method == "no_adjusting":
-                    for i in range(len(current_level_tests)):
-                        if current_level_tests[i].pvalue <= q:
-                            passed_tests.append(current_level_tests[i])
-                            if current_level_tests[i].significance == None:
-                                aOut.append(current_level_tests[i])
-                                aFinal.append(current_level_tests[i])
-                                current_level_tests[i].significance = True
-                                print ("-- association after %s fdr correction" % config.p_adjust_method)
-                                temp_sub_hypotheses = get_children(current_level_tests[i])
-                                if len(temp_sub_hypotheses) > 0:
-                                    for j in range(len(temp_sub_hypotheses)):
-                                        temp_sub_hypotheses[j].pvalue = current_level_tests[i].pvalue
-                        else:
-                            if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
-                                current_level_tests[i].significance = False
-                                aOut.append(current_level_tests[i])
-                                temp_sub_hypotheses = get_children(current_level_tests[i])
-                                if len(temp_sub_hypotheses) > 0:
-                                    for j in range(len(temp_sub_hypotheses)):
-                                        temp_sub_hypotheses[j].pvalue = current_level_tests[i].pvalue
-                            elif is_leaf(current_level_tests[i]):
-                                if current_level_tests[i].significance == None:
-                                    current_level_tests[i].significance = False
-                                    aOut.append(current_level_tests[i])
-                
-                q_values = stats.pvalues2qvalues ([current_level_tests[i].pvalue for i in range(len(current_level_tests))], adjusted=True)
-                for i in range(len(current_level_tests)):
-                    if current_level_tests[i].qvalue == None and current_level_tests[i] in passed_tests: 
-                        current_level_tests[i].qvalue = q_values[i]
-            _get_passed_fdr_tests()
-            
-            #return aFinal, aOut                
-            apChildren = current_level_tests #next_level_apChildren #
-            '''hist_pvalues = [t.pvalue for t in current_level_tests]
-            plt.clf()
-            plt.hist(hist_pvalues, bins=20)  # plt.hist passes it's arguments to np.histogram
-            plt.title("Histogram of nominal p-values in level "+ str(level))
-            #plt.show()
-            plt.savefig(str(level)+'_hist.pdf', pad_inches = .05, dpi=300) 
-            plt.close()'''
-            print "Hypotheses testing level", level, "with ",len(current_level_tests), "hypotheses is finished."
-            level += 1
-            next_level_apChildren = []
-            current_level_tests = []
-            temp_current_level_tests = []
-            from_prev_hypotheses = []
-            leaves_hypotheses = []
-            aP = []
-        config.number_of_performed_tests = len(aOut)
-        print "--- number of performed tests:", config.number_of_performed_tests #len(aOut)#number_performed_tests
-        print "--- number of passed tests after FDR controlling:", len(aFinal)#number_passed_tests                                  
-        return aFinal, aOut
-
-    fdr_function = {"default": _level_by_level_testing,
-                            "level":_level_by_level_testing}
-    #======================================#
-    # Execute 
-    #======================================#
-    strFDR = config.fdr_function
-    pFDR = fdr_function[strFDR]
-    aFinal, aOut = pFDR()
-    return aFinal, aOut
 def hypotheses_level_testing(current_level_tests):
     aOut = []  # # Full log 
     aFinal = []  # # Only the final reported values 
@@ -1439,7 +1234,9 @@ def hypotheses_level_testing(current_level_tests):
                             temp_sub_hypotheses[j].pvalue = current_level_tests[i].pvalue
                 
     q_values = stats.pvalues2qvalues ([current_level_tests[i].pvalue for i in range(len(current_level_tests))], adjusted=True)
+    
+    # update only hypotheses that were not significnat or not passed bypasss threshold in previous levels
     for i in range(len(current_level_tests)):
-        if current_level_tests[i].qvalue == None and current_level_tests[i] in passed_tests: 
+        if  current_level_tests[i] in passed_tests: 
             current_level_tests[i].qvalue = q_values[i]    
     return aFinal, aOut
