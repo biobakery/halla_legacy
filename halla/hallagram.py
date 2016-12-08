@@ -119,7 +119,7 @@ def get_args( ):
     parser.add_argument( "--orderby",
                          default="similarity", \
                          help="Order the significant association by similarity, pvalue, or qvalue" )
-    
+   
     return parser.parse_args()
 
 def get_order( path ):
@@ -287,15 +287,17 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
             np.mean( [y1, y2] )+0.5+c_label_shift*size,
             text,
             size=size,
-            color="white",
+            color="black",
             ha="center",
             va="center",
             weight="bold",
         )
+        """
         text.set_path_effects( [
             path_effects.Stroke( linewidth=c_outline_width, foreground='black'),
             path_effects.Normal(),
         ] )
+        """
     # craziness for hiding the border
     plt.setp( [child for child in ax.get_children() if isinstance( child, mpl.spines.Spine )], visible=False )
     plt.tight_layout()
