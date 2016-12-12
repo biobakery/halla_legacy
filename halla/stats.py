@@ -26,11 +26,10 @@ from . import distance, config
 from scipy.spatial.distance import pdist, squareform
 import pandas as pd
 from sklearn.metrics import explained_variance_score
-'''try:
-	from mca import mca
-except ImportError:
-	sys.exit("Please install mca properly")
-'''
+from scipy.cluster.hierarchy import fcluster
+#from scipy.spatial.distance import pdist
+from scipy.cluster.hierarchy import linkage, dendrogram
+
 # External dependencies 
 # from scipy.stats import percentileofscore
 # ML plug-in 
@@ -1744,11 +1743,10 @@ def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=No
 				if config.strDiscretizing == 'equal-area':
 					order = rankdata(astrValues, method= 'min')# ordinal
 				elif config.strDiscretizing == 'hclust':
-					from scipy.cluster.hierarchy import fcluster
-					#from scipy.spatial.distance import pdist
-					from scipy.cluster.hierarchy import linkage, dendrogram
 					distanceMatrix = abs(numpy.array([astrValues],  dtype= float).T-numpy.array([astrValues], dtype= float))
-					order = fcluster(linkage(distanceMatrix, method='complete'),number_of_bins,'distance')
+					print distanceMatrix	
+					order = fcluster(linkage(distanceMatrix, method='single'),number_of_bins,'distance')
+					print order
 					return order
 			except:
 				print "An exception happend with discretizing continuose data!!!" 

@@ -20,11 +20,7 @@ from scipy.spatial.distance import pdist, squareform
 import numpy as np
 from . import config
 
-#from numbapro import jit, float32
 
-# from minepy import MINE
-
-# mi-based distances from scikit-learn; (log e)-based (i.e. returns nats instead of bits)
 #==========================================================================#
 # CONSTANTS 
 #==========================================================================#
@@ -41,105 +37,6 @@ c_hash_association_method_discretize = {"pearson": False,
                                         "dmic":True,
                                         "ami": True,
 										}
-
-
-class Distance:
-	''' 
-	abstract distance, handles numpy arrays (probably should support lists for compatibility issues)
-	'''
-	__metaclass__ = ABCMeta
-		
-	c_hashInvertFunctions = {"logistic": lambda x:1.0 / (1 + numpy.exp(-1.0 * x)), "flip": lambda x:-1.0 * x, "1mflip": lambda x: 1 - 1.0 * x }
-
-	class EMetricType:
-		NONMETRIC = 0
-		METRIC = 1
-	def __init__(self, c_array1, c_array2): 
-		self.m_data1 = c_array1
-		self.m_data2 = c_array2 
-
-	def get_inverted_distance(self, strFunc=None):
-		pFunc = Distance.c_hashInvertFunctions[strFunc or "flip"] 
-		return pFunc(self.get_distance()) 
-						
-	@abc.abstractmethod
-	def get_distance(self): pass 
-
-	@abc.abstractmethod 
-	def get_distance_type(self): pass
-	
-	
-class EuclideanDistance(Distance):
-
-	__metaclass__ = ABCMeta 
-
-	def __init__(self, c_array1, c_array2):
-		self.m_data1 = c_array1
-		self.m_data2 = c_array2
-		self.c_distance_type = Distance.EMetricType.METRIC  # CDistance.EMetricType.METRIC 
-
-	def get_distance(self):
-		return numpy.linalg.norm(self.m_data2 - self.m_data1) 
-
-	def get_distance_type(self):
-		return self.c_distance_type 	
-	
-class MutualInformation(Distance):
-	"""
-	Scikit-learn uses the convention log = ln
-	Adjust multiplicative factor of log(e,2) 
-	"""	
-
-	__metaclass__ = ABCMeta 
-
-	def __init__(self, c_array1, c_array2, bSym=False):
-		self.m_data1 = c_array1 
-		self.m_data2 = c_array2 
-		self.bSym = bSym
-		self.c_distance_type = Distance.EMetricType.NONMETRIC 
-	
-	def get_distance(self):
-		# assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
-		return math.log(math.e, 2) * mutual_info_score(self.m_data1, self.m_data2) 	
-	def get_distance_type(self):
-		return self.c_distance_type 	
-
-class NormalizedMutualInformation(Distance):
-	"""
-	normalized by sqrt(H1*H2) so the range is [0,1]
-	"""	
-	__metaclass__ = ABCMeta 
-
-	def __init__(self, c_array1, c_array2):
-		self.m_data1 = c_array1 
-		self.m_data2 = c_array2 
-		self.c_distance_type = Distance.EMetricType.NONMETRIC 
-	
-	def get_distance(self):
-		# assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
-		return normalized_mutual_info_score(self.m_data1, self.m_data2)
-
-	def get_distance_type(self):
-		return self.c_distance_type 	
-	
-class AdjustedMutualInformation(Distance):
-	"""
-	adjusted for chance
-	""" 
-	
-	__metaclass__ = ABCMeta 
-
-	def __init__(self, c_array1, c_array2):
-		self.m_data1 = c_array1 
-		self.m_data2 = c_array2 
-		self.c_distance_type = Distance.EMetricType.NONMETRIC 
-	
-	def get_distance(self):
-		# assert( numpy.shape(self.m_data1) == numpy.shape(self.m_data2) )
-		return adjusted_mutual_info_score(self.m_data1, self.m_data2)
-
-	def get_distance_type(self):
-		return self.c_distance_type 	
 
 #==========================================================================#
 # DISTANCE FUNCTIONS  
@@ -196,7 +93,6 @@ def mi(pData1, pData2):
 	(3, 2) 0.311278124459
 	(3, 3) 0.311278124459
 	"""
-
 	return math.log(math.e, 2) * mutual_info_score(pData1, pData2)#return MutualInformation(pData1, pData2).get_distance()
 
 def nmi(X, Y):
@@ -238,15 +134,7 @@ def nmi(X, Y):
         #print new_X, new_Y
     else:
         new_X = X
-        new_Y = Y
-        #print new_X, new_Y
-    #temp_X = X
-    #for i in range(len(X)):
-    #    if X[i] == 'nan':
-     #       print X[i]    
-    #X = [X[i] for i in range(len(X)) if X[i] != 'nan' and Y[i] != 'nan']
-    #Y = [Y[i] for i in range(len(Y)) if temp_X[i] != 'nan' and Y[i] != 'nan']#Y = [Y[i] for i in range(len(Y)) if temp_X[i] != numpy.nan and Y[i] != numpy.nan]
-    
+        new_Y = Y 
     return normalized_mutual_info_score(new_X, new_Y) #return NormalizedMutualInformation(pData1, pData2).get_distance() 
 
 def ami(pData1, pData2):
@@ -281,15 +169,8 @@ def ami(pData1, pData2):
     
     """
     result = adjusted_mutual_info_score(pData1, pData2)
-    #print "AMI:  ", result
-    return result #return AdjustedMutualInformation(pData1, pData2).get_distance()
-
-# ## Changeset March 11, 2014
-# ## NB: As a general rule, always use notion of "strength" of association; i.e. 0 for non-associated and 1 for strongly associated 
-# ## This will alleviate confusion and enforce an invariance principle 
-# ## For most association measures you can take 1-measure as a "distance" measure, but this should never be proscribed to a variable 
-# ## The only place I can see use for this is in hierarchical clustering; otherwise, not relevant 
-
+    return result 
+ 
 def pearson(X, Y):
     X = array(X)
     Y = array(Y)
@@ -297,9 +178,6 @@ def pearson(X, Y):
     	X = X[0]
     if Y.ndim > 1:
     	Y = Y[0]
-    #X = [float(x) for x in X]
-    #Y = [float(y) for y in Y]
-    #print "pearson:", scipy.stats.pearsonr(X, Y)[0]
     return scipy.stats.pearsonr(X, Y)[0]
 def spearman(X, Y):
     X = array(X)
@@ -308,9 +186,6 @@ def spearman(X, Y):
         X = X[0]
     if Y.ndim > 1:
         Y = Y[0]
-    #X = [float(x) for x in X]
-    #Y = [float(y) for y in Y]
-    #print "pearson:", scipy.stats.pearsonr(X, Y)[0]
     return scipy.stats.spearmanr(X, Y, nan_policy='omit')[0]
 def mic (X, Y):
     try:
@@ -319,15 +194,8 @@ def mic (X, Y):
     except (ImportError):
         sys.exit("CRITICAL ERROR:2 Unable to import minepy package." + 
             " Please check your install.") 
-    '''if X.ndim > 1: 
-        X = X[0]
-        #print X
-    if Y.ndim > 1:
-        Y = Y[0]
-        '''
     mine = MINE(alpha=0.6, c=15)
     mine.compute_score(X, Y)
-    # print "MIC:" , mine.mic()
     return mine.mic()
 
 def distcorr(X, Y):
@@ -360,19 +228,16 @@ def distcorr(X, Y):
     dcor = np.sqrt(dcov2_xy)/np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
     return dcor
 
-    
 c_hash_metric = {"nmi": nmi,
-				"mi": mi,
-				"l2": l2,
+                "mi": mi,
+                "l2": l2,
                 "ami":ami,
-				"pearson": pearson,
+                "pearson": pearson,
                 "spearman": spearman,
                 "mic": mic,
                 "dmic":mic,
                 "dcor":distcorr
-				}
-
-# ## Visible and shareable to the outside world 
+                }
 
 #==========================================================================#
 # STRUCTURAL FUNCTIONS   
@@ -397,26 +262,7 @@ def pdist(pArray, metric="euclidean"):
 	Returns
 	---------
 	D : redundancy-checked distance matrix (flat)
-	
-	Examples
-	-----------
 
-	>>> x = array([[0.1,0.2,0.3,0.4],[1,1,1,0],[0.01,0.04,0.09,0.16],[0,0,0,1]])
-	>>> y = array([[-0.1,-0.2,-0.3,-0.4],[1,1,0,0],[0.25,0.5,0.75,1.0],[0.015625,0.125,0.421875,1.0]])
-	>>> dx = halla.stats.discretize( x, iN = None, method = None, aiSkip = [1,3] )
-	>>> dy = halla.stats.discretize( y, iN = None, method = None, aiSkip = [1] )
-	>>> list( halla.distance.pdist( x, halla.distance.cord ) )
-	[0.22540333075851648, 0.015625961302302871, 0.22540333075851648, 0.1358414347819068, 0.0, 0.1358414347819068]
-	>>> list( halla.distance.pdist( y, halla.distance.cord ) )
-	[0.10557280900008403, 0.0, 0.048630144207595816, 0.10557280900008414, 0.16134197652754312, 0.048630144207595594]
-	>>> list( halla.distance.pdist( x, lambda u,v: halla.distance.cord(u,v, method="spearman") ) )
-	[0.2254033307585166, 0.0, 0.2254033307585166, 0.2254033307585166, 0.0, 0.2254033307585166]
-	>>> list( halla.distance.pdist( y, lambda u,v: halla.distance.cord(u,v, method="spearman") ) )
-	[0.10557280900008414, 0.0, 0.0, 0.10557280900008414, 0.10557280900008414, 0.0]
-	>>> list( halla.distance.pdist( dx, halla.distance.nmid ) )
-	[0.65440797005578877, 0.0, 0.65440797005578877, 0.65440797005578877, 0.0, 0.65440797005578877]
-	>>> list( halla.distance.pdist( dy, halla.distance.nmid ) )
-	[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 	""" 
 	pMetric = metric 
 	return scipy.cluster.hierarchy.distance.pdist(pArray, pMetric)

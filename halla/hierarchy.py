@@ -988,7 +988,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         tempTree.level_number = 1
         #current_level_tests.append(tempTree)
         current_level_nodes.append((tempTree, (a, b)))
-        if config.log_hypothesis_tree:
+        if config.write_hypothesis_tree:
             aLineOut = map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
             csvwc.writerow(aLineOut)
     do_next_level = True
@@ -1042,7 +1042,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                     tempTree = Hypothesis_Node(data=[data1, data2], left_distance=a1.dist, right_distance=b1.dist)
                     tempTree.level_number = level_number
                     next_level.append((tempTree, (a1, b1)))
-                    if config.log_hypothesis_tree:
+                    if config.write_hypothesis_tree:
                         aLineOut = map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
                         csvwc.writerow(aLineOut)
         current_level_nodes = next_level

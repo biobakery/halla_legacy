@@ -36,8 +36,8 @@ mpl.rcParams["font.family"] = "Arial"
 
 c_unit_h        = 0.3
 c_unit_w        = 0.3
-c_min_height    = 1 * c_unit_h + 1
-c_min_width     = 3 * c_unit_w + 2
+c_min_height    = 1 * c_unit_h + 3
+c_min_width     = 1 * c_unit_w + 5
 c_label_scale   = 18
 c_label_shift   = -0.005
 c_line_width    = 1.5

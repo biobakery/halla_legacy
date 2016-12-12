@@ -105,6 +105,7 @@ def check_requirements():
             import minepy
         except ImportError: 
             sys.exit("--- Please check minepy installation for MIC library")
+    # if mca is chosen as decomposition method check if it's R package and dependencies are installed
     if config.decomposition == 'mca':
         try: 
             from rpy2 import robjects as ro
@@ -294,14 +295,18 @@ def parse_arguments (args):
         action="store_true",
         help="To count the missing data as a category")
     argp.add_argument(
-        "--log-hypothesis-tree",
-        dest = "log_hypothesis_tree",
+        "--write-hypothesis-tree",
+        dest = "write_hypothesis_tree",
         #default = False,
         action="store_true",
         help="To write levels of hypothesis tree in the file")
     return argp.parse_args()
 
 def set_parameters(args):
+    '''
+    Set the user command line options to config file 
+    to be used in the program
+    '''
     config.similarity_method = args.strMetric.lower()
     config.decomposition = args.strDecomposition.lower()
     #config.fdr_function = args.strFDR
@@ -321,18 +326,15 @@ def set_parameters(args):
             config.permutation_func = 'none'
         else:
             config.permutation_func = 'gpd'
-    config.log_hypothesis_tree = args.log_hypothesis_tree
-    #config.p_adjust_method = args.strAdjust
-    #config.randomization_method = args.strRandomization  # method to generate error bars 
+    config.write_hypothesis_tree = args.write_hypothesis_tree
     config.strStep = "uniform"
     config.verbose = args.verbose
     config.format_feature_names = args.format_feature_names
-    #config.robustness = float(args.robustness)
     config.output_dir = args.output_dir
     config.diagnostics_plot = args.diagnostics_plot
-    #config.heatmap_all = args.heatmap_all
     config.descending = args.strDescending
-    istm = list()  # X and Y are used to store datasets
+    # X and Y are used to store datasets
+    istm = list() 
     config.apply_stop_condition = args.apply_stop_condition
     config.use_one_null_dist = args.use_one_null_distribution
     config.strDiscretizing = args.strDiscretizing
@@ -340,51 +342,30 @@ def set_parameters(args):
         config.seed = random.randint(1,10000)
     else:
         config.seed = args.seed
-
     config.NPROC = args.nproc
     config.NBIN = args.nbin
     config.missing_char = args.missing_char
     config.missing_method = args.missing_method
     config.missing_char_category = args.missing_char_category
-    #config.K = args.k
     config.p_adjust_method = args.strAdjust.lower()
-    #config.fdr_function = args.strFDR.lower()
-    # If Y was not set - we use X
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  
     else:
         istm = [args.X, args.Y]  # Use X and Y
-
-    
     if len(istm) > 1:
         config.strFile1, config.strFile2 = istm[:2]
     else:
         config.strFile1, config.strFile2 = istm[0], istm[0]
-        
     aOut1, aOut2 = parser.Input (config.strFile1.name, config.strFile2.name, headers=args.header).get()
     (config.discretized_dataset[0], config.original_dataset[0], config.FeatureNames[0], config.aOutType1, config.SampleNames[0]) = aOut1 
     (config.discretized_dataset[1], config.original_dataset[1], config.FeatureNames[1], config.aOutType2, config.SampleNames[1]) = aOut2 
-    #config.meta_feature = array([config.original_dataset[0], config.original_dataset[1]])
-    
     config.iterations = args.iIter
-    '''if args.strAdjust.lower() == "bhy":
-        config.iterations = max([args.iIter, 10*len(config.FeatureNames[0])*len(config.FeatureNames[1])])
-    else:
-        config.iterations = args.iIter '''
-    
 def main():
-    
     # Parse arguments from command line
     args=parse_arguments(sys.argv)
     set_parameters(args) 
     check_requirements()
-    
-    # Set the number of processing units available
-    
-    #H = store.HAllA(X = None, Y = None)
-            
     aaOut = store.run()	
-    
 if __name__ == '__main__':
 	main()
 
