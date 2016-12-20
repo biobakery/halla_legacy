@@ -150,7 +150,7 @@ def load_order_table( p_table, p_tree, associations ):
 
 def load_associations( path, largest=None, strongest=None, orderby = 'similarity' ):
     pairs = []
-    dic_order = {'p-value':3, 'q-value':4, 'similarity':5}
+    dic_order = {'pvalue':3, 'qvalue':4, 'similarity':5}
     with open( path ) as fh:
         for row in csv.reader( fh, dialect="excel-tab" ):
             if "Association" not in row[0]:

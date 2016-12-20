@@ -544,7 +544,7 @@ def set_box_color(bp, color):
     plt.setp(bp['fliers'], color='gray')
     #plt.setp(bp, linewidth='.5')
 def scatter_matrix(df, x_size = 0, filename = None, ):
-    plt.figure(figsize=(len(df.columns)*.8+5, len(df.columns)*.8+5))
+    plt.figure(figsize=(len(df.columns)*.5+1, len(df.columns)*.5+1))
     color = 'darkgreen'
     #if x_size>0:
     #    colors = ['green'  if i< x_size and j < x_size else \
@@ -577,7 +577,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     
     for ax in axs[:,0]: # the left boundary
         ax.grid('off', axis='both')
-        ax.set_ylabel(wrap(ax.get_ylabel()), rotation=0, va='center', ha = 'center', labelpad=30, fontsize = 10)#, fontweight='bold')
+        ax.set_ylabel(wrap(ax.get_ylabel()), rotation=0, va='center', ha = 'center', labelpad=30, fontsize = 18)#, fontweight='bold')
         ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
         ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
         #ax.set_yticks([])
@@ -585,7 +585,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     
     for ax in axs[-1,:]: # the lower boundary
         ax.grid('off', axis='both')
-        ax.set_xlabel(wrap(ax.get_xlabel()), fontsize = 10, rotation=45, va='center', ha = 'left',labelpad=30 )#, fontweight='bold'
+        ax.set_xlabel(wrap(ax.get_xlabel()), fontsize = 18, rotation=45, va='center', ha = 'left',labelpad=30 )#, fontweight='bold'
         #ax.set_xticks([])
         ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
         ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
@@ -602,7 +602,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     #[s.set_yticks(()) for s in axs.reshape(-1)]
     plt.tight_layout()
     plt.subplots_adjust(wspace=.01, hspace=.01)
-    plt.savefig(filename)
+    plt.savefig(filename, dpi=300)
 
 def confusion_matrix(X, Y, filename):
     from sklearn.metrics import confusion_matrix
