@@ -764,6 +764,7 @@ def write_config():
     csvw.writerow(["HAllA version:", config.version])
     csvw.writerow(["Decomposition method: ", config.decomposition])
     csvw.writerow(["Similarity method: ", config.similarity_method]) 
+    csvw.writerow(["Hierarchical linkage method: ", config.linkage_method]) 
     csvw.writerow(["q: FDR cut-off : ", config.q]) 
     csvw.writerow(["FDR adjusting method : ", config.p_adjust_method]) 
     csvw.writerow(["FDR using : ", config.fdr_function])

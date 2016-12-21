@@ -354,7 +354,7 @@ def set_parameters(args):
     config.missing_method = args.missing_method
     config.missing_char_category = args.missing_char_category
     config.p_adjust_method = args.strAdjust.lower()
-    config.linkage_method = config.linkage_method
+    config.linkage_method = args.linkage_method
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  
     else:
