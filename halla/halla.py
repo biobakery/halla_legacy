@@ -224,6 +224,12 @@ def parse_arguments (args):
         default="equal-area",
         choices=["equal-area", "hclust", "none"], #"jenks", "hclust", "kmeans", 
         help="approach for discretizing continuous data\n[default = equal-area]")
+    argp.add_argument(
+        "--linkage",
+        dest ="linkage_method",
+        default='single',
+        choices=["single", "average", "complete"],
+        help="The method to be used in linkage hierarchical clustering.")
     
     argp.add_argument(
         "--apply-stop-condition",
@@ -348,6 +354,7 @@ def set_parameters(args):
     config.missing_method = args.missing_method
     config.missing_char_category = args.missing_char_category
     config.p_adjust_method = args.strAdjust.lower()
+    config.linkage_method = config.linkage_method
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  
     else:

@@ -288,7 +288,7 @@ def is_tree(pObj):
 
 def hclust(dataset, labels, dataset_number):
     bTree=True
-    linkage_method = 'single'
+    linkage_method = config.linkage_method
     D = pdist(dataset, metric=distance.pDistance) 
     config.Distance[dataset_number] =  copy.deepcopy(squareform(D))
     if config.diagnostics_plot:

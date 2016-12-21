@@ -1,6 +1,6 @@
 import random
 from numpy import array
-version = '0.6.20'
+version = '0.6.21'
 __description__      = """
   _    _          _ _          
  | |  | |   /\   | | |   /\    
@@ -28,6 +28,7 @@ similarity_method = "nmi"
 decomposition = "medoid" 
 fdr_function = "level"
 permutation_func = 'gpd'
+linkage_method = 'single'
 q = .1  
 iterations = 1000
 p_adjust_method = "bh"
