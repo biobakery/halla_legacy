@@ -127,7 +127,7 @@ class Input:
 				#self.discretized_dataset2 = self.orginal_dataset2
 			except:
 				sys.exit("--- Please check your data types and your similarity metric!")
-			
+		self._check_for_semi_colon()
 		#else:
 		#	self.discretized_dataset1 = np.asarray(self.discretized_dataset1)
 		#	self.discretized_dataset2 = np.asarray(self.discretized_dataset2)
@@ -142,8 +142,22 @@ class Input:
 	def _load(self):
 		self.orginal_dataset1 = load(self.strFileName1)
 		self.orginal_dataset2 = load(self.strFileName2)
-		
-	
+	def _check_for_semi_colon(self):
+		# check the names of features that HAllA uses to make sure they don't have ; which
+		# is special character to separate features in output files
+		for i in range(len(self.outName1)):
+			if ";"  in self.outName1[i]:
+				print "Feature names warning!" 
+				print self.outName1[i]
+				sys.exit("In the first dataset, your feature (row) names contains ; which is the special character HAllA uses for separating features,\n \
+				             Please replace it with another character such as _")
+		for i in range(len(self.outName2)):
+			if ";"  in self.outName2[i]:
+				print "Feature names warning!" 
+				print self.outName2[i]
+				sys.exit("In the second dataset, your feature (row) names contains ; which is the special character HAllA uses for separating features,\n \
+				             Please replace it with another character such as _")
+
 	def _discretize(self):
 	    self.discretized_dataset1 = stats.discretize(self.orginal_dataset1, style = config.strDiscretizing, data_type = config.data_type[0])
 	    self.discretized_dataset2 = stats.discretize(self.orginal_dataset2, style = config.strDiscretizing, data_type = config.data_type[1])
