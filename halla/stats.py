@@ -897,9 +897,7 @@ def permutation_test_by_representative(pArray1, pArray2):
 		pRep2, right_rep_variance, right_loading = mca_method(pArray2, discretize_style = discretize_style)#mean(pArray2)#[len(pArray2)/2]	
 		if bool(distance.c_hash_association_method_discretize[strMetric]):
 			[pRep1, pRep2] = [discretize(aRep) for aRep in [pRep1, pRep2] ]
-		#print len(pArray1)," Rep 1: ", pRep1,
-		#print len(pArray2)," Rep 2: ", pRep2, 
-		#print "Sim: ", pMe(pRep1, pRep2)
+
 	elif decomposition == 'medoid':
 		pRep1 = medoid(pArray1)
 		pRep2 = medoid(pArray2)

@@ -36,7 +36,7 @@ def multi_pMethod(args):
     """
     
     id, pMethod, dataset1, dataset2 = args
-    dP, similarity, left_first_rep_variance, right_first_rep_variance, 
+    dP, similarity, left_first_rep_variance, right_first_rep_variance, \
     left_loading, right_loading, left_rep, right_rep = pMethod(dataset1, dataset2)
 
     return id, dP, similarity, left_first_rep_variance, right_first_rep_variance,\
@@ -291,12 +291,12 @@ def hclust(dataset, labels, dataset_number):
     linkage_method = config.linkage_method
     D = pdist(dataset, metric=distance.pDistance) 
     config.Distance[dataset_number] =  copy.deepcopy(squareform(D))
-    if config.diagnostics_plot and len(config.Distance[dataset_number][0]) < 500:
-        try:
-            print "--- plotting heatmap for Dataset", str(dataset_number)," ... "
-            Z = plot.heatmap(data_table = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.similarity_method)+"_" + str(dataset_number), method =linkage_method, dataset_number= None)
-        except :
-            Z = linkage(D, method= linkage_method)
+    if config.diagnostics_plot :#and len(config.Distance[dataset_number][0]) < 500:
+        #try:
+        print "--- plotting heatmap for Dataset", str(dataset_number)," ... "
+        Z = plot.heatmap(data_table = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.similarity_method)+"_" + str(dataset_number), method =linkage_method)
+        #except :
+        #    Z = linkage(D, method= linkage_method)
     else:
         Z = linkage(D, method= linkage_method)
     import scipy.cluster.hierarchy as sch

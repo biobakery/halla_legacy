@@ -227,8 +227,8 @@ def parse_arguments (args):
     argp.add_argument(
         "--linkage",
         dest ="linkage_method",
-        default='single',
-        choices=["single", "average", "complete"],
+        default='complete',
+        choices=["single", "average", "complete", "weighted" ],
         help="The method to be used in linkage hierarchical clustering.")
     
     argp.add_argument(
