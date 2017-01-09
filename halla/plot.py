@@ -567,7 +567,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
             #     axs[i,j].visible(False)
                 
         
-    plt.subplots_adjust(wspace=.005, hspace=.005)
+    #plt.subplots_adjust(wspace=.005, hspace=.005)
     def wrap(txt, width=20):
         '''helper function to wrap text for long labels'''
         import textwrap

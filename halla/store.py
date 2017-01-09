@@ -140,15 +140,15 @@ def _test_by_level():
     config.meta_alla = hierarchy.test_by_level(apClusterNode0=[config.meta_data_tree[0]],
             apClusterNode1=[config.meta_data_tree[1]],
             dataset1=config.parsed_dataset[0], dataset2=config.parsed_dataset[1])
-def _hypotheses_testing():
-    config.meta_alla = None    
-    fQ = config.q
+#def _hypotheses_testing():
+#    config.meta_alla = None    
+#    fQ = config.q
         
-    if config.verbose == 'INFO':
-        print ("HAllA PROMPT: q value", fQ)
-        print ("q value is", fQ) 
+#    if config.verbose == 'INFO':
+#        print ("HAllA PROMPT: q value", fQ)
+#        print ("q value is", fQ) 
     
-    config.meta_alla = hierarchy.hypotheses_testing() 
+#    config.meta_alla = hierarchy.hypotheses_testing() 
     # # Choose to keep to 2 arrays for now -- change later to generalize 
     #return config.meta_alla 
 
@@ -177,7 +177,6 @@ def _summary_statistics(strMethod=None):
     _final, _all = map(array, Z)  # # Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree
     Z_final = array([[_final[i].m_pData, _final[i].pvalue, _final[i].qvalue] for i in range(len(_final))])
     Z_all = array([[_all[i].m_pData, _all[i].pvalue, _all[i].qvalue] for i in range(len(_all))])    
-        
     # ## Sort the final Z to make sure p-value consolidation happens correctly 
     Z_final_dummy = [-1.0 * (len(line[0][0]) + len(line[0][1])) for line in Z_final]
     args_sorted = np.argsort(Z_final_dummy)

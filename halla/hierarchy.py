@@ -249,14 +249,15 @@ def stop_and_reject(Node):
 def is_bypass(Node ):
     if config.apply_stop_condition:
         return stop_decesnding_silhouette_coefficient(Node)
-        if stop_and_reject(Node):
+        '''if stop_and_reject(Node):
             if config.verbose == 'DEBUG':
                 print "q: ", Node.qvalue, " p: ", Node.pvalue
-            return True
-        else:
-            return False
+            return True'''
     else:
+        if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
+            return True
         return False
+
 
 def report(Node):
     print "\n--- hypothesis test based on permutation test"        
@@ -1000,6 +1001,8 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         temp_aFinal, temp_aOut = hypotheses_level_testing(current_level_tests)
         aFinal.extend(temp_aFinal)
         aOut.extend(temp_aOut)
+        #print len(aFinal)
+        #print len(aOut)
         from_prev_hypothesis =  []
         from_prev_hypothesis_node = []
         do_next_level = False
@@ -1051,6 +1054,8 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             #if len(from_prev_hypothesis) > 0:
             current_level_nodes.extend(from_prev_hypothesis_node)
             #print "--- Tesing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_nodes))
+        #else:
+        #    aOut.extend(from_prev_hypothesis_node).extend(leaf_nodes)
     config.number_of_performed_tests = len(aOut)
     print "--- number of performed tests:", config.number_of_performed_tests
     print "--- number of passed tests after FDR controlling:", len(aFinal)
@@ -1195,9 +1200,9 @@ def hypotheses_level_testing(current_level_tests):
                     aFinal.append(current_level_tests[i])
                     print ("-- association after %s fdr correction" % config.p_adjust_method)
             else:
-               if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
-                   current_level_tests[i].significance = False
-                   aOut.append(current_level_tests[i])
+                if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
+                    current_level_tests[i].significance = False
+                    aOut.append(current_level_tests[i])
                
     elif config.p_adjust_method == "bonferroni":
         print len(current_level_tests)
