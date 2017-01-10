@@ -1,5 +1,6 @@
 """ This file is the main files for module to invoke other modules in order and log the results and performance """
 from matplotlib.pyplot import ylabel
+from numpy import dtype
 
 # Test if matplotlib is installed
 try:
@@ -140,17 +141,6 @@ def _test_by_level():
     config.meta_alla = hierarchy.test_by_level(apClusterNode0=[config.meta_data_tree[0]],
             apClusterNode1=[config.meta_data_tree[1]],
             dataset1=config.parsed_dataset[0], dataset2=config.parsed_dataset[1])
-#def _hypotheses_testing():
-#    config.meta_alla = None    
-#    fQ = config.q
-        
-#    if config.verbose == 'INFO':
-#        print ("HAllA PROMPT: q value", fQ)
-#        print ("q value is", fQ) 
-    
-#    config.meta_alla = hierarchy.hypotheses_testing() 
-    # # Choose to keep to 2 arrays for now -- change later to generalize 
-    #return config.meta_alla 
 
 def _naive_summary_statistics():
     _, p_values = zip(*config.aOut[0])
@@ -174,47 +164,39 @@ def _summary_statistics(strMethod=None):
     S = -1 * np.ones((iX, iY , 2))  # # matrix of all associations; symmetric if using a symmetric measure of association  
     
     Z = config.meta_alla 
-    _final, _all = map(array, Z)  # # Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree
-    Z_final = array([[_final[i].m_pData, _final[i].pvalue, _final[i].qvalue] for i in range(len(_final))])
-    Z_all = array([[_all[i].m_pData, _all[i].pvalue, _all[i].qvalue] for i in range(len(_all))])    
+    _final, _all = Z#map(array, Z)  # # Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree
+    Z_final = np.array([[_final[i].m_pData, _final[i].pvalue, _final[i].qvalue] for i in range(len(_final))])
+    Z_all = np.array([[_all[i].m_pData, _all[i].pvalue, _all[i].qvalue] for i in range(len(_all))])    
     # ## Sort the final Z to make sure p-value consolidation happens correctly 
     Z_final_dummy = [-1.0 * (len(line[0][0]) + len(line[0][1])) for line in Z_final]
     args_sorted = np.argsort(Z_final_dummy)
     Z_final = Z_final[args_sorted]
     if config.verbose == 'INFO':
-        print (Z_final) 
+        print Z_final 
+    
     # assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
     def __set_outcome(Z_final):
-        #all_associations = 0.0
-        #intersection_1_2_count = 0.0
-        config.outcome = np.zeros((len(config.parsed_dataset[0]),len(config.parsed_dataset[1])))
-        
+        config.outcome = np.zeros((len(config.parsed_dataset[0]),len(config.parsed_dataset[1])), dtype = float)
+        #config.outcome[:] = np.NAN
         for aLine in Z_final:
             if config.verbose == 'INFO':
                 print (aLine) 
-            
             aaBag, _, _ = aLine
             listBag1, listBag2 = aaBag 
-            #intersection_1_2 = [val for val in listBag1 if val in listBag2]
-            #all_associations += 1.0
-            #if len(intersection_1_2) < (len(listBag1)/2.0) and len(intersection_1_2) < (len(listBag2)/2.0):
-                  #intersection_1_2_count += 1 
             for i, j in itertools.product(listBag1, listBag2):
                 config.outcome[i][j] = 1.0
         #print "FDR= ", intersection_1_2_count/all_associations 
     def __set_pvalues(Z_all):
-        config.pvalues = np.zeros((len(config.parsed_dataset[0]),len(config.parsed_dataset[1])))
-        
+        config.pvalues = np.empty((len(config.parsed_dataset[0]),len(config.parsed_dataset[1])), dtype = float)
+        config.pvalues[:] = np.NAN
         for aLine in Z_all:
             if config.verbose == 'INFO':
                 print (aLine) 
-            
             aaBag, pvalue, _ = aLine
             listBag1, listBag2 = aaBag     
             for i, j in itertools.product(listBag1, listBag2):
                 config.pvalues[i][j] = pvalue 
-        
-        
+                        
     def __add_pval_product_wise(_x, _y, _fP, _fP_adjust):
         S[_x][_y][0] = _fP
         S[_x][_y][1] = _fP_adjust  

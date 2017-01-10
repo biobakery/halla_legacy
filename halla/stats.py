@@ -846,7 +846,7 @@ def generate_null_dist(X, Y):
 	pMe = pHashMetric[config.similarity_method]
 	n_samples = []
 	for i in xrange(config.iterations):
-		numpy.random.seed(i+config.seed)
+		numpy.random.seed(i+config.seed+1)
 		iter = i
 		permuted_Y = numpy.random.permutation(Y)
 		fAssociation_permuted = math.fabs(pMe(X, permuted_Y))  

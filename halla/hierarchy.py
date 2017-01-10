@@ -58,7 +58,7 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, datase
         
         # check for tests that already have pvalues as these do not need to be recomputed
         ids_to_process=[]
-        result = [0] * len(current_level_tests)
+        result = [0.0] * len(current_level_tests)
         for id in xrange(len(current_level_tests)):
             if current_level_tests[id].significance != None:
                 result[id]=current_level_tests[id].pvalue
@@ -171,6 +171,8 @@ def get_data(node):
     return node.m_pData
 
 def stop_decesnding_silhouette_coefficient(Node):
+    if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
+        return True
     pMe = distance.c_hash_metric[config.similarity_method]
     silhouette_scores = []
     cluster_a = Node.m_pData[0]
@@ -246,18 +248,13 @@ def stop_and_reject(Node):
     else:
         return False
 
-def is_bypass(Node ):
+def is_bypass(Node):
+    if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
+        return True
     if config.apply_stop_condition:
         return stop_decesnding_silhouette_coefficient(Node)
-        '''if stop_and_reject(Node):
-            if config.verbose == 'DEBUG':
-                print "q: ", Node.qvalue, " p: ", Node.pvalue
-            return True'''
     else:
-        if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
-            return True
         return False
-
 
 def report(Node):
     print "\n--- hypothesis test based on permutation test"        
@@ -497,8 +494,8 @@ def _is_start(ClusterNode, X, func, distance):
     else: 
         return False
 
-def _is_stop(ClusterNode, dataSet, max_dist_cluster =  None):
-        if ClusterNode.is_leaf() or ClusterNode.get_count() == 1:
+def _is_stop(ClusterNode):
+        if ClusterNode.get_count() == 1:
             return True
         else:
             return False
@@ -899,8 +896,8 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
         except:
             data1 = reduce_tree(a)
             data2 = reduce_tree(b)        
-        bTauX = _is_stop(a, X, max_dist_cluster1)  # ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
-        bTauY = _is_stop(b, Y, max_dist_cluster2)  # ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
+        bTauX = _is_stop(a)  # ( _min_tau(X[array(data1)], func) >= x_threshold ) ### parametrize by mean, min, or max
+        bTauY = _is_stop(b)  # ( _min_tau(Y[array(data2)], func) >= y_threshold ) ### parametrize by mean, min, or max
         if bTauX and bTauY :
             #print"leaf both"
             if L:
@@ -957,12 +954,11 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
 def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="uniform", strLinkage="min", robustness = None):
     
     func = config.similarity_method
-    
     X, Y = dataset1, dataset2
     aFinal = []
     aOut = []
     
-    # Write the hpothesis that has been tested
+    # Write the hypothesis that has been tested
     output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
     csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
     csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
@@ -993,16 +989,12 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             aLineOut = map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))])
             csvwc.writerow(aLineOut)
     do_next_level = True
-    # test first level
-    #print "--- Tesing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_tests))
     while do_next_level  :
         current_level_tests = [ hypothesis for (hypothesis, _ ) in current_level_nodes]
         print "--- Tesing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_tests))
         temp_aFinal, temp_aOut = hypotheses_level_testing(current_level_tests)
         aFinal.extend(temp_aFinal)
         aOut.extend(temp_aOut)
-        #print len(aFinal)
-        #print len(aOut)
         from_prev_hypothesis =  []
         from_prev_hypothesis_node = []
         do_next_level = False
@@ -1012,18 +1004,18 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         for i in range(len(current_level_nodes)):
             hypothesis_node= current_level_nodes[i]
             (hypothesis, (a, b)) = hypothesis_node
+            #hypothesis.pvalue = 1.0
             #print(hypothesis.significance)
             # Add leaves from current level to next level
-            if len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[0]) == 1 :
+            if len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[0]) == 1 and hypothesis.significance != None :
                 leaf_nodes.append(hypothesis_node)
                 continue
             # Add significant or non significant hypothesis from previous level
-            if hypothesis.significance != None:
+            elif hypothesis.significance != None:
                 from_prev_hypothesis_node.append(hypothesis_node)
-            
             else:
-                bTauX = _is_stop(a, X)  
-                bTauY = _is_stop(b, Y)  
+                bTauX = _is_stop(a)  
+                bTauY = _is_stop(b)  
                 do_next_level = True
                 if not bTauX:
                     apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
@@ -1051,15 +1043,16 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         current_level_nodes = next_level
         if len(current_level_nodes) > 0 :
             current_level_nodes.extend(leaf_nodes)
-            #if len(from_prev_hypothesis) > 0:
             current_level_nodes.extend(from_prev_hypothesis_node)
-            #print "--- Tesing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_nodes))
         #else:
-        #    aOut.extend(from_prev_hypothesis_node).extend(leaf_nodes)
+            # to add leaf nodes that were not significant and are not going
+            #aOut.extend(leaf_nodes)
+            
     config.number_of_performed_tests = len(aOut)
     print "--- number of performed tests:", config.number_of_performed_tests
     print "--- number of passed tests after FDR controlling:", len(aFinal)
     return aFinal, aOut
+
 pHashMethods = {"permutation" : stats.permutation_test,
                         "permutation_test_by_medoid": stats.permutation_test_by_medoid,
                         
@@ -1116,8 +1109,7 @@ def naive_all_against_all():
         tests.append(test)
     
     p_values = multiprocessing_actor(_actor, tests, pMethod, dataset1, dataset2)
-    cluster_size = [1 for i in range(len(p_values))]
-    aP_adjusted, pRank = stats.p_adjust(p_values, config.q, cluster_size )
+    aP_adjusted, pRank = stats.p_adjust(p_values, config.q)
     #print aP_adjusted, pRank
     q_values = stats.pvalues2qvalues (p_values, adjusted=True)
     for i in range(len(tests)):
@@ -1181,6 +1173,7 @@ def hypotheses_level_testing(current_level_tests):
        current_level_tests[i].pvalue = p_values[i]
     q = config.q 
     aP_adjusted, pRank = stats.p_adjust(p_values, q)#config.q)
+    
     for i in range(len(current_level_tests)):
        current_level_tests[i].rank = pRank[i]
    
@@ -1192,7 +1185,7 @@ def hypotheses_level_testing(current_level_tests):
     passed_tests = []
     if config.p_adjust_method in ["bh", "by"]:
         for i in range(len(current_level_tests)):
-            if current_level_tests[i].rank <= max_r_t:#(level ==1000 and sum([1 if current_level_tests[i].pvalue<= val else 0 for val  in list_p_trshld])>= (1.0-config.q)*number_of_bootstrap)\
+            if current_level_tests[i].rank <= max_r_t:
                 passed_tests.append(current_level_tests[i])
                 if current_level_tests[i].significance == None:
                     current_level_tests[i].significance = True
