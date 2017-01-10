@@ -1007,12 +1007,12 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             #hypothesis.pvalue = 1.0
             #print(hypothesis.significance)
             # Add leaves from current level to next level
-            if len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[0]) == 1 and hypothesis.significance != None :
-                leaf_nodes.append(hypothesis_node)
-                continue
+            
             # Add significant or non significant hypothesis from previous level
-            elif hypothesis.significance != None:
+            if hypothesis.significance != None:
                 from_prev_hypothesis_node.append(hypothesis_node)
+            elif len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[1]) == 1 :
+                leaf_nodes.append(hypothesis_node)
             else:
                 bTauX = _is_stop(a)  
                 bTauY = _is_stop(b)  
@@ -1044,9 +1044,6 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         if len(current_level_nodes) > 0 :
             current_level_nodes.extend(leaf_nodes)
             current_level_nodes.extend(from_prev_hypothesis_node)
-        #else:
-            # to add leaf nodes that were not significant and are not going
-            #aOut.extend(leaf_nodes)
             
     config.number_of_performed_tests = len(aOut)
     print "--- number of performed tests:", config.number_of_performed_tests
