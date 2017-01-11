@@ -231,7 +231,10 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
         for j in range(len(pArray2)):
             D[i][j] = pDistance(pArray1[i], pArray2[j])
     # Compute and plot first dendrogram.
-    fig = pylab.figure(dpi = 300,figsize=(math.ceil(len(pArray2)/5.0)+2, math.ceil(len(pArray1)/5.0)+2))
+    plot_height = min(100, math.ceil(len(pArray2)/5.0)+ 2)
+    plot_weight = min(100, math.ceil(len(pArray1)/5.0)+2 )
+    
+    fig = pylab.figure(dpi = 300,figsize=(plot_height, plot_weight))
     ax1 = fig.add_axes([0.09,0.1,0.2,0.6])
     ax1.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
     ax1.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
