@@ -372,7 +372,7 @@ def main():
     args=parse_arguments(sys.argv)
     set_parameters(args) 
     check_requirements()
-    aaOut = store.run()	
+    store.run()	
 if __name__ == '__main__':
 	main()
 

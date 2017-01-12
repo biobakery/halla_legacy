@@ -203,12 +203,11 @@ class Input:
 				else:
 					line = map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else np.nan ), line)  ###### np.nan Convert missings to nans
 					#line = df1 = pd.DataFrame(line)
-					if not distance.c_hash_association_method_discretize[config.similarity_method]:
-						try:
-							line = imp.transform(line)[0]
-						except:
-							print "there is an issue with filling missed data!"
-					#print line 
+					#if distance.c_hash_association_method_discretize[config.similarity_method]:
+					try:
+						line = imp.transform(line)[0]
+					except:
+						print "there is an issue with filling missed data!"
 				if all(val != config.missing_char for val in line):
 					aOut.append(line)
 					if not aNames:

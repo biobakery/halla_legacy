@@ -60,6 +60,7 @@ entropy_threshold2 = 0.0
 missing_char_category = False
 format_feature_names = False
 write_hypothesis_tree = False
+report_results =  True
 #==================================================================#
 # Mutable Meta Objects  
 #==================================================================#

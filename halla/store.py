@@ -67,37 +67,7 @@ def m(dataset, pFunc, strDiscretizing, axis=0,):
         # print dataset.shape
         return array([pFunc(item, strDiscretizing) for item in dataset]) 
 
-"""def bp(dataset, pFunc, axis=0):
-    #Map _by pairs_ ; i.e. apply pFunc over all possible pairs in dataset 
 
-    if bool(axis): 
-        dataset = dataset.T
-
-    pIndices = itertools.combinations(range(dataset.shape[0]), 2)
-
-    return array([pFunc(dataset[i], dataset[j]) for i, j in pIndices])
-
- 
-def bc(dataset1, dataset2, pFunc, axis=0):
-    Map _by cross product_ for ; i.e. apply pFunc over all possible pairs in dataset1 X dataset2 
-
-    if bool(axis): 
-        dataset1, dataset2 = dataset1.T, dataset2.T
-
-    pIndices = itertools.product(range(dataset1.shape[0]), range(dataset2.shape[0]))
-
-    return array([pFunc(dataset1[i], dataset2[j]) for i, j in pIndices])
-
-@staticmethod 
-def r(dataset, pFunc, axis=0):
-    Reduce over array 
-    pFunc is X x Y -> R 
-
-    if bool(axis):
-        dataset = dataset.T
-
-    return reduce(pFunc, dataset)
-"""
 #==========================================================#
 # Helper Functions 
 #==========================================================# 
@@ -167,7 +137,6 @@ def _summary_statistics(strMethod=None):
     _final, _all = Z#map(array, Z)  # # Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree
     Z_final = np.array([[_final[i].m_pData, _final[i].pvalue, _final[i].qvalue] for i in range(len(_final))])
     Z_all = np.array([[_all[i].m_pData, _all[i].pvalue, _all[i].qvalue] for i in range(len(_all))])    
-    # ## Sort the final Z to make sure p-value consolidation happens correctly 
     Z_final_dummy = [-1.0 * (len(line[0][0]) + len(line[0][1])) for line in Z_final]
     args_sorted = np.argsort(Z_final_dummy)
     Z_final = Z_final[args_sorted]
@@ -280,7 +249,7 @@ def _report():
         if fQ != -1:
             aaOut.append([[i, j], fQ, fQ_adust ])
 
-    config.meta_report = aaOut
+    #config.meta_report = aaOut
     # print "meta summary:", config.meta_report
     global associated_feature_X_indecies
     associated_feature_X_indecies = []
@@ -291,7 +260,7 @@ def _report():
         output_file_all  = open(str(config.output_dir)+'/all_association_results_one_by_one.txt', 'w')
         csvw = csv.writer(output_file_all, csv.excel_tab, delimiter='\t')
         #csvw.writerow(["Decomposition method: ", config.decomposition  +"-"+ config.similarity_method , "q value: " + str(config.q), "metric " +config.similarity_method])
-        csvw.writerow(["First Dataset", "Second Dataset", "p-value", "q-value"])
+        csvw.writerow(["First Dataset", "Second Dataset", "pvalue", "qvalue"])
 
         for line in aaOut:
             iX, iY = line[0]
@@ -307,10 +276,10 @@ def _report():
         output_file_associations  = open(str(config.output_dir)+'/associations.txt', 'w')
         bcsvw = csv.writer(output_file_associations, csv.excel_tab, delimiter='\t')
         #bcsvw.writerow(["Method: " + config.decomposition +"-"+ config.similarity_method , "q value: " + str(config.q), "metric " + config.similarity_method])
-        bcsvw.writerow(["Association Number", "Clusters First Dataset", "Cluster Similarity Score", \
-                        "Clusters Second Dataset", \
-                        "Cluster Similarity Score", \
-                        "p-value", "q-value", "Similarity score between Clusters"])
+        bcsvw.writerow(["association_rank", "cluster1", "cluster1_similarity_score", \
+                        "cluster2", \
+                        "cluster2_similarity_score", \
+                        "pvalue", "qvalue", "similarity_score_between_clusters"])
 
         #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
         #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
@@ -520,25 +489,14 @@ def _report():
         #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
         #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
         sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.pvalue, x.qvalue ))
-
-        '''for association in sorted_associations:
-            iX, iY = association.get_data()
-            for i, j in itertools.product(iX, iY):
-                #similarity_score[i][j] = similarity_score[i][j]*2
-                pass         
-       '''
+     
         def _is_in_an_assciostions(i,j):
             for n in range(len(sorted_associations)):
                 iX, iY = sorted_associations[n].m_pData
                 if i in iX and j in iY:
                     return n+1
             return 0
-         
-        '''with open('similarity_score.csv', 'w') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(Y_labels)
-            [writer.writerow(r) for r in similarity_score] 
-        '''
+
         circos_tabel = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))
         for i in range(len(config.Features_order[0])):
             for j in range(len(config.Features_order[1])):
@@ -838,7 +796,8 @@ def run():
     print("--- %s h:m:s summary statistics time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
     
     start_time = time.time() 
-    results = _report()
+    if config.report_results:
+        _report()
     excution_time_temp = time.time() - start_time
     csvw.writerow(["Plotting results time", str(datetime.timedelta(seconds=excution_time_temp)) ])
     print("--- %s h:m:s plotting results time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
@@ -846,7 +805,6 @@ def run():
     csvw.writerow(["Total execution time", str(datetime.timedelta(seconds=excution_time_temp))])
     print("--- in %s h:m:s the task is successfully done ---" % str(datetime.timedelta(seconds=excution_time_temp)) )
     performance_file.close()
-    return results
 
 def view_singleton(pBags):
     aOut = [] 

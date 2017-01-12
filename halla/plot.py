@@ -306,11 +306,14 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
         
 def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.similarity_method, method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True, scale  ='sqrt'):
     # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
-
     if not data_table is None:
+        plot_height = min(10,len(data_table[0]))  
+        plot_weight = math.ceil(len(data_table)/len(data_table[0]))* plot_height 
         fig = pylab.figure(dpi= 300, figsize=(math.ceil(len(data_table[0])/5.0)+6, math.ceil(len(data_table)/5.0)+6))
     else:
-        fig = pylab.figure(dpi= 300, figsize=(math.ceil(len(D)/5.0)+6.0,math.ceil(len(D)/5.0)+6.0))
+        plot_height = min(10,len(data_table[0]))  
+        plot_weight = plot_height
+        fig = pylab.figure(dpi= 300, figsize=(plot_weight,plot_height))
 
         
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)

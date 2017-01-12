@@ -1741,10 +1741,9 @@ def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=No
 				if config.strDiscretizing == 'equal-area':
 					order = rankdata(astrValues, method= 'min')# ordinal
 				elif config.strDiscretizing == 'hclust':
+					#print astrValues
 					distanceMatrix = abs(numpy.array([astrValues],  dtype= float).T-numpy.array([astrValues], dtype= float))
-					print distanceMatrix	
-					order = fcluster(linkage(distanceMatrix, method='single'),number_of_bins,'distance')
-					print order
+					order = fcluster(linkage(distanceMatrix, method='complete'), number_of_bins,'distance')
 					return order
 			except:
 				print "An exception happend with discretizing continuose data!!!" 
