@@ -311,9 +311,9 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
         plot_weight = math.ceil(len(data_table)/len(data_table[0]))* plot_height 
         fig = pylab.figure(dpi= 300, figsize=(math.ceil(len(data_table[0])/5.0)+6, math.ceil(len(data_table)/5.0)+6))
     else:
-        plot_height = min(10,len(data_table[0]))  
+        plot_height = min(100,math.ceil(len(D)/10))  
         plot_weight = plot_height
-        fig = pylab.figure(dpi= 300, figsize=(plot_weight,plot_height))
+        fig = pylab.figure(dpi= 300, figsize=(plot_weight, plot_height))
 
         
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)
