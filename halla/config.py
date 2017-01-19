@@ -10,7 +10,8 @@ __description__      = """
  |_|  |_/_/    \_\_|_/_/    \_\
                                
 
-HAllA Object for hierarchical all-against-all association testing 
+HAllA for hierarchical all-against-all association testing 
+configuration file
 """
 
 __doc__             = __doc__ 
@@ -29,13 +30,13 @@ decomposition = "medoid"
 fdr_function = "level"
 permutation_func = 'gpd'
 linkage_method = 'single'
-q = .1  
-iterations = 1000
-p_adjust_method = "bh"
+q = .1  # FDR/multiple testing threshold
+iterations = 1000 # number of iteration to be used for permuation pvalue estimation
+p_adjust_method = "bh" # multiple testing correction method
 randomization_method = "permutation"  # method to generate error bars 
-sstrStep = "uniform"
+sstrStep = "uniform" # not been used!
 verbose = 'CRITICAL' #"DEBUG","INFO","WARNING","ERROR","CRITICAL"
-descending = "HAllA" 
+descending = "HAllA" # the other otion in all-against-all (AllA) 
 Distance = array([None, None]) # Distance Matrices 
 summary_method = "final"
 output_dir = "./"
@@ -46,14 +47,12 @@ apply_stop_condition = False
 missing_char =""
 missing_method = None
 seed = 0 #random.randint(1,10000)
-K = 1.5 # constant for homogeneity 
-cut_distance_thrd = .5
-use_one_null_dist = False
-gp = None
+use_one_null_dist = False # use one null sampling for permutation test in synthetic evaluation but not in real applications
+gp = None 
 Nexc = None
 nullsamples = []
 number_of_performed_tests = 0
-min_var = 0.0
+min_var = 0.0 # it was designed in a case we use minimum variation to filter features
 entropy_threshold = 0.0
 entropy_threshold1 = 0.0
 entropy_threshold2 = 0.0
@@ -70,8 +69,6 @@ parsed_dataset = array([None, None])
 meta_threshold = None 
 Features_order = array([None, None])
 data_type = array([None, None])
-#X_features_cluster_order  = []
-#Y_features_cluster_order  = []
 meta_data_tree = [] 
 meta_hypothesis_tree = None 
 meta_alla = None  # results of all-against-all

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# user options handling plus check the requirements
 import sys
 
 # Check the python version

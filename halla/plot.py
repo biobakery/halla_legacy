@@ -12,14 +12,16 @@ import scipy
 import pylab
 from array import array
 import math
+from numpy import array , rank, median
+import numpy 
+import scipy.cluster 
+import scipy.cluster.hierarchy as sch
+from scipy.cluster.hierarchy import linkage, to_tree, leaves_list
+from scipy.spatial.distance import pdist, squareform
 import pandas as pd
 import numpy as np
 from numpy.matlib import rand
 import matplotlib.pyplot as plt
-import scipy.cluster 
-from scipy.cluster.hierarchy import linkage, to_tree
-from scipy.spatial.distance import pdist, squareform
-import scipy.cluster.hierarchy as sch
 import matplotlib
 from matplotlib.pyplot import xlabel
 from itertools import product
@@ -304,31 +306,37 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     fig.savefig(filename + '.pdf')
     pylab.close()
         
-def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.similarity_method, method = "single", colLable = False, rowLabel = True, color_bar = True, sortCol = True, scale  ='sqrt'):
+def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.similarity_method, linkage_method = "average", colLable = False, rowLabel = True, color_bar = True, sortCol = True, scale  ='sqrt'):
     # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
+    max_hight = 500
     if not data_table is None:
-        plot_height = 10 
-        plot_weight = math.ceil(len(data_table[0])/len(data_table))* plot_height 
+        plot_height = min(int(len(data_table)/7.25)+5, max_hight)  
+        plot_weight = max(math.floor(len(data_table[0])/len(data_table))* plot_height, min(int(len(data_table[0])/7.25)+5, max_hight))  
+        #print plot_height, plot_weight
         if len(data_table) > 1000:
             plot_dpi = 50
         else: 
             plot_dpi = 200
         fig = pylab.figure(dpi= plot_dpi, figsize=(plot_weight, plot_height))
     else:
-        plot_height = 10  
+        plot_height = min(int(len(D)/7.25)+5, max_hight)  
         plot_weight = plot_height
         fig = pylab.figure(dpi= 300, figsize=(plot_weight, plot_height))
-
         
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)
     ax1.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
     ax1.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+    # Compute and plot second dendrogram.
     if len(D) > 0:
-        Y1 = sch.linkage(D, method=method)
+        Y1 = linkage(D, method = linkage_method)
     else:
-        Y1 = sch.linkage(data_table, metric=distance.pDistance, method=method)
+        Y1 = linkage(data_table, metric=distance.pDistance, method=linkage_method)
     if len(Y1) > 1:
-        Z1 = sch.dendrogram(Y1, orientation='left')#, labels= xlabels)
+        try:
+            Z1 = sch.dendrogram(Y1, orientation='left')
+        except:
+            print"Warning: dendrogram 1 in hetamap plot faced an exception!"
+            return Y1
     ax1.set_xticks([])
     ax1.set_yticks([])
     
@@ -339,9 +347,14 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
         ax2.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
         Y2 = []
         if not data_table is None:
-            Y2 = sch.linkage(data_table.T, metric=distance.pDistance, method=method)
+            Y2 = linkage(data_table.T, metric=distance.pDistance, method=linkage_method)
         if len(Y2) > 1:
-            Z2 = sch.dendrogram(Y2)
+            try:
+                Z2 = sch.dendrogram(Y2)
+            except:
+                print"Warning: dendrogram 2 in hetamap plot faced an exception!"
+                return Y1
+
         ax2.set_xticks([])
         ax2.set_yticks([])
         ax2.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
@@ -370,11 +383,8 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
                 data_table = data_table[:, idx2]
                 xlabels_order.extend(idx2)
             else:
-                #pass
-                
                 data_table = data_table[:, xlabels_order]
-                
-    else:
+    elif len(D)>0:
         D = D.iloc[idx1, idx1]
     myColor =  pylab.cm.YlOrBr
     if distance.c_hash_association_method_discretize[config.similarity_method]:
@@ -409,7 +419,7 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
         
         
         #pylab.xticks(rotation=90, fontsize=6)
-    if rowLabel:
+    if rowLabel and len(data_table)/7.25 < max_hight:
         if len(xlabels) == len(idx1):
             label1 = [xlabels[i] for i in idx1]
         else:
@@ -580,7 +590,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
                 
         
     #plt.subplots_adjust(wspace=.005, hspace=.005)
-    def wrap(txt, width=15):
+    def wrap(txt, width=20):
         '''helper function to wrap text for long labels'''
         import textwrap
         #txt = txt.split("|")
@@ -589,7 +599,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     
     for ax in axs[:,0]: # the left boundary
         ax.grid('off', axis='both')
-        ax.set_ylabel(wrap(ax.get_ylabel()), fontsize = 10, rotation=0, va='center', ha = 'left', labelpad=len(ax.get_ylabel())+20)#, fontweight='bold')
+        ax.set_ylabel(wrap(ax.get_ylabel()), fontsize = 10, rotation=0, va='center', ha = 'left', labelpad=len(ax.get_ylabel())+25)#, fontweight='bold')
         ax.get_xaxis().set_tick_params(which='both', labelsize=6,top='off',  direction='out')
         ax.get_yaxis().set_tick_params(which='both', labelsize=6, right='off', direction='out')
         #ax.set_yticks([])
@@ -597,7 +607,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     
     for ax in axs[-1,:]: # the lower boundary
         ax.grid('off', axis='both')
-        ax.set_xlabel(wrap(ax.get_xlabel()), fontsize = 10, rotation=90, va='center', ha = 'left',labelpad=len(ax.get_xlabel())+20 )#, fontweight='bold'
+        ax.set_xlabel(wrap(ax.get_xlabel()), fontsize = 10, rotation=90, va='center', ha = 'left',labelpad=len(ax.get_xlabel())+25 )#, fontweight='bold'
         #ax.set_xticks([])
         ax.get_xaxis().set_tick_params(which='both', labelsize=6,top='off',  direction='out')
         ax.get_yaxis().set_tick_params(which='both', labelsize=6, right='off', direction='out')

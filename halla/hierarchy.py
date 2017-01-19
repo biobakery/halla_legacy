@@ -9,6 +9,7 @@ import math
 from numpy import array , rank, median
 import numpy 
 import scipy.cluster 
+import scipy.cluster.hierarchy as sch
 from scipy.cluster.hierarchy import linkage, to_tree, leaves_list
 from scipy.spatial.distance import pdist, squareform
 import sys
@@ -285,21 +286,18 @@ def is_tree(pObj):
 
 
 def hclust(dataset, labels, dataset_number):
-    bTree=True
     linkage_method = config.linkage_method
-    D = pdist(dataset, metric=distance.pDistance) 
-    config.Distance[dataset_number] =  copy.deepcopy(squareform(D))
+    Distance_matrix = pdist(dataset, metric=distance.pDistance) 
+    config.Distance[dataset_number] =  squareform(Distance_matrix)
     if config.diagnostics_plot and len(config.Distance[dataset_number][0]) < 1000:
-        try:
-            print "--- plotting heatmap for Dataset", str(dataset_number)," ... "
-            Z = plot.heatmap(data_table = dataset , D = D, xlabels_order = [], xlabels = labels, filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.similarity_method)+"_" + str(dataset_number), method =linkage_method)
-        except :
-            Z = linkage(D, method= linkage_method)
+        print "--- plotting heatmap for Dataset", str(dataset_number+ 1)," ... "
+        Z = plot.heatmap(data_table = dataset , D = Distance_matrix, xlabels_order = [], xlabels = labels,\
+                          filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.similarity_method)+"_" + \
+                          str(dataset_number+1), linkage_method = linkage_method)
     else:
-        Z = linkage(D, method= linkage_method)
-    import scipy.cluster.hierarchy as sch
-    logger.write_table(data=config.Distance[dataset_number], name=config.output_dir+'/Distance_matrix'+str(dataset_number)+'.tsv', rowheader=config.FeatureNames[dataset_number], colheader=config.FeatureNames[dataset_number])
-    return to_tree(Z) if (bTree and len(dataset)>1) else Z, sch.dendrogram(Z, orientation='right')['leaves'] if len(dataset)>1 else sch.dendrogram(Z)['leaves']
+        Z = linkage(Distance_matrix, method = linkage_method)
+    logger.write_table(data=config.Distance[dataset_number], name=config.output_dir+'/Distance_matrix'+str(dataset_number+1)+'.tsv', rowheader=config.FeatureNames[dataset_number], colheader=config.FeatureNames[dataset_number])
+    return to_tree(Z) if len(dataset)>1 else Z, sch.dendrogram(Z)['leaves'] if len(dataset)>1 else sch.dendrogram(Z)['leaves']
 
 def dendrogram(Z):
     return scipy.cluster.hierarchy.dendrogram(Z)
