@@ -299,9 +299,6 @@ def hclust(dataset, labels, dataset_number):
     logger.write_table(data=config.Distance[dataset_number], name=config.output_dir+'/Distance_matrix'+str(dataset_number+1)+'.tsv', rowheader=config.FeatureNames[dataset_number], colheader=config.FeatureNames[dataset_number])
     return to_tree(Z) if len(dataset)>1 else Z, sch.dendrogram(Z)['leaves'] if len(dataset)>1 else sch.dendrogram(Z)['leaves']
 
-def dendrogram(Z):
-    return scipy.cluster.hierarchy.dendrogram(Z)
-
 def truncate_tree(apClusterNode, level=0, skip=0):
     """
     Chop tree from root, returning smaller tree towards the leaves 

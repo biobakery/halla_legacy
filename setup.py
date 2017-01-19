@@ -7,7 +7,7 @@ except ImportError:
 import os
 import urllib
 
-VERSION = "0.7.3"
+VERSION = "0.7.4"
 AUTHOR = "Gholamali Rahnavard, Curtis Huttenhower, Huttenhower Lab"
 AUTHOR_EMAIL = "halla-users@googlegroups.com"
 MAINTAINER = "Gholamali Rahnavard"
@@ -46,7 +46,7 @@ setup(
         "Operating System :: MacOS",
         "Operating System :: Unix",
         "Operating System :: Microsoft :: Windows",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.6",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
         ],
     #long_description=open('readme.md').read(),
