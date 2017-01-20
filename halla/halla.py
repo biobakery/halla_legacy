@@ -3,21 +3,26 @@
 import sys
 
 # Check the python version
-REQUIRED_PYTHON_VERSION_MAJOR = 2
-REQUIRED_PYTHON_VERSION_MINOR = 7
+REQUIRED_PYTHON_VERSION_MAJOR = [2 ,3]
+REQUIRED_PYTHON_VERSION_MINOR2 = 7
+REQUIRED_PYTHON_VERSION_MINOR3 = 6
 try:
-    if (sys.version_info[0] != REQUIRED_PYTHON_VERSION_MAJOR or
-        sys.version_info[1] < REQUIRED_PYTHON_VERSION_MINOR):
+    if (not sys.version_info[0] in REQUIRED_PYTHON_VERSION_MAJOR or
+        (sys.version_info[0] ==2 and sys.version_info[1] < REQUIRED_PYTHON_VERSION_MINOR2) or 
+        (sys.version_info[0] ==3 and sys.version_info[1] < REQUIRED_PYTHON_VERSION_MINOR3)):
         sys.exit("CRITICAL ERROR: The python version found (version "+
             str(sys.version_info[0])+"."+str(sys.version_info[1])+") "+
             "does not match the version required (version "+
-            str(REQUIRED_PYTHON_VERSION_MAJOR)+"."+
-            str(REQUIRED_PYTHON_VERSION_MINOR)+"+)")
+            str(2)+"."+
+            str(REQUIRED_PYTHON_VERSION_MINOR2)+"+) or "+
+            str(3)+"."+
+            str(REQUIRED_PYTHON_VERSION_MINOR3)+"+)")
 except (AttributeError,IndexError):
     sys.exit("CRITICAL ERROR: The python version found (version 1) " +
         "does not match the version required (version "+
         str(REQUIRED_PYTHON_VERSION_MAJOR)+"."+
         str(REQUIRED_PYTHON_VERSION_MINOR)+"+)")  
+
 
 import argparse
 import csv

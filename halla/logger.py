@@ -35,25 +35,6 @@ def _log_plot_scatter(adX, adY, pFigure, strTitle=None, strX=None, strY=None):
 	if isinstance(pFigure, str):
 		pylab.savefig(pFigure)
 
-def _log_plot(pData, pTest, adTotal):
-	
-	# Convenience
-	iOne, iTwo = pTest.m_iOne, pTest.m_iTwo
-	pOne, pTwo = pTest.m_pOne, pTest.m_pTwo
-	dMID, dPOne = pTest.test_permutation()
-	dU, dPTwo = pTest.test_bootstrap()
-
-	figr = pylab.figure(figsize=(12, 6))
-	pylab.subplot(1, 2, 1)
-	# Fix me to plot categoricals as boxplots etc.
-	if all(p.iscontinuous() for p in (pOne, pTwo)):
-		_log_plot_scatter(pOne.m_aDatum, pTwo.m_aDatum, figr, None, pOne.m_strID, pTwo.m_strID)
-	pylab.subplot(1, 2, 2)
- 	_log_plot_histograms([adTotal, pData.get_permutation(iOne, iTwo), pData.get_bootstrap(iOne, iTwo)],
-		figr, "%g (%g), p_perm=%g, p_boot=%g" % (dMID, pTest.get_mutual_information(), dPOne, dPTwo),
-		["Total", "Perm", "Boot"])
-	figr.savefig("-".join((s.split("|")[-1] for s in (pOne.m_strID, pTwo.m_strID))) + ".png")
-
 def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "label",  corner = None, delimiter= '\t'):
     
     '''
@@ -70,7 +51,7 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
     
     '''
     if data is None:
-    	print "Null input for writing table"
+    	print ("Null input for writing table")
     	return
     f = open(name, 'w')
     # row numbers as header

@@ -114,7 +114,7 @@ class Input:
 		self._load()
 		self._parse()
 		self._filter_to_common_columns()
-		print "Discretizing is started using: ", config.strDiscretizing, " style!"
+		print ("Discretizing is started using: %s style!" % config.strDiscretizing)
 		self._discretize()
 		self._remove_low_entropy_features()
 		if len(self.outName1) <2 or len(self.outName1) <2:
@@ -128,11 +128,6 @@ class Input:
 			except:
 				sys.exit("--- Please check your data types and your similarity metric!")
 		self._check_for_semi_colon()
-		#else:
-		#	self.discretized_dataset1 = np.asarray(self.discretized_dataset1)
-		#	self.discretized_dataset2 = np.asarray(self.discretized_dataset2)
-		    
-		
 		
 	def get(self):
 		
@@ -147,14 +142,14 @@ class Input:
 		# is special character to separate features in output files
 		for i in range(len(self.outName1)):
 			if ";"  in self.outName1[i]:
-				print "Feature names warning!" 
-				print self.outName1[i]
+				print ("Feature names warning!") 
+				print (self.outName1[i])
 				sys.exit("In the first dataset, your feature (row) names contains ; which is the special character HAllA uses for separating features,\n \
 				             Please replace it with another character such as _")
 		for i in range(len(self.outName2)):
 			if ";"  in self.outName2[i]:
-				print "Feature names warning!" 
-				print self.outName2[i]
+				print ("Feature names warning!")
+				print (self.outName2[i])
 				sys.exit("In the second dataset, your feature (row) names contains ; which is the special character HAllA uses for separating features,\n \
 				             Please replace it with another character such as _")
 
@@ -207,7 +202,7 @@ class Input:
 					try:
 						line = imp.transform(line)[0]
 					except:
-						print "there is an issue with filling missed data!"
+						print ("there is an issue with filling missed data!")
 				if all(val != config.missing_char for val in line):
 					aOut.append(line)
 					if not aNames:
@@ -227,7 +222,7 @@ class Input:
 						aTypes.append("LEX")
 				else:  # delete corresponding name from namespace 
 					try:
-						print aNames[i], " has an issue with filling missed data!"
+						print (aNames[i], " has an issue with filling missed data!")
 						#aNames.remove(aNames[i])
 					except Exception:
 						pass  
@@ -317,10 +312,10 @@ class Input:
 		l1_after = len(df1.index)
 		l2_after = len(df2.index)
 		if l1_before > l1_after:
-			print "WARNING! %d features with variation equal or less than %.3f have been removed from the first dataset " % (l1_before- l1_after, config.min_var)
+			print ("WARNING! %d features with variation equal or less than %.3f have been removed from the first dataset " % (l1_before- l1_after, config.min_var))
 			
 		if l2_before > l2_after:
-			print "WARNING! %d features with variation equal or less than %.3f have been removed from the second dataset " % (l2_before- l2_after, config.min_var)
+			print ("WARNING! %d features with variation equal or less than %.3f have been removed from the second dataset " % (l2_before- l2_after, config.min_var))
 		# reorder df1 columns as the columns order of df2
 		#df1 = df1.loc[:, df2.columns]
 		
@@ -363,10 +358,10 @@ class Input:
 		l1_after = len(df1.index)
 		l2_after = len(df2.index)
 		if l1_before > l1_after:
-			print "WARNING! %d features with entropy equal or less than %.3f have been removed from the first dataset " % ((l1_before- l1_after), config.entropy_threshold1)
+			print ("WARNING! %d features with entropy equal or less than %.3f have been removed from the first dataset " % ((l1_before- l1_after), config.entropy_threshold1))
 			
 		if l2_before > l2_after:
-			print "WARNING! %d features with entropy equal or less than %.3f have been removed from the second dataset " % ((l2_before- l2_after), config.entropy_threshold2)
+			print ("WARNING! %d features with entropy equal or less than %.3f have been removed from the second dataset " % ((l2_before- l2_after), config.entropy_threshold2))
 		# reorder df1 columns as the columns order of df2
 		#df1 = df1.loc[:, df2.columns]
 		
@@ -387,11 +382,11 @@ class Input:
 		#print self.outHead1
 		#print df2
 		try:
-			print "--- %d features and %d samples are used from first dataset" % (l1_after, len(self.discretized_dataset1[0]))
+			print ("--- %d features and %d samples are used from first dataset" % (l1_after, len(self.discretized_dataset1[0])))
 		except IndexError:
 			sys.exit("WARNING! No feature in the first dataset after filtering.")
 		try:
-			print "--- %d features and %d samples are used from second dataset" % (l2_after, len(self.discretized_dataset2[0]))
+			print ("--- %d features and %d samples are used from second dataset" % (l2_after, len(self.discretized_dataset2[0])))
 		except IndexError:
 			sys.exit("WARNING! No feature in the first dataset after filtering.")
 			

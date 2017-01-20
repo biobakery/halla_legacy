@@ -137,7 +137,7 @@ def main( ):
                                 output_dir = output_dir,  do_plot = args.plot, resolution= args.resolution )
     
     f = open(output_dir+"/hallaclust.txt", 'w')
-    print "There are %s clusters" %(len(clusters))
+    print ("There are %s clusters" % len(clusters))
     c_medoids = []
     for i in range(len(clusters)):
         f.write("cluster"+str(i+1)+"\t")
@@ -153,7 +153,7 @@ def main( ):
     if not df_data.empty:
         df_data.loc[c_medoids, :].to_csv(path_or_buf=output_dir+'/medoids.txt', sep='\t' )
         
-    print "Output is written in " + args.output
+    print ("Output is written in %s" % args.output)
 
         
 if __name__ == "__main__":

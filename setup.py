@@ -6,6 +6,30 @@ except ImportError:
 
 import os
 import urllib
+try:
+       from urllib.request import urlretrieve
+       classifiers=[
+        "Programming Language :: Python",
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Console",
+        "Operating System :: MacOS",
+        "Operating System :: Unix",
+        "Operating System :: Microsoft :: Windows",
+        "Programming Language :: Python :: 2.7",
+        "Topic :: Scientific/Engineering :: Bio-Informatics"
+        ]
+except ImportError:
+       from urllib import urlretrieve
+       classifiers=[
+        "Programming Language :: Python",
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Console",
+        "Operating System :: MacOS",
+        "Operating System :: Unix",
+        "Operating System :: Microsoft :: Windows",
+        "Programming Language :: Python :: 3.6",
+        "Topic :: Scientific/Engineering :: Bio-Informatics"
+        ]
 
 VERSION = "0.7.4"
 AUTHOR = "Gholamali Rahnavard, Curtis Huttenhower, Huttenhower Lab"
@@ -23,7 +47,7 @@ if not os.path.isfile(counter_file):
     print("Downloading counter file to track halla downloads"+
         " since the global PyPI download stats are currently turned off.")
     try:
-        file, headers = urllib.urlretrieve(COUNTER_URL,counter_file)
+        file, headers = urlretrieve(COUNTER_URL,counter_file)
     except EnvironmentError:
         print("Unable to download counter")
 
@@ -39,22 +63,13 @@ setup(
     url="http://huttenhower.sph.harvard.edu/halla",
     keywords=['association','discovery','test','pattern','hierarchically'],
     platforms=['Linux','MacOS'],
-    classifiers=[
-        "Programming Language :: Python",
-        "Development Status :: 5 - Production/Stable",
-        "Environment :: Console",
-        "Operating System :: MacOS",
-        "Operating System :: Unix",
-        "Operating System :: Microsoft :: Windows",
-        "Programming Language :: Python :: 3.6",
-        "Topic :: Scientific/Engineering :: Bio-Informatics"
-        ],
+    classifiers=classifiers,
     #long_description=open('readme.md').read(),
     install_requires=[  
         "Numpy >= 1.9.2",
-        "Scipy >= 0.17.0",
-        "Matplotlib >= 1.5.1",
-        "Scikit-learn >= 0.14.1",
+        #"Scipy >= 0.17.0",
+        #"Matplotlib >= 1.5.1",
+        #"Scikit-learn >= 0.14.1",
         #"minepy >= 1.0.0", #for MIC in evaluation package 
         "pandas >= 0.18.1",
         #"R >= 3.1.0",

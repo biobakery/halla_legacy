@@ -64,7 +64,6 @@ def m(dataset, pFunc, strDiscretizing, axis=0,):
     if isinstance(pFunc , np.ndarray):
         return dataset[pFunc]
     else:  # generic function type
-        # print dataset.shape
         return array([pFunc(item, strDiscretizing) for item in dataset]) 
 
 
@@ -83,15 +82,12 @@ def set_parsed_data():
         config.parsed_dataset = config.discretized_dataset
 
 def _hclust():
-    # print config.discretized_dataset
     config.meta_data_tree = []
     tree1, config.Features_order[0] = hierarchy.hclust(config.parsed_dataset[0], labels=config.FeatureNames[0],  dataset_number = 0)
     config.meta_data_tree.append(tree1)
-    #print config.Features_order[0]
     tree2, config.Features_order[1]= hierarchy.hclust(config.parsed_dataset[1] , labels=config.FeatureNames[1], dataset_number = 1)
     config.meta_data_tree.append(tree2)
     # config.meta_data_tree = config.m( config.parsed_dataset, lambda x: hclust(x , bTree=True) )
-    #print config.meta_data_tree
     return config.meta_data_tree 
 
 def _couple():
@@ -113,7 +109,10 @@ def _test_by_level():
             dataset1=config.parsed_dataset[0], dataset2=config.parsed_dataset[1])
 
 def _naive_summary_statistics():
-    _, p_values = zip(*config.aOut[0])
+    try:
+        _, p_values = zip(*config.aOut[0])
+    except:
+        _, p_values = list(zip(*config.aOut[0]))
     config.meta_summary = []
     config.meta_summary.append(np.reshape([p_values], (int(math.sqrt(len(p_values))), int(math.sqrt(len(p_values))))))
 
@@ -141,7 +140,7 @@ def _summary_statistics(strMethod=None):
     args_sorted = np.argsort(Z_final_dummy)
     Z_final = Z_final[args_sorted]
     if config.verbose == 'INFO':
-        print Z_final 
+        print (Z_final) 
     
     # assert( Z_all.any() ), "association bags empty." ## Technically, Z_final could be empty 
     def __set_outcome(Z_final):
@@ -154,7 +153,6 @@ def _summary_statistics(strMethod=None):
             listBag1, listBag2 = aaBag 
             for i, j in itertools.product(listBag1, listBag2):
                 config.outcome[i][j] = 1.0
-        #print "FDR= ", intersection_1_2_count/all_associations 
     def __set_pvalues(Z_all):
         config.pvalues = np.empty((len(config.parsed_dataset[0]),len(config.parsed_dataset[1])), dtype = float)
         config.pvalues[:] = np.NAN
@@ -186,8 +184,6 @@ def _summary_statistics(strMethod=None):
             
             aaBag, fAssoc, fP_adjust = aLine
             listBag1, listBag2 = aaBag 
-            #aBag1, aBag2 = array(listBag1), array(listBag2)
-            #print aBag1 , aBag2
             for i, j in itertools.product(listBag1, listBag2):
                 S[i][j][0] = fAssoc 
                 S[i][j][1] = fP_adjust
@@ -228,7 +224,10 @@ def _summary_statistics(strMethod=None):
         #assert(S.any())
         config.meta_summary = S
         return config.meta_summary
-
+global associated_feature_X_indecies
+associated_feature_X_indecies = []
+global associated_feature_Y_indecies
+associated_feature_Y_indecies = []
 def _report():
     """
     helper function for reporting the output to the user,
@@ -242,19 +241,14 @@ def _report():
     iRow1 = len(config.original_dataset[0])
     iRow2 = len(config.original_dataset[1])
 
-    for i, j in itertools.product(range(iRow1), range(iRow2)):
+    for i, j in itertools.product(list(range(iRow1)), list(range(iRow2))):
         # ## i <= j 
         fQ = aP[i][j][0] 
         fQ_adust = aP[i][j][1] 
         if fQ != -1:
             aaOut.append([[i, j], fQ, fQ_adust ])
 
-    #config.meta_report = aaOut
-    # print "meta summary:", config.meta_report
-    global associated_feature_X_indecies
-    associated_feature_X_indecies = []
-    global associated_feature_Y_indecies
-    associated_feature_Y_indecies = []
+    
     
     def _report_all_tests():
         output_file_all  = open(str(config.output_dir)+'/all_association_results_one_by_one.txt', 'w')
@@ -266,8 +260,7 @@ def _report():
             iX, iY = line[0]
             fP = line[1]
             fP_adjust = line[2]
-            #print line, config.FeatureNames[0], config.FeatureNames[1]
-            aLineOut = map(str, [config.FeatureNames[0][iX], config.FeatureNames[1][iY], fP, fP_adjust])
+            aLineOut = list(map(str, [config.FeatureNames[0][iX], config.FeatureNames[1][iY], fP, fP_adjust]))
             csvw.writerow(aLineOut)
 
     def _report_associations():    
@@ -346,7 +339,7 @@ def _report():
             associated_feature_X_indecies += iX
             global associated_feature_Y_indecies
             associated_feature_Y_indecies += iY
-            print "--- plotting associations ",association_number," ..."
+            print ("--- plotting associations %s %s" %(association_number," ..."))
             cluster1 = [config.original_dataset[0][i] for i in iX]
             discretized_cluster1 = [config.discretized_dataset[0][i] for i in iX]
             X_labels = np.array([config.FeatureNames[0][i] for i in iX])
@@ -380,7 +373,6 @@ def _report():
             plt.figure()  
             try: 
                 if len(discretized_cluster1) < 40:
-                    #print len(discretized_cluster1)
                     df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
                     ax1 = plot.scatter_matrix(df1, filename = filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
             except:
@@ -398,9 +390,6 @@ def _report():
                     two_clusters.extend(cluster2)
                     two_labels = [config.FeatureNames[0][i] for i in iX]
                     two_labels.extend([config.FeatureNames[1][i] for i in iY])
-                    #print two_clusters 
-                    #print cluster1
-                    #print two_labels, X_labels
                     df_all = pd.DataFrame(np.array(two_clusters, dtype= float).T ,columns=np.array(two_labels) )
                     axes = plot.scatter_matrix(df_all, x_size = len(iX),filename =filename + 'Scatter_association' + str(association_number) + '.pdf')
             except:
@@ -418,7 +407,7 @@ def _report():
             if not bypass_discretizing():
                 d_x_d_rep = decomposition_method(discretized_df1)
                 d_y_d_rep = decomposition_method(discretized_df2)
-                d_x_d_rep, d_y_d_rep = zip(*sorted(zip(d_x_d_rep, d_y_d_rep)))
+                d_x_d_rep, d_y_d_rep = list(zip(*sorted(zip(d_x_d_rep, d_y_d_rep))))
                 plot.confusion_matrix(d_x_d_rep, d_y_d_rep, filename = filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
             plt.close("all")
             
@@ -428,7 +417,7 @@ def _report():
             output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
             csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
             csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
-            aLineOut = map(str, ['0', str(';'.join(config.FeatureNames[0][i] for i in range(len(config.FeatureNames[0])))), str(';'.join(config.FeatureNames[1][i] for i in range(len(config.FeatureNames[1]))))])
+            aLineOut = list(map(str, ['0', str(';'.join(config.FeatureNames[0][i] for i in range(len(config.FeatureNames[0])))), str(';'.join(config.FeatureNames[1][i] for i in range(len(config.FeatureNames[1]))))]))
             csvwc.writerow(aLineOut)
         elif config.meta_hypothesis_tree:
             output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
@@ -439,7 +428,7 @@ def _report():
                 iX, iY = clusters[0], clusters[1]
                 fP = line[1]
                 # fP_adjust = line[2]
-                aLineOut = map(str, [str(level), str(';'.join(config.FeatureNames[0][i] for i in iX)), str(';'.join(config.FeatureNames[1][i] for i in iY))])
+                aLineOut = list(map(str, [str(level), str(';'.join(config.FeatureNames[0][i] for i in iX)), str(';'.join(config.FeatureNames[1][i] for i in iY))]))
                 csvwc.writerow(aLineOut)
         #else:
             #aLineOut = map(str, ['0', str(';'.join(config.FeatureNames[0][i] for i in config.Features_order[0])), str(';'.join(config.FeatureNames[1][i] for i in config.Features_order[1]))])
@@ -448,7 +437,7 @@ def _report():
         #output_file_compared_clusters.close()
 
     def _heatmap_associations():
-        print "--- plotting heatmap of associations  ..."
+        print ("--- plotting heatmap of associations  ...")
         global associated_feature_X_indecies
         Xs = list(set(associated_feature_X_indecies))
         X_labels = np.array([config.FeatureNames[0][i] for i in Xs])
@@ -464,12 +453,11 @@ def _report():
             #nmi = np.zeros(shape=(len(Xs), len(Ys)))
             plot.heatmap2(dataset1=cluster1, dataset2=cluster2, xlabels =X_labels, ylabels = Y_labels, filename = str(config.output_dir)+'/all_nmi_heatmap' )
     def _write_hallagram_info():
+        global associated_feature_X_indecies
+        global associated_feature_Y_indecies
         if len(associated_feature_X_indecies) == 0 or len(associated_feature_Y_indecies) == 0 :
             return
-        global associated_feature_X_indecies
         Xs = list(set(associated_feature_X_indecies)) 
-        
-        global associated_feature_Y_indecies
         Ys = list(set(associated_feature_Y_indecies))
         
         config.Features_order[0] = [config.Features_order[0][i] for i in range (len(config.Features_order[0]))  if config.Features_order[0][i] in Xs ] 
@@ -509,12 +497,12 @@ def _report():
         logger.write_table(similarity_score,str(config.output_dir)+"/" + "similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
         return
     def _heatmap_associations_R():
+        global associated_feature_X_indecies
+        global associated_feature_Y_indecies
         if len(associated_feature_X_indecies) == 0 or len(associated_feature_Y_indecies) == 0 :
             return
-        global associated_feature_X_indecies
-        Xs = list(set(associated_feature_X_indecies)) 
         
-        global associated_feature_Y_indecies
+        Xs = list(set(associated_feature_X_indecies)) 
         Ys = list(set(associated_feature_Y_indecies))
         
         config.Features_order[0] = [config.Features_order[0][i] for i in range (len(config.Features_order[0]))  if config.Features_order[0][i] in Xs ] 
@@ -568,7 +556,7 @@ def _report():
         #anottation_cell = [config.Features_order[0]]
         #anottation_cell = [ anottation_cell[:][j] for j in config.Features_order[1]]
         #print anottation_cell
-        print "--- plotting heatmap associations using R ..."
+        print ("--- plotting heatmap associations using R ...")
         import rpy2.robjects as ro
         #import pandas.rpy.common as com
         import rpy2.robjects.numpy2ri
@@ -598,7 +586,7 @@ def _report():
             
     def _heatmap_datasets_R():
         if config.hallagram:          
-            print "--- plotting heatmap datasets using R ..."
+            print ("--- plotting heatmap datasets using R ...")
             X_indecies = len(config.FeatureNames[0])
             X_labels = np.array([config.FeatureNames[0][i] for i in range(X_indecies)])
             Y_indecies = len(config.FeatureNames[1])
@@ -646,7 +634,7 @@ def _report():
         #_heatmap_associations()
         #from rpy2.rinterface import RRuntimeError
         output_path = config.output_dir# str(config.output_dir).replace("(","\(").replace(")","\)").replace(" ","\ ")
-        print "Writing plotting outputs ...", output_path 
+        print ("--- Writing plotting outputs to  %s " % output_path )
         if os.path.isfile(output_path+"/similarity_table.txt"):
             try:                 
                 hallagram_command= "hallagram "+ output_path+"/similarity_table.txt "+\
@@ -676,7 +664,7 @@ def _report():
                 #_heatmap_datasets_R()
                 #_plot_associations()
             except IOError:
-                print"exception with plotting the final results "       
+                print("exception with plotting the final results ")       
     # Execute report functions
     _report_all_tests()
     _report_associations()
@@ -692,7 +680,7 @@ def _report():
         try:
             _plot_associations()
         except IOError:
-            print"exception with plotting in asscociations "
+            print ("exception with plotting in asscociations ")
     return config.meta_report 
 def write_config():
     try:    

@@ -84,7 +84,7 @@ strFile2 = None
 outcome = None
 pvalues = None
 def reset_default():
-    print "reset to default parameters!"
+    print ("reset to default parameters!")
     use_one_null_dist = False
     gp = None
     Nexc = None

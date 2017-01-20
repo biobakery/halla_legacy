@@ -335,7 +335,7 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
         try:
             Z1 = sch.dendrogram(Y1, orientation='left')
         except:
-            print"Warning: dendrogram 1 in hetamap plot faced an exception!"
+            print("Warning: dendrogram 1 in hetamap plot faced an exception!")
             return Y1
     ax1.set_xticks([])
     ax1.set_yticks([])
@@ -352,7 +352,7 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
             try:
                 Z2 = sch.dendrogram(Y2)
             except:
-                print"Warning: dendrogram 2 in hetamap plot faced an exception!"
+                print ("Warning: dendrogram 2 in hetamap plot faced an exception!")
                 return Y1
 
         ax2.set_xticks([])

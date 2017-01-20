@@ -58,7 +58,7 @@ def get_enropy(x):
 	except:
 		#sys.exit("entropy error")
 		P = scipy.stats.itemfreq(x)[:,1]
-		P = map(float, P)
+		P = list(map(float, P))
 		P = [ val/len(x) for val in P]
 		observed_entropy = -sum([p * numpy.log2(p) for p in P])
 	#max_entropy = numpy.log2(len(P))
@@ -72,7 +72,7 @@ def scale_data(X, scale = 'log'):
 def pvalues2qvalues ( pvalues, adjusted=False ):
     n = len( pvalues )
     # after sorting, index[i] is the original index of the ith-ranked value
-    index = range( n )
+    index = list(range(n))
     index = sorted( index, key=lambda i: pvalues[i] )
     pvalues = sorted( pvalues )
     qvalues = [pvalues[i-1] * n / i for i in range( 1, n+1 )]
@@ -128,7 +128,7 @@ def alpha_threshold(pArray, alpha=0.05, func=distance.nmi):
 	X = pArray
 	XP = array([numpy.random.permutation(x) for x in X])
 	D = discretize(XP)
-	A = numpy.array([func(D[i], D[j]) for i, j in itertools.combinations(range(len(XP)), 2)])
+	A = numpy.array([func(D[i], D[j]) for i, j in itertools.combinations(list(range(len(XP))), 2)])
 	fScore = scoreatpercentile(A, fPercentile)
 	# print "alpha_threshold: ", fScore
 	# print "Distance Function:", str(func)
@@ -138,19 +138,18 @@ def pca_explained_variance_ratio_(pArray, iComponents=1):
 	"""
 	 Input: N x D matrix 
 	 Output: D x N matrix 
-
+	
 	 """
 	from sklearn.decomposition import PCA
-
- 	#iRow, iCol = pArray.shape 
- 	pPCA = PCA(n_components=iComponents)
+		#iRow, iCol = pArray.shape 
+	pPCA = PCA(n_components=iComponents)
 	# # doing this matrix inversion twice doesn't seem to be a good idea 
 	pPCA.fit(pArray.T)
 	# PCA(copy=True, n_components=1, whiten=False)
 	#print "PCA variance", pPCA.explained_variance_ratio_ 
 	return pPCA.explained_variance_ratio_ 
-
 	
+
 def mca_method(pArray, discretize_style, iComponents=1):
 	"""
 	Input: N x D matrix 
@@ -258,21 +257,11 @@ def nlpca(pArray, iComponents=1):
 	 first_pc = []	
 	 try:
 	 	for i in range (t):
-		 	#print pArray.shape 
 		 	pPCA = PCA(n_components=iComponents)
-			# # doing this matrix inversion twice doesn't seem to be a good idea 
-			# print"PCA:",   pPCA.fit_transform( pArray.T ).T 
-			# print "End PCA"
 			sub_pArray = pArray[:, s*i:s*(i+1)-1]
-			#print sub_pArray.shape
 			sub_pc = pPCA.fit_transform(sub_pArray.T).T
-			
-			#print "sub_pc", sub_pc
-			first_pc.extend(sub_pc[0])#map(math.fabs, sub_pc[0]))
-			#print "first PC", i,": ",len(first_pc)
-			
-			#print "Loading:", pPCA.components_
-		#print "first PC shape", i,": ",len(first_pc)
+			first_pc.extend(sub_pc[0])
+
 		return array([first_pc])
 
 	 except ValueError:
@@ -295,7 +284,7 @@ def mds(pArray, iComponents=1):
 		pos = mds.fit_transform(similarities)
 		
 
-		print "End MDS", pos.T
+		print ("End MDS", pos.T)
 		return pos.T
 		
 	 except ValueError:
@@ -387,7 +376,7 @@ def pls(pArray1, pArray2, iComponents=1):
 	return X_plsout, Y_plsout 
 
 def mean(X):
-	rep = map(round,numpy.mean(X, axis=0))
+	rep = list(map(round,numpy.mean(X, axis=0)))
 	return rep
 
 def middle(X):
@@ -421,8 +410,7 @@ def get_medoid_centroid(pArray, iAxis=0, pMetric=distance.l2):
 	mean_vec = numpy.mean(pArray, 0) 
 	
 	pArrayCenter = pArray - (mean_vec * numpy.ones(pArray.shape))
-	#print pArray[numpy.argsort(map(numpy.linalg.norm, pArrayCenter))[0], :]
-	return pArray[numpy.argsort(map(numpy.linalg.norm, pArrayCenter))[0], :]
+	return pArray[numpy.argsort(list(map(numpy.linalg.norm, pArrayCenter)))[0], :]
 def medoid(pArray, iAxis=0, pMetric=distance.nmi):
 	"""
 	Input: numpy array 
@@ -716,7 +704,7 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 
 	fAssociation = pMe(pRep1, pRep2) 
 
-	aDist = numpy.array([ pMe(_permutation(pRep1), pRep2) for _ in xrange(iIter) ])
+	aDist = numpy.array([ pMe(_permutation(pRep1), pRep2) for _ in range(iIter) ])
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
 	# # BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iIter iterations of PCA
 
@@ -845,7 +833,7 @@ def generate_null_dist(X, Y):
 
 	pMe = pHashMetric[config.similarity_method]
 	n_samples = []
-	for i in xrange(config.iterations):
+	for i in range(config.iterations):
 		numpy.random.seed(i+config.seed+1)
 		iter = i
 		permuted_Y = numpy.random.permutation(Y)
@@ -986,19 +974,19 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 	        py[ychar] += delta
 	        pxy[( xchar, ychar )] += delta
 	    S = 0
-	    for ( xchar, ychar ), value in pxy.items():
+	    for ( xchar, ychar ), value in list(pxy.items()):
 	        S += value * ( log( value, 2 ) - log( px[xchar], 2 ) - log( py[ychar], 2 ) )
 	    return S
 	
 	# actual value
 	mi = distance.mi( pRep1, pRep2 )
-	print "mutual information... =", mi
+	print ("mutual information... =", mi)
 	
 	# compute degrees of freedom for table
 	xdf = len( set( pRep1 ) ) - 1
 	ydf = len( set( pRep2 ) ) - 1
 	df = xdf * ydf
-	print "degrees of freedom... =", df
+	print ("degrees of freedom... =", df)
 	
 	# calculate a pvalue from permutation
 	pvalue = 0
@@ -1008,14 +996,14 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 	    y2 = numpy.random.permutation( y2 )
 	    if distance.mi( pRep1, y2 ) >= mi:
 	        pvalue += delta
-	print "permutation P-value.. =", pvalue
+	print ("permutation P-value.. =", pvalue)
 	
 	# calculate a pvalue based on a G test
 	# G = 2 * N * MI, with MI measured in nats (not bits)
 	# behaves as a contingency chi^2, with df=(rows-1)(cols-1)
 	mi_natural_log = mi / log( exp( 1 ), 2 )
 	fP = 1 - chi2.cdf( 2 * len(pRep1) * mi_natural_log, df )
-	print "G-test P-value....... =", fP
+	print ("G-test P-value....... =", fP)
 	
 	#permerror = 2 * sqrt( pvalue * ( 1 - pvalue ) / float( trials ) )
 	#print "permutation error.... =", permerror
@@ -1073,7 +1061,7 @@ def permutation_test_by_max_pca(pArray1, pArray2, k=2, metric="nmi", iIter=1000)
 
 		fAssociation = pMe(pOne, pTwo) 
 
-		aDist = numpy.array([ pMe(_permutation(pOne), pTwo) for _ in xrange(iIter) ])
+		aDist = numpy.array([ pMe(_permutation(pOne), pTwo) for _ in range(iIter) ])
 		# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
 		# # BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iIter iterations of PCA
 
@@ -1137,7 +1125,7 @@ def permutation_test_by_cca(pArray1, pArray2, metric="nmi", iIter=1000):
 	fAssociation = similarity_score(pRep1, pRep2, strMetric= strMetric)
 
 	#### Perform Permutaiton 
-	for _ in xrange(iIter):
+	for _ in range(iIter):
 
 		XP = array([numpy.random.permutation(x) for x in X])
 		YP = array([numpy.random.permutation(y) for y in Y])
@@ -1213,7 +1201,7 @@ def permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=1000):
 	fAssociation = similarity_score(pRep1, pRep2, strMetric = metric)
 
 	#### Perform Permutaiton 
-	for _ in xrange(iIter):
+	for _ in range(iIter):
 
 		XP = array([numpy.random.permutation(x) for x in X])
 		YP = array([numpy.random.permutation(y) for y in Y])
@@ -1228,20 +1216,6 @@ def permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=1000):
 
 		aDist.append(fAssociation_)
 
-	# if metric == "nmi":
-	# 	fAssociation = cca_score_nmi( pArray1, pArray2 ) 
-	# 	pMetric = cca_score_nmi 
-	# elif metric == "pearson":
-	# 	fAssociation = cca_score( pArray1, pArray2 ) 
-	# 	pMetric = cca_score
-	
-	# aDist = [pMetric( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
-	
-	# aDist = numpy.array([ py.distance.nmi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
-	# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
-	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
-	# # BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iIter iterations of PCA
-
 	fPercentile = percentileofscore(aDist, fAssociation, kind="strict")  # #source: Good 2000 
 	# ## \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
 	# ## k number of iterations, \hat{X} is randomized version of X 
@@ -1251,9 +1225,6 @@ def permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=1000):
 	fP = ((1.0 - fPercentile / 100.0) * iIter + 1) / (iIter + 1)
 
 	return fP, fAssociation, pRep1[0], pRep2[0]
-
-def permutation_test_by_copula():
-	pass 
 
 def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 
@@ -1274,7 +1245,7 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 	dVal = pFun(pArray1, pArray2)
 
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
-	pArrayPerm = numpy.array([ pFun(array([_permutation(x) for x in pArray1]), pArray2) for i in xrange(iIter) ])
+	pArrayPerm = numpy.array([ pFun(array([_permutation(x) for x in pArray1]), pArray2) for i in range(iIter) ])
 
 	dPPerm = percentileofscore(pArrayPerm, dVal) / 100.0 	
 
@@ -1356,249 +1327,7 @@ def parametric_test_by_pls_pearson(pArray1, pArray2, iIter=1000):
 	fP = pearsonr(X_pls, Y_pls)[1]
 
 	return fP
-
-#=========================================================
-# Cake Cutting 
-#=========================================================
-"""
-Think about the differences between pdf and cdf 
-"""
-
-def identity_cut(data_length, iCuts):
-	cake = range(data_length)
-	return [[i] for i in cake]
-
-def uniform_cut(pArray, iCuts, iAxis=1):
-	"""
-	Uniform cuts of the data 
-
-	Parameters
-	-------------
-
-	pArray : numpy array, array-like 
-		Input array 
-	iCuts : int 
-		Number of cuts 
-	iAxis : int 
-
-	Returns 
-	----------
-
-	C : list  
-		Divided array 
-
-	Note
-	------
-
-	Code still observes sub-optimal behavior; fix. 
-
-	"""
-
-	def _uniform_cut(iData, iCuts):
-		pData = range(iData)
-		if iCuts > iData:
-			sys.stderr.write("Number of cuts exceed the length of the data\n")
-			return [[i] for i in pData]
-		else:		
-			iMod = iData % iCuts 
-			iStep = iData / iCuts 
-			aOut = [pData[i * iStep:(i + 1) * iStep] for i in range(iCuts)]
-			pRemain = pData[iCuts * iStep:] 
-			assert(iMod == len(pRemain))
-			for j, x in enumerate(pRemain):
-				aOut[j].append(x)
-		return aOut 
-
-	if not iCuts: 
-		iCuts = math.floor(math.log(len(pArray), 2))
-
-	pArray = array(pArray)
-
-	aIndex = map(array, _uniform_cut(len(pArray), iCuts=iCuts))  # Make sure each subset is an array so we can map with numpy 
-	return [pArray[x] for x in aIndex]
-
-def cumulative_uniform_cut(cake_length, iCuts):
-	assert(cake_length > iCuts)
-
-	aOut = [] 
-
-	iSize = int(math.floor(float(cake_length) / iCuts))
-
-	for iStep in range(1, iSize + 1):
-		if iStep != iSize:
-			aOut.append(range(cake_length)[:iStep * iCuts])
-		else:
-			aOut.append(range(cake_length)[:])
-
-	return aOut 
-
-def log_cut(cake_length, iBase=2):
-	"""
-	Input: cake_length <- length of array, iBase <- base of logarithm 
-
-	Output: array of indices corresponding to the slice 
-
-	Note: Probably don't want size-1 cake slices, but for proof-of-concept, this should be okay. 
-	Avoid the "all" case 
-
-	"""
-
-	aOut = [] 
-
-	iLength = cake_length 
-
-	iSize = int(math.floor(math.log(iLength , iBase)))
-	aSize = [2 ** i for i in range(iSize)] 
-
-	iStart = 0 
-	for item in aSize:
-		iStop = iStart + item 
-		if iStop == iLength - 1:
-			iStop += 1 
-			# ensure that the rest of the cake gets included in the tail case  
-		aOut.append(array(range(iStart, iStop))) 
-		iStart = iStop 
-
-	aOut.reverse()  # bigger ones first 
-	return aOut 
-
-def cumulative_log_cut(cake_length, iBase=2):
-	"""
-	Input: cake_length <- length of array, iBase <- base of logarithm 
-
-	Output: array of indices corresponding to the slice 
-
-	Note: Probably don't want size-1 cake slices, but for proof-of-concept, this should be okay. 
-	Avoid the "all" case 
-
-	"""
-
-	aOut = [] 
-
-	iLength = cake_length 
-
-	iSize = int(math.floor(math.log(iLength , iBase)))
-	aSize = [2 ** i for i in range(iSize + 1)] 
-
-	aOut = [ range(cake_length)[:x] for x in aSize]
-	aOut.reverse()
-	return map(array, aOut)
-
-def tables_to_probability(aaTable):
-	if not aaTable:
-		raise Exception("Empty table.")
-	
-	aOut = [] 
-	iN = sum([len(x) for x in aaTable])
-	# iN = reduce( lambda x,y: len(x)+y, aaTable, 0 ) #number of elements 
-
-	for aTable in aaTable:
-		iB = len(aTable)
-		aOut.append(float(iB) / (iN + 1))
-
-	# probability of creating new table 
-	aOut.append(1.0 / (iN + 1))
-
-	return aOut 
-
-def CRP_cut(cake_length):
-	
-	iLength = cake_length 
-
-	aOut = None 
-
-	for i in range(iLength):
-		if not aOut:
-			aOut = [[i]] 
-			continue 
-		else:
-			pBool = multinomial(1, tables_to_probability(aOut)) 
-		
-			iK = [x for x in compress(range(len(pBool)), pBool)][0]
-			if iK + 1 > len(aOut):  # create new table 
-				aOut.append([i])
-			else:
-				aOut[iK].append(i)  # seat the customer on an existing table 
-
-	return map(array, aOut)  # return as numpy array, so we can vectorize 
-
-def cumulative_CRP_cut(cake_length):
-	aTmp = sorted(CRP_cut(cake_length), key=lambda x:-1 * len(x))
-	iLength = len(aTmp)
-
-	return [ numpy.hstack(aTmp[:i]) for i in range(1, iLength) ]
-
-def PY_cut(cake_length):
-	""" 
-	random cut generated by pitman-yor process prior
-	"""
-
-	pass
-
-def IBP_cut(cake_length):
-	"""
-	random cut generated by Indian Buffet Process prior
-	"""
-
-	pass 
-	
-
-def p_val_plot(pArray1, pArray2, pCut=log_cut, iIter=1000):
-	"""
-	Returns p value plot of combinatorial cuts 
-
-	In practice, works best when arrays are of similar size, since I implement the minimum ... 
-	For future think about implementing the correct step function 
-
-	"""
-
-	aOut = None 
-	D1, D2 = pArray1[:], pArray2[:]
-
-	for i in range(iIter):
-		shuffle(D1)
-		shuffle(D2)
-
-		print "shuffled data"
-		print D1 
-
-		len1, len2 = len(D1), len(D2)
-		cut1, cut2 = sorted(pCut(len1), key=lambda x:-1.0 * len(x)), sorted(pCut(len2), key=lambda x:-1.0 * len(x))
-		lencut1, lencut2 = len(cut1), len(cut2)
-		iMin = min(lencut1, lencut2)
-		if not aOut:
-			aOut = [[] for _ in range(iMin)] 
-
-		print "cut1"
-		print cut1
-		print "cut2"
-		print cut2
-
-		for j in range(iMin):
-			dP = permutation_test_by_representative(pArray1[cut1[j]], pArray2[cut2[j]])
-
-			print "pval"
-			print dP 
-
-			# be careful when using CRP/PYP, don't know the cluster size in advance 
-			try: 
-				aOut[j].append(dP)
-			except IndexError: 
-				aOut += [[] for _ in range(j - len(aOut) + 1)]
-				aOut[j].append(dP)
-
-	return aOut 
-
-
-#=========================================================
-# Density estimation 
-#=========================================================
-
-def step_function():
-	pass 
-
-# ## This is a very simple linear cutting method, with \sqrt{N} bins 
-# ## To be tested with other estimators, like kernel density estimators for improved performance 
+ 
 def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=None, method=None, aiSkip=[]):
 	
 	"""
@@ -1734,7 +1463,7 @@ def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=No
 			try:
 				return rankdata(astrValues, method= 'dense')
 			except:
-				print "An exception happend with discretizing continuose data!!!"
+				print ("An exception happend with discretizing continuose data!!!")
 				_discretize_categorical(astrValues, number_of_bins=number_of_bins)
 		else:							
 			try:
@@ -1746,7 +1475,7 @@ def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=No
 					order = fcluster(linkage(distanceMatrix, method='complete'), number_of_bins,'distance')
 					return order
 			except:
-				print "An exception happend with discretizing continuose data!!!" 
+				print ("An exception happend with discretizing continuose data!!!")
 				_discretize_categorical(astrValues, number_of_bins=number_of_bins)
 
 		discretized_result = [None] * len(astrValues)
@@ -1828,7 +1557,7 @@ def _discretize_continuous_old(astrValues, number_of_bins=None):
 		number_of_bins = min(number_of_bins, len(set(astrValues)))
 	#print number_of_bins	
 	# This is still a bit buggy since ( [0, 0, 0, 1, 2, 2, 2, 2], 3 ) will exhibit suboptimal behavior
-	aiIndices = sorted(range(len(astrValues)), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
+	aiIndices = sorted(list(range(len(astrValues))), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
 	astrRet = [None] * len(astrValues)
 	#print "aiIndices:", aiIndices
 	#print "astrRet:", astrRet
@@ -1869,7 +1598,7 @@ def mp(pArray, pFunc, axis=0):
 	if bool(axis): 
 		pArray = pArray.T
 
-	pIndices = itertools.combinations(range(pArray.shape[0]), 2)
+	pIndices = itertools.combinations(list(range(pArray.shape[0])), 2)
 
 	return array([pFunc(pArray[i], pArray[j]) for i, j in pIndices])
 
@@ -1907,7 +1636,7 @@ def mc(pArray1, pArray2, pFunc, axis=0, bExpand=False):
 	iRow1 = len(pArray1)
 	iRow2 = len(pArray2)
 
-	pIndices = itertools.product(range(iRow1), range(iRow2))
+	pIndices = itertools.product(list(range(iRow1)), list(range(iRow2)))
 
 	aOut = array([pFunc(pArray1[i], pArray2[j]) for i, j in pIndices])
 	return (aOut if not bExpand else numpy.reshape(aOut, (iRow1, iRow2)))
@@ -2098,7 +1827,7 @@ def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
 			(gp, Nexc) = estimate_tail_gpd(null_samples)
 			config.gp  = gp
 			config.Nexc = Nexc
-		except ArithmeticError, ValueError:
+		except ArithmeticError as ValueError:
 			return float(M)/float(N)
 	else:
 		(gp, Nexc) = (config.gp, config.Nexc)
