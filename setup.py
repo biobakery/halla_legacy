@@ -27,7 +27,8 @@ except ImportError:
         "Operating System :: MacOS",
         "Operating System :: Unix",
         "Operating System :: Microsoft :: Windows",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.4",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
         ]
 
@@ -62,15 +63,15 @@ setup(
         "between two or more heterogeneous datasets, each containing a mixture of discrete, binary, or continuous data." ,
     url="http://huttenhower.sph.harvard.edu/halla",
     keywords=['association','discovery','test','pattern','hierarchically'],
-    platforms=['Linux','MacOS'],
+    platforms=['Linux','MacOS', "Windows"],
     classifiers=classifiers,
     #long_description=open('readme.md').read(),
     install_requires=[  
         "Numpy >= 1.9.2",
-        #"Scipy >= 0.17.0",
-        #"Matplotlib >= 1.5.1",
-        #"Scikit-learn >= 0.14.1",
-        #"minepy >= 1.0.0", #for MIC in evaluation package 
+        "Scipy >= 0.17.0",
+        "Matplotlib >= 1.5.1",
+        "Scikit-learn >= 0.14.1",
+        "minepy >= 1.0.0", #for MIC in evaluation package 
         "pandas >= 0.18.1",
         #"R >= 3.1.0",
         #"rpy2 >= 0.0.0"
