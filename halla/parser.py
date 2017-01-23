@@ -173,10 +173,10 @@ class Input:
 			# Parse variable names
 			if bVar: 
 				aNames =  list(pArray[:, 0])
-				aNames = map(str, aNames)
+				aNames = list(map(str, aNames))
 				if config.format_feature_names:
-					aNames = map(wrap_features, aNames)
-					aNames = map(substitute_special_characters, aNames)
+					aNames = list(map(wrap_features, aNames))
+					aNames = list(map(substitute_special_characters, aNames))
 				pArray = pArray[:, 1:]
 
 			# # Parse data types, missing values, and whitespace
@@ -193,10 +193,10 @@ class Input:
 				#***************************************************************************************************** 
 				if config.missing_method is  None: #and not distance.c_hash_association_method_discretize[config.similarity_method]:
 					#warn_message ="There is missing data in feature "+  aNames[i]+"!!! " + "Try --missing-method=method to fill missing data. "
-					line = map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) 
-										else np.nan), line)  ###### np.nan Convert missings to nans
+					line = list(map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) 
+										else np.nan), line))  ###### np.nan Convert missings to nans
 				else:
-					line = map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else np.nan ), line)  ###### np.nan Convert missings to nans
+					line = list(map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else np.nan ), line))  ###### np.nan Convert missings to nans
 					#line = df1 = pd.DataFrame(line)
 					#if distance.c_hash_association_method_discretize[config.similarity_method]:
 					try:
@@ -213,7 +213,7 @@ class Input:
 						#aTypes.append("CAT")
 					#except ValueError:
 					try:
-						line = map(float, line)  # is it continuous? 
+						line = list(map(float, line))  # is it continuous? 
 						aTypes.append("CON")
 						#print "Continues data !"
 					except ValueError:

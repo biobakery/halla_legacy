@@ -4,6 +4,7 @@
 Grand summary of HAllA output as heatmap figure
 ===============================================
 Author: Eric Franzosa (eric.franzosa@gmail.com)
+        Gholamali Rahnavard (gholamali.rahnavard@gmail.com)
 """
 
 import os
@@ -28,8 +29,10 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 import numpy as np
-mpl.rcParams["pdf.fonttype"] = 42
+plt.rcParams["font.family"] = "Arial"
+#mpl.rcParams["pdf.fonttype"] = 42
 mpl.rcParams["font.family"] = "Arial"
+
 # ---------------------------------------------------------------
 # constants / config
 # ---------------------------------------------------------------
@@ -71,7 +74,7 @@ class Table:
                     self.colheads = values
                 else:
                     self.rowheads.append( rowhead )
-                    self.data.append( map( float, values ) )
+                    self.data.append( list(map( float, values )))
         self.data = np.array( self.data )
         self.update()
         
@@ -154,7 +157,7 @@ def load_associations( path, largest=None, strongest=None, orderby = 'similarity
     with open( path ) as fh:
         for row in csv.reader( fh, dialect="excel-tab" ):
             if "association" not in row[0]:
-                pairs.append( [row[0], row[1].split( ";" ), row[3].split( ";" ), float( row[5] ), float( row[6] ),  float( row[7] )] )
+                pairs.append( [row[0], row[1].split(";"), row[3].split( ";" ), float(row[5]), float(row[6]),  float(row[7])] )
     if largest is not None and strongest is not None:
         sys.exit( "Can only specify one of LARGEST and STRONGEST" )
     elif largest is not None:
@@ -204,9 +207,9 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
     # begin plotting
     fig = plt.figure()
     width = max( c_unit_w * simtable.ncols, c_min_width )
-    width += c_char_pad * max( map( len, simtable.rowheads ) )
+    width += c_char_pad * max( list(map( len, simtable.rowheads )))
     height = max( c_unit_h * simtable.nrows, c_min_height )
-    height += c_char_pad * max( map( len, simtable.colheads ) )
+    height += c_char_pad * max(list( map( len, simtable.colheads )) )
     fig.set_size_inches( width, height )
     span = simtable.ncols
     cbarspan = c_cbarspan
@@ -251,7 +254,7 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
     twin_ax.set_ylim( vmin, vmax )
     if similarity != "Pairwise Similarity":
         similarity = "Pairwise "+similarity
-    twin_ax.set_ylabel( similarity, size=c_giant_text, fontsize=10 )
+    twin_ax.set_ylabel( similarity, size=c_giant_text)#, fontsize=c_large_text )
     ticks = [vmin]
     while ticks[-1] < vmax:
         ticks.append( ticks[-1] + c_simstep )
@@ -272,6 +275,7 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
                 x2 - x1 + 1,
                 y2 - y1 + 1,
                 facecolor="none",
+                edgecolor = "black",
                 linewidth=c_line_width,
                 clip_on=False,
             )
@@ -281,7 +285,7 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
         size = c_label_scale * min( delx, dely )
         size /= 1 if len( text ) == 1 else c_label_aspect * len( text )
         size = int( size )
-        text = ax.text(
+        text = ax.text(#np.mean( [x1, x2] )+0.5+c_label_shift*size,
             np.mean( [x1, x2] )+.75+c_label_shift*size if (len(row_items)%2 != 0 and len(row_items)>1 and len(col_items) >1)  else\
             np.mean( [x1, x2] )+.5+c_label_shift*size if len(row_items) == 1 else np.mean( [x1, x2] )+0.5+c_label_shift*size ,
             np.mean( [y1, y2] )+0.5+c_label_shift*size,

@@ -4,8 +4,8 @@ unified statistics module
 """
 
 # native python 
-import exceptions 
-from exceptions import ArithmeticError, ValueError 	
+#import exceptions 
+#from exceptions import ArithmeticError, ValueError 	
 from itertools import compress
 from itertools import product
 import itertools
@@ -218,80 +218,72 @@ def mca_method(pArray, discretize_style, iComponents=1):
 	'''
 
 def pca(pArray, iComponents=1):
-	 """
-	 Input: N x D matrix 
-	 Output: D x N matrix 
-
-	 """
-	 from sklearn.decomposition import PCA
-	 # print "pArray:", pArray
-	 try:
-	 	iRow, iCol = pArray.shape 
-	 	pPCA = PCA(n_components=iComponents)
-		# # doing this matrix inversion twice doesn't seem to be a good idea 
-		# print"PCA:",   pPCA.fit_transform( pArray.T ).T 
-		# print "End PCA"
-		
+	"""
+	Input: N x D matrix 
+	Output: D x N matrix 
+	
+	"""
+	from sklearn.decomposition import PCA
+	# print "pArray:", pArray
+	try:
+		iRow, iCol = pArray.shape 
+		pPCA = PCA(n_components=iComponents)
+	# # doing this matrix inversion twice doesn't seem to be a good idea 
+	# print"PCA:",   pPCA.fit_transform( pArray.T ).T 
+	# print "End PCA"
 		pcs = pPCA.fit_transform(pArray.T).T
 		#print "Loading:", pPCA.components_
 		loadings = pPCA.components_
 		return (pcs[0], pPCA.explained_variance_ratio_[0], loadings[0])
-
-	 except ValueError:
-	 	iRow = pArray.shape
-	 	iCol = None 
-
-	 	return pArray, 1.0, [1.0]
-def nlpca(pArray, iComponents=1):
-	 """
-	 Input: N x D matrix 
-	 Output: D x N matrix 
-
-	 """
-	 from sklearn.decomposition import PCA
-	 #print "pArray:", pArray
-	 _, number_sample = pArray.shape
-	 t = int(number_sample/math.sqrt(number_sample))
-	 s = int(number_sample/t)
-	 #print t
-	 first_pc = []	
-	 try:
-	 	for i in range (t):
-		 	pPCA = PCA(n_components=iComponents)
-			sub_pArray = pArray[:, s*i:s*(i+1)-1]
-			sub_pc = pPCA.fit_transform(sub_pArray.T).T
-			first_pc.extend(sub_pc[0])
-
-		return array([first_pc])
-
-	 except ValueError:
-	 	iRow = pArray.shape
-	 	iCol = None 
-
-	 	return pArray
-def mds(pArray, iComponents=1):
-	 """
-	 Input: N x D matrix 
-	 Output: D x N matrix 
-
-	 """
-	 from sklearn.decomposition import MDS
-	 # print "pArray:", pArray
-	 try:
-	 	iRow, iCol = pArray.shape
-	 	mds = manifold.MDS(n_components=iComponents, max_iter=3000, eps=1e-9, random_state=seed,
-                   dissimilarity="precomputed", n_jobs=1)
-		pos = mds.fit_transform(similarities)
 		
-
+	except ValueError:
+		iRow = pArray.shape
+		iCol = None 
+	
+		return pArray, 1.0, [1.0]
+def nlpca(pArray, iComponents=1):
+	"""
+	Input: N x D matrix 
+	Output: D x N matrix 
+	
+	"""
+	from sklearn.decomposition import PCA
+	#print "pArray:", pArray
+	_, number_sample = pArray.shape
+	t = int(number_sample/math.sqrt(number_sample))
+	s = int(number_sample/t)
+	#print t
+	first_pc = []	
+	try:
+	 	for i in range (t):
+	 		pPCA = PCA(n_components=iComponents)
+	 		sub_pArray = pArray[:, s*i:s*(i+1)-1]
+	 		sub_pc = pPCA.fit_transform(sub_pArray.T).T
+	 		first_pc.extend(sub_pc[0])
+	 	return array([first_pc])
+	except ValueError:
+		iRow = pArray.shape
+		iCol = None 
+		return pArray
+def mds(pArray, iComponents=1):
+	"""
+	Input: N x D matrix 
+	Output: D x N matrix 
+	
+	"""
+	from sklearn.decomposition import MDS
+	# print "pArray:", pArray
+	try:
+		iRow, iCol = pArray.shape
+		mds = manifold.MDS(n_components=iComponents, max_iter=3000, eps=1e-9, random_state=seed,
+		          dissimilarity="precomputed", n_jobs=1)
+		pos = mds.fit_transform(similarities)
 		print ("End MDS", pos.T)
 		return pos.T
-		
-	 except ValueError:
-	 	iRow = pArray.shape
-	 	iCol = None 
-
-	 	return pArray
+	except ValueError:
+		iRow = pArray.shape
+		iCol = None 
+		return pArray
 def first_rep(pArray, decomposition, iComponents=1 ):
 	
 	from sklearn.decomposition import PCA
@@ -309,24 +301,22 @@ def kpca(pArray, iComponents=1):
 	
 	return kpca.fit_transform(pArray.T).T [0]
 def ica(pArray, iComponents=1):
-	 """
-	 Input: N x D matrix 
-	 Output: D x N matrix 
-
-	 """
-	 from sklearn.decomposition import FastICA
-	 
-	 try:
-	 	iRow, iCol = pArray.shape 
-	 	pICA = FastICA(n_components=iComponents)
+	"""
+	Input: N x D matrix 
+	Output: D x N matrix 
+	
+	"""
+	from sklearn.decomposition import FastICA
+	
+	try:
+		iRow, iCol = pArray.shape 
+		pICA = FastICA(n_components=iComponents)
 		# # doing this matrix inversion twice doesn't seem to be a good idea 
 		return pICA.fit_transform(pArray.T).T 
-
-	 except ValueError:
-	 	iRow = pArray.shape
-	 	iCol = None 
-
-	 	return pArray
+	except ValueError:
+		iRow = pArray.shape
+		iCol = None 
+		return pArray
 
 def cca(pArray1, pArray2, StrMetric, iComponents=1):
 	"""
@@ -1267,17 +1257,11 @@ def g_test(pArray1, pArray2, metric, decomposition, iIter):
 	if decomposition in ["average"]:
 		return g_test_by_average(pArray1, pArray2, metric=metric, iIter=iIter)
 def parametric_test(pArray1, pArray2):
-	
-	# numpy.random.seed(0)
-
 	pMe1 = lambda x, y:  cor(x, y, method="pearson", pval=True)
 	pMe2 = lambda x, y:  cor(x, y, method="spearman", pval=True)
-
 	pVal1 = [pMe1(i, j)[1] for i, j in itertools.product(pArray1, pArray2)]
- 	pVal2 = [pMe2(i, j)[1] for i, j in itertools.product(pArray1, pArray2)]
-
+	pVal2 = [pMe2(i, j)[1] for i, j in itertools.product(pArray1, pArray2)]
 	return numpy.average(pVal1), numpy.average(pVal2)
-
 
 def parametric_test_by_cca(pArray1, pArray2, iIter=1000):
 	
@@ -1537,10 +1521,10 @@ def _discretize_continuous_old_R(astrValues, number_of_bins=None, style =None):
 			ro.r(' descretized_v <- findCols(clI)')
 			astrRet = ro.globalenv['descretized_v']
 			return astrRet
-		except Exception, err:
+		except Exception as err:
 			print(traceback.format_exc())
 			
-			print "Discretizing as exeception in ClassInt happend!!!"
+			print ("Discretizing as exeception in ClassInt happend!!!")
 			try:
 				order = rankdata(astrValues, method= 'min')
 			except:

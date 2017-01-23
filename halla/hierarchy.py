@@ -30,7 +30,7 @@ from matplotlib.sankey import RIGHT
 from itertools import product, combinations
 from unicodedata import decomposition
 from math import fabs
-from profile import Stats
+#from profile import Stats
 try:
     from functools import reduce
 except:
@@ -322,20 +322,19 @@ def truncate_tree(apClusterNode, level=0, skip=0):
 
     """
     iSkip = skip 
-    iLevel = level 
-
+    iLevel = level
     if iLevel < iSkip:
         try:
-            return truncate_tree(filter(lambda x: bool(x), [(p.right if p.right else None) for p in apClusterNode]) \
-            + filter(lambda x: bool(x), [(q.left if p.left else None) for q in apClusterNode]), level=iLevel + 1, skip=iSkip)
+            return truncate_tree(list(filter(lambda x: bool(x), [(p.right if p.right else None) for p in apClusterNode])) \
+            + list(filter(lambda x: bool(x), [(q.left if q.left else None) for q in apClusterNode]), level=iLevel + 1, skip=iSkip))
         except:
             return truncate_tree([x for x in [(p.right if p.right else None) for p in apClusterNode] if bool(x)] \
-            + [x for x in [(q.left if p.left else None) for q in apClusterNode] if bool(x)], level=iLevel + 1, skip=iSkip) 
+            + [x for x in [(q.left if q.left else None) for q in apClusterNode] if bool(x)], level=iLevel + 1, skip=iSkip) 
 
     elif iSkip == iLevel:
         if any(apClusterNode):
             try:
-                return filter(lambda x: bool(x), apClusterNode)
+                return list(filter(lambda x: bool(x), apClusterNode))
             except:
                 return [x for x in apClusterNode if bool(x)]
     
@@ -408,11 +407,8 @@ def reduce_tree_by_layer(apParents, iLevel=0, iStop=None):
 
     """
 
-    apParents = list(apParents)
-    try:
-        apParents = filter(bool, apParents)
-    except:
-        apParents = list(filter(bool, apParents))
+    apParents = list(filter(bool, list(apParents)))
+
 
     bTree = False 
     
