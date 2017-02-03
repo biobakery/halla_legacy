@@ -311,7 +311,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
 def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.similarity_method, linkage_method = "average", colLable = False, rowLabel = True, color_bar = True, sortCol = True):
     # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
     scale  = config.transform_method
-    max_hight = 500
+    max_hight = 1000
     if not data_table is None:
         plot_height = min(int(len(data_table)/7.25)+5, max_hight)  
         plot_weight = max(math.floor(len(data_table[0])/len(data_table))* plot_height, min(int(len(data_table[0])/7.25)+5, max_hight))  
@@ -320,11 +320,11 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
             plot_dpi = 50
         else: 
             plot_dpi = 200
-        fig = pylab.figure(dpi= plot_dpi, figsize=(plot_weight, plot_height))
+        fig = pylab.figure(figsize=(plot_weight, plot_height))
     else:
         plot_height = min(int(len(D)/7.25)+5, max_hight)  
         plot_weight = plot_height
-        fig = pylab.figure(dpi= 300, figsize=(plot_weight, plot_height))
+        fig = pylab.figure(figsize=(plot_weight, plot_height))
         
     ax1 = fig.add_axes([0.09, 0.1, 0.2, 0.6], frame_on=True)
     ax1.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')

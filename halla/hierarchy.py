@@ -878,6 +878,19 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
                 level_number += 1
 
     return [Hypothesis_Tree_Root]
+def number_of_pause(n1,n2):
+    #number of pause
+    n = 0
+    if n1 == n2:
+        return 0
+    else:
+        a = max(n1, n2)
+        b = min(n1, n2)
+        if (a/math.log(a,2) >= b):
+            return 1 + number_of_pause(a/math.log(a,2), b)
+        else:
+            return 0
+        
 def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="uniform", strLinkage="min", robustness = None):
     
     func = config.similarity_method
@@ -890,14 +903,16 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     # e.g. 2 means we cut in each 2 iteration 
     n1 = apClusterNode0[0].get_count()
     n2 = apClusterNode1[0].get_count()
-    if n1 > n2 :
+    n_pause = number_of_pause(n1, n2)
+    #print ("Number of pause:", n_pause)
+    '''if n1 > n2 :
         cut_speed_1 = 1
     else:
-        cut_speed_1 = int(max(math.log(n2 - n1 + 1),1)) 
+        cut_speed_1 = int(max(math.log(n2 - n1 + 1,2),1)) 
     if n2 > n1:
         cut_speed_2 = 1
     else:
-        cut_speed_2 = int(max(math.log(n1 - n2 + 1),1))
+        cut_speed_2 = int(max(math.log(n1 - n2 + 1),1))'''
     
     # Write the hypothesis that has been tested
     output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
@@ -957,8 +972,8 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                 bTauX = _is_stop(a)  
                 bTauY = _is_stop(b)  
                 do_next_level = True
-                if cut_speed_1 != 1:
-                    if level_number % cut_speed_1 == 0 and not bTauX:
+                if n1 < n2:
+                    if level_number-1 > n_pause and not bTauX:
                         apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
                     else:
                        apChildren0 = [a] 
@@ -968,8 +983,8 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                     elif not bTauY:
                         apChildren0 = [a]
                     
-                if cut_speed_2 != 1:
-                    if level_number % cut_speed_2 == 0:
+                if n2  < n1:
+                    if level_number-1 > n_pause and not bTauY :
                         apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
                     else:
                         apChildren1 = [b]
