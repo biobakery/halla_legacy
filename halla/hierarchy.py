@@ -50,9 +50,9 @@ def multi_pMethod(args):
     return id, dP, similarity, left_first_rep_variance, right_first_rep_variance,\
          left_loading, right_loading, left_rep, right_rep
 
-def multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, dataset2):
+def multiprocessing_estimate_pvalue(estimate_pvalue, current_level_tests, pMethod, dataset1, dataset2):
     """
-    Return the results from applying the data to the actor function
+    Return the results from applying the data to the estimate_pvalue function
     """
     def _multi_pMethod_args(current_level_tests, pMethod, dataset1, dataset2, ids_to_process):
         for id in ids_to_process:
@@ -90,7 +90,7 @@ def multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, datase
             if current_level_tests[i].significance != None:
                 result.append(current_level_tests[i].pvalue)
             else: 
-                result.append(_actor(current_level_tests[i]))
+                result.append(estimate_pvalue(current_level_tests[i]))
 
     return result
 
@@ -257,6 +257,7 @@ def stop_and_reject(Node):
         return False
 
 def is_bypass(Node):
+    
     if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
         return True
     if config.apply_stop_condition:
@@ -886,7 +887,7 @@ def number_of_pause(n1,n2):
     else:
         a = max(n1, n2)
         b = min(n1, n2)
-        if (a/math.log(a,2) >= b):
+        if a/math.log(a,2) >= b:
             return 1 + number_of_pause(a/math.log(a,2), b)
         else:
             return 0
@@ -983,7 +984,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                     elif not bTauY:
                         apChildren0 = [a]
                     
-                if n2  < n1:
+                if n2 < n1:
                     if level_number-1 > n_pause and not bTauY :
                         apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
                     else:
@@ -1032,7 +1033,7 @@ pHashMethods = {"permutation" : stats.permutation_test,
 
 strMethod = config.randomization_method
 pMethod = pHashMethods[strMethod]
-def _actor(pNode):
+def estimate_pvalue(pNode):
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
     """
@@ -1044,9 +1045,9 @@ def _actor(pNode):
     aIndiciesMapped = list(map(array, aIndicies))  # So we can vectorize over numpy arrays
     X = dataset1[aIndiciesMapped[0]]
     Y = dataset2[aIndiciesMapped[1]]
-    dP, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y)
+    est_pvalue, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y)
     pNode.similarity_score = similarity
-    return dP        
+    return est_pvalue        
 def naive_all_against_all():
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
@@ -1072,7 +1073,7 @@ def naive_all_against_all():
         test = add_data(test, data)
         tests.append(test)
     
-    p_values = multiprocessing_actor(_actor, tests, pMethod, dataset1, dataset2)
+    p_values = multiprocessing_estimate_pvalue(estimate_pvalue, tests, pMethod, dataset1, dataset2)
     aP_adjusted, pRank = stats.p_adjust(p_values, config.q)
     q_values = stats.pvalues2qvalues (p_values, adjusted=True)
     for i in range(len(tests)):
@@ -1130,11 +1131,11 @@ def hypotheses_level_testing(current_level_tests):
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
     #print "number of hypotheses in the level:  %s" % (len(current_level_tests))
-    p_values = multiprocessing_actor(_actor, current_level_tests, pMethod, dataset1, dataset2)
+    p_values = multiprocessing_estimate_pvalue(estimate_pvalue, current_level_tests, pMethod, dataset1, dataset2)
     for i in range(len(current_level_tests)):
        current_level_tests[i].pvalue = p_values[i]
     q = config.q 
-    aP_adjusted, pRank = stats.p_adjust(p_values, q)#config.q)
+    aP_adjusted, pRank = stats.p_adjust(p_values, config.q)#config.q)
     
     for i in range(len(current_level_tests)):
        current_level_tests[i].rank = pRank[i]
