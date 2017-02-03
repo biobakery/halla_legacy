@@ -25,8 +25,10 @@ import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.pyplot import xlabel
 from itertools import product
-matplotlib.rcParams["pdf.fonttype"] = 42
-
+#matplotlib.rcParams["pdf.fonttype"] = 42
+plt.rcParams["font.family"] = "Arial"
+#matplotlib.rcParams["pdf.fonttype"] = 42
+matplotlib.rcParams["font.family"] = "Arial"
 from . import config
 from . import distance
 from . import stats
@@ -306,8 +308,9 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     fig.savefig(filename + '.pdf')
     pylab.close()
         
-def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.similarity_method, linkage_method = "average", colLable = False, rowLabel = True, color_bar = True, sortCol = True, scale  ='sqrt'):
+def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.similarity_method, linkage_method = "average", colLable = False, rowLabel = True, color_bar = True, sortCol = True):
     # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
+    scale  = config.transform_method
     max_hight = 500
     if not data_table is None:
         plot_height = min(int(len(data_table)/7.25)+5, max_hight)  
@@ -392,7 +395,7 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
     else:
         myColor = pylab.cm.RdBu_r
     if not data_table is None:
-        scaled_values = stats.scale_data(data_table, scale = scale)
+        scaled_values = data_table#stats.scale_data(data_table, scale = scale)
     else:
         myColor = pylab.cm.pink
         scaled_values = D#stats.scale_data(D, scale = scale)
@@ -439,7 +442,10 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
         rect = l,b,w,h
         axcolor = fig.add_axes(rect)
         #axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
-        fig.colorbar(im, cax=axcolor, label=str(config.similarity_method).upper()+" ("+scale+")" )
+        legend_lable = str(config.similarity_method).upper() if len(config.similarity_method) <5 else config.similarity_method.title()
+        if len(scale) >0 :
+            legend_lable = legend_lable + ' ('+str(scale.title())+')'
+        fig.colorbar(im, cax=axcolor, label = legend_lable)
         #pylab.colorbar(ax=axmatrix) 
         #axmatrix.get_figure().colorbar(im, ax=axmatrix)
     #plt.tight_layout()
@@ -517,12 +523,12 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
         ax = plt.gca()
         
     max_group_size = max(len(item) for item in data_groups)
-    total_padding = pad  * (max_group_size - 1)     
+    total_padding = pad  * (max_group_size - 1)   
     width = (max_width - total_padding) / max_group_size
     kwargs['widths'] = width
 
     def positions(group, i):
-        span = width * len(group) + pad * (len(group)-1)
+        span = width * len(group) + pad * (len(group))
         ends = (span - width) / 2
         x = np.linspace(-ends, ends, len(group))
         return x + i
@@ -584,7 +590,10 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
                 #import ggplot as gg
                 #axs[i,j] = gg.qplot(df[df.columns[j]], df[df.columns[i]]) + gg.geom_smooth(color="blue")
             else:
-                axs[i,j].hist(df[df.columns[j]], color = 'darkslategrey')
+                try:
+                    df[df.columns[j]].hist(ax=axs[i,j], color = 'darkslategrey')
+                except:
+                    pass
             #if i>j:
             #     axs[i,j].visible(False)
                 

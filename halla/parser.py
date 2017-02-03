@@ -119,10 +119,12 @@ class Input:
 		self._remove_low_entropy_features()
 		if len(self.outName1) <2 or len(self.outName1) <2:
 			sys.exit("--- HAllA to continue needs at lease two features in each dataset!!!\n--- Please repeat the one feature or provide the -a AllA option in the command line to do pairwise alla-against-all test!!")
+		
 		if store.bypass_discretizing():
 			try:
 				self.orginal_dataset1= np.asarray(self.orginal_dataset1, dtype = float)
 				self.orginal_dataset2= np.asarray(self.orginal_dataset2, dtype = float)
+				self._transform_data()
 				#self.discretized_dataset1 = self.orginal_dataset1
 				#self.discretized_dataset2 = self.orginal_dataset2
 			except:
@@ -388,10 +390,16 @@ class Input:
 		try:
 			print ("--- %d features and %d samples are used from second dataset" % (l2_after, len(self.discretized_dataset2[0])))
 		except IndexError:
-			sys.exit("WARNING! No feature in the first dataset after filtering.")
+			sys.exit("WARNING! No feature in the second dataset after filtering.")
 			
 		assert(len(self.discretized_dataset1[0]) == len(self.discretized_dataset2[0]))	
-
+	
+	def _transform_data(self):
+		scale = config.transform_method
+		#print(self.orginal_dataset1)
+		self.orginal_dataset1 = stats.scale_data(self.orginal_dataset1, scale = scale)
+		self.orginal_dataset2 = stats.scale_data(self.orginal_dataset2, scale = scale)
+		#print(self.orginal_dataset1)
 
 
 

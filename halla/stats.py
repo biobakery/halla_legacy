@@ -68,6 +68,12 @@ def scale_data(X, scale = 'log'):
 		y = numpy.sqrt(numpy.abs(X)) * numpy.sign(X)
 	elif scale =='log': 
 		y = numpy.abs(numpy.log(numpy.abs(X))) * numpy.sign(X) 
+	elif scale =='arcsin': 
+		y = numpy.arcsin(X) 
+	elif scale =='arcsinh': 
+		y = numpy.arcsinh(X) 
+	elif scale == '':
+		y= X
 	return y 
 def pvalues2qvalues ( pvalues, adjusted=False ):
     n = len( pvalues )
@@ -788,7 +794,7 @@ def permutation_test_pvalue(X, Y):
 				config.nullsamples = generate_null_dist(X,Y)
 			aDist = config.nullsamples
 		else:
-			for i in xrange(iIter):
+			for i in range(iIter):
 				iter = i
 				permuted_Y = numpy.random.permutation(Y)
 				fAssociation_permuted = math.fabs(pMe(X, permuted_Y))  

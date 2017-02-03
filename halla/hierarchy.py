@@ -294,7 +294,7 @@ def hclust(dataset, labels, dataset_number):
     linkage_method = config.linkage_method
     Distance_matrix = pdist(dataset, metric=distance.pDistance) 
     config.Distance[dataset_number] =  squareform(Distance_matrix)
-    if config.diagnostics_plot and len(config.Distance[dataset_number][0]) < 1000:
+    if config.diagnostics_plot:# and len(config.Distance[dataset_number][0]) < 2000:
         print ("--- plotting heatmap for Dataset %s %s" %(str(dataset_number+ 1)," ... "))
         Z = plot.heatmap(data_table = dataset , D = Distance_matrix, xlabels_order = [], xlabels = labels,\
                           filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.similarity_method)+"_" + \
@@ -885,6 +885,20 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     aFinal = []
     aOut = []
     
+    # Define the speed of cutting hierarchies
+    # e.g. 1 means we cut in each iteration
+    # e.g. 2 means we cut in each 2 iteration 
+    n1 = apClusterNode0[0].get_count()
+    n2 = apClusterNode1[0].get_count()
+    if n1 > n2 :
+        cut_speed_1 = 1
+    else:
+        cut_speed_1 = int(max(math.log(n2 - n1 + 1),1)) 
+    if n2 > n1:
+        cut_speed_2 = 1
+    else:
+        cut_speed_2 = int(max(math.log(n1 - n2 + 1),1))
+    
     # Write the hypothesis that has been tested
     output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
     csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
@@ -934,6 +948,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
 
             # Add leaves from current level to next level
             # Add significant or non significant hypothesis from previous level
+            
             if hypothesis.significance != None:
                 from_prev_hypothesis_node.append(hypothesis_node)
             elif len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[1]) == 1 :
@@ -942,14 +957,27 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                 bTauX = _is_stop(a)  
                 bTauY = _is_stop(b)  
                 do_next_level = True
-                if not bTauX:
-                    apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
+                if cut_speed_1 != 1:
+                    if level_number % cut_speed_1 == 0 and not bTauX:
+                        apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
+                    else:
+                       apChildren0 = [a] 
                 else:
-                    apChildren0 = [a]
-                if not bTauY:
-                    apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
+                    if not bTauX:
+                        apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
+                    elif not bTauY:
+                        apChildren0 = [a]
+                    
+                if cut_speed_2 != 1:
+                    if level_number % cut_speed_2 == 0:
+                        apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
+                    else:
+                        apChildren1 = [b]
                 else:
-                    apChildren1 = [b]
+                    if not bTauY:
+                        apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
+                    elif not bTauX:
+                        apChildren1 = [b]
                 LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren0, apChildren1)] 
                 while LChild:
                     (a1, b1) = LChild.pop(0)

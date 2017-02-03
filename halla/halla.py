@@ -292,7 +292,7 @@ def parse_arguments (args):
         "--missing-char",
         dest ="missing_char",
         default=None,
-        help="defines missing characters\n[default = " "]")
+        help="defines missing characters\n[default = '']")
     argp.add_argument(
         "--missing-method",
         dest ="missing_method",
@@ -311,6 +311,12 @@ def parse_arguments (args):
         #default = False,
         action="store_true",
         help="To write levels of hypothesis tree in the file")
+    argp.add_argument(
+        "-t", "--transform",
+        dest="transform_method", 
+        choices=['log', 'sqrt', 'arcsin', 'arcsinh',''], 
+        default='',
+        help="data transformation method \n[default = '' ]")    
     return argp.parse_args()
 
 def set_parameters(args):
@@ -337,6 +343,7 @@ def set_parameters(args):
             config.permutation_func = 'none'
         else:
             config.permutation_func = 'gpd'
+    config.transform_method = args.transform_method
     config.write_hypothesis_tree = args.write_hypothesis_tree
     config.strStep = "uniform"
     config.verbose = args.verbose

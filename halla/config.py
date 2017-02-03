@@ -1,6 +1,6 @@
 import random
 from numpy import array
-version = '0.7.4'
+version = '0.7.5'
 __description__      = """
   _    _          _ _          
  | |  | |   /\   | | |   /\    
@@ -60,6 +60,7 @@ missing_char_category = False
 format_feature_names = False
 write_hypothesis_tree = False
 report_results =  True
+transform_method = ''
 #==================================================================#
 # Mutable Meta Objects  
 #==================================================================#
