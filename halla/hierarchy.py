@@ -257,9 +257,6 @@ def stop_and_reject(Node):
         return False
 
 def is_bypass(Node):
-    
-    if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
-        return True
     if config.apply_stop_condition:
         return stop_decesnding_silhouette_coefficient(Node)
     else:
@@ -893,7 +890,7 @@ def number_of_pause(n1,n2):
             return 0
 def number_of_level(n):
     #number of possible levels
-    print(n)
+    #print(n)
     if n <= 1:
         return 0
     elif n ==2:
@@ -920,15 +917,14 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     if n1 > n2 :
         cut_speed_1 = 1
     else:
-        cut_speed_1 = max(math.log(n2,2)/math.log(n1,2) ,1) 
-        #cut_speed_1 = int(max(number_of_level(n2)/number_of_level(n1) ,1))
+        #cut_speed_1 = max(math.log(n2,2)/math.log(n1,2) ,1) 
+        cut_speed_1 = max(number_of_level(n2)*1.0/number_of_level(n1) ,1)
     if n2 > n1:
         cut_speed_2 = 1
     else:
-        cut_speed_2 = max(math.log(n1,2) / math.log(n2, 2),1)
-        #cut_speed_2 = int(max(number_of_level(n1)/number_of_level(n2) ,1))
-        #print(number_of_level(n1),number_of_level(n2))
-    #print ("Cut speed 1:",cut_speed_1 ,"Cut speed 2:",cut_speed_2)
+        #cut_speed_2 = max(math.log(n1,2) / math.log(n2, 2),1)
+        cut_speed_2 = max(number_of_level(n1)*1.0/number_of_level(n2) ,1)
+    #print("Number of levels: ",number_of_level(n1),number_of_level(n2))
     # Write the hypothesis that has been tested
     output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
     csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
@@ -980,11 +976,15 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
 
             # Add leaves from current level to next level
             # Add significant or non significant hypothesis from previous level
-            
-            if hypothesis.significance != None:
+            if len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[1]) == 1 :
+                # pass pairwise test to next levels 
+                # to participate in FDR correction and increase the power 
+                #Pairwise test is a test between clusters with only one feature
+                if hypothesis.significance == False:
+                    hypothesis.significance = None
+                    leaf_nodes.append(hypothesis_node)
+            elif hypothesis.significance != None:
                 from_prev_hypothesis_node.append(hypothesis_node)
-            elif len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[1]) == 1 :
-                leaf_nodes.append(hypothesis_node)
             else:
                 bTauX = _is_stop(a)  
                 bTauY = _is_stop(b)  
@@ -1024,27 +1024,6 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                         apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
                     elif not bTauX:
                         apChildren1 = [b]
-                '''if n1 < n2:
-                    if level_number-1 > n_pause and not bTauX:
-                        apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
-                    else:
-                       apChildren0 = [a] 
-                else:
-                    if not bTauX:
-                        apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
-                    elif not bTauY:
-                        apChildren0 = [a]
-                    
-                if n2 < n1:
-                    if level_number-1 > n_pause and not bTauY :
-                        apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
-                    else:
-                        apChildren1 = [b]
-                else:
-                    if not bTauY:
-                        apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
-                    elif not bTauX:
-                        apChildren1 = [b]'''
                 LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren0, apChildren1)] 
                 while LChild:
                     (a1, b1) = LChild.pop(0)
@@ -1061,7 +1040,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                         aLineOut = list(map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))]))
                         csvwc.writerow(aLineOut)
         current_level_nodes = next_level
-        if len(current_level_nodes) > 0 :
+        if len(current_level_nodes) > 0:
             current_level_nodes.extend(leaf_nodes)
             current_level_nodes.extend(from_prev_hypothesis_node)
             
