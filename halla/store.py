@@ -701,7 +701,8 @@ def write_config():
     csvw.writerow(["Permutation function: ", config.permutation_func])
     csvw.writerow(["Seed number: ", config.seed]) 
     csvw.writerow(["Number of permutations iterations for estimating pvalues: ", config.iterations]) 
-    csvw.writerow(["Minimum entropy for filtering threshold : ", config.entropy_threshold])
+    csvw.writerow(["Minimum entropy for filtering threshold in the first dataset : ", config.entropy_threshold1])
+    csvw.writerow(["Minimum entropy for filtering threshold in the second dataset: ", config.entropy_threshold2])
     csvw.writerow([]) 
     performance_file.close() 
 def run():
