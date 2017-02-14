@@ -68,9 +68,11 @@ def multiprocessing_estimate_pvalue(estimate_pvalue, current_level_tests, pMetho
         ids_to_process=[]
         result = [0.0] * len(current_level_tests)
         for id in range(len(current_level_tests)):
-            if current_level_tests[id].significance != None:
+            if current_level_tests[id].pvalue != None:
                 result[id]=current_level_tests[id].pvalue
             else:
+                # increment the number of permutations tests 
+                config.number_of_performed_tests +=1
                 ids_to_process.append(id)
         
         
@@ -87,9 +89,11 @@ def multiprocessing_estimate_pvalue(estimate_pvalue, current_level_tests, pMetho
     else:
         result=[]
         for i in range(len(current_level_tests)):
-            if current_level_tests[i].significance != None:
+            if current_level_tests[i].pvalue != None:
                 result.append(current_level_tests[i].pvalue)
             else: 
+                # increment the number of permutations tests 
+                config.number_of_performed_tests +=1
                 result.append(estimate_pvalue(current_level_tests[i]))
 
     return result
@@ -1040,11 +1044,12 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                         aLineOut = list(map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))]))
                         csvwc.writerow(aLineOut)
         current_level_nodes = next_level
+        #config.number_of_performed_tests += len(current_level_nodes)
         if len(current_level_nodes) > 0:
             current_level_nodes.extend(leaf_nodes)
             current_level_nodes.extend(from_prev_hypothesis_node)
             
-    config.number_of_performed_tests = len(aOut)
+    #config.number_of_performed_tests = len(aOut)
     print ("--- number of performed tests: %s" % config.number_of_performed_tests)
     print ("--- number of passed tests after FDR controlling: %s" % len(aFinal))
     return aFinal, aOut
