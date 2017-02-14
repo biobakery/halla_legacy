@@ -25,10 +25,13 @@ import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.pyplot import xlabel
 from itertools import product
-#matplotlib.rcParams["pdf.fonttype"] = 42
-plt.rcParams["font.family"] = "Arial"
-#matplotlib.rcParams["pdf.fonttype"] = 42
-matplotlib.rcParams["font.family"] = "Arial"
+try:
+    #matplotlib.rcParams["pdf.fonttype"] = 42
+    plt.rcParams["font.family"] = "Arial"
+    #matplotlib.rcParams["pdf.fonttype"] = 42
+    matplotlib.rcParams["font.family"] = "Arial"
+except:
+    pass
 from . import config
 from . import distance
 from . import stats

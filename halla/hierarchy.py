@@ -1191,7 +1191,6 @@ def hypotheses_level_testing(current_level_tests):
                     aOut.append(current_level_tests[i])
                
     elif config.p_adjust_method == "bonferroni":
-        print (len(current_level_tests))
         for i in range(len(current_level_tests)):
             if current_level_tests[i].pvalue <= aP_adjusted[i]:
                 passed_tests.append(current_level_tests[i])

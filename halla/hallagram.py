@@ -29,9 +29,12 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 import numpy as np
-plt.rcParams["font.family"] = "Arial"
-#mpl.rcParams["pdf.fonttype"] = 42
-mpl.rcParams["font.family"] = "Arial"
+try:
+    plt.rcParams["font.family"] = "Arial"
+    #mpl.rcParams["pdf.fonttype"] = 42
+    mpl.rcParams["font.family"] = "Arial"
+except:
+    pass
 
 # ---------------------------------------------------------------
 # constants / config
