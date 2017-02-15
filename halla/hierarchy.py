@@ -795,8 +795,8 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     
     func = config.similarity_method
     X, Y = dataset1, dataset2
-    aFinal = []
-    aOut = []
+    significant_hypotheses = []
+    tested_hypotheses = []
     config.number_of_performed_tests = 0
     
     # Define the speed of cutting hierarchies
@@ -818,7 +818,6 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     else:
         #cut_speed_2 = max(math.log(n1,2) / math.log(n2, 2),1)
         cut_speed_2 = max(number_of_level(n1)*1.0/number_of_level(n2) ,1)
-    #print("Number of levels: ",number_of_level(n1),number_of_level(n2))
     # Write the hypothesis that has been tested
     output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
     csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
@@ -853,9 +852,9 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     while do_next_level  :
         current_level_tests = [ hypothesis for (hypothesis, _ ) in current_level_nodes]
         print ("--- Tesing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_tests)))
-        temp_aFinal, temp_aOut = hypotheses_level_testing(current_level_tests)
-        aFinal.extend(temp_aFinal)
-        aOut.extend(temp_aOut)
+        temp_significant_hypotheses, temp_tested_hypotheses = hypotheses_level_testing(current_level_tests)
+        significant_hypotheses.extend(temp_significant_hypotheses)
+        tested_hypotheses.extend(temp_tested_hypotheses)
         from_prev_hypothesis =  []
         from_prev_hypothesis_node = []
         do_next_level = False
@@ -939,10 +938,10 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             current_level_nodes.extend(leaf_nodes)
             current_level_nodes.extend(from_prev_hypothesis_node)
             
-    #config.number_of_performed_tests = len(aOut)
+    #config.number_of_performed_tests = len(tested_hypotheses)
     print ("--- number of performed tests: %s" % config.number_of_performed_tests)
-    print ("--- number of passed tests after FDR controlling: %s" % len(aFinal))
-    return aFinal, aOut
+    print ("--- number of passed tests after FDR controlling: %s" % len(significant_hypotheses))
+    return significant_hypotheses, tested_hypotheses
 
 pHashMethods = {"permutation" : stats.permutation_test,
                         "permutation_test_by_medoid": stats.permutation_test_by_medoid,
@@ -980,18 +979,15 @@ def naive_all_against_all():
     decomposition = config.decomposition
     method = config.randomization_method
     metric = config.similarity_method
-    fQ = config.q
     iIter= config.iterations
     discretize_style = config.strDiscretizing
     
     iRow = len(dataset1)
     iCol = len(dataset2)
     
-    aOut = [] 
-    aFinal = []
-    aP = []
+    tested_hypotheses = [] 
+    significant_hypotheses = []
     tests = []
-    passed_tests = []
     for i, j in itertools.product(list(range(iRow)), list(range(iCol))):
         test =  Hypothesis_Node(left_distance=0.0, right_distance=0.0)
         data = [[i], [j]]
@@ -1013,57 +1009,56 @@ def naive_all_against_all():
                     max_r_t = tests[i].rank
             for i in range(len(tests)):
                 if tests[i].rank <= max_r_t:
-                    passed_tests.append(tests[i])
-                    aOut.append(tests[i])
-                    aFinal.append(tests[i])
+                    tested_hypotheses.append(tests[i])
+                    significant_hypotheses.append(tests[i])
                     tests[i].significance = True
                     print ("-- association after %s fdr correction" % p_adjusting_method)
                 else:
                     tests[i].significance = False
-                    aOut.append(tests[i])
+                    tested_hypotheses.append(tests[i])
         elif p_adjusting_method == "bonferroni":
             for i in range(len(tests)):
                 if tests[i].pvalue <= aP_adjusted[i]:
-                    passed_tests.append(tests[i])
-                    aOut.append(tests[i])
-                    aFinal.append(tests[i])
+                    tested_hypotheses.append(tests[i])
+                    significant_hypotheses.append(tests[i])
                     tests[i].significance = True
                     print ("-- association after %s fdr correction" % p_adjusting_method)
                 else:
                     tests[i].significance = False
-                    aOut.append(tests[i])
+                    tested_hypotheses.append(tests[i])
         elif p_adjusting_method == "no_adjusting":
             for i in range(len(tests)):
-                if tests[i].pvalue <= fQ:
-                    passed_tests.append(tests[i])
-                    aOut.append(tests[i])
-                    aFinal.append(tests[i])
+                if tests[i].pvalue <= config.q:
+                    tested_hypotheses.append(tests[i])
+                    significant_hypotheses.append(tests[i])
                     tests[i].significance = True
                     print ("-- association after %s fdr correction" % p_adjusting_method)
                 else:
                     tests[i].significance = False
-                    aOut.append(tests[i])
+                    tested_hypotheses.append(tests[i])
     _get_passed_fdr_tests()
-    config.number_of_performed_tests =len(aOut)
+    config.number_of_performed_tests =len(tested_hypotheses)
     print("--- number of performed tests: %s" % config.number_of_performed_tests)
-    print("--- number of passed tests after FDR controlling: %s "%len(aFinal)) 
-    return aFinal, aOut
+    print("--- number of passed tests after FDR controlling: %s "%len(significant_hypotheses)) 
+    return significant_hypotheses, tested_hypotheses
 
 
 def hypotheses_level_testing(current_level_tests):
-    aOut = []  # # Full log 
-    aFinal = []  # # Only the final reported values 
+    tested_hypotheses = []  # # Full log 
+    significant_hypotheses = []  # # Only the final reported values 
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
     #print "number of hypotheses in the level:  %s" % (len(current_level_tests))
     p_values = multiprocessing_estimate_pvalue(estimate_pvalue, current_level_tests, pMethod, dataset1, dataset2)
-    for i in range(len(current_level_tests)):
-       current_level_tests[i].pvalue = p_values[i]
-    q = config.q 
+    q_values = stats.pvalues2qvalues (p_values, adjusted=True)
+    
     aP_adjusted, pRank = stats.p_adjust(p_values, config.q)#config.q)
     
     for i in range(len(current_level_tests)):
        current_level_tests[i].rank = pRank[i]
+       current_level_tests[i].pvalue = p_values[i]
+       current_level_tests[i].already_tested = True
+       current_level_tests[i].q_value = q_values[i]
    
     max_r_t = 0
     for i in range(len(current_level_tests)):
@@ -1074,54 +1069,45 @@ def hypotheses_level_testing(current_level_tests):
     if config.p_adjust_method in ["bh", "by"]:
         for i in range(len(current_level_tests)):
             if current_level_tests[i].rank <= max_r_t:
-                passed_tests.append(current_level_tests[i])
                 if current_level_tests[i].significance == None:
                     current_level_tests[i].significance = True
-                    aOut.append(current_level_tests[i])
-                    aFinal.append(current_level_tests[i])
+                    tested_hypotheses.append(current_level_tests[i])
+                    significant_hypotheses.append(current_level_tests[i])
                     print ("-- association after %s fdr correction" % config.p_adjust_method)
             else:
                 if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
                     current_level_tests[i].significance = False
-                    aOut.append(current_level_tests[i])
+                    tested_hypotheses.append(current_level_tests[i])
                
     elif config.p_adjust_method == "bonferroni":
         for i in range(len(current_level_tests)):
             if current_level_tests[i].pvalue <= aP_adjusted[i]:
-                passed_tests.append(current_level_tests[i])
                 if current_level_tests[i].significance == None:
-                    aOut.append(current_level_tests[i])
-                    aFinal.append(current_level_tests[i])
+                    tested_hypotheses.append(current_level_tests[i])
+                    significant_hypotheses.append(current_level_tests[i])
                     current_level_tests[i].significance = True
                     print ("-- association after %s fdr correction" % config.p_adjust_method)
                     
             else:
                 if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
                     current_level_tests[i].significance = False
-                    aOut.append(current_level_tests[i])
+                    tested_hypotheses.append(current_level_tests[i])
     elif config.p_adjust_method == "no_adjusting":
         for i in range(len(current_level_tests)):
-            if current_level_tests[i].pvalue <= q:
-                passed_tests.append(current_level_tests[i])
+            if current_level_tests[i].pvalue <= config.q:
                 if current_level_tests[i].significance == None:
-                    aOut.append(current_level_tests[i])
-                    aFinal.append(current_level_tests[i])
+                    tested_hypotheses.append(current_level_tests[i])
+                    significant_hypotheses.append(current_level_tests[i])
                     current_level_tests[i].significance = True
                     print ("-- association after %s fdr correction" % config.p_adjust_method)
                     
             else:
                 if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
                     current_level_tests[i].significance = False
-                    aOut.append(current_level_tests[i])
+                    tested_hypotheses.append(current_level_tests[i])
                     temp_sub_hypotheses = get_children(current_level_tests[i])
                     if len(temp_sub_hypotheses) > 0:
                         for j in range(len(temp_sub_hypotheses)):
                             temp_sub_hypotheses[j].pvalue = current_level_tests[i].pvalue
-                
-    q_values = stats.pvalues2qvalues ([current_level_tests[i].pvalue for i in range(len(current_level_tests))], adjusted=True)
-    
-    # update only hypotheses that were not significnat or not passed bypasss threshold in previous levels
-    for i in range(len(current_level_tests)):
-        if  current_level_tests[i] in passed_tests: 
-            current_level_tests[i].qvalue = q_values[i]    
-    return aFinal, aOut
+                               
+    return significant_hypotheses, tested_hypotheses
