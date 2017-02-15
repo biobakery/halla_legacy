@@ -72,7 +72,7 @@ def multiprocessing_estimate_pvalue(estimate_pvalue, current_level_tests, pMetho
                 result[id]=current_level_tests[id].pvalue
             else:
                 # increment the number of permutations tests 
-                config.number_of_performed_tests +=1
+                config.number_of_performed_tests += 1
                 ids_to_process.append(id)
         
         
@@ -133,28 +133,14 @@ class Hypothesis_Node():
         self.significance =  None
         self.rank = None
 
-def pop(node):
-    # pop one of the children, else return none, since this amounts to killing the singleton 
-    if node.m_arrayChildren:
-        return node.m_arrayChildren.pop()
-
-def l(node):
-    return node.left()
-
-def r(node):
-    return node.right()
-
 def left(node):
-    return node.get_child(iIndex=0)
+    return get_child(node, iIndex=0)
 
 def right(node):
-    return node.get_child(iIndex=1)
+    return get_child(node, iIndex=1)
 
 def is_leaf(node):
     return bool(not(node.m_pData and node.m_arrayChildren))
-
-def is_degenerate(node):
-    return (not(node.m_pData) and not(node.m_arrayChildren))            
 
 def add_child(node, data):
     if not isinstance(data, Hypothesis_Node):
@@ -344,103 +330,6 @@ def truncate_tree(apClusterNode, level=0, skip=0):
             return []
             raise Exception("truncated tree is malformed--empty!")
 
-def reduce_tree(pClusterNode, pFunction=lambda x: x.id, aOut=[]):
-    """
-    Recursive
-
-    Input: pClusterNode, pFunction = lambda x: x.id, aOut = []
-
-    Output: a list of pFunction calls (node ids by default)
-
-    Should be designed to handle both ClusterNode and Hypothesis_Node types 
-    """ 
-
-    bTree = is_tree(pClusterNode)
-
-    func = pFunction if not bTree else lambda x: x.m_pData 
-
-    if pClusterNode:
-
-        if not bTree:
-            if pClusterNode.is_leaf():
-                return (aOut + [func(pClusterNode)])
-            else:
-                return reduce_tree(pClusterNode.left, func, aOut) + reduce_tree(pClusterNode.right, func, aOut) 
-        elif bTree:
-            if pClusterNode.is_leaf():
-                return (aOut + [func(pClusterNode)])
-            else:
-                pChildren = pClusterNode.get_children()
-                iChildren = len(pChildren)
-                return reduce(lambda x, y: x + y, [reduce_tree(pClusterNode.get_child(i), func, aOut) for i in range(iChildren)], [])
-    else:
-        return [] 
-
-def reduce_tree_by_layer(apParents, iLevel=0, iStop=None):
-    """
-
-    Traverse one tree. 
-
-    Input: apParents, iLevel = 0, iStop = None
-
-    Output: a list of (iLevel, list_of_nodes_at_iLevel)
-
-        Ex. 
-
-        [(0, [0, 2, 6, 7, 4, 8, 9, 5, 1, 3]),
-         (1, [0, 2, 6, 7]),
-         (1, [4, 8, 9, 5, 1, 3]),
-         (2, [0]),
-         (2, [2, 6, 7]),
-         (2, [4]),
-         (2, [8, 9, 5, 1, 3]),
-         (3, [2]),
-         (3, [6, 7]),
-         (3, [8, 9]),
-         (3, [5, 1, 3]),
-         (4, [6]),
-         (4, [7]),
-         (4, [8]),
-         (4, [9]),
-         (4, [5]),
-         (4, [1, 3]),
-         (5, [1]),
-         (5, [3])]
-
-    """
-
-    apParents = list(filter(bool, list(apParents)))
-
-
-    bTree = False 
-    
-    if not isinstance(apParents, list):
-        bTree = is_tree(apParents)
-        apParents = [apParents]
-    else:
-        try:
-            bTree = is_tree(apParents[0])
-        except IndexError:
-            pass 
-
-    if (iStop and (iLevel > iStop)) or not(apParents):
-        return [] 
-    else:
-        try:
-            filtered_apParents = filter(lambda x: not(is_leaf(x)) , apParents)
-        except:
-            filtered_apParents = [x for x in apParents if not(is_leaf(x))]
-        new_apParents = [] 
-        for q in filtered_apParents:
-            if not bTree:
-                new_apParents.append(q.left); new_apParents.append(q.right)
-            else:
-                for item in get_children(q):
-                    new_apParents.append(item)
-        if not bTree:
-            return [(iLevel, reduce_tree(p)) for p in apParents ] + reduce_tree_by_layer(new_apParents, iLevel=iLevel + 1)
-        else:
-            return [(iLevel, p.m_pData) for p in apParents ] + reduce_tree_by_layer(new_apParents, iLevel=iLevel + 1)
 
 #-------------------------------------#
 # Decider Functions                   #
@@ -908,6 +797,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     X, Y = dataset1, dataset2
     aFinal = []
     aOut = []
+    config.number_of_performed_tests = 0
     
     # Define the speed of cutting hierarchies
     # e.g. 1 means we cut in each iteration
