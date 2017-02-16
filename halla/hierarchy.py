@@ -870,7 +870,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             # Add leaves from current level to next level
             # Add significant or non significant hypothesis from previous level
             if len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[1]) == 1 :
-                # pass pairwise test to next levels 
+                # pass hypothesis tests with individual features to next levels 
                 # to participate in FDR correction and increase the power 
                 #Pairwise test is a test between clusters with only one feature
                 if hypothesis.significance == False:
@@ -879,9 +879,10 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             elif hypothesis.significance != None:
                 from_prev_hypothesis_node.append(hypothesis_node)
             else:
-                bTauX = _is_stop(a)  
-                bTauY = _is_stop(b)  
+                bTauX = _is_stop(a) # currently if a is a tip 
+                bTauY = _is_stop(b) # currently if b is a tip 
                 do_next_level = True
+                # Pair clusters between relevant levels for two hierarchies 
                 if cut_speed_1 != 1:
                     if level_number  / cut_speed_1 > level_number_2 :
                         if change_level_flag:
@@ -1048,8 +1049,10 @@ def hypotheses_level_testing(current_level_tests):
     significant_hypotheses = []  # # Only the final reported values 
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
-    #print "number of hypotheses in the level:  %s" % (len(current_level_tests))
+
+    # Calculate p-value for all hypotheses
     p_values = multiprocessing_estimate_pvalue(estimate_pvalue, current_level_tests, pMethod, dataset1, dataset2)
+    # Calculate q-value for all hypotheses
     q_values = stats.pvalues2qvalues (p_values, adjusted=True)
     
     aP_adjusted, pRank = stats.p_adjust(p_values, config.q)#config.q)
