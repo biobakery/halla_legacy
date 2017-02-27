@@ -889,7 +889,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                             level_number_2 += 1
                             change_level_flag = False
                         if not bTauX:
-                            print (level_number  / cut_speed_1 , level_number, level_number_2)
+                            #print (level_number  / cut_speed_1 , level_number, level_number_2)
                             apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
                         else:
                            apChildren0 = [a] 
@@ -907,7 +907,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                             level_number_2 += 1
                             change_level_flag = False
                         if not bTauY:
-                            print (level_number  / cut_speed_2 , level_number, level_number_2)
+                            #print (level_number  / cut_speed_2 , level_number, level_number_2)
                             apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
                         else:
                             apChildren1 = [b]
@@ -1061,7 +1061,7 @@ def hypotheses_level_testing(current_level_tests):
        current_level_tests[i].rank = pRank[i]
        current_level_tests[i].pvalue = p_values[i]
        current_level_tests[i].already_tested = True
-       current_level_tests[i].q_value = q_values[i]
+       current_level_tests[i].qvalue = q_values[i]
    
     max_r_t = 0
     for i in range(len(current_level_tests)):

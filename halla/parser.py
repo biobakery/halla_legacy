@@ -196,9 +196,9 @@ class Input:
 				if config.missing_method is  None: #and not distance.c_hash_association_method_discretize[config.similarity_method]:
 					#warn_message ="There is missing data in feature "+  aNames[i]+"!!! " + "Try --missing-method=method to fill missing data. "
 					line = list(map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) 
-										else np.nan), line))  ###### np.nan Convert missings to nans
+										else 'nan'), line))  ###### np.nan Convert missings to nans
 				else:
-					line = list(map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else np.nan ), line))  ###### np.nan Convert missings to nans
+					line = list(map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else 'nan' ), line))  ###### np.nan Convert missings to nans
 					#line = df1 = pd.DataFrame(line)
 					#if distance.c_hash_association_method_discretize[config.similarity_method]:
 					try:

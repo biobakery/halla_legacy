@@ -1454,23 +1454,24 @@ def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=No
 				return rankdata(astrValues, method= 'dense')
 			except:
 				print ("An exception happend with discretizing continuose data!!!")
-				_discretize_categorical(astrValues, number_of_bins=number_of_bins)
+				#return _discretize_categorical(astrValues, number_of_bins=number_of_bins)
 		else:							
-			try:
-				if config.strDiscretizing == 'equal-area':
-					order = rankdata(astrValues, method= 'min')# ordinal
-				elif config.strDiscretizing == 'hclust':
-					#print astrValues
-					distanceMatrix = abs(numpy.array([astrValues],  dtype= float).T-numpy.array([astrValues], dtype= float))
-					order = fcluster(linkage(distanceMatrix, method='complete'), number_of_bins,'distance')
-					return order
-			except:
+			#try:
+			if config.strDiscretizing == 'equal-area':
+				order = rankdata(astrValues, method= 'min')# ordinal
+			elif config.strDiscretizing == 'hclust':
+				#print astrValues
+				distanceMatrix = abs(numpy.array([astrValues],  dtype= float).T-numpy.array([astrValues], dtype= float))
+				order = fcluster(linkage(distanceMatrix, method='complete'), number_of_bins,'distance')
+				return order
+			'''except:
 				print ("An exception happend with discretizing continuose data!!!")
-				_discretize_categorical(astrValues, number_of_bins=number_of_bins)
+			'''	#return _discretize_categorical(astrValues, number_of_bins=number_of_bins)
 
 		discretized_result = [None] * len(astrValues)
 		bins_size = numpy.ceil(len(astrValues)/float(number_of_bins))
 		#print "bin size: ", bins_size, "len of the array", len(astrValues)
+		#print (astrValues)
 		for i in range(len(astrValues)):
 			discretized_result[i] = int((order[i]-1) / bins_size)
 		discretized_result = rankdata(discretized_result, method= 'dense')
