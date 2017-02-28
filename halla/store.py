@@ -371,29 +371,32 @@ def _report():
             except EnvironmentError:
                 sys.exit("Unable to create directory: "+association_dir)
             plt.figure()  
-            #try: 
-            if len(discretized_cluster1) < 40:
-                df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
-                ax1 = plot.scatter_matrix(df1, filename = filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-            #except:
+            try: 
+                if len(discretized_cluster1) < 40:
+                    df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
+                    ax1 = plot.scatter_matrix(df1, filename = filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+            except:
+                pass
                 #print ("Exception in first dataset")
             
-            #try:
-            if len(discretized_cluster2) < 40:
-                df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
-                ax2 = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
-            #except:
+            try:
+                if len(discretized_cluster2) < 40:
+                    df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
+                    ax2 = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
+            except:
+                pass
                 #print ("Exception in second dataset")
-            #try:
-            if len (iX) + len(iY) <40:
-                two_clusters = cluster1
-                two_clusters.extend(cluster2)
-                two_labels = [config.FeatureNames[0][i] for i in iX]
-                two_labels.extend([config.FeatureNames[1][i] for i in iY])
-                df_all = pd.DataFrame(np.array(two_clusters, dtype= float).T ,columns=np.array(two_labels) )
-                axes = plot.scatter_matrix(df_all, x_size = len(iX),filename =filename + 'Scatter_association' + str(association_number) + '.pdf')
-            #except:
-            #    print ("Exception in association")
+            try:
+                if len (iX) + len(iY) <40:
+                    two_clusters = cluster1
+                    two_clusters.extend(cluster2)
+                    two_labels = [config.FeatureNames[0][i] for i in iX]
+                    two_labels.extend([config.FeatureNames[1][i] for i in iY])
+                    df_all = pd.DataFrame(np.array(two_clusters, dtype= float).T ,columns=np.array(two_labels) )
+                    axes = plot.scatter_matrix(df_all, x_size = len(iX),filename =filename + 'Scatter_association' + str(association_number) + '.pdf')
+            except:
+                pass
+                #print ("Exception in association")
             
             x_label_order = []
             fig = plt.figure(figsize=(5, 4))

@@ -851,7 +851,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     do_next_level = True
     while do_next_level  :
         current_level_tests = [ hypothesis for (hypothesis, _ ) in current_level_nodes]
-        print ("--- Tesing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_tests)))
+        print ("--- Testing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_tests)))
         temp_significant_hypotheses, temp_tested_hypotheses = hypotheses_level_testing(current_level_tests)
         significant_hypotheses.extend(temp_significant_hypotheses)
         tested_hypotheses.extend(temp_tested_hypotheses)
@@ -873,7 +873,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                 # pass hypothesis tests with individual features to next levels 
                 # to participate in FDR correction and increase the power 
                 #Pairwise test is a test between clusters with only one feature
-                if hypothesis.significance == False:
+                if hypothesis.significance != True:
                     hypothesis.significance = None
                     leaf_nodes.append(hypothesis_node)
             elif hypothesis.significance != None:
@@ -934,6 +934,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                         aLineOut = list(map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))]))
                         csvwc.writerow(aLineOut)
         current_level_nodes = next_level
+        #print ("--- number of new tests: %s leafs: %s  prev: %s" % (len(next_level), len(leaf_nodes), len(from_prev_hypothesis_node)) )
         #config.number_of_performed_tests += len(current_level_nodes)
         if len(current_level_nodes) > 0:
             current_level_nodes.extend(leaf_nodes)
@@ -1061,7 +1062,8 @@ def hypotheses_level_testing(current_level_tests):
        current_level_tests[i].rank = pRank[i]
        current_level_tests[i].pvalue = p_values[i]
        current_level_tests[i].already_tested = True
-       current_level_tests[i].qvalue = q_values[i]
+       if current_level_tests[i].significance == None: 
+           current_level_tests[i].qvalue = q_values[i]
    
     max_r_t = 0
     for i in range(len(current_level_tests)):
