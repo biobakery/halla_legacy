@@ -164,6 +164,7 @@ class Input:
  
 			aOut = [] 
 			aNames = []
+			used_names = []
 			aTypes = []
 			aHeaders = None
 			
@@ -201,10 +202,16 @@ class Input:
 					line = list(map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else 'nan' ), line))  ###### np.nan Convert missings to nans
 					#line = df1 = pd.DataFrame(line)
 					#if distance.c_hash_association_method_discretize[config.similarity_method]:
-					try:
+					#try:
+					print (line)
+					if all([val == 'nan' for val in line]):
+						# if all values in a feature are missing values then skip the feature
+						continue
+					else:
+						# fill missing values
 						line = imp.transform(line)[0]
-					except:
-						print ("there is an issue with filling missed data!")
+					#except:
+					#	print ("there is an issue with filling missed data!")
 				if all(val != config.missing_char for val in line):
 					aOut.append(line)
 					if not aNames:
@@ -227,8 +234,9 @@ class Input:
 						print (aNames[i], " has an issue with filling missed data!")
 						#aNames.remove(aNames[i])
 					except Exception:
-						pass  
-			return aOut, aNames, aTypes, aHeaders 
+						pass 
+				used_names.append(aNames[i]) 
+			return aOut, used_names, aTypes, aHeaders 
 
 		self.orginal_dataset1, self.outName1, self.outType1, self.outHead1 = __parse(self.orginal_dataset1, self.varNames, self.headers)
 		self.orginal_dataset2, self.outName2, self.outType2, self.outHead2 = __parse(self.orginal_dataset2, self.varNames, self.headers)

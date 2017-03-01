@@ -294,7 +294,7 @@ def parse_arguments (args):
         default=None,
         help="defines missing characters\n[default = '']")
     argp.add_argument(
-        "--missing-method",
+        "--fill-missing",
         dest ="missing_method",
         default=None,
         choices=["mean", "median", "most_frequent"],
