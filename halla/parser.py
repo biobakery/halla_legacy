@@ -203,7 +203,6 @@ class Input:
 					#line = df1 = pd.DataFrame(line)
 					#if distance.c_hash_association_method_discretize[config.similarity_method]:
 					#try:
-					print (line)
 					if all([val == 'nan' for val in line]):
 						# if all values in a feature are missing values then skip the feature
 						continue

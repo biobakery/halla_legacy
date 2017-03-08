@@ -12,17 +12,21 @@ import sys
 import itertools
 import math 
 import time
+import argparse
+import os
+import shutil
 try:
     from functools import reduce
 except:
     pass
+from . import logger
 
 def parse_arguments(args):
     """ 
     Parse the arguments from the user
     """
     parser = argparse.ArgumentParser(
-        description= "HAllA's Clustering using hierarchical clustering and Silhouette score.\n",
+        description= "HAllA synthetic data generator to produce paired data sets with association among their features.\n",
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument(
         "-v","--verbose", 
@@ -33,106 +37,148 @@ def parse_arguments(args):
         "-f","--features",
         help="number of features in the input file D*N, Rows: D features and columns: N samples \n",
         default = 500,
+        type = int,
         required=False)
     parser.add_argument(
         "-n","--samples",
         help="number of samples in the input file D*N, Rows: D features and columns: N samples \n",
-         default = 50,
+        default = 50,
+        type = int,
+        required=False)
+    parser.add_argument(
+        "-a","--association",
+        help="association type [sine, parabola, log, line, L, step, happy_face, default =parabola] \n",
+        default = 'parabola',
         required=False)
     parser.add_argument(
         "-d","--distribution",
-        help="Distribution [nomral, uniform, deafualt =uniform] \n",
+        help="Distribution [normal, uniform, default =uniform] \n",
         default = 'uniform',
         required=False)
     parser.add_argument(
         "-b","--noise-between",
+        dest="noise_between",
         help="number of samples in the input file D*N, Rows: D features and columns: N samples \n",
         default = None,
-        equired=False)
+        type = float,
+        required=False)
     parser.add_argument(
         "-w","--noise-within",
+        dest = "noise_within",
         help="number of samples in the input file D*N, Rows: D features and columns: N samples \n",
         default = None,
+        type = float,
         required=False)
     parser.add_argument(
         "-o","--output",
         help="the output directory\n",
         required=True)
+    parser.add_argument(
+        "-s","--structure",
+        help="structure [balanced, imbalanced, default =balanced] \n",
+        default = 'balanced',
+        required=False)
     return parser.parse_args()
 
 def call_data_generator(args):
-    number_features = args.f #+ Iter *50 
-    number_samples = args.n #+ Iter * 10
+    number_features = args.features #+ Iter *50 
+    number_samples = args.samples #+ Iter * 10
     number_blocks =  int(min(number_features/2.0, round(math.log(number_features,2))*1.5)) #round(math.sqrt(number_features)* 1.5 +.5 )  
     cluster_percentage_l= 1.0#1.0/number_blocks 
-
+    association_type = args.association
     print ('Synthetic Data Generation ...')
     if association_type == "sine":
-        if args.w == None:
-            args.w = 0.1 
-        if args.b == None:
-            args.b = .1
+        if args.noise_within == None:
+            args.noise_within = 0.1 
+        if args.noise_between == None:
+            args.noise_between = .1
     elif association_type == "log":
-        if args.w == None:
-            args.w = 0.55
-        if args.b == None:
+        if args.noise_within == None:
+            args.noise_within = 0.55
+        if args.noise_between == None:
             between_noise = .25  
     elif association_type == "parabola":
-        if args.w == None:
-            args.w = 0.25 
-        if args.b == None:
-            args.b = .15
+        if args.noise_within == None:
+            args.noise_within = 0.25 
+        if args.noise_between == None:
+            args.noise_between = .15
     elif association_type == "line":
-        if args.w == None:
-            args.w = 0.55
-        if args.b == None:
-            args.b = 0.5
+        if args.noise_within == None:
+            args.noise_within = 0.55
+        if args.noise_between == None:
+            args.noise_between = 0.5
         
     elif association_type == "step":
-        if args.w == None:
-            args.w = 0.15
-        if args.b == None:
-            args.b = .25
+        if args.noise_within == None:
+            args.noise_within = 0.15
+        if args.noise_between == None:
+            args.noise_between = .25
     elif association_type == "L":
-        if args.w == None:
-            args.w = 0.05
-        if args.b == None:
-            args.b = 0.05
+        if args.noise_within == None:
+            args.noise_within = 0.05
+        if args.noise_between == None:
+            args.noise_between = 0.05
     elif association_type == "happyface":
-        if args.w == None:
-            args.w = 0.05
-        if args.b == None:
-            args.b = 0.0
+        if args.noise_within == None:
+            args.noise_within = 0.05
+        if args.noise_between == None:
+            args.noise_between = 0.0
     elif association_type == "random":
         X = np.random.uniform(low=-1,high=1 ,size=(number_features, number_samples ))
         Y = np.random.uniform(low=-1,high=1,size=(number_features, number_samples))
         A = np.zeros((len(X),len(Y)))
-    elif association_type == "structured_random":
-        X,_,_ = halla.synthetic_data.imbalanced_synthetic_dataset_uniform( D = number_features, N = number_samples,\
-                                                                           B = number_blocks, within_noise= args.w , between_noise = args.b, cluster_percentage = cluster_percentage_l, association_type ='parabola' ) 
-        _,Y,_ = halla.synthetic_data.imbalanced_synthetic_dataset_uniform( D = number_features, N = number_samples\
-                                                , B = number_blocks, within_noise =args.w  , between_noise = args.b ,\
-                                               cluster_percentage = cluster_percentage_l, association_type ='parabola' ) 
-        A = np.zeros((len(X),len(Y)))
-    if args.d == "norm":
-        X,Y,A = halla.synthetic_data.imbalanced_synthetic_dataset_uniform( D = number_features, N = number_samples, \
-                                                                           cluster_percentage = cluster_percentage_l , \
-                                                                           B = number_blocks, within_noise = args.w, \
-                                                                           between_noise = args.b ,association_type =association_type ) 
-    elif args.d == "uniform":
-        X,Y,A = halla.synthetic_data.imbalanced_synthetic_dataset_uniform( D = number_features, N = number_samples\
-                                                , B = number_blocks, within_noise = args.w , between_noise = args.b ,\
-                                               cluster_percentage = cluster_percentage_l, association_type =association_type ) 
-    halla.logger.write_table(X, args.output+"/X_"+\
-                             association_type+str(Iter)+"_"+str(number_features)+"_"+\
+     
+    if args.structure == "imbalanced":
+        if association_type == "structured_random":
+            X,_,_ = halla.synthetic_data.imbalanced_synthetic_dataset_uniform( D = number_features, N = number_samples,\
+                                                                               B = number_blocks, within_noise= args.noise_within , between_noise = args.noise_between, cluster_percentage = cluster_percentage_l, association_type ='parabola' ) 
+            _,Y,_ = halla.synthetic_data.imbalanced_synthetic_dataset_uniform( D = number_features, N = number_samples\
+                                                    , B = number_blocks, within_noise =args.noise_within  , between_noise = args.noise_between ,\
+                                                   cluster_percentage = cluster_percentage_l, association_type ='parabola' ) 
+            A = np.zeros((len(X),len(Y)))
+        
+        if args.distribution == "norm":
+            X,Y,A = imbalanced_synthetic_dataset_norm( D = number_features, N = number_samples, \
+                                                                               cluster_percentage = cluster_percentage_l , \
+                                                                               B = number_blocks, within_noise = args.noise_within, \
+                                                                               between_noise = args.noise_between ,association_type =association_type ) 
+        elif args.distribution == "uniform":
+            X,Y,A = imbalanced_synthetic_dataset_uniform( D = number_features, N = number_samples\
+                                                    , B = number_blocks, within_noise = args.noise_within , between_noise = args.noise_between ,\
+                                                   cluster_percentage = cluster_percentage_l, association_type =association_type )
+    elif args.structure == "balanced":
+        if association_type == "structured_random":
+            X,_,_ = balanced_synthetic_dataset_uniform( D = number_features, N = number_samples,\
+                                                                               B = number_blocks, within_noise= args.noise_within , between_noise = args.noise_between, cluster_percentage = cluster_percentage_l, association_type ='parabola' ) 
+            _,Y,_ = balanced_synthetic_dataset_uniform( D = number_features, N = number_samples\
+                                                    , B = number_blocks, within_noise =args.noise_within  , between_noise = args.noise_between ,\
+                                                   cluster_percentage = cluster_percentage_l, association_type ='parabola' ) 
+            A = np.zeros((len(X),len(Y)))
+        
+        if args.distribution == "norm":
+            X,Y,A = balanced_synthetic_dataset_norm( D = number_features, N = number_samples, \
+                                                                               cluster_percentage = cluster_percentage_l , \
+                                                                               B = number_blocks, within_noise = args.noise_within, \
+                                                                               between_noise = args.noise_between ,association_type =association_type ) 
+        elif args.distribution == "uniform":
+            X,Y,A = balanced_synthetic_dataset_uniform( D = number_features, N = number_samples\
+                                                    , B = number_blocks, within_noise = args.noise_within , between_noise = args.noise_between ,\
+                                                   cluster_percentage = cluster_percentage_l, association_type =association_type )  
+    create_dir(args.output)
+    print (X, Y , A)
+    logger.write_table(X, args.output+"/X_"+\
+                             association_type+"_"+str(number_features)+"_"+\
                              str(number_samples)+".txt", prefix = "X", corner = "#")
-    halla.logger.write_table(Y, args.output+"Y_"+\
-                             association_type+str(Iter)+"_"+str(number_features)+"_"+\
+    logger.write_table(Y, args.output+"/Y_"+\
+                             association_type+"_"+str(number_features)+"_"+\
                              str(number_samples)+".txt", prefix = "Y", corner = "#")
-    halla.logger.write_table(A, args.output+"A_"+\
-                             association_type+str(Iter)+"_"+str(number_features)+"_"+\
-                             str(number_samples)+".txt", prefix = "", corner = "#")
-    
+    rowheader = ["X"+str(i) for i in range(len(X))]
+    colheader = ["Y"+str(i) for i in range(len(Y))]
+    logger.write_table(A, args.output+"/A_"+ \
+                             association_type+"_"+str(number_features)+"_"+\
+                             str(number_samples)+".txt", rowheader=rowheader, colheader=colheader,\
+                             prefix = "", corner = "#")
+
 def happyface(x):
     # Head
     arch = math.sqrt(1.0 - x*x)
@@ -483,11 +529,27 @@ def imbalanced_synthetic_dataset_norm(  D, N, B, within_noise = 0.5, between_noi
         #print assoc1[a], assoc2[a]
         for i, j in itertools.product(assoc1[a], assoc2[a]):
             A[i][j] = 1
-    return X,Y,A 
+    return X,Y,A
+def create_dir(dir): 
+    if os.path.isdir(dir):
+        try:
+            shutil.rmtree(dir)
+            #shutil.rmtree(dir)
+            #shutil.rmtree(discretized_dir)
+        except EnvironmentError:
+            sys.exit("Unable to remove directory: "+dir)
+    
+    # create new directory
+    try:
+        os.mkdir(dir)
+        #os.mkdir(dir)
+        #if not bypass_discretizing():
+            #os.mkdir(discretized_dir)
+    except EnvironmentError:
+        sys.exit("Unable to create directory: "+dir)
 def main( ):
     # Parse arguments from command line
     args=parse_arguments(sys.argv)
-    call_datagenerator(args)
-    output_dir= args.output+"/"
+    call_data_generator(args)
 if __name__ == "__main__":
     main( )   
