@@ -165,7 +165,6 @@ def call_data_generator(args):
                                                     , B = number_blocks, within_noise = args.noise_within , between_noise = args.noise_between ,\
                                                    cluster_percentage = cluster_percentage_l, association_type =association_type )  
     create_dir(args.output)
-    print (X, Y , A)
     logger.write_table(X, args.output+"/X_"+\
                              association_type+"_"+str(number_features)+"_"+\
                              str(number_samples)+".txt", prefix = "X", corner = "#")
