@@ -231,22 +231,12 @@ def pca(pArray, iComponents=1):
 	"""
 	from sklearn.decomposition import PCA
 	# print "pArray:", pArray
-	try:
-		iRow, iCol = pArray.shape 
-		pPCA = PCA(n_components=iComponents)
-	# # doing this matrix inversion twice doesn't seem to be a good idea 
-	# print"PCA:",   pPCA.fit_transform( pArray.T ).T 
-	# print "End PCA"
-		pcs = pPCA.fit_transform(pArray.T).T
-		#print "Loading:", pPCA.components_
-		loadings = pPCA.components_
-		return (pcs[0], pPCA.explained_variance_ratio_[0], loadings[0])
-		
-	except ValueError:
-		iRow = pArray.shape
-		iCol = None 
-	
-		return pArray, 1.0, [1.0]
+	pPCA = PCA(n_components=iComponents)
+	pcs = pPCA.fit_transform(pArray.T).T
+	#print "Loading:", pPCA.components_
+	loadings = pPCA.components_
+	return (pcs[0], pPCA.explained_variance_ratio_[0], loadings[0])
+
 def nlpca(pArray, iComponents=1):
 	"""
 	Input: N x D matrix 

@@ -13,7 +13,7 @@ import scipy.cluster.hierarchy as sch
 from scipy.cluster.hierarchy import linkage, to_tree, leaves_list
 from scipy.spatial.distance import pdist, squareform
 import sys
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import pandas
 import csv
