@@ -578,7 +578,10 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     #if x_size>0:
     #    colors = ['green'  if i< x_size and j < x_size else \
     #              'yellow' if i >= x_size and j >= x_size else 'black' for i,j in product(range(len(df.columns)),range(len(df.columns)))]
-    #    
+    #
+    #if config.similarity_method == 'spearman':
+    #    df = df.rank()
+    #print (df)    
     axs = pd.tools.plotting.scatter_matrix(df, alpha = .1, s =25, c = 'white',\
                                            hist_kwds={'color':['white']},\
                                            range_padding = .2, grid=False, figsize=(len(df.columns)*.4+3, len(df.columns)*.4+3)) # diagonal='kde', grid=False,

@@ -374,6 +374,10 @@ def _report():
             try: 
                 if len(discretized_cluster1) < 40:
                     df1 = pd.DataFrame(np.array(cluster1, dtype= float).T ,columns=X_labels )
+                    if config.similarity_method in ['spearman', 'pearson']:
+                        df1_rank = df1.rank()
+                        ax1 = plot.scatter_matrix(df1_rank, filename = filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix_rank.pdf')
+
                     ax1 = plot.scatter_matrix(df1, filename = filename + 'Dataset_1_cluster_' + str(association_number) + '_scatter_matrix.pdf')
             except:
                 pass
@@ -382,6 +386,10 @@ def _report():
             try:
                 if len(discretized_cluster2) < 40:
                     df2 = pd.DataFrame(np.array(cluster2, dtype= float).T ,columns=Y_labels )
+                    if config.similarity_method in ['spearman', 'pearson']:
+                        df2_rank = df2.rank()
+                        ax2 = plot.scatter_matrix(df2_rank, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix_rank.pdf')
+
                     ax2 = plot.scatter_matrix(df2, filename =filename + 'Dataset_2_cluster_' + str(association_number) + '_scatter_matrix.pdf')
             except:
                 pass
@@ -392,7 +400,10 @@ def _report():
                     two_clusters.extend(cluster2)
                     two_labels = [config.FeatureNames[0][i] for i in iX]
                     two_labels.extend([config.FeatureNames[1][i] for i in iY])
-                    df_all = pd.DataFrame(np.array(two_clusters, dtype= float).T ,columns=np.array(two_labels) )
+                    df_all = pd.DataFrame(np.array(two_clusters, dtype= float).T ,columns=np.array(two_labels))
+                    if config.similarity_method in ['spearman', 'pearson']:
+                        df_all_rank = df_all.rank()
+                        axes = plot.scatter_matrix(df_all_rank, x_size = len(iX),filename =filename + 'Scatter_association' + str(association_number) + '_rank.pdf')
                     axes = plot.scatter_matrix(df_all, x_size = len(iX),filename =filename + 'Scatter_association' + str(association_number) + '.pdf')
             except:
                 pass

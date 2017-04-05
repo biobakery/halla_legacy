@@ -209,6 +209,27 @@ def stop_decesnding_silhouette_coefficient(Node):
         return False
     else:
         return True
+
+def Node_clusters_diameter(Node):
+    
+    number_left_features = len(Node.m_pData[0])
+    number_right_features = len(Node.m_pData[1])
+
+    counter = 0
+    temp_right_loading = list()
+    reps_similarity = Node.similarity_score
+    pMe = distance.c_hash_metric[config.similarity_method] 
+    if len(Node.m_pData[0]) == 1:
+        left_all_sim = [1.0]
+    else:
+        left_all_sim = [pMe(config.parsed_dataset[0][i], config.parsed_dataset[0][j]) for i,j in combinations(Node.m_pData[0], 2)]
+    if len(Node.m_pData[1]) == 1:
+        right_all_sim = [1.0]
+    else:
+        right_all_sim = [pMe(config.parsed_dataset[1][i], config.parsed_dataset[1][j]) for i,j in combinations(Node.m_pData[1],2)]
+    diam_A_r = ((1.0 - math.fabs(min(left_all_sim))))# - math.fabs((1.0 - max(left_all_sim))))
+    diam_B_r = ((1.0 - math.fabs(min(right_all_sim))))# - math.fabs((1.0 - max(right_all_sim))))
+    return diam_A_r, diam_B_r
     
 def stop_and_reject(Node):
     
@@ -348,7 +369,7 @@ def _is_start(ClusterNode, X, func, distance):
         return False
 
 def _is_stop(ClusterNode):
-        if ClusterNode.get_count() == 1:
+        if ClusterNode.get_count() == 1 :#or ClusterNode.dist < .4:
             return True
         else:
             return False
@@ -869,7 +890,10 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
 
             # Add leaves from current level to next level
             # Add significant or non significant hypothesis from previous level
-            if len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[1]) == 1 :
+            #if len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[1]) == 1 :
+            bTauX = _is_stop(a) # currently if a is a tip 
+            bTauY = _is_stop(b) # currently if b is a tip 
+            if bTauX and  bTauY :
                 # pass hypothesis tests with individual features to next levels 
                 # to participate in FDR correction and increase the power 
                 #Pairwise test is a test between clusters with only one feature
@@ -879,12 +903,14 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             elif hypothesis.significance != None:
                 from_prev_hypothesis_node.append(hypothesis_node)
             else:
-                bTauX = _is_stop(a) # currently if a is a tip 
-                bTauY = _is_stop(b) # currently if b is a tip 
+                #bTauX = _is_stop(a) # currently if a is a tip 
+                #bTauY = _is_stop(b) # currently if b is a tip 
                 do_next_level = True
                 # Pair clusters between relevant levels for two hierarchies 
-                if cut_speed_1 != 1:
-                    if level_number  / cut_speed_1 > level_number_2 :
+                #diam_A_r, diam_B_r = Node_clusters_diameter(hypothesis)
+                #print(diam_A_r, diam_B_r)
+                if cut_speed_1 != 1:# or diam_A_r > 2* diam_B_r:
+                    if level_number  / cut_speed_1 > level_number_2:# or diam_A_r > 1.0 * diam_B_r :
                         if change_level_flag:
                             level_number_2 += 1
                             change_level_flag = False
@@ -901,8 +927,8 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                     elif not bTauY:
                         apChildren0 = [a]
                     
-                if cut_speed_2 != 1:
-                    if level_number  / cut_speed_2 > level_number_2: 
+                if cut_speed_2 != 1:# or diam_B_r > 2* diam_A_r:
+                    if level_number  / cut_speed_2 > level_number_2:# or diam_B_r > 1.0* diam_A_r: 
                         if change_level_flag:
                             level_number_2 += 1
                             change_level_flag = False
