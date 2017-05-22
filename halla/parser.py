@@ -114,7 +114,7 @@ class Input:
 		self._load()
 		self._parse()
 		self._filter_to_common_columns()
-		print ("Discretizing is started using: %s style!" % config.strDiscretizing)
+		print ("Discretizing is started using: %s style for filtering features with low entropy!" % config.strDiscretizing)
 		self._discretize()
 		self._remove_low_entropy_features()
 		if len(self.outName1) <2 or len(self.outName1) <2:

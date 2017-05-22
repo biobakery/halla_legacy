@@ -527,23 +527,17 @@ def silhouette_coefficient(clusters, distance_matrix):
         
     for i in range(len(clusters)):
         cluster_a = clusters[i].pre_order(lambda x: x.id)
-        #cluster_b = [val for val in range(len(config.Distance[dataset_number])) if val not in cluster_a]
-        if i%2 == 0 and i<len(clusters)-1:
-            next_cluster = clusters[i+1].pre_order(lambda x: x.id)
+        
+        # find the next and previous clusters for each cluster as a
+        # potential closest clusters to the cluster[i]
+        if i==0:
+            next_cluster = prev_cluster = clusters[i+1].pre_order(lambda x: x.id)
+        elif i == len((clusters))-1:
+            next_cluster = prev_cluster = clusters[i-1].pre_order(lambda x: x.id) 
         else:
-            next_cluster = clusters[i-1].pre_order(lambda x: x.id)
-        #all_features = [a for a in range(len(distance_matrix))] 
-        #cluster_b = [item for item in all_features if item not in cluster_a]  
-         
-        if i%2 != 0 and i> 0:
+            next_cluster = clusters[i+1].pre_order(lambda x: x.id)
             prev_cluster = clusters[i-1].pre_order(lambda x: x.id)
-        elif i < len((clusters))-1:
-            prev_cluster = clusters[i+1].pre_order(lambda x: x.id)
-        else: 
-            prev_cluster = clusters[i-1].pre_order(lambda x: x.id)
-        #next_cluster = [clusters[num].pre_order(lambda x: x.id) for num in range(i+1, len(clusters)) if clusters[num].pre_order(lambda x: x.id)>1 ]
-        #prev_cluster = [clusters[num].pre_order(lambda x: x.id) for num in range(0, i-1) if clusters[num].pre_order(lambda x: x.id)>1 and i>0  ]
-        #silhouette_score.append(silhouette_coefficient(cluster))
+
         s_all_a = []
         for a_feature in cluster_a:
             if len(cluster_a) ==1:
@@ -555,7 +549,8 @@ def silhouette_coefficient(clusters, distance_matrix):
             b1 = np.mean([ distance_matrix.iloc[i, j] for i,j in product([a_feature], next_cluster)])
             b2 = np.mean([ distance_matrix.iloc[i, j] for i,j in product([a_feature], prev_cluster)])
             b = min(b1,b2)
-            s = (b-a)/max([a,b])
+            print  a, b
+            s = (b-a)/max(a,b)
             s_all_a.append(s)
         silhouette_scores.append(np.mean(s_all_a))
     return silhouette_scores
@@ -652,14 +647,17 @@ def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estim
     while True:
         min_silhouette_node = sub_clusters[0]
         min_silhouette_node_index = 0
-
+        
+        # find cluster with minimum homogeneity 
         for i in range(len(sub_clusters)):
             if sub_silhouette_coefficient[min_silhouette_node_index] > sub_silhouette_coefficient[i]:
                 min_silhouette_node = sub_clusters[i]
                 min_silhouette_node_index = i
+        # if the cluster with the minimum homogeneity has silhouette_coefficient
+        # it means all cluster has passed the minimum homogeneity threshold  
         if sub_silhouette_coefficient[min_silhouette_node_index] == 1.0:
             break
-        sub_clusters_to_add = truncate_tree([min_silhouette_node], level=0, skip=1)#cutree_to_get_number_of_clusters([min_silhouette_node])##
+        sub_clusters_to_add = cutree_to_get_number_of_features(min_silhouette_node, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters) #truncate_tree([min_silhouette_node], level=0, skip=1) #
         if len(sub_clusters_to_add) < 2:
             break
         sub_silhouette_coefficient_to_add = silhouette_coefficient(sub_clusters_to_add, distance_matrix)

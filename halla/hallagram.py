@@ -30,8 +30,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 import numpy as np
 try:
-    plt.rcParams["font.family"] = "Arial"
-    #mpl.rcParams["pdf.fonttype"] = 42
+    mpl.rcParams["pdf.fonttype"] = 42
     mpl.rcParams["font.family"] = "Arial"
 except:
     pass
@@ -262,8 +261,12 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
     while ticks[-1] < vmax:
         ticks.append( ticks[-1] + c_simstep )
     twin_ax.set_yticks( ticks )
+    # 
+    # number is used as rank of the association based on the order
+    number = 0
     # add associations
-    for number, row_items, col_items, sig, _, _ in associations:
+    for sim_rank , row_items, col_items, sig, _, _ in associations:
+        number += 1
         row_items = row_items[::-1]
         y1 = simtable.rowmap[row_items[0]]
         y2 = simtable.rowmap[row_items[-1]]
