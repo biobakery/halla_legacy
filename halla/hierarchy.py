@@ -549,7 +549,7 @@ def silhouette_coefficient(clusters, distance_matrix):
             b1 = np.mean([ distance_matrix.iloc[i, j] for i,j in product([a_feature], next_cluster)])
             b2 = np.mean([ distance_matrix.iloc[i, j] for i,j in product([a_feature], prev_cluster)])
             b = min(b1,b2)
-            print  a, b
+            #print  a, b
             s = (b-a)/max(a,b)
             s_all_a.append(s)
         silhouette_scores.append(np.mean(s_all_a))
