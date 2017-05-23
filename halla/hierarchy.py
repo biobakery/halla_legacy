@@ -549,6 +549,7 @@ def silhouette_coefficient(clusters, distance_matrix):
             b1 = np.mean([ distance_matrix.iloc[i, j] for i,j in product([a_feature], next_cluster)])
             b2 = np.mean([ distance_matrix.iloc[i, j] for i,j in product([a_feature], prev_cluster)])
             b = min(b1,b2)
+            #print a, b
             s = (b-a)/max(a,b)
             s_all_a.append(s)
         silhouette_scores.append(np.mean(s_all_a))
@@ -641,7 +642,7 @@ def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estim
     if resolution == 'low' :
         sub_clusters = cutree_to_get_number_of_clusters(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)    
     else:
-        sub_clusters = truncate_tree([cluster], level=0, skip=1)#cutree_to_get_number_of_features(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)
+        sub_clusters = cutree_to_get_number_of_features(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)#truncate_tree([cluster], level=0, skip=1)#
     sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, distance_matrix) 
     while True:
         min_silhouette_node = sub_clusters[0]
@@ -656,20 +657,24 @@ def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estim
         # it means all cluster has passed the minimum homogeneity threshold  
         if sub_silhouette_coefficient[min_silhouette_node_index] == 1.0:
             break
-        sub_clusters_to_add = cutree_to_get_number_of_features(min_silhouette_node, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters) #truncate_tree([min_silhouette_node], level=0, skip=1) #
-        if len(sub_clusters_to_add) < 2:
+        sub_clusters_to_check = cutree_to_get_number_of_features(min_silhouette_node, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters) #truncate_tree([min_silhouette_node], level=0, skip=1) #
+        clusters_to_add = truncate_tree([min_silhouette_node], level=0, skip=1)
+        if len(clusters_to_add) < 2:
             break
-        sub_silhouette_coefficient_to_add = silhouette_coefficient(sub_clusters_to_add, distance_matrix)
-        temp_sub_silhouette_coefficient_to_add = sub_silhouette_coefficient_to_add[:]
-        temp_sub_silhouette_coefficient_to_add = [value for value in temp_sub_silhouette_coefficient_to_add if value != 1.0]
+        temp_silhouette_coefficient = silhouette_coefficient(clusters_to_add, distance_matrix)
+        if len(sub_clusters_to_check) < 2:
+            break
+        sub_silhouette_coefficient_to_check = silhouette_coefficient(sub_clusters_to_check, distance_matrix)
+        temp_sub_silhouette_coefficient_to_check = sub_silhouette_coefficient_to_check[:]
+        temp_sub_silhouette_coefficient_to_check = [value for value in temp_sub_silhouette_coefficient_to_check if value != 1.0]
 
-        if len(temp_sub_silhouette_coefficient_to_add) == 0 or sub_silhouette_coefficient[min_silhouette_node_index] >= np.max(temp_sub_silhouette_coefficient_to_add) :
+        if len(temp_sub_silhouette_coefficient_to_check) == 0 or sub_silhouette_coefficient[min_silhouette_node_index] >= np.max(temp_sub_silhouette_coefficient_to_check) :
             sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
         else:
             del sub_clusters[min_silhouette_node_index]#min_silhouette_node)
             del sub_silhouette_coefficient[min_silhouette_node_index]
-            sub_silhouette_coefficient.extend(sub_silhouette_coefficient_to_add)
-            sub_clusters.extend(sub_clusters_to_add)
+            sub_silhouette_coefficient.extend(temp_silhouette_coefficient)
+            sub_clusters.extend(clusters_to_add)
    
     return sub_clusters
     
