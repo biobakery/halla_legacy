@@ -549,7 +549,6 @@ def silhouette_coefficient(clusters, distance_matrix):
             b1 = np.mean([ distance_matrix.iloc[i, j] for i,j in product([a_feature], next_cluster)])
             b2 = np.mean([ distance_matrix.iloc[i, j] for i,j in product([a_feature], prev_cluster)])
             b = min(b1,b2)
-            #print  a, b
             s = (b-a)/max(a,b)
             s_all_a.append(s)
         silhouette_scores.append(np.mean(s_all_a))
@@ -642,7 +641,7 @@ def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estim
     if resolution == 'low' :
         sub_clusters = cutree_to_get_number_of_clusters(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)    
     else:
-        sub_clusters = cutree_to_get_number_of_features(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)
+        sub_clusters = truncate_tree([cluster], level=0, skip=1)#cutree_to_get_number_of_features(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)
     sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, distance_matrix) 
     while True:
         min_silhouette_node = sub_clusters[0]
