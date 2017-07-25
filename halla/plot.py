@@ -5,8 +5,6 @@ including all graphics and 'data object to plot' transformations.
 
 # from pylab import plot, hist, scatter
 
-
-
 import sys
 import scipy
 import pylab
@@ -25,16 +23,19 @@ import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.pyplot import xlabel
 from itertools import product
-try:
-    #matplotlib.rcParams["pdf.fonttype"] = 42
-    plt.rcParams["font.family"] = "Arial"
-    #matplotlib.rcParams["pdf.fonttype"] = 42
-    matplotlib.rcParams["font.family"] = "Arial"
-except:
-    pass
+from matplotlib import font_manager
 from . import config
 from . import distance
 from . import stats
+import warnings
+
+with warnings.catch_warnings():
+    warnings.simplefilter("error")
+    try:
+        font_file = font_manager.findfont(font_manager.FontProperties(family='Arial'))
+        matplotlib.rcParams["font.family"] = "Arial"
+    except UserWarning:
+        pass
 
 #matplotlib.style.use('ggplot')
 #matplotlib.use( "Agg" )

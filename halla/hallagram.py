@@ -19,21 +19,26 @@ except:
     csv.field_size_limit(2147483647)
 
 #import matplotlib.pyplot as plt
-import matplotlib as mpl
-#mpl.style.use('ggplot')
-mpl.use( "Agg" )
+import matplotlib 
+#matplotlib.style.use('ggplot')
+matplotlib.use( "Agg" )
 import matplotlib.pyplot as plt
-#import matplotlib as mpl
-#mpl.use( "Agg" )
+#import matplotlib as matplotlib
+#matplotlib.use( "Agg" )
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 import numpy as np
-try:
-    mpl.rcParams["pdf.fonttype"] = 42
-    mpl.rcParams["font.family"] = "Arial"
-except:
-    pass
+from matplotlib import font_manager
+import warnings
+
+with warnings.catch_warnings():
+    warnings.simplefilter("error")
+    try:
+        font_file = font_manager.findfont(font_manager.FontProperties(family='Arial'))
+        matplotlib.rcParams["font.family"] = "Arial"
+    except UserWarning:
+        pass
 
 # ---------------------------------------------------------------
 # constants / config
@@ -56,8 +61,8 @@ c_grid_color    = "0.9"
 c_cbarspan      = 2
 c_simstep       = 0.1
 
-mpl.rcParams['xtick.major.pad'] = '10'
-mpl.rcParams['ytick.major.pad'] = '10'
+matplotlib.rcParams['xtick.major.pad'] = '10'
+matplotlib.rcParams['ytick.major.pad'] = '10'
 
 # ---------------------------------------------------------------
 # classes
@@ -241,8 +246,8 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
     # main heatmap
     heatmap = ax.pcolormesh( simtable.data, cmap=cmap, vmin=vmin, vmax=vmax )
     # craziness for getting cbar on the left with left-facing ticks
-    norm = mpl.colors.Normalize( vmin=vmin, vmax=vmax )
-    cbar = mpl.colorbar.ColorbarBase( 
+    norm = matplotlib.colors.Normalize( vmin=vmin, vmax=vmax )
+    cbar = matplotlib.colorbar.ColorbarBase( 
         ax_cbar,
         norm=norm,
         cmap=cmap,
@@ -307,7 +312,7 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
             path_effects.Normal(),
         ] )
     # craziness for hiding the border
-    plt.setp( [child for child in ax.get_children() if isinstance( child, mpl.spines.Spine )], visible=False )
+    plt.setp( [child for child in ax.get_children() if isinstance( child, matplotlib.spines.Spine )], visible=False )
     plt.tight_layout()
     plt.savefig( outfile )
 

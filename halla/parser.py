@@ -197,12 +197,13 @@ class Input:
 				if config.missing_method is  None: #and not distance.c_hash_association_method_discretize[config.similarity_method]:
 					#warn_message ="There is missing data in feature "+  aNames[i]+"!!! " + "Try --missing-method=method to fill missing data. "
 					line = list(map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) 
-										else 'nan'), line))  ###### np.nan Convert missings to nans
+										else np.nan), line))  ###### np.nan Convert missings to nans
 				else:
-					line = list(map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else 'nan' ), line))  ###### np.nan Convert missings to nans
+					line = list(map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else np.nan ), line))  ###### np.nan Convert missings to nans
 					#line = df1 = pd.DataFrame(line)
 					#if distance.c_hash_association_method_discretize[config.similarity_method]:
 					#try:
+					print any([val == 'nan' for val in line])
 					if all([val == 'nan' for val in line]):
 						# if all values in a feature are missing values then skip the feature
 						continue
@@ -264,43 +265,50 @@ class Input:
 			header1="\t".join(self.outHead1)
 			header2="\t".join(self.outHead2)
 			#print header1, header2
-			if not (header1.lower() == header2.lower()):
-				print("WARNING: The samples are not in the same order " + 
-				    "in the two files. The program uses the common samples between the two data sets based on headers")#+
-				    #"." + " \n File1 header: " + header1 + "\n" +
-				    #" File2 header: " + header2)
-				try:
-					df1 = pd.DataFrame(self.orginal_dataset1, index = self.outName1, columns = self.outHead1)
-				except:
-					df1 = pd.DataFrame(self.orginal_dataset1, index = self.outName1, columns = self.outHead1)
-				try:
-					df2 = pd.DataFrame(self.orginal_dataset2, index = self.outName2, columns = self.outHead2)
-				except:
-					df2 = pd.DataFrame(self.orginal_dataset2, index = self.outName2, columns = self.outHead2)
-				#print df1.columns.isin(df2.columns)
-				#print df2.columns.isin(df1.columns)
-				df1 = df1.loc[: , df1.columns.isin(df2.columns)]
-				df2 = df2.loc[: , df2.columns.isin(df1.columns)]
-				
-				# reorder df1 columns as the columns order of df2
-				df1 = df1.loc[:, df2.columns]
-				
-				self.orginal_dataset1 = df1.values
-				self.orginal_dataset2 = df2.values 
-				#print self.orginal_dataset1
-				self.outName1 = list(df1.index) 
-				self.outName2 = list(df2.index) 
-				#print self.outName1
-				#print self.outName2
-				#self.outType1 = int
-				#self.outType2 = int 
+			#if not (header1.lower() == header2.lower()):
+			print("The program uses the common samples between the two data sets based on headers")#+
+			    #"." + " \n File1 header: " + header1 + "\n" +
+			    #" File2 header: " + header2)
+			try:
+				df1 = pd.DataFrame(self.orginal_dataset1, index = self.outName1, columns = self.outHead1)
+			except:
+				df1 = pd.DataFrame(self.orginal_dataset1, index = self.outName1, columns = self.outHead1)
+			try:
+				df2 = pd.DataFrame(self.orginal_dataset2, index = self.outName2, columns = self.outHead2)
+			except:
+				df2 = pd.DataFrame(self.orginal_dataset2, index = self.outName2, columns = self.outHead2)
+			#print df1.columns.isin(df2.columns)
+			#print df2.columns.isin(df1.columns)
+			
+			# remove samples/columns with all NaN/missing values
+			df1 = df1.dropna( axis=1, how='all')
+			df2 = df2.dropna( axis=1, how='all')
+			
+			
+			
+			# Keep common samples/columns between two data frame
+			df1 = df1.loc[: , df1.columns.isin(df2.columns)]
+			df2 = df2.loc[: , df2.columns.isin(df1.columns)]
 		
-				self.outHead1 = df1.columns
-				self.outHead2 = df2.columns 
-				#print self.outHead1
-		#print self.outHead1 ,self.outHead2  
+			# reorder df1 columns as the columns order of df2
+			df1 = df1.loc[:, df2.columns]
+			
+			self.orginal_dataset1 = df1.values
+			self.orginal_dataset2 = df2.values 
+			#print self.orginal_dataset1
+			self.outName1 = list(df1.index) 
+			self.outName2 = list(df2.index) 
+			#print self.outName1
+			#print self.outName2
+			#self.outType1 = int
+			#self.outType2 = int 
+	
+			#self.outHead1 = df1.columns
+			#self.outHead2 = df2.columns 
+			self.outHead1 = df1.columns
+			self.outHead2 = df2.columns
 		if len(self.orginal_dataset1[0]) != len(self.orginal_dataset2[0]):
-			sys.exit("Have you proivded --header option to use sample/column names for shared sample/columns.")
+			sys.exit("Have you provided --header option to use sample/column names for shared sample/columns.")
 	def _remove_low_variant_features(self):
 		try:
 			df1 = pd.DataFrame(self.orginal_dataset1, index = self.outName1, columns = self.outHead1, dtype=float)
@@ -356,6 +364,8 @@ class Input:
 		#print df1.var(), np.var(df2, axis=1)
 		l1_before =  len(df1.index)
 		l2_before =  len(df2.index)
+		
+		# filter for only features with entropy greater that the threshold
 		temp_df1 = df1 
 		df1 = df1[df1.apply(stats.get_enropy, 1) > config.entropy_threshold1]
 		df1_org = df1_org[temp_df1.apply(stats.get_enropy, 1) > config.entropy_threshold1]
