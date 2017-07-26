@@ -280,11 +280,22 @@ class Input:
 			#print df1.columns.isin(df2.columns)
 			#print df2.columns.isin(df1.columns)
 			
+			l1_before =  len(df1.columns)
+			l2_before =  len(df2.columns)
+
 			# remove samples/columns with all NaN/missing values
 			df1 = df1.dropna( axis=1, how='all')
 			df2 = df2.dropna( axis=1, how='all')
 			
+			l1_after = len(df1.columns)
+			l2_after = len(df2.columns)
 			
+			if l1_before > l1_after:
+				print ("--- %d samples/columns with all missing values have been removed from the first dataset " % (l1_before- l1_after))
+				
+			if l2_before > l2_after:
+				print ("--- %d samples/columns with all missing values have been removed from the second dataset " % (l2_before- l2_after))
+		
 			
 			# Keep common samples/columns between two data frame
 			df1 = df1.loc[: , df1.columns.isin(df2.columns)]
@@ -329,10 +340,10 @@ class Input:
 		l1_after = len(df1.index)
 		l2_after = len(df2.index)
 		if l1_before > l1_after:
-			print ("WARNING! %d features with variation equal or less than %.3f have been removed from the first dataset " % (l1_before- l1_after, config.min_var))
+			print ("--- %d features with variation equal or less than %.3f have been removed from the first dataset " % (l1_before- l1_after, config.min_var))
 			
 		if l2_before > l2_after:
-			print ("WARNING! %d features with variation equal or less than %.3f have been removed from the second dataset " % (l2_before- l2_after, config.min_var))
+			print ("--- %d features with variation equal or less than %.3f have been removed from the second dataset " % (l2_before- l2_after, config.min_var))
 		# reorder df1 columns as the columns order of df2
 		#df1 = df1.loc[:, df2.columns]
 		
@@ -377,10 +388,10 @@ class Input:
 		l1_after = len(df1.index)
 		l2_after = len(df2.index)
 		if l1_before > l1_after:
-			print ("WARNING! %d features with entropy equal or less than %.3f have been removed from the first dataset " % ((l1_before- l1_after), config.entropy_threshold1))
+			print ("--- %d features with entropy equal or less than %.3f have been removed from the first dataset " % ((l1_before- l1_after), config.entropy_threshold1))
 			
 		if l2_before > l2_after:
-			print ("WARNING! %d features with entropy equal or less than %.3f have been removed from the second dataset " % ((l2_before- l2_after), config.entropy_threshold2))
+			print ("--- %d features with entropy equal or less than %.3f have been removed from the second dataset " % ((l2_before- l2_after), config.entropy_threshold2))
 		# reorder df1 columns as the columns order of df2
 		#df1 = df1.loc[:, df2.columns]
 		
