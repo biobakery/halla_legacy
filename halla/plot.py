@@ -354,7 +354,10 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
         ax2.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
         Y2 = []
         if not data_table is None:
-            Y2 = linkage(data_table.T, metric=distance.pDistance, method=linkage_method)
+            try:
+                Y2 = linkage(data_table.T, metric=distance.pDistance, method=linkage_method)
+            except ValueError:
+                pass
         if len(Y2) > 1:
             try:
                 Z2 = sch.dendrogram(Y2)
