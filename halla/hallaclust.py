@@ -34,7 +34,7 @@ def resoltion_hclust(distance_matrix=None,
 
     if do_plot:
         Z = plot.heatmap(data_table = None , D = distance_matrix, xlabels_order = [], xlabels = distance_matrix.index, 
-                     filename= output_dir+"/hierarchical_heatmap", colLable = False, method =linkage_method, scale ='log') 
+                     filename= output_dir+"/hierarchical_heatmap", colLable = False, linkage_method =linkage_method) 
     else:
         Z = Z = linkage(distance_matrix, method= linkage_method)
     import scipy.cluster.hierarchy as sch

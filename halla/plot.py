@@ -312,7 +312,9 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     fig.savefig(filename + '.pdf')
     pylab.close()
         
-def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], filename='./hierarchical_heatmap', metric = config.similarity_method, linkage_method = "average", colLable = False, rowLabel = True, color_bar = True, sortCol = True):
+def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
+            filename='./hierarchical_heatmap', metric = config.similarity_method, linkage_method = "average", 
+            colLable = False, rowLabel = True, color_bar = True, sortCol = True):
     # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
     scale  = config.transform_method
     max_hight = 1000
@@ -449,7 +451,7 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [], 
         rect = l,b,w,h
         axcolor = fig.add_axes(rect)
         #axcolor = fig.add_axes([0.94,0.1,0.02,0.6])
-        legend_lable = str(config.similarity_method).upper() if len(config.similarity_method) <5 else config.similarity_method.title()
+        legend_lable = ""#str(config.similarity_method).upper() if len(config.similarity_method) <5 else config.similarity_method.title()
         if len(scale) >0 :
             legend_lable = legend_lable + ' ('+str(scale.title())+')'
         fig.colorbar(im, cax=axcolor, label = legend_lable)
@@ -473,7 +475,6 @@ def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], ylabel = "R
     ticks_fontsize = 6
     fig = None
     if ax == None:
-        xlable_rotation = 45
         labels_fontsize = 10
         ticks_fontsize = 10
         fig, ax = plt.subplots(dpi= 300, figsize=( len(data)/2+2.5, 3))# figsize=(4, 4)) 
@@ -496,7 +497,7 @@ def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], ylabel = "R
         ax.legend(proxy_artists, ['FPR'], loc='center', fontsize = labels_fontsize)
         
     else:
-        ax.legend(proxy_artists, ['Recall', 'FDR'], loc='center', fontsize = labels_fontsize)
+        ax.legend(proxy_artists, ['Recall', 'FDR'], loc='best', fontsize = labels_fontsize)
 
     ax.get_xaxis().set_tick_params(which='both', labelsize=ticks_fontsize,top='off',  direction='out')
     ax.get_yaxis().set_tick_params(which='both', labelsize=ticks_fontsize, right='off', direction='out')
@@ -525,7 +526,7 @@ def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], ylabel = "R
     #plt.show()
     #plt.close()
     return ax
-def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
+def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, show_points = False,  **kwargs):
     if ax is None:
         ax = plt.gca()
         
@@ -559,6 +560,8 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, **kwargs):
         ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
            
         artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
+        if show_points:
+            ax.plot(pos,group,  mec='grey', marker="+", linestyle="None",  ms =3, color="grey", alpha = .6, lw =.05 )
         #artist.patch.set(facecolor='0.95')
         set_box_color(artist, color = 'red')
         artists.append(artist)

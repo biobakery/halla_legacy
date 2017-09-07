@@ -94,7 +94,16 @@ def mi(pData1, pData2):
 	(3, 3) 0.311278124459
 	"""
 	return math.log(math.e, 2) * mutual_info_score(pData1, pData2)#return MutualInformation(pData1, pData2).get_distance()
+def remove_pairs_with_a_missing(X, Y):
+    if  not config.missing_char_category:
+        test = [0 in [a, b] for a,b in zip(X,Y)]
+        new_X= [a for a,b in zip (X,test) if ~b]
+        new_Y= [a for a,b in zip (Y,test) if ~b]
 
+    else:
+        new_X = X
+        new_Y = Y
+    return (new_X, new_Y)
 def nmi(X, Y):
     """
     Static implementation of normalized mutual information 
@@ -126,18 +135,11 @@ def nmi(X, Y):
     (3, 3) 0.345592029944
     
     """
-    if  not config.missing_char_category:
-        test = [0 in [a, b] for a,b in zip(X,Y)]
-        new_X= [a for a,b in zip (X,test) if ~b]
-        new_Y= [a for a,b in zip (Y,test) if ~b]
-        #print test
-        #print new_X, new_Y
-    else:
-        new_X = X
-        new_Y = Y 
+    # remove pairs with a missing value in comparison  
+    new_X , new_Y = remove_pairs_with_a_missing(X, Y)
     return normalized_mutual_info_score(new_X, new_Y) #return NormalizedMutualInformation(pData1, pData2).get_distance() 
 
-def ami(pData1, pData2):
+def ami(X, Y):
     """ 
     Static implementation of adjusted distance 
     
@@ -168,17 +170,21 @@ def ami(pData1, pData2):
     (3, 3) -3.72523550982e-08
     
     """
-    result = adjusted_mutual_info_score(pData1, pData2)
+    # remove pairs with a missing value in comparison  
+    new_X , new_Y = remove_pairs_with_a_missing(X, Y) 
+    result = adjusted_mutual_info_score(new_X, new_Y)
     return result 
  
 def pearson(X, Y):
+    
     X = array(X)
     Y = array(Y)
     if X.ndim > 1: 
     	X = X[0]
     if Y.ndim > 1:
     	Y = Y[0]
-    return scipy.stats.pearsonr(X, Y)[0]
+    new_X , new_Y = remove_pairs_with_a_missing(X, Y)
+    return scipy.stats.pearsonr(new_X, new_Y)[0]
 def spearman(X, Y):
     X = array(X)
     Y = array(Y)
@@ -188,6 +194,7 @@ def spearman(X, Y):
         Y = Y[0]
     return scipy.stats.spearmanr(X, Y, nan_policy='omit')[0]
 def mic (X, Y):
+    new_X , new_Y = remove_pairs_with_a_missing(X, Y)
     try:
         import minepy
         from minepy import MINE
@@ -195,7 +202,7 @@ def mic (X, Y):
         sys.exit("CRITICAL ERROR:2 Unable to import minepy package." + 
             " Please check your install.") 
     mine = MINE(alpha=0.6, c=15)
-    mine.compute_score(X, Y)
+    mine.compute_score(new_X , new_Y)
     return mine.mic()
 
 def distcorr(X, Y):
@@ -205,7 +212,9 @@ def distcorr(X, Y):
     >>> b = np.array([1,2,9,4,4])
     >>> distcorr(a, b)
     0.762676242417
+    
     """
+    X , Y = remove_pairs_with_a_missing(X, Y)
     X = np.atleast_1d(X)
     Y = np.atleast_1d(Y)
     if np.prod(X.shape) == len(X):

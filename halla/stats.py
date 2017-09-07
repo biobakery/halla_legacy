@@ -1308,7 +1308,7 @@ def parametric_test_by_pls_pearson(pArray1, pArray2, iIter=1000):
 
 	return fP
  
-def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=None, method=None, aiSkip=[]):
+def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=None, method=None, aiSkip=[]):
 	
 	"""
 	This functio discretizes data and has two approach one for continuse data
@@ -1415,7 +1415,7 @@ def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=No
 		setastrValues = list(set(astrValues))
 		dictA ={}
 		for i, item in enumerate(setastrValues):
-			if str(astrValues[i]) != numpy.nan:
+			if str(astrValues[i]) != 'nan':
 				dictA[item] = i+1
 			else:
 				#if str(astrValues[i]) == 'nan':
@@ -1447,12 +1447,13 @@ def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=No
 				#return _discretize_categorical(astrValues, number_of_bins=number_of_bins)
 		else:							
 			#try:
-			if config.strDiscretizing == 'equal-area':
+			if config.strDiscretizing == 'equal-freq':
 				order = rankdata(astrValues, method= 'min')# ordinal
 			elif config.strDiscretizing == 'hclust':
-				#print astrValues
+				#astrValues = distance.remove_pairs_with_a_missing(astrValues, astrValues)
 				distanceMatrix = abs(numpy.array([astrValues],  dtype= float).T-numpy.array([astrValues], dtype= float))
-				order = fcluster(linkage(distanceMatrix, method='complete'), number_of_bins,'distance')
+				order = fcluster(Z=linkage(distanceMatrix, method=config.linkage_method), t=number_of_bins,criterion='maxclust')
+				#print order, number_of_bins
 				return order
 			'''except:
 				print ("An exception happend with discretizing continuose data!!!")
@@ -1466,8 +1467,7 @@ def discretize(pArray, style = "equal-area", data_type = None, number_of_bins=No
 			discretized_result[i] = int((order[i]-1) / bins_size)
 		discretized_result = rankdata(discretized_result, method= 'dense')
 		for i in range(len(astrValues)):
-			if str(astrValues[i]) == numpy.nan:
-				#print  astrValues[i] 
+			if str(astrValues[i]) == 'nan':
 				discretized_result[i]= 0
 		#print astrRet
 		return discretized_result

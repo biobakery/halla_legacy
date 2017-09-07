@@ -20,7 +20,7 @@ from . import stats
 def wrap_features(txt, width=40):
 		'''helper function to wrap text for long labels'''
 		import textwrap
-		txt = txt.replace('g__','').replace('f__','').replace('o__','').replace('c__','').replace('p__','').replace('k__','')
+		txt = txt.replace('s__','').replace('g__','').replace('f__','').replace('o__','').replace('c__','').replace('p__','').replace('k__','')
 		txt = str(txt).split("|")
 		txt = [val for val in txt if len(val)>0 ]
 		if len(txt)>1:
@@ -185,7 +185,7 @@ class Input:
 			# # Parse data types, missing values, and whitespace
 			if config.missing_method:
 				from sklearn.preprocessing import Imputer
-				imp = Imputer(missing_values='NaN', strategy=config.missing_method, axis=1)
+				imp = Imputer(missing_values='nan', strategy=config.missing_method, axis=1)
 				imp.fit(pArray)
 			#Imputer(axis=0, copy=True, missing_values='NaN', strategy='mean', verbose=0)
 			#line = [[np.nan, 2], [6, np.nan], [7, 6]]
@@ -194,47 +194,33 @@ class Input:
 			for i, line in enumerate(pArray):
 				# *   If the line is not full,  replace the Nones with nans                                           *
 				#***************************************************************************************************** 
-				if config.missing_method is  None: #and not distance.c_hash_association_method_discretize[config.similarity_method]:
-					#warn_message ="There is missing data in feature "+  aNames[i]+"!!! " + "Try --missing-method=method to fill missing data. "
-					line = list(map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) 
-										else np.nan), line))  ###### np.nan Convert missings to nans
-				else:
-					line = list(map(lambda x: (x.strip(config.missing_char) if bool(x.strip(config.missing_char)) else np.nan ), line))  ###### np.nan Convert missings to nans
-					#line = df1 = pd.DataFrame(line)
-					#if distance.c_hash_association_method_discretize[config.similarity_method]:
-					#try:
-					print any([val == 'nan' for val in line])
-					if all([val == 'nan' for val in line]):
-						# if all values in a feature are missing values then skip the feature
-						continue
-					else:
-						# fill missing values
-						line = imp.transform(line)[0]
-					#except:
-					#	print ("there is an issue with filling missed data!")
-				if all(val != config.missing_char for val in line):
-					aOut.append(line)
-					if not aNames:
-						aNames.append(i)
+				line = list(map(lambda x: 'nan' if x == config.missing_char else x, line))  ###### np.nan Convert missings to nans
+				
+				if all([val == 'nan' for val in line]):
+					# if all values in a feature are missing values then skip the feature
+					print ('All missing value in' , aNames[i])
+					continue
+				
+				aOut.append(line)
+				if not aNames:
+					aNames.append(i)
 
-					#try: 
-						#line = map(int, line)  # is it explicitly categorical?  
-						#aTypes.append("CAT")
-					#except ValueError:
-					try:
-						line = list(map(float, line))  # is it continuous? 
-						aTypes.append("CON")
-						#print "Continues data !"
-					except ValueError:
-						#print "Categorical data !"
-						line = line  # we are forced to conclude that it is implicitly categorical, with some lexical ordering 
-						aTypes.append("LEX")
-				else:  # delete corresponding name from namespace 
-					try:
-						print (aNames[i], " has an issue with filling missed data!")
-						#aNames.remove(aNames[i])
-					except Exception:
-						pass 
+				try:
+					line = list(map(float, line))  # is it continuous? 
+					aTypes.append("CON")
+					# fill missing values
+					if config.missing_method:
+						try:
+							line = imp.transform(line)[0]
+						except:
+							print (aNames[i], " has an issue with filling missed data!")
+							pass
+					#print "Continues data !"
+				except ValueError:
+					#print "Categorical data !"
+					line = line  # we are forced to conclude that it is implicitly categorical, with some lexical ordering 
+					aTypes.append("LEX")
+			
 				used_names.append(aNames[i]) 
 			return aOut, used_names, aTypes, aHeaders 
 

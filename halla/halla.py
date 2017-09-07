@@ -226,9 +226,9 @@ def parse_arguments (args):
     argp.add_argument(
         "--discretizing", 
         dest="strDiscretizing",
-        default="equal-area",
-        choices=["equal-area", "hclust", "none"], #"jenks", "hclust", "kmeans", 
-        help="approach for discretizing continuous data\n[default = equal-area]")
+        default="equal-freq",
+        choices=["equal-freq", "hclust", "none"], #"jenks", "hclust", "kmeans", 
+        help="approach for discretizing continuous data\n[default = equal-freq]")
     argp.add_argument(
         "--linkage",
         dest ="linkage_method",
@@ -291,7 +291,7 @@ def parse_arguments (args):
     argp.add_argument(
         "--missing-char",
         dest ="missing_char",
-        default=None,
+        default='',
         help="defines missing characters\n[default = '']")
     argp.add_argument(
         "--fill-missing",
