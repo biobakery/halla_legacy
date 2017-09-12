@@ -550,19 +550,19 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, show_points = Fa
         #artist = ax.boxplot(group, positions= pos, **kwargs)
         if i % 2 == 0:
             #print pos
-            ax.bar( np.mean(pos)-(width+2*pad), 1 , zorder=0, color=".985", width=(width+2*pad)*2, edgecolor="none" )
+            ax.bar( np.mean(pos), 1 , zorder=0, color=".985", width=(width+2*pad)*2, edgecolor="none" ) # np.mean(pos)-(width+2*pad)
             #'''width * len(group) + pad * (len(group) - 1)-width/2 -pad'''
             #plt.setp(artist, color ='red')
         #artist.patch.set(facecolor='0.1')
         else:
-           ax.bar( np.mean(pos)-(width+2*pad), 1 , zorder=0, color="0.955", width=(width+2*pad)*2, edgecolor="none" ) 
+           ax.bar( np.mean(pos), 1 , zorder=0, color="0.955", width=(width+2*pad)*2, edgecolor="none" ) # np.mean(pos)-(width+2*pad)
         ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
         ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
            
-        artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
         if show_points:
             ax.plot(pos,group,  mec='grey', marker="+", linestyle="None",  ms =3, color="grey", alpha = .6, lw =.05 )
         #artist.patch.set(facecolor='0.95')
+        artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
         set_box_color(artist, color = 'red')
         artists.append(artist)
         flage = True

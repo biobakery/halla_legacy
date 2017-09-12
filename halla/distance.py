@@ -15,7 +15,7 @@ from scipy.spatial.distance import cdist
 import scipy.stats
 
 from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, \
-    adjusted_mutual_info_score, make_scorer
+    adjusted_mutual_info_score, make_scorer, r2_score
 from scipy.spatial.distance import pdist, squareform
 import numpy as np
 from . import config
@@ -26,6 +26,7 @@ from . import config
 #==========================================================================#
 c_hash_association_method_discretize = {"pearson": False,
 										"spearman": False,
+                                        "r2": False,
 										"kw": False,
 										"anova": False,
 										"x2": False,
@@ -237,6 +238,20 @@ def distcorr(X, Y):
     dcor = np.sqrt(dcov2_xy)/np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
     return dcor
 
+def r2(X, Y):
+    X = array(X)
+    Y = array(Y)
+    if X.ndim > 1: 
+        X = X[0]
+    if Y.ndim > 1:
+        Y = Y[0]
+    new_X , new_Y = remove_pairs_with_a_missing(X, Y)
+    slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(new_X, new_Y)
+    return  r_value**2
+    #coefficient_of_dermination =  r2_score(new_X, new_Y, multioutput='raw_values')
+    #return coefficient_of_dermination
+    
+
 c_hash_metric = {"nmi": nmi,
                 "mi": mi,
                 "l2": l2,
@@ -245,7 +260,8 @@ c_hash_metric = {"nmi": nmi,
                 "spearman": spearman,
                 "mic": mic,
                 "dmic":mic,
-                "dcor":distcorr
+                "dcor":distcorr,
+                "r2": r2
                 }
 
 #==========================================================================#
