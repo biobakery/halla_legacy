@@ -1498,7 +1498,6 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 				#print "SKIPE LINE!"
 				discretized_data.append(line)
 			elif data_type!= None and data_type[i] == 'LEX':
-				#print "LEX", line
 				discretized_data.append(array(_discretize_categorical(line, number_of_bins)))
 			else:
 				discretized_data.append(_discretize_continuous(line, number_of_bins))

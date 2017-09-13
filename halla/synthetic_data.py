@@ -19,8 +19,7 @@ try:
     from functools import reduce
 except:
     pass
-from . import logger
-
+from . import logger, stats
 def parse_arguments(args):
     """ 
     Parse the arguments from the user
@@ -350,7 +349,9 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
         B: int
             number of blocks 
     """
-    
+    if association_type == "categorical-step":
+        cat_X = numpy.empty((D, N), dtype=object)
+        cat_Y = numpy.empty((D, N), dtype=object)
     
     X = numpy.random.uniform(low=-1,high=1,size=(D,N))
     Y = numpy.random.uniform(low=-1,high=1,size=(D,N))
@@ -378,6 +379,8 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                 else:    
                     X[j]= [common_base[l,k]  + within_noise * numpy.random.uniform(low=-1,high=1 ,size=1) for k in range(N)]
                 assoc[l].append(j)
+                
+                    
         l += 1
     if association_type == "L":
         common_base_Y = numpy.random.uniform(low=-1,high=1 ,size=(B+1,N))
@@ -399,7 +402,7 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                     Y[j]= [.5* math.sin(math.pi * common_base[l,k]*1.5)  + within_noise * numpy.random.uniform(low=-1,high=1 ,size=1)  for k in range(N)]
                 elif association_type == "log":
                     Y[j]= [math.log(math.fabs(common_base[l,k]))  + within_noise *math.fabs(numpy.random.uniform(low=0,high=1 ,size=1)) for k in range(N)]
-                elif association_type == "step":
+                elif association_type == "step" or association_type == "categorical-step":
                     p1 = numpy.percentile(common_base[l], 25)
                     p2 = numpy.percentile(common_base[l], 50)
                     p3 = numpy.percentile(common_base[l], 75)
@@ -410,6 +413,7 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                     Y[j]= [ 2.0 +within_noise *numpy.random.uniform(low=-1,high=1 ,size=1) if common_base[l,k] < p1 else  1.0 + within_noise *numpy.random.uniform(low=-1,high=1 ,size=1)\
                         if common_base[l,k] < p2 else  3.0 + within_noise *numpy.random.uniform(low=-1,high=1 ,size=1) if common_base[l,k] < p3  else
                         0.0 + within_noise *numpy.random.uniform(low=-1,high=1 ,size=1) for k in range(N)]
+                
                 elif association_type == "L":
                     Y[j] = [ common_base_Y[l,k] + within_noise * numpy.random.uniform(low=-1,high=1, size=1) for k in range(N)]
                     #Y[j]= [ numpy.random.uniform(low=10,high=100, size=1) * common_base[l,k] if common_base[l,k] < -0.8 else numpy.random.uniform(low=.2,high=.5, size=1) for k in range(N)]
@@ -422,6 +426,19 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
     for r in range(0,B+1):
         for i, j in itertools.product(assoc[r], assoc[r]):
             A[i][j] = 1
+    if association_type == "categorical-step":
+        xdisc_value = stats.discretize(X)
+        ydisc_value = stats.discretize(Y)
+        for i in range(D):
+            #try:
+            cat_X[i] = [chr(int(value)+64) for value in xdisc_value[i]]
+            cat_Y[i] = [chr(int(value)+64) for value in ydisc_value[i]]
+                #print "X", cat_X[i]
+            #except:
+            #   print( 'issue with categorical data generation')
+    if association_type == "categorical-step":
+        #print cat_X, cat_Y
+        return cat_X, cat_Y , A
     return X,Y,A
 def balanced_synthetic_dataset_norm( D, N, B, within_noise = 0.5, between_noise = 0.1, cluster_percentage = 1, association_type = 'parabola' ):
     """
