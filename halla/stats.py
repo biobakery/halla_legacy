@@ -18,7 +18,6 @@ import scipy.stats
 import sys
 import random
 from scipy.stats import scoreatpercentile, pearsonr, rankdata, percentileofscore, spearmanr
-
 import sklearn 
 from sklearn.metrics import roc_curve, auc 
 from sklearn import manifold
@@ -29,6 +28,10 @@ from sklearn.metrics import explained_variance_score
 from scipy.cluster.hierarchy import fcluster
 #from scipy.spatial.distance import pdist
 from scipy.cluster.hierarchy import linkage, dendrogram
+try:
+	from jenks import jenks
+except:
+	pass
 
 # External dependencies 
 # from scipy.stats import percentileofscore
@@ -1307,7 +1310,17 @@ def parametric_test_by_pls_pearson(pArray1, pArray2, iIter=1000):
 	fP = pearsonr(X_pls, Y_pls)[1]
 
 	return fP
- 
+
+def classify(value, breaks):
+    for i in range(1, len(breaks)):
+        if value < breaks[i]:
+            return i
+    return len(breaks) - 1
+def jenks_discretize(values, n):
+	breaks = jenks(values, int(n))
+	values_in_bins = [ classify(value, breaks) for value in values]
+	return values_in_bins
+	 
 def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=None, method=None, aiSkip=[]):
 	
 	"""
@@ -1454,6 +1467,9 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 				distanceMatrix = abs(numpy.array([astrValues],  dtype= float).T-numpy.array([astrValues], dtype= float))
 				order = fcluster(Z=linkage(distanceMatrix, method=config.linkage_method), t=number_of_bins,criterion='maxclust')
 				#print order, number_of_bins
+				return order
+			elif config.strDiscretizing == 'jenks':
+				order = jenks_discretize(astrValues, number_of_bins)
 				return order
 			'''except:
 				print ("An exception happend with discretizing continuose data!!!")

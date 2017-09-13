@@ -227,7 +227,7 @@ def parse_arguments (args):
         "--discretizing", 
         dest="strDiscretizing",
         default="equal-freq",
-        choices=["equal-freq", "hclust", "none"], #"jenks", "hclust", "kmeans", 
+        choices=["equal-freq", "hclust", "jenks", "none"], #"jenks", "hclust", "kmeans", 
         help="approach for discretizing continuous data\n[default = equal-freq]")
     argp.add_argument(
         "--linkage",
