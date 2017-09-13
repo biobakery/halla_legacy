@@ -29,7 +29,7 @@ from scipy.cluster.hierarchy import fcluster
 #from scipy.spatial.distance import pdist
 from scipy.cluster.hierarchy import linkage, dendrogram
 try:
-	from jenks import jenks
+	import jenkspy
 except:
 	pass
 
@@ -1317,7 +1317,7 @@ def classify(value, breaks):
             return i
     return len(breaks) - 1
 def jenks_discretize(values, n):
-	breaks = jenks(values, int(n))
+	breaks = jenkspy.jenks_breaks(values, int(n))
 	values_in_bins = [ classify(value, breaks) for value in values]
 	return values_in_bins
 	 
