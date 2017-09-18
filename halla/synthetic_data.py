@@ -338,7 +338,7 @@ def imbalanced_synthetic_dataset_uniform(D, N, B, cluster_percentage = 1, within
             A[i][j] = 1
     return X,Y,A
 
-def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_noise = 0.1, cluster_percentage = 1, association_type = 'parabola' ):
+def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_noise = 0.1, cluster_percentage = 1, association_type = 'parabola', number_of_cat = None ):
     """
         D: int
             number of features
@@ -349,7 +349,7 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
         B: int
             number of blocks 
     """
-    if association_type == "categorical-step":
+    if association_type == "categorical-step" or association_type == "mixed":
         cat_X = numpy.empty((D, N), dtype=object)
         cat_Y = numpy.empty((D, N), dtype=object)
     
@@ -402,7 +402,7 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                     Y[j]= [.5* math.sin(math.pi * common_base[l,k]*1.5)  + within_noise * numpy.random.uniform(low=-1,high=1 ,size=1)  for k in range(N)]
                 elif association_type == "log":
                     Y[j]= [math.log(math.fabs(common_base[l,k]))  + within_noise *math.fabs(numpy.random.uniform(low=0,high=1 ,size=1)) for k in range(N)]
-                elif association_type == "step" or association_type == "categorical-step":
+                elif association_type == "step" or association_type == "categorical-step" or association_type == "mixed":
                     p1 = numpy.percentile(common_base[l], 25)
                     p2 = numpy.percentile(common_base[l], 50)
                     p3 = numpy.percentile(common_base[l], 75)
@@ -427,8 +427,8 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
         for i, j in itertools.product(assoc[r], assoc[r]):
             A[i][j] = 1
     if association_type == "categorical-step":
-        xdisc_value = stats.discretize(X)
-        ydisc_value = stats.discretize(Y)
+        xdisc_value = stats.discretize(X, number_of_bins = number_of_cat)
+        ydisc_value = stats.discretize(Y, number_of_bins = number_of_cat)
         for i in range(D):
             #try:
             cat_X[i] = [chr(int(value)+64) for value in xdisc_value[i]]
@@ -436,10 +436,21 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                 #print "X", cat_X[i]
             #except:
             #   print( 'issue with categorical data generation')
-    if association_type == "categorical-step":
-        #print cat_X, cat_Y
         return cat_X, cat_Y , A
-    return X,Y,A
+    elif association_type == "mixed":
+        xdisc_value = stats.discretize(X)
+        ydisc_value = stats.discretize(Y)
+        for i in range(D):
+            #try:
+            if i < math.trunc((D/10)):
+                cat_X[i] = [chr(int(value)+64) for value in xdisc_value[i]]
+                cat_Y[i] = [chr(int(value)+64) for value in ydisc_value[i]]
+            else:
+                cat_X[i] = X[i]
+                cat_Y[i] = Y[i]
+        return cat_X, cat_Y , A
+    else:      
+        return X,Y,A
 def balanced_synthetic_dataset_norm( D, N, B, within_noise = 0.5, between_noise = 0.1, cluster_percentage = 1, association_type = 'parabola' ):
     """
         D: int
