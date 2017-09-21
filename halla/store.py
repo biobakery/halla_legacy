@@ -107,6 +107,11 @@ def _test_by_level():
     config.meta_alla = hierarchy.test_by_level(apClusterNode0=[config.meta_data_tree[0]],
             apClusterNode1=[config.meta_data_tree[1]],
             dataset1=config.parsed_dataset[0], dataset2=config.parsed_dataset[1])
+def _test_by_family():
+    config.meta_alla = hierarchy.test_by_family(apClusterNode0=[config.meta_data_tree[0]],
+            apClusterNode1=[config.meta_data_tree[1]],
+            dataset1=config.parsed_dataset[0], dataset2=config.parsed_dataset[1])
+
 
 def _naive_summary_statistics():
     try:
@@ -708,7 +713,7 @@ def write_config():
     csvw.writerow(["Hierarchical linkage method: ", config.linkage_method]) 
     csvw.writerow(["q: FDR cut-off : ", config.q]) 
     csvw.writerow(["FDR adjusting method : ", config.p_adjust_method]) 
-    csvw.writerow(["FDR using : ", config.fdr_function])
+    csvw.writerow(["FDR style using : ", config.fdr_style])
     #csvw.writerow(["r: effect size for robustness : ", config.robustness]) 
     csvw.writerow(["Applied stop condition : ", config.apply_stop_condition]) 
     csvw.writerow(["Discretizing method : ", config.strDiscretizing])
@@ -778,7 +783,10 @@ def run():
         # coupling clusters hierarchically 
         start_time = time.time()
         #_couple()
-        _test_by_level()
+        if config.fdr_style == 'level':
+            _test_by_level()
+        elif config.fdr_style == 'family':
+            _test_by_family()
         excution_time_temp = time.time() - start_time
         csvw.writerow(["Level-by-level hypothesis testing", str(datetime.timedelta(seconds=excution_time_temp)) ])
         print("--- %s h:m:s level-by-level hypothesis testing ---" % str(datetime.timedelta(seconds=excution_time_temp)))

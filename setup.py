@@ -32,7 +32,7 @@ except ImportError:
         "Topic :: Scientific/Engineering :: Bio-Informatics"
         ]
 
-VERSION = "0.7.17"
+VERSION = "0.7.18"
 AUTHOR = "Gholamali Rahnavard, Curtis Huttenhower, Huttenhower Lab"
 AUTHOR_EMAIL = "halla-users@googlegroups.com"
 MAINTAINER = "Gholamali Rahnavard"

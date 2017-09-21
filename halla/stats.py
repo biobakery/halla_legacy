@@ -627,7 +627,7 @@ def p_adjust(pval, q, cluster_size = None, method="BH"):
 	if config.p_adjust_method == "by":
 			return by(pval, q) 
 			#fAdjusted = q * 1.0 * pRank[i] / (iLen*math.log(iLen))  # iLenReduced
-	elif config.p_adjust_method == "bh":
+	elif config.p_adjust_method == "bh" or config.p_adjust_method == "y" :
 		return bh(pval, q, cluster_size) 
 	elif config.p_adjust_method == "bonferroni":
 		return bonferroni(pval, q)

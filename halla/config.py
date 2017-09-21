@@ -1,6 +1,6 @@
 import random
 from numpy import array
-version = '0.7.17'
+version = '0.7.18'
 __description__      = """
   _    _          _ _          
  | |  | |   /\   | | |   /\    
@@ -27,7 +27,7 @@ NPROC = 1 # number of threads to use
 
 similarity_method = "nmi"
 decomposition = "medoid" 
-fdr_function = "level"
+fdr_style = "level"
 permutation_func = 'gpd'
 linkage_method = 'average'
 q = .1  # FDR/multiple testing threshold

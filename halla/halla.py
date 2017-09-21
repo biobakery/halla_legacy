@@ -174,13 +174,12 @@ def parse_arguments (args):
         choices=["HAllA","AllA"],
         help="descending approach\n[default = HAllA for hierarchical all-against-all]")
     
-    '''argp.add_argument(
-        "-f","--fdr",
-        dest="strFDR",
+    argp.add_argument(
+        "--fdr-style",
+        dest="fdr_style",
         default = "level",
-        choices=["level","simple","all"],
-        help="hypothesis function to  maximize statistical power and control false discovery rate\n[default = level]")
-    '''
+        choices=["level","all", "family"],
+        help="the style of grouping hypotheses in hypothesis tree to control false discovery rate\n[default = level]")
     argp.add_argument(
         "-i","--iterations", metavar="<1000>",
         dest="iIter",
@@ -206,7 +205,7 @@ def parse_arguments (args):
         "--fdr",
         dest="strAdjust",    
         default="bh",
-        choices=["bh", "by", "bonferroni", "no_adjusting"],
+        choices=["bh", "by", 'y', "bonferroni", "no_adjusting"],
         help="approach for FDR correction\n[default = bh]")
     argp.add_argument(
         "-v", "--verbose",
@@ -327,7 +326,8 @@ def set_parameters(args):
     config.similarity_method = args.strMetric.lower()
     config.decomposition = args.strDecomposition.lower()
     #config.fdr_function = args.strFDR
-    config.q = args.dQ  
+     
+     
     config.entropy_threshold = args.entropy_threshold
     if args.entropy_threshold1 == None:
         config.entropy_threshold1 = args.entropy_threshold
@@ -366,6 +366,12 @@ def set_parameters(args):
     config.missing_method = args.missing_method
     config.missing_char_category = args.missing_char_category
     config.p_adjust_method = args.strAdjust.lower()
+    config.q = args.dQ
+    if config.fdr_style =='family':
+        config.q = args.dQ/(2.0*1.44) #Daniel YEKUTIELI
+    if config.p_adjust_method =='y':
+        config.q = args.dQ/(2.0*1.44) #Daniel YEKUTIELI
+        config.p_adjust_method = 'bh'
     config.linkage_method = args.linkage_method
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  
