@@ -33,7 +33,7 @@ except ImportError:
         ]
 
 VERSION = "0.7.18"
-AUTHOR = "Gholamali Rahnavard, Curtis Huttenhower, Huttenhower Lab"
+AUTHOR = "Gholamali Rahnavard"
 AUTHOR_EMAIL = "halla-users@googlegroups.com"
 MAINTAINER = "Gholamali Rahnavard"
 MAINTAINER_EMAIL = "gholamali.rahnavard@gmail.com"

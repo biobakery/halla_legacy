@@ -30,7 +30,7 @@ def wrap_features(txt, width=40):
 		return txt #'\n'.join(textwrap.wrap(txt, width))
 	
 def substitute_special_characters(txt):
-    txt = re.sub('[\n\;]', '_', txt).replace('__','_')#.replace('__','_').replace(' ','_') # replace('.','_')
+    txt = re.sub('[\n\;]', '_', txt).replace('__','_').replace('__','_').replace('_',' ') # replace('.','_')
     return txt
 def load(file):
 	# Read in the file
@@ -187,15 +187,11 @@ class Input:
 				from sklearn.preprocessing import Imputer
 				imp = Imputer(missing_values='nan', strategy=config.missing_method, axis=1)
 				imp.fit(pArray)
-			#Imputer(axis=0, copy=True, missing_values='NaN', strategy='mean', verbose=0)
-			#line = [[np.nan, 2], [6, np.nan], [7, 6]]
-			#print imp 
- 
+
 			for i, line in enumerate(pArray):
 				# *   If the line is not full,  replace the Nones with nans                                           *
 				#***************************************************************************************************** 
 				line = list(map(lambda x: 'nan' if x == config.missing_char else x, line))  ###### np.nan Convert missings to nans
-				
 				if all([val == 'nan' for val in line]):
 					# if all values in a feature are missing values then skip the feature
 					print ('All missing value in' , aNames[i])
@@ -252,7 +248,7 @@ class Input:
 			header2="\t".join(self.outHead2)
 			#print header1, header2
 			#if not (header1.lower() == header2.lower()):
-			print("The program uses the common samples between the two data sets based on headers")#+
+			#+
 			    #"." + " \n File1 header: " + header1 + "\n" +
 			    #" File2 header: " + header2)
 			try:
@@ -270,11 +266,16 @@ class Input:
 			l2_before =  len(df2.columns)
 
 			# remove samples/columns with all NaN/missing values
+			# First change missing value to np.NaN for pandas
+			df1[df1=='nan'] =np.NAN
+			df2[df2=='nan'] =np.NAN
 			df1 = df1.dropna( axis=1, how='all')
 			df2 = df2.dropna( axis=1, how='all')
-			
 			l1_after = len(df1.columns)
 			l2_after = len(df2.columns)
+			# replace np.NaN's with 'nan'
+			df1[df1.isnull()] = 'nan'
+			df2[df2.isnull()] = 'nan'
 			
 			if l1_before > l1_after:
 				print ("--- %d samples/columns with all missing values have been removed from the first dataset " % (l1_before- l1_after))
@@ -288,6 +289,7 @@ class Input:
 			df2 = df2.loc[: , df2.columns.isin(df1.columns)]
 		
 			# reorder df1 columns as the columns order of df2
+			
 			df1 = df1.loc[:, df2.columns]
 			
 			self.orginal_dataset1 = df1.values
@@ -304,6 +306,7 @@ class Input:
 			#self.outHead2 = df2.columns 
 			self.outHead1 = df1.columns
 			self.outHead2 = df2.columns
+			print("The program uses %s common samples between the two data sets based on headers")%(df1.shape[1])
 		if len(self.orginal_dataset1[0]) != len(self.orginal_dataset2[0]):
 			sys.exit("Have you provided --header option to use sample/column names for shared sample/columns.")
 	def _remove_low_variant_features(self):

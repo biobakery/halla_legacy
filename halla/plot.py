@@ -317,16 +317,17 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [],
             colLable = False, rowLabel = True, color_bar = True, sortCol = True):
     # Adopted from Ref: http://stackoverflow.com/questions/2982929/plotting-results-of-hierarchical-clustering-ontop-of-a-matrix-of-data-in-python
     scale  = config.transform_method
-    max_hight = 1000
+    max_hight = 300
+    max_weight = 300
     if not data_table is None:
         plot_height = min(int(len(data_table)/7.25)+5, max_hight)  
-        plot_weight = max(math.floor(len(data_table[0])/len(data_table))* plot_height, min(int(len(data_table[0])/7.25)+5, max_hight))  
+        plot_weight = min(math.floor(len(data_table[0])/len(data_table))* plot_height, min(int(len(data_table[0])/7.25)+5, max_weight))  
         #print plot_height, plot_weight
-        if len(data_table) > 1000:
+        if len(data_table) > 1000 or len(data_table[0]) > 1000:
             plot_dpi = 50
         else: 
-            plot_dpi = 200
-        fig = pylab.figure(figsize=(plot_weight, plot_height))
+            plot_dpi = 300
+        fig = pylab.figure(figsize=(plot_weight, plot_height), dpi = plot_dpi)
     else:
         plot_height = min(int(len(D)/7.25)+5, max_hight)  
         plot_weight = plot_height
