@@ -300,16 +300,17 @@ def is_tree(pObj):
 
 
 def hclust(dataset, labels, dataset_number):
-    linkage_method = config.linkage_method
+    #linkage_method = config.linkage_method
     Distance_matrix = pdist(dataset, metric=distance.pDistance) 
     config.Distance[dataset_number] =  squareform(Distance_matrix)
+    Z= None
     if config.diagnostics_plot:# and len(config.Distance[dataset_number][0]) < 2000:
         print ("--- plotting heatmap for Dataset %s %s" %(str(dataset_number+ 1)," ... "))
         Z = plot.heatmap(data_table = dataset , D = Distance_matrix, xlabels_order = [], xlabels = labels,\
                           filename= config.output_dir+"/"+"hierarchical_heatmap_"+str(config.similarity_method)+"_" + \
-                          str(dataset_number+1), linkage_method = linkage_method)
+                          str(dataset_number+1), linkage_method = config.linkage_method)
     else:
-        Z = linkage(Distance_matrix, method = linkage_method)
+        Z = linkage(Distance_matrix, method = config.linkage_method)
     logger.write_table(data=config.Distance[dataset_number], name=config.output_dir+'/Distance_matrix'+str(dataset_number+1)+'.tsv', rowheader=config.FeatureNames[dataset_number], colheader=config.FeatureNames[dataset_number])
     return to_tree(Z) if len(dataset)>1 else Z, sch.dendrogram(Z)['leaves'] if len(dataset)>1 else sch.dendrogram(Z)['leaves']
 
@@ -668,7 +669,7 @@ def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estim
         temp_sub_silhouette_coefficient_to_check = sub_silhouette_coefficient_to_check[:]
         temp_sub_silhouette_coefficient_to_check = [value for value in temp_sub_silhouette_coefficient_to_check if value != 1.0]
 
-        if len(temp_sub_silhouette_coefficient_to_check) == 0 or sub_silhouette_coefficient[min_silhouette_node_index] >= np.max(temp_sub_silhouette_coefficient_to_check) :
+        if len(temp_sub_silhouette_coefficient_to_check) != 0 and sub_silhouette_coefficient[min_silhouette_node_index] >= np.max(temp_sub_silhouette_coefficient_to_check):
             sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
         else:
             del sub_clusters[min_silhouette_node_index]#min_silhouette_node)

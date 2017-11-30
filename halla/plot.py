@@ -340,12 +340,15 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [],
     if len(D) > 0:
         Y1 = linkage(D, method = linkage_method)
     else:
-        Y1 = linkage(data_table, metric=distance.pDistance, method=linkage_method)
+        D= pdist(data_table, metric=distance.pDistance)
+        Y1 = linkage(D, method=linkage_method)
     if len(Y1) > 1:
         try:
             Z1 = sch.dendrogram(Y1, orientation='left')
         except:
             print("Warning: dendrogram 1 in hetamap plot faced an exception!")
+            pylab.close()
+            Y1 = linkage(D, method = linkage_method) 
             return Y1
     ax1.set_xticks([])
     ax1.set_yticks([])
@@ -366,6 +369,7 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [],
                 Z2 = sch.dendrogram(Y2)
             except:
                 print ("Warning: dendrogram 2 in hetamap plot faced an exception!")
+                pylab.close()
                 return Y1
 
         ax2.set_xticks([])
@@ -460,7 +464,7 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [],
         #axmatrix.get_figure().colorbar(im, ax=axmatrix)
     #plt.tight_layout()
         
-    fig.savefig(filename + '.pdf')
+    fig.savefig(filename + '.pdf', bbox_inches ='tight')
     #heatmap2(data_table, xlabels = xlabels, filename=filename+"_distance", metric = "nmi", method = "single", )
     pylab.close()
     return Y1
@@ -590,9 +594,9 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     #if config.similarity_method == 'spearman':
     #    df = df.rank()
     #print (df)    
-    axs = pd.tools.plotting.scatter_matrix(df, alpha = .1, s =25, c = 'white',\
+    axs = pd.plotting.scatter_matrix(df, alpha = .2, s =20, c = 'white',\
                                            hist_kwds={'color':['white']},\
-                                           range_padding = .2, grid=False, figsize=(len(df.columns)*.4+3, len(df.columns)*.4+3)) # diagonal='kde', grid=False,
+                                           range_padding = .1, grid=False, figsize=(len(df.columns)*.25+3, len(df.columns)*.25+3)) # diagonal='kde', grid=False,
     #color scatters
     for i in range(len(axs[:,0])):
         for j in range(len(axs[-1,:])):
@@ -622,18 +626,21 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     
     for ax in axs[:,0]: # the left boundary
         ax.grid('off', axis='both')
-        ax.set_ylabel(wrap(ax.get_ylabel()), fontsize = 10, rotation=0, va='center', ha = 'left', labelpad=len(ax.get_ylabel())+25)#, fontweight='bold')
-        ax.get_xaxis().set_tick_params(which='both', labelsize=6,top='off',  direction='out')
-        ax.get_yaxis().set_tick_params(which='both', labelsize=6, right='off', direction='out')
+        ax.autoscale_view('tight')
+        ax.set_ylabel(wrap(ax.get_ylabel()),fontsize = 7, rotation=0, va='center', ha = 'left', labelpad=len(ax.get_ylabel())+25) #fontweight='bold',
+        ax.get_xaxis().set_tick_params(which='both', labelsize=5,top='off',  direction='out')
+        ax.get_yaxis().set_tick_params(which='both', labelsize=5, right='off', direction='out')
         #ax.set_yticks([])
         #ax.set_color("gray")
     
     for ax in axs[-1,:]: # the lower boundary
         ax.grid('off', axis='both')
-        ax.set_xlabel(wrap(ax.get_xlabel()), fontsize = 10, rotation=90, va='center', ha = 'left',labelpad=len(ax.get_xlabel())+25 )#, fontweight='bold'
+        ax.autoscale_view('tight')
+        #wrap(ax.get_xlabel())
+        ax.set_xlabel( wrap(ax.get_xlabel()), fontsize = 7, rotation=90, va='center', ha = 'left',labelpad=len(ax.get_xlabel())+25 )#, fontweight='bold'
         #ax.set_xticks([])
-        ax.get_xaxis().set_tick_params(which='both', labelsize=6,top='off',  direction='out')
-        ax.get_yaxis().set_tick_params(which='both', labelsize=6, right='off', direction='out')
+        ax.get_xaxis().set_tick_params(which='both', labelsize=5,top='off',  direction='out')
+        ax.get_yaxis().set_tick_params(which='both', labelsize=5, right='off', direction='out')
         #ax.set_color('yellow')
     #Change label rotation
     #[s.xaxis.label.set_rotation(45) for s in axs.reshape(-1)]

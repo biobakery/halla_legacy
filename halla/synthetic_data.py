@@ -45,6 +45,12 @@ def parse_arguments(args):
         type = int,
         required=False)
     parser.add_argument(
+        "-c","--clusters",
+        help="number of blocks, default = min(number_features/2.0, math.log(number_features,2)*1.5) \n",
+        default = 13,
+        type = int,
+        required=False)
+    parser.add_argument(
         "-a","--association",
         help="association type [sine, parabola, log, line, L, step, happy_face, default =parabola] \n",
         default = 'parabola',
@@ -57,14 +63,14 @@ def parse_arguments(args):
     parser.add_argument(
         "-b","--noise-between",
         dest="noise_between",
-        help="number of samples in the input file D*N, Rows: D features and columns: N samples \n",
+        help="noise between associated blocks[0 is no noise, 1 is complete noise, default =0.25]\n",
         default = None,
         type = float,
         required=False)
     parser.add_argument(
         "-w","--noise-within",
         dest = "noise_within",
-        help="number of samples in the input file D*N, Rows: D features and columns: N samples \n",
+        help="noise within blocks[0 is no noise, 1 is complete noise, default =0.25]\n",
         default = None,
         type = float,
         required=False)
@@ -82,7 +88,7 @@ def parse_arguments(args):
 def call_data_generator(args):
     number_features = args.features #+ Iter *50 
     number_samples = args.samples #+ Iter * 10
-    number_blocks =  int(min(number_features/2.0, round(math.log(number_features,2))*1.5)) #round(math.sqrt(number_features)* 1.5 +.5 )  
+    number_blocks =  round(math.sqrt(number_features)* 1.5 +.5 )  
     cluster_percentage_l= 1.0#1.0/number_blocks 
     association_type = args.association
     print ('Synthetic Data Generation ...')

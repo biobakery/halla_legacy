@@ -314,7 +314,7 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
     # craziness for hiding the border
     plt.setp( [child for child in ax.get_children() if isinstance( child, matplotlib.spines.Spine )], visible=False )
     plt.tight_layout()
-    plt.savefig( outfile )
+    plt.savefig( outfile, dpi=300 )
 
 # ---------------------------------------------------------------
 # main
