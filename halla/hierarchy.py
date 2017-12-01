@@ -669,7 +669,7 @@ def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estim
         temp_sub_silhouette_coefficient_to_check = sub_silhouette_coefficient_to_check[:]
         temp_sub_silhouette_coefficient_to_check = [value for value in temp_sub_silhouette_coefficient_to_check if value != 1.0]
 
-        if len(temp_sub_silhouette_coefficient_to_check) != 0 and sub_silhouette_coefficient[min_silhouette_node_index] >= np.max(temp_sub_silhouette_coefficient_to_check):
+        if len(temp_sub_silhouette_coefficient_to_check) == 0 or sub_silhouette_coefficient[min_silhouette_node_index] >= np.max(temp_sub_silhouette_coefficient_to_check):
             sub_silhouette_coefficient[min_silhouette_node_index] =  1.0
         else:
             del sub_clusters[min_silhouette_node_index]#min_silhouette_node)
