@@ -9,6 +9,7 @@ HAllA is an end-to-end statistical method for Hierarchical All-against-All disco
 genotypes, microarrays, and microbiomes all drawn from the same subjects).  In all of these cases, HAllA will identify which pairs of features (genes, microbes, loci, etc.) share statistically significant co-variation, without getting tripped up by high-dimensionality.
 
 For additional information, please see the [HAllA User Manual](http://huttenhower.sph.harvard.edu/halla/manual).
+
 For a quick demo and installation, please see the [HAllA Toturial](https://bitbucket.org/biobakery/biobakery/wiki/halla).
 
 If you use this tool, the included scripts, or any related code in your work,
