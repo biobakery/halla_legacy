@@ -38,14 +38,29 @@ from . import logger
 from . import config
 import random
 
-
+def smart_decisoin():
+    '''
+    This function decides for similarity metric, permutation type
+    if not explicitly decided by user.
+    '''
+    if config.similarity_method =='':
+        if all ([val == 'CON' for val in config.data_type[0]]) and all ([val == 'CON' for val in config.data_type[1]]): 
+            config.similarity_method = 'spearman'
+        else:
+            config.similarity_method = 'nmi' 
+    if config.permutation_func == '':
+        if config.similarity_method in ['spearman', 'pearson']:
+            config.permutation_func = 'none'
+        else:
+            config.permutation_func = 'gpd'
 def bypass_discretizing():
     """
     This module decide if the discretizing should by bypassed or not based on 
     similarity metric and decomposition method
     """
-    if not distance.c_hash_association_method_discretize[config.similarity_method] or  config.strDiscretizing == "none" or\
-        config.similarity_method in ["pearson"] or config.decomposition in ["pca", "ica"] :
+    if config.strDiscretizing == "none" or\
+        config.similarity_method in ["pearson"] or config.decomposition in ["pca", "ica"] or \
+        not distance.c_hash_association_method_discretize[config.similarity_method]:
         return True
     else:
         return False

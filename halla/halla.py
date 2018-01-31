@@ -190,9 +190,9 @@ def parse_arguments (args):
     argp.add_argument(
         "-m","--metric",
         dest="strMetric",
-        default="nmi",
+        default='',
         choices=["nmi","ami","mic","dmic","dcor","pearson", "spearman", "r2"],
-        help="metric to be used for similarity measurement\n[default = nmi]")
+        help="metric to be used for similarity measurement\n[default = '']")
     
     argp.add_argument(
         "-d","--decomposition",
@@ -338,11 +338,6 @@ def set_parameters(args):
     else:
         config.entropy_threshold2 = args.entropy_threshold2
     config.permutation_func = args.permutation_func
-    if config.permutation_func == '':
-        if args.strMetric in ['spearman', 'pearson']:
-            config.permutation_func = 'none'
-        else:
-            config.permutation_func = 'gpd'
     config.transform_method = args.transform_method
     config.write_hypothesis_tree = args.write_hypothesis_tree
     config.strStep = "uniform"
@@ -381,12 +376,13 @@ def set_parameters(args):
         config.strFile1, config.strFile2 = istm[:2]
     else:
         config.strFile1, config.strFile2 = istm[0], istm[0]
+    config.iterations = args.iIter
     aOut1, aOut2 = parser.Input (config.strFile1.name, config.strFile2.name, headers=args.header).get()
     (config.discretized_dataset[0], config.original_dataset[0], config.FeatureNames[0], config.aOutType1, config.SampleNames[0]) = aOut1 
-    (config.discretized_dataset[1], config.original_dataset[1], config.FeatureNames[1], config.aOutType2, config.SampleNames[1]) = aOut2 
-    config.iterations = args.iIter
+    (config.discretized_dataset[1], config.original_dataset[1], config.FeatureNames[1], config.aOutType2, config.SampleNames[1]) = aOut2
+
 def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA', fdr_style ='level',\
-              i =1000, m = 'nmi', d= 'medoid',  fdr = 'bh', hallagram = True, \
+              i =1000, m = '', d= 'medoid',  fdr = 'bh', hallagram = True, \
               diagnostics_plot = True, discretizing = 'equal-freq', linkage_method = 'average',\
               apply_stop_condition = False, fast= False, header = False, format_feature_names = False,\
               nproc = 1, nbin = None, s  = 0, e = 0.5, e1 = None, e2 = None, missing_char = '', missing_method = None,\
@@ -464,11 +460,6 @@ def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA', fdr_style ='leve
     config.permutation_func = p
     # for Spaearman and Pearson use pvalue from python module if not spceifiefd by user
     # otherwise use gpd as fast and accurate pvalue calculation approach 
-    if config.permutation_func == '':
-        if m in ['spearman', 'pearson']:
-            config.permutation_func = 'none'
-        else:
-            config.permutation_func = 'gpd'
     config.transform_method = t
     config.write_hypothesis_tree = write_hypothesis_tree
     #config.strStep = "uniform"
@@ -505,14 +496,15 @@ def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA', fdr_style ='leve
     if len(istm) > 1:
         config.strFile1, config.strFile2 = istm[:2]
     else:
-        config.strFile1, config.strFile2 = istm[0], istm[0]
-    aOut1, aOut2 = parser.Input (config.strFile1, config.strFile2, headers=header).get()
-    (config.discretized_dataset[0], config.original_dataset[0], config.FeatureNames[0], config.aOutType1, config.SampleNames[0]) = aOut1 
-    (config.discretized_dataset[1], config.original_dataset[1], config.FeatureNames[1], config.aOutType2, config.SampleNames[1]) = aOut2 
+        config.strFile1, config.strFile2 = istm[0], istm[0] 
     config.iterations = i
     check_requirements()
-    results = store.run() 
-    return results   
+    load_input()
+    store.run() 
+    aOut1, aOut2 = parser.Input (config.strFile1, config.strFile2, headers=header).get()
+    (config.discretized_dataset[0], config.original_dataset[0], config.FeatureNames[0], config.aOutType1, config.SampleNames[0]) = aOut1 
+    (config.discretized_dataset[1], config.original_dataset[1], config.FeatureNames[1], config.aOutType2, config.SampleNames[1]) = aOut2
+
 def main():
     # Parse arguments from command line
     args=parse_arguments(sys.argv)
@@ -522,7 +514,7 @@ def main():
     
     # check the requiremnts based on need for parameters
     check_requirements()
-    
+
     # run halla approach
     store.run()
 if __name__ == '__main__':

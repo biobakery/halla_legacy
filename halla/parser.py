@@ -120,7 +120,7 @@ class Input:
 		self._remove_low_entropy_features()
 		if len(self.outName1) <2 or len(self.outName1) <2:
 			sys.exit("--- HAllA to continue needs at lease two features in each dataset!!!\n--- Please repeat the one feature or provide the -a AllA option in the command line to do pairwise alla-against-all test!!")
-		
+		store.smart_decisoin()
 		if store.bypass_discretizing():
 			try:
 				self.orginal_dataset1= np.asarray(self.orginal_dataset1, dtype = float)
@@ -204,7 +204,6 @@ class Input:
 
 				try:
 					line = list(map(float, line))  # is it continuous? 
-					aTypes.append("CON")
 					# fill missing values
 					if config.missing_method:
 						try:
@@ -212,7 +211,10 @@ class Input:
 						except:
 							print (aNames[i], " has an issue with filling missed data!")
 							pass
+					else:
+						line = list(map(float, line))
 					#print "Continues data !"
+					aTypes.append("CON")
 				except ValueError:
 					#print "Categorical data !"
 					line = line  # we are forced to conclude that it is implicitly categorical, with some lexical ordering 
