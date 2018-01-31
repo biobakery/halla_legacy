@@ -1799,7 +1799,7 @@ def estimate_tail_gpd(samples):
 
 	return (scipy.stats.genpareto(shape, loc=t, scale=scale), Nexc)
 
-def estimate_pvalue(x, null_samples,X, Y, regenrate_GPD_flag = False):
+def estimate_pvalue(x, null_samples, regenrate_GPD_flag = False):
 	"""
 	Estimates the p-value, given the observed test statistic x and a set of
 	samples from the null distribution.
@@ -1906,7 +1906,7 @@ def nonparametric_test_pvalue(X, Y, similarity_method = None,  alpha_cutoff = 0.
 		config.nullsamples = nullsamples
 	#print("Finished gathering: N = %d; P(p<%f) = %f" % (len(nullsamples), alpha_cutoff, prob_pvalue_lt_samples(alpha_cutoff, x, nullsamples)))
 	# Estimate the p-value from the current set of samples
-	return estimate_pvalue(x = sim_score, null_samples = config.nullsamples, X=X, Y=Y)
+	return estimate_pvalue(x = sim_score, null_samples = config.nullsamples)
 
 
 	
