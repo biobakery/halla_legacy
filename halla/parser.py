@@ -16,6 +16,7 @@ from . import config
 from . import distance
 from . import store
 from . import stats
+from . import HSIC
 
 def wrap_features(txt, width=40):
 		'''helper function to wrap text for long labels'''
@@ -295,6 +296,8 @@ class Input:
 			self.orginal_dataset1 = df1.values
 			self.orginal_dataset2 = df2.values 
 			#print self.orginal_dataset1
+			#print HSIC.HSIC_pval(df1.values,df2.values, p_method ='gamma', N_samp =1000)
+
 			self.outName1 = list(df1.index) 
 			self.outName2 = list(df2.index) 
 			#print self.outName1

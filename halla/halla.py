@@ -385,12 +385,146 @@ def set_parameters(args):
     (config.discretized_dataset[0], config.original_dataset[0], config.FeatureNames[0], config.aOutType1, config.SampleNames[0]) = aOut1 
     (config.discretized_dataset[1], config.original_dataset[1], config.FeatureNames[1], config.aOutType2, config.SampleNames[1]) = aOut2 
     config.iterations = args.iIter
+def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA', fdr_style ='level',\
+              i =1000, m = 'nmi', d= 'medoid',  fdr = 'bh', hallagram = True, \
+              diagnostics_plot = True, discretizing = 'equal-freq', linkage_method = 'average',\
+              apply_stop_condition = False, fast= False, header = False, format_feature_names = False,\
+              nproc = 1, nbin = None, s  = 0, e = 0.5, e1 = None, e2 = None, missing_char = '', missing_method = None,\
+              missing_char_category = False, write_hypothesis_tree = False, t  = ''):
+    '''
+    This function runs halla on passed parameters and returns significant associations
+    Parameters
+    ----------
+    filename : str
+    X    first file: Tab-delimited text input file, one row per feature, one column per measurement\n[REQUIRED]",            
+    Y    second file: Tab-delimited text input file, one row per feature, one column per measurement\n[default = the first file (-X)]")
+    output_dir    directory to write output files\n[REQUIRED]", 
+    q    q-value for overall significance tests (cut-off for false discovery rate)\n[default = 0.1]
+    p    permutation function \n[default = none for Spearman and Pearson and gpd for other]"
+         choices=['ecdf', 'gpd', 'none'], 
+    a    descending approach\n[default = HAllA for hierarchical all-against-all]
+        default = "HAllA",
+        choices=["HAllA","AllA"],    
+    fdr_style the style of grouping hypotheses in hypothesis tree to control false discovery rate\n[default = level]
+        default = "level",
+        choices=["level","all", "family"],
+    i   iterations for nonparametric significance testing (permutation test)\n[default = 1000]
+    m   metric to be used for similarity measurement\n[default = nmi]
+        choices=["nmi","ami","mic","dmic","dcor","pearson", "spearman", "r2"],
+    d    approach for reducing dimensions (or decomposition)\n[default = medoid]
+        choices=["none", "mca", "pca", "ica", "cca","kpca","pls","medoid"], #mean
+    
+    fdr    approach for FDR correction\n[default = bh]
+        choices=["bh", "by", 'y', "bonferroni", "no_adjusting"],
+    hallagram    plot the results [default = True]
+    diagnostics_plot Diagnostics plot for associations[default = True]
+    discretizing    approach for discretizing continuous data\n[default = equal-freq]
+        choices=["equal-freq", "hclust", "jenks", "none"], #"jenks", "hclust", "kmeans", 
+    linkage_method    The method to be used in linkage hierarchical clustering [default='average']
+        choices=["single", "average", "complete", "weighted" ],
+    apply_stop_condition    stops when two clusters are two far from each other [default = False]
+    fast Use one null distribution for permutation test [default = False]
+    header    the input files contain a header line [default = False] 
+    format_feature_names    Replaces special characters and for OTUs separated  by | uses the known end of a clade,\n
+                           it a good option only for Metaphlan and HUMnN2 output and not other tools [default = False]
+    nproc    the number of processing units available\n[default = 1]
+    nbin    the number of bins for discretizing \n[default = None]
+    s    a seed number to make the random permutation reproducible\n[default = 0,and -1 for random number]
+    e    Minimum entropy threshold to filter features with low information\n[default = 0.5]")
+    e1   Minimum entropy threshold for the first dataset if user want to use dirrent threshold for each dataset\n[default = None]")
+    e2   Minimum entropy threshold for the second dataset if user want to use dirrent threshold for each dataset \n[default = None]")
+    missing_char    defines missing characters\n[default = '']
+    missing_method    defines missing strategy to fill missing data.\nFor categorical data puts all missing data in one new category[default=None]
+                        choices=["mean", "median", "most_frequent"],
+    missing_char_category    To count the missing data as a category [default = False]
+    write_hypothesis_tree    To write levels of hypothesis tree in the file [default = False]
+    t data transformation method \n[default = '' ] 
+        choices=['log', 'sqrt', 'arcsin', 'arcsinh',''], 
+    
+    Returns
+    -------
+    associations : dict
+        Non-zero value indicates error code, or zero on success.
+    all othe rouput will be written in the output directory
+    '''
+    
+    # set the paramater to config file
+    config.similarity_method = m.lower()
+    config.decomposition = d.lower()
+     
+    config.entropy_threshold = e
+    if e1 == None:
+        config.entropy_threshold1 = e
+    else:
+        config.entropy_threshold1 = e1
+    if e2 == None:
+        config.entropy_threshold2 = e
+    else:
+        config.entropy_threshold2 = e2
+    config.permutation_func = p
+    # for Spaearman and Pearson use pvalue from python module if not spceifiefd by user
+    # otherwise use gpd as fast and accurate pvalue calculation approach 
+    if config.permutation_func == '':
+        if m in ['spearman', 'pearson']:
+            config.permutation_func = 'none'
+        else:
+            config.permutation_func = 'gpd'
+    config.transform_method = t
+    config.write_hypothesis_tree = write_hypothesis_tree
+    #config.strStep = "uniform"
+    config.format_feature_names = format_feature_names
+    config.output_dir = output_dir
+    config.diagnostics_plot = diagnostics_plot
+    config.descending = a
+    # X and Y are used to store datasets
+    istm = list() 
+    config.apply_stop_condition = apply_stop_condition
+    config.use_one_null_dist = fast
+    config.strDiscretizing = discretizing
+    if s == -1:
+        config.seed = random.randint(1,10000)
+    else:
+        config.seed = s
+    config.NPROC = nproc
+    config.NBIN = nbin
+    config.missing_char = missing_char
+    config.missing_method = missing_method
+    config.missing_char_category = missing_char_category
+    config.p_adjust_method = fdr.lower()
+    config.q = q
+    if config.fdr_style =='family':
+        config.q = q/(2.0*1.44) #Daniel YEKUTIELI
+    if config.p_adjust_method =='y':
+        config.q = q/(2.0*1.44) #Daniel YEKUTIELI
+        config.p_adjust_method = 'bh'
+    config.linkage_method = linkage_method
+    if Y == None:
+        istm = [X, X]  # Use X  
+    else:
+        istm = [X, Y]  # Use X and Y
+    if len(istm) > 1:
+        config.strFile1, config.strFile2 = istm[:2]
+    else:
+        config.strFile1, config.strFile2 = istm[0], istm[0]
+    aOut1, aOut2 = parser.Input (config.strFile1, config.strFile2, headers=header).get()
+    (config.discretized_dataset[0], config.original_dataset[0], config.FeatureNames[0], config.aOutType1, config.SampleNames[0]) = aOut1 
+    (config.discretized_dataset[1], config.original_dataset[1], config.FeatureNames[1], config.aOutType2, config.SampleNames[1]) = aOut2 
+    config.iterations = i
+    check_requirements()
+    results = store.run() 
+    return results   
 def main():
     # Parse arguments from command line
     args=parse_arguments(sys.argv)
+    
+    # set the parameter to config file
     set_parameters(args) 
+    
+    # check the requiremnts based on need for parameters
     check_requirements()
-    store.run()	
+    
+    # run halla approach
+    store.run()
 if __name__ == '__main__':
 	main()
 

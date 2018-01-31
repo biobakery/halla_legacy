@@ -88,7 +88,7 @@ def parse_arguments(args):
 def call_data_generator(args):
     number_features = args.features #+ Iter *50 
     number_samples = args.samples #+ Iter * 10
-    number_blocks =  round(math.sqrt(number_features)* 1.5 +.5 )  
+    number_blocks =  int(round(math.sqrt(number_features)* 1.5 +.5 ) ) 
     cluster_percentage_l= 1.0#1.0/number_blocks 
     association_type = args.association
     print ('Synthetic Data Generation ...')
@@ -123,6 +123,11 @@ def call_data_generator(args):
             args.noise_within = 0.05
         if args.noise_between == None:
             args.noise_between = 0.05
+    elif association_type == "mixed":
+        if args.noise_within == None:
+            args.noise_within = 0.05
+        if args.noise_between == None:
+            args.noise_between = 0.05
     elif association_type == "happyface":
         if args.noise_within == None:
             args.noise_within = 0.05
@@ -151,7 +156,7 @@ def call_data_generator(args):
             X,Y,A = imbalanced_synthetic_dataset_uniform( D = number_features, N = number_samples\
                                                     , B = number_blocks, within_noise = args.noise_within , between_noise = args.noise_between ,\
                                                    cluster_percentage = cluster_percentage_l, association_type =association_type )
-    elif args.structure == "balanced":
+    else:#if args.structure == "balanced":
         if association_type == "structured_random":
             X,_,_ = balanced_synthetic_dataset_uniform( D = number_features, N = number_samples,\
                                                                                B = number_blocks, within_noise= args.noise_within , between_noise = args.noise_between, cluster_percentage = cluster_percentage_l, association_type ='parabola' ) 
