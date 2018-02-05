@@ -198,7 +198,7 @@ def parse_arguments (args):
         "-d","--decomposition",
         dest="strDecomposition",
         default=config.decomposition,
-        choices=["none", "mca", "pca", "ica", "cca","kpca","pls","medoid"], #mean
+        choices=["none", "mca", "pca", "ica", "cca","kpca","pls","medoid", "mean"],
         help="approach for reducing dimensions (or decomposition)\n[default = medoid]")    
     
     argp.add_argument(
@@ -498,13 +498,14 @@ def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA', fdr_style ='leve
     else:
         config.strFile1, config.strFile2 = istm[0], istm[0] 
     config.iterations = i
-    check_requirements()
-    load_input()
-    store.run() 
+    
+    #load_input()
+     
     aOut1, aOut2 = parser.Input (config.strFile1, config.strFile2, headers=header).get()
     (config.discretized_dataset[0], config.original_dataset[0], config.FeatureNames[0], config.aOutType1, config.SampleNames[0]) = aOut1 
     (config.discretized_dataset[1], config.original_dataset[1], config.FeatureNames[1], config.aOutType2, config.SampleNames[1]) = aOut2
-
+    check_requirements()
+    store.run()
 def main():
     # Parse arguments from command line
     args=parse_arguments(sys.argv)

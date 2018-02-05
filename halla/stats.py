@@ -748,7 +748,9 @@ def null_fun(X, Y):
 def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, similarity_method = None, seed = 0 ):
 	 
 	if not similarity_method:
-		strMetric = config.similarity_method 
+		similarity_method = config.similarity_method 
+	else:
+		config.similarity_method = similarity_method
 	if not seed:
 		seed = config.seed
 	if not iterations:
@@ -759,7 +761,7 @@ def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, sim
 	pHashMetric = distance.c_hash_metric 
 	def _permutation(pVec):
 		return numpy.random.permutation(pVec)
-	pMe = pHashMetric[strMetric] 
+	pMe = pHashMetric[similarity_method] 
 	aDist = [] 
 	sim_score= pMe(X, Y)
 	fAssociation = math.fabs(sim_score)
@@ -1903,7 +1905,7 @@ def nonparametric_test_pvalue(X, Y, similarity_method = None,  alpha_cutoff = 0.
 		config.nullsamples = nullsamples
 	elif not config.use_one_null_dist: #or not config.use_one_null_dist:
 		nullsamples = [null_fun(X, Y) for val in range(0, start_samples)]
-		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(config.q, sim_score, nullsamples) > .05 * 1.0/(len(config.FeatureNames[0])* len(config.FeatureNames[1])):
+		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(config.q, sim_score, nullsamples) > .05 * 1.0/len((X)* len(Y)):
 			#print("Gathering more.. N = %d; P(p<%f) = %.2f" % (len(nullsamples), config.q, prob_pvalue_lt_samples(config.q, x, nullsamples)))
 			nullsamples = [null_fun(X, Y) for val in range(0,sample_increments)] + nullsamples 
 		#nullsamples = [null_fun(X, Y) for val in range(0,max_samples)]
