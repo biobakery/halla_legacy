@@ -1,6 +1,7 @@
 """ This file is the main files for module to invoke other modules in order and log the results and performance """
 from matplotlib.pyplot import ylabel
 from numpy import dtype
+from time import sleep
 
 # Test if matplotlib is installed
 try:
@@ -53,6 +54,18 @@ def smart_decisoin():
             config.permutation_func = 'none'
         else:
             config.permutation_func = 'gpd'
+    if config.permutation_func == 'ecdf':
+        if  config.p_adjust_method ==  "by" and config.iterations < len(config.data_type[0])* len(config.data_type[1]) * math.log(len(config.data_type[0])* len(config.data_type[1])):
+            print ('--- WARNING: HAllA recommends to use 10*number of feature in first data set been used * number of features been used in second data set\n \
+                when using ECDF as the permutation method with Benjamini–Yekutieli procedure. In this run HAllA update your requested iterations to %s it will takes more time.')%\
+                (int(len(config.data_type[0])* len(config.data_type[1]) * math.log(len(config.data_type[0])* len(config.data_type[1]))))
+            config.iterations =int(len(config.data_type[0])* len(config.data_type[1]) * math.log(len(config.data_type[0])* len(config.data_type[1])))
+        elif config.p_adjust_method ==  "bh" and config.iterations < len(config.data_type[0])* len(config.data_type[1] * 10):
+            print ('--- WARNING: HAllA recommends to use 10*number of feature in first data set been used * number of features been used in second data set\n \
+                when using ECDF as the permutation method with Benjamini–Hochberg procedure. In this run HAllA update your requested iterations to %s it will takes more time.')%\
+                (int(len(config.data_type[0])* len(config.data_type[1]) * 10))
+            config.iterations = int(len(config.data_type[0])* len(config.data_type[1]) * 10)
+        sleep(10)
 def bypass_discretizing():
     """
     This module decide if the discretizing should by bypassed or not based on 
@@ -554,6 +567,7 @@ def _report():
             for j in range(len(config.Features_order[1])):
                 similarity_score[i][j] = distance.c_hash_metric[config.similarity_method](config.parsed_dataset[0][config.Features_order[0][i]], config.parsed_dataset[1][config.Features_order[1][j]])
         sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.pvalue, x.qvalue ))
+        
         #sorted_associations = sorted(sorted_associations, key=lambda x: ( x.s)
         for association in sorted_associations:
             iX, iY = association.m_pData

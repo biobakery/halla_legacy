@@ -112,7 +112,6 @@ def call_data_generator(args):
             args.noise_within = 0.55
         if args.noise_between == None:
             args.noise_between = 0.5
-        
     elif association_type == "step":
         if args.noise_within == None:
             args.noise_within = 0.15
@@ -125,9 +124,9 @@ def call_data_generator(args):
             args.noise_between = 0.05
     elif association_type == "mixed":
         if args.noise_within == None:
-            args.noise_within = 0.05
+            args.noise_within = 0.01
         if args.noise_between == None:
-            args.noise_between = 0.05
+            args.noise_between = 0.01
     elif association_type == "happyface":
         if args.noise_within == None:
             args.noise_within = 0.05
@@ -280,6 +279,8 @@ def imbalanced_synthetic_dataset_uniform(D, N, B, cluster_percentage = 1, within
             if j < D:
                 X[j]= [X[i,k]  + numpy.random.normal(0,.1,1) for k in range(len(X[j]))]
     '''
+    print ("Number of features %s, number of samples: %s, number of clusters: %s, number of features with each cluster: %s")\
+         %(D, N, B, blockSize)
     if association_type == "L":
         common_base = numpy.hstack((numpy.random.uniform(low=-1.0,high=-1.0 ,size=(B+1,N/2)), numpy.random.uniform(low=-1,high=50 ,size=(B+1,N/2))))
         for l in range(B+1):
@@ -368,7 +369,8 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
     Y = numpy.random.uniform(low=-1,high=1,size=(D,N))
     A = numpy.zeros( (len(X),len(Y)) )
     blockSize = int(round(D/B+.5))
-    print (D, B, blockSize)
+    print ("Number of features %s, number of samples: %s, number of clusters: %s, number of features with each cluster: %s")\
+         %(D, N, B, blockSize)
     if association_type == "L":
         common_base = numpy.hstack((numpy.random.uniform(low=-1.0,high=-1.0 ,size=(B+1,N/2)), numpy.random.uniform(low=-1,high=10 ,size=(B+1,N/2))))
         for l in range(B+1):

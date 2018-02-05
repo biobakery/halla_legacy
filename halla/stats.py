@@ -638,7 +638,7 @@ def p_adjust(pval, q, cluster_size = None, method="BH"):
 # Statistical test 
 #=========================================================
 
-def association_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000):
+def association_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iterations=1000):
 	"""
 	Returns the inverse of the strength of the association (smaller scores for better association)
 	"""
@@ -664,10 +664,10 @@ def parametric_test_by_representative_ica(pArray1, pArray2):
 
 	return fP
 
-def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
+def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iterations=1000):
 	"""
 	Input: 
-	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 100
+	pArray1, pArray2, metric = "mi", decomposition = "pca", iterations = 100
 
 	metric = {pca": pca} 
 	"""
@@ -693,9 +693,9 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 
 	fAssociation = pMe(pRep1, pRep2) 
 
-	aDist = numpy.array([ pMe(_permutation(pRep1), pRep2) for _ in range(iIter) ])
+	aDist = numpy.array([ pMe(_permutation(pRep1), pRep2) for _ in range(iterations) ])
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
-	# # BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iIter iterations of PCA
+	# # BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iterations iterations of PCA
 
 	fPercentile = percentileofscore(aDist, fAssociation, kind="strict")  # #source: Good 2000 
 	# ## \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
@@ -703,7 +703,7 @@ def permutation_test_by_medoid(pArray1, pArray2, metric="nmi", iIter=1000):
 	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
 	# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
 
-	fP = ((1.0 - fPercentile / 100.0) * iIter + 1) / (iIter + 1)
+	fP = ((1.0 - fPercentile / 100.0) * iterations + 1) / (iterations + 1)
 
 	assert(fP <= 1.0)
 
@@ -745,12 +745,17 @@ def null_fun(X, Y):
 	pHashMetric = distance.c_hash_metric 
 	pMe = pHashMetric[strMetric]
 	return math.fabs(pMe(X, numpy.random.permutation(Y)))
-def permutation_test_pvalue(X, Y):
+def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, similarity_method = None, seed = 0 ):
 	 
-	strMetric = config.similarity_method 
-	seed = config.seed
-	iIter = config.iterations
-	pHashDecomposition = c_hash_decomposition
+	if not similarity_method:
+		strMetric = config.similarity_method 
+	if not seed:
+		seed = config.seed
+	if not iterations:
+		iterations = config.iterations
+	if not permutation_func:
+		permutation_func = config.permutation_func
+	#pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
 	def _permutation(pVec):
 		return numpy.random.permutation(pVec)
@@ -780,14 +785,14 @@ def permutation_test_pvalue(X, Y):
 		return pval
 
 	few_permutation = False
-	if config.permutation_func == 'ecdf':
-		iter = iIter
+	if permutation_func == 'ecdf':
+		iter = iterations
 		if config.use_one_null_dist:
 			if len(config.nullsamples) == 0:
 				config.nullsamples = generate_null_dist(X,Y)
 			aDist = config.nullsamples
 		else:
-			for i in range(iIter):
+			for i in range(iterations):
 				iter = i
 				permuted_Y = numpy.random.permutation(Y)
 				fAssociation_permuted = math.fabs(pMe(X, permuted_Y))  
@@ -800,7 +805,7 @@ def permutation_test_pvalue(X, Y):
 					else: 
 						fP = new_fP2
 		fP = _calculate_pvalue(iter)
-	elif config.permutation_func == 'gpd':
+	elif permutation_func == 'gpd':
 		fP = nonparametric_test_pvalue(X, Y)
 	#print "Estimated P-value:",fP
 	'''import matplotlib.pyplot as plt
@@ -832,12 +837,12 @@ def generate_null_dist(X, Y):
 def permutation_test_by_representative(pArray1, pArray2):
 	"""
 	Input: 
-	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 1000
+	pArray1, pArray2, metric = "mi", decomposition = "pca", iterations = 1000
 
 	"""
 	metric = config.similarity_method
 	decomposition = config.decomposition
-	iIter=config.iterations
+	iterations=config.iterations
 	#seed = config.seed
 	discretize_style = config.strDiscretizing
 	#X, Y = pArray1, pArray2 
@@ -901,15 +906,15 @@ def permutation_test_by_representative(pArray1, pArray2):
 	#print fP
 	return fP, sim_score, left_rep_variance, right_rep_variance, left_loading, right_loading, pRep1, pRep2 
 
-def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iIter=1000):
+def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iterations=1000):
 	"""
 	Input: 
-	pArray1, pArray2, metric = "mi", decomposition = "pca", iIter = 1000
+	pArray1, pArray2, metric = "mi", decomposition = "pca", iterations = 1000
 
 	metric = {pca": pca} 
 	"""
 	# numpy.random.seed(0)
-	# return g_test_by_representative( pArray1, pArray2, metric = "nmi", decomposition = "pca", iIter = 1000 )
+	# return g_test_by_representative( pArray1, pArray2, metric = "nmi", decomposition = "pca", iterations = 1000 )
 	X, Y = pArray1, pArray2 
 
 	strMetric = metric 
@@ -979,8 +984,8 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 	
 	# calculate a pvalue from permutation
 	pvalue = 0
-	delta = 1 / float( iIter )
-	for t in range( iIter ):
+	delta = 1 / float( iterations )
+	for t in range( iterations ):
 	    y2 = pRep2[:]
 	    y2 = numpy.random.permutation( y2 )
 	    if distance.mi( pRep1, y2 ) >= mi:
@@ -999,7 +1004,7 @@ def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca"
 	#print "within perm error.... =", abs( pvalue - pvalue2 ) < permerror
 
 	return fP, fAssociation, left_rep_variance, right_rep_variance
-def parametric_test_by_max_pca(pArray1, pArray2, k=2, metric="spearman", iIter=1000):
+def parametric_test_by_max_pca(pArray1, pArray2, k=2, metric="spearman", iterations=1000):
 
 	aOut = [] 
 
@@ -1020,7 +1025,7 @@ def parametric_test_by_max_pca(pArray1, pArray2, k=2, metric="spearman", iIter=1
 
 	return aOut 
 
-def permutation_test_by_max_pca(pArray1, pArray2, k=2, metric="nmi", iIter=1000):
+def permutation_test_by_max_pca(pArray1, pArray2, k=2, metric="nmi", iterations=1000):
 
 	aOut = [] 
 
@@ -1050,9 +1055,9 @@ def permutation_test_by_max_pca(pArray1, pArray2, k=2, metric="nmi", iIter=1000)
 
 		fAssociation = pMe(pOne, pTwo) 
 
-		aDist = numpy.array([ pMe(_permutation(pOne), pTwo) for _ in range(iIter) ])
+		aDist = numpy.array([ pMe(_permutation(pOne), pTwo) for _ in range(iterations) ])
 		# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
-		# # BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iIter iterations of PCA
+		# # BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iterations iterations of PCA
 
 		fPercentile = percentileofscore(aDist, fAssociation, kind="strict")  # #source: Good 2000 
 		# ## \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
@@ -1060,7 +1065,7 @@ def permutation_test_by_max_pca(pArray1, pArray2, k=2, metric="nmi", iIter=1000)
 		# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
 		# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
 
-		fP = ((1.0 - fPercentile / 100.0) * iIter + 1) / (iIter + 1)
+		fP = ((1.0 - fPercentile / 100.0) * iterations + 1) / (iterations + 1)
 
 		assert(fP <= 1.0)
 
@@ -1068,15 +1073,15 @@ def permutation_test_by_max_pca(pArray1, pArray2, k=2, metric="nmi", iIter=1000)
 
 	return aOut 	
 
-def permutation_test_by_multiple_representative(pArray1, pArray2, k=2, metric="nmi", iIter=1000):
+def permutation_test_by_multiple_representative(pArray1, pArray2, k=2, metric="nmi", iterations=1000):
 
-	return min(permutation_test_by_max_pca(pArray1, pArray2, k=k, metric=metric, iIter=iIter))
+	return min(permutation_test_by_max_pca(pArray1, pArray2, k=k, metric=metric, iterations=iterations))
 
 def parametric_test_by_multiple_representative(pArray1, pArray2, k=2, metric="spearman"):
 
 	return min(parametric_test_by_max_pca(pArray1, pArray2, k=k, metric=metric))
 
-def permutation_test_by_cca(pArray1, pArray2, metric="nmi", iIter=1000):
+def permutation_test_by_cca(pArray1, pArray2, metric="nmi", iterations=1000):
 
 	# numpy.random.seed(0)
 
@@ -1114,7 +1119,7 @@ def permutation_test_by_cca(pArray1, pArray2, metric="nmi", iIter=1000):
 	fAssociation = similarity_score(pRep1, pRep2, strMetric= strMetric)
 
 	#### Perform Permutaiton 
-	for _ in range(iIter):
+	for _ in range(iterations):
 
 		XP = array([numpy.random.permutation(x) for x in X])
 		YP = array([numpy.random.permutation(y) for y in Y])
@@ -1136,12 +1141,12 @@ def permutation_test_by_cca(pArray1, pArray2, metric="nmi", iIter=1000):
 	# 	fAssociation = cca_score( pArray1, pArray2 ) 
 	# 	pMetric = cca_score
 	
-	# aDist = [pMetric( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iIter)]
+	# aDist = [pMetric( _permute_matrix(pArray1), pArray2 ) for _ in xrange(iterations)]
 	
-	# aDist = numpy.array([ py.distance.nmi( _permutation( X_c ), Y_c ) for _ in xrange(iIter) ])
-	# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iIter ) ] )
+	# aDist = numpy.array([ py.distance.nmi( _permutation( X_c ), Y_c ) for _ in xrange(iterations) ])
+	# aDist = numpy.array( [ pMe( _permutation( pRep1 ), pRep2 ) for _ in xrange( iterations ) ] )
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
-	# # BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iIter iterations of PCA
+	# # BUGBUG: currently this permutes the discretized values; we may be using information, but better than doing iterations iterations of PCA
 
 	fPercentile = percentileofscore(aDist, fAssociation, kind="strict")  # #source: Good 2000 
 	# ## \frac{ \sharp\{\rho(\hat{X},Y) \geq \rho(X,Y) \} +1  }{ k + 1 }
@@ -1149,11 +1154,11 @@ def permutation_test_by_cca(pArray1, pArray2, metric="nmi", iIter=1000):
 	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
 	# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
 
-	fP = ((1.0 - fPercentile / 100.0) * iIter + 1) / (iIter + 1)
+	fP = ((1.0 - fPercentile / 100.0) * iterations + 1) / (iterations + 1)
 
 	return fP, fAssociation, pRep1[0], pRep2[0]
 
-def permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=1000):
+def permutation_test_by_pls(pArray1, pArray2, metric="nmi", iterations=1000):
 
 	# numpy.random.seed(0)
 
@@ -1190,7 +1195,7 @@ def permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=1000):
 	fAssociation = similarity_score(pRep1, pRep2, strMetric = metric)
 
 	#### Perform Permutaiton 
-	for _ in range(iIter):
+	for _ in range(iterations):
 
 		XP = array([numpy.random.permutation(x) for x in X])
 		YP = array([numpy.random.permutation(y) for y in Y])
@@ -1211,11 +1216,11 @@ def permutation_test_by_pls(pArray1, pArray2, metric="nmi", iIter=1000):
 	# ## PercentileofScore function ('strict') is essentially calculating the additive inverse (1-x) of the wanted quantity above 
 	# ## consult scipy documentation at: http://docs.scipy.org/doc/scipy-0.7.x/reference/generated/scipy.stats.percentileofscore.html
 
-	fP = ((1.0 - fPercentile / 100.0) * iIter + 1) / (iIter + 1)
+	fP = ((1.0 - fPercentile / 100.0) * iterations + 1) / (iterations + 1)
 
 	return fP, fAssociation, pRep1[0], pRep2[0]
 
-def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
+def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iterations=1000):
 
 	# numpy.random.seed(0)
 
@@ -1234,7 +1239,7 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iIter=1000):
 	dVal = pFun(pArray1, pArray2)
 
 	# WLOG, permute pArray1 instead of 2, or both. Can fix later with added theory. 
-	pArrayPerm = numpy.array([ pFun(array([_permutation(x) for x in pArray1]), pArray2) for i in range(iIter) ])
+	pArrayPerm = numpy.array([ pFun(array([_permutation(x) for x in pArray1]), pArray2) for i in range(iterations) ])
 
 	dPPerm = percentileofscore(pArrayPerm, dVal) / 100.0 	
 
@@ -1246,15 +1251,15 @@ def permutation_test(pArray1, pArray2):
 		return permutation_test_by_representative(pArray1, pArray2)
 	
 	if config.decomposition in ["average"]:
-		return permutation_test_by_average(pArray1, pArray2, metric=metric, iIter=iIter)
+		return permutation_test_by_average(pArray1, pArray2, metric=metric, iterations=iterations)
 
 
-def g_test(pArray1, pArray2, metric, decomposition, iIter):
+def g_test(pArray1, pArray2, metric, decomposition, iterations):
 	if decomposition in ['cca', 'pls',"pca", "nlpca", "ica", "kpca"]:
-		return g_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iIter=iIter)
+		return g_test_by_representative(pArray1, pArray2, metric=metric, decomposition= decomposition, iterations=iterations)
 	
 	if decomposition in ["average"]:
-		return g_test_by_average(pArray1, pArray2, metric=metric, iIter=iIter)
+		return g_test_by_average(pArray1, pArray2, metric=metric, iterations=iterations)
 def parametric_test(pArray1, pArray2):
 	pMe1 = lambda x, y:  cor(x, y, method="pearson", pval=True)
 	pMe2 = lambda x, y:  cor(x, y, method="spearman", pval=True)
@@ -1262,7 +1267,7 @@ def parametric_test(pArray1, pArray2):
 	pVal2 = [pMe2(i, j)[1] for i, j in itertools.product(pArray1, pArray2)]
 	return numpy.average(pVal1), numpy.average(pVal2)
 
-def parametric_test_by_cca(pArray1, pArray2, iIter=1000):
+def parametric_test_by_cca(pArray1, pArray2, iterations=1000):
 	
 	# numpy.random.seed(0)
 
@@ -1288,7 +1293,7 @@ def parametric_test_by_cca(pArray1, pArray2, iIter=1000):
 
 	return fP
 
-def parametric_test_by_pls_pearson(pArray1, pArray2, iIter=1000):
+def parametric_test_by_pls_pearson(pArray1, pArray2, iterations=1000):
 	
 	# numpy.random.seed(0)
 
