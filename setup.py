@@ -32,7 +32,7 @@ except ImportError:
         "Topic :: Scientific/Engineering :: Bio-Informatics"
         ]
 
-VERSION = "0.7.18"
+VERSION = "0.8.0"
 AUTHOR = "Gholamali Rahnavard"
 AUTHOR_EMAIL = "halla-users@googlegroups.com"
 MAINTAINER = "Gholamali Rahnavard"
@@ -42,7 +42,7 @@ MAINTAINER_EMAIL = "gholamali.rahnavard@gmail.com"
 # this has been added since PyPI has turned off the download stats
 # this will be removed when PyPI Warehouse is production as it
 # will have download stats
-COUNTER_URL="http://bitbucket.org/biobakery/halla/downloads/counter.txt"
+COUNTER_URL="http://bitbucket.org/biobakery/halla/downloads/README.txt"
 counter_file="counter.txt"
 if not os.path.isfile(counter_file):
     print("Downloading counter file to track halla downloads"+

@@ -83,6 +83,7 @@ def parse_arguments(args):
         help="structure [balanced, imbalanced, default =balanced] \n",
         default = 'balanced',
         required=False)
+
     return parser.parse_args()
 
 def call_data_generator(args):

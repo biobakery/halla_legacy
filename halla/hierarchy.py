@@ -22,6 +22,7 @@ from . import stats
 from . import plot
 from . import config
 from . import logger
+from . import HSIC
 #try:
 #from __builtin__ import 'True'
 #except:
@@ -267,9 +268,23 @@ def stop_and_reject(Node):
     else:
         return False
 
-def is_bypass(Node):
+def is_bypass(Node, method = ''):
+    
+    if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
+        return True
+    else: return False
     if config.apply_stop_condition:
-        return stop_decesnding_silhouette_coefficient(Node)
+        if method == 'HSIC':
+            l0 =Node.m_pData[0]
+            l1 =Node.m_pData[1]
+            if len(l0) == 1 and len(l1)==1:
+                return False
+            #print l0, l1
+            #print config.parsed_dataset[0][Node.m_pData[0]]
+            return HSIC.HSIC_pval(config.parsed_dataset[0][l0].T, config.parsed_dataset[1][l1].T)[1] > .05
+        else:
+            return stop_and_reject(Node)
+            #return stop_decesnding_silhouette_coefficient(Node)
     else:
         return False
 
@@ -822,7 +837,6 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     significant_hypotheses = []
     tested_hypotheses = []
     config.number_of_performed_tests = 0
-    
     # Define the speed of cutting hierarchies
     # e.g. 1 means we cut in each iteration
     # e.g. 2 means we cut in each 2 iteration 
@@ -876,7 +890,8 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     while do_next_level  :
         current_level_tests = [ hypothesis for (hypothesis, _ ) in current_level_nodes]
         print ("--- Testing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_tests)))
-        temp_significant_hypotheses, temp_tested_hypotheses = significance_testing(current_level_tests)
+        temp_significant_hypotheses, temp_tested_hypotheses = significance_testing(current_level_tests, level = level_number)
+        #print len(temp_tested_hypotheses)
         significant_hypotheses.extend(temp_significant_hypotheses)
         tested_hypotheses.extend(temp_tested_hypotheses)
         from_prev_hypothesis =  []
@@ -964,13 +979,11 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                         csvwc.writerow(aLineOut)
         current_level_nodes = next_level
         #print ("--- number of new tests: %s leafs: %s  prev: %s" % (len(next_level), len(leaf_nodes), len(from_prev_hypothesis_node)) )
-        #config.number_of_performed_tests += len(current_level_nodes)
         if len(current_level_nodes) > 0:
             current_level_nodes.extend(leaf_nodes)
             current_level_nodes.extend(from_prev_hypothesis_node)
             
-    #config.number_of_performed_tests = len(tested_hypotheses)
-    print ("--- number of performed tests: %s" % config.number_of_performed_tests)
+    print ("--- number of performed tests: %s") % (config.number_of_performed_tests)
     print ("--- number of passed tests after FDR controlling: %s" % len(significant_hypotheses))
     return significant_hypotheses, tested_hypotheses
 
@@ -1237,7 +1250,7 @@ def naive_all_against_all():
     return significant_hypotheses, tested_hypotheses
 
 
-def significance_testing(current_level_tests):
+def significance_testing(current_level_tests, level = None):
     tested_hypotheses = []  # # Full log 
     significant_hypotheses = []  # # Only the final reported values 
     dataset1 = config.parsed_dataset[0]
@@ -1261,6 +1274,9 @@ def significance_testing(current_level_tests):
         if current_level_tests[i].pvalue <= aP_adjusted[i] and max_r_t <= current_level_tests[i].rank:
              max_r_t = current_level_tests[i].rank
             #print "max_r_t", max_r_t
+    hsci_within_pvalues = []
+    hsci_between_pvalues = []
+    hsci_between_significant =[]
     passed_tests = []
     if config.p_adjust_method in ["bh", "by"]:
         for i in range(len(current_level_tests)):
@@ -1270,10 +1286,38 @@ def significance_testing(current_level_tests):
                     tested_hypotheses.append(current_level_tests[i])
                     significant_hypotheses.append(current_level_tests[i])
                     print ("-- association after %s fdr correction" % config.p_adjust_method)
+                    #hsci_between_significant.append('Significant')
             else:
                 if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
                     current_level_tests[i].significance = False
                     tested_hypotheses.append(current_level_tests[i])
+                #hsci_between_significant.append('Not significant')
+           
+        '''print current_level_tests[i].m_pData
+            if len(current_level_tests[i].m_pData[0]) > 1:
+                hsci_within_pvalues.append(HSIC.HSIC_pval(config.parsed_dataset[0][current_level_tests[i].m_pData[0]].T,\
+                                                          config.parsed_dataset[1][current_level_tests[i].m_pData[0]].T)[1])
+            if len(current_level_tests[i].m_pData[1]) > 1:
+                hsci_within_pvalues.append(HSIC.HSIC_pval(config.parsed_dataset[0][current_level_tests[i].m_pData[1]].T,\
+                                                          config.parsed_dataset[1][current_level_tests[i].m_pData[1]].T)[1])
+            if len(current_level_tests[i].m_pData[0]) > 1 and len(current_level_tests[i].m_pData[1]) > 1:
+                hsci_between_pvalues.append(HSIC.HSIC_pval(config.parsed_dataset[0][current_level_tests[i].m_pData[0]].T,\
+                                                          config.parsed_dataset[1][current_level_tests[i].m_pData[1]].T)[1])
+            
+        with open("clusters_pvalues.txt", "a") as text_file:
+            text_file.write("Level" + "\t" + "pvalue" + "\t" + 'Category' + "\t" + "Significance" + "\n")
+            for i in range(len(hsci_within_pvalues)):
+                text_file.write(str(level) + "\t" + str(hsci_within_pvalues[i]) + "\t" + 'Within cluster' + "\t" + "Homogeneous" + "\n")
+        with open("clusters_pvalues.txt", "a") as text_file:
+            for i in range(len(hsci_between_pvalues)):
+                text_file.write(str(level) + "\t" + str(hsci_between_pvalues[i]) + "\t" + 'Between cluster' + "\t" + str(hsci_between_significant[i]) + "\n")
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots(1, 1)
+        ax.hist(hsci_within_pvalues, normed=True, histtype='stepfilled', alpha=0.2)
+        ax.legend(loc='best', frameon=False)
+        plt.savefig("hsci_within_pvalues_" + str(level)+".pdf")
+        plt.show()
+        #exit()'''
                
     elif config.p_adjust_method == "bonferroni":
         for i in range(len(current_level_tests)):
@@ -1305,5 +1349,5 @@ def significance_testing(current_level_tests):
                     if len(temp_sub_hypotheses) > 0:
                         for j in range(len(temp_sub_hypotheses)):
                             temp_sub_hypotheses[j].pvalue = current_level_tests[i].pvalue
-                               
     return significant_hypotheses, tested_hypotheses
+

@@ -197,7 +197,7 @@ def plot_roc(roc_info=None, title = None, figure_name='roc_plot_HAllA', ax= None
     #fig.set_size_inches(1, 1)
     #plt.figure(dpi= 300, figsize=(4, 4))
     for i in range(len(roc_info)):
-        params = {'legend.fontsize': 8,
+        params = {'legend.fontsize': 4,
         'legend.fancybox': True}
         plt.rcParams.update(params)
         ax.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='{0} (area = {1:0.2f})'
