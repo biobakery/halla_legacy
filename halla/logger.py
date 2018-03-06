@@ -35,7 +35,7 @@ def _log_plot_scatter(adX, adY, pFigure, strTitle=None, strX=None, strY=None):
 	if isinstance(pFigure, str):
 		pylab.savefig(pFigure)
 
-def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "label",  corner = None, delimiter= '\t'):
+def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "label", col_prefix = None,  corner = None, delimiter= '\t'):
     
     '''
     wite a matrix of data in tab-delimated format file
@@ -61,8 +61,10 @@ def write_table(data=None, name=None, rowheader=None, colheader=None, prefix = "
         else:
             f.write(corner)
             f.write(delimiter)
+        if col_prefix is None:
+        	col_prefix = 'S'
         for i in range(len(data[0])):
-            f.write("S"+str(i))
+            f.write(col_prefix+str(i))
             if i < len(data[0]) - 1:
                 f.write(delimiter)
         f.write('\n')
