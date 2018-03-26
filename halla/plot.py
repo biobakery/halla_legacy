@@ -604,7 +604,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
                 color = 'maroon'  if i< x_size and j < x_size else \
                       'darkblue' if i >= x_size and j >= x_size else 'black'
             if i!= j:
-                axs[i,j].scatter(df[df.columns[j]], df[df.columns[i]], c = color, s =25, alpha = .5)
+                axs[i,j].scatter(df[df.columns[j]], df[df.columns[i]], c = color, s =10, alpha = .5, linewidths = .25, edgecolors = 'black')
                 #import ggplot as gg
                 #axs[i,j] = gg.qplot(df[df.columns[j]], df[df.columns[i]]) + gg.geom_smooth(color="blue")
             else:
@@ -654,7 +654,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     #[s.set_yticks(()) for s in axs.reshape(-1)]
     plt.tight_layout()
     plt.subplots_adjust(wspace=.01, hspace=.01)
-    plt.savefig(filename, dpi=300)
+    plt.savefig(filename, dpi=350)
 
 def confusion_matrix(X, Y, filename):
     from sklearn.metrics import confusion_matrix

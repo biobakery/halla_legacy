@@ -369,7 +369,7 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
     X = numpy.random.uniform(low=-1,high=1,size=(D,N))
     Y = numpy.random.uniform(low=-1,high=1,size=(D,N))
     A = numpy.zeros( (len(X),len(Y)) )
-    blockSize = int(round(D/B+.5))
+    blockSize = int(D/B)#int(round(D/B+.5))
     print ("Number of features %s, number of samples: %s, number of clusters: %s, number of features with each cluster: %s")\
          %(D, N, B, blockSize)
     if association_type == "L":
@@ -377,30 +377,28 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
         for l in range(B+1):
             common_base[l]= numpy.random.permutation(common_base[l])
     else:
-        common_base = numpy.random.uniform(low=-1,high=1 ,size=(B+1,N))
+        common_base = numpy.random.uniform(low=-1,high=1 ,size=(B, N))
     common_base = orthogonalize_matrix(common_base)
     
-    assoc = [[] for i in range((B+1))]
+    assoc = [[] for i in range(B)]
     l = 0
-    for i in range(0,int(D*cluster_percentage),blockSize):
-        for j in range(i,i+blockSize):
+    for i in range(0, int(D*cluster_percentage), blockSize):
+        for j in range(i, i + blockSize):
             if j < D:
                 numpy.random.seed(j)
                 if association_type == "L":
-                    X[j]= [common_base[l,k]+ within_noise * numpy.random.uniform(low=-.1,high=.1, size=1) for k in range(N)]
+                    X[j]= [common_base[l,k] + within_noise * numpy.random.uniform(low=-.1, high=.1, size=1) for k in range(N)]
                 elif association_type == "log":
-                    X[j]= [math.fabs(common_base[l,k])  + within_noise * numpy.random.uniform(low=0,high=1 ,size=1) for k in range(N)]
+                    X[j]= [math.fabs(common_base[l,k]) + within_noise * numpy.random.uniform(low=0, high=1 ,size=1) for k in range(N)]
                 else:    
-                    X[j]= [common_base[l,k]  + within_noise * numpy.random.uniform(low=-1,high=1 ,size=1) for k in range(N)]
-                assoc[l].append(j)
-                
-                    
+                    print i, j, l, len(X), len(X[j])
+                    X[j] = [(common_base[l, k] + within_noise * numpy.random.uniform(low=-1, high=1 ,size=1)) for k in range(N)]
+                    assoc[l].append(j)               
         l += 1
     if association_type == "L":
         common_base_Y = numpy.random.uniform(low=-1,high=1 ,size=(B+1,N))
         for l in range(B+1):
             common_base_Y[l] = [numpy.random.uniform(low=l,high=10, size=1)  if common_base[l,k] < -0.99 else l+ within_noise * numpy.random.uniform(low=-.1,high=.1, size=1) for k in range(N)]
-
     l= 0
     for i in range(0,int(D*cluster_percentage),blockSize):
         numpy.random.seed()
@@ -409,7 +407,7 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
             if j < D:
                 numpy.random.seed()
                 if association_type == "parabola":
-                    Y[j]= [common_base[l,k]*common_base[l,k]  + within_noise *math.sqrt(math.fabs(numpy.random.uniform(low=-1,high=1 ,size=1))) for k in range(N)]
+                    Y[j] = [common_base[l,k]*common_base[l,k]  + within_noise *math.sqrt(math.fabs(numpy.random.uniform(low=-1,high=1 ,size=1))) for k in range(N)]
                 elif association_type == "line":
                     Y[j]= [common_base[l,k]  + within_noise * numpy.random.uniform(low=-1,high=1 ,size=1) for k in range(N)]
                 elif association_type == "sine":
@@ -437,7 +435,7 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                 for index,b in enumerate(noise_num):
                     Y[j][b] = Y[j][index]
         l += 1
-    for r in range(0,B+1):
+    for r in range(B):
         for i, j in itertools.product(assoc[r], assoc[r]):
             A[i][j] = 1
     if association_type == "categorical-step":

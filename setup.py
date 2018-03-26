@@ -32,7 +32,7 @@ except ImportError:
         "Topic :: Scientific/Engineering :: Bio-Informatics"
         ]
 
-VERSION = "0.8.0"
+VERSION = "0.8.1"
 AUTHOR = "Gholamali Rahnavard"
 AUTHOR_EMAIL = "halla-users@googlegroups.com"
 MAINTAINER = "Gholamali Rahnavard"
@@ -83,7 +83,8 @@ setup(
             'halla = halla.halla:main',
             'hallagram = halla.hallagram:main',
             'hallaclust = halla.hallaclust:main',
-            'halladata = halla.synthetic_data:main'
+            'halladata = halla.synthetic_data:main',
+            'hallascatter = halla.hallascatter:main'
         ]},
     test_suite= 'halla.tests.halla_test.main',
     zip_safe = False

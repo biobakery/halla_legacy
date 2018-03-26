@@ -272,21 +272,21 @@ def is_bypass(Node, method = ''):
     
     if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
         return True
-    else: return False
-    if config.apply_stop_condition:
-        if method == 'HSIC':
-            l0 =Node.m_pData[0]
-            l1 =Node.m_pData[1]
-            if len(l0) == 1 and len(l1)==1:
-                return False
-            #print l0, l1
-            #print config.parsed_dataset[0][Node.m_pData[0]]
-            return HSIC.HSIC_pval(config.parsed_dataset[0][l0].T, config.parsed_dataset[1][l1].T)[1] > .05
+    else: #return False
+        if config.apply_stop_condition:
+            if method == 'HSIC':
+                l0 =Node.m_pData[0]
+                l1 =Node.m_pData[1]
+                if len(l0) == 1 and len(l1)==1:
+                    return False
+                #print l0, l1
+                #print config.parsed_dataset[0][Node.m_pData[0]]
+                return HSIC.HSIC_pval(config.parsed_dataset[0][l0].T, config.parsed_dataset[1][l1].T)[1] > .05
+            else:
+                return stop_and_reject(Node)
+                #return stop_decesnding_silhouette_coefficient(Node)
         else:
-            return stop_and_reject(Node)
-            #return stop_decesnding_silhouette_coefficient(Node)
-    else:
-        return False
+            return False
 
 def report(Node):
     print ("\n--- hypothesis test based on permutation test")        
