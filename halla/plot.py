@@ -594,7 +594,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     #if config.similarity_method == 'spearman':
     #    df = df.rank()
     #print (df)    
-    axs = pd.plotting.scatter_matrix(df, alpha = .2, s =20, c = 'white',\
+    axs = pd.plotting.scatter_matrix(df, alpha = .0, s =10, c = 'white',\
                                            hist_kwds={'color':['white']},\
                                            range_padding = .1, grid=False, figsize=(len(df.columns)*.25+3, len(df.columns)*.25+3)) # diagonal='kde', grid=False,
     #color scatters
@@ -603,17 +603,17 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
             if x_size>0:
                 color = 'maroon'  if i< x_size and j < x_size else \
                       'darkblue' if i >= x_size and j >= x_size else 'black'
-            if i!= j:
+            if i>j:
                 axs[i,j].scatter(df[df.columns[j]], df[df.columns[i]], c = color, s =10, alpha = .5, linewidths = .25, edgecolors = 'black')
                 #import ggplot as gg
                 #axs[i,j] = gg.qplot(df[df.columns[j]], df[df.columns[i]]) + gg.geom_smooth(color="blue")
-            else:
+            elif i==j:
                 try:
                     df[df.columns[j]].hist(ax=axs[i,j], color = 'darkslategrey')
                 except:
                     pass
-            #if i>j:
-            #     axs[i,j].visible(False)
+            else:
+                axs[i,j].axis('off')
                 
         
     #plt.subplots_adjust(wspace=.005, hspace=.005)
@@ -627,9 +627,9 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
     for ax in axs[:,0]: # the left boundary
         ax.grid('off', axis='both')
         ax.autoscale_view('tight')
-        ax.set_ylabel(wrap(ax.get_ylabel()),fontsize = 7, rotation=0, va='center', ha = 'left', labelpad=len(ax.get_ylabel())+25) #fontweight='bold',
-        ax.get_xaxis().set_tick_params(which='both', labelsize=5,top='off',  direction='out')
-        ax.get_yaxis().set_tick_params(which='both', labelsize=5, right='off', direction='out')
+        ax.set_ylabel(wrap(ax.get_ylabel()), fontsize = 7, rotation=0, va='center', ha = 'left', labelpad=len(ax.get_ylabel())+25) #fontweight='bold',
+        ax.get_xaxis().set_tick_params(which='both', labelsize= 5, top='off', direction='out')
+        ax.get_yaxis().set_tick_params(which='both', labelsize= 5, right='off', direction='out')
         #ax.set_yticks([])
         #ax.set_color("gray")
     
@@ -639,7 +639,7 @@ def scatter_matrix(df, x_size = 0, filename = None, ):
         #wrap(ax.get_xlabel())
         ax.set_xlabel( wrap(ax.get_xlabel()), fontsize = 7, rotation=90, va='center', ha = 'left',labelpad=len(ax.get_xlabel())+25 )#, fontweight='bold'
         #ax.set_xticks([])
-        ax.get_xaxis().set_tick_params(which='both', labelsize=5,top='off',  direction='out')
+        ax.get_xaxis().set_tick_params(which='both', labelsize=5, top='off',  direction='out')
         ax.get_yaxis().set_tick_params(which='both', labelsize=5, right='off', direction='out')
         #ax.set_color('yellow')
     #Change label rotation

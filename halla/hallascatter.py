@@ -49,7 +49,7 @@ def get_args():
                          help="Association number to be plotted",
                          type=int )
     parser.add_argument( "--input",
-                         help="hypothesis tree (for getting feature order)",
+                         help="HAllA output directory",
                          default='./' )
     parser.add_argument( "--outfile",
                          default=None, help="output file name" )
@@ -63,19 +63,14 @@ def load_table(args):
     except ImportError:
         sys.exit("Input Error for plotting points file!") 
     association_number = 1
-    sim_rank , row_items, col_items, sig, _, _ = associations[args.association_number]
-    #row_items = row_items[::-1]
-    #col_items = col_items[::-1]
-    
+    sim_rank , row_items, col_items, sig, _, _ = associations[args.association_number]   
     two_clusters = pd.concat([df1.loc[row_items], df2.loc[col_items]], axis=0, ignore_index=True)
-    #two_clusters.append(df2.loc[col_items])
     two_labels = row_items + col_items
     df_all = pd.DataFrame(np.array(two_clusters, dtype= float).T ,columns=np.array(two_labels))
-    #if config.similarity_method in ['spearman', 'pearson']:
     df_all_rank = df_all.rank()
     if args.outfile:
-        plot.scatter_matrix(df_all_rank, x_size = len(row_items),filename = args.outfile)
-        plot.scatter_matrix(df_all, x_size = len(row_items),filename ='ranked_'+args.outfile)
+        plot.scatter_matrix(df_all, x_size = len(row_items),filename = args.outfile)
+        plot.scatter_matrix(df_all_rank, x_size = len(row_items),filename ='ranked_'+args.outfile)
     else:
         plot.scatter_matrix(df_all_rank, x_size = len(row_items),filename ='Scatter_association_' + str(args.association_number) + '_rank.pdf')
         plot.scatter_matrix(df_all, x_size = len(row_items),filename ='Scatter_association_' + str(args.association_number) + '.pdf')
