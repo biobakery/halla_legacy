@@ -405,6 +405,7 @@ def medoid(pArray, iAxis=0, pMetric=distance.nmi):
 	Input: numpy array 
 	Output: float
 	"""
+	print "Medoid has been called"
 	#X = pArray
     #return X[len(X)/2]
 	#return pArray[len(pArray) -1, :]
@@ -420,6 +421,29 @@ def medoid(pArray, iAxis=0, pMetric=distance.nmi):
 			medoid_index = i
 	#print "medoid index :", medoid_index, len(pArray)-1
 	return pArray[medoid_index, :]
+def farthest (pArray1, pArray2, similarity_method):
+	pMe = distance.c_hash_metric [similarity_method] 
+	best_rep_1 = pArray1[0, :]
+	best_rep_2 =  pArray2[0, :]
+	worst_rep_1 = pArray1[0, :]
+	worst_rep_2 = pArray2[0, :]
+	best_similarity = 0.0
+	worst_simialrity = 1.0
+	for i in range(len(pArray1)):
+		m1 = pArray1[i, :]
+		for j in range(len(pArray2)):
+			m2 = pArray2[j, :] 
+			sim_score_temp = math.fabs(pMe(m1, m2))
+			if  sim_score_temp > best_similarity:
+				best_similarity = sim_score_temp
+				best_rep_1, best_rep_2 = m1 , m2 
+			if sim_score_temp < worst_simialrity:
+				worst_simialrity = sim_score_temp
+				worst_rep_1, worst_rep_2 =  m1, m2
+	#pRep1 = worst_rep_1
+	#pRep2 = worst_rep_2
+	return worst_rep_1, worst_rep_2, best_rep_1, best_rep_2
+	
 def concat(pArray, iAxis=0, pMetric=distance.nmi):
 	"""
 	Input: numpy array 
@@ -431,7 +455,8 @@ def get_representative(pArray, pMethod=None):
 	return hash_method[pMethod](pArray)
 
 c_hash_decomposition = {"none":	"none",
-						"pca"    : pca,"dpca"    : pca,
+						"pca"    : pca,
+						"dpca"    : pca,
 						"mca"    : mca_method,
 						"nlpca"    : nlpca,
                         "ica"    : ica,
@@ -439,6 +464,7 @@ c_hash_decomposition = {"none":	"none",
                         "pls"	 : pls,
                         "kpca"   : kpca,
                         "medoid" : medoid,
+                        "farthest" : farthest,
                         "mean"   : mean,
                         "centroid-medoid" : get_medoid_centroid,
                         "average": None }
@@ -862,15 +888,14 @@ def permutation_test_by_representative(pArray1, pArray2):
 	right_rep_variance = 1.0
 	left_loading = []
 	right_loading = []
-	#print pArray1[0]
 	#### Calculate Point estimate
 	if (len(pArray1) == 1 and len(pArray2) == 1) or decomposition =="none":
 		#if decomposition == "pca":
 		#	pRep1 = discretize(pArray1[0, :])
 		#	pRep2 = discretize(pArray2[0, :])
 		#else:
-		pRep1 = pArray1[0, :]
-		pRep2 = pArray2[0, :]
+		worst_rep_1 = best_rep_1 = pRep1 = pArray1[0, :]
+		worst_rep_2 = best_rep_2 = pRep2 = pArray2[0, :]
 		#left_rep_variance = 1.0
 		#right_rep_variance = 1.0
 		left_loading = [1.0]
@@ -881,7 +906,6 @@ def permutation_test_by_representative(pArray1, pArray2):
 		pRep2, right_rep_variance, right_loading = mca_method(pArray2, discretize_style = discretize_style)#mean(pArray2)#[len(pArray2)/2]	
 		if bool(distance.c_hash_association_method_discretize[strMetric]):
 			[pRep1, pRep2] = [discretize(aRep) for aRep in [pRep1, pRep2] ]
-
 	elif decomposition == 'medoid':
 		pRep1 = medoid(pArray1)
 		pRep2 = medoid(pArray2)
@@ -893,20 +917,26 @@ def permutation_test_by_representative(pArray1, pArray2):
 		[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA)[0] for pA in [pArray1, pArray2]]
 	elif decomposition in ['pls', 'cca']:
 		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
+	elif decomposition == 'farthest':
+		worst_rep_1, worst_rep_2, best_rep_1, best_rep_2 = farthest(pArray1, pArray2, config.similarity_method)
+		#_, best_pvalue = scipy.stats.spearmanr(best_rep_1, best_rep_2, nan_policy='omit')
+		#_, worst_pvalue = scipy.stats.spearmanr(worst_rep_1, worst_rep_2, nan_policy='omit')
 	else:
 		[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 
-	
 	if config.similarity_method == 'spearman' and config.permutation_func == "none":# and randomization_method != "permutation" :
-		sim_score, fP = scipy.stats.spearmanr(pRep1, pRep2, nan_policy='omit')
+		best_sim_score, best_pvalue = scipy.stats.spearmanr(best_rep_1, best_rep_2, nan_policy='omit')
+		worst_sim_score, worst_pvalue = scipy.stats.spearmanr(worst_rep_1, worst_rep_2, nan_policy='omit')
 	elif  config.similarity_method == 'pearson' and config.permutation_func == "none":# and randomization_method != "permutation" :
-		sim_score, fP = scipy.stats.pearsonr(pRep1, pRep2)
+		best_sim_score, best_pvalue = scipy.stats.pearsonr(best_rep_1, best_rep_2)
+		worst_sim_score, worst_pvalue = scipy.stats.pearsonr(worst_rep_1, worst_rep_2)
 	else:
-		sim_score= pMe(pRep1, pRep2)
-		fP = permutation_test_pvalue(X=pRep1, Y=pRep2)
-	assert(fP <= 1.0)
-	#print fP
-	return fP, sim_score, left_rep_variance, right_rep_variance, left_loading, right_loading, pRep1, pRep2 
+		best_sim_score = pMe(best_rep_1, best_rep_2)
+		best_pvalue = permutation_test_pvalue(X = best_rep_1, Y = best_rep_2)
+		worst_sim_score = pMe(best_rep_1, best_rep_2)
+		worst_pvalue = permutation_test_pvalue(X = worst_rep_1, Y = worst_rep_2)
+	
+	return worst_pvalue, best_pvalue, best_sim_score, worst_sim_score, left_rep_variance, right_rep_variance, left_loading, right_loading, worst_rep_1, worst_rep_2 
 
 def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iterations=1000):
 	"""
@@ -1249,7 +1279,7 @@ def permutation_test_by_average(pArray1, pArray2, metric= "nmi", iterations=1000
 
 def permutation_test(pArray1, pArray2):
 	
-	if config.decomposition in ['none','cca', 'pls',"pca", "dpca", "nlpca", "ica", "kpca","centroid-medoid","medoid","mean", "mca"]:
+	if config.decomposition in ['none','cca', 'pls',"pca", "dpca", "nlpca", "ica", "kpca","centroid-medoid","medoid","mean", "mca", "farthest"]:
 		return permutation_test_by_representative(pArray1, pArray2)
 	
 	if config.decomposition in ["average"]:
