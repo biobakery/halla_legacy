@@ -47,7 +47,7 @@ def parse_arguments(args):
     parser.add_argument(
         "-c","--clusters",
         help="number of blocks, default = min(number_features/2.0, math.log(number_features,2)*1.5) \n",
-        default = 13,
+        default = 0,
         type = int,
         required=False)
     parser.add_argument(
@@ -83,14 +83,24 @@ def parse_arguments(args):
         help="structure [balanced, imbalanced, default =balanced] \n",
         default = 'balanced',
         required=False)
+    parser.add_argument(
+        "-l","--cluster-percentage",
+        dest = "cluster_percentage",
+        help="structure [balanced, imbalanced, default =balanced] \n",
+        default = 1,
+        type = float,
+        required=False)
 
     return parser.parse_args()
 
 def call_data_generator(args):
     number_features = args.features #+ Iter *50 
     number_samples = args.samples #+ Iter * 10
-    number_blocks =  int(round(math.sqrt(number_features)* 1.5 +.5 ) ) 
-    cluster_percentage_l= 1.0#1.0/number_blocks 
+    if args.clusters == 0:
+        number_blocks =  int(round(math.sqrt(number_features)* 1.5 +.5 ) ) 
+    else:
+        number_blocks = args.clusters
+    cluster_percentage_l= args.cluster_percentage 
     association_type = args.association
     print ('Synthetic Data Generation ...')
     if association_type == "sine":
@@ -395,6 +405,8 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                     X[j] = [(common_base[l, k] + within_noise * numpy.random.uniform(low=-1, high=1 ,size=1)) for k in range(N)]
                     assoc[l].append(j)               
         l += 1
+        if l>B:
+            break
     if association_type == "L":
         common_base_Y = numpy.random.uniform(low=-1,high=1 ,size=(B+1,N))
         for l in range(B+1):
@@ -435,6 +447,8 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                 for index,b in enumerate(noise_num):
                     Y[j][b] = Y[j][index]
         l += 1
+        if l>B:
+            break
     for r in range(B):
         for i, j in itertools.product(assoc[r], assoc[r]):
             A[i][j] = 1
@@ -526,7 +540,7 @@ def imbalanced_synthetic_dataset_norm(  D, N, B, within_noise = 0.5, between_noi
     Y = numpy.random.normal(0, 1,size=(D,N))
     Y_base = numpy.random.normal(0, 1,size=(D,N))
     A = numpy.zeros( (len(X),len(Y)) )
-    blockSize = int(round(D/B+.5))
+    blockSize = int(round(D/B))
     #print D, B, blockSize
     
     

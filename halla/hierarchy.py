@@ -1227,9 +1227,9 @@ def estimate_pvalue(pNode):
     pNode.similarity_score = best_sim_score
     pNode.left_rep = left_rep
     pNode.right_rep = right_rep
-    pNode.best_pvalue = best_pvalue
+    pNode.best_pvalue = best_pvalue 
     pNode.worst_pvalue = worst_pvalue
-    pNode.pvalue = worst_pvalue
+    pNode.pvalue = ( worst_pvalue + best_pvalue )/2.0
     return worst_pvalue        
 def naive_all_against_all():
     dataset1 = config.parsed_dataset[0]
@@ -1312,7 +1312,8 @@ def significance_testing(current_level_tests, level = None):
     p_values = multiprocessing_estimate_pvalue(estimate_pvalue, current_level_tests, pMethod, dataset1, dataset2)
     # Calculate q-value for all hypotheses
     q_values = stats.pvalues2qvalues (p_values, adjusted=True)
-    aP_adjusted, pRank = stats.p_adjust(p_values, config.q)
+    aP_adjusted, pRank = stats.p_adjust([current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))], config.q, config.q)
+    #stats.p_adjust(p_values, config.q)
     aP_adjusted_best, rank_best = stats.p_adjust([current_level_tests[i].best_pvalue for i in range(len(current_level_tests))], config.q)
     for i in range(len(current_level_tests)):
        current_level_tests[i].rank = pRank[i]
