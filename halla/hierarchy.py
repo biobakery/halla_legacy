@@ -87,6 +87,9 @@ def multiprocessing_estimate_pvalue(estimate_pvalue, current_level_tests, pMetho
          right_loading, left_rep, right_rep in results_by_id:
             result[id]=dP
             current_level_tests[id].similarity_score = similarity
+            current_level_tests[id].left_rep = left_rep
+            current_level_tests[id].right_rep = right_rep
+            
     else:
         result=[]
         for i in range(len(current_level_tests)):
@@ -126,13 +129,18 @@ class Hypothesis_Node():
         self.left_distance = left_distance
         self.right_distance = right_distance
         self.pvalue = None
+        self.best_pvalue = None
+        self.worst_pvalue = None
         self.qvalue = None
+        self.left_rep = None
+        self.right_rep = None
         self.similarity_score = None
         self.already_tested = False
         self.already_passed = False
         self.level_number = 1
         self.significance =  None
         self.rank = None
+        self.best_p_rank = None
 
 def left(node):
     return get_child(node, iIndex=0)
@@ -170,8 +178,8 @@ def get_data(node):
     return node.m_pData
 
 def stop_decesnding_silhouette_coefficient(Node):
-    if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
-        return True
+    #if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
+     #   return True
     pMe = distance.c_hash_metric[config.similarity_method]
     silhouette_scores = []
     cluster_a = Node.m_pData[0]
@@ -184,7 +192,7 @@ def stop_decesnding_silhouette_coefficient(Node):
         else:
             temp_a_features = cluster_a[:]
             temp_a_features.remove(a_feature)
-            a = np.mean([1.0 - config.Distance[0][i][j] for i,j in product([a_feature], temp_a_features)])
+            a = np.mean([config.Distance[0][i][j] for i,j in product([a_feature], temp_a_features)])
 
         b = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[0][i], config.parsed_dataset[1][j])) 
                     for i,j in product([a_feature], cluster_b)])
@@ -196,26 +204,24 @@ def stop_decesnding_silhouette_coefficient(Node):
         else:
             temp_a_features = cluster_b[:]
             temp_a_features.remove(a_feature)
-            a = np.mean([1.0 - config.Distance[1][i][j] for i,j in product([a_feature], temp_a_features)])
+            a = np.mean([config.Distance[1][i][j] for i,j in product([a_feature], temp_a_features)])
                
         b = np.mean([1.0 - math.fabs(pMe(config.parsed_dataset[1][i], config.parsed_dataset[0][j])) 
                     for i,j in product([a_feature], cluster_a)])
         s = (b-a)/max([a,b])
         silhouette_coefficient_B.append(s)
-
     silhouette_scores = silhouette_coefficient_A
     silhouette_scores.extend(silhouette_coefficient_B)
-    
-    if numpy.min(silhouette_scores)  < 0.25:
+    print cluster_a, cluster_b, silhouette_scores
+    if all([sil> 0.5  for sil in silhouette_scores]):
         return False
     else:
+        
         return True
 
 def Node_clusters_diameter(Node):
-    
     number_left_features = len(Node.m_pData[0])
     number_right_features = len(Node.m_pData[1])
-
     counter = 0
     temp_right_loading = list()
     reps_similarity = Node.similarity_score
@@ -232,26 +238,66 @@ def Node_clusters_diameter(Node):
     diam_B_r = ((1.0 - math.fabs(min(right_all_sim))))# - math.fabs((1.0 - max(right_all_sim))))
     return diam_A_r, diam_B_r
     
-def stop_and_reject(Node):
+def too_heterogeneous_paired_clusters(Node):
     
     number_left_features = len(Node.m_pData[0])
     number_right_features = len(Node.m_pData[1])
 
-    if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
+    #if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
+    #    return True
+    counter = 0
+    temp_right_loading = list()
+    reps_similarity = Node.similarity_score
+    pMe = distance.c_hash_metric[config.similarity_method] 
+    #diam_Ar_Br = (1.0 - math.fabs(pMe(Node.left_rep, Node.right_rep)))
+    diam_Ar_Br = min([1.0 - math.fabs(pMe(config.parsed_dataset[0][i], config.parsed_dataset[1][j])) for i,j in product(Node.m_pData[0], Node.m_pData[1])])
+    if len(Node.m_pData[0]) == 1:
+        left_all_sim = [1.0]
+    else:
+        left_all_sim = [math.fabs(pMe(config.parsed_dataset[0][i], config.parsed_dataset[0][j])) for i,j in combinations(Node.m_pData[0], 2)]
+    if len(Node.m_pData[1]) == 1:
+        right_all_sim = [1.0]
+    else:
+        right_all_sim = [math.fabs(pMe(config.parsed_dataset[1][i], config.parsed_dataset[1][j])) for i,j in combinations(Node.m_pData[1],2)]
+    diam_A_r = 1.0 - min(left_all_sim)# - math.fabs((1.0 - max(left_all_sim))))
+    diam_B_r = 1.0 - min(right_all_sim)# - math.fabs((1.0 - max(right_all_sim))))
+    if config.verbose == 'DEBUG':
+        print ("===================stop and reject check========================")
+        #print "Left Exp. Var.: ", Node.left_first_rep_variance
+        print ("Left before: ", Node.m_pData[0])
+        #print "Right Exp. Var.: ", Node.right_first_rep_variance
+        print ("Right before: ", Node.m_pData[1])
+        print ("dime_A_r: ", diam_A_r,"  ", "dime_B_r: ", diam_B_r, "diam_Ar_Br: ", diam_Ar_Br)
+    print 'diam_Ar_Br', diam_Ar_Br, 'diam_A_r', diam_A_r, 'diam_B_r', diam_B_r
+    if diam_A_r == 0.0 or diam_B_r == 0.0:
+        return False
+    if diam_Ar_Br + diam_A_r + diam_B_r:# diam_Ar_Br > 2 * (diam_A_r + diam_B_r):
         return True
+    else:
+        return False
+def enough_homogeneous_paired_clusters(Node):
+    
+    number_left_features = len(Node.m_pData[0])
+    number_right_features = len(Node.m_pData[1])
+
+    #if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
+    #    return True
     counter = 0
     temp_right_loading = list()
     reps_similarity = Node.similarity_score
     pMe = distance.c_hash_metric[config.similarity_method] 
     diam_Ar_Br = (1.0 - math.fabs(pMe(Node.left_rep, Node.right_rep)))
+    #diam_Ar_Br = max([1.0 - math.fabs(pMe(config.parsed_dataset[0][i], config.parsed_dataset[1][j])) for i,j in product(Node.m_pData[0], Node.m_pData[1])])
     if len(Node.m_pData[0]) == 1:
         left_all_sim = [1.0]
     else:
-        left_all_sim = [pMe(config.parsed_dataset[0][i], config.parsed_dataset[0][j]) for i,j in combinations(Node.m_pData[0], 2)]
+        #left_all_sim = [pMe(config.parsed_dataset[0][i], config.parsed_dataset[0][j]) for i,j in combinations(Node.m_pData[0], 2)]
+        left_all_sim = [pMe(Node.left_rep, config.parsed_dataset[0][i]) for i in Node.m_pData[0]]
     if len(Node.m_pData[1]) == 1:
         right_all_sim = [1.0]
     else:
-        right_all_sim = [pMe(config.parsed_dataset[1][i], config.parsed_dataset[1][j]) for i,j in combinations(Node.m_pData[1],2)]
+        #right_all_sim = [pMe(config.parsed_dataset[1][i], config.parsed_dataset[1][j]) for i,j in combinations(Node.m_pData[1],2)]
+        right_all_sim = [pMe(Node.right_rep, config.parsed_dataset[1][i]) for i in Node.m_pData[1]]
     diam_A_r = ((1.0 - math.fabs(min(left_all_sim))))# - math.fabs((1.0 - max(left_all_sim))))
     diam_B_r = ((1.0 - math.fabs(min(right_all_sim))))# - math.fabs((1.0 - max(right_all_sim))))
     if config.verbose == 'DEBUG':
@@ -261,32 +307,33 @@ def stop_and_reject(Node):
         #print "Right Exp. Var.: ", Node.right_first_rep_variance
         print ("Right before: ", Node.m_pData[1])
         print ("dime_A_r: ", diam_A_r,"  ", "dime_B_r: ", diam_B_r, "diam_Ar_Br: ", diam_Ar_Br)
-    if diam_A_r + diam_B_r == 0:
+    print 'AB', diam_Ar_Br, 'A', diam_A_r, 'B', diam_B_r
+    if diam_A_r ==0 or diam_B_r == 0:
         return True
-    if diam_Ar_Br > diam_A_r + diam_B_r:
+    if diam_Ar_Br + diam_A_r + diam_B_r < 1.0 :#diam_A_r or diam_Ar_Br < diam_B_r*2:
         return True
     else:
         return False
 
 def is_bypass(Node, method = ''):
     
-    if len(Node.m_pData[0]) <= 1 and len(Node.m_pData[1]) <= 1:
-        return True
-    else: #return False
-        if config.apply_stop_condition:
-            if method == 'HSIC':
-                l0 =Node.m_pData[0]
-                l1 =Node.m_pData[1]
-                if len(l0) == 1 and len(l1)==1:
-                    return False
-                #print l0, l1
-                #print config.parsed_dataset[0][Node.m_pData[0]]
-                return HSIC.HSIC_pval(config.parsed_dataset[0][l0].T, config.parsed_dataset[1][l1].T)[1] > .05
-            else:
-                return stop_and_reject(Node)
-                #return stop_decesnding_silhouette_coefficient(Node)
+    if len(Node.m_pData[0]) <= 1 or len(Node.m_pData[1]) <= 1:
+        return False
+    #else: #return False
+    if config.apply_stop_condition:
+        if method == 'HSIC':
+            l0 =Node.m_pData[0]
+            l1 =Node.m_pData[1]
+            if len(l0) == 1 and len(l1)==1:
+                return False
+            #print l0, l1
+            #print config.parsed_dataset[0][Node.m_pData[0]]
+            return HSIC.HSIC_pval(config.parsed_dataset[0][l0].T, config.parsed_dataset[1][l1].T)[1] > .05
         else:
-            return False
+            return too_heterogeneous_paired_clusters(Node)
+            #return stop_decesnding_silhouette_coefficient(Node)
+    else:
+        return False
 
 def report(Node):
     print ("\n--- hypothesis test based on permutation test")        
@@ -508,12 +555,12 @@ def descending_silhouette_coefficient(cluster, dataset_number):
     for a_cluster in all_a_clusters:
         if len(all_a_clusters) ==1:
             # math.fabs(pMe(config.parsed_dataset[dataset_number][i], config.parsed_dataset[dataset_number][j])
-            a = np.mean([1.0 - config.Distance[dataset_number][i][j] for i,j in product([a_cluster], all_a_clusters)])
+            a = np.mean([config.Distance[dataset_number][i][j] for i,j in product([a_cluster], all_a_clusters)])
         else:
             temp_all_a_clusters = all_a_clusters[:]#deepcopy(all_a_clusters)
             temp_all_a_clusters.remove(a_cluster)
-            a = np.mean([1.0 - config.Distance[dataset_number][i][j] for i,j in product([a_cluster], temp_all_a_clusters)])            
-        b = np.mean([1.0 - config.Distance[dataset_number][i][j] for i,j in product([a_cluster], all_b_clusters)])
+            a = np.mean([config.Distance[dataset_number][i][j] for i,j in product([a_cluster], temp_all_a_clusters)])            
+        b = np.mean([config.Distance[dataset_number][i][j] for i,j in product([a_cluster], all_b_clusters)])
         s = (b-a)/max([a,b])
         s_all_a.append(s)
     if any(val <= 0.0 for val in s_all_a) and not len(s_all_a) == 1:
@@ -562,8 +609,8 @@ def silhouette_coefficient(clusters, distance_matrix):
                 temp_a_features = cluster_a[:]#deepcopy(all_a_clusters)
                 temp_a_features.remove(a_feature)
                 a = np.mean([distance_matrix.iloc[i, j] for i,j in product([a_feature], temp_a_features)])            
-            b1 = np.mean([ distance_matrix.iloc[i, j] for i,j in product([a_feature], next_cluster)])
-            b2 = np.mean([ distance_matrix.iloc[i, j] for i,j in product([a_feature], prev_cluster)])
+            b1 = np.mean([distance_matrix.iloc[i, j] for i,j in product([a_feature], next_cluster)])
+            b2 = np.mean([distance_matrix.iloc[i, j] for i,j in product([a_feature], prev_cluster)])
             b = min(b1,b2)
             #print a, b
             s = (b-a)/max(a,b)
@@ -651,7 +698,7 @@ def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
 def get_leaves(cluster):
     return cluster.pre_order(lambda x: x.id)  
     
-def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters=None, resolution= 'high'):
+def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters=2, resolution= 'high'):
     n = cluster.get_count()
     if n==1:
         return [cluster]
@@ -1176,9 +1223,14 @@ def estimate_pvalue(pNode):
     aIndiciesMapped = list(map(array, aIndicies))  # So we can vectorize over numpy arrays
     X = dataset1[aIndiciesMapped[0]]
     Y = dataset2[aIndiciesMapped[1]]
-    est_pvalue, similarity, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y)
-    pNode.similarity_score = similarity
-    return est_pvalue        
+    worst_pvalue, best_pvalue, best_sim_score, worst_sim_score, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y)
+    pNode.similarity_score = best_sim_score
+    pNode.left_rep = left_rep
+    pNode.right_rep = right_rep
+    pNode.best_pvalue = best_pvalue
+    pNode.worst_pvalue = worst_pvalue
+    pNode.pvalue = worst_pvalue
+    return worst_pvalue        
 def naive_all_against_all():
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
@@ -1260,10 +1312,11 @@ def significance_testing(current_level_tests, level = None):
     p_values = multiprocessing_estimate_pvalue(estimate_pvalue, current_level_tests, pMethod, dataset1, dataset2)
     # Calculate q-value for all hypotheses
     q_values = stats.pvalues2qvalues (p_values, adjusted=True)
-    aP_adjusted, pRank = stats.p_adjust(p_values, config.q)#config.q)
-    
+    aP_adjusted, pRank = stats.p_adjust(p_values, config.q)
+    aP_adjusted_best, rank_best = stats.p_adjust([current_level_tests[i].best_pvalue for i in range(len(current_level_tests))], config.q)
     for i in range(len(current_level_tests)):
        current_level_tests[i].rank = pRank[i]
+       current_level_tests[i].best_p_rank = rank_best[i]
        current_level_tests[i].pvalue = p_values[i]
        current_level_tests[i].already_tested = True
        if current_level_tests[i].significance == None: 
@@ -1272,7 +1325,11 @@ def significance_testing(current_level_tests, level = None):
     max_r_t = 0
     for i in range(len(current_level_tests)):
         if current_level_tests[i].pvalue <= aP_adjusted[i] and max_r_t <= current_level_tests[i].rank:
-             max_r_t = current_level_tests[i].rank
+            max_r_t = current_level_tests[i].rank
+    max_r_t_best = 0
+    for i in range(len(current_level_tests)):
+        if current_level_tests[i].best_pvalue <= aP_adjusted_best[i] and max_r_t_best <= current_level_tests[i].best_p_rank:
+            max_r_t_best = current_level_tests[i].best_p_rank
             #print "max_r_t", max_r_t
     hsci_within_pvalues = []
     hsci_between_pvalues = []
@@ -1280,7 +1337,7 @@ def significance_testing(current_level_tests, level = None):
     passed_tests = []
     if config.p_adjust_method in ["bh", "by"]:
         for i in range(len(current_level_tests)):
-            if current_level_tests[i].rank <= max_r_t:
+            if current_level_tests[i].rank <= max_r_t:# and enough_homogeneous_paired_clusters(current_level_tests[i]):
                 if current_level_tests[i].significance == None:
                     current_level_tests[i].significance = True
                     tested_hypotheses.append(current_level_tests[i])
@@ -1288,7 +1345,7 @@ def significance_testing(current_level_tests, level = None):
                     print ("-- association after %s fdr correction" % config.p_adjust_method)
                     #hsci_between_significant.append('Significant')
             else:
-                if current_level_tests[i].significance == None and is_bypass(current_level_tests[i]):
+                if current_level_tests[i].significance == None and current_level_tests[i].best_p_rank > max_r_t_best:
                     current_level_tests[i].significance = False
                     tested_hypotheses.append(current_level_tests[i])
                 #hsci_between_significant.append('Not significant')
