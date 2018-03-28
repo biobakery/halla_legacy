@@ -1314,7 +1314,6 @@ def significance_testing(current_level_tests, level = None):
     q_values = stats.pvalues2qvalues (p_values, adjusted=True)
     aP_adjusted, pRank = stats.p_adjust(p_values, config.q)
     aP_adjusted_best, rank_best = stats.p_adjust([current_level_tests[i].best_pvalue for i in range(len(current_level_tests))], config.q)
-    
     for i in range(len(current_level_tests)):
        current_level_tests[i].rank = pRank[i]
        current_level_tests[i].best_p_rank = rank_best[i]
