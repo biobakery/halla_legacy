@@ -298,8 +298,8 @@ def enough_homogeneous_paired_clusters(Node):
     else:
         #right_all_sim = [pMe(config.parsed_dataset[1][i], config.parsed_dataset[1][j]) for i,j in combinations(Node.m_pData[1],2)]
         right_all_sim = [pMe(Node.right_rep, config.parsed_dataset[1][i]) for i in Node.m_pData[1]]
-    diam_A_r = ((1.0 - math.fabs(min(left_all_sim))))# - math.fabs((1.0 - max(left_all_sim))))
-    diam_B_r = ((1.0 - math.fabs(min(right_all_sim))))# - math.fabs((1.0 - max(right_all_sim))))
+    diam_A_r = ((1.0 - min(map(math.fabs, left_all_sim))))# - math.fabs((1.0 - max(left_all_sim))))
+    diam_B_r = ((1.0 - min(map(math.fabs, right_all_sim))))# - math.fabs((1.0 - max(right_all_sim))))
     if config.verbose == 'DEBUG':
         print ("===================stop and reject check========================")
         #print "Left Exp. Var.: ", Node.left_first_rep_variance
@@ -1223,13 +1223,13 @@ def estimate_pvalue(pNode):
     aIndiciesMapped = list(map(array, aIndicies))  # So we can vectorize over numpy arrays
     X = dataset1[aIndiciesMapped[0]]
     Y = dataset2[aIndiciesMapped[1]]
-    worst_pvalue, best_pvalue, best_sim_score, worst_sim_score, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y)
+    worst_pvalue, best_pvalue, medoid_pvalue, best_sim_score, worst_sim_score, left_first_rep_variance, right_first_rep_variance, left_loading, right_loading, left_rep, right_rep = pMethod(X, Y)
     pNode.similarity_score = best_sim_score
     pNode.left_rep = left_rep
     pNode.right_rep = right_rep
     pNode.best_pvalue = best_pvalue 
     pNode.worst_pvalue = worst_pvalue
-    pNode.pvalue = ( worst_pvalue + best_pvalue )/2.0
+    pNode.pvalue = worst_pvalue
     return worst_pvalue        
 def naive_all_against_all():
     dataset1 = config.parsed_dataset[0]
@@ -1318,14 +1318,14 @@ def significance_testing(current_level_tests, level = None):
     for i in range(len(current_level_tests)):
        current_level_tests[i].rank = pRank[i]
        current_level_tests[i].best_p_rank = rank_best[i]
-       current_level_tests[i].pvalue = p_values[i]
+       #current_level_tests[i].pvalue = p_values[i]
        current_level_tests[i].already_tested = True
        if current_level_tests[i].significance == None: 
            current_level_tests[i].qvalue = q_values[i]
    
     max_r_t = 0
     for i in range(len(current_level_tests)):
-        if current_level_tests[i].pvalue <= aP_adjusted[i] and max_r_t <= current_level_tests[i].rank:
+        if current_level_tests[i].worst_pvalue <= aP_adjusted[i] and max_r_t <= current_level_tests[i].rank:
             max_r_t = current_level_tests[i].rank
     max_r_t_best = 0
     for i in range(len(current_level_tests)):
@@ -1338,9 +1338,10 @@ def significance_testing(current_level_tests, level = None):
     passed_tests = []
     if config.p_adjust_method in ["bh", "by"]:
         for i in range(len(current_level_tests)):
-            if current_level_tests[i].rank <= max_r_t:# and enough_homogeneous_paired_clusters(current_level_tests[i]):
+            if current_level_tests[i].rank <= max_r_t and enough_homogeneous_paired_clusters(current_level_tests[i]):
                 if current_level_tests[i].significance == None:
                     current_level_tests[i].significance = True
+                    current_level_tests[i].worst_pvalue = current_level_tests[i].best_pvalue
                     tested_hypotheses.append(current_level_tests[i])
                     significant_hypotheses.append(current_level_tests[i])
                     print ("-- association after %s fdr correction" % config.p_adjust_method)
