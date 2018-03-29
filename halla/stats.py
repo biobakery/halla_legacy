@@ -918,29 +918,43 @@ def permutation_test_by_representative(pArray1, pArray2):
 		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
 	elif decomposition == 'farthest':
 		worst_rep_1, worst_rep_2, best_rep_1, best_rep_2 = farthest(pArray1, pArray2, config.similarity_method)
-		pRep1 = medoid(pArray1)
-		pRep2 = medoid(pArray2)
+		pRep1 = worst_rep_1# medoid(pArray1)
+		pRep2 = worst_rep_2#medoid(pArray2)
 
 		#_, best_pvalue = scipy.stats.spearmanr(best_rep_1, best_rep_2, nan_policy='omit')
 		#_, worst_pvalue = scipy.stats.spearmanr(worst_rep_1, worst_rep_2, nan_policy='omit')
 	else:
 		[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 
-	if config.similarity_method == 'spearman' and config.permutation_func == "none":# and randomization_method != "permutation" :
-		best_sim_score, best_pvalue = scipy.stats.spearmanr(best_rep_1, best_rep_2, nan_policy='omit')
-		worst_sim_score, worst_pvalue = scipy.stats.spearmanr(worst_rep_1, worst_rep_2, nan_policy='omit')
-		medoid_pvalue = scipy.stats.spearmanr(pRep1, pRep2, nan_policy='omit')
-		
-	elif  config.similarity_method == 'pearson' and config.permutation_func == "none":# and randomization_method != "permutation" :
-		best_sim_score, best_pvalue = scipy.stats.pearsonr(best_rep_1, best_rep_2)
-		worst_sim_score, worst_pvalue = scipy.stats.pearsonr(worst_rep_1, worst_rep_2)
+	if decomposition == 'farthest':
+		if config.similarity_method == 'spearman' and config.permutation_func == "none":# and randomization_method != "permutation" :
+			best_sim_score, best_pvalue = scipy.stats.spearmanr(best_rep_1, best_rep_2, nan_policy='omit')
+			worst_sim_score, worst_pvalue = scipy.stats.spearmanr(worst_rep_1, worst_rep_2, nan_policy='omit')
+			medoid_pvalue = scipy.stats.spearmanr(pRep1, pRep2, nan_policy='omit')
+			
+		elif  config.similarity_method == 'pearson' and config.permutation_func == "none":# and randomization_method != "permutation" :
+			best_sim_score, best_pvalue = scipy.stats.pearsonr(best_rep_1, best_rep_2)
+			worst_sim_score, worst_pvalue = scipy.stats.pearsonr(worst_rep_1, worst_rep_2)
+		else:
+			best_sim_score = pMe(best_rep_1, best_rep_2)
+			best_pvalue = permutation_test_pvalue(X = best_rep_1, Y = best_rep_2)
+			worst_sim_score = pMe(best_rep_1, best_rep_2)
+			worst_pvalue = permutation_test_pvalue(X = worst_rep_1, Y = worst_rep_2)
+			medoid_pvalue = permutation_test_pvalue(X = pRep1, Y = pRep2)
 	else:
-		best_sim_score = pMe(best_rep_1, best_rep_2)
-		best_pvalue = permutation_test_pvalue(X = best_rep_1, Y = best_rep_2)
-		worst_sim_score = pMe(best_rep_1, best_rep_2)
-		worst_pvalue = permutation_test_pvalue(X = worst_rep_1, Y = worst_rep_2)
-		medoid_pvalue = permutation_test_pvalue(X = pRep1, Y = pRep2)
-	return worst_pvalue, best_pvalue, medoid_pvalue,  best_sim_score, worst_sim_score, left_rep_variance, right_rep_variance, left_loading, right_loading, worst_rep_1, worst_rep_2 
+		if config.similarity_method == 'spearman' and config.permutation_func == "none":# and randomization_method != "permutation" :
+			worst_sim_score, worst_pvalue = best_sim_score, best_pvalue = scipy.stats.spearmanr(pRep1, pRep2, nan_policy='omit')
+			medoid_pvalue = worst_pvalue
+			
+		elif  config.similarity_method == 'pearson' and config.permutation_func == "none":# and randomization_method != "permutation" :
+			orst_sim_score, worst_pvalue = best_sim_score, best_pvalue = scipy.stats.pearsonr(pRep1, pRep2,)
+			medoid_pvalue = worst_pvalue
+		else:
+			best_sim_score = pMe(pRep1, pRep2)
+			best_pvalue = permutation_test_pvalue(X = pRep1, Y = pRep2)
+			worst_sim_score = best_sim_score
+			worst_pvalue = medoid_pvalue = best_pvalue
+	return worst_pvalue, best_pvalue, medoid_pvalue,  best_sim_score, worst_sim_score, left_rep_variance, right_rep_variance, left_loading, right_loading, pRep1, pRep2 
 
 def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iterations=1000):
 	"""

@@ -405,11 +405,11 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                     X[j] = [(common_base[l, k] + within_noise * numpy.random.uniform(low=-1, high=1 ,size=1)) for k in range(N)]
                     assoc[l].append(j)               
         l += 1
-        if l>B:
+        if l>=B:
             break
     if association_type == "L":
-        common_base_Y = numpy.random.uniform(low=-1,high=1 ,size=(B+1,N))
-        for l in range(B+1):
+        common_base_Y = numpy.random.uniform(low=-1,high=1 ,size=(B,N))
+        for l in range(B):
             common_base_Y[l] = [numpy.random.uniform(low=l,high=10, size=1)  if common_base[l,k] < -0.99 else l+ within_noise * numpy.random.uniform(low=-.1,high=.1, size=1) for k in range(N)]
     l= 0
     for i in range(0,int(D*cluster_percentage),blockSize):
@@ -447,7 +447,7 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                 for index,b in enumerate(noise_num):
                     Y[j][b] = Y[j][index]
         l += 1
-        if l>B:
+        if l>=B:
             break
     for r in range(B):
         for i, j in itertools.product(assoc[r], assoc[r]):

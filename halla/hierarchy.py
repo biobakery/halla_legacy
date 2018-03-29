@@ -139,8 +139,8 @@ class Hypothesis_Node():
         self.already_passed = False
         self.level_number = 1
         self.significance =  None
-        self.rank = None
-        self.best_p_rank = None
+        self.worst_rank = None
+        self.best_rank = None
 
 def left(node):
     return get_child(node, iIndex=0)
@@ -275,7 +275,7 @@ def too_heterogeneous_paired_clusters(Node):
         return True
     else:
         return False
-def enough_homogeneous_paired_clusters(Node):
+def is_triangle_inequality(Node):
     
     number_left_features = len(Node.m_pData[0])
     number_right_features = len(Node.m_pData[1])
@@ -469,7 +469,7 @@ def cutree_to_get_number_of_features (cluster, distance_matrix, number_of_estima
     if n_features==1:
         return [cluster]
     if number_of_estimated_clusters == None:
-        number_of_estimated_clusters = math.log(n_features, 2)
+        number_of_estimated_clusters = math.sqrt(n_features)#math.log(n_features, 2)
     sub_clusters = []
     sub_clusters = truncate_tree([cluster], level=0, skip=1)
     
@@ -698,7 +698,7 @@ def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
 def get_leaves(cluster):
     return cluster.pre_order(lambda x: x.id)  
     
-def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters=2, resolution= 'high'):
+def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters=None, resolution= 'high'):
     n = cluster.get_count()
     if n==1:
         return [cluster]
@@ -939,14 +939,14 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         print ("--- Testing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_tests)))
         temp_significant_hypotheses, temp_tested_hypotheses = significance_testing(current_level_tests, level = level_number)
         #print len(temp_tested_hypotheses)
-        significant_hypotheses.extend(temp_significant_hypotheses)
-        tested_hypotheses.extend(temp_tested_hypotheses)
-        from_prev_hypothesis =  []
+        significant_hypotheses = temp_significant_hypotheses
+        tested_hypotheses = temp_tested_hypotheses
+        #from_prev_hypothesis =  []
         from_prev_hypothesis_node = []
         do_next_level = False
         change_level_flag = True
         next_level = []
-        leaf_nodes = []
+        #leaf_nodes = []
         level_number += 1
         level_number_2 = 1
         for i in range(len(current_level_nodes)):
@@ -958,14 +958,14 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             #if len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[1]) == 1 :
             bTauX = _is_stop(a) # currently if a is a tip 
             bTauY = _is_stop(b) # currently if b is a tip 
-            if bTauX and  bTauY :
+            '''if bTauX and  bTauY :
                 # pass hypothesis tests with individual features to next levels 
                 # to participate in FDR correction and increase the power 
                 #Pairwise test is a test between clusters with only one feature
                 if hypothesis.significance != True:
                     hypothesis.significance = None
-                    leaf_nodes.append(hypothesis_node)
-            elif hypothesis.significance != None:
+                    leaf_nodes.append(hypothesis_node)'''
+            if hypothesis.significance != None:
                 from_prev_hypothesis_node.append(hypothesis_node)
             else:
                 #bTauX = _is_stop(a) # currently if a is a tip 
@@ -1026,175 +1026,26 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                         csvwc.writerow(aLineOut)
         current_level_nodes = next_level
         #print ("--- number of new tests: %s leafs: %s  prev: %s" % (len(next_level), len(leaf_nodes), len(from_prev_hypothesis_node)) )
-        if len(current_level_nodes) > 0:
-            current_level_nodes.extend(leaf_nodes)
-            current_level_nodes.extend(from_prev_hypothesis_node)
+        #if len(current_level_nodes) > 0:
+        #    current_level_nodes.extend(leaf_nodes)
+        current_level_nodes.extend(from_prev_hypothesis_node)
             
-    print ("--- number of performed tests: %s") % (config.number_of_performed_tests)
-    print ("--- number of passed tests after FDR controlling: %s" % len(significant_hypotheses))
-    return significant_hypotheses, tested_hypotheses
-
-def test_by_family(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="uniform", strLinkage="min", robustness = None):
-    
-    func = config.similarity_method
-    X, Y = dataset1, dataset2
-    significant_hypotheses = []
-    tested_hypotheses = []
-    config.number_of_performed_tests = 0
-    
-    # Define the speed of cutting hierarchies
-    # e.g. 1 means we cut in each iteration
-    # e.g. 2 means we cut in each 2 iteration 
-    n1 = apClusterNode0[0].get_count()
-    n2 = apClusterNode1[0].get_count()
-    n_pause = number_of_pause(n1, n2)
-    #print ("Number of pause:", n_pause)
-    n1 = apClusterNode0[0].get_count()
-    n2 = apClusterNode1[0].get_count()
-    if n1 > n2 :
-        cut_speed_1 = 1
-    else:
-        #cut_speed_1 = max(math.log(n2,2)/math.log(n1,2) ,1) 
-        cut_speed_1 = max(number_of_level(n2)*1.0/number_of_level(n1) ,1)
-    if n2 > n1:
-        cut_speed_2 = 1
-    else:
-        #cut_speed_2 = max(math.log(n1,2) / math.log(n2, 2),1)
-        cut_speed_2 = max(number_of_level(n1)*1.0/number_of_level(n2) ,1)
-    # Write the hypothesis that has been tested
-    output_file_compared_clusters  = open(str(config.output_dir)+'/hypotheses_tree.txt', 'w')
-    csvwc = csv.writer(output_file_compared_clusters , csv.excel_tab, delimiter='\t')
-    csvwc.writerow(['Level', "Dataset 1", "Dataset 2" ])
-    data1 = apClusterNode0[0].pre_order(lambda x: x.id)
-    data2 = apClusterNode1[0].pre_order(lambda x: x.id)
-    aLineOut = list(map(str, [str(0), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))]))
-    csvwc.writerow(aLineOut)
-    
-    # Get the first level homogeneous clusters
-    apChildren0 = get_homogenous_clusters_silhouette (apClusterNode0[0], config.Distance[0])
-    apChildren1 = get_homogenous_clusters_silhouette (apClusterNode1[0], config.Distance[1])
-    current_level_nodes = []
-    current_level_tests = []    
-    level_number = 1
-      
-    for a, b in itertools.product(apChildren0, apChildren1):
-        try:
-            data1 = a.pre_order(lambda x: x.id)
-            data2 = b.pre_order(lambda x: x.id)
-        except:
-            data1 = reduce_tree(a)
-            data2 = reduce_tree(b)
-        tempTree = Hypothesis_Node(data=[data1, data2], left_distance=a.dist, right_distance=b.dist)
-        tempTree.level_number = 1
-        #current_level_tests.append(tempTree)
-        current_level_nodes.append((tempTree, (a, b)))
-        if config.write_hypothesis_tree:
-            aLineOut = list(map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))]))
-            csvwc.writerow(aLineOut)
-    do_next_level = True
-    
-    while do_next_level  :
-        next_level_nodes =[]
-        if level_number ==1 :
-            print ("--- Testing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_nodes)))
-            current_level_tests = [ hypothesis for (hypothesis, _ ) in current_level_nodes]
-            temp_significant_hypotheses, temp_tested_hypotheses = significance_testing(current_level_tests)
-            significant_hypotheses.extend(temp_significant_hypotheses)
-            tested_hypotheses.extend(temp_tested_hypotheses)
-            for i in range(len(current_level_tests)):
-                if current_level_tests[i] not in significant_hypotheses:
-                    next_level_nodes.append(current_level_nodes[i])
+    significant_hypotheses2 =[]
+    p_adjusted, p_rank = stats.p_adjust([tested_hypotheses[i].pvalue for i in range(len(tested_hypotheses))], config.q)
+    max_r_t = 0
+    for i in range(len(tested_hypotheses)):
+        tested_hypotheses[i].worst_rank = p_rank[i]
+        if tested_hypotheses[i].pvalue <= p_adjusted[i] and max_r_t <= tested_hypotheses[i].worst_rank:
+            max_r_t = tested_hypotheses[i].worst_rank
+    for i in range(len(tested_hypotheses)):
+        if tested_hypotheses[i].worst_rank <= max_r_t:
+            significant_hypotheses2.append(tested_hypotheses[i])
+            tested_hypotheses[i].significance = True
         else:
-            next_level_nodes =   current_level_nodes 
-            
-        current_level_nodes = []     
-        do_next_level = False
-        change_level_flag = True
-        current_family_tests = []
-        next_set = []
-        level_number += 1
-        level_number_2 = 1
-        for i in range(len(next_level_nodes)):
-            current_family_tests = []
-            next_set = []
-            hypothesis_node= next_level_nodes[i]
-            (hypothesis, (a, b)) = hypothesis_node
-            if hypothesis in significant_hypotheses:
-                continue
-            # Add leaves from current level to next level
-            # Add significant or non significant hypothesis from previous level
-            #if len(hypothesis.m_pData[0]) == 1 and  len(hypothesis.m_pData[1]) == 1 :
-            bTauX = _is_stop(a) # currently if a is a tip 
-            bTauY = _is_stop(b) # currently if b is a tip 
-            if bTauX and  bTauY :
-                continue
-            else:
-                do_next_level = True
-                
-                if cut_speed_1 != 1:# or diam_A_r > 2* diam_B_r:
-                    if level_number  / cut_speed_1 > level_number_2:# or diam_A_r > 1.0 * diam_B_r :
-                        if change_level_flag:
-                            level_number_2 += 1
-                            change_level_flag = False
-                        if not bTauX:
-                            #print (level_number  / cut_speed_1 , level_number, level_number_2)
-                            apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
-                        else:
-                           apChildren0 = [a] 
-                    else:
-                        apChildren0 = [a]
-                else:
-                    if not bTauX:
-                        apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
-                    elif not bTauY:
-                        apChildren0 = [a]
-                    
-                if cut_speed_2 != 1:# or diam_B_r > 2* diam_A_r:
-                    if level_number  / cut_speed_2 > level_number_2:# or diam_B_r > 1.0* diam_A_r: 
-                        if change_level_flag:
-                            level_number_2 += 1
-                            change_level_flag = False
-                        if not bTauY:
-                            #print (level_number  / cut_speed_2 , level_number, level_number_2)
-                            apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
-                        else:
-                            apChildren1 = [b]
-                    else:
-                        apChildren1 = [b]
-                else:
-                    if not bTauY:
-                        apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
-                    elif not bTauX:
-                        apChildren1 = [b]
-                LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren0, apChildren1)] 
-                while LChild:
-                    (a1, b1) = LChild.pop(0)
-                    try:
-                        data1 = a1.pre_order(lambda x: x.id)
-                        data2 = b1.pre_order(lambda x: x.id)
-                    except:
-                        data1 = reduce_tree(a1)
-                        data2 = reduce_tree(b1)
-                    tempTree = Hypothesis_Node(data=[data1, data2], left_distance=a1.dist, right_distance=b1.dist)
-                    tempTree.level_number = level_number
-                    current_family_tests.append(tempTree)
-                    next_set.append((tempTree, (a1, b1)))
-                    if config.write_hypothesis_tree:
-                        aLineOut = list(map(str, [str(level_number), str(';'.join([config.FeatureNames[0][i] for i in data1])), str(';'.join([config.FeatureNames[1][i] for i in data2]))]))
-                        csvwc.writerow(aLineOut)
-                temp_significant_hypotheses, temp_tested_hypotheses = significance_testing(current_family_tests)
-                significant_hypotheses.extend(temp_significant_hypotheses)
-                for h in range(len(current_family_tests)):
-                    if current_family_tests[h] not in significant_hypotheses:
-                        current_level_nodes.append(next_set[h])
-                current_family_tests = []
-                next_set = []
-        #current_level_nodes = next_set
-
-    print ("--- number of performed tests: %s" % config.number_of_performed_tests)
-    print ("--- number of passed tests after FDR controlling: %s" % len(significant_hypotheses))
-    return significant_hypotheses, tested_hypotheses
-
+            tested_hypotheses[i].significance = False
+    print ("--- number of performed tests: %s") % (config.number_of_performed_tests)
+    print ("--- number of passed tests after FDR controlling: %s" % len(significant_hypotheses2))
+    return significant_hypotheses2, tested_hypotheses
 
 
 pHashMethods = {"permutation" : stats.permutation_test,
@@ -1316,8 +1167,8 @@ def significance_testing(current_level_tests, level = None):
     #stats.p_adjust(p_values, config.q)
     aP_adjusted_best, rank_best = stats.p_adjust([current_level_tests[i].best_pvalue for i in range(len(current_level_tests))], config.q)
     for i in range(len(current_level_tests)):
-       current_level_tests[i].rank = pRank[i]
-       current_level_tests[i].best_p_rank = rank_best[i]
+       current_level_tests[i].worst_rank = pRank[i]
+       current_level_tests[i].best_rank = rank_best[i]
        #current_level_tests[i].pvalue = p_values[i]
        current_level_tests[i].already_tested = True
        if current_level_tests[i].significance == None: 
@@ -1325,12 +1176,12 @@ def significance_testing(current_level_tests, level = None):
    
     max_r_t = 0
     for i in range(len(current_level_tests)):
-        if current_level_tests[i].worst_pvalue <= aP_adjusted[i] and max_r_t <= current_level_tests[i].rank:
-            max_r_t = current_level_tests[i].rank
+        if current_level_tests[i].worst_pvalue <= aP_adjusted[i] and max_r_t <= current_level_tests[i].worst_rank:
+            max_r_t = current_level_tests[i].worst_rank
     max_r_t_best = 0
     for i in range(len(current_level_tests)):
-        if current_level_tests[i].best_pvalue <= aP_adjusted_best[i] and max_r_t_best <= current_level_tests[i].best_p_rank:
-            max_r_t_best = current_level_tests[i].best_p_rank
+        if current_level_tests[i].best_pvalue <= aP_adjusted_best[i] and max_r_t_best <= current_level_tests[i].best_rank:
+            max_r_t_best = current_level_tests[i].best_rank
             #print "max_r_t", max_r_t
     hsci_within_pvalues = []
     hsci_between_pvalues = []
@@ -1338,18 +1189,23 @@ def significance_testing(current_level_tests, level = None):
     passed_tests = []
     if config.p_adjust_method in ["bh", "by"]:
         for i in range(len(current_level_tests)):
-            if current_level_tests[i].rank <= max_r_t and enough_homogeneous_paired_clusters(current_level_tests[i]):
-                if current_level_tests[i].significance == None:
-                    current_level_tests[i].significance = True
-                    current_level_tests[i].worst_pvalue = current_level_tests[i].best_pvalue
+            if current_level_tests[i].worst_rank <= max_r_t :#and is_triangle_inequality(current_level_tests[i]):
+                #if current_level_tests[i].significance == None:
+                current_level_tests[i].significance = True
+                #current_level_tests[i].worst_pvalue = current_level_tests[i].best_pvalue
+                if not current_level_tests[i] in tested_hypotheses:
                     tested_hypotheses.append(current_level_tests[i])
+                if not current_level_tests[i] in significant_hypotheses:
                     significant_hypotheses.append(current_level_tests[i])
-                    print ("-- association after %s fdr correction" % config.p_adjust_method)
-                    #hsci_between_significant.append('Significant')
+                #print ("-- association after %s fdr correction" % config.p_adjust_method)
+                #hsci_between_significant.append('Significant')
             else:
-                if current_level_tests[i].significance == None and current_level_tests[i].best_p_rank > max_r_t_best:
+                if  current_level_tests[i].best_rank > max_r_t_best:#current_level_tests[i].significance == None and
                     current_level_tests[i].significance = False
-                    tested_hypotheses.append(current_level_tests[i])
+                    if not current_level_tests[i] in tested_hypotheses:
+                        tested_hypotheses.append(current_level_tests[i])
+                    if current_level_tests[i] in significant_hypotheses:
+                        significant_hypotheses.remove(current_level_tests[i])
                 #hsci_between_significant.append('Not significant')
            
         '''print current_level_tests[i].m_pData
