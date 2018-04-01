@@ -128,9 +128,6 @@ class Hypothesis_Node():
         self.m_arrayChildren = []
         self.left_distance = left_distance
         self.right_distance = right_distance
-        self.pvalue = None
-        self.best_pvalue = None
-        self.worst_pvalue = None
         self.qvalue = None
         self.left_rep = None
         self.right_rep = None
@@ -141,6 +138,11 @@ class Hypothesis_Node():
         self.significance =  None
         self.worst_rank = None
         self.best_rank = None
+        self.worst_pvalue = None
+        self.best_pvalue = None
+        self.pvalue = None
+        
+        
 
 def left(node):
     return get_child(node, iIndex=0)
