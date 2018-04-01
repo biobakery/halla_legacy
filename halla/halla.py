@@ -198,8 +198,8 @@ def parse_arguments (args):
         "-d","--decomposition",
         dest="strDecomposition",
         default=config.decomposition,
-        choices=["none", "mca", "pca", "ica", "cca","kpca","pls","medoid", "mean", 'medoid2'],
-        help="approach for reducing dimensions (or decomposition)\n[default = farthest]")    
+        choices=["none", "mca", "pca", "ica", "cca","kpca","pls","medoid", "mean"],
+        help="approach for reducing dimensions (or decomposition)\n[default = medoid]")    
     
     argp.add_argument(
         "--fdr",

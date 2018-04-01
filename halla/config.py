@@ -26,7 +26,7 @@ NBIN = None # number of bins specified by user
 NPROC = 1 # number of threads to use 
 
 similarity_method = "nmi"
-decomposition = "farthest" 
+decomposition = "medoid" 
 fdr_style = "level"
 permutation_func = 'gpd'
 linkage_method = 'average'
