@@ -700,7 +700,7 @@ def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
 def get_leaves(cluster):
     return cluster.pre_order(lambda x: x.id)  
     
-def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters=2, resolution= 'high'):
+def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters= None, resolution= 'high'):
     n = cluster.get_count()
     if n==1:
         return [cluster]
@@ -1169,17 +1169,19 @@ def significance_testing(current_level_tests, level = None):
     #stats.p_adjust(p_values, config.q)
     aP_adjusted_best, rank_best = stats.p_adjust([current_level_tests[i].best_pvalue for i in range(len(current_level_tests))], config.q)
     for i in range(len(current_level_tests)):
-       current_level_tests[i].worst_rank = pRank[i]
-       current_level_tests[i].best_rank = rank_best[i]
-       #current_level_tests[i].pvalue = p_values[i]
-       current_level_tests[i].already_tested = True
-       if current_level_tests[i].significance == None: 
-           current_level_tests[i].qvalue = q_values[i]
+        current_level_tests[i].worst_rank = pRank[i]
+        current_level_tests[i].best_rank = rank_best[i]
+        #current_level_tests[i].pvalue = p_values[i]
+        #current_level_tests[i].already_tested = True
+        #if current_level_tests[i].significance == None: 
+        current_level_tests[i].qvalue = q_values[i]
    
-    max_r_t = 0
+    max_r_t_worst = 0
+    passed_worst_pvalue = 0
     for i in range(len(current_level_tests)):
-        if current_level_tests[i].worst_pvalue <= aP_adjusted[i] and max_r_t <= current_level_tests[i].worst_rank:
-            max_r_t = current_level_tests[i].worst_rank
+        if current_level_tests[i].worst_pvalue <= aP_adjusted[i] and max_r_t_worst <= current_level_tests[i].worst_rank:
+            max_r_t_worst = current_level_tests[i].worst_rank
+            passed_worst_pvalue = current_level_tests[i].worst_pvalue
     max_r_t_best = 0
     for i in range(len(current_level_tests)):
         if current_level_tests[i].best_pvalue <= aP_adjusted_best[i] and max_r_t_best <= current_level_tests[i].best_rank:
@@ -1191,7 +1193,7 @@ def significance_testing(current_level_tests, level = None):
     passed_tests = []
     if config.p_adjust_method in ["bh", "by"]:
         for i in range(len(current_level_tests)):
-            if current_level_tests[i].worst_rank <= max_r_t :#and is_triangle_inequality(current_level_tests[i]):
+            if current_level_tests[i].worst_rank <= max_r_t_worst and current_level_tests[i].best_rank <= max_r_t_best: #and is_triangle_inequality(current_level_tests[i]):
                 #if current_level_tests[i].significance == None:
                 current_level_tests[i].significance = True
                 #current_level_tests[i].worst_pvalue = current_level_tests[i].best_pvalue
@@ -1202,7 +1204,7 @@ def significance_testing(current_level_tests, level = None):
                 #print ("-- association after %s fdr correction" % config.p_adjust_method)
                 #hsci_between_significant.append('Significant')
             else:
-                if  current_level_tests[i].best_rank > max_r_t_best:#current_level_tests[i].significance == None and
+                if  current_level_tests[i].best_pvalue > passed_worst_pvalue:#current_level_tests[i].significance == None and
                     current_level_tests[i].significance = False
                     if not current_level_tests[i] in tested_hypotheses:
                         tested_hypotheses.append(current_level_tests[i])
