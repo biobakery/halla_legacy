@@ -698,7 +698,7 @@ def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
 def get_leaves(cluster):
     return cluster.pre_order(lambda x: x.id)  
     
-def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters= 2, resolution= 'high'):
+def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters= None, resolution= 'high'):
     n = cluster.get_count()
     if n==1:
         return [cluster]
@@ -1024,7 +1024,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         current_level_nodes.extend(from_prev_hypothesis_node)
             
     significant_hypotheses =[]
-    p_adjusted, p_rank = stats.p_adjust([tested_hypotheses[i].pvalue for i in range(len(tested_hypotheses))], config.q)
+    p_adjusted, p_rank = stats.p_adjust([tested_hypotheses[i].worst_pvalue for i in range(len(tested_hypotheses))], config.q)
     max_r_t = 0
     for i in range(len(tested_hypotheses)):
         tested_hypotheses[i].worst_rank = p_rank[i]
@@ -1071,8 +1071,9 @@ def estimate_pvalue(pNode):
     pNode.similarity_score = best_sim_score
     pNode.left_rep = left_rep
     pNode.right_rep = right_rep
-    pNode.best_pvalue = best_pvalue 
-    pNode.worst_pvalue = worst_pvalue
+    #print len(pNode.m_pData[0]), len(pNode.m_pData[0])
+    pNode.best_pvalue = best_pvalue #math.pow(best_pvalue, max(1, len(pNode.m_pData[0] * len(pNode.m_pData[0]))))#1.0 - math.pow(1.0 - best_pvalue, len(pNode.m_pData[0]) * len(pNode.m_pData[0])) 
+    pNode.worst_pvalue = worst_pvalue #math.pow(worst_pvalue, max(1, len(pNode.m_pData[0] * len(pNode.m_pData[0]))))
     pNode.pvalue = rep_pvalue
     return worst_pvalue        
 def naive_all_against_all():
