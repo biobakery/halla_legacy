@@ -1024,7 +1024,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         current_level_nodes.extend(from_prev_hypothesis_node)
             
     significant_hypotheses =[]
-    p_adjusted, p_rank = stats.p_adjust([tested_hypotheses[i].worst_pvalue for i in range(len(tested_hypotheses))], config.q)
+    p_adjusted, p_rank = stats.p_adjust([tested_hypotheses[i].pvalue for i in range(len(tested_hypotheses))], config.q)
     max_r_t = 0
     for i in range(len(tested_hypotheses)):
         tested_hypotheses[i].worst_rank = p_rank[i]
@@ -1075,7 +1075,7 @@ def estimate_pvalue(pNode):
     pNode.best_pvalue = best_pvalue #math.pow(best_pvalue, max(1, len(pNode.m_pData[0] * len(pNode.m_pData[0]))))#1.0 - math.pow(1.0 - best_pvalue, len(pNode.m_pData[0]) * len(pNode.m_pData[0])) 
     pNode.worst_pvalue = worst_pvalue #math.pow(worst_pvalue, max(1, len(pNode.m_pData[0] * len(pNode.m_pData[0]))))
     pNode.pvalue = rep_pvalue
-    return worst_pvalue        
+    return rep_pvalue        
 def naive_all_against_all():
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
