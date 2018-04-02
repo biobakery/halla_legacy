@@ -379,7 +379,7 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
     X = numpy.random.uniform(low=-1,high=1,size=(D,N))
     Y = numpy.random.uniform(low=-1,high=1,size=(D,N))
     A = numpy.zeros( (len(X),len(Y)) )
-    blockSize = int(D/B)#int(round(D/B+.5))
+    blockSize = int(round(D/B+.5)) # int(D/B)
     print ("Number of features %s, number of samples: %s, number of clusters: %s, number of features with each cluster: %s")\
          %(D, N, B, blockSize)
     if association_type == "L":
@@ -387,7 +387,7 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
         for l in range(B+1):
             common_base[l]= numpy.random.permutation(common_base[l])
     else:
-        common_base = numpy.random.uniform(low=-1,high=1 ,size=(B, N))
+        common_base = numpy.random.uniform(low=-1,high=1 ,size=(B+1, N))
     common_base = orthogonalize_matrix(common_base)
     
     assoc = [[] for i in range(B)]
@@ -405,8 +405,8 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                     X[j] = [(common_base[l, k] + within_noise * numpy.random.uniform(low=-1, high=1 ,size=1)) for k in range(N)]
                     assoc[l].append(j)               
         l += 1
-        if l>=B:
-            break
+        '''if l>=B:
+            break'''
     if association_type == "L":
         common_base_Y = numpy.random.uniform(low=-1,high=1 ,size=(B,N))
         for l in range(B):
@@ -447,8 +447,8 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                 for index,b in enumerate(noise_num):
                     Y[j][b] = Y[j][index]
         l += 1
-        if l>=B:
-            break
+        '''if l>=B:
+            break'''
     for r in range(B):
         for i, j in itertools.product(assoc[r], assoc[r]):
             A[i][j] = 1
