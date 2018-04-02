@@ -937,15 +937,15 @@ def permutation_test_by_representative(pArray1, pArray2):
 		#[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
 		sys.exit('Decomposition method is not defined!')
 	if config.similarity_method == 'spearman' and config.permutation_func == "none":# and randomization_method != "permutation" :
-		worst_sim_score, medoid_pvalue = scipy.stats.spearmanr(pRep1, pRep2, nan_policy='omit')
+		rep_sim_score, rep_pvalue = scipy.stats.spearmanr(pRep1, pRep2, nan_policy='omit')
 		
 	elif  config.similarity_method == 'pearson' and config.permutation_func == "none":# and randomization_method != "permutation" :
-		worst_sim_score, medoid_pvalue = scipy.stats.pearsonr(pRep1, pRep2,)
+		rep_sim_score, medoid_pvalue = scipy.stats.pearsonr(pRep1, pRep2,)
 	else:
-		worst_sim_score = pMe(pRep1, pRep2)
-		medoid_pvalue = permutation_test_pvalue(X = pRep1, Y = pRep2)
+		rep_sim_score = pMe(pRep1, pRep2)
+		rep_pvalue = permutation_test_pvalue(X = pRep1, Y = pRep2)
 
-	return worst_pvalue, best_pvalue, medoid_pvalue,  best_sim_score, worst_sim_score, left_rep_variance, right_rep_variance, left_loading, right_loading, pRep1, pRep2 
+	return worst_pvalue, best_pvalue, rep_pvalue,  worst_sim_score, best_sim_score, left_rep_variance, right_rep_variance, left_loading, right_loading, pRep1, pRep2 
 
 def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iterations=1000):
 	"""
