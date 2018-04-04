@@ -486,7 +486,7 @@ def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], ylabel = "R
     #plt.hold(True)
     #plt.xlim([-0.05, 1.15])
     #plt.ylim([-0.05, 1.15])
-    groups = grouped_boxplots(data, ax, patch_artist=True, max_width=0.5, notch=0, sym='+', vert=1, whis=1.0)
+    groups = grouped_boxplots(data, ax, patch_artist=True, max_width=0.5, notch=0, sym='+', vert=1, whis=1)
     if ylabel ==  "False Positive Rate":
         colors = ['darkgoldenrod']#
         
@@ -565,7 +565,7 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, show_points = Fa
         ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
            
         if show_points:
-            ax.plot(pos,group,  mec='grey', marker="+", linestyle="None",  ms =3, color="grey", alpha = .6, lw =.05 )
+            ax.plot(pos,group,  mec='grey', marker="o", linestyle='solid',  ms = 3, color="white", alpha = .9, lw =.005 )
         #artist.patch.set(facecolor='0.95')
         artist = ax.boxplot(group, positions=positions(group, i), **kwargs)
         set_box_color(artist, color = 'red')

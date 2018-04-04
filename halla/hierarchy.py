@@ -1194,13 +1194,13 @@ def significance_testing(current_level_tests, level = None):
                 current_level_tests[i].significance = True
                 tested_hypotheses.append(current_level_tests[i])
                 #hsci_between_significant.append('Significant')
-            elif math.pow(current_level_tests[i].worst_pvalue, len(current_level_tests[i].m_pData[0] * len(current_level_tests[i].m_pData[1]))) > passed_worst_pvalue:# and not current_level_tests[i].significance == True:
+            elif not (current_level_tests[i].significance == True) and math.pow(current_level_tests[i].worst_pvalue, len(current_level_tests[i].m_pData[0] * len(current_level_tests[i].m_pData[1]))) > passed_worst_pvalue:# and not current_level_tests[i].significance == True:
                 #print current_level_tests[i].best_pvalue, current_level_tests[i].worst_pvalue 
                 #print math.pow(current_level_tests[i].worst_pvalue, len(current_level_tests[i].m_pData[0] * len(current_level_tests[i].m_pData[1])))
                 #print 1.0 - math.pow(1.0 - current_level_tests[i].worst_pvalue, len(current_level_tests[i].m_pData[0]) * len(current_level_tests[i].m_pData[1]))
                 current_level_tests[i].significance = False
                 tested_hypotheses.append(current_level_tests[i])
-            else:#if not current_level_tests[i].significance == True:
+            elif not current_level_tests[i].significance == True:
                 current_level_tests[i].significance = None
                 tested_hypotheses.append(current_level_tests[i])
             #hsci_between_significant.append('Not significant')
@@ -1236,7 +1236,7 @@ def significance_testing(current_level_tests, level = None):
             if current_level_tests[i].worst_rank <= p_adjusted_worst[i] and current_level_tests[i].best_rank <= p_adjusted_best[i]: #and is_triangle_inequality(current_level_tests[i]):
                 current_level_tests[i].significance = True
                 tested_hypotheses.append(current_level_tests[i])
-            elif  current_level_tests[i].best_pvalue > p_adjusted_worst[i]:#current_level_tests[i].significance == None and
+            elif  math.pow(current_level_tests[i].worst_pvalue, len(current_level_tests[i].m_pData[0] * len(current_level_tests[i].m_pData[1]))) > p_adjusted_worst[i]:#current_level_tests[i].significance == None and
                 current_level_tests[i].significance = False
                 tested_hypotheses.append(current_level_tests[i])
             else:
