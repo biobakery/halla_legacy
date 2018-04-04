@@ -1026,7 +1026,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     significant_hypotheses =[]
     p_adjusted, p_rank = stats.p_adjust([tested_hypotheses[i].worst_pvalue for i in range(len(tested_hypotheses))], config.q)
     max_r_t = 0
-    for i in range(len(tested_hypotheses)):
+    '''for i in range(len(tested_hypotheses)):
         tested_hypotheses[i].worst_rank = p_rank[i]
         if tested_hypotheses[i].worst_pvalue <= p_adjusted[i] and max_r_t <= tested_hypotheses[i].worst_rank:
             max_r_t = tested_hypotheses[i].worst_rank
@@ -1035,10 +1035,10 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             tested_hypotheses[i].significance = True
             significant_hypotheses.append(tested_hypotheses[i])
         else:
-            tested_hypotheses[i].significance = False
-    '''for i in range(len(tested_hypotheses)):
+            tested_hypotheses[i].significance = False'''
+    for i in range(len(tested_hypotheses)):
         if tested_hypotheses[i].significance == True:
-            significant_hypotheses.append(tested_hypotheses[i])'''
+            significant_hypotheses.append(tested_hypotheses[i])
     print ("--- number of performed tests: %s") % (config.number_of_performed_tests)
     print ("--- number of passed tests after FDR controlling: %s" % len(significant_hypotheses))
     return significant_hypotheses, tested_hypotheses
