@@ -519,8 +519,8 @@ def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], ylabel = "R
     #pylab.xticks(rotation=45)
 
     #ax.plot([-.05, 5], [.1, .1], 'k-', lw=1, color='red')
-    if threshold_line !=0:
-        ax.axhline(y = .1, linewidth=.5, color='r', alpha= 1)
+    for thr_line in threshold_line:
+        ax.axhline(y = thr_line, linewidth=.5, color='r', alpha= 1)
     #
     #ax.grid(axis='y', ls='-', color='white', lw=2)
     #ax.patch.set(facecolor='0.95')

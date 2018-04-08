@@ -379,8 +379,8 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
     X = numpy.random.uniform(low=-1,high=1,size=(D,N))
     Y = numpy.random.uniform(low=-1,high=1,size=(D,N))
     A = numpy.zeros( (len(X),len(Y)) )
-    blockSize = int(round(D/B+.5)) # int(D/B)
-    print ("Number of features %s, number of samples: %s, number of clusters: %s, number of features with each cluster: %s")\
+    blockSize = int(round(D/B+ 0.4999999999999)) # int(D/B)
+    print ("Number of features %s, number of samples: %s, number of clusters: %s, number of features within each cluster: %s")\
          %(D, N, B, blockSize)
     if association_type == "L":
         common_base = numpy.hstack((numpy.random.uniform(low=-1.0,high=-1.0 ,size=(B+1,N/2)), numpy.random.uniform(low=-1,high=10 ,size=(B+1,N/2))))
@@ -401,12 +401,12 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                 elif association_type == "log":
                     X[j]= [math.fabs(common_base[l,k]) + within_noise * numpy.random.uniform(low=0, high=1 ,size=1) for k in range(N)]
                 else:    
-                    print i, j, l, len(X), len(X[j])
+                    #print i, j, l, len(X), len(X[j])
                     X[j] = [(common_base[l, k] + within_noise * numpy.random.uniform(low=-1, high=1 ,size=1)) for k in range(N)]
                     assoc[l].append(j)               
         l += 1
-        '''if l>=B:
-            break'''
+        if l>=B:
+            break
     if association_type == "L":
         common_base_Y = numpy.random.uniform(low=-1,high=1 ,size=(B,N))
         for l in range(B):
@@ -447,8 +447,8 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                 for index,b in enumerate(noise_num):
                     Y[j][b] = Y[j][index]
         l += 1
-        '''if l>=B:
-            break'''
+        if l>=B:
+            break
     for r in range(B):
         for i, j in itertools.product(assoc[r], assoc[r]):
             A[i][j] = 1

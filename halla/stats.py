@@ -423,22 +423,23 @@ def medoid(pArray, iAxis=0, pMetric=distance.nmi):
 def farthest (pArray1, pArray2, similarity_method):
 	pMe = distance.c_hash_metric [similarity_method] 
 	best_rep_1 = pArray1[0, :]
-	best_rep_2 =  pArray2[0, :]
+	best_rep_2 = pArray2[0, :]
 	worst_rep_1 = pArray1[0, :]
 	worst_rep_2 = pArray2[0, :]
 	best_similarity = 0.0
-	worst_simialrity = 1.0
+	worst_similarity = 1.0
 	for i in range(len(pArray1)):
 		m1 = pArray1[i, :]
 		for j in range(len(pArray2)):
 			m2 = pArray2[j, :] 
-			sim_score_temp = math.fabs(pMe(m1, m2))
-			if  sim_score_temp > best_similarity:
+			sim_score_temp = math.fabs(pMe(m1, m2)) #= 1.0 - permutation_test_pvalue(m1, m2)#
+			if sim_score_temp <= worst_similarity:
+				worst_similarity = sim_score_temp
+				worst_rep_1, worst_rep_2 =  m1, m2
+			if  sim_score_temp >= best_similarity:
 				best_similarity = sim_score_temp
 				best_rep_1, best_rep_2 = m1 , m2 
-			if sim_score_temp < worst_simialrity:
-				worst_simialrity = sim_score_temp
-				worst_rep_1, worst_rep_2 =  m1, m2
+	#print best_similarity, worst_similarity
 	#pRep1 = worst_rep_1
 	#pRep2 = worst_rep_2
 	return worst_rep_1, worst_rep_2, best_rep_1, best_rep_2
@@ -510,8 +511,43 @@ def by(afPVAL, q):
 	# assert( all(map(lambda x: x <= 1.0, aOut)) ) ##sanity check 
 
 	return aAjusted, pRank
-
-def bh(afPVAL, q, cluster_size =None):
+def halla_meinshausen(current_level_tests):
+	m = sum([len(test.m_pData[0])* len(test.m_pData[1]) for test in current_level_tests])
+	p_adjusted = [len(test.m_pData[0])* len(test.m_pData[1])* config.q /m for test in current_level_tests]
+	return p_adjusted
+def halla_bh(current_level_tests):
+	worst_rank= rankdata([test.worst_pvalue  for test in current_level_tests], method= 'ordinal')
+	for i in range(len(current_level_tests)):
+		current_level_tests[i].worst_rank = worst_rank[i]
+	for i in range(len(current_level_tests)):
+		#current_level_tests[i].worst_rank = 1
+		for j in range(len(current_level_tests)):
+			if i != j:
+				if current_level_tests[i].worst_pvalue >= current_level_tests[j].worst_pvalue:
+				    if current_level_tests[j].significance != None:
+				        num_sub_h = len(current_level_tests[j].m_pData[0]) * len(current_level_tests[j].m_pData[1]) - 1
+				        current_level_tests[i].worst_rank += num_sub_h
+		continue
+	worst_rank = [test.worst_rank  for test in current_level_tests]
+	m = max(worst_rank)
+	print m
+	p_adjusted_worst = [test.worst_rank * config.q / m for test in current_level_tests]
+	
+	for i in range(len(current_level_tests)):
+	    current_level_tests[i].rank = 1
+	    for j in range(len(current_level_tests)):
+	        if i != j:
+	            if current_level_tests[i].pvalue >= current_level_tests[j].pvalue:
+	                if current_level_tests[j].significance != None:
+	                    num_sub_h = len(current_level_tests[j].m_pData[0]) * len(current_level_tests[j].m_pData[1])
+	                    current_level_tests[i].rank += num_sub_h
+	                else:
+	                    current_level_tests[i].rank += 1 
+	rep_rank = [test.rank  for test in current_level_tests]
+	m = max(rep_rank)
+	p_adjusted = [test.rank * config.q / m for test in current_level_tests]
+	return p_adjusted_worst, p_adjusted  
+def bh(afPVAL, q, add_exra_order =0 , minus_extra_order = 0, cluster_size =None):
 	"""
 	Implement the benjamini-hochberg hierarchical hypothesis testing criterion 
 	In practice, used for implementing Yekutieli criterion *per layer*.  
@@ -560,18 +596,18 @@ def bh(afPVAL, q, cluster_size =None):
 	#weighted_p = [afPVAL[i]*math.log(cluster_size[i],2) for i in range(len(cluster_size)) ]
 	total_cluster_size = numpy.sum(cluster_size)
 	pRank = rankdata(afPVAL, method= 'ordinal')
-	pRank = [int(i) for i in pRank]
+	pRank = [int(i) + add_exra_order for i in pRank]
 	aAjusted = [] 
 	aQvalue = []
 	m = len(afPVAL)
-	q_bar=q#0.0
-	iLen = len(afPVAL)
+	iLen = len(afPVAL) + add_exra_order + minus_extra_order
 	
-	q_bar = q#/math.log(total_cluster_size/m) #q*2/math.log1p(size_effect+1)
+	q_bar = q #+ (1-q)*add_exra_order*(1-q)/(iLen + minus_extra_order)#/math.log(total_cluster_size/m) #q*2/math.log1p(size_effect+1)
 	#print q_bar
-	for i, fP in enumerate(afPVAL):
+	aAjusted = [q_bar * pRank[i] / iLen for i in range(len(afPVAL))]
+	'''for i, fP in enumerate(afPVAL):
 		fAdjusted = q_bar * pRank[i] / iLen  # iLenReduce
-		aAjusted.append(fAdjusted)
+		aAjusted.append(fAdjusted)'''
 	'''zipped =  zip(pRank, cluster_size)
 	zipped = sorted(zipped, key=lambda x: x[0])
 	weight = [0 for i in range(len(afPVAL))]
@@ -627,7 +663,7 @@ def simple_no_adusting(afPVAL, q):
 	"""
 	pRank = rankdata(afPVAL, method= 'ordinal')
 	return afPVAL, pRank
-def p_adjust(pval, q, cluster_size = None, method="BH"):
+def p_adjust(pval, q, add_exra_order =0 , minus_extra_order = 0, cluster_size = None, method="BH"):
 	"""
 	
 	Parameters
@@ -650,10 +686,10 @@ def p_adjust(pval, q, cluster_size = None, method="BH"):
 	except (TypeError, IndexError):
 		pval = [pval]
 	if config.p_adjust_method == "by":
-			return by(pval, q) 
+			return by(pval,  q) 
 			#fAdjusted = q * 1.0 * pRank[i] / (iLen*math.log(iLen))  # iLenReduced
 	elif config.p_adjust_method == "bh" or config.p_adjust_method == "y" :
-		return bh(pval, q, cluster_size) 
+		return bh(pval, q, add_exra_order, minus_extra_order, cluster_size) 
 	elif config.p_adjust_method == "bonferroni":
 		return bonferroni(pval, q)
 	elif config.p_adjust_method == "no_adjusting":

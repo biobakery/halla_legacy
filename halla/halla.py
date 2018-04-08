@@ -205,7 +205,7 @@ def parse_arguments (args):
         "--fdr",
         dest="strAdjust",    
         default="bh",
-        choices=["bh", "by", 'y', "bonferroni", "no_adjusting"],
+        choices=["bh", "by", "meinshausen", "bonferroni", "no_adjusting"],
         help="approach for FDR correction\n[default = bh]")
     argp.add_argument(
         "-v", "--verbose",
