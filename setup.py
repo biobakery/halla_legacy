@@ -82,7 +82,6 @@ setup(
         'console_scripts': [
             'halla = halla.halla:main',
             'hallagram = halla.hallagram:main',
-            'hallaclust = halla.hallaclust:main',
             'halladata = halla.synthetic_data:main',
             'hallascatter = halla.hallascatter:main'
         ]},

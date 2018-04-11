@@ -1079,8 +1079,8 @@ def estimate_pvalue(pNode):
     #print len(pNode.m_pData[0]), len(pNode.m_pData[0])
     pNode.best_pvalue = best_pvalue #math.pow(best_pvalue, max(1, len(pNode.m_pData[0] * len(pNode.m_pData[1]))))#1.0 - math.pow(1.0 - best_pvalue, len(pNode.m_pData[0]) * len(pNode.m_pData[1])) 
     pNode.worst_pvalue = worst_pvalue #math.pow(worst_pvalue, max(1, len(pNode.m_pData[0] * len(pNode.m_pData[1]))))
-    pNode.pvalue = rep_pvalue
-    return rep_pvalue        
+    pNode.pvalue = worst_pvalue#rep_pvalue
+    return worst_pvalue#rep_pvalue        
 def naive_all_against_all():
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
@@ -1201,7 +1201,7 @@ def significance_testing(current_level_tests, level = None):
     
             
     if config.p_adjust_method in ["bh", "by"]:
-        p_adjusted_worst, p_adjusted  = stats.halla_bh(current_level_tests)
+        p_adjusted_worst = stats.halla_bh(current_level_tests)#, p_adjusted 
         max_r_t_worst = 0
         passed_worst_pvalue = 1.0
         passed_best_pvalue = 1.0
