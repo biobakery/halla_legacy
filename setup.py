@@ -43,7 +43,7 @@ MAINTAINER_EMAIL = "gholamali.rahnavard@gmail.com"
 # this will be removed when PyPI Warehouse is production as it
 # will have download stats
 COUNTER_URL="http://bitbucket.org/biobakery/halla/downloads/README.txt"
-counter_file="counter.txt"
+counter_file="README.txt"
 if not os.path.isfile(counter_file):
     print("Downloading counter file to track halla downloads"+
         " since the global PyPI download stats are currently turned off.")
