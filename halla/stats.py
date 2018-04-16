@@ -511,9 +511,27 @@ def by(afPVAL, q):
 	# assert( all(map(lambda x: x <= 1.0, aOut)) ) ##sanity check 
 
 	return aAjusted, pRank
+
+def is_leaf(node):
+    return bool(not(node.m_pData and node.m_arrayChildren))
+
+def get_children(node): 
+    return node.m_arrayChildren
+
+
 def halla_meinshausen(current_level_tests):
+	
+	c_si = []
+	for test in current_level_tests:
+		num_leaf_child = 0
+		if math.log(len(test.m_pData[0]), 2) < 2 and math.log(len(test.m_pData[1]), 2) < 2:
+			num_leaf_child = len(test.m_pData[0]) * len(test.m_pData[1])
+		#print len(test.m_pData[0]), len(test.m_pData[1]), num_leaf_child
+		c_si.append(num_leaf_child + test.c)
+	
 	m = sum([len(test.m_pData[0])* len(test.m_pData[1]) for test in current_level_tests])
-	p_adjusted = [len(test.m_pData[0])* len(test.m_pData[1])* config.q /m for test in current_level_tests]
+		
+	p_adjusted = [ val * config.q /m for  val in c_si]
 	return p_adjusted
 def halla_bh(current_level_tests):
 	worst_rank= rankdata([test.worst_pvalue  for test in current_level_tests], method= 'ordinal')
@@ -524,9 +542,13 @@ def halla_bh(current_level_tests):
 		for j in range(len(current_level_tests)):
 			if i != j:
 				if current_level_tests[i].worst_pvalue >= current_level_tests[j].worst_pvalue:
-				    if current_level_tests[j].significance != None:
-				        num_sub_h = len(current_level_tests[j].m_pData[0]) * len(current_level_tests[j].m_pData[1]) - 1
-				        current_level_tests[i].worst_rank += num_sub_h
+				    #if current_level_tests[j].significance != None:
+					num_sub_h = 1# len(current_level_tests[j].m_pData[0]) * len(current_level_tests[j].m_pData[1]) - 1
+					current_level_tests[i].worst_rank += num_sub_h
+			else:
+				current_level_tests[i].worst_rank += 1
+				#current_level_tests[i].worst_rank += len(current_level_tests[j].m_pData[0]) * len(current_level_tests[j].m_pData[1]) - 1
+				
 		continue
 	worst_rank = [test.worst_rank  for test in current_level_tests]
 	m = max(worst_rank)
@@ -547,6 +569,14 @@ def halla_bh(current_level_tests):
 	m = max(rep_rank)
 	p_adjusted = [test.rank * config.q / m for test in current_level_tests]'''
 	return p_adjusted_worst #, p_adjusted  
+def halla_y(pvalues, q):
+	worst_rank= rankdata(pvalues , method= 'ordinal')
+	m = len(pvalues)
+	q  = q/(2.0*1.44)
+	q_bar =   q * 1.0 /sum([1.0/i for i in range(1,m+1)])#q#/(2.0*1.44) # (m + 1)/(4* math.log( m)) * q * 1.0 /sum([1.0/i for i in range(1,m+1)])
+	p_adjusted_worst = [worst_rank[i] * q_bar / m for i in range(m)]
+	return p_adjusted_worst, worst_rank 
+ 
 def bh(afPVAL, q, add_exra_order =0 , minus_extra_order = 0, cluster_size =None):
 	"""
 	Implement the benjamini-hochberg hierarchical hypothesis testing criterion 
@@ -599,11 +629,10 @@ def bh(afPVAL, q, add_exra_order =0 , minus_extra_order = 0, cluster_size =None)
 	pRank = [int(i) + add_exra_order for i in pRank]
 	aAjusted = [] 
 	aQvalue = []
-	m = len(afPVAL)
 	iLen = len(afPVAL) + add_exra_order + minus_extra_order
 	
 	q_bar = q #+ (1-q)*add_exra_order*(1-q)/(iLen + minus_extra_order)#/math.log(total_cluster_size/m) #q*2/math.log1p(size_effect+1)
-	#print q_bar
+	#print q_bar, iLen
 	aAjusted = [q_bar * pRank[i] / iLen for i in range(len(afPVAL))]
 	'''for i, fP in enumerate(afPVAL):
 		fAdjusted = q_bar * pRank[i] / iLen  # iLenReduce
@@ -649,10 +678,7 @@ def bonferroni(afPVAL, q):
 	aAjusted = [] 
 	aQvalue = []
 	iLen = len(afPVAL)
-	for i, fP in enumerate(afPVAL):
-		# fAdjusted = fP*1.0*pRank[i]/iLen#iLenReduced
-		fAdjusted = q / iLen  # iLenReduced
-		aAjusted.append(fAdjusted)
+	aAjusted = [q/iLen for val in afPVAL]
 	return aAjusted, pRank
 def simple_no_adusting(afPVAL, q):
 	"""

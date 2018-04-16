@@ -205,7 +205,7 @@ def parse_arguments (args):
         "--fdr",
         dest="strAdjust",    
         default="bh",
-        choices=["bh", "by", "meinshausen", "bonferroni", "no_adjusting"],
+        choices=["bh", "by", "y","meinshausen", "bonferroni", "no_adjusting"],
         help="approach for FDR correction\n[default = bh]")
     argp.add_argument(
         "-v", "--verbose",
@@ -362,10 +362,11 @@ def set_parameters(args):
     config.missing_char_category = args.missing_char_category
     config.p_adjust_method = args.strAdjust.lower()
     config.q = args.dQ
-    if config.fdr_style =='family':
-        config.q = args.dQ/(2.0*1.44) #Daniel YEKUTIELI
+    #if config.fdr_style =='family':
+    #    config.q = args.dQ/(2.0*1.44) #Daniel YEKUTIELI
     if config.p_adjust_method =='y':
-        config.q = args.dQ/(2.0*1.44) #Daniel YEKUTIELI
+        #config.q = args.dQ/(2.0*1.44) #Daniel YEKUTIELI
+        config.fdr_style ='family'
         config.p_adjust_method = 'bh'
     config.linkage_method = args.linkage_method
     if args.Y == None:
@@ -483,11 +484,12 @@ def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA', fdr_style ='leve
     config.missing_char_category = missing_char_category
     config.p_adjust_method = fdr.lower()
     config.q = q
-    if config.fdr_style =='family':
-        config.q = q/(2.0*1.44) #Daniel YEKUTIELI
+    '''if config.fdr_style =='family':
+        config.q = q/(2.0*1.44) #Daniel YEKUTIELI'''
     if config.p_adjust_method =='y':
         config.q = q/(2.0*1.44) #Daniel YEKUTIELI
-        config.p_adjust_method = 'bh'
+        config.fdr_style ='family'
+        #config.p_adjust_method = 'bh'
     config.linkage_method = linkage_method
     if Y == None:
         istm = [X, X]  # Use X  

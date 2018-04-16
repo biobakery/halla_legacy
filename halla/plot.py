@@ -470,7 +470,7 @@ def heatmap(data_table, D=[], xlabels_order = [], xlabels = None, ylabels = [],
     return Y1
 
 
-def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], ylabel = "Recall/FDR" , xlable_rotation = 10,  file_name ="Grouped_Recall_FDR", ax = None):
+def grouped_boxplots2(data, title, threshold_line = [], xlabels = [], ylabel = "Recall/FDR" , xlable_rotation = 10,  file_name ="Grouped_Recall_FDR", ax = None):
     '''data = [[np.random.normal(i, 1, 30) for i in range(2)],
             [np.random.normal(i, 1.5, 30) for i in range(3)],
             [np.random.normal(i, 2, 30) for i in range(4)]]
@@ -486,7 +486,7 @@ def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], ylabel = "R
     #plt.hold(True)
     #plt.xlim([-0.05, 1.15])
     #plt.ylim([-0.05, 1.15])
-    groups = grouped_boxplots(data, ax, patch_artist=True, max_width=0.5, notch=0, sym='+', vert=1, whis=1)
+    groups = grouped_boxplots(data, ax, patch_artist=True, max_width=0.5, threshold_line = threshold_line, notch=0, sym='+', vert=1, whis=1)
     if ylabel ==  "False Positive Rate":
         colors = ['darkgoldenrod']#
         
@@ -519,8 +519,9 @@ def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], ylabel = "R
     #pylab.xticks(rotation=45)
 
     #ax.plot([-.05, 5], [.1, .1], 'k-', lw=1, color='red')
-    for thr_line in threshold_line:
-        ax.axhline(y = thr_line, linewidth=.5, color='r', alpha= 1)
+    '''if len(threshold_line) == 1:
+        for thr_line in threshold_line:
+            ax.axhline(y = thr_line, linewidth=.5, color='r', alpha= 1)'''
     #
     #ax.grid(axis='y', ls='-', color='white', lw=2)
     #ax.patch.set(facecolor='0.95')
@@ -531,7 +532,7 @@ def grouped_boxplots2(data, title, threshold_line = 0, xlabels = [], ylabel = "R
     #plt.show()
     #plt.close()
     return ax
-def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, show_points = False,  **kwargs):
+def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, threshold_line = [.1], show_points = False,  **kwargs):
     if ax is None:
         ax = plt.gca()
         
@@ -563,7 +564,13 @@ def grouped_boxplots(data_groups, ax, max_width=0.95, pad=0.05, show_points = Fa
            ax.bar( np.mean(pos), 1 , zorder=0, color="0.955", width=(width+2*pad)*2, edgecolor="none" ) # np.mean(pos)-(width+2*pad)
         ax.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
         ax.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-           
+        #print threshold_line[int((i-1)/2)]
+        if len(threshold_line) == 1:
+            ax.axhline(y = threshold_line[0], linewidth=.5, color='r', alpha= 1)
+        else:
+            #print i, len(data_groups)  
+            #print float((i-1))/len(data_groups), float(i)/len(data_groups)
+            ax.axhline(y = threshold_line[int((i-1)/2)], xmin=float((i-1))/len(data_groups), xmax=float(i)/len(data_groups), linewidth=.5, color='r', alpha= 1) 
         if show_points:
             ax.plot(pos,group,  mec='grey', marker="o", linestyle='solid',  ms = 3, color="white", alpha = .9, lw =.005 )
         #artist.patch.set(facecolor='0.95')
