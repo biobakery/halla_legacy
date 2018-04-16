@@ -101,3 +101,4 @@ def reset_default():
     meta_hypothesis_tree = None 
     meta_alla = None  # results of all-against-all
     meta_out = None  # final output array; some methods (e.g. hypotheses_testing) have multiple outputs piped to both meta_alla and meta_out 
+    aOut = None 
