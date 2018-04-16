@@ -1142,9 +1142,9 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                 #diam_A_r, diam_B_r = Node_clusters_diameter(hypothesis)
                 #print(diam_A_r, diam_B_r)
                 
-                if bTauX and bTauY or hypothesis.significance !=None:
+                if bTauX and bTauY:# or hypothesis.significance !=None:
                     #hypothesis.significance = None
-                    from_prev_hypothesis_node.append(hypothesis_node)
+                    #from_prev_hypothesis_node.append(hypothesis_node)
                     continue
                 else:
                     do_next_level = True
@@ -1403,8 +1403,8 @@ def significance_testing(current_level_tests, level = None):
             current_level_tests[i].include != True:
                 current_level_tests[i].significance = True
                 current_level_tests[i].include = True
-                print current_level_tests[i].worst_pvalue
-            elif current_level_tests[i].significance == None and current_level_tests[i].best_pvalue > config.q and\
+                #print current_level_tests[i].worst_pvalue
+            elif current_level_tests[i].significance != None and current_level_tests[i].best_pvalue > config.q and\
             current_level_tests[i].include != True:
                 current_level_tests[i].significance = False
                 current_level_tests[i].include = True
