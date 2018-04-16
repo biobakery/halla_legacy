@@ -569,11 +569,12 @@ def halla_bh(current_level_tests):
 	m = max(rep_rank)
 	p_adjusted = [test.rank * config.q / m for test in current_level_tests]'''
 	return p_adjusted_worst #, p_adjusted  
-def halla_y(pvalues, q):
+def halla_y(pvalues, q, level):
 	worst_rank= rankdata(pvalues , method= 'ordinal')
 	m = len(pvalues)
 	q  = q/(2.0*1.44)
-	q_bar =   q * 1.0 /sum([1.0/i for i in range(1,m+1)])#q#/(2.0*1.44) # (m + 1)/(4* math.log( m)) * q * 1.0 /sum([1.0/i for i in range(1,m+1)])
+	q_bar =   (q * 1.0) / (sum([1.0/i for i in range(1,m+1)]))#q#/(2.0*1.44) # (m + 1)/(4* math.log( m)) * q * 1.0 /sum([1.0/i for i in range(1,m+1)])
+	#print q, q_bar, m, level
 	p_adjusted_worst = [worst_rank[i] * q_bar / m for i in range(m)]
 	return p_adjusted_worst, worst_rank 
  

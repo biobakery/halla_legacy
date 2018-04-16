@@ -951,8 +951,8 @@ def test_by_family(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod
         family = []
         change_level_flag = True
         #leaf_nodes = []
-        level_number += 1
-        level_number_2 = 1
+        #level_number += 1
+        #level_number_2 = 1
         (hypothesis, (a, b)) = hypothesis_node
 
         # Add leaves from current level to next level
@@ -1028,7 +1028,7 @@ def test_by_family(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod
                     tempTree.c = len(data1) * len(data2)
                 
                     
-                tempTree.level_number = level_number
+                tempTree.level_number = hypothesis.level_number+1
 
                     
                 family.append((tempTree, (a1, b1)))
@@ -1038,7 +1038,7 @@ def test_by_family(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod
                     csvwc.writerow(aLineOut)
             current_level_tests = [ hypothesis for (hypothesis, _ ) in family]
             #print ("--- Testing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_tests)))
-            tested_hypotheses = significance_testing(current_level_tests, level = level_number)
+            tested_hypotheses = significance_testing(current_level_tests, level = current_level_tests[0].level_number)
             significant_hypotheses.extend([tested_hypotheses[i]  for i in range(len(tested_hypotheses)) if tested_hypotheses[i].significance == True and tested_hypotheses[i].include == True])
             next_level.extend([(hypothesis, (a, b)) for (hypothesis, (a, b)) in family if hypothesis.significance == None])       
     tested_hypotheses2 = [tested_hypotheses[i]  for i in range(len(tested_hypotheses)) if tested_hypotheses[i].include == True ]
@@ -1047,7 +1047,7 @@ def test_by_family(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod
     return list(set(significant_hypotheses)), tested_hypotheses2
 
         
-def test_by_level2(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="uniform", strLinkage="min", robustness = None):
+def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="uniform", strLinkage="min", robustness = None):
     func = config.similarity_method
     X, Y = dataset1, dataset2
     #config.nullsamples = [stats.null_fun(X[0, :], Y[len(Y)-1, :]) for val in range(0, config.iterations)]
@@ -1438,7 +1438,7 @@ def significance_testing(current_level_tests, level = None):
         plt.show()
         #exit()'''
     elif config.p_adjust_method== 'y':
-        p_adjusted_worst, worst_rank = stats.halla_y([current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))], config.q)#, p_adjusted 
+        p_adjusted_worst, worst_rank = stats.halla_y([current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))], config.q, level)#, p_adjusted 
         max_r_t_worst = 0
         passed_worst_pvalue = 1.0
         passed_best_pvalue = 1.0
@@ -1453,7 +1453,7 @@ def significance_testing(current_level_tests, level = None):
                 current_level_tests[i].significance = True
                 current_level_tests[i].include = True
                 #print current_level_tests[i].worst_pvalue
-            elif current_level_tests[i].significance == None and current_level_tests[i].best_pvalue > config.q and\
+            elif current_level_tests[i].significance == None and current_level_tests[i].best_pvalue > config.q/(2.0*1.44) and\
             current_level_tests[i].include != True:
                 current_level_tests[i].significance = False
                 current_level_tests[i].include = True
