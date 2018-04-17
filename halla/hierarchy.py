@@ -1132,7 +1132,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             #bTauX = _is_stop(a) # currently if a is a tip 
             #bTauY = _is_stop(b) # currently if b is a tip 
             
-            if hypothesis.significance == False: #False
+            if False:#hypothesis.significance == False: #
                 from_prev_hypothesis_node.append(hypothesis_node)
             else:
                 
@@ -1200,7 +1200,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                     
                         
                     tempTree.level_number = level_number
-                    if hypothesis.significance == True:#!= None:
+                    if hypothesis.significance != None:
                         tempTree.significance = hypothesis.significance
                         tempTree.worst_pvalue = hypothesis.worst_pvalue
                         tempTree.best_pvalue = hypothesis.best_pvalue
