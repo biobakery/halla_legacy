@@ -1107,7 +1107,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             csvwc.writerow(aLineOut)
     do_next_level = True
     descend_c = False
-    significant_hypotheses = [ ]
+    significant_hypotheses = []
     while do_next_level :
         current_level_tests = [ hypothesis for (hypothesis, _ ) in current_level_nodes]
         print ("--- Testing hypothesis level %s with %s hypotheses ... " % (level_number, len(current_level_tests)))
@@ -1406,6 +1406,7 @@ def significance_testing(current_level_tests, level = None):
                 #print current_level_tests[i].worst_pvalue
             elif current_level_tests[i].significance != None and current_level_tests[i].best_pvalue > config.q and\
             current_level_tests[i].include != True:
+                print current_level_tests[i].worst_pvalue
                 current_level_tests[i].significance = False
                 current_level_tests[i].include = True
             elif not(current_level_tests[i].significance == True):
@@ -1464,18 +1465,17 @@ def significance_testing(current_level_tests, level = None):
         #m = max(rep_rank)
         p_adjusted_worst, worst_rank = stats.p_adjust([current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))], config.q)
         for i in range(len(current_level_tests)):
-            #print current_level_tests[i].best_pvalue
-            if current_level_tests[i].worst_pvalue <= p_adjusted_worst[i]: #and is_triangle_inequality(current_level_tests[i]):
+            if current_level_tests[i].worst_rank <= p_adjusted_worst[i] and current_level_tests[i].significance == None and\
+            current_level_tests[i].include != True:
                 current_level_tests[i].significance = True
-                print current_level_tests[i].best_pvalue, current_level_tests[i].worst_pvalue
-                #tested_hypotheses.append(current_level_tests[i])
-            elif not (current_level_tests[i].significance == True) and current_level_tests[i].best_pvalue > config.q:#current_level_tests[i].significance == None and
-                #print current_level_tests[i].best_pvalue
+                current_level_tests[i].include = True
+                #print current_level_tests[i].worst_pvalue
+            elif current_level_tests[i].significance == None and current_level_tests[i].best_pvalue > config.q and\
+            current_level_tests[i].include != True:
                 current_level_tests[i].significance = False
-                #tested_hypotheses.append(current_level_tests[i])
-            elif not (current_level_tests[i].significance == True):
-                current_level_tests[i].significance = None
-                #tested_hypotheses.append(current_level_tests[i])
+                current_level_tests[i].include = True
+            elif not(current_level_tests[i].significance == True):
+                current_level_tests[i].significance = None 
     elif config.p_adjust_method == "meinshausen":
         p_adjusted = stats.halla_meinshausen(current_level_tests)
         for i in range(len(current_level_tests)):

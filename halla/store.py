@@ -644,7 +644,7 @@ def _report():
                 df2 = np.array(config.parsed_dataset[1], dtype=float)
                 drows1 = np.zeros(shape=(X_indecies, X_indecies))
                 drows2 = np.zeros(shape=(Y_indecies, Y_indecies))
-                if config.Distance[0] ==None:
+                if config.Distance[0] == None:
                     for i in range(X_indecies):
                         for j in range(X_indecies):
                             drows1[i][j] = distance.c_hash_metric[config.similarity_method](df1[i], df1[j]) 

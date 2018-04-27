@@ -361,7 +361,7 @@ def imbalanced_synthetic_dataset_uniform(D, N, B, cluster_percentage = 1, within
             A[i][j] = 1
     return X,Y,A
 
-def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_noise = 0.1, cluster_percentage = 1, association_type = 'parabola', number_of_cat = None ):
+def balanced_synthetic_dataset_uniform(D, N, B, within_noise = 0.5, between_noise = 0.1, cluster_percentage = 1, association_type = 'parabola', number_of_cat = None ):
     """
         D: int
             number of features
@@ -379,7 +379,7 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
     X = numpy.random.uniform(low=-1,high=1,size=(D,N))
     Y = numpy.random.uniform(low=-1,high=1,size=(D,N))
     A = numpy.zeros( (len(X),len(Y)) )
-    blockSize = int(round(D/B+ 0.4999999999999)) # int(D/B)
+    blockSize =  int(D/B) #int(round(D/B+ 0.4999999999999))
     print ("Number of features %s, number of samples: %s, number of clusters: %s, number of features within each cluster: %s")\
          %(D, N, B, blockSize)
     if association_type == "L":
@@ -389,10 +389,9 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
     else:
         common_base = numpy.random.uniform(low=-1,high=1 ,size=(B+1, N))
     common_base = orthogonalize_matrix(common_base)
-    
     assoc = [[] for i in range(B)]
     l = 0
-    for i in range(0, int(D*cluster_percentage), blockSize):
+    for i in range(0, int(D * cluster_percentage), blockSize):
         for j in range(i, i + blockSize):
             if j < D:
                 numpy.random.seed(j)
@@ -401,8 +400,7 @@ def balanced_synthetic_dataset_uniform(  D, N, B, within_noise = 0.5, between_no
                 elif association_type == "log":
                     X[j]= [math.fabs(common_base[l,k]) + within_noise * numpy.random.uniform(low=0, high=1 ,size=1) for k in range(N)]
                 else:    
-                    #print i, j, l, len(X), len(X[j])
-                    X[j] = [(common_base[l, k] + within_noise * numpy.random.uniform(low=-1, high=1 ,size=1)) for k in range(N)]
+                    X[j] = [common_base[l, k] + within_noise * numpy.random.uniform(low=-1, high=1 ,size=1) for k in range(0,50,1)]
                     assoc[l].append(j)               
         l += 1
         if l>=B:
