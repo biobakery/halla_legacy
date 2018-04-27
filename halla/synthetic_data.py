@@ -389,6 +389,7 @@ def balanced_synthetic_dataset_uniform(D, N, B, within_noise = 0.5, between_nois
     else:
         common_base = numpy.random.uniform(low=-1,high=1 ,size=(B+1, N))
     common_base = orthogonalize_matrix(common_base)
+    
     assoc = [[] for i in range(B)]
     l = 0
     for i in range(0, int(D * cluster_percentage), blockSize):
@@ -400,7 +401,8 @@ def balanced_synthetic_dataset_uniform(D, N, B, within_noise = 0.5, between_nois
                 elif association_type == "log":
                     X[j]= [math.fabs(common_base[l,k]) + within_noise * numpy.random.uniform(low=0, high=1 ,size=1) for k in range(N)]
                 else:    
-                    X[j] = [common_base[l, k] + within_noise * numpy.random.uniform(low=-1, high=1 ,size=1) for k in range(0,50,1)]
+                    #print i, j, l, len(X), len(X[j])
+                    X[j] = [common_base[l, k] + within_noise * numpy.random.uniform(low=-1, high=1 ,size=1) for k in range(N)]
                     assoc[l].append(j)               
         l += 1
         if l>=B:
