@@ -1120,7 +1120,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         #leaf_nodes = []
         level_number += 1
         level_number_2 = 1
-        if any([test.significance==False for test in current_level_tests]):
+        if any([test.significance == False for test in current_level_tests]):
             descend_c = True
         for i in range(len(current_level_nodes)):
             hypothesis_node= current_level_nodes[i]
@@ -1130,10 +1130,9 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             # to find a sub-significant hypothesis then stop and use it 
             # as one hypothesis for the branch in the next levels to 
             # compress non significants and shrink positives
-            #if hypothesis.significance == False: #
-            #    from_prev_hypothesis_node.append(hypothesis_node)
-            #else:
-                
+            '''if hypothesis.significance == False: #
+                from_prev_hypothesis_node.append(hypothesis_node)
+            else:'''
             bTauX = _is_stop(a) # currently if a is a tip 
             bTauY = _is_stop(b) # currently if b is a tip             
             if bTauX and bTauY:
@@ -1207,10 +1206,11 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                     csvwc.writerow(aLineOut)
         current_level_nodes = next_level
         current_level_nodes.extend(from_prev_hypothesis_node)
+    
     tested_hypotheses2 = [tested_hypotheses[i]  for i in range(len(tested_hypotheses)) if tested_hypotheses[i].include == True ]
     print ("--- number of performed tests: %s") % (config.number_of_performed_tests)
-    print ("--- number of passed tests after FDR controlling: %s" % len(significant_hypotheses))
-    return significant_hypotheses, tested_hypotheses2
+    print ("--- number of passed tests after FDR controlling: %s" % len(set(significant_hypotheses)))
+    return list(significant_hypotheses), tested_hypotheses2
 
 pHashMethods = {"permutation" : stats.permutation_test,
                         "permutation_test_by_medoid": stats.permutation_test_by_medoid,
@@ -1362,32 +1362,52 @@ def significance_testing(current_level_tests, level = None):
     hsci_within_pvalues = []
     hsci_between_pvalues = []
     hsci_between_significant =[]
-    passed_tests = []
-    
-            
+    passed_tests = []            
     if config.p_adjust_method in ["bh", "by"]:
-        p_adjusted_worst, worst_rank = stats.p_adjust([current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))], config.q)#, p_adjusted 
+        #p_adjusted_worst, worst_rank = stats.p_adjust([current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))], config.q)#, p_adjusted 
+        #p_adjusted_best, best_rank = stats.p_adjust([current_level_tests[i].best_pvalue for i in range(len(current_level_tests))], config.q)
+        intervals_p = [current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))] +\
+                                                            [current_level_tests[i].best_pvalue for i in range(len(current_level_tests))]
+        p_adjusted_interval, interval_rank = stats.p_adjust(intervals_p, config.q)#, p_adjusted 
+        #print p_adjusted_interval,interval_rank
         max_r_t_worst = 0
+        max_r_t_best = 0
+        max_r_t_intervals = 0
         passed_worst_pvalue = 1.0
         passed_best_pvalue = 1.0
+        passed_intervals_p = 0
         for i in range(len(current_level_tests)):
+            current_level_tests[i].worst_rank = interval_rank[i]
+            current_level_tests[i].best_rank = interval_rank[i+ len(current_level_tests)]
+            #print  current_level_tests[i].worst_rank, current_level_tests[i].best_rank
+        for i in range(2*len(current_level_tests)):
+            if intervals_p[i] <= p_adjusted_interval[i] and max_r_t_intervals <= interval_rank[i]:
+                max_r_t_intervals = interval_rank[i]
+        '''for i in range(len(current_level_tests)):
             current_level_tests[i].worst_rank = worst_rank[i]
+            current_level_tests[i].best_rank = best_rank[i]
             if current_level_tests[i].worst_pvalue <= p_adjusted_worst[i] and max_r_t_worst <= current_level_tests[i].worst_rank:
                 max_r_t_worst = current_level_tests[i].worst_rank
                 passed_worst_pvalue = current_level_tests[i].worst_pvalue
         for i in range(len(current_level_tests)):
-            if current_level_tests[i].worst_rank <= max_r_t_worst and current_level_tests[i].significance == None and\
+            if current_level_tests[i].best_pvalue <= p_adjusted_best[i] and max_r_t_best <= current_level_tests[i].best_rank:
+                max_r_t_best = current_level_tests[i].best_rank
+                passed_best_pvalue = current_level_tests[i].best_pvalue'''
+        for i in range(len(current_level_tests)):
+            if current_level_tests[i].worst_rank <= max_r_t_intervals and current_level_tests[i].significance == None and\
             current_level_tests[i].include != True:
                 current_level_tests[i].significance = True
                 current_level_tests[i].include = True
-                #print current_level_tests[i].worst_pvalue
-            elif current_level_tests[i].significance != None and current_level_tests[i].best_pvalue > config.q and\
+                #print 'Worst passed:', current_level_tests[i].worst_pvalue
+            elif current_level_tests[i].significance == None and current_level_tests[i].best_rank > max_r_t_intervals  and\
             current_level_tests[i].include != True:
-                print current_level_tests[i].worst_pvalue
+                #print 'Best faild:', current_level_tests[i].best_pvalue
                 current_level_tests[i].significance = False
                 current_level_tests[i].include = True
-            elif not(current_level_tests[i].significance == True):
-                current_level_tests[i].significance = None
+            '''elif not(current_level_tests[i].significance == True):
+                #print current_level_tests[i].worst_pvalue, current_level_tests[i].best_pvalue
+                current_level_tests[i].significance = None'''
+                
             #hsci_between_significant.append('Not significant')
             #HSIC_eval
 
