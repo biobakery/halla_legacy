@@ -25,8 +25,8 @@ matplotlib.use( "Agg" )
 import matplotlib.pyplot as plt
 #import matplotlib as matplotlib
 #matplotlib.use( "Agg" )
+#plt.style.use('ggplot')
 import matplotlib.patches as patches
-import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 import numpy as np
 from matplotlib import font_manager
@@ -39,30 +39,45 @@ with warnings.catch_warnings():
         matplotlib.rcParams["font.family"] = "Arial"
     except UserWarning:
         pass
+    
+# paper size
+'''
+ information from: https://s3-service-broker-live-19ea8b98-4d41-4cb4-be4c-d68f4963b7dd.s3.amazonaws.com/documents/NRJs-guide-to-preparing-final-artwork.pdf
+• All text should be sans-serif typeface, preferably Helvetica or Arial.
+• Maximum text size is 7pt. Minimum text size is 5pt.
+• 300 dpi
+• 1-column width: 88 mm 
+• 2-column width: 180 mm
+• height is depend of number of words in caption and column size
+• 1 column max height: ~220 mm, 2 column max height: ~225 mm
 
+'''
 # ---------------------------------------------------------------
 # constants / config
 # ---------------------------------------------------------------
 
-c_unit_h        = 0.3
-c_unit_w        = 0.3
-c_min_height    = 1 * c_unit_h + 3
-c_min_width     = 1 * c_unit_w + 5
-c_label_scale   = 18
+c_unit_h        = 0.15 #0.3
+c_unit_w        = 0.15 #0.3
+c_min_height    = 1 * c_unit_h #+ 3
+c_min_width     = 1 * c_unit_w #+ 5
+c_label_scale   = 6 #18
 c_label_shift   = -0.005
-c_line_width    = 1.5
-c_char_pad      = 0.1
-c_label_aspect  = 0.7
-c_small_text    = 12
-c_large_text    = 16
-c_giant_text    = 20
-c_outline_width = 3
+c_line_width    = .75 # 1.5
+c_char_pad      = 0.05 #0.1
+c_label_aspect  = .35 #0.7
+c_small_text    = 5 #12
+c_large_text    = 6 #16
+c_giant_text    = 7# 20
+c_outline_width = 1.5 #3
 c_grid_color    = "0.9"
-c_cbarspan      = 2
-c_simstep       = 0.1
+c_cbarspan      = 1 #2
+c_simstep       = 0.1 #0.1
+paper_dpi = 300
 
-matplotlib.rcParams['xtick.major.pad'] = '10'
-matplotlib.rcParams['ytick.major.pad'] = '10'
+
+
+matplotlib.rcParams['xtick.major.pad'] = '5' #'10'
+matplotlib.rcParams['ytick.major.pad'] = '5' #'10'
 
 # ---------------------------------------------------------------
 # classes
@@ -221,7 +236,8 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
     span = simtable.ncols
     cbarspan = c_cbarspan
     ax = plt.subplot2grid( ( 1, span ), ( 0, cbarspan ), rowspan=1, colspan=span-cbarspan )
-    ax_cbar = plt.subplot2grid( ( 1, span ), ( 0, 0 ), rowspan=1, colspan=cbarspan )
+    #ax_cbar = plt.subplot2grid( ( 2, span ), ( 0, 0 ), rowspan=2, colspan=cbarspan )
+    ax_cbar = plt.subplot2grid( ( 2, span ), ( 0, 0 ), rowspan=2, colspan=cbarspan )
     ax.yaxis.tick_right( )
     ax.yaxis.set_label_position("right")
     ax.set_yticks( [0.5+i for i in range( simtable.nrows )] )
@@ -232,8 +248,8 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
     ax.yaxis.set_ticks_position( 'none' ) 
     ax.set_ylim( 0, len( simtable.rowheads ) )
     ax.set_xlim( 0, len( simtable.colheads ) )
-    ax.set_ylabel( axlabels[0], size=c_giant_text )
-    ax.set_xlabel( axlabels[1], size=c_giant_text )
+    ax.set_ylabel( axlabels[0], size=c_giant_text, fontweight='bold' )
+    ax.set_xlabel( axlabels[1], size=c_giant_text, fontweight='bold' )
     # if masking, draw a light grid to help with orientation
     if mask:
         kwargs = {"zorder":0, "color":c_grid_color}
@@ -314,7 +330,7 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
     # craziness for hiding the border
     plt.setp( [child for child in ax.get_children() if isinstance( child, matplotlib.spines.Spine )], visible=False )
     plt.tight_layout()
-    plt.savefig( outfile, dpi=300 )
+    plt.savefig( outfile, dpi=paper_dpi, papertype = None )
 
 # ---------------------------------------------------------------
 # main

@@ -1208,9 +1208,10 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         current_level_nodes.extend(from_prev_hypothesis_node)
     
     tested_hypotheses2 = [tested_hypotheses[i]  for i in range(len(tested_hypotheses)) if tested_hypotheses[i].include == True ]
+    significant_hypotheses =  list(set(significant_hypotheses))
     print ("--- number of performed tests: %s") % (config.number_of_performed_tests)
-    print ("--- number of passed tests after FDR controlling: %s" % len(set(significant_hypotheses)))
-    return list(significant_hypotheses), tested_hypotheses2
+    print ("--- number of passed tests after FDR controlling: %s" % len(significant_hypotheses))
+    return significant_hypotheses, tested_hypotheses2
 
 pHashMethods = {"permutation" : stats.permutation_test,
                         "permutation_test_by_medoid": stats.permutation_test_by_medoid,
@@ -1383,16 +1384,6 @@ def significance_testing(current_level_tests, level = None):
         for i in range(2*len(current_level_tests)):
             if intervals_p[i] <= p_adjusted_interval[i] and max_r_t_intervals <= interval_rank[i]:
                 max_r_t_intervals = interval_rank[i]
-        '''for i in range(len(current_level_tests)):
-            current_level_tests[i].worst_rank = worst_rank[i]
-            current_level_tests[i].best_rank = best_rank[i]
-            if current_level_tests[i].worst_pvalue <= p_adjusted_worst[i] and max_r_t_worst <= current_level_tests[i].worst_rank:
-                max_r_t_worst = current_level_tests[i].worst_rank
-                passed_worst_pvalue = current_level_tests[i].worst_pvalue
-        for i in range(len(current_level_tests)):
-            if current_level_tests[i].best_pvalue <= p_adjusted_best[i] and max_r_t_best <= current_level_tests[i].best_rank:
-                max_r_t_best = current_level_tests[i].best_rank
-                passed_best_pvalue = current_level_tests[i].best_pvalue'''
         for i in range(len(current_level_tests)):
             if current_level_tests[i].worst_rank <= max_r_t_intervals and current_level_tests[i].significance == None and\
             current_level_tests[i].include != True:
@@ -1404,10 +1395,6 @@ def significance_testing(current_level_tests, level = None):
                 #print 'Best faild:', current_level_tests[i].best_pvalue
                 current_level_tests[i].significance = False
                 current_level_tests[i].include = True
-            '''elif not(current_level_tests[i].significance == True):
-                #print current_level_tests[i].worst_pvalue, current_level_tests[i].best_pvalue
-                current_level_tests[i].significance = None'''
-                
             #hsci_between_significant.append('Not significant')
             #HSIC_eval
 
