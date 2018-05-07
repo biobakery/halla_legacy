@@ -70,7 +70,7 @@ c_large_text    = 6 #16
 c_giant_text    = 7# 20
 c_outline_width = 1.5 #3
 c_grid_color    = "0.9"
-c_cbarspan      = 1 #2
+c_cbarspan      = 2 #2
 c_simstep       = 0.1 #0.1
 paper_dpi = 300
 
@@ -329,7 +329,9 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
         ] )
     # craziness for hiding the border
     plt.setp( [child for child in ax.get_children() if isinstance( child, matplotlib.spines.Spine )], visible=False )
-    plt.tight_layout()
+    try:
+        plt.tight_layout()
+    except: pass
     plt.savefig( outfile, dpi=paper_dpi, papertype = None )
 
 # ---------------------------------------------------------------

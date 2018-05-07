@@ -1537,7 +1537,7 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 		setastrValues = list(set(astrValues))
 		dictA ={}
 		for i, item in enumerate(setastrValues):
-			if str(astrValues[i]) != 'nan':
+			if str(astrValues[i]) != 'NaN':
 				dictA[item] = i+1
 			else:
 				#if str(astrValues[i]) == 'nan':
@@ -1592,7 +1592,7 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 			discretized_result[i] = int((order[i]-1) / bins_size)
 		discretized_result = rankdata(discretized_result, method= 'dense')
 		for i in range(len(astrValues)):
-			if str(astrValues[i]) == 'nan':
+			if str(astrValues[i]) == 'NaN':
 				discretized_result[i]= 0
 		#print astrRet
 		return discretized_result

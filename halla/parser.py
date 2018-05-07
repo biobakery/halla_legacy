@@ -41,7 +41,7 @@ def load(file):
 	except EnvironmentError:
 		sys.exit("Error: Unable to read file: " + file)
 		
-	csvr = csv.reader(file_handle, csv.excel_tab)
+	csvr = csv.reader(file_handle, dialect="excel-tab") #csv.excel_tab, 
 	
 	# Ignore comment lines in input file
 	data=[]
@@ -182,45 +182,40 @@ class Input:
 					aNames = list(map(wrap_features, aNames))
 					aNames = list(map(substitute_special_characters, aNames))
 				pArray = pArray[:, 1:]
-
+			
+			# replace missing charaters with nan
+			pArray[pArray == config.missing_char] = 'NaN'
+			#print pArray
 			# # Parse data types, missing values, and whitespace
 			if config.missing_method:
+				#print 'missing_method: ', config.missing_method
 				from sklearn.preprocessing import Imputer
-				imp = Imputer(missing_values='nan', strategy=config.missing_method, axis=1)
-				imp.fit(pArray)
+				imp = Imputer(missing_values='NaN', strategy=config.missing_method, axis=1)
+				#imp.fit(pArray)
 
 			for i, line in enumerate(pArray):
 				# *   If the line is not full,  replace the Nones with nans                                           *
 				#***************************************************************************************************** 
-				line = list(map(lambda x: 'nan' if x == config.missing_char else x, line))  ###### np.nan Convert missings to nans
-				if all([val == 'nan' for val in line]):
+				#line = list(map(lambda x: 'NaN' if x == config.missing_char else x, line))  ###### np.nan Convert missings to nans
+				if all([val == 'NaN' for val in line]):
 					# if all values in a feature are missing values then skip the feature
 					print ('All missing value in' , aNames[i])
 					continue
-				
-				aOut.append(line)
 				if not aNames:
 					aNames.append(i)
-
+				#aOut.append(line)
 				try:
-					line = list(map(float, line))  # is it continuous? 
-					# fill missing values
 					if config.missing_method:
-						try:
-							line = imp.transform(line)[0]
-						except:
-							print (aNames[i], " has an issue with filling missed data!")
-							pass
-					else:
-						line = list(map(float, line))
-					#print "Continues data !"
-					aTypes.append("CON")
+						line =  array(imp.fit_transform(line.reshape(1,-1)))[0]
+						aTypes.append("CON")
 				except ValueError:
-					#print "Categorical data !"
 					line = line  # we are forced to conclude that it is implicitly categorical, with some lexical ordering 
 					aTypes.append("LEX")
-			
+				
 				used_names.append(aNames[i]) 
+				aOut.append(line)
+			#aOut = array(aOut)
+			#print aOut
 			return aOut, used_names, aTypes, aHeaders 
 
 		self.orginal_dataset1, self.outName1, self.outType1, self.outHead1 = __parse(self.orginal_dataset1, self.varNames, self.headers)
@@ -270,15 +265,15 @@ class Input:
 
 			# remove samples/columns with all NaN/missing values
 			# First change missing value to np.NaN for pandas
-			df1[df1=='nan'] =np.NAN
-			df2[df2=='nan'] =np.NAN
+			#df1[df1=='NaN'] =np.NAN
+			#df2[df2=='NaN'] =np.NAN
 			df1 = df1.dropna( axis=1, how='all')
 			df2 = df2.dropna( axis=1, how='all')
 			l1_after = len(df1.columns)
 			l2_after = len(df2.columns)
-			# replace np.NaN's with 'nan'
-			df1[df1.isnull()] = 'nan'
-			df2[df2.isnull()] = 'nan'
+			# replace np.NaN's with 'NaN'
+			#df1[df1.isnull()] = 'NaN'
+			#df2[df2.isnull()] = 'NaN'
 			
 			if l1_before > l1_after:
 				print ("--- %d samples/columns with all missing values have been removed from the first dataset " % (l1_before- l1_after))
