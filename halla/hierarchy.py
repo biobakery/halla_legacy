@@ -1368,7 +1368,8 @@ def significance_testing(current_level_tests, level = None):
         #p_adjusted_worst, worst_rank = stats.p_adjust([current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))], config.q)#, p_adjusted 
         #p_adjusted_best, best_rank = stats.p_adjust([current_level_tests[i].best_pvalue for i in range(len(current_level_tests))], config.q)
         intervals_p = [current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))] +\
-                                                            [current_level_tests[i].best_pvalue for i in range(len(current_level_tests))]
+                                                            [current_level_tests[i].best_pvalue for i in range(len(current_level_tests)) 
+                                                             if len(current_level_tests[i].m_pData[0]) > 1 or len(current_level_tests[i].m_pData[1]) > 1 ]
         p_adjusted_interval, interval_rank = stats.p_adjust(intervals_p, config.q)#, p_adjusted 
         #print p_adjusted_interval,interval_rank
         max_r_t_worst = 0
@@ -1377,11 +1378,17 @@ def significance_testing(current_level_tests, level = None):
         passed_worst_pvalue = 1.0
         passed_best_pvalue = 1.0
         passed_intervals_p = 0
+        num_non_tips = 0
         for i in range(len(current_level_tests)):
             current_level_tests[i].worst_rank = interval_rank[i]
-            current_level_tests[i].best_rank = interval_rank[i+ len(current_level_tests)]
+            # best rank and worst rank of tips are the same
+            if len(current_level_tests[i].m_pData[0]) == 1 and len(current_level_tests[i].m_pData[1]) == 1:
+                current_level_tests[i].best_rank = interval_rank[i]
+            else:
+                current_level_tests[i].best_rank = interval_rank[num_non_tips + len(current_level_tests)]
+                num_non_tips += 1
             #print  current_level_tests[i].worst_rank, current_level_tests[i].best_rank
-        for i in range(2*len(current_level_tests)):
+        for i in range(num_non_tips + len(current_level_tests)):
             if intervals_p[i] <= p_adjusted_interval[i] and max_r_t_intervals <= interval_rank[i]:
                 max_r_t_intervals = interval_rank[i]
         for i in range(len(current_level_tests)):

@@ -207,15 +207,14 @@ class Input:
 				try:
 					if config.missing_method:
 						line =  array(imp.fit_transform(line.reshape(1,-1)))[0]
-						aTypes.append("CON")
+					aTypes.append("CON")
 				except ValueError:
 					line = line  # we are forced to conclude that it is implicitly categorical, with some lexical ordering 
 					aTypes.append("LEX")
 				
 				used_names.append(aNames[i]) 
 				aOut.append(line)
-			#aOut = array(aOut)
-			#print aOut
+
 			return aOut, used_names, aTypes, aHeaders 
 
 		self.orginal_dataset1, self.outName1, self.outType1, self.outHead1 = __parse(self.orginal_dataset1, self.varNames, self.headers)
