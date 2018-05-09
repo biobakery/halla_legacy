@@ -1,6 +1,6 @@
 import random
 from numpy import array
-version = '0.8.5'
+version = '0.8.6'
 __description__      = """
   _    _          _ _          
  | |  | |   /\   | | |   /\    

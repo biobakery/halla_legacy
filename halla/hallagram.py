@@ -76,8 +76,8 @@ paper_dpi = 300
 
 
 
-matplotlib.rcParams['xtick.major.pad'] = '5' #'10'
-matplotlib.rcParams['ytick.major.pad'] = '5' #'10'
+matplotlib.rcParams['xtick.major.pad'] = '.1' #'10'
+matplotlib.rcParams['ytick.major.pad'] = '.1' #'10'
 
 # ---------------------------------------------------------------
 # classes

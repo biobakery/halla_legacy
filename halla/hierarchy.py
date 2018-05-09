@@ -1406,43 +1406,55 @@ def significance_testing(current_level_tests, level = None):
             #HSIC_eval
 
     elif config.p_adjust_method== 'y':
-        p_adjusted_worst, worst_rank = stats.halla_y([current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))], config.q, level)#, p_adjusted 
+        intervals_p = [current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))] +\
+                                                            [current_level_tests[i].best_pvalue for i in range(len(current_level_tests)) 
+                                                             if len(current_level_tests[i].m_pData[0]) > 1 or len(current_level_tests[i].m_pData[1]) > 1 ]
+        p_adjusted_interval, interval_rank = stats.halla_y(intervals_p, config.q)#, p_adjusted 
+        #print p_adjusted_interval,interval_rank
         max_r_t_worst = 0
+        max_r_t_best = 0
+        max_r_t_intervals = 0
         passed_worst_pvalue = 1.0
         passed_best_pvalue = 1.0
+        passed_intervals_p = 0
+        num_non_tips = 0
         for i in range(len(current_level_tests)):
-            current_level_tests[i].worst_rank = worst_rank[i]
-            if current_level_tests[i].worst_pvalue <= p_adjusted_worst[i] and max_r_t_worst <= current_level_tests[i].worst_rank:
-                max_r_t_worst = current_level_tests[i].worst_rank
-                passed_worst_pvalue = current_level_tests[i].worst_pvalue
+            current_level_tests[i].worst_rank = interval_rank[i]
+            # best rank and worst rank of tips are the same
+            if len(current_level_tests[i].m_pData[0]) == 1 and len(current_level_tests[i].m_pData[1]) == 1:
+                current_level_tests[i].best_rank = interval_rank[i]
+            else:
+                current_level_tests[i].best_rank = interval_rank[num_non_tips + len(current_level_tests)]
+                num_non_tips += 1
+            #print  current_level_tests[i].worst_rank, current_level_tests[i].best_rank
+        for i in range(num_non_tips + len(current_level_tests)):
+            if intervals_p[i] <= p_adjusted_interval[i] and max_r_t_intervals <= interval_rank[i]:
+                max_r_t_intervals = interval_rank[i]
         for i in range(len(current_level_tests)):
-            if current_level_tests[i].worst_rank <= max_r_t_worst and current_level_tests[i].significance == None and\
+            if current_level_tests[i].worst_rank <= max_r_t_intervals and current_level_tests[i].significance == None and\
             current_level_tests[i].include != True:
                 current_level_tests[i].significance = True
                 current_level_tests[i].include = True
-                #print current_level_tests[i].worst_pvalue
-            elif current_level_tests[i].significance == None and current_level_tests[i].best_pvalue > config.q/(2.0*1.44) and\
+                #print 'Worst passed:', current_level_tests[i].worst_pvalue
+            elif current_level_tests[i].significance == None and current_level_tests[i].best_rank > max_r_t_intervals  and\
             current_level_tests[i].include != True:
+                #print 'Best faild:', current_level_tests[i].best_pvalue
                 current_level_tests[i].significance = False
-                current_level_tests[i].include = True
-            elif not(current_level_tests[i].significance == True):
-                current_level_tests[i].significance = None           
+                current_level_tests[i].include = True           
     elif config.p_adjust_method == "bonferroni":
-        #rep_rank = rankdata([current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))], method= 'ordinal')
-        #m = max(rep_rank)
-        p_adjusted_worst, worst_rank = stats.p_adjust([current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))], config.q)
+        intervals_p = [current_level_tests[i].worst_pvalue for i in range(len(current_level_tests))]
+        p_adjusted_interval, interval_rank = stats.p_adjust(intervals_p, config.q)#, p_adjusted 
+
         for i in range(len(current_level_tests)):
-            if current_level_tests[i].worst_rank <= p_adjusted_worst[i] and current_level_tests[i].significance == None and\
+            if current_level_tests[i].worst_pvalue <= p_adjusted_interval[i] and current_level_tests[i].significance == None and\
             current_level_tests[i].include != True:
                 current_level_tests[i].significance = True
                 current_level_tests[i].include = True
-                #print current_level_tests[i].worst_pvalue
-            elif current_level_tests[i].significance == None and current_level_tests[i].best_pvalue > config.q and\
+                #print 'Worst passed:', current_level_tests[i].worst_pvalue
+            elif current_level_tests[i].significance == None and current_level_tests[i].best_pvalue > p_adjusted_interval[i]  and\
             current_level_tests[i].include != True:
+                #print 'Best faild:', current_level_tests[i].best_pvalue
                 current_level_tests[i].significance = False
-                current_level_tests[i].include = True
-            elif not(current_level_tests[i].significance == True):
-                current_level_tests[i].significance = None 
     elif config.p_adjust_method == "meinshausen":
         p_adjusted = stats.halla_meinshausen(current_level_tests)
         for i in range(len(current_level_tests)):
