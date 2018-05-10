@@ -569,7 +569,7 @@ def halla_bh(current_level_tests):
 	m = max(rep_rank)
 	p_adjusted = [test.rank * config.q / m for test in current_level_tests]'''
 	return p_adjusted_worst #, p_adjusted  
-def halla_y(pvalues, q, level):
+def halla_y(pvalues, q):
 	worst_rank= rankdata(pvalues , method= 'ordinal')
 	m = len(pvalues)
 	q  = q/(2.0*1.44)
