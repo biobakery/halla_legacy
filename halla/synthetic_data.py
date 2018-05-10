@@ -20,6 +20,93 @@ try:
 except:
     pass
 from . import logger, stats
+
+
+import sys
+import numpy as np
+import math
+
+def nearest_spd(M):
+    # Find the nearest SPD matrix to M
+    # http://www.sciencedirect.com/science/article/pii/0024379588902236
+    U, s, V = np.linalg.svd(M)
+    H = V * s * V.T
+    Ms = (M + H) / 2
+    return (Ms + Ms.T) / 2
+
+def hard_cov_dataset_generate(nSamples, C, nX, nY):
+    # Find a nearby SPD matrix to C, maintaining the zero/nonzero structure of C
+    Z = abs(C) < 10*sys.float_info.epsilon
+    for i in range(0, 50):
+        E, V = np.linalg.eig(C)
+        if not any(E < 100 * sys.float_info.epsilon):
+            break
+        
+        C = nearest_spd(C)
+        C[Z] = 0.0
+    
+    # Ensure there is no lingering floating point silliness
+    E, V = np.linalg.eig(C)
+    while any(E < 100 * sys.float_info.epsilon):
+        C = C * 0.999 + 0.001 * np.eye(nX+nY)
+        E, V = np.linalg.eig(C)
+    
+    # Generate a dataset
+    xy = np.random.multivariate_normal(np.zeros(nX+nY), C, nSamples)
+    
+    # Split it into pieces to get the two paired datasets
+    x = xy[:,:nX].T
+    y = xy[:,nX:].T
+    
+    return (x, y, C[:nX, nX:])
+
+def circular_continuous(nSamples, nX, nY, noiseVar, autoCov, lengthScaleX, lengthScaleY, crossCov, crossLengthScale, fractionZero):
+    # Make masks for the parts of the matrix representing X and Y
+    isX = np.concatenate([np.ones(nX), np.zeros(nY)])
+    isY = np.concatenate([np.zeros(nX), np.ones(nY)])
+    pairX = np.multiply.outer(isX, isX)
+    pairY = np.multiply.outer(isY, isY)
+    
+    # Within-dataset "time" dimension
+    t = np.concatenate([np.linspace(0, 2*math.pi, num=nX, endpoint=False),
+                        np.linspace(0, 2*math.pi, num=nY, endpoint=False)])
+    dt = np.subtract.outer(t, t)
+    periodicCov = (pairX * autoCov * np.exp(-np.abs(np.sin(dt)) / lengthScaleX) +
+                   pairY * autoCov * np.exp(-np.abs(np.sin(dt)) / lengthScaleY) +
+                   np.maximum(0.0, (1 - pairX - pairY) * crossCov * np.exp(-np.abs(np.sin(dt)) / crossLengthScale) - fractionZero * crossCov))
+
+    # Put it all together
+    C = noiseVar * np.eye(nX+nY) + periodicCov
+    return hard_cov_dataset_generate(nSamples, C, nX, nY)
+
+def rope_unrelated(nSamples, nX, nY, noiseVar, ropeMinCov, ropeMaxCov, fractionTruePositive, crossDatasetCov):
+    # Make masks for the parts of the matrix representing X and Y
+    isX = np.concatenate([np.ones(nX), np.zeros(nY)])
+    isY = np.concatenate([np.zeros(nX), np.ones(nY)])
+    pairX = np.multiply.outer(isX, isX)
+    pairY = np.multiply.outer(isY, isY)
+    
+    # Build the within-dataset ropes
+    cI = np.concatenate([np.linspace(ropeMinCov, ropeMaxCov, num=nX),
+                         np.linspace(ropeMinCov, ropeMaxCov, num=nY)])
+    ropeCov = (pairX + pairY) * np.minimum.outer(cI, cI)
+    
+    # Cross-dataset correlations
+    xyCov = crossDatasetCov * (np.random.rand(nX, nY) < fractionTruePositive)
+    crossCov = np.vstack([np.hstack([np.zeros((nX, nX)), xyCov]), np.hstack([xyCov.T, np.zeros((nY, nY))])])
+
+    # Put it all together
+    C = noiseVar * np.eye(nX+nY) + ropeCov + crossCov
+    return hard_cov_dataset_generate(nSamples, C, nX, nY)
+
+#circular_continuous(5, 7, 11, 0.1, 0.5, 0.3, 0.3, 0.3, 0.25, 0.01)
+#rope_unrelated(5, 3, 4, 0.1, 0.4, 0.7, 0.5, 0.3)
+
+
+
+
+
+
 def parse_arguments(args):
     """ 
     Parse the arguments from the user

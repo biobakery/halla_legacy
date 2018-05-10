@@ -32,7 +32,7 @@ except ImportError:
         "Topic :: Scientific/Engineering :: Bio-Informatics"
         ]
 
-VERSION = "0.8.6"
+VERSION = "0.8.7"
 AUTHOR = "Gholamali Rahnavard"
 AUTHOR_EMAIL = "halla-users@googlegroups.com"
 MAINTAINER = "Gholamali Rahnavard"

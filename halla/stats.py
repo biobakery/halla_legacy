@@ -998,7 +998,8 @@ def permutation_test_by_representative(pArray1, pArray2):
 		[pRep1, pRep2] = discretize(pDe(pArray1, pArray2, metric)) if bool(distance.c_hash_association_method_discretize[strMetric]) else pDe(pArray1, pArray2, metric)
 	else:
 		#[pRep1, pRep2] = [discretize(pDe(pA))[0] for pA in [pArray1, pArray2] ] if bool(distance.c_hash_association_method_discretize[strMetric]) else [pDe(pA) for pA in [pArray1, pArray2]]
-		sys.exit('Decomposition method is not defined!')
+		#sys.exit('Decomposition method is not defined!')
+		pass
 	'''if config.similarity_method == 'spearman' and config.permutation_func == "none":# and randomization_method != "permutation" :
 		rep_sim_score, rep_pvalue = scipy.stats.spearmanr(pRep1, pRep2, nan_policy='omit')
 		
@@ -1008,6 +1009,10 @@ def permutation_test_by_representative(pArray1, pArray2):
 		rep_sim_score = pMe(pRep1, pRep2)
 		rep_pvalue = permutation_test_pvalue(X = pRep1, Y = pRep2)'''
 	rep_pvalue = None
+	if worst_pvalue < best_pvalue:
+		temp = worst_pvalue
+		worst_pvalue = best_pvalue
+		best_pvalue = temp
 	return worst_pvalue, best_pvalue, rep_pvalue,  worst_sim_score, best_sim_score, left_rep_variance, right_rep_variance, left_loading, right_loading, pRep1, pRep2 
 
 def g_test_by_representative(pArray1, pArray2, metric="nmi", decomposition="pca", iterations=1000):
