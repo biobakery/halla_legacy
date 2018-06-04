@@ -173,13 +173,7 @@ def parse_arguments (args):
         default = "HAllA",
         choices=["HAllA","AllA"],
         help="descending approach\n[default = HAllA for hierarchical all-against-all]")
-    
-    argp.add_argument(
-        "--fdr-style",
-        dest="fdr_style",
-        default = "level",
-        choices=["level","all", "family"],
-        help="the style of grouping hypotheses in hypothesis tree to control false discovery rate\n[default = level]")
+
     argp.add_argument(
         "-i","--iterations", metavar="<1000>",
         dest="iIter",
@@ -192,14 +186,7 @@ def parse_arguments (args):
         dest="strMetric",
         default='',
         choices=["nmi","ami","mic","dmic","dcor","pearson", "spearman", "r2"],
-        help="metric to be used for similarity measurement\n[default = '']")
-    
-    argp.add_argument(
-        "-d","--decomposition",
-        dest="strDecomposition",
-        default=config.decomposition,
-        choices=["none", "mca", "pca", "ica", "cca","kpca","pls","medoid", "mean","farthest"],
-        help="approach for reducing dimensions (or decomposition)\n[default = farthest]")    
+        help="metric to be used for similarity measurement\n[default = '']")   
     
     argp.add_argument(
         "--fdr",
@@ -212,11 +199,7 @@ def parse_arguments (args):
         dest="verbose",
         default=config.verbose,
         help="additional output is printed")
-    
-    '''argp.add_argument(
-        "--hallagram", 
-        help="plot the results", 
-        action="store_true")'''
+
     argp.add_argument(
         "--diagnostics-plot", 
         dest="diagnostics_plot",
@@ -234,12 +217,7 @@ def parse_arguments (args):
         default='average',
         choices=["single", "average", "complete", "weighted" ],
         help="The method to be used in linkage hierarchical clustering.")
-    
-    argp.add_argument(
-        "--apply-stop-condition",
-        dest ="apply_stop_condition", 
-        help="stops when two clusters are two far from each other", 
-        action="store_true")
+
     argp.add_argument(
         "--generate-one-null-samples", "--fast",
         dest ="use_one_null_distribution", 
@@ -324,7 +302,6 @@ def set_parameters(args):
     to be used in the program
     '''
     config.similarity_method = args.strMetric.lower()
-    config.decomposition = args.strDecomposition.lower()
     #config.fdr_function = args.strFDR
      
      
@@ -348,7 +325,6 @@ def set_parameters(args):
     config.descending = args.strDescending
     # X and Y are used to store datasets
     istm = list() 
-    config.apply_stop_condition = args.apply_stop_condition
     config.use_one_null_dist = args.use_one_null_distribution
     config.strDiscretizing = args.strDiscretizing
     if args.seed == -1:
@@ -362,12 +338,6 @@ def set_parameters(args):
     config.missing_char_category = args.missing_char_category
     config.p_adjust_method = args.strAdjust.lower()
     config.q = args.dQ
-    #if config.fdr_style =='family':
-    #    config.q = args.dQ/(2.0*1.44) #Daniel YEKUTIELI
-    if config.p_adjust_method =='y':
-        #config.q = args.dQ/(2.0*1.44) #Daniel YEKUTIELI
-        config.fdr_style ='family'
-        config.p_adjust_method = 'bh'
     config.linkage_method = args.linkage_method
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  
@@ -382,7 +352,7 @@ def set_parameters(args):
     (config.discretized_dataset[0], config.original_dataset[0], config.FeatureNames[0], config.aOutType1, config.SampleNames[0]) = aOut1 
     (config.discretized_dataset[1], config.original_dataset[1], config.FeatureNames[1], config.aOutType2, config.SampleNames[1]) = aOut2
 
-def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA', fdr_style ='level',\
+def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA',\
               i =1000, m = '', d= 'medoid',  fdr = 'bh', hallagram = True, \
               diagnostics_plot = True, discretizing = 'equal-freq', linkage_method = 'average',\
               apply_stop_condition = False, fast= False, header = False, format_feature_names = False,\
@@ -402,14 +372,9 @@ def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA', fdr_style ='leve
     a    descending approach\n[default = HAllA for hierarchical all-against-all]
         default = "HAllA",
         choices=["HAllA","AllA"],    
-    fdr_style the style of grouping hypotheses in hypothesis tree to control false discovery rate\n[default = level]
-        default = "level",
-        choices=["level","all", "family"],
     i   iterations for nonparametric significance testing (permutation test)\n[default = 1000]
     m   metric to be used for similarity measurement\n[default = nmi]
         choices=["nmi","ami","mic","dmic","dcor","pearson", "spearman", "r2"],
-    d    approach for reducing dimensions (or decomposition)\n[default = medoid]
-        choices=["none", "mca", "pca", "ica", "cca","kpca","pls","medoid"], #mean
     
     fdr    approach for FDR correction\n[default = bh]
         choices=["bh", "by", 'y', "bonferroni", "no_adjusting"],
@@ -447,7 +412,6 @@ def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA', fdr_style ='leve
     
     # set the paramater to config file
     config.similarity_method = m.lower()
-    config.decomposition = d.lower()
      
     config.entropy_threshold = e
     if e1 == None:
@@ -484,11 +448,8 @@ def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA', fdr_style ='leve
     config.missing_char_category = missing_char_category
     config.p_adjust_method = fdr.lower()
     config.q = q
-    '''if config.fdr_style =='family':
-        config.q = q/(2.0*1.44) #Daniel YEKUTIELI'''
     if config.p_adjust_method =='y':
         config.q = q/(2.0*1.44) #Daniel YEKUTIELI
-        config.fdr_style ='family'
         #config.p_adjust_method = 'bh'
     config.linkage_method = linkage_method
     if Y == None:

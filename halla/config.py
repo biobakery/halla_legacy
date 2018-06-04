@@ -26,7 +26,7 @@ NBIN = None # number of bins specified by user
 NPROC = 1 # number of threads to use 
 
 similarity_method = "nmi"
-decomposition = "medoid" 
+decomposition = "farthest" 
 fdr_style = "level"
 permutation_func = 'gpd'
 linkage_method = 'average'
@@ -84,6 +84,8 @@ strFile1 = None
 strFile2 = None
 outcome = None
 pvalues = None
+similarity_table = None
+similarity_rank = None
 def reset_default():
     print ("reset to default parameters!")
     use_one_null_dist = False
@@ -102,3 +104,5 @@ def reset_default():
     meta_alla = None  # results of all-against-all
     meta_out = None  # final output array; some methods (e.g. hypotheses_testing) have multiple outputs piped to both meta_alla and meta_out 
     aOut = None 
+    similarity_table = None
+    similarity_rank = None

@@ -24,6 +24,9 @@ import shutil
 import time
 import math
 import datetime
+from scipy.stats import rankdata
+import pandas as pd
+import numpy
 #  Load a halla module to check the installation
 try:
     from . import hierarchy
@@ -57,12 +60,12 @@ def smart_decisoin():
     if config.permutation_func == 'ecdf':
         if  config.p_adjust_method ==  "by" and config.iterations < len(config.data_type[0])* len(config.data_type[1]) * math.log(len(config.data_type[0])* len(config.data_type[1])):
             print ('--- WARNING: HAllA recommends to use 10*number of feature in first data set been used * number of features been used in second data set\n \
-                when using ECDF as the permutation method with Benjamini–Yekutieli procedure. In this run HAllA update your requested iterations to %s it will takes more time.')%\
+                when using ECDF as the permutation method with Benjamini-Yekutieli procedure. In this run HAllA update your requested iterations to %s it will takes more time.')%\
                 (int(len(config.data_type[0])* len(config.data_type[1]) * math.log(len(config.data_type[0])* len(config.data_type[1]))))
             config.iterations =int(len(config.data_type[0])* len(config.data_type[1]) * math.log(len(config.data_type[0])* len(config.data_type[1])))
         elif config.p_adjust_method ==  "bh" and config.iterations < len(config.data_type[0])* len(config.data_type[1] * 10):
             print ('--- WARNING: HAllA recommends to use 10*number of feature in first data set been used * number of features been used in second data set\n \
-                when using ECDF as the permutation method with Benjamini–Hochberg procedure. In this run HAllA update your requested iterations to %s it will takes more time.')%\
+                when using ECDF as the permutation method with Benjamini-Hochberg procedure. In this run HAllA update your requested iterations to %s it will takes more time.')%\
                 (int(len(config.data_type[0])* len(config.data_type[1]) * 10))
             config.iterations = int(len(config.data_type[0])* len(config.data_type[1]) * 10)
         sleep(10)
@@ -117,6 +120,25 @@ def _hclust():
     config.meta_data_tree.append(tree2)
     # config.meta_data_tree = config.m( config.parsed_dataset, lambda x: hclust(x , bTree=True) )
     return config.meta_data_tree 
+def _similarity_between():
+    n = len(config.parsed_dataset[0])
+    m = len(config.parsed_dataset[1])
+    similarity_score = np.zeros(shape=(n, m)) 
+    config.pvalues = np.zeros(shape=(n, m), dtype=object)
+    config.pvalues[config.pvalues == 0 ] = None
+    config.rank_index = np.zeros(shape=(n*m, 2),dtype=int)
+    for i in range(n):
+        for j in range(m):
+            similarity_score[i,j] = distance.c_hash_metric[config.similarity_method](config.parsed_dataset[0][i], config.parsed_dataset[1][j])    
+    logger.write_table(similarity_score,str(config.output_dir)+"/" + "similarity_table.txt", rowheader=config.FeatureNames[0], colheader=config.FeatureNames[1], corner = "#")
+    config.similarity_table = similarity_score#pd.DataFrame(similarity_score, index = X_labels, columns = Y_labels)
+    #print similarity_score.shape
+    m_n = m*n
+    abs_similarity_score = numpy.fabs(similarity_score)
+    config.similarity_rank = (1 + m_n - rankdata(abs_similarity_score, method='ordinal')).reshape(abs_similarity_score.shape)
+    for i in range(config.similarity_rank.shape[0]):
+        for j in range(config.similarity_rank.shape[1]):
+            config.rank_index[config.similarity_rank[i, j]-1,] = [i, j]
 
 def _couple():
     config.meta_hypothesis_tree = None        
@@ -127,8 +149,10 @@ def _couple():
     # # remember, `couple_tree` returns object wrapped in list 
     #return config.meta_hypothesis_tree 
 
-def _naive_all_against_all(iIter=100):
+def _naive_all_against_all():
     config.meta_alla = None
+    #config.Features_order[0] = [i for i in len(config.Features_names[0])]
+    #config.Features_order[1] = [i for i in len(config.Features_names[1])]
     config.meta_alla = hierarchy.naive_all_against_all()
     return config.meta_alla 
 def _test_by_level():
@@ -167,8 +191,8 @@ def _summary_statistics(strMethod=None):
     
     Z = config.meta_alla 
     _final, _all = Z#map(array, Z)  # # Z_final is the final bags that passed criteria; Z_all is all the associations delineated throughout computational tree
-    Z_final = np.array([[_final[i].m_pData, _final[i].pvalue, _final[i].qvalue] for i in range(len(_final))])
-    Z_all = np.array([[_all[i].m_pData, _all[i].pvalue, _all[i].qvalue] for i in range(len(_all))])    
+    Z_final = np.array([[_final[i].m_pData, _final[i].worst_pvalue, _final[i].qvalue] for i in range(len(_final))])
+    Z_all = np.array([[_all[i].m_pData, _all[i].worst_pvalue, _all[i].qvalue] for i in range(len(_all))])    
     Z_final_dummy = [-1.0 * (len(line[0][0]) + len(line[0][1])) for line in Z_final]
     args_sorted = np.argsort(Z_final_dummy)
     Z_final = Z_final[args_sorted]
@@ -187,16 +211,15 @@ def _summary_statistics(strMethod=None):
             for i, j in itertools.product(listBag1, listBag2):
                 config.outcome[i][j] = 1.0
     def __set_pvalues(Z_all):
-        config.pvalues = np.empty((len(config.parsed_dataset[0]),len(config.parsed_dataset[1])), dtype = float)
-        config.pvalues[:] = np.NAN
+        #config.pvalues = np.empty((len(config.parsed_dataset[0]),len(config.parsed_dataset[1])), dtype = float)
+        #config.pvalues[:] = np.NAN
         for aLine in Z_all:
             if config.verbose == 'INFO':
                 print (aLine) 
             aaBag, pvalue, _ = aLine
-            listBag1, listBag2 = aaBag     
+            listBag1, listBag2 = aaBag 
             for i, j in itertools.product(listBag1, listBag2):
                 config.pvalues[i][j] = pvalue 
-                        
     def __add_pval_product_wise(_x, _y, _fP, _fP_adjust):
         S[_x][_y][0] = _fP
         S[_x][_y][1] = _fP_adjust  
@@ -280,8 +303,6 @@ def _report():
         fQ_adust = aP[i][j][1] 
         if fQ != -1:
             aaOut.append([[i, j], fQ, fQ_adust ])
-
-    
     
     def _report_all_tests():
         output_file_all  = open(str(config.output_dir)+'/all_association_results_one_by_one.txt', 'w')
@@ -302,14 +323,13 @@ def _report():
         output_file_associations  = open(str(config.output_dir)+'/associations.txt', 'w')
         bcsvw = csv.writer(output_file_associations, csv.excel_tab, delimiter='\t')
         #bcsvw.writerow(["Method: " + config.decomposition +"-"+ config.similarity_method , "q value: " + str(config.q), "metric " + config.similarity_method])
-        bcsvw.writerow(["association_rank", "cluster1", "cluster1_similarity_score", \
+        bcsvw.writerow(["association_rank", "cluster1", \
                         "cluster2", \
-                        "cluster2_similarity_score", \
                         "pvalue", "qvalue", "similarity_score_between_clusters"])
 
         #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
         #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
-        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.pvalue, x.qvalue ))
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.worst_pvalue, x.qvalue ))
 
         for association in sorted_associations:
             number_of_association += 1
@@ -319,21 +339,13 @@ def _report():
             associated_feature_X_indecies += iX
             global associated_feature_Y_indecies
             associated_feature_Y_indecies += iY
-            fP = association.pvalue
+            fP = association.worst_pvalue
             fP_adjust = association.qvalue
-            clusterX_similarity = 1.0 - association.left_distance
-            #clusterX_first_rep = association.get_left_first_rep_variance()
-            clusterY_similarity = 1.0 - association.right_distance
-            #clusterY_first_rep = association.get_right_first_rep_variance()
             association_similarity = association.similarity_score
             
             aLineOut = [number_of_association,
                                  str(';'.join(config.FeatureNames[0][i] for i in iX)),
-                                 clusterX_similarity,
-                                 #clusterX_first_rep,
                                  str(';'.join(config.FeatureNames[1][i] for i in iY)),
-                                 clusterY_similarity,
-                                 #clusterY_first_rep,
                                  fP,
                                  fP_adjust,
                                  association_similarity]
@@ -347,7 +359,7 @@ def _report():
         
     #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
     #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
-    sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.pvalue, x.qvalue ))
+    sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.worst_pvalue, x.qvalue ))
 
     if config.descending == "AllA":
         config.Features_order[0]  = [i for i in range(len(config.original_dataset[0]))]   
@@ -510,20 +522,12 @@ def _report():
         config.Features_order[0] = [config.Features_order[0][i] for i in range (len(config.Features_order[0]))  if config.Features_order[0][i] in Xs ] 
         config.Features_order[1]= [config.Features_order[1][i] for i in range (len(config.Features_order[1]))  if config.Features_order[1][i] in Ys ] 
         
-        X_labels = np.array([config.FeatureNames[0][i] for i in config.Features_order[0]])
-        Y_labels = np.array([config.FeatureNames[1][i] for i in config.Features_order[1]])
-        
         import re
         X_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', config.FeatureNames[0][i]).replace(' ','_') for i in config.Features_order[0]])
         Y_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', config.FeatureNames[1][i]).replace(' ','_') for i in config.Features_order[1]])
         
-        similarity_score = np.zeros(shape=(len(config.Features_order[0]), len(config.Features_order[1])))  
-        for i in range(len(config.Features_order[0])):
-            for j in range(len(config.Features_order[1])):
-                similarity_score[i][j] = distance.c_hash_metric[config.similarity_method](config.parsed_dataset[0][config.Features_order[0][i]], config.parsed_dataset[1][config.Features_order[1][j]])
-        #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
-        #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
-        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.pvalue, x.qvalue ))
+        similarity_score = config.similarity_table 
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.worst_pvalue, x.qvalue ))
      
         def _is_in_an_assciostions(i,j):
             for n in range(len(sorted_associations)):
@@ -541,8 +545,8 @@ def _report():
                     except:
                         circos_tabel[i][j] = 0
         logger.write_circos_table(circos_tabel, str(config.output_dir)+"/" +"circos_table_"+ config.similarity_method+".txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
-        logger.write_table(similarity_score,str(config.output_dir)+"/" + "similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
-        return
+        #logger.write_table(similarity_score,str(config.output_dir)+"/" + "similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
+        logger.write_table(config.pvalues, str(config.output_dir)+"/" + "pvalues_table.txt", rowheader=config.FeatureNames[0], colheader=config.FeatureNames[1], corner = "#")
     def _heatmap_associations_R():
         global associated_feature_X_indecies
         global associated_feature_Y_indecies
@@ -566,7 +570,7 @@ def _report():
         for i in range(len(config.Features_order[0])):
             for j in range(len(config.Features_order[1])):
                 similarity_score[i][j] = distance.c_hash_metric[config.similarity_method](config.parsed_dataset[0][config.Features_order[0][i]], config.parsed_dataset[1][config.Features_order[1][j]])
-        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.pvalue, x.qvalue ))
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.worst_pvalue, x.qvalue ))
         
         #sorted_associations = sorted(sorted_associations, key=lambda x: ( x.s)
         for association in sorted_associations:
@@ -743,7 +747,6 @@ def write_config():
     csvw.writerow(["q: FDR cut-off : ", config.q]) 
     csvw.writerow(["FDR adjusting method : ", config.p_adjust_method]) 
     csvw.writerow(["FDR style using : ", config.fdr_style])
-    #csvw.writerow(["r: effect size for robustness : ", config.robustness]) 
     csvw.writerow(["Applied stop condition : ", config.apply_stop_condition]) 
     csvw.writerow(["Discretizing method : ", config.strDiscretizing])
     csvw.writerow(["Permutation function: ", config.permutation_func])
@@ -794,6 +797,13 @@ def run():
     if config.log_input:
         logger.write_table(data=config.parsed_dataset[0], name=config.output_dir+"/X_dataset.txt", rowheader=config.FeatureNames[0] , colheader=config.SampleNames[0], prefix = "label",  corner = '#', delimiter= '\t')
         logger.write_table(data=config.parsed_dataset[1], name=config.output_dir+"/Y_dataset.txt", rowheader=config.FeatureNames[1] , colheader=config.SampleNames[1], prefix = "label",  corner = '#', delimiter= '\t')
+    
+    start_time = time.time()
+    _similarity_between()
+    excution_time_temp = time.time() - start_time
+    csvw.writerow(["Similarity between two datasets features time", str(datetime.timedelta(seconds=excution_time_temp)) ])
+    print("--- %s h:m:s similarity caluclation between two datasets featurestime ---" % str(datetime.timedelta(seconds=excution_time_temp)))
+    
     if config.descending == "AllA":
         print("--- association hypotheses testing is started, this task may take longer ...")
         start_time = time.time()
@@ -812,10 +822,7 @@ def run():
         # coupling clusters hierarchically 
         start_time = time.time()
         #_couple()
-        if config.fdr_style == 'level':
-            _test_by_level()
-        elif config.fdr_style == 'family':
-            _test_by_family()
+        _test_by_level()
         excution_time_temp = time.time() - start_time
         csvw.writerow(["Level-by-level hypothesis testing", str(datetime.timedelta(seconds=excution_time_temp)) ])
         print("--- %s h:m:s level-by-level hypothesis testing ---" % str(datetime.timedelta(seconds=excution_time_temp)))
