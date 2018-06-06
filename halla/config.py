@@ -84,6 +84,7 @@ strFile1 = None
 strFile2 = None
 outcome = None
 pvalues = None
+number_of_pairs = None
 similarity_table = None
 similarity_rank = None
 def reset_default():

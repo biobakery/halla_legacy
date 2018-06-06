@@ -944,7 +944,7 @@ def permutation_test_by_representative(hierarchy1, hierarchy2):
 	dataset2 = config.parsed_dataset[1]
 
 	worst_rep_1, worst_rep_2, best_rep_1, best_rep_2 = farthest(dataset1, dataset2, hierarchy1, hierarchy2,  config.similarity_method)
-	
+
 	if config.similarity_method == 'spearman' and config.permutation_func == "none":# and randomization_method != "permutation" :
 		best_sim_score = config.similarity_table[best_rep_1, best_rep_2]
 		worst_sim_score = config.similarity_table[worst_rep_1, worst_rep_2]

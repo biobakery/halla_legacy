@@ -179,7 +179,7 @@ def load_associations( path, largest=None, strongest=None, orderby = 'similarity
     with open( path ) as fh:
         for row in csv.reader( fh, dialect="excel-tab" ):
             if "association" not in row[0]:
-                pairs.append( [row[0], row[1].split(";"), row[2].split( ";" ), float(row[3]), float(row[4]),  float(row[5])] )
+                pairs.append( [row[0], row[1].split(";"), row[2].split( ";" ), row[3], row[4], row[5]] )
     if largest is not None and strongest is not None:
         sys.exit( "Can only specify one of LARGEST and STRONGEST" )
     elif largest is not None:
@@ -187,7 +187,7 @@ def load_associations( path, largest=None, strongest=None, orderby = 'similarity
         pairs = pairs[0:min( len( pairs ), largest )]
     elif strongest is not None:
         # not reversed, smaller p = stronger assoc
-        pairs = sorted( pairs, key=lambda row: abs(row[dic_order[orderby]]), reverse=True )
+        pairs = sorted( pairs, key=lambda row: abs(float(row[dic_order[orderby]])), reverse=True )
         pairs = pairs[0:min( len( pairs ), strongest )]
     return pairs
 

@@ -134,6 +134,7 @@ def _similarity_between():
     config.similarity_table = similarity_score#pd.DataFrame(similarity_score, index = X_labels, columns = Y_labels)
     #print similarity_score.shape
     m_n = m*n
+    config.number_of_pairs = m_n
     abs_similarity_score = numpy.fabs(similarity_score)
     config.similarity_rank = (1 + m_n - rankdata(abs_similarity_score, method='ordinal')).reshape(abs_similarity_score.shape)
     for i in range(config.similarity_rank.shape[0]):
@@ -329,7 +330,7 @@ def _report():
 
         #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
         #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
-        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.worst_pvalue, x.qvalue ))
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score)))
 
         for association in sorted_associations:
             number_of_association += 1
@@ -359,7 +360,7 @@ def _report():
         
     #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
     #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
-    sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.worst_pvalue, x.qvalue ))
+    sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score)))
 
     if config.descending == "AllA":
         config.Features_order[0]  = [i for i in range(len(config.original_dataset[0]))]   
@@ -527,7 +528,7 @@ def _report():
         Y_labels_circos = np.array([re.sub('[^a-zA-Z0-9  \n\.]', '_', config.FeatureNames[1][i]).replace(' ','_') for i in config.Features_order[1]])
         
         similarity_score = config.similarity_table 
-        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.worst_pvalue, x.qvalue ))
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score)))
      
         def _is_in_an_assciostions(i,j):
             for n in range(len(sorted_associations)):
@@ -546,7 +547,6 @@ def _report():
                         circos_tabel[i][j] = 0
         logger.write_circos_table(circos_tabel, str(config.output_dir)+"/" +"circos_table_"+ config.similarity_method+".txt", rowheader=X_labels_circos, colheader=Y_labels_circos, corner = "Data")         
         #logger.write_table(similarity_score,str(config.output_dir)+"/" + "similarity_table.txt", rowheader=X_labels, colheader=Y_labels, corner = "#")
-        logger.write_table(config.pvalues, str(config.output_dir)+"/" + "pvalues_table.txt", rowheader=config.FeatureNames[0], colheader=config.FeatureNames[1], corner = "#")
     def _heatmap_associations_R():
         global associated_feature_X_indecies
         global associated_feature_Y_indecies
@@ -570,7 +570,7 @@ def _report():
         for i in range(len(config.Features_order[0])):
             for j in range(len(config.Features_order[1])):
                 similarity_score[i][j] = distance.c_hash_metric[config.similarity_method](config.parsed_dataset[0][config.Features_order[0][i]], config.parsed_dataset[1][config.Features_order[1][j]])
-        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score), x.worst_pvalue, x.qvalue ))
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score) ))
         
         #sorted_associations = sorted(sorted_associations, key=lambda x: ( x.s)
         for association in sorted_associations:
@@ -802,7 +802,7 @@ def run():
     _similarity_between()
     excution_time_temp = time.time() - start_time
     csvw.writerow(["Similarity between two datasets features time", str(datetime.timedelta(seconds=excution_time_temp)) ])
-    print("--- %s h:m:s similarity caluclation between two datasets featurestime ---" % str(datetime.timedelta(seconds=excution_time_temp)))
+    print("--- %s h:m:s similarity caluclation between two datasets features time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
     
     if config.descending == "AllA":
         print("--- association hypotheses testing is started, this task may take longer ...")
@@ -836,6 +836,8 @@ def run():
         #print("--- %s h:m:s hypotheses testing time ---" % str(datetime.timedelta(seconds=excution_time_temp)))
     
     # Generate a report
+    logger.write_table(config.pvalues, str(config.output_dir)+"/" + "pvalues_table.txt", rowheader=config.FeatureNames[0], colheader=config.FeatureNames[1], corner = "#")
+
     start_time = time.time() 
     _summary_statistics('final') 
     excution_time_temp = time.time() - start_time
@@ -860,14 +862,5 @@ def view_singleton(pBags):
             aOut.append([aIndices, fP])
     return aOut 
 
-def is_correct_submethods_combination():
-    if config.descending == "AllA" and config.decomposition in ['farthest']:
-        config.decomposition = 'none'        
-    if (config.descending == "AllA" and not config.decomposition in ['none', "pls","cca"]) or\
-                        (config.descending == "HAllA" and config.decomposition =='none') or\
-                        (config.decomposition in ["ica","pca",'pls', 'cca', 'kpca'] and\
-                        config.similarity_method not in ["pearson", "spearman","mic","dcor"] ) or\
-                        (config.descending == "HAllA" and config.decomposition in  ['pls', 'cca']):
-            False
-    else:
-        return True
+def is_correct_submethods_combination():        
+    return True
