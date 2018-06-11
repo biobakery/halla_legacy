@@ -470,11 +470,11 @@ def balanced_synthetic_dataset_uniform(D, N, B, within_noise = 0.5, between_nois
     print ("Number of features %s, number of samples: %s, number of clusters: %s, number of features within each cluster: %s")\
          %(D, N, B, blockSize)
     if association_type == "L":
-        '''if N % 2 == 0:
-            N2 # Even 
+        if N % 2 != 0:
+            N +=1 
         else:
             pass # Odd'''
-        common_base = numpy.hstack((numpy.random.uniform(low=-1.0,high=-1.0 ,size=(B,(N-1)/2)), numpy.random.uniform(low=-1,high=10 ,size=(B,(N+1)/2))))
+        common_base = numpy.hstack((numpy.random.uniform(low=-1.0,high=-1.0 ,size=(B,N/2)), numpy.random.uniform(low=-1,high=10 ,size=(B,N/2))))
         for l in range(B):
             common_base[l]= numpy.random.permutation(common_base[l])
     else:
