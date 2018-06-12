@@ -1073,14 +1073,14 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                             change_level_flag = False
                         if not bTauX:
                             #print (level_number  / cut_speed_1 , level_number, level_number_2)
-                            apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
+                            apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0], number_of_estimated_clusters=2)
                         else:
                            apChildren0 = [a] 
                     else:
                         apChildren0 = [a]
                 else:
                     if not bTauX:
-                        apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
+                        apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0], number_of_estimated_clusters = 2)
                     elif not bTauY:
                         apChildren0 = [a]
                     
@@ -1090,14 +1090,14 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                             level_number_2 += 1
                             change_level_flag = False
                         if not bTauY:
-                            apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
+                            apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1], number_of_estimated_clusters = 2)
                         else:
                             apChildren1 = [b]
                     else:
                         apChildren1 = [b]
                 else:
                     if not bTauY:
-                        apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])
+                        apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1], number_of_estimated_clusters = 2)
                     elif not bTauX:
                         apChildren1 = [b]
                 #generate sub hypothesis for current hypothesis and add them to next level
