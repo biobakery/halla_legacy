@@ -61,6 +61,7 @@ format_feature_names = False
 write_hypothesis_tree = False
 report_results =  True
 transform_method = ''
+do_alla_halla = True
 #==================================================================#
 # Mutable Meta Objects  
 #==================================================================#

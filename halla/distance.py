@@ -13,7 +13,7 @@ import scipy
 import scipy.cluster
 from scipy.spatial.distance import cdist
 import scipy.stats
-
+from scipy.stats import chi2_contingency
 from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, \
     adjusted_mutual_info_score, make_scorer, r2_score
 from scipy.spatial.distance import pdist, squareform
@@ -37,6 +37,7 @@ c_hash_association_method_discretize = {"pearson": False,
 										"mi": True,
                                         "dmic":True,
                                         "ami": True,
+                                        "chi":True
 										}
 
 #==========================================================================#
@@ -94,7 +95,7 @@ def mi(pData1, pData2):
 	(3, 2) 0.311278124459
 	(3, 3) 0.311278124459
 	"""
-	return math.log(math.e, 2) * mutual_info_score(pData1, pData2)#return MutualInformation(pData1, pData2).get_distance()
+	return  mutual_info_score(pData1, pData2), None#return MutualInformation(pData1, pData2).get_distance() #math.log(math.e, 2) *
 def remove_pairs_with_a_missing(X, Y):
     if  not config.missing_char_category:
         test = [0 in [a, b] for a,b in zip(X,Y)]
@@ -138,7 +139,7 @@ def nmi(X, Y):
     """
     # remove pairs with a missing value in comparison  
     new_X , new_Y = remove_pairs_with_a_missing(X, Y)
-    return normalized_mutual_info_score(new_X, new_Y) #return NormalizedMutualInformation(pData1, pData2).get_distance() 
+    return normalized_mutual_info_score(new_X, new_Y), None #return NormalizedMutualInformation(pData1, pData2).get_distance() 
 
 def ami(X, Y):
     """ 
@@ -174,7 +175,7 @@ def ami(X, Y):
     # remove pairs with a missing value in comparison  
     new_X , new_Y = remove_pairs_with_a_missing(X, Y) 
     result = adjusted_mutual_info_score(new_X, new_Y)
-    return result 
+    return result, None 
  
 def pearson(X, Y):
     
@@ -185,7 +186,8 @@ def pearson(X, Y):
     if Y.ndim > 1:
     	Y = Y[0]
     new_X , new_Y = remove_pairs_with_a_missing(X, Y)
-    return scipy.stats.pearsonr(new_X, new_Y)[0]
+    pval, simval = scipy.stats.pearsonr(new_X, new_Y)
+    return pval, simval
 def spearman(X, Y):
     X = array(X)
     Y = array(Y)
@@ -193,7 +195,8 @@ def spearman(X, Y):
         X = X[0]
     if Y.ndim > 1:
         Y = Y[0]
-    return scipy.stats.spearmanr(X, Y, nan_policy='omit')[0]
+    pval, simval = scipy.stats.spearmanr(X, Y, nan_policy='omit')
+    return pval, simval
 def mic (X, Y):
     new_X , new_Y = remove_pairs_with_a_missing(X, Y)
     try:
@@ -204,7 +207,7 @@ def mic (X, Y):
             " Please check your install.") 
     mine = MINE(alpha=0.6, c=15)
     mine.compute_score(new_X , new_Y)
-    return mine.mic()
+    return mine.mic(),  None
 
 def distcorr(X, Y):
     """ Compute the distance correlation function
@@ -236,7 +239,7 @@ def distcorr(X, Y):
     dcov2_xx = (A * A).sum()/float(n * n)
     dcov2_yy = (B * B).sum()/float(n * n)
     dcor = np.sqrt(dcov2_xy)/np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
-    return dcor
+    return dcor, None
 
 def r2(X, Y):
     X = array(X)
@@ -247,10 +250,16 @@ def r2(X, Y):
         Y = Y[0]
     new_X , new_Y = remove_pairs_with_a_missing(X, Y)
     slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(new_X, new_Y)
-    return  r_value**2
+    return  r_value**2, p_value
     #coefficient_of_dermination =  r2_score(new_X, new_Y, multioutput='raw_values')
     #return coefficient_of_dermination
-    
+def chi(X, Y):
+    obs = np.zeros(shape = (len(set(X)), len(set(Y))), dtype=int)
+                #print config.parsed_dataset[0][i], config.parsed_dataset[1][j]
+    for i1, j1 in zip(X, Y):
+        obs [i1-1, j1-1] += 1
+    g, p, dof, _ = chi2_contingency(obs, lambda_="log-likelihood") 
+    return g, p   
 
 c_hash_metric = {"nmi": nmi,
                 "mi": mi,
@@ -261,7 +270,8 @@ c_hash_metric = {"nmi": nmi,
                 "mic": mic,
                 "dmic":mic,
                 "dcor":distcorr,
-                "r2": r2
+                "r2": r2,
+                "chi": chi
                 }
 
 #==========================================================================#
@@ -293,5 +303,5 @@ def pdist(pArray, metric="euclidean"):
 	return scipy.cluster.hierarchy.distance.pdist(pArray, pMetric)
 def pDistance(x, y):
     pMetric = c_hash_metric[config.similarity_method]
-    dist = math.fabs(1.0 - math.fabs(pMetric(x, y)))
+    dist = math.fabs(1.0 - math.fabs(pMetric(x, y)[0]))
     return  dist

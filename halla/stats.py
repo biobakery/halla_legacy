@@ -420,6 +420,23 @@ def medoid(pArray, iAxis=0, pMetric=distance.nmi):
 			medoid_index = i
 	#print "medoid index :", medoid_index, len(pArray)-1
 	return pArray[medoid_index, :]
+def farthest_rank (cluster1, cluster2):
+	worst_rep_1 = best_rep_1 = cluster1[0]
+	worst_rep_2 = best_rep_2 = cluster2[0]
+	best_rank = config.similarity_rank[best_rep_1, best_rep_2]
+	worst_rank = config.similarity_rank[worst_rep_1, worst_rep_2]
+	for i in cluster1:
+		for j in cluster2:
+			rank_temp = config.similarity_rank[i, j]
+			if rank_temp <= best_rank:
+				best_rank = rank_temp
+				best_rep_1, best_rep_2 =  i, j
+			if  rank_temp >= worst_rank:
+				worst_rank = rank_temp
+				worst_rep_1, worst_rep_2 = i, j 
+
+	return worst_rep_1, worst_rep_2, best_rep_1, best_rep_2
+
 def farthest (dataset1, dataset2, cluster1, cluster2, similarity_method):
 	pMe = distance.c_hash_metric [similarity_method]
 	best_rep_1 = cluster1[0]
@@ -432,7 +449,7 @@ def farthest (dataset1, dataset2, cluster1, cluster2, similarity_method):
 		m1 = dataset1[i, :]
 		for j in cluster2:
 			m2 = dataset2[j, :] 
-			sim_score_temp = math.fabs(pMe(m1, m2)) #= 1.0 - permutation_test_pvalue(m1, m2)#
+			sim_score_temp = math.fabs(pMe(m1, m2)[0]) #= 1.0 - permutation_test_pvalue(m1, m2)#
 			if sim_score_temp <= worst_similarity:
 				worst_similarity = sim_score_temp
 				worst_rep_1, worst_rep_2 =  i, j
@@ -830,7 +847,7 @@ def null_fun(X, Y):
 	pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
 	pMe = pHashMetric[strMetric]
-	return math.fabs(pMe(X, numpy.random.permutation(Y)))
+	return math.fabs(pMe(X, numpy.random.permutation(Y))[0])
 def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, similarity_method = None, seed = 0 ):
 	 
 	if not similarity_method:
@@ -849,7 +866,7 @@ def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, sim
 		return numpy.random.permutation(pVec)
 	pMe = pHashMetric[similarity_method] 
 	aDist = [] 
-	sim_score= pMe(X, Y)
+	sim_score= pMe(X, Y)[0]
 	fAssociation = math.fabs(sim_score)
 	fP = 1.0 
 	def _calculate_num_exceedances(observed_value, random_distribution):
@@ -883,7 +900,7 @@ def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, sim
 			for i in range(iterations):
 				iter = i
 				permuted_Y = numpy.random.permutation(Y)
-				fAssociation_permuted = math.fabs(pMe(X, permuted_Y))  
+				fAssociation_permuted = math.fabs(pMe(X, permuted_Y)[0])  
 				aDist.append(fAssociation_permuted)
 				if i % 50 == 0:
 					new_fP2 = _calculate_pvalue(i) #estimate_pvalue(sim_score, aDist) #
@@ -928,6 +945,7 @@ def permutation_test_by_representative(hierarchy1, hierarchy2):
 	pArray1, pArray2, metric = "mi", decomposition = "pca", iterations = 1000
 
 	"""
+	
 	metric = config.similarity_method
 	decomposition = config.decomposition
 	iterations=config.iterations
@@ -937,7 +955,7 @@ def permutation_test_by_representative(hierarchy1, hierarchy2):
 	strMetric = metric 
 	pHashMetric = distance.c_hash_metric 
 	
-	pMe = pHashMetric[config.similarity_method] 
+	#pMe = pHashMetric[config.similarity_method] 
 
 	#### Calculate Point estimate
 	dataset1 = config.parsed_dataset[0]
@@ -949,14 +967,14 @@ def permutation_test_by_representative(hierarchy1, hierarchy2):
 		best_sim_score = config.similarity_table[best_rep_1, best_rep_2]
 		worst_sim_score = config.similarity_table[worst_rep_1, worst_rep_2]
 		if config.pvalues[best_rep_1,best_rep_2] is None:
-			best_sim_score, best_pvalue = scipy.stats.spearmanr(dataset1[best_rep_1, ], dataset2[best_rep_2, ], nan_policy='omit')
+			best_sim_score, best_pvalue = distance.c_hash_metric[config.similarity_method](dataset1[best_rep_1, ], dataset2[best_rep_2, ])
 			config.pvalues[best_rep_1,best_rep_2] = best_pvalue
 		else:
 			best_pvalue = config.pvalues[best_rep_1, best_rep_2]
 			best_sim_score = config.similarity_table[best_rep_1, best_rep_2]
 		
 		if config.pvalues[worst_rep_1,worst_rep_2] is None:
-			worst_sim_score, worst_pvalue = scipy.stats.spearmanr(dataset1[worst_rep_1,], dataset2[worst_rep_2,], nan_policy='omit')
+			worst_sim_score, worst_pvalue = distance.c_hash_metric[config.similarity_method](dataset1[worst_rep_1,], dataset2[worst_rep_2,])
 			config.pvalues[worst_rep_1, worst_rep_2] = worst_pvalue
 		else:
 			worst_pvalue = config.pvalues[worst_rep_1, worst_rep_2]
@@ -967,7 +985,21 @@ def permutation_test_by_representative(hierarchy1, hierarchy2):
 		best_sim_score = config.similarity_table[best_rep_1,best_rep_2]
 		worst_sim_score = config.similarity_table[worst_rep_1,worst_rep_2]
 		if config.pvalues[best_rep_1,best_rep_2] is None:
-			best_sim_score, best_pvalue = scipy.stats.pearsonr(dataset1[best_rep_1, ], dataset2[best_rep_2, ])
+			best_sim_score, best_pvalue = distance.c_hash_metric[config.similarity_method](dataset1[best_rep_1, ], dataset2[best_rep_2, ])
+			config.pvalues[best_rep_1,best_rep_2] = best_pvalue
+		else:
+			best_pvalue = config.pvalues[best_rep_1,best_rep_2]
+		
+		if config.pvalues[worst_rep_1,worst_rep_2] is None:	
+			worst_sim_score, worst_pvalue = distance.c_hash_metric[config.similarity_method](dataset1[worst_rep_1,], dataset2[worst_rep_2,])
+			config.pvalues[worst_rep_1, worst_rep_2] = worst_pvalue
+		else:
+			worst_pvalue = config.pvalues[worst_rep_1, worst_rep_2]
+	elif  config.similarity_method == 'chi' and config.permutation_func == "none":# and randomization_method != "permutation" :
+		best_sim_score = config.similarity_table[best_rep_1,best_rep_2]
+		worst_sim_score = config.similarity_table[worst_rep_1,worst_rep_2]
+		if config.pvalues[best_rep_1,best_rep_2] is None:
+			best_sim_score, best_pvalue = distance.c_hash_metric[config.similarity_method](dataset1[best_rep_1, ], dataset2[best_rep_2, ])
 			config.pvalues[best_rep_1,best_rep_2] = best_pvalue
 		else:
 			best_pvalue = config.pvalues[best_rep_1,best_rep_2]
@@ -980,6 +1012,7 @@ def permutation_test_by_representative(hierarchy1, hierarchy2):
 			
 		#print "Pearson: ", best_pvalue, worst_pvalue
 	else:
+		
 		best_sim_score = config.similarity_table[best_rep_1,best_rep_2]
 		worst_sim_score = config.similarity_table[worst_rep_1, worst_rep_2]
 		if config.pvalues[best_rep_1,best_rep_2] is None:
@@ -992,8 +1025,6 @@ def permutation_test_by_representative(hierarchy1, hierarchy2):
 			config.pvalues[worst_rep_1, worst_rep_2] = worst_pvalue
 		else:
 			worst_pvalue = config.pvalues[worst_rep_1, worst_rep_2]
-				
-		
 		
 	return worst_pvalue, best_pvalue, worst_sim_score, best_sim_score, worst_rep_1, worst_rep_2, best_rep_1, best_rep_2 
 
@@ -1977,7 +2008,7 @@ def nonparametric_test_pvalue(X, Y, similarity_method = None,  alpha_cutoff = 0.
 		similarity_method = config.similarity_method
 		
 	pMe = distance.c_hash_metric[similarity_method]
-	sim_score = pMe(X, Y)
+	sim_score = pMe(X, Y)[0]
 	sim_score = math.fabs(sim_score)
 	# The number of null samples to start with
 	start_samples =  100

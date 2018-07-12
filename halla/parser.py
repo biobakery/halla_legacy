@@ -214,6 +214,10 @@ class Input:
 				
 				used_names.append(aNames[i]) 
 				aOut.append(line)
+			# if there is categorical data then do HAllA with AllA style of 
+			# finding the BH threshold using all p-values
+			if "LEX" in aTypes:
+				config.do_alla_halla = True
 
 			return aOut, used_names, aTypes, aHeaders 
 

@@ -62,8 +62,7 @@ def load_table(args):
         df2 = pd.read_csv(str(args.input)+'/Y_dataset.txt', sep='\t', header=0, index_col =0)
     except ImportError:
         sys.exit("Input Error for plotting points file!") 
-    association_number = 1
-    sim_rank , row_items, col_items, sig, _, _ = associations[args.association_number]   
+    sim_rank , row_items, col_items, sig, _, _ = associations[args.association_number-1]   
     two_clusters = pd.concat([df1.loc[row_items], df2.loc[col_items]], axis=0, ignore_index=True)
     two_labels = row_items + col_items
     df_all = pd.DataFrame(np.array(two_clusters, dtype= float).T ,columns=np.array(two_labels))

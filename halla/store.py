@@ -27,6 +27,7 @@ import datetime
 from scipy.stats import rankdata
 import pandas as pd
 import numpy
+from scipy.stats import chi2_contingency
 #  Load a halla module to check the installation
 try:
     from . import hierarchy
@@ -53,7 +54,7 @@ def smart_decisoin():
         else:
             config.similarity_method = 'nmi' 
     if config.permutation_func == '':
-        if config.similarity_method in ['spearman', 'pearson']:
+        if config.similarity_method in ['spearman', 'pearson', 'chi']:
             config.permutation_func = 'none'
         else:
             config.permutation_func = 'gpd'
@@ -72,10 +73,10 @@ def smart_decisoin():
 def bypass_discretizing():
     """
     This module decide if the discretizing should by bypassed or not based on 
-    similarity metric and decomposition method
+    similarity metric method
     """
     if config.strDiscretizing == "none" or\
-        config.similarity_method in ["pearson"] or config.decomposition in ["pca", "ica"] or \
+        config.similarity_method in ["pearson"] or \
         not distance.c_hash_association_method_discretize[config.similarity_method]:
         return True
     else:
@@ -114,10 +115,18 @@ def set_parsed_data():
 
 def _hclust():
     config.meta_data_tree = []
+    flag = False
+    temp = ''
+    if config.similarity_method in ['mi', 'chi']:
+        temp = config.similarity_method
+        config.similarity_method = 'nmi' 
+        flag = True
     tree1, config.Features_order[0] = hierarchy.hclust(config.parsed_dataset[0], labels=config.FeatureNames[0],  dataset_number = 0)
     config.meta_data_tree.append(tree1)
     tree2, config.Features_order[1]= hierarchy.hclust(config.parsed_dataset[1] , labels=config.FeatureNames[1], dataset_number = 1)
     config.meta_data_tree.append(tree2)
+    if flag:
+        config.similarity_method = temp
     # config.meta_data_tree = config.m( config.parsed_dataset, lambda x: hclust(x , bTree=True) )
     return config.meta_data_tree 
 def _similarity_between():
@@ -129,14 +138,24 @@ def _similarity_between():
     config.rank_index = np.zeros(shape=(n*m, 2),dtype=int)
     for i in range(n):
         for j in range(m):
-            similarity_score[i,j] = distance.c_hash_metric[config.similarity_method](config.parsed_dataset[0][i], config.parsed_dataset[1][j])    
+            similarity_score[i,j] , config.pvalues[i,j]  = distance.c_hash_metric[config.similarity_method](config.parsed_dataset[0][i], config.parsed_dataset[1][j])
     logger.write_table(similarity_score,str(config.output_dir)+"/" + "similarity_table.txt", rowheader=config.FeatureNames[0], colheader=config.FeatureNames[1], corner = "#")
-    config.similarity_table = similarity_score#pd.DataFrame(similarity_score, index = X_labels, columns = Y_labels)
+    config.similarity_table =  similarity_score#pd.DataFrame(similarity_score, index = X_labels, columns = Y_labels)
     #print similarity_score.shape
     m_n = m*n
     config.number_of_pairs = m_n
-    abs_similarity_score = numpy.fabs(similarity_score)
-    config.similarity_rank = (1 + m_n - rankdata(abs_similarity_score, method='ordinal')).reshape(abs_similarity_score.shape)
+    if config.similarity_method in ['chi', 'pearson', 'spearman'] and config.permutation_func == 'none':
+        config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
+    elif config.do_alla_halla:
+        #use p-value rank and calculate actual p-value
+        for i in range(n):
+            for j in range(m):
+                config.pvalues[i,j] = stats.permutation_test_pvalue(config.parsed_dataset[0][i], config.parsed_dataset[1][j])
+        config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
+    else:
+        #use monotonicity relationship and calculate similarity score ranks
+        abs_similarity_score = numpy.fabs(similarity_score)
+        config.similarity_rank = (1 + m_n - rankdata(abs_similarity_score, method='ordinal')).reshape(abs_similarity_score.shape)
     for i in range(config.similarity_rank.shape[0]):
         for j in range(config.similarity_rank.shape[1]):
             config.rank_index[config.similarity_rank[i, j]-1,] = [i, j]
@@ -308,7 +327,6 @@ def _report():
     def _report_all_tests():
         output_file_all  = open(str(config.output_dir)+'/all_association_results_one_by_one.txt', 'w')
         csvw = csv.writer(output_file_all, csv.excel_tab, delimiter='\t')
-        #csvw.writerow(["Decomposition method: ", config.decomposition  +"-"+ config.similarity_method , "q value: " + str(config.q), "metric " +config.similarity_method])
         csvw.writerow(["First Dataset", "Second Dataset", "pvalue", "qvalue"])
 
         for line in aaOut:
@@ -323,7 +341,6 @@ def _report():
         number_of_association_faeture = 0
         output_file_associations  = open(str(config.output_dir)+'/associations.txt', 'w')
         bcsvw = csv.writer(output_file_associations, csv.excel_tab, delimiter='\t')
-        #bcsvw.writerow(["Method: " + config.decomposition +"-"+ config.similarity_method , "q value: " + str(config.q), "metric " + config.similarity_method])
         bcsvw.writerow(["association_rank", "cluster1", \
                         "cluster2", \
                         "pvalue", "qvalue", "similarity_score_between_clusters"])
@@ -679,8 +696,8 @@ def _report():
                 ro.r('pheatmap(drows2, filename =D2, cellwidth = 10, cellheight = 10, fontsize = 10, show_rownames = T,  show_colnames = F, cluster_cols=T, dendrogram="row")')#,scale="row",  key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5
                 ro.r('dev.off()')
     def _hallagram_strongest(n):
-        if config.similarity_method=="nmi":
-            sim_color = ' --similarity=\"NMI\" --cmap=YlGnBu'
+        if distance.c_hash_association_method_discretize[config.similarity_method]:
+            sim_color = ' --similarity='+ config.similarity_method+' --cmap=YlGnBu'
         else:
             sim_color =''
         #_heatmap_associations()
@@ -741,7 +758,7 @@ def write_config():
         sys.exit("IO Exception: "+config.output_dir+"/performance.txt") 
     csvw = csv.writer(performance_file, csv.excel_tab, delimiter='\t')
     csvw.writerow(["HAllA version:", config.version])
-    csvw.writerow(["Decomposition method: ", config.decomposition])
+    csvw.writerow(["Descending approach: ", config.descending])
     csvw.writerow(["Similarity method: ", config.similarity_method]) 
     csvw.writerow(["Hierarchical linkage method: ", config.linkage_method]) 
     csvw.writerow(["q: FDR cut-off : ", config.q]) 

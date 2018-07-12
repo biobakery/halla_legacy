@@ -230,7 +230,7 @@ def heatmap2(pArray1, pArray2 = None, xlabels = None, ylabels = None, filename='
     # # Remember, pMetric is a notion of _strength_, not _distance_ 
     # print str(pMetric)
     def pDistance(x, y):
-        return  1.0 - matha.fabs(pMetric(x, y))
+        return  1.0 - matha.fabs(pMetric(x, y)[0])
     
     #D = pdist(pArray, metric=pDistance)
     #print len(pArray1), len(pArray2)

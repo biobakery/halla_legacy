@@ -779,12 +779,12 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
     Hypothesis_Tree_Root.level_number = 0
     
     # Get the first level homogeneous clusters
-    apChildren0 = get_homogenous_clusters_silhouette (apClusterNode0[0], config.Distance[0])
-    apChildren1 = get_homogenous_clusters_silhouette (apClusterNode1[0], config.Distance[1])
+    apChildren1 = get_homogenous_clusters_silhouette (apClusterNode0[0], config.Distance[0])
+    apChildren2 = get_homogenous_clusters_silhouette (apClusterNode1[0], config.Distance[1])
     
     childList = []
     L = []    
-    for a, b in itertools.product(apChildren0, apChildren1):
+    for a, b in itertools.product(apChildren1, apChildren2):
         try:
             data1 = a.pre_order(lambda x: x.id)
             data2 = b.pre_order(lambda x: x.id)
@@ -818,18 +818,18 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
                     level_number += 1
                 continue
         if not bTauX:
-            apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0])
+            apChildren1 = get_homogenous_clusters_silhouette(a,config.Distance[0])
         else:
-            apChildren0 = [a]
+            apChildren1 = [a]
         if not bTauY:
-            apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1])#cutree_to_get_number_of_clusters([b])
+            apChildren2 = get_homogenous_clusters_silhouette(b,config.Distance[1])#cutree_to_get_number_of_clusters([b])
             #cutree_to_get_number_of_features(b)
             ##
             #get_homogenous_clusters_silhouette(b,1)#
         else:
-            apChildren1 = [b]
+            apChildren2 = [b]
 
-        LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren0, apChildren1)] 
+        LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren1, apChildren2)] 
         childList = []
         while LChild:
             (a1, b1) = LChild.pop(0)
@@ -956,7 +956,24 @@ def find_p_threshold( low, high, prev_delta_t = 0 ):
             return find_p_threshold( low, mid-1, delta_t ) 
         else:
             return rank_sig
-options = []        
+options = [] 
+def gini_impurity(array, rank):
+    # Return 0 impurity for the empty set
+    if len(array) == 0:
+        return 0.0
+    # Get probabilities of element values in array
+    probability_pass_fdr = sum(i<=rank for i in array)/float(len(array))
+    #print probability_pass_fdr
+    probability_fail_fdr = 1.0 - probability_pass_fdr
+    # Calculate impurity = 1 - sum(squared_probability)
+    return 1.0 - probability_pass_fdr* probability_pass_fdr - probability_fail_fdr*probability_fail_fdr
+
+
+def gini_gain(array, splits, rank):
+    # Average child gini impurity
+    splits_impurity = sum([gini_impurity(split, rank)*float(len(split))/len(array) for split in splits])
+    return gini_impurity(array, rank) - splits_impurity
+       
 def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="uniform", strLinkage="min", robustness = None):
     func = config.similarity_method
     X, Y = dataset1, dataset2
@@ -994,13 +1011,13 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     csvwc.writerow(aLineOut)
     
     # Get the first level homogeneous clusters
-    apChildren0 = get_homogenous_clusters_silhouette (apClusterNode0[0], config.Distance[0])
-    apChildren1 = get_homogenous_clusters_silhouette (apClusterNode1[0], config.Distance[1])
+    apChildren1 = get_homogenous_clusters_silhouette (apClusterNode0[0], config.Distance[0], 2)
+    apChildren2 = get_homogenous_clusters_silhouette (apClusterNode1[0], config.Distance[1], 2)
     current_level_nodes = []
     current_level_tests = []    
     level_number = 1
       
-    for a, b in itertools.product(apChildren0, apChildren1):
+    for a, b in itertools.product(apChildren1, apChildren2):
         try:
             data1 = a.pre_order(lambda x: x.id)
             data2 = b.pre_order(lambda x: x.id)
@@ -1073,16 +1090,16 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                             change_level_flag = False
                         if not bTauX:
                             #print (level_number  / cut_speed_1 , level_number, level_number_2)
-                            apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0], number_of_estimated_clusters=2)
+                            apChildren1 = get_homogenous_clusters_silhouette(a,config.Distance[0],2)
                         else:
-                           apChildren0 = [a] 
+                           apChildren1 = [a] 
                     else:
-                        apChildren0 = [a]
+                        apChildren1 = [a]
                 else:
                     if not bTauX:
-                        apChildren0 = get_homogenous_clusters_silhouette(a,config.Distance[0], number_of_estimated_clusters = 2)
+                        apChildren1 = get_homogenous_clusters_silhouette(a,config.Distance[0],2)
                     elif not bTauY:
-                        apChildren0 = [a]
+                        apChildren1 = [a]
                     
                 if cut_speed_2 != 1:
                     if level_number  / cut_speed_2 > level_number_2: 
@@ -1090,18 +1107,39 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                             level_number_2 += 1
                             change_level_flag = False
                         if not bTauY:
-                            apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1], number_of_estimated_clusters = 2)
+                            apChildren2 = get_homogenous_clusters_silhouette(b,config.Distance[1],2)
                         else:
-                            apChildren1 = [b]
+                            apChildren2 = [b]
                     else:
-                        apChildren1 = [b]
+                        apChildren2 = [b]
                 else:
                     if not bTauY:
-                        apChildren1 = get_homogenous_clusters_silhouette(b,config.Distance[1], number_of_estimated_clusters = 2)
+                        apChildren2 = get_homogenous_clusters_silhouette(b,config.Distance[1],2)
                     elif not bTauX:
-                        apChildren1 = [b]
+                        apChildren2 = [b]
+                # decide based on Gini gaining to cut
+                data1 = a.pre_order(lambda x: x.id)
+                data2 = b.pre_order(lambda x: x.id)
+                #print 'data', data1, data2
+                parent_class = [config.similarity_rank[i, j] for i, j in itertools.product(data1, data2)]
+                #print 'Array:', parent_class
+                splits1 = [[config.similarity_rank[i, j] for i, j in itertools.product(a1.pre_order(lambda x: x.id), data2)]  
+                           for a1 in apChildren1]
+                #print splits1
+                g1 = gini_gain(parent_class, splits1, p_rank)
+                splits2 = [[config.similarity_rank[i, j] for i, j in itertools.product(data1, b1.pre_order(lambda x: x.id))]
+                           for b1 in apChildren2]
+                #print splits2
+                g2 = gini_gain(parent_class, splits2, p_rank)
+                
+                #print 'Gini gain 1:', g1, 'Gini gain 2:', g2
+                if g2 > g1:
+                   apChildren1  = [a]
+                elif g1 > g2:
+                   apChildren2  = [b] 
+                
                 #generate sub hypothesis for current hypothesis and add them to next level
-                LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren0, apChildren1)] 
+                LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren1, apChildren2)] 
                 while LChild:
                     (a1, b1) = LChild.pop(0)
                     try:
@@ -1161,10 +1199,6 @@ def naive_all_against_all():
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
     p_adjusting_method = config.p_adjust_method
-    method = config.randomization_method
-    metric = config.similarity_method
-    iIter= config.iterations
-    discretize_style = config.strDiscretizing
     
     iRow = len(dataset1)
     iCol = len(dataset2)
@@ -1228,13 +1262,21 @@ def naive_all_against_all():
     print("--- number of passed tests after FDR controlling: %s "%len(significant_hypotheses)) 
     return significant_hypotheses, tested_hypotheses
 
-   
+def majority_significant(test, rank, majority = 0.5):
+    ranks_in_block = [config.similarity_rank[i, j] for i, j in itertools.product(test.m_pData[0], test.m_pData[1])]
+    propotion_passed_fdr = sum(i<=rank for i in ranks_in_block)/float(len(ranks_in_block))
+    if propotion_passed_fdr >= majority:
+        return True
+    else:
+        return False   
 def significance_testing(current_level_tests, p_rank, level = None):
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
-
     for test in current_level_tests:
-        test.xw, test.yw, test.xb, test.yb = stats.farthest (dataset1, dataset2, test.m_pData[0], test.m_pData[1], config.similarity_method)
+        #if config.do_alla_halla:
+        test.xw, test.yw, test.xb, test.yb = stats.farthest_rank (test.m_pData[0], test.m_pData[1])
+        #else:
+        #    test.xw, test.yw, test.xb, test.yb = stats.farthest (dataset1, dataset2, test.m_pData[0], test.m_pData[1], config.similarity_method)
         test.similarity_score = config.similarity_table[test.xw, test.yw]
     hsci_within_pvalues = []
     hsci_between_pvalues = []
@@ -1242,8 +1284,8 @@ def significance_testing(current_level_tests, p_rank, level = None):
     passed_tests = []  
     if config.p_adjust_method in ["bh", "by"]:
         for test in current_level_tests:
-            if config.similarity_rank[test.xw, test.yw] <= p_rank:
-                #print config.similarity_rank[current_level_tests[i].xw, current_level_tests[i].yw]
+            if majority_significant(test, p_rank, majority = 0.75):#if config.similarity_rank[test.xw, test.yw] <= p_rank:
+                #print config.similarity_rank[test.xw, test.yw]
                 test.significance = True
             elif config.similarity_rank[test.xb, test.yb] > p_rank:
                 test.significance = False
