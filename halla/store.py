@@ -150,7 +150,7 @@ def _similarity_between():
             for j in range(m):
                 config.pvalues[i,j] = stats.permutation_test_pvalue(config.parsed_dataset[0][i], config.parsed_dataset[1][j])
         config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
-    elif not c_hash_association_method_discretize[config.similarity_method] and config.permutation_func == 'none':
+    elif not distance.c_hash_association_method_discretize[config.similarity_method] and config.permutation_func == 'none':
         config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
     else:
         #use monotonicity relationship and calculate similarity score ranks
