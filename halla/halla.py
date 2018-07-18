@@ -165,7 +165,7 @@ def parse_arguments (args):
         metavar="<.25>",
         dest="fnr",
         type=float,
-        default=0.1,
+        default=0.25,
         help="Estimated False Negative Rate in block association\n[default = 0.25]")
     argp.add_argument(
         "-p", "--permutation",
