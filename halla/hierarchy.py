@@ -695,10 +695,13 @@ def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
 def get_leaves(cluster):
     return cluster.pre_order(lambda x: x.id)  
     
-def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters= None, resolution= 'high'):
+def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters= None, bifurcate = False, resolution= 'high'):
     n = cluster.get_count()
     if n==1:
         return [cluster]
+    if bifurcate: 
+        sub_clusters =  truncate_tree([cluster], level=0, skip=1)
+        return sub_clusters
     if resolution == 'low' :
         sub_clusters = cutree_to_get_number_of_clusters(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)    
     else:
@@ -779,8 +782,8 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
     Hypothesis_Tree_Root.level_number = 0
     
     # Get the first level homogeneous clusters
-    apChildren1 = get_homogenous_clusters_silhouette (apClusterNode0[0], config.Distance[0])
-    apChildren2 = get_homogenous_clusters_silhouette (apClusterNode1[0], config.Distance[1])
+    apChildren1 = get_homogenous_clusters_silhouette (apClusterNode0[0], config.Distance[0], 2)
+    apChildren2 = get_homogenous_clusters_silhouette (apClusterNode1[0], config.Distance[1], 2)
     
     childList = []
     L = []    
@@ -817,19 +820,20 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
                     next_L = []
                     level_number += 1
                 continue
+        bifurcate  = False
         if not bTauX:
-            apChildren1 = get_homogenous_clusters_silhouette(a,config.Distance[0])
+            apChildren1 = get_homogenous_clusters_silhouette(a,config.Distance[0], 2, bifurcate)
         else:
             apChildren1 = [a]
         if not bTauY:
-            apChildren2 = get_homogenous_clusters_silhouette(b,config.Distance[1])#cutree_to_get_number_of_clusters([b])
+            apChildren2 = get_homogenous_clusters_silhouette(b,config.Distance[1], 2, bifurcate)#cutree_to_get_number_of_clusters([b])
             #cutree_to_get_number_of_features(b)
             ##
             #get_homogenous_clusters_silhouette(b,1)#
         else:
             apChildren2 = [b]
 
-        LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren1, apChildren2)] 
+        LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren1, apChildren2), 2] 
         childList = []
         while LChild:
             (a1, b1) = LChild.pop(0)
@@ -1011,8 +1015,9 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     csvwc.writerow(aLineOut)
     
     # Get the first level homogeneous clusters
-    apChildren1 = get_homogenous_clusters_silhouette (apClusterNode0[0], config.Distance[0], 2)
-    apChildren2 = get_homogenous_clusters_silhouette (apClusterNode1[0], config.Distance[1], 2)
+    bifurcate = False
+    apChildren1 = get_homogenous_clusters_silhouette (apClusterNode0[0], config.Distance[0], 2, bifurcate)
+    apChildren2 = get_homogenous_clusters_silhouette (apClusterNode1[0], config.Distance[1], 2, bifurcate)
     current_level_nodes = []
     current_level_tests = []    
     level_number = 1
@@ -1083,21 +1088,21 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                     do_next_level = True
                 
                 # Pair clusters between relevant levels for two hierarchies
-                if cut_speed_1 != 1:# or diam_A_r > 2* diam_B_r:
+                '''if cut_speed_1 != 1:# or diam_A_r > 2* diam_B_r:
                     if level_number  / cut_speed_1 > level_number_2:# or diam_A_r > 1.0 * diam_B_r :
                         if change_level_flag:
                             level_number_2 += 1
                             change_level_flag = False
                         if not bTauX:
                             #print (level_number  / cut_speed_1 , level_number, level_number_2)
-                            apChildren1 = get_homogenous_clusters_silhouette(a,config.Distance[0],2)
+                            apChildren1 = get_homogenous_clusters_silhouette(a,config.Distance[0], 2)
                         else:
                            apChildren1 = [a] 
                     else:
                         apChildren1 = [a]
                 else:
                     if not bTauX:
-                        apChildren1 = get_homogenous_clusters_silhouette(a,config.Distance[0],2)
+                        apChildren1 = get_homogenous_clusters_silhouette(a,config.Distance[0], 2)
                     elif not bTauY:
                         apChildren1 = [a]
                     
@@ -1107,16 +1112,24 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                             level_number_2 += 1
                             change_level_flag = False
                         if not bTauY:
-                            apChildren2 = get_homogenous_clusters_silhouette(b,config.Distance[1],2)
+                            apChildren2 = get_homogenous_clusters_silhouette(b,config.Distance[1], 2)
                         else:
                             apChildren2 = [b]
                     else:
                         apChildren2 = [b]
                 else:
                     if not bTauY:
-                        apChildren2 = get_homogenous_clusters_silhouette(b,config.Distance[1],2)
+                        apChildren2 = get_homogenous_clusters_silhouette(b,config.Distance[1], 2)
                     elif not bTauX:
-                        apChildren2 = [b]
+                        apChildren2 = [b]'''
+                if not bTauX:
+                    apChildren1 = get_homogenous_clusters_silhouette(a,config.Distance[0], 2, bifurcate)
+                else:
+                   apChildren1 = [a]     
+                if not bTauY:
+                    apChildren2 = get_homogenous_clusters_silhouette(b,config.Distance[1], 2, bifurcate)
+                elif not bTauX:
+                    apChildren2 = [b]
                 # decide based on Gini gaining to cut
                 data1 = a.pre_order(lambda x: x.id)
                 data2 = b.pre_order(lambda x: x.id)
@@ -1160,7 +1173,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         #current_level_nodes.extend(failed_to_reject_first_descending)
     
     significant_hypotheses = list(set(significant_hypotheses))
-    print ("--- number of performed tests: %s") % (config.number_of_performed_tests)
+    #print ("--- number of performed tests: %s") % (config.number_of_performed_tests)
     print ("--- number of passed tests after FDR controlling: %s" % len(significant_hypotheses))
     return significant_hypotheses, tested_hypotheses
 
@@ -1258,7 +1271,7 @@ def naive_all_against_all():
     config.number_of_performed_tests =len(tested_hypotheses)
 
     significant_hypotheses = [tested_hypotheses[i]  for i in range(len(tested_hypotheses)) if tested_hypotheses[i].significance == True]
-    print("--- number of performed tests: %s" % config.number_of_performed_tests)
+    #print("--- number of performed tests: %s" % config.number_of_performed_tests)
     print("--- number of passed tests after FDR controlling: %s "%len(significant_hypotheses)) 
     return significant_hypotheses, tested_hypotheses
 
@@ -1284,7 +1297,7 @@ def significance_testing(current_level_tests, p_rank, level = None):
     passed_tests = []  
     if config.p_adjust_method in ["bh", "by"]:
         for test in current_level_tests:
-            if majority_significant(test, p_rank, majority = 0.75):#if config.similarity_rank[test.xw, test.yw] <= p_rank:
+            if majority_significant(test, p_rank, majority = 1.0 - config.fnr):#if config.similarity_rank[test.xw, test.yw] <= p_rank:
                 #print config.similarity_rank[test.xw, test.yw]
                 test.significance = True
             elif config.similarity_rank[test.xb, test.yb] > p_rank:

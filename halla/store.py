@@ -144,13 +144,13 @@ def _similarity_between():
     #print similarity_score.shape
     m_n = m*n
     config.number_of_pairs = m_n
-    if config.similarity_method in ['chi', 'pearson', 'spearman'] and config.permutation_func == 'none':
-        config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
-    elif config.do_alla_halla:
+    if distance.c_hash_association_method_discretize[config.similarity_method]:
         #use p-value rank and calculate actual p-value
         for i in range(n):
             for j in range(m):
                 config.pvalues[i,j] = stats.permutation_test_pvalue(config.parsed_dataset[0][i], config.parsed_dataset[1][j])
+        config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
+    elif not c_hash_association_method_discretize[config.similarity_method] and config.permutation_func == 'none':
         config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
     else:
         #use monotonicity relationship and calculate similarity score ranks

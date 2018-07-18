@@ -161,6 +161,13 @@ def parse_arguments (args):
         default=0.1,
         help="q-value for overall significance tests (cut-off for false discovery rate)\n[default = 0.1]")
     argp.add_argument(
+        "--fnr",
+        metavar="<.25>",
+        dest="fnr",
+        type=float,
+        default=0.1,
+        help="Estimated False Negative Rate in block association\n[default = 0.25]")
+    argp.add_argument(
         "-p", "--permutation",
         #metavar="<0.001>",
         dest="permutation_func", 
@@ -338,6 +345,7 @@ def set_parameters(args):
     config.missing_char_category = args.missing_char_category
     config.p_adjust_method = args.strAdjust.lower()
     config.q = args.dQ
+    config.fnr = args.fnr
     config.linkage_method = args.linkage_method
     if args.Y == None:
         istm = [args.X, args.X]  # Use X  
