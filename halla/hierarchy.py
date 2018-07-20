@@ -1297,7 +1297,7 @@ def significance_testing(current_level_tests, p_rank, level = None):
     passed_tests = []  
     if config.p_adjust_method in ["bh", "by"]:
         for test in current_level_tests:
-            if majority_significant(test, p_rank, majority = 1.0 - config.fnr):#if config.similarity_rank[test.xw, test.yw] <= p_rank:
+            if majority_significant(test, p_rank, majority = 1.0 - config.fnt):#if config.similarity_rank[test.xw, test.yw] <= p_rank:
                 #print config.similarity_rank[test.xw, test.yw]
                 test.significance = True
             elif config.similarity_rank[test.xb, test.yb] > p_rank:

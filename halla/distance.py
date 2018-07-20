@@ -186,8 +186,8 @@ def pearson(X, Y):
     if Y.ndim > 1:
     	Y = Y[0]
     new_X , new_Y = remove_pairs_with_a_missing(X, Y)
-    pval, simval = scipy.stats.pearsonr(new_X, new_Y)
-    return pval, simval
+    simval, pval = scipy.stats.pearsonr(new_X, new_Y)
+    return simval, pval
 def spearman(X, Y):
     X = array(X)
     Y = array(Y)
@@ -195,8 +195,8 @@ def spearman(X, Y):
         X = X[0]
     if Y.ndim > 1:
         Y = Y[0]
-    pval, simval = scipy.stats.spearmanr(X, Y, nan_policy='omit')
-    return pval, simval
+    simval, pval = scipy.stats.spearmanr(X, Y, nan_policy='omit')
+    return simval, pval
 def mic (X, Y):
     new_X , new_Y = remove_pairs_with_a_missing(X, Y)
     try:

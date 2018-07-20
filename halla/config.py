@@ -1,6 +1,6 @@
 import random
 from numpy import array
-version = '0.8.10'
+version = '0.8.11'
 __description__      = """
   _    _          _ _          
  | |  | |   /\   | | |   /\    
@@ -31,7 +31,7 @@ fdr_style = "level"
 permutation_func = 'gpd'
 linkage_method = 'average'
 q = .1  # FDR/multiple testing threshold
-fnr = .1 # False Negative Rate
+fnt = .25 # False Negative Rate
 iterations = 1000 # number of iteration to be used for permutations p-value estimation
 p_adjust_method = "bh" # multiple testing correction method
 randomization_method = "permutation"  # method to generate error bars 

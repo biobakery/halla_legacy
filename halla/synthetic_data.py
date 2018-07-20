@@ -530,7 +530,7 @@ def balanced_synthetic_dataset_uniform(D, N, B, within_noise = 0.5, between_nois
                         0.0 + within_noise *numpy.random.uniform(low=-1,high=1 ,size=1) for k in range(N)]
                 
                 elif association_type == "L":
-                    Y[j] = [ common_base_Y[l,k] + within_noise * numpy.random.uniform(low=-1,high=1, size=1) for k in range(N)]
+                    Y[j] = [ common_base_Y[l,k] + within_noise * numpy.random.uniform(low=-.1,high=.1, size=1) for k in range(N)]
                     #Y[j]= [ numpy.random.uniform(low=10,high=100, size=1) * common_base[l,k] if common_base[l,k] < -0.8 else numpy.random.uniform(low=.2,high=.5, size=1) for k in range(N)]
                 elif association_type =="happyface":
                     Y[j] = [ happyface(common_base[l,k]) + within_noise * numpy.random.uniform(low=-.1,high=.1, size=1) for k in range(N)]

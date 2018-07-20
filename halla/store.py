@@ -133,8 +133,8 @@ def _similarity_between():
     n = len(config.parsed_dataset[0])
     m = len(config.parsed_dataset[1])
     similarity_score = np.zeros(shape=(n, m)) 
-    config.pvalues = np.zeros(shape=(n, m), dtype=object)
-    config.pvalues[config.pvalues == 0 ] = None
+    config.pvalues = np.zeros(shape=(n, m), dtype=float)
+    #config.pvalues[config.pvalues == 0 ] = None
     config.rank_index = np.zeros(shape=(n*m, 2),dtype=int)
     for i in range(n):
         for j in range(m):
@@ -144,18 +144,18 @@ def _similarity_between():
     #print similarity_score.shape
     m_n = m*n
     config.number_of_pairs = m_n
-    if distance.c_hash_association_method_discretize[config.similarity_method]:
+    if distance.c_hash_association_method_discretize[config.similarity_method] or config.permutation_func != 'none' :
         #use p-value rank and calculate actual p-value
         for i in range(n):
             for j in range(m):
                 config.pvalues[i,j] = stats.permutation_test_pvalue(config.parsed_dataset[0][i], config.parsed_dataset[1][j])
-        config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
-    elif not distance.c_hash_association_method_discretize[config.similarity_method] and config.permutation_func == 'none':
+    config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
+    '''elif distance.c_hash_association_method_discretize[config.similarity_method]:# and config.permutation_func == 'none':
         config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
     else:
-        #use monotonicity relationship and calculate similarity score ranks
-        abs_similarity_score = numpy.fabs(similarity_score)
-        config.similarity_rank = (1 + m_n - rankdata(abs_similarity_score, method='ordinal')).reshape(abs_similarity_score.shape)
+    #use monotonicity relationship and calculate similarity score ranks
+    abs_similarity_score = numpy.fabs(similarity_score)
+    config.similarity_rank = (1 + m_n - rankdata(abs_similarity_score, method='ordinal')).reshape(abs_similarity_score.shape)'''
     for i in range(config.similarity_rank.shape[0]):
         for j in range(config.similarity_rank.shape[1]):
             config.rank_index[config.similarity_rank[i, j]-1,] = [i, j]
@@ -762,6 +762,7 @@ def write_config():
     csvw.writerow(["Similarity method: ", config.similarity_method]) 
     csvw.writerow(["Hierarchical linkage method: ", config.linkage_method]) 
     csvw.writerow(["q: FDR cut-off : ", config.q]) 
+    csvw.writerow(["fnt: False Negative Tolerance in blocks : ", config.fnt])
     csvw.writerow(["FDR adjusting method : ", config.p_adjust_method]) 
     csvw.writerow(["FDR style using : ", config.fdr_style])
     csvw.writerow(["Applied stop condition : ", config.apply_stop_condition]) 
