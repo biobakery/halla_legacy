@@ -86,6 +86,7 @@ strFile1 = None
 strFile2 = None
 outcome = None
 pvalues = None
+qvalues = None
 number_of_pairs = None
 similarity_table = None
 similarity_rank = None
@@ -99,6 +100,7 @@ def reset_default():
     number_of_performed_tests = 0
     outcome = None
     pvalues = None
+    qvalues = None
     meta_summary = None  # summary statistics 
     meta_report = None  # summary report 
     original_dataset = array([None, None])

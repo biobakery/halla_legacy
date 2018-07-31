@@ -1286,11 +1286,11 @@ def significance_testing(current_level_tests, p_rank, level = None):
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
     for test in current_level_tests:
-        #if config.do_alla_halla:
         test.xw, test.yw, test.xb, test.yb = stats.farthest_rank (test.m_pData[0], test.m_pData[1])
-        #else:
-        #    test.xw, test.yw, test.xb, test.yb = stats.farthest (dataset1, dataset2, test.m_pData[0], test.m_pData[1], config.similarity_method)
-        test.similarity_score = config.similarity_table[test.xw, test.yw]
+        test.similarity_score = config.similarity_table[test.xb, test.yb]
+        test.qvalue = config.qvalues[test.xb, test.yb] 
+        test.best_pvalue = config.pvalues[test.xb, test.yb]
+        
     hsci_within_pvalues = []
     hsci_between_pvalues = []
     hsci_between_significant =[]

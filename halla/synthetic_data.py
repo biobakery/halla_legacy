@@ -470,15 +470,15 @@ def balanced_synthetic_dataset_uniform(D, N, B, within_noise = 0.5, between_nois
     print ("Number of features %s, number of samples: %s, number of clusters: %s, number of features within each cluster: %s")\
          %(D, N, B, blockSize)
     if association_type == "L":
-        if N % 2 != 0:
+        '''if N % 2 != 0:
             N +=1 
         else:
             pass # Odd'''
-        common_base = numpy.hstack((numpy.random.uniform(low=-1.0,high=-1.0 ,size=(B,N/2)), numpy.random.uniform(low=-1,high=10 ,size=(B,N/2))))
+        common_base = numpy.hstack((numpy.random.uniform(low=-.1,high=0.1 ,size=(B,N/2)), numpy.random.uniform(low=-1.0,high=10.0 ,size=(B,N/2))))
         for l in range(B):
             common_base[l]= numpy.random.permutation(common_base[l])
     else:
-        common_base = numpy.random.uniform(low=-1,high=1 ,size=(B+1, N))
+        common_base = numpy.random.uniform(low=-1,high=1 ,size=(B, N))
     common_base = orthogonalize_matrix(common_base)
     
     assoc = [[] for i in range(B)]
@@ -501,7 +501,8 @@ def balanced_synthetic_dataset_uniform(D, N, B, within_noise = 0.5, between_nois
     if association_type == "L":
         common_base_Y = numpy.random.uniform(low=-1,high=1 ,size=(B,N))
         for l in range(B):
-            common_base_Y[l] = [numpy.random.uniform(low=l,high=10, size=1)  if common_base[l,k] < -0.99 else l+ within_noise * numpy.random.uniform(low=-.1,high=.1, size=1) for k in range(N)]
+            common_base_Y[l] = [numpy.random.uniform(low=l,high=10, size=1)  if common_base[l,k] < -0.99 else 
+                                l+ within_noise * numpy.random.uniform(low=-.1,high=.1, size=1) for k in range(N)]
     l= 0
     for i in range(0,int(D*cluster_percentage),blockSize):
         numpy.random.seed()

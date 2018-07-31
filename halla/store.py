@@ -134,6 +134,7 @@ def _similarity_between():
     m = len(config.parsed_dataset[1])
     similarity_score = np.zeros(shape=(n, m)) 
     config.pvalues = np.zeros(shape=(n, m), dtype=float)
+    config.qvalues = np.zeros(shape=(n, m), dtype=float)
     #config.pvalues[config.pvalues == 0 ] = None
     config.rank_index = np.zeros(shape=(n*m, 2),dtype=int)
     for i in range(n):
@@ -150,6 +151,7 @@ def _similarity_between():
             for j in range(m):
                 config.pvalues[i,j] = stats.permutation_test_pvalue(config.parsed_dataset[0][i], config.parsed_dataset[1][j])
     config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
+    config.qvalues = numpy.reshape(stats.pvalues2qvalues (config.pvalues.flatten(), adjusted=True), config.pvalues.shape)
     '''elif distance.c_hash_association_method_discretize[config.similarity_method]:# and config.permutation_func == 'none':
         config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
     else:
@@ -346,8 +348,8 @@ def _report():
                         "pvalue", "qvalue", "similarity_score_between_clusters"])
 
         #sorted_associations = sorted(config.meta_alla[0], key=lambda x: math.fabs(x.similarity_score), reverse=True)
-        #sorted_associations = sorted(sorted_associations, key=lambda x: x.pvalue)
-        sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score)))
+        sorted_associations = sorted(config.meta_alla[0], key=lambda x: x.best_pvalue)
+        #sorted_associations = sorted(config.meta_alla[0], key=lambda x: (- math.fabs(x.similarity_score)))
 
         for association in sorted_associations:
             number_of_association += 1
@@ -357,7 +359,7 @@ def _report():
             associated_feature_X_indecies += iX
             global associated_feature_Y_indecies
             associated_feature_Y_indecies += iY
-            fP = association.worst_pvalue
+            fP = association.best_pvalue
             fP_adjust = association.qvalue
             association_similarity = association.similarity_score
             
