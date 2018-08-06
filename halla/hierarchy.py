@@ -1276,6 +1276,17 @@ def naive_all_against_all():
     return significant_hypotheses, tested_hypotheses
 
 def majority_significant(test, rank, majority = 0.5):
+    
+    # check if we have a row or block with all non significants
+    if len(test.m_pData[1]) > 1:
+        for row in test.m_pData[0]:
+            if all([config.similarity_rank[row, j] > rank for j in test.m_pData[1]]):
+                return False
+    if len(test.m_pData[0]) > 1:
+        for col in test.m_pData[1]:
+            if all([config.similarity_rank[i, col] > rank for i in test.m_pData[0]]):
+                return False
+    # check if majority are significant
     ranks_in_block = [config.similarity_rank[i, j] for i, j in itertools.product(test.m_pData[0], test.m_pData[1])]
     propotion_passed_fdr = sum(i<=rank for i in ranks_in_block)/float(len(ranks_in_block))
     if propotion_passed_fdr >= majority:

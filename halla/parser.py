@@ -268,8 +268,8 @@ class Input:
 
 			# remove samples/columns with all NaN/missing values
 			# First change missing value to np.NaN for pandas
-			#df1[df1=='NaN'] =np.NAN
-			#df2[df2=='NaN'] =np.NAN
+			df1[df1=='NaN'] =np.NAN
+			df2[df2=='NaN'] =np.NAN
 			df1 = df1.dropna( axis=1, how='all')
 			df2 = df2.dropna( axis=1, how='all')
 			l1_after = len(df1.columns)
