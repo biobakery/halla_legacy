@@ -57,7 +57,6 @@ min_var = 0.0 # it was designed in a case we use minimum variation to filter fea
 entropy_threshold = 0.0
 entropy_threshold1 = 0.0
 entropy_threshold2 = 0.0
-missing_char_category = False
 format_feature_names = False
 write_hypothesis_tree = False
 report_results =  True

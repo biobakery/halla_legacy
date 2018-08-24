@@ -135,7 +135,6 @@ def HSIC_pval(X, Y, N_samp=500, kernelX="Gaussian", kernelY="Gaussian", eta = 0.
     sigmaY: sigma for Y when using Gaussian kernel
     """
     timeA = time.time()
-    print X.shape
     m,_ = X.shape
 
     sigmaX = getSigmaGaussian(X,X,200) if sigmaX is None else sigmaX
@@ -165,7 +164,6 @@ def HSIC_pval(X, Y, N_samp=500, kernelX="Gaussian", kernelY="Gaussian", eta = 0.
     else: #gamma
         fit_alpha, fit_loc, fit_beta= gamma.fit(boots)
         pval = 1 - gamma.cdf(HSIC, fit_alpha, scale=fit_beta, loc=fit_loc)
-    print HSIC, pval
     if return_boots:
         return HSIC, pval, boots
     else:

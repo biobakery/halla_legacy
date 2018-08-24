@@ -211,7 +211,7 @@ def stop_decesnding_silhouette_coefficient(Node):
         silhouette_coefficient_B.append(s)
     silhouette_scores = silhouette_coefficient_A
     silhouette_scores.extend(silhouette_coefficient_B)
-    print cluster_a, cluster_b, silhouette_scores
+    #print cluster_a, cluster_b, silhouette_scores
     if all([sil> 0.5  for sil in silhouette_scores]):
         return False
     else:
@@ -267,7 +267,7 @@ def too_heterogeneous_paired_clusters(Node):
         #print "Right Exp. Var.: ", Node.right_first_rep_variance
         print ("Right before: ", Node.m_pData[1])
         print ("dime_A_r: ", diam_A_r,"  ", "dime_B_r: ", diam_B_r, "diam_Ar_Br: ", diam_Ar_Br)
-    print 'diam_Ar_Br', diam_Ar_Br, 'diam_A_r', diam_A_r, 'diam_B_r', diam_B_r
+    print ('diam_Ar_Br', diam_Ar_Br, 'diam_A_r', diam_A_r, 'diam_B_r', diam_B_r)
     if diam_A_r == 0.0 or diam_B_r == 0.0:
         return False
     if diam_Ar_Br + diam_A_r + diam_B_r:# diam_Ar_Br > 2 * (diam_A_r + diam_B_r):
@@ -306,7 +306,7 @@ def is_triangle_inequality(Node):
         #print "Right Exp. Var.: ", Node.right_first_rep_variance
         print ("Right before: ", Node.m_pData[1])
         print ("dime_A_r: ", diam_A_r,"  ", "dime_B_r: ", diam_B_r, "diam_Ar_Br: ", diam_Ar_Br)
-    print 'AB', diam_Ar_Br, 'A', diam_A_r, 'B', diam_B_r
+    print ('AB', diam_Ar_Br, 'A', diam_A_r, 'B', diam_B_r)
     if diam_A_r ==0 or diam_B_r == 0:
         return True
     if diam_Ar_Br + diam_A_r + diam_B_r < 1.0 :#diam_A_r or diam_Ar_Br < diam_B_r*2:
@@ -695,7 +695,7 @@ def predict_best_number_of_clusters(hierarchy_tree, distance_matrix):
 def get_leaves(cluster):
     return cluster.pre_order(lambda x: x.id)  
     
-def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters= None, bifurcate = False, resolution= 'high'):
+def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estimated_clusters= 2, bifurcate = False, resolution= 'high'):
     n = cluster.get_count()
     if n==1:
         return [cluster]
@@ -833,7 +833,7 @@ def couple_tree(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod="u
         else:
             apChildren2 = [b]
 
-        LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren1, apChildren2), 2] 
+        LChild = [(c1, c2) for c1, c2 in itertools.product(apChildren1, apChildren2)] 
         childList = []
         while LChild:
             (a1, b1) = LChild.pop(0)
@@ -1122,6 +1122,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
                         apChildren2 = get_homogenous_clusters_silhouette(b,config.Distance[1], 2)
                     elif not bTauX:
                         apChildren2 = [b]'''
+                bifurcate = True
                 if not bTauX:
                     apChildren1 = get_homogenous_clusters_silhouette(a,config.Distance[0], 2, bifurcate)
                 else:
@@ -1174,7 +1175,7 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     
     significant_hypotheses = list(set(significant_hypotheses))
     #print ("--- number of performed tests: %s") % (config.number_of_performed_tests)
-    print ("--- number of passed tests after FDR controlling: %s" % len(significant_hypotheses))
+    print ("--- number of passed block tests after FDR and FNT  controlling: %s" % len(significant_hypotheses))
     return significant_hypotheses, tested_hypotheses
 
 pHashMethods = {"permutation" : stats.permutation_test,
@@ -1286,6 +1287,7 @@ def majority_significant(test, rank, majority = 0.5):
         for col in test.m_pData[1]:
             if all([config.similarity_rank[i, col] > rank for i in test.m_pData[0]]):
                 return False
+    
     # check if majority are significant
     ranks_in_block = [config.similarity_rank[i, j] for i, j in itertools.product(test.m_pData[0], test.m_pData[1])]
     propotion_passed_fdr = sum(i<=rank for i in ranks_in_block)/float(len(ranks_in_block))
@@ -1389,7 +1391,6 @@ def significance_testing(current_level_tests, p_rank, level = None):
     
     return current_level_tests
 def HSIC_eval(hypothesis):
-    print hypothesis.m_pData
     if len(hypothesis.m_pData[0]) > 1:
         hsci_within_pvalues.append(HSIC.HSIC_pval(config.parsed_dataset[0][hypothesis.m_pData[0]].T,\
                                                   config.parsed_dataset[1][hypothesis.m_pData[0]].T)[1])

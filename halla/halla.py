@@ -366,57 +366,6 @@ def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA',\
               apply_stop_condition = False, fast= False, header = False, format_feature_names = False,\
               nproc = 1, nbin = None, s  = 0, e = 0.5, e1 = None, e2 = None, missing_char = '', missing_method = None,\
               missing_char_category = False, write_hypothesis_tree = False, t  = ''):
-    '''
-    This function runs halla on passed parameters and returns significant associations
-    Parameters
-    ----------
-    filename : str
-    X    first file: Tab-delimited text input file, one row per feature, one column per measurement\n[REQUIRED]",            
-    Y    second file: Tab-delimited text input file, one row per feature, one column per measurement\n[default = the first file (-X)]")
-    output_dir    directory to write output files\n[REQUIRED]", 
-    q    q-value for overall significance tests (cut-off for false discovery rate)\n[default = 0.1]
-    p    permutation function \n[default = none for Spearman and Pearson and gpd for other]"
-         choices=['ecdf', 'gpd', 'none'], 
-    a    descending approach\n[default = HAllA for hierarchical all-against-all]
-        default = "HAllA",
-        choices=["HAllA","AllA"],    
-    i   iterations for nonparametric significance testing (permutation test)\n[default = 1000]
-    m   metric to be used for similarity measurement\n[default = nmi]
-        choices=["nmi","ami","mic","dmic","dcor","pearson", "spearman", "r2"],
-    
-    fdr    approach for FDR correction\n[default = bh]
-        choices=["bh", "by", 'y', "bonferroni", "no_adjusting"],
-    hallagram    plot the results [default = True]
-    diagnostics_plot Diagnostics plot for associations[default = True]
-    discretizing    approach for discretizing continuous data\n[default = equal-freq]
-        choices=["equal-freq", "hclust", "jenks", "none"], #"jenks", "hclust", "kmeans", 
-    linkage_method    The method to be used in linkage hierarchical clustering [default='average']
-        choices=["single", "average", "complete", "weighted" ],
-    apply_stop_condition    stops when two clusters are two far from each other [default = False]
-    fast Use one null distribution for permutation test [default = False]
-    header    the input files contain a header line [default = False] 
-    format_feature_names    Replaces special characters and for OTUs separated  by | uses the known end of a clade,\n
-                           it a good option only for Metaphlan and HUMnN2 output and not other tools [default = False]
-    nproc    the number of processing units available\n[default = 1]
-    nbin    the number of bins for discretizing \n[default = None]
-    s    a seed number to make the random permutation reproducible\n[default = 0,and -1 for random number]
-    e    Minimum entropy threshold to filter features with low information\n[default = 0.5]")
-    e1   Minimum entropy threshold for the first dataset if user want to use dirrent threshold for each dataset\n[default = None]")
-    e2   Minimum entropy threshold for the second dataset if user want to use dirrent threshold for each dataset \n[default = None]")
-    missing_char    defines missing characters\n[default = '']
-    missing_method    defines missing strategy to fill missing data.\nFor categorical data puts all missing data in one new category[default=None]
-                        choices=["mean", "median", "most_frequent"],
-    missing_char_category    To count the missing data as a category [default = False]
-    write_hypothesis_tree    To write levels of hypothesis tree in the file [default = False]
-    t data transformation method \n[default = '' ] 
-        choices=['log', 'sqrt', 'arcsin', 'arcsinh',''], 
-    
-    Returns
-    -------
-    associations : dict
-        Non-zero value indicates error code, or zero on success.
-    all othe rouput will be written in the output directory
-    '''
     
     # set the paramater to config file
     config.similarity_method = m.lower()

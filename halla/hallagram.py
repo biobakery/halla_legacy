@@ -236,7 +236,6 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
     span = simtable.ncols
     cbarspan = c_cbarspan
     ax = plt.subplot2grid( ( 1, span ), ( 0, cbarspan ), rowspan=1, colspan=span-cbarspan )
-    #ax_cbar = plt.subplot2grid( ( 2, span ), ( 0, 0 ), rowspan=2, colspan=cbarspan )
     ax_cbar = plt.subplot2grid( ( 2, span ), ( 0, 0 ), rowspan=2, colspan=cbarspan )
     ax.yaxis.tick_right( )
     ax.yaxis.set_label_position("right")

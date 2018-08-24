@@ -96,15 +96,14 @@ def mi(pData1, pData2):
 	(3, 3) 0.311278124459
 	"""
 	return  mutual_info_score(pData1, pData2), None#return MutualInformation(pData1, pData2).get_distance() #math.log(math.e, 2) *
-def remove_pairs_with_a_missing(X, Y):
-    if  not config.missing_char_category:
-        test = [0 in [a, b] for a,b in zip(X,Y)]
-        new_X= [a for a,b in zip (X,test) if ~b]
-        new_Y= [a for a,b in zip (Y,test) if ~b]
-
+def remove_pairs_with_a_missing(X, Y, missing_char = config.missing_char):
+    if missing_char != missing_char:
+        test = [missing_char in [a, b] or not a == a or not b==b for a,b in zip(X,Y)]
     else:
-        new_X = X
-        new_Y = Y
+        test = [missing_char in [a, b] for a,b in zip(X,Y)]
+    new_X= [a for a,b in zip (X,test) if not b ]
+    new_Y= [a for a,b in zip (Y,test) if not b ]
+    #print new_Y
     return (new_X, new_Y)
 def nmi(X, Y):
     """
@@ -137,8 +136,9 @@ def nmi(X, Y):
     (3, 3) 0.345592029944
     
     """
-    # remove pairs with a missing value in comparison  
-    new_X , new_Y = remove_pairs_with_a_missing(X, Y)
+    # remove pairs with a missing value in comparison
+
+    new_X , new_Y = remove_pairs_with_a_missing(X, Y, missing_char=0)
     return normalized_mutual_info_score(new_X, new_Y), None #return NormalizedMutualInformation(pData1, pData2).get_distance() 
 
 def ami(X, Y):
@@ -173,7 +173,7 @@ def ami(X, Y):
     
     """
     # remove pairs with a missing value in comparison  
-    new_X , new_Y = remove_pairs_with_a_missing(X, Y) 
+    new_X , new_Y = remove_pairs_with_a_missing(X, Y, missing_char=0) 
     result = adjusted_mutual_info_score(new_X, new_Y)
     return result, None 
  
@@ -185,6 +185,7 @@ def pearson(X, Y):
     	X = X[0]
     if Y.ndim > 1:
     	Y = Y[0]
+    
     new_X , new_Y = remove_pairs_with_a_missing(X, Y)
     simval, pval = scipy.stats.pearsonr(new_X, new_Y)
     return simval, pval

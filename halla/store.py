@@ -484,8 +484,8 @@ def _report():
             discretized_df1 = np.array(discretized_cluster1, dtype=float)
             discretized_df2 = np.array(discretized_cluster2, dtype=float)
             if not bypass_discretizing():
-                d_x_d_rep = decomposition_method(discretized_df1)
-                d_y_d_rep = decomposition_method(discretized_df2)
+                d_x_d_rep = discretized_df1[0]
+                d_y_d_rep = discretized_df2[0]
                 d_x_d_rep, d_y_d_rep = list(zip(*sorted(zip(d_x_d_rep, d_y_d_rep))))
                 plot.confusion_matrix(d_x_d_rep, d_y_d_rep, filename = filename + '/association_' + str(association_number) + '_confusion_matrix.pdf' )
             plt.close("all")

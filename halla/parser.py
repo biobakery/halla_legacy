@@ -183,21 +183,21 @@ class Input:
 					aNames = list(map(substitute_special_characters, aNames))
 				pArray = pArray[:, 1:]
 			
-			# replace missing charaters with nan
-			pArray[pArray == config.missing_char] = 'NaN'
+			#replace missing charaters with nan
+			#pArray[pArray == config.missing_char] = 'NaN'
+			
 			#print pArray
 			# # Parse data types, missing values, and whitespace
 			if config.missing_method:
-				#print 'missing_method: ', config.missing_method
 				from sklearn.preprocessing import Imputer
-				imp = Imputer(missing_values='NaN', strategy=config.missing_method, axis=1)
+				imp = Imputer(missing_values=config.missing_char, strategy=config.missing_method, axis=1)
 				#imp.fit(pArray)
 
 			for i, line in enumerate(pArray):
 				# *   If the line is not full,  replace the Nones with nans                                           *
 				#***************************************************************************************************** 
 				#line = list(map(lambda x: 'NaN' if x == config.missing_char else x, line))  ###### np.nan Convert missings to nans
-				if all([val == 'NaN' for val in line]):
+				if all([val == config.missing_char for val in line]):
 					# if all values in a feature are missing values then skip the feature
 					print ('All missing value in' , aNames[i])
 					continue
@@ -268,15 +268,15 @@ class Input:
 
 			# remove samples/columns with all NaN/missing values
 			# First change missing value to np.NaN for pandas
-			df1[df1=='NaN'] =np.NAN
-			df2[df2=='NaN'] =np.NAN
+			df1[df1==config.missing_char] =np.NAN
+			df2[df2==config.missing_char] =np.NAN
 			df1 = df1.dropna( axis=1, how='all')
 			df2 = df2.dropna( axis=1, how='all')
 			l1_after = len(df1.columns)
 			l2_after = len(df2.columns)
 			# replace np.NaN's with 'NaN'
-			#df1[df1.isnull()] = 'NaN'
-			#df2[df2.isnull()] = 'NaN'
+			df1[df1.isnull()] = 'NaN'
+			df2[df2.isnull()] = 'NaN'
 			
 			if l1_before > l1_after:
 				print ("--- %d samples/columns with all missing values have been removed from the first dataset " % (l1_before- l1_after))

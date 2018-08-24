@@ -1669,31 +1669,6 @@ def _discretize_continuous_old_R(astrValues, number_of_bins=None, style =None):
 			except:
 				return astrValues
 
-def _discretize_continuous_old(astrValues, number_of_bins=None): 
-		
-	if number_of_bins == None:
-		# Default to rounded sqrt(n) if no bin count requested
-		number_of_bins = round(math.sqrt(len(astrValues)))  # **0.5 + 0.5)
-	elif number_of_bins == 0:
-		number_of_bins = len(astrValues)
-	else:
-		number_of_bins = min(number_of_bins, len(set(astrValues)))
-	#print number_of_bins	
-	# This is still a bit buggy since ( [0, 0, 0, 1, 2, 2, 2, 2], 3 ) will exhibit suboptimal behavior
-	aiIndices = sorted(list(range(len(astrValues))), cmp=lambda i, j: cmp(astrValues[i], astrValues[j]))
-	astrRet = [None] * len(astrValues)
-	#print "aiIndices:", aiIndices
-	#print "astrRet:", astrRet
-	iPrev = 0
-	for i, iIndex in enumerate(aiIndices):
-		# If you're on a tie, you can't increase the bin number
-		# Otherwise, increase by at most one
-		iPrev = astrRet[iIndex] = iPrev if (i and (astrValues[iIndex] == astrValues[aiIndices[i - 1]])) else \
-			min(iPrev + 1, int(number_of_bins * i / float(len(astrValues))))
-	return astrRet	
-
-def discretize2d(pX, pY, method=None):
-	pass 
 
 #=========================================================
 # Classification and Validation 
