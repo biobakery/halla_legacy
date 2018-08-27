@@ -89,15 +89,15 @@ def check_requirements():
             os.mkdir(output_dir)
         except EnvironmentError:
             sys.exit("CRITICAL ERROR: Unable to create output directory.")
-    else:
+    '''else:
         try:
-            print("Removing the old output directory: " + output_dir)
+            print("will rewrite files as the output directory exist" + output_dir)
             shutil.rmtree(output_dir)
             print("Creating output directory: " + output_dir)
             os.mkdir(output_dir)
         except EnvironmentError:
-            sys.exit("CRITICAL ERROR: Unable to create output directory.")
-        
+            sys.exit("CRITICAL ERROR2: Unable to create output directory.")
+        '''
     
     if not os.access(output_dir, os.W_OK):
         sys.exit("CRITICAL ERROR: The output directory is not " + 
@@ -360,16 +360,25 @@ def set_parameters(args):
     (config.discretized_dataset[0], config.original_dataset[0], config.FeatureNames[0], config.aOutType1, config.SampleNames[0]) = aOut1 
     (config.discretized_dataset[1], config.original_dataset[1], config.FeatureNames[1], config.aOutType2, config.SampleNames[1]) = aOut2
 
-def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA',\
-              i =1000, m = '', d= 'medoid',  fdr = 'bh', hallagram = True, \
-              diagnostics_plot = True, discretizing = 'equal-freq', linkage_method = 'average',\
-              apply_stop_condition = False, fast= False, header = False, format_feature_names = False,\
-              nproc = 1, nbin = None, s  = 0, e = 0.5, e1 = None, e2 = None, missing_char = '', missing_method = None,\
-              missing_char_category = False, write_hypothesis_tree = False, t  = ''):
+def hallatest(X, Y, output_dir = '.', q =.1, fnt = 0.25, p ='', a= 'HAllA',\
+              e1 = None, e2 = None,
+              e = 0.5,
+              missing_char = '',
+              missing_method = None,
+              i =1000, 
+              linkage_method = 'average',
+              discretizing = 'equal-freq',
+              m = '', 
+              hallagram = True, \
+              diagnostics_plot = True,\
+              header = False, format_feature_names = False,\
+              nproc = 1, nbin = None, s  = 0,\
+              missing_char_category = False, 
+              write_hypothesis_tree = False, t  = ''):
     
     # set the paramater to config file
     config.similarity_method = m.lower()
-     
+    donfig.fnt = fnt 
     config.entropy_threshold = e
     if e1 == None:
         config.entropy_threshold1 = e
@@ -409,7 +418,7 @@ def hallatest(X, Y, output_dir = '.', q =.1, p ='', a= 'HAllA',\
         config.q = q/(2.0*1.44) #Daniel YEKUTIELI
         #config.p_adjust_method = 'bh'
     config.linkage_method = linkage_method
-    if Y == None:
+    if Y is None:
         istm = [X, X]  # Use X  
     else:
         istm = [X, Y]  # Use X and Y

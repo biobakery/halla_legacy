@@ -35,6 +35,8 @@ def substitute_special_characters(txt):
     return txt
 def load(file):
 	# Read in the file
+	if isinstance(file, pd.DataFrame):
+		return file.values
 	try:
 		import io
 		file_handle=io.open(file, encoding='utf-8')
@@ -97,7 +99,7 @@ class Input:
 
 		# Initialize data structures 
 		self.strFileName1 = strFileName1
-		self.strFileName2 = strFileName1 if not strFileName2 else strFileName2 
+		self.strFileName2 = strFileName1 if strFileName2 is None else strFileName2 
 
 		self.discretized_dataset1 = None
 		self.discretized_dataset2 = None 
@@ -170,7 +172,7 @@ class Input:
 			aHeaders = None
 			
 			# Parse header if indicated by user or "#"
-			if bHeaders or re.match("#",pArray[0,0]):
+			if bHeaders or re.match("#",str(pArray[0,0])):
 				aHeaders = list(pArray[0,1:])
 				pArray = pArray[1:]
 
@@ -309,7 +311,7 @@ class Input:
 			#self.outHead2 = df2.columns 
 			self.outHead1 = df1.columns
 			self.outHead2 = df2.columns
-			print("The program uses %s common samples between the two data sets based on headers")%(df1.shape[1])
+			print(("The program uses %s common samples between the two data sets based on headers")%(str(df1.shape[1])))
 		if len(self.orginal_dataset1[0]) != len(self.orginal_dataset2[0]):
 			sys.exit("Have you provided --header option to use sample/column names for shared sample/columns.")
 	def _remove_low_variant_features(self):

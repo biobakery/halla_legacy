@@ -118,8 +118,8 @@ class Hypothesis_Node():
     a basic core unit    
     A general object, tree need not be 2-tree 
     '''    
-    __slots__ = ['m_pData', 'm_arrayChildren', 'left_distance', 'right_distance',
-                'left_rep', 'right_rep', 'similarity_score','level_number' , 'significance', 'worst_rank', 
+    __slots__ = ['m_pData', 'm_arrayChildren', 'left_rep', 'right_rep', 'xb', 'yb', 'xw', 'yw', 
+                 'similarity_score','level_number' , 'significance', 'worst_rank', 
                 'best_rank', 'worst_pvalue', 'best_pvalue', 'qvalue']
     def __init__(self, data=None, similarity=None):
         self.m_pData = data 
@@ -442,7 +442,7 @@ def _cutree_to_log2 (apNode, X, func, distance, cluster_threshold):
         n = node.get_count()
         print ("Number of feature in node: ", n)
         sub_apChildren = truncate_tree([node], level=0, skip=1)
-        if sub_apChildren == None:
+        if sub_apChildren is None:
             sub_apChildren = [node]
         else:
             while len(set(sub_apChildren)) < round(math.log(n)):
@@ -454,7 +454,7 @@ def _cutree_to_log2 (apNode, X, func, distance, cluster_threshold):
                             else:
                                 temp_sub_apChildren = [sub_apChildren[i]]
                 
-                if temp_sub_apChildren == None:
+                if temp_sub_apChildren is None:
                     temp_sub_apChildren = sub_apChildren
                 sub_apChildren = temp_sub_apChildren
                 temp_sub_apChildren = []
@@ -465,7 +465,7 @@ def cutree_to_get_number_of_features (cluster, distance_matrix, number_of_estima
     n_features = cluster.get_count()
     if n_features==1:
         return [cluster]
-    if number_of_estimated_clusters == None:
+    if number_of_estimated_clusters is None:
         number_of_estimated_clusters = math.sqrt(n_features)#math.log(n_features, 2)
     sub_clusters = []
     sub_clusters = truncate_tree([cluster], level=0, skip=1)
@@ -488,7 +488,7 @@ def cutree_to_get_number_of_features (cluster, distance_matrix, number_of_estima
 
 def cutree_to_get_below_threshold_distance_of_clusters (cluster, t = None):
     n_features = cluster.get_count()
-    if t == None:
+    if t is None:
         t = config.cut_distance_thrd
     if n_features==1:# or cluster.dist <= t:
         return [cluster]
@@ -1031,7 +1031,6 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
             data2 = reduce_tree(b)
         tempTree = Hypothesis_Node(data=[data1, data2])
         tempTree.level_number = 1
-        tempTree.c = len(data1) * len(data2)
         #current_level_tests.append(tempTree)
         current_level_nodes.append((tempTree, (a, b)))
         if config.write_hypothesis_tree:
@@ -1344,10 +1343,10 @@ def significance_testing(current_level_tests, p_rank, level = None):
             if intervals_p[i] <= p_adjusted_interval[i] and max_r_t_intervals <= interval_rank[i]:
                 max_r_t_intervals = interval_rank[i]
         for i in range(len(current_level_tests)):
-            if current_level_tests[i].worst_rank <= max_r_t_intervals and current_level_tests[i].significance == None:
+            if current_level_tests[i].worst_rank <= max_r_t_intervals and current_level_tests[i].significance is None:
                 current_level_tests[i].significance = True
                 #print 'Worst passed:', current_level_tests[i].worst_pvalue
-            elif current_level_tests[i].significance == None and current_level_tests[i].best_rank > max_r_t_intervals:
+            elif current_level_tests[i].significance is None and current_level_tests[i].best_rank > max_r_t_intervals:
                 #print 'Best faild:', current_level_tests[i].best_pvalue
                 current_level_tests[i].significance = False
     elif config.p_adjust_method == "bonferroni":
@@ -1355,10 +1354,10 @@ def significance_testing(current_level_tests, p_rank, level = None):
         p_adjusted_interval, interval_rank = stats.p_adjust(intervals_p, config.q)#, p_adjusted 
 
         for i in range(len(current_level_tests)):
-            if current_level_tests[i].worst_pvalue <= p_adjusted_interval[i] and current_level_tests[i].significance == None:
+            if current_level_tests[i].worst_pvalue <= p_adjusted_interval[i] and current_level_tests[i].significance is None:
                 current_level_tests[i].significance = True
                 #print 'Worst passed:', current_level_tests[i].worst_pvalue
-            elif current_level_tests[i].significance == None and current_level_tests[i].best_pvalue > p_adjusted_interval[i]:
+            elif current_level_tests[i].significance is None and current_level_tests[i].best_pvalue > p_adjusted_interval[i]:
                 #print 'Best faild:', current_level_tests[i].best_pvalue
                 current_level_tests[i].significance = False
     elif config.p_adjust_method == "meinshausen":
@@ -1367,7 +1366,7 @@ def significance_testing(current_level_tests, p_rank, level = None):
             if current_level_tests[i].worst_pvalue <= p_adjusted[i]: #and is_triangle_inequality(current_level_tests[i]):
                 current_level_tests[i].significance = True
                 #tested_hypotheses.append(current_level_tests[i])
-            elif not (current_level_tests[i].significance == True) and current_level_tests[i].best_pvalue > config.q:#current_level_tests[i].significance == None and
+            elif not (current_level_tests[i].significance == True) and current_level_tests[i].best_pvalue > config.q:#current_level_tests[i].significance is None and
                 current_level_tests[i].significance = False
                 #tested_hypotheses.append(current_level_tests[i])
             elif not (current_level_tests[i].significance == True):
@@ -1377,7 +1376,7 @@ def significance_testing(current_level_tests, p_rank, level = None):
         if current_level_tests[i].worst_rank <= config.q: #and is_triangle_inequality(current_level_tests[i]):
                current_level_tests[i].significance = True
                #tested_hypotheses.append(current_level_tests[i])
-        elif  not (current_level_tests[i].significance == True) and current_level_tests[i].best_pvalue > config.q:#current_level_tests[i].significance == None and
+        elif  not (current_level_tests[i].significance == True) and current_level_tests[i].best_pvalue > config.q:#current_level_tests[i].significance is None and
             current_level_tests[i].significance = False
             #tested_hypotheses.append(current_level_tests[i])
         elif not (current_level_tests[i].significance == True):
