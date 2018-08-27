@@ -378,7 +378,7 @@ def hallatest(X, Y, output_dir = '.', q =.1, fnt = 0.25, p ='', a= 'HAllA',\
     
     # set the paramater to config file
     config.similarity_method = m.lower()
-    donfig.fnt = fnt 
+    config.fnt = fnt 
     config.entropy_threshold = e
     if e1 == None:
         config.entropy_threshold1 = e
@@ -400,8 +400,6 @@ def hallatest(X, Y, output_dir = '.', q =.1, fnt = 0.25, p ='', a= 'HAllA',\
     config.descending = a
     # X and Y are used to store datasets
     istm = list() 
-    config.apply_stop_condition = apply_stop_condition
-    config.use_one_null_dist = fast
     config.strDiscretizing = discretizing
     if s == -1:
         config.seed = random.randint(1,10000)
@@ -412,11 +410,8 @@ def hallatest(X, Y, output_dir = '.', q =.1, fnt = 0.25, p ='', a= 'HAllA',\
     config.missing_char = missing_char
     config.missing_method = missing_method
     config.missing_char_category = missing_char_category
-    config.p_adjust_method = fdr.lower()
     config.q = q
-    if config.p_adjust_method =='y':
-        config.q = q/(2.0*1.44) #Daniel YEKUTIELI
-        #config.p_adjust_method = 'bh'
+    
     config.linkage_method = linkage_method
     if Y is None:
         istm = [X, X]  # Use X  
