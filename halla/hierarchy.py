@@ -6,7 +6,7 @@ Handles clustering and other organization schemes.
 import itertools
 import copy
 import math 
-from numpy import array , rank, median
+from numpy import array, median
 from scipy.stats import rankdata
 import numpy 
 import scipy.cluster 
@@ -18,12 +18,12 @@ import sys
 import numpy as np
 import pandas
 import csv
-from . import distance
-from . import stats
-from . import plot
-from . import config
-from . import logger
-from . import HSIC
+import distance
+import stats
+import plot
+import config
+import logger
+import HSIC
 #try:
 #from __builtin__ import 'True'
 #except:

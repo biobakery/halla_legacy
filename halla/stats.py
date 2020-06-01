@@ -21,7 +21,7 @@ from scipy.stats import scoreatpercentile, pearsonr, rankdata, percentileofscore
 import sklearn 
 from sklearn.metrics import roc_curve, auc 
 from sklearn import manifold
-from . import distance, config
+import distance, config
 from scipy.spatial.distance import pdist, squareform
 import pandas as pd
 from sklearn.metrics import explained_variance_score
@@ -860,6 +860,7 @@ def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, sim
 		iterations = config.iterations
 	if not permutation_func:
 		permutation_func = config.permutation_func
+	# ADDED: permutation_func = 'ecdf'
 	#pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
 	def _permutation(pVec):
@@ -869,6 +870,7 @@ def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, sim
 	sim_score= pMe(X, Y)[0]
 	fAssociation = math.fabs(sim_score)
 	fP = 1.0 
+	print('iteration is', iterations)
 	def _calculate_num_exceedances(observed_value, random_distribution):
 	    """Determines the number of values from a random distribution which
 	    exceed or equal the observed value.
@@ -885,6 +887,7 @@ def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, sim
 	    return num_exceedances
        	
 	def _calculate_pvalue(iter):
+		print(len(aDist), fAssociation)
 		fPercentile = percentileofscore(aDist, fAssociation, kind = 'strict')#, kind="mean")  # #source: Good 2000  
 		pval = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
 		return pval
@@ -892,6 +895,7 @@ def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, sim
 	few_permutation = False
 	if permutation_func == 'ecdf':
 		iter = iterations
+		config.use_one_null_dist = False
 		if config.use_one_null_dist:
 			if len(config.nullsamples) == 0:
 				config.nullsamples = generate_null_dist(X,Y)
@@ -900,15 +904,17 @@ def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, sim
 			for i in range(iterations):
 				iter = i
 				permuted_Y = numpy.random.permutation(Y)
+				#WHY absolute
 				fAssociation_permuted = math.fabs(pMe(X, permuted_Y)[0])  
 				aDist.append(fAssociation_permuted)
+				#WHY mod 50
 				if i % 50 == 0:
-					new_fP2 = _calculate_pvalue(i) #estimate_pvalue(sim_score, aDist) #
-					if new_fP2 > fP:
+					new_fP = _calculate_pvalue(i) #estimate_pvalue(sim_score, aDist) #
+					if new_fP > fP:
 						#print "Break before the end of permutation iterations"
 						break
 					else: 
-						fP = new_fP2
+						fP = new_fP
 		fP = _calculate_pvalue(iter)
 	elif permutation_func == 'gpd':
 		fP = nonparametric_test_pvalue(X, Y)
@@ -1449,7 +1455,7 @@ def jenks_discretize(values, n):
 	return values_in_bins
 	 
 def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=None, method=None, aiSkip=[]):
-	
+	print('data type is', data_type)
 	"""
 	This functio discretizes data and has two approach one for continuse data
 	and one for categorical data and categories names start with 1 and 0 is uses for
@@ -1550,6 +1556,7 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 
 	"""
 	def _discretize_categorical(astrValues, number_of_bins=number_of_bins):
+		print('categorical', astrValues)
 		if config.similarity_method in ['mic', 'dmic']:
 					sys.exit('No categorical data is allowed with mic or dmic!')
 		setastrValues = list(set(astrValues))
@@ -1565,8 +1572,10 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 		result_discretized_data = []
 		for i, item in enumerate(astrValues):
 			result_discretized_data.append(dictA[item])
+		print(result_discretized_data)
 		return result_discretized_data	
 	def _discretize_continuous(astrValues, number_of_bins=number_of_bins):
+		print('cont')
 		#decide about the number of bins
 		if number_of_bins == None:
 			# Default to rounded sqrt(n) if no bin count requested
@@ -1577,6 +1586,7 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 			number_of_bins = len(set(astrValues))
 		else:
 			number_of_bins = min(number_of_bins, len(set(astrValues)))
+		print(len(set(astrValues)), number_of_bins)
 
 		# descritize the vector
 		if len(set(astrValues)) <= number_of_bins:
@@ -1601,10 +1611,10 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 			'''except:
 				print ("An exception happend with discretizing continuose data!!!")
 			'''	#return _discretize_categorical(astrValues, number_of_bins=number_of_bins)
-
 		discretized_result = [None] * len(astrValues)
 		bins_size = numpy.ceil(len(astrValues)/float(number_of_bins))
-		#print "bin size: ", bins_size, "len of the array", len(astrValues)
+		print(astrValues)
+		print('order is', order)
 		#print (astrValues)
 		for i in range(len(astrValues)):
 			discretized_result[i] = int((order[i]-1) / bins_size)

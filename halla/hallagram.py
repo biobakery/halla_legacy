@@ -265,7 +265,7 @@ def plot( simtable, associations, cmap, mask, axlabels, outfile, similarity ):
     cbar = matplotlib.colorbar.ColorbarBase( 
         ax_cbar,
         norm=norm,
-        cmap=cmap,
+        # cmap=cmap,
         orientation="vertical",
     )
     cbar.set_ticks( [] )

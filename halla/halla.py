@@ -51,14 +51,14 @@ except ImportError:
     
 #  Load a halla module to check the installation
 try:
-    from . import store
+    import store
 except ImportError:
     sys.exit("CRITICAL ERROR: Unable to find the store module." + 
         " Please check your halla install.") 
 
-from . import parser
-from . import hierarchy
-from . import config
+import parser
+import hierarchy
+import config
 
 def get_halla_base_directory():
     """ 
@@ -229,7 +229,7 @@ def parse_arguments (args):
         "--generate-one-null-samples", "--fast",
         dest ="use_one_null_distribution", 
         help="Use one null distribution for permutation test", 
-        action="store_true")
+        action="store_false")
     argp.add_argument(
         "--header",
         action="store_true",
@@ -433,6 +433,7 @@ def hallatest(X, Y, output_dir = '.', q =.1, fnt = 0.25, p ='', a= 'HAllA',\
 def main():
     # Parse arguments from command line
     args=parse_arguments(sys.argv)
+    print(args)
     
     # set the parameter to config file
     set_parameters(args) 

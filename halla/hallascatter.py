@@ -39,8 +39,8 @@ with warnings.catch_warnings():
         matplotlib.rcParams["font.family"] = "Arial"
     except UserWarning:
         pass
-from . import hallagram 
-from . import plot, config
+import hallagram 
+import plot, config
 from plot import scatter_matrix
 
 def get_args():

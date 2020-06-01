@@ -12,11 +12,11 @@ from numpy import array
 import numpy as np
 import pandas as pd
 from pandas import *
-from . import config
-from . import distance
-from . import store
-from . import stats
-from . import HSIC
+import config
+import distance
+import store
+import stats
+import HSIC
 
 def wrap_features(txt, width=40):
 		'''helper function to wrap text for long labels'''
@@ -159,9 +159,13 @@ class Input:
 				             Please replace it with another character such as _")
 
 	def _discretize(self):
-	    self.discretized_dataset1 = stats.discretize(self.orginal_dataset1, style = config.strDiscretizing, data_type = config.data_type[0])
-	    self.discretized_dataset2 = stats.discretize(self.orginal_dataset2, style = config.strDiscretizing, data_type = config.data_type[1])
-	   
+		self.discretized_dataset1 = stats.discretize(self.orginal_dataset1, style = config.strDiscretizing, data_type = config.data_type[0])
+		print('----')
+		print(self.discretized_dataset1)
+		self.discretized_dataset2 = stats.discretize(self.orginal_dataset2, style = config.strDiscretizing, data_type = config.data_type[1])
+		print(self.discretized_dataset2)
+		print('----')
+
 	def _parse(self):
 		def __parse(pArray, bVar, bHeaders):
  

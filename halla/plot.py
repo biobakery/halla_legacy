@@ -10,7 +10,7 @@ import scipy
 import pylab
 from array import array
 import math
-from numpy import array , rank, median
+from numpy import array, median
 import numpy 
 import scipy.cluster 
 import scipy.cluster.hierarchy as sch
@@ -24,9 +24,9 @@ import matplotlib
 from matplotlib.pyplot import xlabel
 from itertools import product
 from matplotlib import font_manager
-from . import config
-from . import distance
-from . import stats
+import config
+import distance
+import stats
 import warnings
 
 with warnings.catch_warnings():

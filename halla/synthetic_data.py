@@ -19,7 +19,7 @@ try:
     from functools import reduce
 except:
     pass
-from . import logger, stats
+import logger, stats
 
 
 import sys

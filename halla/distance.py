@@ -18,7 +18,7 @@ from sklearn.metrics import mutual_info_score, normalized_mutual_info_score, \
     adjusted_mutual_info_score, make_scorer, r2_score
 from scipy.spatial.distance import pdist, squareform
 import numpy as np
-from . import config
+import config
 
 
 #==========================================================================#

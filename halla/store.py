@@ -30,17 +30,18 @@ import numpy
 from scipy.stats import chi2_contingency
 #  Load a halla module to check the installation
 try:
-    from . import hierarchy
-except ImportError:
+    import hierarchy
+except ImportError as err:
+    print(err)
     sys.exit("CRITICAL ERROR: Unable to find the hierarchy module." + 
         " Please check your halla install.")
 
 # import HAllA's module sthat are needed here
-from . import distance
-from . import stats
-from . import plot
-from . import logger
-from . import config
+import distance
+import stats
+import plot
+import logger
+import config
 import random
 
 def smart_decisoin():
@@ -708,28 +709,32 @@ def _report():
         print ("--- Writing plotting outputs to  %s " % output_path )
         if os.path.isfile(output_path+"/similarity_table.txt"):
             try:                 
-                hallagram_command= "hallagram "+ output_path+"/similarity_table.txt "+\
+                hallagram_command= "python hallagram.py "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
                           output_path+"/associations.txt "+ "--similarity "+ config.similarity_method.title()+\
                           " --outfile="+output_path+"/hallagram_strongest_"+str(n)+".pdf" + " --strongest " + str(n) + sim_color
+                print('the command is', hallagram_command)
                 os.system(hallagram_command)
                 
-                hallagram_command_png= "hallagram "+ output_path+"/similarity_table.txt "+\
+                hallagram_command_png= "python hallagram.py "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
                           output_path+"/associations.txt "+ "--similarity "+ config.similarity_method.title()+\
                           " --outfile="+output_path+"/hallagram_strongest_"+str(n)+".png" + " --strongest " + str(n) + sim_color
+                print('the command is', hallagram_command_png)
                 os.system(hallagram_command_png)
                 
-                hallagram_command_mask = "hallagram "+ output_path+"/similarity_table.txt "+\
+                hallagram_command_mask = "python hallagram.py "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
                           output_path+"/associations.txt " + "--similarity "+ config.similarity_method.title()+\
                           " --outfile="+output_path+"/hallagram_strongest_"+str(n)+"_mask.pdf --mask" + " --strongest " + str(n) + sim_color
+                print('the command is', hallagram_command_mask)
                 os.system(hallagram_command_mask)
                 
-                hallagram_command_mask_png = "hallagram "+ output_path+"/similarity_table.txt "+\
+                hallagram_command_mask_png = "python hallagram.py "+ output_path+"/similarity_table.txt "+\
                           output_path+"/hypotheses_tree.txt "+\
                           output_path+"/associations.txt " + "--similarity "+ config.similarity_method.title()+\
                           " --outfile="+output_path+"/hallagram_strongest_"+str(n)+"_mask.png --mask" + " --strongest " + str(n) + sim_color
+                print('the command is', hallagram_command_mask_png)
                 os.system(hallagram_command_mask_png)
                 #_heatmap_associations_R()
                 #_heatmap_datasets_R()
