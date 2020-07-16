@@ -141,9 +141,9 @@ def _similarity_between():
     for i in range(n):
         for j in range(m):
             similarity_score[i,j] , config.pvalues[i,j]  = distance.c_hash_metric[config.similarity_method](config.parsed_dataset[0][i], config.parsed_dataset[1][j])
+
     logger.write_table(similarity_score,str(config.output_dir)+"/" + "similarity_table.txt", rowheader=config.FeatureNames[0], colheader=config.FeatureNames[1], corner = "#")
     config.similarity_table =  similarity_score#pd.DataFrame(similarity_score, index = X_labels, columns = Y_labels)
-    #print similarity_score.shape
     m_n = m*n
     config.number_of_pairs = m_n
     if distance.c_hash_association_method_discretize[config.similarity_method] or config.permutation_func != 'none' :
@@ -152,7 +152,11 @@ def _similarity_between():
             for j in range(m):
                 config.pvalues[i,j] = stats.permutation_test_pvalue(config.parsed_dataset[0][i], config.parsed_dataset[1][j])
     config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
+    print('pvalues')
+    print(config.pvalues)
     config.qvalues = numpy.reshape(stats.pvalues2qvalues (config.pvalues.flatten(), adjusted=True), config.pvalues.shape)
+    print('qvalues')
+    print(config.qvalues)
     '''elif distance.c_hash_association_method_discretize[config.similarity_method]:# and config.permutation_func == 'none':
         config.similarity_rank = rankdata(config.pvalues, method='ordinal').reshape(config.pvalues.shape)
     else:

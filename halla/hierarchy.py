@@ -53,6 +53,7 @@ def multi_pMethod(args):
 def multiprocessing_estimate_pvalue(estimate_pvalue, current_level_tests, pMethod, dataset1, dataset2):
     """
     Return the results from applying the data to the estimate_pvalue function
+    pMethod = permutation function
     """
     def _multi_pMethod_args(current_level_tests, pMethod, dataset1, dataset2, ids_to_process):
         for id in ids_to_process:
@@ -360,7 +361,7 @@ def is_tree(pObj):
 
 def hclust(dataset, labels, dataset_number):
     #linkage_method = config.linkage_method
-    Distance_matrix = pdist(dataset, metric=distance.pDistance) 
+    Distance_matrix = pdist(dataset, metric=distance.pDistance)
     config.Distance[dataset_number] =  squareform(Distance_matrix)
     Z= None
     if config.diagnostics_plot:# and len(config.Distance[dataset_number][0]) < 2000:
@@ -370,8 +371,9 @@ def hclust(dataset, labels, dataset_number):
                           str(dataset_number+1), linkage_method = config.linkage_method)
     else:
         Z = linkage(Distance_matrix, method = config.linkage_method)
+    print(to_tree(Z).pre_order())
     logger.write_table(data=config.Distance[dataset_number], name=config.output_dir+'/Distance_matrix'+str(dataset_number+1)+'.tsv', rowheader=config.FeatureNames[dataset_number], colheader=config.FeatureNames[dataset_number])
-    return to_tree(Z) if len(dataset)>1 else Z, sch.dendrogram(Z)['leaves'] if len(dataset)>1 else sch.dendrogram(Z)['leaves']
+    return to_tree(Z) if len(dataset)>1 else Z, sch.dendrogram(Z)['leaves']
 
 def truncate_tree(apClusterNode, level=0, skip=0):
     """
@@ -469,10 +471,12 @@ def cutree_to_get_number_of_features (cluster, distance_matrix, number_of_estima
         number_of_estimated_clusters = math.sqrt(n_features)#math.log(n_features, 2)
     sub_clusters = []
     sub_clusters = truncate_tree([cluster], level=0, skip=1)
+    print('after truncate', [cluster.id for cluster in sub_clusters])
     
     while True:# not all(val <= t for val in distances):
         largest_node = sub_clusters[0]
         index = 0
+        # largest_node would be the largest subcluster
         for i in range(len(sub_clusters)):
             if largest_node.get_count() < sub_clusters[i].get_count():
                 largest_node = sub_clusters[i]
@@ -708,6 +712,7 @@ def get_homogenous_clusters_silhouette(cluster, distance_matrix, number_of_estim
         sub_clusters = cutree_to_get_number_of_features(cluster, distance_matrix, number_of_estimated_clusters= number_of_estimated_clusters)#truncate_tree([cluster], level=0, skip=1)#
     sub_silhouette_coefficient = silhouette_coefficient(sub_clusters, distance_matrix) 
     while True:
+        # initialize
         min_silhouette_node = sub_clusters[0]
         min_silhouette_node_index = 0
         
@@ -1026,7 +1031,9 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
         try:
             data1 = a.pre_order(lambda x: x.id)
             data2 = b.pre_order(lambda x: x.id)
+            print('data1 data2', data1, data2)
         except:
+            print('except...')
             data1 = reduce_tree(a)
             data2 = reduce_tree(b)
         tempTree = Hypothesis_Node(data=[data1, data2])
@@ -1039,7 +1046,6 @@ def test_by_level(apClusterNode0, apClusterNode1, dataset1, dataset2, strMethod=
     do_next_level = True
     descend_c = False
     significant_hypotheses = []
-    
     
     '''find_pthreshold2( 1, n1*n2)
     p_threshold = max(options)'''
@@ -1224,7 +1230,6 @@ def naive_all_against_all():
         data = [[i], [j]]
         test = add_data(test, data)
         tests.append(test)
-    
     p_values = multiprocessing_estimate_pvalue(estimate_pvalue, tests, pMethod, dataset1, dataset2)
     p_adjusted, pRank = stats.p_adjust(p_values, config.q)
     q_values = stats.pvalues2qvalues (p_values, adjusted=True)
@@ -1272,7 +1277,7 @@ def naive_all_against_all():
 
     significant_hypotheses = [tested_hypotheses[i]  for i in range(len(tested_hypotheses)) if tested_hypotheses[i].significance == True]
     #print("--- number of performed tests: %s" % config.number_of_performed_tests)
-    print("--- number of passed tests after FDR controlling: %s "%len(significant_hypotheses)) 
+    print("--- number of passed tests after FDR controlling: %s "%len(significant_hypotheses))
     return significant_hypotheses, tested_hypotheses
 
 def majority_significant(test, rank, majority = 0.5):
@@ -1295,6 +1300,8 @@ def majority_significant(test, rank, majority = 0.5):
     else:
         return False   
 def significance_testing(current_level_tests, p_rank, level = None):
+    '''Add significance = True or False
+    '''
     dataset1 = config.parsed_dataset[0]
     dataset2 = config.parsed_dataset[1]
     for test in current_level_tests:

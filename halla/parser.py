@@ -160,11 +160,9 @@ class Input:
 
 	def _discretize(self):
 		self.discretized_dataset1 = stats.discretize(self.orginal_dataset1, style = config.strDiscretizing, data_type = config.data_type[0])
-		print('----')
-		print(self.discretized_dataset1)
 		self.discretized_dataset2 = stats.discretize(self.orginal_dataset2, style = config.strDiscretizing, data_type = config.data_type[1])
+		print(self.discretized_dataset1)
 		print(self.discretized_dataset2)
-		print('----')
 
 	def _parse(self):
 		def __parse(pArray, bVar, bHeaders):

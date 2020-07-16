@@ -28,6 +28,7 @@ from sklearn.metrics import explained_variance_score
 from scipy.cluster.hierarchy import fcluster
 #from scipy.spatial.distance import pdist
 from scipy.cluster.hierarchy import linkage, dendrogram
+import numpy as np
 try:
 	import jenkspy
 except:
@@ -860,7 +861,6 @@ def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, sim
 		iterations = config.iterations
 	if not permutation_func:
 		permutation_func = config.permutation_func
-	# ADDED: permutation_func = 'ecdf'
 	#pHashDecomposition = c_hash_decomposition
 	pHashMetric = distance.c_hash_metric 
 	def _permutation(pVec):
@@ -870,7 +870,6 @@ def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, sim
 	sim_score= pMe(X, Y)[0]
 	fAssociation = math.fabs(sim_score)
 	fP = 1.0 
-	print('iteration is', iterations)
 	def _calculate_num_exceedances(observed_value, random_distribution):
 	    """Determines the number of values from a random distribution which
 	    exceed or equal the observed value.
@@ -887,10 +886,14 @@ def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, sim
 	    return num_exceedances
        	
 	def _calculate_pvalue(iter):
-		print(len(aDist), fAssociation)
-		fPercentile = percentileofscore(aDist, fAssociation, kind = 'strict')#, kind="mean")  # #source: Good 2000  
-		pval = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
-		return pval
+		# fPercentile = percentileofscore(aDist, fAssociation, kind = 'strict')#, kind="mean")  # #source: Good 2000  
+		# pval = ((1.0 - fPercentile / 100.0) * iter + 1) / (iter + 1)
+		# return pval
+		low_bound, up_bound = min(fAssociation, -fAssociation), max(fAssociation, -fAssociation)
+		temp_dist = np.array(aDist)
+		pval = ((temp_dist < low_bound).sum() + (temp_dist > up_bound).sum() + 1) / (iter+1)
+		return(min(1.0, pval))
+
 
 	few_permutation = False
 	if permutation_func == 'ecdf':
@@ -901,6 +904,7 @@ def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, sim
 				config.nullsamples = generate_null_dist(X,Y)
 			aDist = config.nullsamples
 		else:
+			np.random.seed(123)
 			for i in range(iterations):
 				iter = i
 				permuted_Y = numpy.random.permutation(Y)
@@ -915,7 +919,6 @@ def permutation_test_pvalue(X, Y, iterations = None, permutation_func= None, sim
 						break
 					else: 
 						fP = new_fP
-		fP = _calculate_pvalue(iter)
 	elif permutation_func == 'gpd':
 		fP = nonparametric_test_pvalue(X, Y)
 	#print "Estimated P-value:",fP
@@ -1455,7 +1458,6 @@ def jenks_discretize(values, n):
 	return values_in_bins
 	 
 def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=None, method=None, aiSkip=[]):
-	print('data type is', data_type)
 	"""
 	This functio discretizes data and has two approach one for continuse data
 	and one for categorical data and categories names start with 1 and 0 is uses for
@@ -1556,7 +1558,6 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 
 	"""
 	def _discretize_categorical(astrValues, number_of_bins=number_of_bins):
-		print('categorical', astrValues)
 		if config.similarity_method in ['mic', 'dmic']:
 					sys.exit('No categorical data is allowed with mic or dmic!')
 		setastrValues = list(set(astrValues))
@@ -1572,10 +1573,8 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 		result_discretized_data = []
 		for i, item in enumerate(astrValues):
 			result_discretized_data.append(dictA[item])
-		print(result_discretized_data)
 		return result_discretized_data	
 	def _discretize_continuous(astrValues, number_of_bins=number_of_bins):
-		print('cont')
 		#decide about the number of bins
 		if number_of_bins == None:
 			# Default to rounded sqrt(n) if no bin count requested
@@ -1586,7 +1585,6 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 			number_of_bins = len(set(astrValues))
 		else:
 			number_of_bins = min(number_of_bins, len(set(astrValues)))
-		print(len(set(astrValues)), number_of_bins)
 
 		# descritize the vector
 		if len(set(astrValues)) <= number_of_bins:
@@ -1597,7 +1595,15 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 				#return _discretize_categorical(astrValues, number_of_bins=number_of_bins)
 		else:							
 			#try:
+			is_cont = False
 			if config.strDiscretizing == 'equal-freq':
+				# remove
+				try:
+					float(astrValues[0])
+					astrValues = [float(val) for val in astrValues]
+					is_cont = True
+				except:
+					print('not changing')
 				order = rankdata(astrValues, method= 'min')# ordinal
 			elif config.strDiscretizing == 'hclust':
 				#astrValues = distance.remove_pairs_with_a_missing(astrValues, astrValues)
@@ -1613,8 +1619,6 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 			'''	#return _discretize_categorical(astrValues, number_of_bins=number_of_bins)
 		discretized_result = [None] * len(astrValues)
 		bins_size = numpy.ceil(len(astrValues)/float(number_of_bins))
-		print(astrValues)
-		print('order is', order)
 		#print (astrValues)
 		for i in range(len(astrValues)):
 			discretized_result[i] = int((order[i]-1) / bins_size)
@@ -1623,6 +1627,10 @@ def discretize(pArray, style = "equal-freq", data_type = None, number_of_bins=No
 			if str(astrValues[i]) == 'NaN':
 				discretized_result[i]= 0
 		#print astrRet
+		if is_cont:
+			discretized_result = pd.cut(astrValues, bins=number_of_bins, labels=False) + 1
+		else:
+			discretized_result = _discretize_categorical(astrValues)
 		return discretized_result
 
 	# iRow1, iCol = pArray.shape
@@ -2008,15 +2016,13 @@ def nonparametric_test_pvalue(X, Y, similarity_method = None,  alpha_cutoff = 0.
 	if config.use_one_null_dist and len(config.nullsamples) == 0:
 		nullsamples = [null_fun(X, Y) for val in range(0, max_samples)]
 		config.nullsamples = nullsamples
-	elif not config.use_one_null_dist: #or not config.use_one_null_dist:
+	elif not config.use_one_null_dist:
 		nullsamples = [null_fun(X, Y) for val in range(0, start_samples)]
 		while len(nullsamples) < max_samples and prob_pvalue_lt_samples(config.q, sim_score, nullsamples) > .05 * 1.0/len((X)* len(Y)):
-			#print("Gathering more.. N = %d; P(p<%f) = %.2f" % (len(nullsamples), config.q, prob_pvalue_lt_samples(config.q, x, nullsamples)))
 			nullsamples = [null_fun(X, Y) for val in range(0,sample_increments)] + nullsamples 
 		#nullsamples = [null_fun(X, Y) for val in range(0,max_samples)]
 
 		config.nullsamples = nullsamples
-	#print("Finished gathering: N = %d; P(p<%f) = %f" % (len(nullsamples), alpha_cutoff, prob_pvalue_lt_samples(alpha_cutoff, x, nullsamples)))
 	# Estimate the p-value from the current set of samples
 	return estimate_pvalue(x = sim_score, null_samples = config.nullsamples)
 

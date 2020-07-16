@@ -58,8 +58,8 @@ with warnings.catch_warnings():
 
 c_unit_h        = 0.15 #0.3
 c_unit_w        = 0.15 #0.3
-c_min_height    = 1 * c_unit_h #+ 3
-c_min_width     = 1 * c_unit_w #+ 5
+c_min_height    = 1 * c_unit_h + 2# + 3
+c_min_width     = 1 * c_unit_w + 3# + 5
 c_label_scale   = 6 #18
 c_label_shift   = -0.005
 c_line_width    = .75 # 1.5

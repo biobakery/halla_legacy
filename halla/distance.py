@@ -304,5 +304,6 @@ def pdist(pArray, metric="euclidean"):
 	return scipy.cluster.hierarchy.distance.pdist(pArray, pMetric)
 def pDistance(x, y):
     pMetric = c_hash_metric[config.similarity_method]
-    dist = math.fabs(1.0 - math.fabs(pMetric(x, y)[0]))
+    dist = 1 - pMetric(x, y)[0]
+    # dist = math.fabs(1.0 - math.fabs(pMetric(x, y)[0]))
     return  dist

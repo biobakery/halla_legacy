@@ -239,7 +239,7 @@ def call_data_generator(args):
         if args.noise_within == None:
             args.noise_within = 0.55
         if args.noise_between == None:
-            between_noise = .25  
+            args.noise_between = .25  
     elif association_type == "parabola":
         if args.noise_within == None:
             args.noise_within = 0.25 
@@ -277,9 +277,9 @@ def call_data_generator(args):
      
     if args.structure == "imbalanced":
         if association_type == "structured_random":
-            X,_,_ = halla.synthetic_data.imbalanced_synthetic_dataset_uniform( D = number_features, N = number_samples,\
+            X,_,_ = imbalanced_synthetic_dataset_uniform( D = number_features, N = number_samples,\
                                                                                B = number_blocks, within_noise= args.noise_within , between_noise = args.noise_between, cluster_percentage = cluster_percentage_l, association_type ='parabola' ) 
-            _,Y,_ = halla.synthetic_data.imbalanced_synthetic_dataset_uniform( D = number_features, N = number_samples\
+            _,Y,_ = imbalanced_synthetic_dataset_uniform( D = number_features, N = number_samples\
                                                     , B = number_blocks, within_noise =args.noise_within  , between_noise = args.noise_between ,\
                                                    cluster_percentage = cluster_percentage_l, association_type ='parabola' ) 
             A = np.zeros((len(X),len(Y)))
@@ -396,16 +396,15 @@ def imbalanced_synthetic_dataset_uniform(D, N, B, cluster_percentage = 1, within
         B: int
             number of blocks 
     """
-    
     X = numpy.random.uniform(low=-1,high=1 ,size=(D,N))
     Y = numpy.random.uniform(low=-1,high=1,size=(D,N))
     
     common_base = numpy.random.uniform(low=-1,high=1 ,size=(B+1,N))
-    X_base = numpy.random.uniform(low=-1,high=1 ,size=(D,N))
-    Y_base = numpy.random.uniform(low=-1,high=1 ,size=(D,N))
+    # X_base = numpy.random.uniform(low=-1,high=1 ,size=(D,N))
+    # Y_base = numpy.random.uniform(low=-1,high=1 ,size=(D,N))
     
-    X_base = orthogonalize_matrix(X_base)
-    Y_base = orthogonalize_matrix(Y_base)
+    # X_base = orthogonalize_matrix(X_base)
+    # Y_base = orthogonalize_matrix(Y_base)
     #X = orthogonalize_matrix(X)
     #Y = orthogonalize_matrix(Y)
     #common_base = orthogonalize_matrix(common_base)
@@ -417,8 +416,8 @@ def imbalanced_synthetic_dataset_uniform(D, N, B, cluster_percentage = 1, within
             if j < D:
                 X[j]= [X[i,k]  + numpy.random.normal(0,.1,1) for k in range(len(X[j]))]
     '''
-    print ("Number of features %s, number of samples: %s, number of clusters: %s, number of features with each cluster: %s")\
-         %(D, N, B, blockSize)
+    print ("Number of features %s, number of samples: %s, number of clusters: %s, number of features with each cluster: %s"\
+         %(D, N, B, blockSize))
     if association_type == "L":
         common_base = numpy.hstack((numpy.random.uniform(low=-1.0,high=-1.0 ,size=(B+1,N/2)), numpy.random.uniform(low=-1,high=50 ,size=(B+1,N/2))))
         for l in range(B+1):
@@ -477,11 +476,10 @@ def imbalanced_synthetic_dataset_uniform(D, N, B, cluster_percentage = 1, within
             #Y[j]= [ numpy.random.uniform(low=10,high=100, size=1) * common_base[l,k] if common_base[l,k] < -0.8 else numpy.random.uniform(low=.2,high=.5, size=1) for k in range(N)]
         elif association_type =="happyface":
             Y[i] = [ happyface(common_base[l,k]) + within_noise * numpy.random.uniform(low=-.1,high=.1, size=1) for k in range(N)]
-            
+        
         for index,b in enumerate(noise_num):
             Y[i][b] = Y[i][index]
         assoc2[l].append(i)
-
     for a in range(number_associated_blocks):
         #print assoc1[a], assoc2[a]
         for i, j in itertools.product(assoc1[a], assoc2[a]):
@@ -507,8 +505,8 @@ def balanced_synthetic_dataset_uniform(D, N, B, within_noise = 0.5, between_nois
     Y = numpy.random.uniform(low=-1,high=1,size=(D,N))
     A = numpy.zeros( (len(X),len(Y)) )
     blockSize =  int(D/B) #int(round(D/B+ 0.4999999999999))
-    print ("Number of features %s, number of samples: %s, number of clusters: %s, number of features within each cluster: %s")\
-         %(D, N, B, blockSize)
+    print ("Number of features %s, number of samples: %s, number of clusters: %s, number of features within each cluster: %s" \
+         % (D, N, B, blockSize))
     if association_type == "L":
         '''if N % 2 != 0:
             N +=1 
@@ -522,6 +520,7 @@ def balanced_synthetic_dataset_uniform(D, N, B, within_noise = 0.5, between_nois
     common_base = orthogonalize_matrix(common_base)
     
     assoc = [[] for i in range(B)]
+    # kath: modify matrix X
     l = 0
     for i in range(0, int(D * cluster_percentage), blockSize):
         for j in range(i, i + blockSize):
