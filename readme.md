@@ -1,4 +1,5 @@
-# HAllA User Manual #
+
+# HAllA Legacy User Manual #
 
 Hierarchical All-against-All association testing (HAllA) is a method for general purpose and well-powered association discovery in high-dimensional heterogeneous datasets. 
 
@@ -8,11 +9,11 @@ Hierarchical All-against-All association testing (HAllA) is a method for general
 
 **Citation:**
 
-Gholamali Rahnavard, Eric A. Franzosa, Lauren J. McIver, Emma Schwager, Jason Lloyd-Price, George Weingart, Yo Sup Moon, Xochitl C. Morgan, Levi Waldron, Curtis Huttenhower, *High-sensitivity pattern discovery in large multi'omic datasets.* [huttenhower.sph.harvard.edu/halla](http://huttenhower.sph.harvard.edu/halla)
+Gholamali Rahnavard, Eric A. Franzosa, Lauren J. McIver, Emma Schwager, Jason Lloyd-Price, George Weingart, Yo Sup Moon, Xochitl C. Morgan, Levi Waldron, Curtis Huttenhower, *High-sensitivity pattern discovery in large multi'omic datasets.* [huttenhower.sph.harvard.edu/halla_legacy](http://huttenhower.sph.harvard.edu/halla)
 
-**For installation and a quick demo, read the [HAllA Tutorial](https://github.com/biobakery/biobakery/wiki/halla)**
+**For installation and a quick demo, read the [HAllA Legacy Tutorial](https://github.com/biobakery/biobakery/wiki/halla_legacy)**
 
-# ( **For additional information, read the [HAllA Tutorial](https://github.com/biobakery/biobakery/wiki/halla)** )
+# ( **For additional information, read the [HAllA Legacy Tutorial](https://github.com/biobakery/biobakery/wiki/halla_legacy)** )
 
 HAllA combines hierarchical nonparametric hypothesis testing with false discovery rate correction to enable high-sensitivity discovery of linear and non-linear associations in high-dimensional datasets (which may be categorical, continuous, or mixed). HAllA operates by 1) discretizing data to a unified representation, 2) hierarchically clustering paired high-dimensional datasets, 3) applying dimensionality reduction to boost power and potentially improve signal-to-noise ratio, and 4) iteratively testing associations between blocks of progressively more related features. 
 
